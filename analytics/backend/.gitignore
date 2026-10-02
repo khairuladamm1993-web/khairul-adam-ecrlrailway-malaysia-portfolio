@@ -1,0 +1,6 @@
+wrangler.json
+.wrangler/
+node_modules/
+.env*
+.dev.vars*
+analytics-pages.js
