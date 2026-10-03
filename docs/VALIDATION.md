@@ -57,3 +57,11 @@ See [SOURCES.md](SOURCES.md). One inherited electrical answer was corrected agai
 ## Outcome
 
 Ready for **branch review**, not merge/publication. Outstanding: responsive visual/touch review, owner content review, approved backend allowlist deployment and live new-metric write/read validation. Main and the old Sites version remain rollback references.
+
+## Identity / theme / references checkpoint — 2026-10-04 (Malaysia)
+
+34 automated tests pass (the original 32 plus preference-preserving theme navigation and public references coverage). Quiz banks, quiz logic, original photograph and analytics implementation remain unchanged.
+
+Opening glass is now rgba(4,13,20,.20), blur 3px, smaller name, lighter existing overlay. Shared explicit light/dark palette defaults dark; preference persists locally. Language labels shrink from 13px to 11px, padding 9px to 3px/5px and gaps reduce; 44px touch areas are preserved, so the total tap area is intentionally not reduced 40%. Chinese Pinyin remains opt-in. Reference page has six organisations and the four requested equipment labels; it sends no analytics because no additional production route has been introduced.
+
+Responsive CSS retains svh, safe areas, width breakpoints and phone scrolling. Device-specific Safari/iPadOS 26.7.1 rendering and glass readability over the actual photo still require visual review; DOM checks do not constitute a device pass. Production and main are unchanged. Preview packaging removes the analytics script and blocks outbound fetch using connect-src 'none'.

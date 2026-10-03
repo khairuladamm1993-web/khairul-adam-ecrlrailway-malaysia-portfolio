@@ -91,3 +91,9 @@ Each of ten modules has sixteen distinct question records: 48 inherited question
 One selected module uses its full sixteen questions. Two selected modules draw eight questions each from their sixteen-question banks. Both question and answer order use Fisher–Yates shuffling. PASS is 12/16 (75%, matching the old 6/8 ratio). Entry to the portfolio does not require taking or passing the quiz.
 
 BM and English translations accompany simplified Chinese. Tone-mark Pinyin is precomputed for Chinese words only; model identifiers and numeric values are excluded. Technical translation review by the owner/training instructor is recommended before publication, particularly inherited translated procedural wording. Language changes retain the current attempt and answer identities.
+
+## Visitor reference page — 2026-10-04 (Malaysia)
+
+`references.html` replaces raw source-register links. CARS official profile: https://www.rails.cn/tkzb/html/about/about2.html (turnout equipment verified); CRRC ECRL release: https://www.crrcgc.cc/en/2025-11/26/article_2025112614454135130.html; MRL: https://www.mrl.com.my/ (project and asset owner). CHEC Malaysia-facing domain https://chec.my/ is listed by its recruitment profile and Malaysia–China Summit exhibitor directory. CRCC High-Tech company domain: https://www.crcce.com.cn/. Company sites may restrict automated retrieval; a failed automated fetch is not proof that a normal browser link is broken.
+
+The SPZ-200, CDC16, DC-32 and DCL32 equipment lineup is supplied by Adam for reference; no unverified model specifications are added. GEMAX scope is explicitly attributed to Adam's first-hand field source, with no invented public company citation. No endorsement or operating-authority claim is added.
