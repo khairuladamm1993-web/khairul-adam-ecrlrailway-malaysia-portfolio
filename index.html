@@ -108,7 +108,7 @@
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
   </style>
 </head>
-<body>
+<body data-screen="welcome">
   <main class="hero" aria-label="Khairul Adam railway learning portfolio opening screen">
     <div class="rail-grid" aria-hidden="true"></div><div class="arc" aria-hidden="true"></div>
     <section class="panel">
@@ -119,8 +119,8 @@
       <p class="welcome">Welcome to my railway learning journey.</p>
       <p class="motto">Learn the system. Master the procedure. Earn the drive.</p>
       <div class="actions">
-        <a class="btn primary" href="portfolio.html"><span class="icon" aria-hidden="true">→</span>CONTINUE</a>
-        <button class="btn secondary" id="aboutBtn" type="button"><span class="icon" aria-hidden="true">i</span>ABOUT / INFORMATION</button>
+        <a class="btn primary" id="continue" href="portfolio.html"><span class="icon" aria-hidden="true">→</span>CONTINUE</a>
+        <button class="btn secondary" id="information" type="button"><span class="icon" aria-hidden="true">i</span>ABOUT / INFORMATION</button>
       </div>
     </section>
     <div class="footer" aria-label="Learning cycle">Learn&nbsp; • &nbsp;Inspect&nbsp; • &nbsp;Test&nbsp; • &nbsp;Improve&nbsp; • &nbsp;<strong>Simulate</strong></div>
@@ -133,9 +133,10 @@
   </dialog>
   <script>
     const aboutDialog=document.getElementById("aboutDialog");
-    document.getElementById("aboutBtn").addEventListener("click",()=>{if(typeof aboutDialog.showModal==="function")aboutDialog.showModal();else aboutDialog.setAttribute("open","")});
+    document.getElementById("information").addEventListener("click",()=>{if(typeof aboutDialog.showModal==="function")aboutDialog.showModal();else aboutDialog.setAttribute("open","")});
     document.getElementById("closeDialog").addEventListener("click",()=>aboutDialog.close());
     aboutDialog.addEventListener("click",event=>{const box=aboutDialog.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)aboutDialog.close()});
   </script>
+  <script defer src="assets/analytics.js"></script>
 </body>
 </html>
