@@ -1,17 +1,22 @@
-/* Same-origin, aggregate-only analytics. No identifiers or browsing histories leave this page. */
+/* Aggregate-only analytics; compatible migration-flow extension. No identifiers or browsing histories leave this page. */
 (()=>{
   'use strict';
   if(navigator.doNotTrack==='1'||window.doNotTrack==='1'||navigator.globalPrivacyControl===true)return;
   const endpoint="https://khairul-adam-railway-analytics.khairuladamm1993-web.workers.dev/api/anonymous-counts",counts=new Map();
+  const migrationFlow=document.querySelector('meta[name="railway-flow"]')?.content==='learning-gateway';
+  const extended=document.querySelector('meta[name="railway-analytics-extension"]')?.content==='enabled';
   const allowed=new Set(['welcome','modes','ready','home','journey','experience','lab','activities','about','contact']);
-  const safeRoute=value=>allowed.has(value)?value:'welcome';
+  const safeRoute=value=>value==='resume'?'about':allowed.has(value)?value:'welcome'; // Existing production collector: resume is grouped with About until backend extension approval.
   const route=()=>document.body.dataset.screen==='portfolio'?safeRoute(location.hash.slice(1)||'home'):safeRoute(document.body.dataset.screen);
   const step=value=>['welcome','modes','ready'].includes(value)?value:'portfolio';
   const lang=()=>({'ms':'BM','en':'EN','zh-Hans':'中文'}[document.documentElement.lang]||'BM');
   const pyn=()=>document.body.classList.contains('with-pinyin')?'ON':'OFF';
   const add=(metric,bucket,n=1)=>{if(n>0){const k=metric+'|'+bucket;counts.set(k,(counts.get(k)||0)+n);}};
   let current=route(),last=performance.now(),active=0,ended=false,flushing=false,progress=-1;
-  const reached=new Set(),stages=['welcome','modes','ready','portfolio'];
+  const reached=new Set(),stages=migrationFlow?['welcome','modes','portfolio']:['welcome','modes','ready','portfolio'];
+  // A fixed navigation-stage marker, not a session identifier or browsing history.
+  const continuationKey='railway-analytics-next-stage';
+  if(migrationFlow){try{const expected=sessionStorage.getItem(continuationKey);sessionStorage.removeItem(continuationKey);if(expected===step(current))progress=stages.indexOf(expected)-1;}catch{}}
   let started=performance.now();
   function flush(){
     if(flushing||!counts.size)return;
@@ -69,8 +74,21 @@
     if(visible)view(visible.target.id);
   },{rootMargin:'-145px 0px -45% 0px',threshold:0});
   document.querySelectorAll('main>section').forEach(s=>observer.observe(s));
+  const learningBuckets={category:['practical','ebook','corridor','future','news'],module:['df8b_inspection','df8b_electrical','df8b_brake','stabilizer','ballast','tamping','gmc48','ccpg500a','eloco','cr200j'],quiz_start:['all'],quiz_complete:['all']};
+  window.addEventListener('railway-learning-event',e=>{
+    // Never mix unsupported new buckets into production batches. Enable only after backend approval.
+    if(!extended)return;
+    const {metric,bucket}=e.detail||{};
+    if(!Object.hasOwn(learningBuckets,metric)||!learningBuckets[metric].includes(bucket))return;
+    add(metric,bucket);flush();
+  });
   document.addEventListener('click',e=>{
     const el=e.target.closest('button,a');if(!el)return;
+    if(migrationFlow){
+      const next=el.id==='continue'?'modes':(el.id==='enter-portfolio'||el.getAttribute('href')?.startsWith('portfolio.html#'))?'portfolio':null;
+      if(next&&progress===stages.indexOf(next)-1){try{sessionStorage.setItem(continuationKey,next);}catch{}}
+    }
+
     if(el.dataset.lang){add('language',lang());if(el.dataset.lang==='zh')add('pinyin_initial',pyn());}
     else if(el.classList.contains('pinyin-toggle'))add('pinyin',pyn());
     else if(el.dataset.mode){add('learning_mode',el.dataset.mode);if(el.dataset.mode==='home')add('click','full_portfolio');}

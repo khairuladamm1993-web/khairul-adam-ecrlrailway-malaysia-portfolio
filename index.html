@@ -107,8 +107,8 @@
       .btn{width:100%;min-width:0;min-height:50px}.footer{right:18px;left:18px;bottom:max(20px,calc(env(safe-area-inset-bottom) + 12px));text-align:right;white-space:normal}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
   </style>
-</head>
-<body data-screen="welcome">
+<link rel="stylesheet" href="assets/language.css"><meta name="railway-flow" content="learning-gateway"></head>
+<body data-screen="welcome"><div class="language-dock" aria-label="Language"><div class="language-options"><button data-lang="ms">BM</button><button data-lang="en">EN</button><button data-lang="zh">中文</button></div><button class="pinyin-toggle" hidden>Pinyin OFF</button></div>
   <main class="hero" aria-label="Khairul Adam railway learning portfolio opening screen">
     <div class="rail-grid" aria-hidden="true"></div><div class="arc" aria-hidden="true"></div>
     <section class="panel">
@@ -119,11 +119,11 @@
       <p class="welcome">Welcome to my railway learning journey.</p>
       <p class="motto">Learn the system. Master the procedure. Earn the drive.</p>
       <div class="actions">
-        <a class="btn primary" id="continue" href="portfolio.html"><span class="icon" aria-hidden="true">→</span>CONTINUE</a>
+        <a class="btn primary" id="continue" href="gateway.html"><span class="icon" aria-hidden="true">→</span>CONTINUE</a>
         <button class="btn secondary" id="information" type="button"><span class="icon" aria-hidden="true">i</span>ABOUT / INFORMATION</button>
       </div>
     </section>
-    <div class="footer" aria-label="Learning cycle">Learn&nbsp; • &nbsp;Inspect&nbsp; • &nbsp;Test&nbsp; • &nbsp;Improve&nbsp; • &nbsp;<strong>Simulate</strong></div>
+    <div class="footer" aria-label="Learning cycle"><span>Learn</span> • <span>Inspect</span> • <span>Test</span> • <span>Improve</span> • <strong>Simulate</strong></div>
   </main>
   <dialog id="aboutDialog" aria-labelledby="aboutTitle">
     <div class="modal-inner"><h2 id="aboutTitle">About this portfolio</h2>
@@ -137,6 +137,6 @@
     document.getElementById("closeDialog").addEventListener("click",()=>aboutDialog.close());
     aboutDialog.addEventListener("click",event=>{const box=aboutDialog.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)aboutDialog.close()});
   </script>
-  <script defer src="assets/analytics.js"></script>
+  <script src="assets/translations.js"></script><script src="assets/ui-translations.js"></script><script src="assets/i18n.js"></script><script defer src="assets/analytics.js"></script>
 </body>
 </html>
