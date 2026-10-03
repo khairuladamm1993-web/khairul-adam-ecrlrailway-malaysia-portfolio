@@ -40,3 +40,5 @@ body[data-screen=portfolio] .badge,body[data-screen=portfolio] .green{color:var(
 .references-shell{max-width:1120px;margin:auto;padding:calc(92px + env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) calc(40px + env(safe-area-inset-bottom,0px)) max(22px,env(safe-area-inset-left,0px))}
 .references-shell header{max-width:760px;margin-bottom:22px}.references-shell .learning-grid{gap:18px}.references-shell h2{font-size:19px}.reference-back{display:flex;gap:12px;margin-bottom:22px}.reference-back .quiet{margin:0}.references-shell li{margin-bottom:8px;font-size:14px;line-height:1.6}
 @media(max-width:420px){.language-dock{padding-left:6px;padding-right:6px}.theme-toggle{max-width:80px}.language-options button{min-width:44px}.gateway-shell{padding-top:calc(100px + env(safe-area-inset-top,0px))}}
+/* Override the legacy portfolio-specific dock so light-mode controls stay legible. */
+body[data-screen=portfolio] .language-dock{background:var(--dock);border-bottom:0;min-height:50px}
