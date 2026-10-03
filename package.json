@@ -1,0 +1,10 @@
+{
+  "name": "khairul-adam-portfolio-migration",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/migration.test.cjs tests/analytics-extension.test.mjs analytics/original/analytics/client.test.mjs analytics/original/analytics/collector.test.mjs analytics/backend/worker.test.mjs",
+    "preview": "python3 -m http.server 8765"
+  },
+  "engines": {"node": ">=22.13"},
+  "devDependencies": {"jsdom": "26.1.0"}
+}

@@ -1,10 +1,12 @@
 # Privacy
 
-The GitHub Pages welcome page uses privacy-friendly aggregate analytics collected by a Cloudflare Worker and stored in Cloudflare D1.
+The GitHub Pages frontend uses privacy-friendly aggregate analytics collected by a Cloudflare Worker and stored in Cloudflare D1.
 
-Only separate daily counters are stored: document visits, estimated daily browsers and new/returning status, welcome views, entry/exit stage, button interactions, engagement/duration totals, and broad device, screen, browser and operating-system categories. Coarse country is included only when Cloudflare's network metadata supplies it. There are no joined visitor profiles or individual session records.
+Only separate daily counters are stored: document visits, estimated daily browsers and new/returning status, page/section views, entry/exit stage, button interactions, engagement/duration totals, and broad device, screen, browser and operating-system categories. Coarse country is included only when Cloudflare's network metadata supplies it. There are no joined visitor profiles or individual session records.
 
-The existing analytics also supports portfolio section views, the ordered gateway funnel, learning modes, BM/EN/中文 and Pinyin choices. These counters require those actual controls/sections to be present and integrated. The current portfolio.html handoff to the separate Sites portfolio does not transfer this analytics script to that site; do not interpret absent events as zero interest.
+This migration integrates portfolio section views, Welcome → Gateway → Portfolio funnel counters, learning modes, BM/EN/中文 and Pinyin choices. A fixed next-stage marker in sessionStorage connects internal page transitions without a session identifier; it contains only a stage name and is consumed on arrival. Resume views currently share the About bucket. The old Sites redirect is removed in this branch only.
+
+Category selections, practical module selections and quiz start/completion counters are prepared as fixed aggregate buckets. They remain disabled until the compatible backend allowlist extension is approved and deployed. Quiz answers, scores and question order are not transmitted. The latest completed study score and selected module names are saved only in the visitor’s local browser for their own review; language and Pinyin are also local preferences. Category/module/destination choices last for the tab session.
 
 No GPS, precise location, browser geolocation permission, visitor name, email, phone number or login identity is requested or stored. No raw IP address, raw user-agent string, URL, referrer, query string, or free text is stored by the analytics collector. Cloudflare and GitHub may process network information separately to operate and secure their hosting services.
 

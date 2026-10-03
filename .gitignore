@@ -6,3 +6,7 @@
 *.p12
 *.pfx
 .DS_Store
+node_modules/
+.wrangler/
+analytics/backend/wrangler.json
+analytics/backend/wrangler.jsonc
