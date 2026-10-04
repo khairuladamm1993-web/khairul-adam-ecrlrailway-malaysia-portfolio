@@ -35,3 +35,17 @@ The original railway photograph is unchanged (SHA-256 `fabd30d5c79262f9b968a38a8
 ## Analytics boundary
 
 Existing production-compatible counters and Worker endpoint are preserved. Cross-page funnel continuation uses only a fixed next-stage flag. New category/module/quiz counters are implemented and tested but capability-gated until the owner approves deployment of the compatible backend allowlist. This branch does not deploy or recreate the Worker or D1 and contains no credentials. See the staged extension README before enabling it.
+
+## Master correction / public-access checkpoint
+
+The public gateway now defaults to Light Mode (stored preferences still win), with
+News / Insights / References rows and locked member previews. Authentication is
+pending; no user can sign in or unlock full material in this build. The 160-question
+quiz implementation is preserved and regression-tested using a **test-only fixture**.
+It is not loaded by the public gateway. See `docs/ACCESS-ARCHITECTURE.md` for the
+private-content deployment gate and known public-repository limitation.
+
+For isolated public preview, build into a NEW empty directory:
+`python3 scripts/build-preview.py /absolute/path/to/new-preview/public`.
+This excludes legacy member quiz assets and disables analytics. Do not serve the
+source-tree root as a purported protected member environment.

@@ -19,7 +19,7 @@
   document.querySelectorAll('[data-i18n]').forEach(el=>el.innerHTML=html(el.dataset.i18n));
   document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===language)));
   document.querySelectorAll('.pinyin-toggle').forEach(b=>{b.hidden=language!=='zh';b.textContent='Pinyin '+(pinyin?'ON':'OFF');b.setAttribute('aria-pressed',String(pinyin));});
-  document.querySelectorAll('.theme-toggle').forEach(b=>{const light=window.RailwayTheme?.value==='light';b.innerHTML=html(light?'Light Mode':'Dark Mode');b.setAttribute('aria-pressed',String(light));});
+  document.querySelectorAll('.theme-toggle').forEach(b=>{const light=window.RailwayTheme?.value==='light';b.innerHTML=html(light?'Dark Mode':'Light Mode');b.setAttribute('aria-pressed',String(!light));});
   listeners.forEach(fn=>fn());
   if(anchor)window.scrollBy(0,anchor.getBoundingClientRect().top-offset);
  }
