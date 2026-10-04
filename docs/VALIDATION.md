@@ -71,3 +71,11 @@ Live preview browser review: welcome photograph/glass, light gateway, and light 
 ## Cross-device continuation — 4 October 2026
 
 See [RESPONSIVE-VALIDATION.md](RESPONSIVE-VALIDATION.md): 35 automated tests and 216 loaded Chromium viewport combinations pass. Added Escape dismissal/focus return for compact portfolio navigation; no responsive layout redesign was necessary. Physical Safari/Android/Windows/macOS testing remains pending and is not inferred from Chromium checks. Preview creation is now reproducible with `scripts/build-preview.py` and excludes production analytics submission.
+
+## Master correction — 5 October 2026
+
+See [MASTER-CORRECTION-VALIDATION.md](MASTER-CORRECTION-VALIDATION.md): 40 automated
+checks, 144 page viewport cases, 45 category cases and 18 modal bounds checks pass.
+First-visit theme now Light. Public learning areas are title/locked previews only;
+secure member/backend functionality remains pending. Earlier quiz UI test results
+are retained through an explicit test-only fixture, not a public authentication bypass.

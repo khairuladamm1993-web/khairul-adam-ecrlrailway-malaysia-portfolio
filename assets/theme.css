@@ -1,4 +1,4 @@
-/* Palette shared by the existing screens. Dark remains the default. */
+/* Palette shared by the existing screens. Theme preference is applied early by theme.js; first visit defaults Light. */
 :root{color-scheme:dark;--bg:#09131b;--surface:#12212b;--surface-soft:#0e1c25;--text:#eef5f8;--white:#eef5f8;--muted:#b6c4cd;--line:#31444f;--cyan:#68cde5;--green:#85e6ac;--selected:#183946;--good:#183c2b;--bad:#472c34;--dock:#0c1923f5}
 :root[data-theme=light]{color-scheme:light;--bg:#f3f6f7;--surface:#fff;--surface-soft:#e8eff1;--text:#182e3a;--white:#182e3a;--muted:#465e6b;--line:#cbd6dc;--cyan:#086d87;--green:#146b42;--selected:#d9eef2;--good:#e0f2e6;--bad:#fbe5e7;--dock:#f3f6f7f5}
 html,body{background:var(--bg);color:var(--text)}

@@ -15,8 +15,10 @@
  const track=(metric,bucket)=>window.dispatchEvent(new CustomEvent('railway-learning-event',{detail:{metric,bucket}}));
  function renderDetail(){
   const body=document.querySelector('#detail-content');
+  const controls=`<div class="quiz-languages">${['ms','en','zh'].map(l=>`<button data-detail-lang="${l}" aria-pressed="${R.language===l}">${({ms:'BM',en:'EN',zh:'中文'})[l]}</button>`).join('')}${R.language==='zh'?`<button data-detail-pinyin aria-pressed="${R.pinyin}">Pinyin ${R.pinyin?'ON':'OFF'}</button>`:''}<button data-detail-theme>${h(window.RailwayTheme.value==='light'?'Dark Mode':'Light Mode')}</button></div>`;
   if(currentDetail==='member')body.innerHTML=`<h2 id="detail-title">${h('Verified Member')}</h2><p class="access-label">${h('Email verification — coming soon')}</p><p>${h('Member sign-in is not connected yet. No account or email is collected here. Public portfolio access remains available.')}</p><p>${h('Full material will open only after secure email verification is available. No IC or passport is required.')}</p><a class="primary" href="portfolio.html#home">${h('Browse the public portfolio')}</a>`;
   else {const item=window.RailwayInsights[currentDetail];if(!item)return;body.innerHTML=`<p class="access-label">${h('Public overview')}</p><h2 id="detail-title">${h(item.title)}</h2><p>${h(item.summary)}</p><div class="detail-member"><h3>${h('Detailed Insights — Member Access')}</h3>${accessButton()}</div>`;}
+  body.insertAdjacentHTML('afterbegin',controls);
  }
  function openDetail(detail,selector){currentDetail=detail;returnSelector=selector;renderDetail();if(!dialog.open)dialog.showModal();dialog.scrollTop=0;dialog.querySelector('[data-close]').focus();}
  function render(){
@@ -37,6 +39,9 @@
  document.querySelector('#categories').addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const bs=[...e.currentTarget.querySelectorAll('button')],i=bs.indexOf(document.activeElement),n=e.key==='Home'?0:e.key==='End'?4:(i+(e.key==='ArrowRight'?1:4))%5;bs[n].click();});
  document.querySelector('#destinations').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;destination=b.dataset.mode;write('railway-gateway-destination',destination);render();document.querySelector(`[data-mode="${destination}"]`).focus({preventScroll:true});});
  document.addEventListener('click',e=>{
+  const lang=e.target.closest('[data-detail-lang]');if(lang){document.querySelector(`[data-lang="${lang.dataset.detailLang}"]`).click();dialog.querySelector(`[data-detail-lang="${lang.dataset.detailLang}"]`)?.focus();return;}
+  if(e.target.closest('[data-detail-pinyin]')){document.querySelector('.language-dock .pinyin-toggle').click();dialog.querySelector('[data-detail-pinyin]')?.focus();return;}
+  if(e.target.closest('[data-detail-theme]')){window.RailwayTheme.toggle();dialog.querySelector('[data-detail-theme]')?.focus();return;}
   const insight=e.target.closest('[data-insight]');if(insight){openDetail(Number(insight.dataset.insight),`[data-insight="${insight.dataset.insight}"]`);return;}
   const member=e.target.closest('[data-member]');if(member){const prior=returnSelector;openDetail('member',dialog.contains(member)?prior:member.dataset.previewModule?`[data-preview-module="${member.dataset.previewModule}"]`:member.closest('#gateway-status')?'#gateway-status [data-member]':'#gateway-content [data-member]');}
  });
