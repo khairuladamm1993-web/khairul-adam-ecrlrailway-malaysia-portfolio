@@ -67,3 +67,7 @@ Opening glass is now rgba(4,13,20,.20), blur 3px, smaller name, lighter existing
 Responsive CSS retains svh, safe areas, width breakpoints and phone scrolling. Device-specific Safari/iPadOS 26.7.1 rendering and glass readability over the actual photo still require visual review; DOM checks do not constitute a device pass. Production and main are unchanged. Preview packaging removes the analytics script and blocks outbound fetch using connect-src 'none'.
 
 Live preview browser review: welcome photograph/glass, light gateway, and light portfolio inspected at the available desktop viewport. Theme persisted Welcome → Gateway → Portfolio → References. A legacy dark portfolio language-bar background was identified and corrected in theme.css. Actual iPad Safari is not available in this environment; portrait, split-screen and physical touch review remain pending. CHEC Malaysia, MRL, CARS and CRRC reference URLs returned HTTP 200; CRCC returned HTTP 403 to automated retrieval and remains unverified in a normal browser.
+
+## Cross-device continuation — 4 October 2026
+
+See [RESPONSIVE-VALIDATION.md](RESPONSIVE-VALIDATION.md): 35 automated tests and 216 loaded Chromium viewport combinations pass. Added Escape dismissal/focus return for compact portfolio navigation; no responsive layout redesign was necessary. Physical Safari/Android/Windows/macOS testing remains pending and is not inferred from Chromium checks. Preview creation is now reproducible with `scripts/build-preview.py` and excludes production analytics submission.
