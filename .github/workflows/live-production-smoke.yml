@@ -68,8 +68,8 @@ jobs:
           curl -fsSL --retry 4 --retry-delay 2 "${BASE}assets/member-gateway.js" -o /tmp/live-assets_member-gateway.js
           grep -Fq "const escape=v=>R.escape(String(v??''));" /tmp/live-assets_member-gateway.js
           ! grep -Fq "const escape=v=>h(String(v??''));" /tmp/live-assets_member-gateway.js
-          grep -Fq 'data-member-module="'+escape(id)+'"' /tmp/live-assets_member-gateway.js
-          grep -Fq 'aria-pressed="'+selected.has(id)+'"' /tmp/live-assets_member-gateway.js
+          grep -Fq "data-member-module=\"'+escape(id)+'\"" /tmp/live-assets_member-gateway.js
+          grep -Fq "aria-pressed=\"'+selected.has(id)+'\"" /tmp/live-assets_member-gateway.js
           echo 'Live byte parity, Member renderer fix, GEMAC correction, protected-path and Admin-gate scan: PASS'
 
       - name: Public fail-closed MAP and responsive browser smoke
