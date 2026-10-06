@@ -11,12 +11,12 @@
  let currentDetail=null,returnSelector=null;
  const accessButton=(label='LOGIN / MEMBER ACCESS')=>`<button class="secondary" data-member>${h(label)}</button>`;
  const boundary=()=>`<p class="study-boundary">${h('Publicly confirmed · Personal field reference · Simulator / development only')}</p>`;
- const locked=title=>`<article class="learning-card locked-card"><span class="access-label">${h('Verified Member access')}</span><h2>${h(title)}</h2><p>${h('Full material will open only after secure email verification is available. No IC or passport is required.')}</p>${accessButton()}</article>`;
+ const locked=title=>`<article class="learning-card locked-card"><span class="access-label">${h('Verified Member access')}</span><h2>${h(title)}</h2><p>${h('Full material opens after verified email sign-in using the secure Magic Link sent to your email. No IC or passport is required.')}</p>${accessButton()}</article>`;
  const track=(metric,bucket)=>window.dispatchEvent(new CustomEvent('railway-learning-event',{detail:{metric,bucket}}));
  function renderDetail(){
   const body=document.querySelector('#detail-content');
   const controls=`<div class="quiz-languages">${['ms','en','zh'].map(l=>`<button data-detail-lang="${l}" aria-pressed="${R.language===l}">${({ms:'BM',en:'EN',zh:'中文'})[l]}</button>`).join('')}${R.language==='zh'?`<button data-detail-pinyin aria-pressed="${R.pinyin}">Pinyin ${R.pinyin?'ON':'OFF'}</button>`:''}<button data-detail-theme>${h(window.RailwayTheme.value==='light'?'Dark Mode':'Light Mode')}</button></div>`;
-  if(currentDetail==='member')body.innerHTML=`<h2 id="detail-title">${h('Verified Member')}</h2><p class="access-label">${h('Email verification — coming soon')}</p><p>${h('Member sign-in is not connected yet. No account or email is collected here. Public portfolio access remains available.')}</p><p>${h('Full material will open only after secure email verification is available. No IC or passport is required.')}</p><a class="primary" href="portfolio.html#home">${h('Browse the public portfolio')}</a>`;
+  if(currentDetail==='member')body.innerHTML=`<h2 id="detail-title">${h('Verified Member')}</h2><p class="access-label">${h('Secure email Magic Link')}</p><p>${h('Enter your email to receive a one-time secure sign-in link. Member access remains locked until a verified Supabase session is confirmed.')}</p><p>${h('No IC or passport is required. Public portfolio access remains available without login.')}</p><a class="primary" href="portfolio.html#home">${h('Browse the public portfolio')}</a>`;
   else {const item=window.RailwayInsights[currentDetail];if(!item)return;body.innerHTML=`<p class="access-label">${h('Public overview')}</p><h2 id="detail-title">${h(item.title)}</h2><p>${h(item.summary)}</p><div class="detail-member"><h3>${h('Detailed Insights — Member Access')}</h3>${accessButton()}</div>`;}
   body.insertAdjacentHTML('afterbegin',controls);
  }
