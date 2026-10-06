@@ -281,13 +281,22 @@ for(const [width,height] of viewports){
         if(!ownerOK)failures.push({role,width,height,phase:'owner-security',result:ownerState});
       }else{
         await waitEval(client,"!!document.querySelector('.owner-map-panel')");
-        const preOwner=await evalValue(client,`(()=>({geo:window.__geoCalls,publish:window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length,panel:!!document.querySelector('.owner-map-panel')}))()`);
-        ownerOK=preOwner.panel&&preOwner.geo===0&&preOwner.publish===0;
+        const preOwner=await evalValue(client,`(()=>{
+          const p=document.querySelector('.owner-map-panel'),r=p?.getBoundingClientRect();
+          const controls=[...p.querySelectorAll('button,input,select,textarea')].filter(x=>{const b=x.getBoundingClientRect();return b.width>0&&b.height>0});
+          return {geo:window.__geoCalls,publish:window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length,panel:!!p,docOverflow:document.documentElement.scrollWidth-window.innerWidth,panelOverflow:p.scrollWidth-p.clientWidth,right:r.right,minControl:Math.min(...controls.map(x=>x.getBoundingClientRect().height))};
+        })()`);
+        ownerOK=preOwner.panel&&preOwner.geo===0&&preOwner.publish===0&&preOwner.docOverflow<=1&&preOwner.panelOverflow<=1&&preOwner.right<=width+1&&preOwner.minControl>=42;
         if(width===1024&&height===768){
           await evalValue(client,`(()=>{document.querySelector('[data-owner-geolocate]')?.click();return true})()`);
           await waitEval(client,"window.__geoCalls===1&&document.querySelector('[data-owner-use-current]')");
           await evalValue(client,`(()=>{document.querySelector('[data-owner-use-current]')?.click();return true})()`);
           await waitEval(client,"!!document.querySelector('[data-owner-edit-form]')");
+          await evalValue(client,`(()=>{
+            const m=window.__railwayMapCalls.markers.find(x=>!x.removed&&x.marker?.dragging?.enabled);
+            if(m){m.coords=[6.22223,102.66667];m.handlers.dragend?.({target:m.marker});}
+            return true;
+          })()`);
           const draftBefore=await evalValue(client,"window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length");
           await evalValue(client,`(()=>{
             const f=document.querySelector('[data-owner-edit-form]');
@@ -315,9 +324,10 @@ for(const [width,height] of viewports){
             historyRows:window.__locationHistory.length,
             baseline:window.__locationHistory.some(x=>x.action==='baseline'),
             rollback:window.__locationHistory.some(x=>x.action==='rollback'),
+            restoredMarker:window.__railwayMapCalls.markers.some(x=>!x.removed&&Math.abs(x.coords[0]-6.12345)<1e-8&&Math.abs(x.coords[1]-102.54321)<1e-8),
             detail:document.querySelector('[data-map-detail]')?.textContent||''
           }))()`);
-          ownerOK=ownerOK&&draftBefore===0&&reviewBefore===0&&historyState.rows>=2&&historyState.baseline&&historyState.publish&&ownerState.geo===1&&ownerState.publishCalls===1&&ownerState.restoreCalls===1&&ownerState.rollback&&/6\.12345/.test(ownerState.detail);
+          ownerOK=ownerOK&&draftBefore===0&&reviewBefore===0&&historyState.rows>=2&&historyState.baseline&&historyState.publish&&ownerState.geo===1&&ownerState.publishCalls===1&&ownerState.restoreCalls===1&&ownerState.rollback&&ownerState.restoredMarker&&/6\.12345/.test(ownerState.detail);
         }
         if(!ownerOK)failures.push({role,width,height,phase:'owner-workflow',result:preOwner});
       }
