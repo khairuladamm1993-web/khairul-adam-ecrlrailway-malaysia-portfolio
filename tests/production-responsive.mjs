@@ -66,7 +66,7 @@ function mockScript(role){
       member_profiles:[profile],
       member_content:[
         {id:'roll-1',kind:'rolling-stock',title:{en:'Protected rolling stock'},body:{en:'Member data'},evidence:'member',approved:true},
-        {id:'corr-1',kind:'corridor',title:{en:'Protected corridor'},body:{en:'Member corridor data'},evidence:'member',approved:true}
+        {id:'STN01',kind:'corridor',title:{en:'Kota Bharu'},body:{en:'Member corridor data',chainage:'CH000+670',location:{latitude:6.12345,longitude:102.54321,locationConfidence:'Validated Location',coordinateSource:'Validated project reference'}},evidence:'personal-field-reference',approved:true}
       ],
       quiz_banks:[{id:'smoke',title:{en:'Smoke bank'},bank:{id:'smoke',index:1,title:{en:'Smoke bank'},questions:q},approved:true}],
       member_files:[],member_progress:[],quiz_attempts:[],member_engagement:[],admin_audit:[],public_analytics_snapshots:[]
@@ -75,11 +75,16 @@ function mockScript(role){
       const b={select(){return b},eq(){return b},order(){return b},limit(){return b},maybeSingle(){return Promise.resolve({data:rows[name]?.[0]||null,error:null})},then(resolve,reject){return Promise.resolve({data:rows[name]||[],error:null}).then(resolve,reject)}};
       return b;
     }
+    window.__railwayMapCalls={setView:[],markers:[]};
     window.L={
-      map(el){return {_el:el,setView(){return this},fitBounds(){return this},invalidateSize(){},remove(){el.replaceChildren()}}}, 
+      map(el){return {_el:el,setView(coords,zoom){window.__railwayMapCalls.setView.push({coords:[...coords],zoom});return this},fitBounds(){return this},invalidateSize(){},remove(){el.replaceChildren()}}}, 
       tileLayer(){return {addTo(){return this}}},
       divIcon(options){return options},
-      marker(){return {addTo(){return this},bindTooltip(){return this},on(){return this},remove(){}}},
+      marker(coords){
+        const rec={coords:[...coords],handlers:{},removed:false};
+        window.__railwayMapCalls.markers.push(rec);
+        return {addTo(){return this},bindTooltip(){return this},on(name,fn){rec.handlers[name]=fn;return this},remove(){rec.removed=true;}};
+      },
       latLngBounds(coords){return {coords}}
     };
     window.supabase={createClient(){return{
@@ -190,9 +195,48 @@ for(const [width,height] of viewports){
           order:[...document.querySelectorAll('#categories [data-category]')].map(x=>x.dataset.category).join(',')
         };
       })()`);
+      const expectedMarkers=role==='public'?0:1;
+      const exactResult=await evalValue(client,`(()=>{
+        const host=document.querySelector('#railway-map-mount');
+        const markers=window.__railwayMapCalls.markers;
+        const focus=document.querySelector('[data-map-focus]');
+        const kota=[...document.querySelectorAll('[data-map-point]')].find(x=>x.textContent.includes('Kota Bharu'));
+        const before=markers[0]?.coords?[...markers[0].coords]:null;
+        if(markers[0]?.handlers?.click){
+          window.__railwayMapCalls.setView.length=0;
+          markers[0].handlers.click();
+        }else if(kota){
+          kota.click();
+        }
+        const markerFocus=window.__railwayMapCalls.setView.at(-1)||null;
+        if(role!=='public'){
+          window.__railwayMapCalls.setView.length=0;
+          focus?.click();
+        }
+        const buttonFocus=window.__railwayMapCalls.setView.at(-1)||null;
+        const after=markers[0]?.coords?[...markers[0].coords]:null;
+        const detail=document.querySelector('[data-map-detail]')?.textContent||'';
+        return {
+          validatedMarkers:Number(host?.dataset.validatedMarkers||0),
+          markerCount:markers.length,
+          before,after,markerFocus,buttonFocus,
+          focusDisabled:focus?.disabled,
+          detail
+        };
+      })()`);
+      const exactOK=role==='public'
+        ? exactResult.validatedMarkers===0&&exactResult.markerCount===0
+        : exactResult.validatedMarkers===1&&exactResult.markerCount===1&&
+          JSON.stringify(exactResult.before)===JSON.stringify([6.12345,102.54321])&&
+          JSON.stringify(exactResult.after)===JSON.stringify(exactResult.before)&&
+          JSON.stringify(exactResult.markerFocus?.coords)===JSON.stringify(exactResult.before)&&exactResult.markerFocus?.zoom===11&&
+          JSON.stringify(exactResult.buttonFocus?.coords)===JSON.stringify(exactResult.before)&&exactResult.buttonFocus?.zoom===11&&
+          exactResult.focusDisabled===false&&/STN01/.test(exactResult.detail)&&/CH000\+670/.test(exactResult.detail)&&
+          /6\.12345/.test(exactResult.detail)&&/102\.54321/.test(exactResult.detail)&&/Validated Location/.test(exactResult.detail);
       const mapOK=mapResult.docOverflow<=1&&mapResult.moduleOverflow<=1&&mapResult.canvasHeight>=280&&mapResult.minControl>=42&&mapResult.lazyScript&&mapResult.order==='practical,ebook,corridor,map,future,news';
       if(!mapOK)failures.push({role,width,height,phase:'map',result:mapResult});
-      if(ok&&mapOK)console.log(`PASS ${role} ${width}x${height}`);
+      if(!exactOK)failures.push({role,width,height,phase:'exact-location',result:exactResult});
+      if(ok&&mapOK&&exactOK)console.log(`PASS ${role} ${width}x${height}`);
     }finally{
       client.close();
       try{await fetch(`http://127.0.0.1:${debugPort}/json/close/${target.id}`);}catch{}
