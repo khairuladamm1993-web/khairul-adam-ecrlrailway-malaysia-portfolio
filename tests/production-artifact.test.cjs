@@ -103,8 +103,17 @@ test('MAP exact-location contract classifies coordinates and never shifts marker
   const registry=fs.readFileSync(path.join(dir,'assets','corridor-reference.js'),'utf8');
   assert(registry.includes("'Public Reference Location'"));
   assert(registry.includes("'Pending Validation'"));
-  assert(map.includes("const VALID='Validated Location',PERSONAL='Personal Field-Validated Location',ENGINEERING='Engineering/Survey Validated Location',PUBLIC='Public Reference Location',PENDING='Pending Validation'"));
-  assert(map.includes("[VALID,PERSONAL,ENGINEERING].includes(r?.locationConfidence)"));
+  for(const classification of [
+    'Validated Location',
+    'Personal Field-Validated Location',
+    'Engineering/Survey Validated Location',
+    'Public Reference Location',
+    'Pending Validation'
+  ]) assert(map.includes(classification),classification);
+  assert(map.includes('[VALID,PERSONAL,ENGINEERING].includes(r?.locationConfidence)'));
+  assert(map.includes('[VALID,PERSONAL,ENGINEERING].includes(loc.locationConfidence)'));
+  assert(map.includes('loc.locationConfidence===PUBLIC'));
+  assert(map.includes('loc.locationConfidence===PENDING'));
   assert(map.includes("marker=state.leaflet.marker([Number(r.lat),Number(r.lon)]"));
   assert(map.includes("state.map.setView([Number(r.lat),Number(r.lon)],zoom)"));
   assert(map.includes("const mappable=r=>finite(r?.lat)&&finite(r?.lon)"));
