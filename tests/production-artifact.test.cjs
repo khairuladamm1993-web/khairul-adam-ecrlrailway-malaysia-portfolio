@@ -85,8 +85,29 @@ test('MAP is lazy, marker-only and contains no protected Corridor registry',()=>
   assert(!/\bSTN\d{2}\b/.test(registry));
   assert(!/\bCH\s*\d{1,3}\+\d{3}\b/.test(registry));
   for(const token of ['totalTrackLength','turnoutCount','TrackLine(','MapPolyline','L.polyline'])assert(!map.includes(token)&&!registry.includes(token),token);
-  assert(registry.includes("['Alang Sedayu','PL',null,null,'coordinate-pending']"));
-  assert(registry.includes("['Kuantan Port City Depot','Depot',null,null,'coordinate-pending']"));
-  assert(registry.includes("['Gombak North EMU Depot','Depot',null,null,'coordinate-pending']"));
+  assert(registry.includes("['Alang Sedayu','PL',null,null,'Pending Validation']"));
+  assert(registry.includes("['Kuantan Port City Depot','Depot',null,null,'Pending Validation']"));
+  assert(registry.includes("['Gombak North EMU Depot','Depot',null,null,'Pending Validation']"));
+  fs.rmSync(dir,{recursive:true,force:true});
+});
+
+test('MAP exact-location contract classifies coordinates and never shifts markers',()=>{
+  const dir=build('build-production.py','railway-production-');
+  const map=fs.readFileSync(path.join(dir,'assets','map-gateway.js'),'utf8');
+  const registry=fs.readFileSync(path.join(dir,'assets','corridor-reference.js'),'utf8');
+  assert(registry.includes("'Public Reference Location'"));
+  assert(registry.includes("'Pending Validation'"));
+  assert(map.includes("const VALID='Validated Location',PUBLIC='Public Reference Location',PENDING='Pending Validation'"));
+  assert(map.includes("r?.locationConfidence===VALID"));
+  assert(map.includes("marker=state.leaflet.marker([Number(r.lat),Number(r.lon)]"));
+  assert(map.includes("state.map.setView([Number(r.lat),Number(r.lon)],zoom)"));
+  assert(!map.includes('setLatLng('));
+  assert(!map.includes('MapPolyline'));
+  assert(!map.includes('L.polyline'));
+  assert(!map.includes('.polyline('));
+  assert(!map.includes("state.map.on('zoom"));
+  assert(!map.includes("state.map.on('move"));
+  assert(map.includes("Public Reference Location · locality/reference position only; not an exact railway or survey/GIS coordinate."));
+  assert(map.includes("Pending Validation · no exact railway location is rendered."));
   fs.rmSync(dir,{recursive:true,force:true});
 });
