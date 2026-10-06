@@ -76,14 +76,31 @@ function mockScript(role){
       return b;
     }
     window.__railwayMapCalls={setView:[],markers:[]};
+    window.__rpcCalls=[];
+    window.__geoCalls=0;
+    window.__locationHistory=[];
+    window.__nextLocationVersion=1;
+    window.confirm=()=>true;
+    window.prompt=()=> 'Rollback after CI review';
+    Object.defineProperty(navigator,'geolocation',{configurable:true,value:{
+      getCurrentPosition(success){window.__geoCalls++;success({coords:{latitude:6.22222,longitude:102.66666,accuracy:8}});}
+    }});
     window.L={
-      map(el){return {_el:el,setView(coords,zoom){window.__railwayMapCalls.setView.push({coords:[...coords],zoom});return this},fitBounds(){return this},invalidateSize(){},remove(){el.replaceChildren()}}}, 
+      map(el){
+        const handlers={};
+        return {_el:el,setView(coords,zoom){window.__railwayMapCalls.setView.push({coords:[...coords],zoom});return this},fitBounds(){return this},invalidateSize(){},remove(){},on(name,fn){handlers[name]=fn;return this},off(name,fn){if(handlers[name]===fn)delete handlers[name];return this},_handlers:handlers};
+      }, 
       tileLayer(){return {addTo(){return this}}},
       divIcon(options){return options},
-      marker(coords){
-        const rec={coords:[...coords],handlers:{},removed:false};
+      marker(coords,options={}){
+        const rec={coords:[...coords],handlers:{},removed:false,options};
         window.__railwayMapCalls.markers.push(rec);
-        return {addTo(){return this},bindTooltip(){return this},on(name,fn){rec.handlers[name]=fn;return this},remove(){rec.removed=true;}};
+        const marker={
+          addTo(){return marker},bindTooltip(){return marker},on(name,fn){rec.handlers[name]=fn;return marker},off(name,fn){if(rec.handlers[name]===fn)delete rec.handlers[name];return marker},
+          remove(){rec.removed=true},setLatLng(next){rec.coords=[Number(next[0]),Number(next[1])];return marker},getLatLng(){return {lat:rec.coords[0],lng:rec.coords[1]}},
+          dragging:{enabled:false,enable(){this.enabled=true},disable(){this.enabled=false}}
+        };
+        rec.marker=marker;return marker;
       },
       latLngBounds(coords){return {coords}}
     };
@@ -94,10 +111,29 @@ function mockScript(role){
         onAuthStateChange(){return {data:{subscription:{unsubscribe(){}}}}},
         async signInWithOtp(){return {error:null}},async signOut(){return {error:null}}
       },
-      async rpc(name){
+      async rpc(name,args={}){
+        window.__rpcCalls.push({name,args});
         if(name==='account_role')return {data:role,error:null};
         if(name==='admin_summary')return {data:{members:1,quiz_attempts:0,member_sessions:0,average_visit_seconds:0,active_engagement_seconds:0},error:null};
         if(name==='submit_quiz')return {data:{score:12,passed:true},error:null};
+        if(name==='admin_publish_location'){
+          const item=rows.member_content.find(x=>x.id===args.p_asset_id),loc=item.body.location;
+          if(!window.__locationHistory.some(x=>x.asset_id===item.id)){
+            window.__locationHistory.push({version_id:window.__nextLocationVersion++,asset_id:item.id,previous_latitude:loc.latitude,previous_longitude:loc.longitude,new_latitude:loc.latitude,new_longitude:loc.longitude,previous_confidence:loc.locationConfidence,new_confidence:loc.locationConfidence,source_note:'Baseline captured before first Owner location change',accuracy_m:null,owner_user_id:profile.user_id,action:'baseline',created_at:new Date().toISOString()});
+          }
+          window.__locationHistory.push({version_id:window.__nextLocationVersion++,asset_id:item.id,previous_latitude:loc.latitude,previous_longitude:loc.longitude,new_latitude:args.p_latitude,new_longitude:args.p_longitude,previous_confidence:loc.locationConfidence,new_confidence:args.p_confidence,source_note:args.p_source_note,accuracy_m:args.p_accuracy_m,owner_user_id:profile.user_id,action:'publish',created_at:new Date().toISOString()});
+          item.body.location={latitude:args.p_latitude,longitude:args.p_longitude,locationConfidence:args.p_confidence,coordinateSource:'Owner-approved test location'};
+          return {data:{version_id:window.__locationHistory.at(-1).version_id,asset_id:item.id},error:null};
+        }
+        if(name==='admin_location_history'){
+          return {data:window.__locationHistory.filter(x=>!args.p_asset_id||x.asset_id===args.p_asset_id).slice().reverse(),error:null};
+        }
+        if(name==='admin_restore_location'){
+          const v=window.__locationHistory.find(x=>x.version_id===args.p_version_id),item=rows.member_content.find(x=>x.id===v.asset_id),loc=item.body.location;
+          item.body.location={latitude:v.new_latitude,longitude:v.new_longitude,locationConfidence:v.new_confidence,coordinateSource:'Restored approved test location'};
+          window.__locationHistory.push({version_id:window.__nextLocationVersion++,asset_id:item.id,previous_latitude:loc.latitude,previous_longitude:loc.longitude,new_latitude:v.new_latitude,new_longitude:v.new_longitude,previous_confidence:loc.locationConfidence,new_confidence:v.new_confidence,source_note:args.p_source_note,accuracy_m:v.accuracy_m,owner_user_id:profile.user_id,action:'rollback',restored_from_version:v.version_id,created_at:new Date().toISOString()});
+          return {data:{version_id:window.__locationHistory.at(-1).version_id,asset_id:item.id},error:null};
+        }
         return {data:null,error:null};
       },
       from(name){return builder(name)},
@@ -201,10 +237,11 @@ for(const [width,height] of viewports){
         const markers=window.__railwayMapCalls.markers;
         const focus=document.querySelector('[data-map-focus]');
         const kota=[...document.querySelectorAll('[data-map-point]')].find(x=>x.textContent.includes('Kota Bharu'));
-        const before=markers[0]?.coords?[...markers[0].coords]:null;
-        if(markers[0]?.handlers?.click){
+        const targetMarker=markers.find(m=>Math.abs(m.coords[0]-6.12345)<1e-8&&Math.abs(m.coords[1]-102.54321)<1e-8);
+        const before=targetMarker?.coords?[...targetMarker.coords]:null;
+        if(targetMarker?.handlers?.click){
           window.__railwayMapCalls.setView.length=0;
-          markers[0].handlers.click();
+          targetMarker.handlers.click({target:targetMarker.marker});
         }else if(kota){
           kota.click();
         }
@@ -214,7 +251,7 @@ for(const [width,height] of viewports){
           focus?.click();
         }
         const buttonFocus=window.__railwayMapCalls.setView.at(-1)||null;
-        const after=markers[0]?.coords?[...markers[0].coords]:null;
+        const after=targetMarker?.coords?[...targetMarker.coords]:null;
         const detail=document.querySelector('[data-map-detail]')?.textContent||'';
         return {
           validatedMarkers:Number(host?.dataset.validatedMarkers||0),
@@ -225,7 +262,7 @@ for(const [width,height] of viewports){
         };
       })()`);
       const exactOK=role==='public'
-        ? exactResult.validatedMarkers===0&&exactResult.markerCount===0
+        ? exactResult.validatedMarkers===0&&exactResult.markerCount>0&&exactResult.before===null
         : exactResult.validatedMarkers===1&&exactResult.markerCount===1&&
           JSON.stringify(exactResult.before)===JSON.stringify([6.12345,102.54321])&&
           JSON.stringify(exactResult.after)===JSON.stringify(exactResult.before)&&
@@ -236,7 +273,55 @@ for(const [width,height] of viewports){
       const mapOK=mapResult.docOverflow<=1&&mapResult.moduleOverflow<=1&&mapResult.canvasHeight>=280&&mapResult.minControl>=42&&mapResult.lazyScript&&mapResult.order==='practical,ebook,corridor,map,future,news';
       if(!mapOK)failures.push({role,width,height,phase:'map',result:mapResult});
       if(!exactOK)failures.push({role,width,height,phase:'exact-location',result:exactResult});
-      if(ok&&mapOK&&exactOK)console.log(`PASS ${role} ${width}x${height}`);
+
+      let ownerOK=true;
+      if(role!=='admin'){
+        const ownerState=await evalValue(client,`(()=>({script:!!document.querySelector('script[data-railway-owner-map]'),panel:!!document.querySelector('.owner-map-panel'),geo:window.__geoCalls,publish:window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length}))()`);
+        ownerOK=!ownerState.script&&!ownerState.panel&&ownerState.geo===0&&ownerState.publish===0;
+        if(!ownerOK)failures.push({role,width,height,phase:'owner-security',result:ownerState});
+      }else{
+        await waitEval(client,"!!document.querySelector('.owner-map-panel')");
+        const preOwner=await evalValue(client,`(()=>({geo:window.__geoCalls,publish:window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length,panel:!!document.querySelector('.owner-map-panel')}))()`);
+        ownerOK=preOwner.panel&&preOwner.geo===0&&preOwner.publish===0;
+        if(width===1024&&height===768){
+          await evalValue(client,`(()=>{document.querySelector('[data-owner-geolocate]')?.click();return true})()`);
+          await waitEval(client,"window.__geoCalls===1&&document.querySelector('[data-owner-use-current]')");
+          await evalValue(client,`(()=>{document.querySelector('[data-owner-use-current]')?.click();return true})()`);
+          await waitEval(client,"!!document.querySelector('[data-owner-edit-form]')");
+          const draftBefore=await evalValue(client,"window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length");
+          await evalValue(client,`(()=>{
+            const f=document.querySelector('[data-owner-edit-form]');
+            f.querySelector('[name=confidence]').value='Personal Field-Validated Location';
+            f.querySelector('[name=sourceNote]').value='CI field GPS confirmation';
+            f.requestSubmit();return true;
+          })()`);
+          await waitEval(client,"!!document.querySelector('[data-owner-confirm]')");
+          const reviewBefore=await evalValue(client,"window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length");
+          await evalValue(client,`(()=>{document.querySelector('[data-owner-confirm]')?.click();return true})()`);
+          await waitEval(client,"window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length===1");
+          await waitEval(client,"/6\\.22222/.test(document.querySelector('[data-map-detail]')?.textContent||'')");
+          await evalValue(client,`(()=>{document.querySelector('[data-owner-history]')?.click();return true})()`);
+          await waitEval(client,"document.querySelectorAll('[data-owner-restore]').length>=2");
+          const historyState=await evalValue(client,`(()=>({rows:window.__locationHistory.length,baseline:window.__locationHistory.some(x=>x.action==='baseline'),publish:window.__locationHistory.some(x=>x.action==='publish')}))()`);
+          await evalValue(client,`(()=>{
+            const b=[...document.querySelectorAll('[data-owner-restore]')].find(x=>x.dataset.ownerRestore==='1');b?.click();return true;
+          })()`);
+          await waitEval(client,"window.__rpcCalls.filter(x=>x.name==='admin_restore_location').length===1");
+          await waitEval(client,"/6\\.12345/.test(document.querySelector('[data-map-detail]')?.textContent||'')");
+          const ownerState=await evalValue(client,`(()=>({
+            geo:window.__geoCalls,
+            publishCalls:window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length,
+            restoreCalls:window.__rpcCalls.filter(x=>x.name==='admin_restore_location').length,
+            historyRows:window.__locationHistory.length,
+            baseline:window.__locationHistory.some(x=>x.action==='baseline'),
+            rollback:window.__locationHistory.some(x=>x.action==='rollback'),
+            detail:document.querySelector('[data-map-detail]')?.textContent||''
+          }))()`);
+          ownerOK=ownerOK&&draftBefore===0&&reviewBefore===0&&historyState.rows>=2&&historyState.baseline&&historyState.publish&&ownerState.geo===1&&ownerState.publishCalls===1&&ownerState.restoreCalls===1&&ownerState.rollback&&/6\.12345/.test(ownerState.detail);
+        }
+        if(!ownerOK)failures.push({role,width,height,phase:'owner-workflow',result:preOwner});
+      }
+      if(ok&&mapOK&&exactOK&&ownerOK)console.log(`PASS ${role} ${width}x${height}`);
     }finally{
       client.close();
       try{await fetch(`http://127.0.0.1:${debugPort}/json/close/${target.id}`);}catch{}
