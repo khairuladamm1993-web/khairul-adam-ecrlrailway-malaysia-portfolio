@@ -83,7 +83,7 @@
   unmount();
   if(!host)return;
   const controller=new AbortController(),signal=controller.signal;
-  const state={host,controller,map:null,markers:new Map(),selected:null,filter:'All',query:''};
+  const state={host,controller,map:null,leaflet:null,markers:new Map(),selected:null,filter:'All',query:''};
   instance=state;
   host.innerHTML='<section class="map-module" aria-label="ECRL public reference map">'+
    '<div class="map-toolbar"><label class="map-search"><span>Search</span><input type="search" data-map-search placeholder="Station name; Member code / chainage when available" autocomplete="off"></label>'+
@@ -112,8 +112,8 @@
    for(const p of visible()){
     if(!Number.isFinite(p.lat)||!Number.isFinite(p.lon)||state.markers.has(p.id))continue;
     const cls='railway-map-pin map-pin-'+p.type.toLowerCase();
-    const icon=L.divIcon({className:'railway-map-divicon',html:'<span class="'+cls+'" aria-hidden="true"></span>',iconSize:[18,18],iconAnchor:[9,9]});
-    const marker=L.marker([p.lat,p.lon],{icon,keyboard:true,title:p.name,riseOnHover:true}).addTo(state.map);
+    const icon=state.leaflet.divIcon({className:'railway-map-divicon',html:'<span class="'+cls+'" aria-hidden="true"></span>',iconSize:[18,18],iconAnchor:[9,9]});
+    const marker=state.leaflet.marker([p.lat,p.lon],{icon,keyboard:true,title:p.name,riseOnHover:true}).addTo(state.map);
     marker.bindTooltip(esc(p.name),{direction:'top',offset:[0,-8],opacity:.92,className:'railway-map-label'});
     marker.on('click',()=>{renderDetail(p);renderResults();});
     state.markers.set(p.id,marker);
@@ -126,7 +126,7 @@
   }
   function fit(){
    const coords=visible().filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon)).map(p=>[p.lat,p.lon]);
-   if(coords.length)state.map.fitBounds(L.latLngBounds(coords),{padding:[24,24],maxZoom:8});
+   if(coords.length)state.map.fitBounds(state.leaflet.latLngBounds(coords),{padding:[24,24],maxZoom:8});
   }
   input.addEventListener('input',()=>{state.query=input.value;renderResults();},{signal});
   host.querySelector('.map-filters').addEventListener('click',e=>{const b=e.target.closest('[data-map-filter]');if(!b)return;state.filter=b.dataset.mapFilter;host.querySelectorAll('[data-map-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderResults();fit();},{signal});
@@ -138,10 +138,10 @@
 
   try{
    await ensureMemberData();
-   const L=await loadLeaflet();
+   state.leaflet=await loadLeaflet();
    if(instance!==state||!host.isConnected)return;
-   state.map=L.map(host.querySelector('[data-map-canvas]'),{zoomControl:true,attributionControl:true,preferCanvas:true,minZoom:5,maxZoom:15});
-   L.tileLayer(TILE_URL,{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',updateWhenIdle:true,keepBuffer:1,detectRetina:false}).addTo(state.map);
+   state.map=state.leaflet.map(host.querySelector('[data-map-canvas]'),{zoomControl:true,attributionControl:true,preferCanvas:true,minZoom:5,maxZoom:15});
+   state.leaflet.tileLayer(TILE_URL,{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',updateWhenIdle:true,keepBuffer:1,detectRetina:false}).addTo(state.map);
    state.map.setView([4.55,102.55],6);
    renderResults();fit();renderDetail(null);
    host.dataset.mapReady='true';
