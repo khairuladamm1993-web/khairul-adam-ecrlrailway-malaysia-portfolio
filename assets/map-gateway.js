@@ -90,7 +90,7 @@
    '<div class="map-toolbar"><label class="map-search"><span>Search</span><input type="search" data-map-search placeholder="Station name; Member code / chainage when available" autocomplete="off"></label>'+
    '<div class="map-filters" role="group" aria-label="Map filters">'+['All','STN','PL','Depot'].map(x=>'<button type="button" data-map-filter="'+x+'" aria-pressed="'+(x==='All')+'">'+x+'</button>').join('')+'</div>'+
    '<div class="map-actions"><button type="button" data-map-fit>FIT FULL ROUTE</button><button type="button" data-map-focus disabled>FOCUS SELECTED</button></div></div>'+
-   '<div class="map-layout"><div class="map-canvas-wrap"><div class="map-canvas" data-map-canvas aria-label="Interactive Malaysia reference map"></div><p class="map-attribution-note">Exact railway markers require Validated Location. Public-reference coordinates are not railway survey/GIS coordinates.</p></div>'+
+   '<div class="map-layout"><div class="map-canvas-wrap"><div class="map-canvas" data-map-canvas aria-label="Interactive Malaysia reference map"></div><p class="map-attribution-note">Exact railway markers require a validated confidence class. Public Reference and Pending markers are approximate/reference only, never survey/GIS-grade.</p></div>'+
    '<aside class="map-side"><div data-map-detail class="map-detail"><span class="access-label">MAP</span><h3>Select an asset</h3><p>Choose a result to inspect coordinate confidence. Exact markers appear only for validated locations.</p></div><div class="map-results" data-map-results></div></aside></div>'+
    '<p class="study-boundary">No route line / no polyline. Manual pan or zoom never recalculates stored marker coordinates.</p>'+
    '</section>';
@@ -138,13 +138,21 @@
    const records=visible(),allowed=new Set(records.filter(mappable).map(r=>r.id));
    for(const [id,m] of state.markers){if(!allowed.has(id)){m.remove();state.markers.delete(id);}}
    for(const r of records){
-    if(!mappable(r)||state.markers.has(r.id))continue;
+    if(!mappable(r))continue;
+    let marker=state.markers.get(r.id);
+    if(marker&&marker._railwayConfidence!==r.locationConfidence){marker.remove();state.markers.delete(r.id);marker=null;}
+    if(marker){
+     const ll=marker.getLatLng?.();
+     if(!ll||Math.abs(ll.lat-Number(r.lat))>1e-10||Math.abs(ll.lng-Number(r.lon))>1e-10)marker.setLatLng?.([Number(r.lat),Number(r.lon)]);
+     continue;
+    }
     const confidenceClass=exact(r)?'map-confidence-exact':r.locationConfidence===PUBLIC?'map-confidence-reference':'map-confidence-pending';
     const cls='railway-map-pin map-pin-'+r.type.toLowerCase()+' '+confidenceClass;
     const icon=state.leaflet.divIcon({className:'railway-map-divicon',html:'<span class="'+cls+'" aria-hidden="true"></span>',iconSize:[18,18],iconAnchor:[9,9]});
-    const marker=state.leaflet.marker([Number(r.lat),Number(r.lon)],{icon,keyboard:true,title:r.name,riseOnHover:true}).addTo(state.map);
+    marker=state.leaflet.marker([Number(r.lat),Number(r.lon)],{icon,keyboard:true,title:r.name,riseOnHover:true}).addTo(state.map);
+    marker._railwayConfidence=r.locationConfidence;
     marker.bindTooltip(esc(r.name)+' · '+esc(r.locationConfidence),{direction:'top',offset:[0,-8],opacity:.92,className:'railway-map-label'});
-    marker.on('click',()=>{renderDetail(r);renderResults();focusStored(r);loadOwnerTools();});
+    marker.on('click',()=>{const fresh=effective(points().find(x=>x.id===r.id)||r);renderDetail(fresh);renderResults();focusStored(fresh);loadOwnerTools();});
     state.markers.set(r.id,marker);
    }
   }
