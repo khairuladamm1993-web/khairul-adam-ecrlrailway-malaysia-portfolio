@@ -1,8 +1,14 @@
 # Access architecture — migration only, 5 October 2026
 
-Status: PUBLIC UI implemented; verified-email authentication, private content storage,
-member services and Adam-only admin are **not connected**. No login is simulated.
-No email, password, IC, passport or session credential is requested by this build.
+Status: Supabase browser authentication and server-authorized member/admin session wiring
+are now implemented on migration/full-portfolio. The browser uses only the public
+publishable key. Access remains Public until Supabase returns a valid user and
+public.account_role() returns member or admin. No frontend-selected role, URL parameter
+or local storage flag can unlock protected content. No IC or passport is requested.
+
+End-to-end email verification is still **unverified in production** because the project
+currently has zero real auth users/sessions. Supabase Auth redirect URLs must include the
+actual migration/preview origin before the first real magic-link acceptance test.
 
 ## Public delivery boundary
 
@@ -25,31 +31,37 @@ use a private content repository/store, authenticated delivery, and a public-onl
 build artifact. Do not deploy this source tree wholesale through Pages main.
 Current live main is deliberately unchanged and retains its previous public scope.
 
-## Server contract to implement before enabling members
+## Implemented Supabase access contract
 
-Use a separate auth/backend deployment from the anonymous analytics Worker/D1.
-Prefer a reputable verified-email provider, PKCE/one-time email-link flow and a
-first-party secure session. Cross-site Pages/backend cookie behavior must be tested
-in Safari; a same-site custom-domain architecture may be needed. Never persist
-bearer/session secrets in localStorage or query strings. No credential goes in Git.
+`assets/access.js` initializes the pinned Supabase browser client using the project URL
+and browser-safe publishable key. It restores the SDK session, validates the user with
+Auth, then calls `account_role()`. Any missing, invalid, expired or rejected session
+fails closed to Public.
 
-- GET `/session`: validated server session -> public/member/admin and verified-email
-  status. No frontend role assertion is trusted.
-- POST `/auth/email/start`, `/auth/email/complete`: rate-limited, one-time, expiring,
-  anti-enumeration email verification. Provider credentials remain server secrets.
-- POST `/logout`: revoke session; clear member data in memory, invalidate private URLs.
-- GET `/member/{resource}`: 401 unless authenticated, 403 unless approved verified member;
-  validate authorization on **each** request. `Cache-Control: private, no-store`.
-- Quiz history/progress is pending server storage; current retained quiz is local-only.
-- GET/POST `/admin/*`: server-side immutable Adam owner subject allowlist, not an email
-  suffix or self-selected role. MFA/reauth for sensitive changes, CSRF protection,
-  audit trail, and least privilege. No public admin route, toolbar or data in this build.
-- Exact origin allowlist + credential policy; CORS is not authentication. Do not reuse
-  anonymous analytics credentials or expose authenticated data on that collector.
+- Email entry calls `signInWithOtp` using a one-time email flow. Success means
+  "verification sent", not member access.
+- Member/admin access is granted only when `account_role()` returns that role.
+- Approved member content, quiz banks and member-file metadata are fetched only after
+  that server result. Own profile/progress/attempts remain RLS-scoped.
+- Quiz writes call `submit_quiz(...)`; score and PASS are server-calculated.
+- Progress writes call `save_progress(...)`.
+- Activity recording is blocked client-side until explicit `set_activity_consent(true)`
+  and is independently enforced by the RPC.
+- Admin summary/content/member-enable operations use the existing admin RPCs and the UI
+  is not rendered unless the role RPC returns admin.
+- Logout clears in-memory member data and returns the UI to Public.
+- Protected file access uses short-lived signed Storage URLs after authenticated metadata
+  access; no private object URL is embedded in the public HTML.
+
+The public static preview remains intentionally different: its build removes the Supabase
+CDN and member UI, replaces `access.js` with a Public-only stub and keeps
+`connect-src 'none'`. Preview therefore cannot become a back door to production data.
 
 ## Member content manifest (not in public asset bundle)
 
-- Full practical assessment: existing ten modules × sixteen questions, unchanged.
+- Full practical assessment: existing ten modules × sixteen questions are delivered from
+  RLS-protected `quiz_banks` after verified member authorization; no new question bank
+  is copied into the public frontend.
 - E-book notes; approved simulator material; detailed Insights: content approval pending.
 - Corridor: station code/name, section, approved chainage, classification, detail and
   source/evidence flag (`public-confirmed`, `personal-field-reference`, `development-only`).
@@ -103,3 +115,26 @@ privacy notice, minimal account association, retention and deletion policy. Anon
 public traffic must not be enriched from login identities. Preview never writes to
 production. New engagement logic needs dedicated tests and approved backend rollout
 before claiming these dashboard metrics are implemented.
+
+
+## Phase 2 frontend checkpoint — 6 October 2026
+
+Implemented files: `assets/access.js`, `assets/member-gateway.js`, `gateway.html`,
+preview isolation script, gateway auth/member styling and `tests/auth-wiring.test.cjs`.
+
+The member gateway preserves the existing Light/Dark, BM/EN/Chinese/Pinyin and public
+locked-preview design. Member data is memory-cached only for the active page. Practical
+assessment selects one or two approved banks and builds exactly sixteen questions
+(16 from one bank or 8 + 8 from two); answers are submitted to the server RPC using a
+client attempt UUID. The displayed PASS threshold remains 12/16 and is explicitly
+described as personal self-assessment, not an official qualification.
+
+Authenticated member engagement uses a random per-page UUID and monotonically increasing
+sequence only after explicit consent. Visit Duration is accumulated separately from
+Active Engagement Time; active time pauses while hidden/unfocused or after 60 seconds of
+inactivity. No keystroke contents, pointer coordinates or browsing identity are recorded.
+
+Remaining gate: configure/confirm the real allowed Auth redirect URL, create the first
+verified account through the UI, and perform browser/Safari end-to-end checks. Until that
+happens, email delivery, callback exchange, session restore and admin ownership are
+implemented but cannot honestly be marked production-validated.
