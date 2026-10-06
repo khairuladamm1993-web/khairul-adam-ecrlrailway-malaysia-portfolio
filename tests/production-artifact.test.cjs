@@ -122,7 +122,9 @@ test('canonical Corridor confidence overrides the public-safe projection',()=>{
   const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
   assert(map.includes("if(loc.locationConfidence===PUBLIC&&finite(loc.lat)&&finite(loc.lon))"));
   assert(map.includes("if(loc.locationConfidence===PENDING)"));
-  assert(map.includes("lat:finite(loc.lat)?Number(loc.lat):null,lon:finite(loc.lon)?Number(loc.lon):null,locationConfidence:PENDING"));
+  assert(map.includes("lat:finite(loc.lat)?Number(loc.lat):(finite(point.lat)?Number(point.lat):null)"));
+  assert(map.includes("lon:finite(loc.lon)?Number(loc.lon):(finite(point.lon)?Number(point.lon):null)"));
+  assert(map.includes("locationConfidence:PENDING"));
 });
 
 test('Owner MAP runtime is lazy, admin-gated and never persists device location automatically',()=>{
