@@ -1,0 +1,69 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const os=require('node:os');
+const path=require('node:path');
+const cp=require('node:child_process');
+
+const root=path.resolve(__dirname,'..');
+
+function build(script,prefix){
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),prefix));
+  const r=cp.spawnSync('python3',[path.join(root,'scripts',script),dir],{cwd:root,encoding:'utf8'});
+  assert.equal(r.status,0,(r.stdout||'')+(r.stderr||''));
+  return dir;
+}
+function walk(dir){
+  const out=[];
+  for(const name of fs.readdirSync(dir)){
+    const p=path.join(dir,name),s=fs.statSync(p);
+    if(s.isDirectory())out.push(...walk(p));else out.push(p);
+  }
+  return out;
+}
+
+test('production artifact excludes retained legacy quiz/protected assets',()=>{
+  const dir=build('build-production.py','railway-production-');
+  for(const name of ['questions.js','gateway.js','quiz-core.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),false,name);
+  for(const name of ['access.js','public-gateway.js','member-gateway.js','module-previews.js','analytics.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),true,name);
+  const textFiles=walk(dir).filter(p=>/\.(?:html|js|css|md|xml|txt)$/i.test(p));
+  const all=textFiles.map(p=>fs.readFileSync(p,'utf8')).join('\n');
+  assert(!all.includes('window.RailwayModules='));
+  assert(!all.includes('df8b_inspection-1'));
+  assert(!all.includes('"correct":0'));
+  assert(!all.includes('Email verification — coming soon'));
+  assert(!all.includes('Member sign-in is not connected yet'));
+  assert(all.includes('signInWithOtp'));
+  assert(all.includes("rpc('account_role')"));
+  fs.rmSync(dir,{recursive:true,force:true});
+});
+
+test('production gateway keeps authenticated runtime and fail-closed public entry',()=>{
+  const dir=build('build-production.py','railway-production-');
+  const html=fs.readFileSync(path.join(dir,'gateway.html'),'utf8');
+  for(const src of ['assets/access.js','assets/public-gateway.js','assets/member-gateway.js'])assert(html.includes(src));
+  assert(!html.includes('assets/questions.js'));
+  assert(!html.includes('assets/gateway.js'));
+  assert(!html.includes('assets/quiz-core.js'));
+  const access=fs.readFileSync(path.join(dir,'assets/access.js'),'utf8');
+  assert(access.includes("level:'public'"));
+  assert(access.includes("rpc('account_role')"));
+  assert(access.includes("failClosed"));
+  fs.rmSync(dir,{recursive:true,force:true});
+});
+
+test('preview artifact remains analytics- and authentication-isolated',()=>{
+  const dir=build('build-preview.py','railway-preview-');
+  const html=fs.readFileSync(path.join(dir,'gateway.html'),'utf8');
+  const access=fs.readFileSync(path.join(dir,'assets/access.js'),'utf8');
+  const analytics=fs.readFileSync(path.join(dir,'assets/analytics.js'),'utf8');
+  const headers=fs.readFileSync(path.join(dir,'_headers'),'utf8');
+  assert(!html.includes('@supabase/supabase-js'));
+  assert(!html.includes('assets/member-gateway.js'));
+  assert(!html.includes('assets/analytics.js'));
+  assert(access.includes("status:'preview-public-only'"));
+  assert.equal(analytics.trim(),'/* Preview only: analytics submission disabled. */');
+  assert(headers.includes("connect-src 'none'"));
+  for(const name of ['questions.js','gateway.js','quiz-core.js','member-gateway.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),false,name);
+  fs.rmSync(dir,{recursive:true,force:true});
+});
