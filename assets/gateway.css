@@ -2,3 +2,11 @@
 @media(min-width:720px) and (min-height:850px){.gateway-shell{height:100svh;overflow:hidden}.gateway-content{overflow-y:auto;padding-right:4px;overscroll-behavior:contain}.gateway-header,.categories,.gateway-footer{flex-shrink:0}}
 @media(max-width:719px){.gateway-shell{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px));gap:10px}.gateway-header{display:block;padding:15px}#gateway-status{margin-top:12px;text-align:left;display:flex;gap:12px;flex-wrap:wrap}.module-grid,.learning-grid{grid-template-columns:1fr}.categories{gap:5px;padding:5px}.categories button{font-size:9px;padding:7px 3px;overflow-wrap:anywhere;min-height:64px}.content-heading{align-items:flex-start;gap:12px}.module{padding:14px 12px}.gateway-actions .primary{flex:1}.gateway-actions .quiet{width:auto}.destination-controls button{flex:1 1 40%}dialog{padding:20px}.with-pinyin .categories button{font-size:10px}}
 @media(max-width:359px){.gateway-actions{display:grid;grid-template-columns:1fr 1fr}.gateway-actions .primary{grid-column:1/-1}.module{grid-template-columns:28px minmax(0,1fr) 21px;gap:8px}.module-title{font-size:14px}}
+
+/* Phase 2 member/auth additions preserve existing gateway layout. */
+#member-dialog input[type=email]{width:100%;min-height:46px;margin:8px 0 14px;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface,#10222d);color:var(--text)}
+#member-auth-form{display:grid;gap:10px}.member-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.member-actions .quiet{margin:0}
+.member-consent{margin-top:14px}.member-resource .member-body{color:var(--muted);font-size:14px;line-height:1.6;margin:12px 0}
+.auth-error{color:#d64d4d}.admin-summary{white-space:pre-wrap;overflow:auto;max-height:260px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface-soft,#0e1c25)}
+#gateway-status .member-entry{max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:719px){#member-dialog{width:calc(100% - 18px);padding:18px}.member-actions>*{flex:1 1 180px}.admin-summary{max-height:210px}}
