@@ -113,7 +113,7 @@
   const activity=()=>{state.lastActivity=performance.now();};
   for(const event of ['pointerdown','keydown','scroll','touchstart']){addEventListener(event,activity,{passive:true});state.listeners.push([event,activity]);}
   const tick=()=>{const now=performance.now(),delta=Math.max(0,Math.min(35,(now-state.last)/1000));state.visit+=delta;if(!document.hidden&&document.hasFocus()&&now-state.lastActivity<60000)state.active+=delta;state.last=now;};
-  state.flush=async()=>{tick();const visit=Math.floor(state.visit),active=Math.floor(state.active);if(!visit&&!active)return;state.visit-=visit;state.active-=active;try{await A.recordEngagement(state.id,category(),state.seq++,visit,active);}catch{state.visit+=visit;state.active+=active;}};
+  state.flush=async()=>{tick();const visit=Math.floor(state.visit),active=Math.floor(state.active);if(!visit&&!active)return;state.visit-=visit;state.active-=active;const section=category()==='map'?'corridor':category();try{await A.recordEngagement(state.id,section,state.seq++,visit,active);}catch{state.visit+=visit;state.active+=active;}};
   state.pagehide=()=>{state.flush();};
   state.visibility=()=>{if(document.hidden)state.flush();else state.last=performance.now();};
   addEventListener('pagehide',state.pagehide);document.addEventListener('visibilitychange',state.visibility);
