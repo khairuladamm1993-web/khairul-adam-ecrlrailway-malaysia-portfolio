@@ -25,7 +25,7 @@
    userId=user.id;
    const {data:role,error:roleError}=await c.rpc('account_role');
    if(roleError||!['member','admin'].includes(role))return failClosed(roleError?'role-error':'public',roleError);
-   const profile=await c.from('member_profiles').select('email,role,enabled,activity_consent_at,privacy_version').maybeSingle();
+   const profile=await c.from('member_profiles').select('email,role,enabled,activity_consent_at,privacy_version').eq('user_id',userId).maybeSingle();
    if(profile.error)return failClosed('profile-error',profile.error.message);
    consent=Boolean(profile.data?.activity_consent_at);
    return set({level:role,status:'authenticated',canReadMemberContent:true,canAdmin:role==='admin',email:user.email||profile.data?.email||null,error:null});
