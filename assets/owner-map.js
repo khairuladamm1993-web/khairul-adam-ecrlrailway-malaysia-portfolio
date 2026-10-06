@@ -46,7 +46,7 @@
    '<div class="owner-map-actions"><button type="button" data-owner-geolocate>MY CURRENT LOCATION</button>'+
    (code?'<button type="button" data-owner-edit>EDIT LOCATION</button><button type="button" data-owner-history>LOCATION HISTORY</button>':'')+
    '</div>'+
-   (cur?'<div class="owner-current"><strong>Current Location</strong><span>'+coord(cur.lat)+', '+coord(cur.lon)+'</span><span>Current device accuracy: ±'+Math.round(cur.accuracy)+' m</span>'+(cur.accuracy>30?'<span class="owner-warning">Accuracy is poor for field confirmation. Review carefully before saving.</span>':'')+(code?'<button type="button" data-owner-use-current>USE CURRENT LOCATION FOR ASSET</button>':'')+'</div>':'<p class="owner-privacy">Device location is requested only when you tap the button. No background tracking or automatic persistence.</p>')+
+   (cur?'<div class="owner-current"><strong>Current Location</strong><span>'+coord(cur.lat)+', '+coord(cur.lon)+'</span>'+(cur.accuracy!=null?'<span>Current device accuracy: ±'+Math.round(cur.accuracy)+' m</span>':'<span>Current device accuracy: not reported by browser</span>')+(cur.accuracy!=null&&cur.accuracy>30?'<span class="owner-warning">Accuracy is poor for field confirmation. Review carefully before saving.</span>':'')+(code?'<button type="button" data-owner-use-current>USE CURRENT LOCATION FOR ASSET</button>':'')+'</div>':'<p class="owner-privacy">Device location is requested only when you tap the button. No background tracking or automatic persistence.</p>')+
    '<p data-owner-message class="owner-message" role="status"></p>'+
    '<div data-owner-workflow></div>'+
    '</section>';
@@ -72,7 +72,8 @@
   navigator.geolocation.getCurrentPosition(
    pos=>{
     if(!mounted||!A.canAdmin)return;
-    mounted.current={lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:Number(pos.coords.accuracy)||0,observedAt:new Date().toISOString()};
+    const rawAccuracy=Number(pos.coords.accuracy);
+    mounted.current={lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:Number.isFinite(rawAccuracy)&&rawAccuracy>=0?rawAccuracy:null,observedAt:new Date().toISOString()};
     drawCurrentMarker();render();
    },
    error=>{if(mounted){setMessage('Device location unavailable: '+(error.message||'permission denied'),true);bindBase();}},
@@ -89,7 +90,7 @@
   const s=mounted;if(!s?.current)return;
   try{s.currentMarker?.remove();}catch{}
   s.currentMarker=s.ctx.leaflet.marker([s.current.lat,s.current.lon],{icon:currentIcon(),keyboard:false,title:'Current device location'}).addTo(s.ctx.map);
-  s.currentMarker.bindTooltip('Current device location · ±'+Math.round(s.current.accuracy)+' m',{direction:'top',offset:[0,-9]});
+  s.currentMarker.bindTooltip('Current device location'+(s.current.accuracy!=null?' · ±'+Math.round(s.current.accuracy)+' m':''),{direction:'top',offset:[0,-9]});
  }
  function confidenceOptions(current){
   const values=[PERSONAL,PUBLIC,PENDING];
@@ -171,7 +172,7 @@
    '<div class="owner-coordinate-grid"><label>Latitude<input name="latitude" type="number" step="0.000001" value="'+(d.latitude??'')+'" required></label><label>Longitude<input name="longitude" type="number" step="0.000001" value="'+(d.longitude??'')+'" required></label></div>'+
    '<label>Classification<select name="confidence">'+confidenceOptions(d.confidence)+'</select></label>'+
    '<label>Source / evidence note<textarea name="sourceNote" maxlength="2000" required placeholder="Describe the field pin, drawing, public reference or other evidence.">'+esc(d.sourceNote)+'</textarea></label>'+
-   (d.accuracyM!=null?'<p class="'+(d.accuracyM>30?'owner-warning':'')+'">Device accuracy carried into draft: ±'+Math.round(d.accuracyM)+' m. Consumer GPS is not survey/GIS-grade.</p>':'')+
+   (d.accuracyM!=null?'<p class="'+(d.accuracyM>30?'owner-warning':'')+'">Device accuracy carried into draft: ±'+Math.round(d.accuracyM)+' m. Consumer GPS is not survey/GIS-grade.</p>':'<p class="owner-hint">Device accuracy was not reported. Treat this as field reference only unless supported by other evidence.</p>')+
    '<p class="owner-hint">Drag the selected marker or tap a precise point on the map. Nothing is published until Owner Confirm.</p>'+
    '<div class="owner-map-actions"><button type="submit">REVIEW DRAFT</button><button type="button" data-owner-cancel>CANCEL</button></div>'+
    '</form>';
