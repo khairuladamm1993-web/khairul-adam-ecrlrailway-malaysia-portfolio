@@ -6,9 +6,7 @@ publishable key. Access remains Public until Supabase returns a valid user and
 public.account_role() returns member or admin. No frontend-selected role, URL parameter
 or local storage flag can unlock protected content. No IC or passport is requested.
 
-End-to-end email verification is still **unverified in production** because the project
-currently has zero real auth users/sessions. Supabase Auth redirect URLs must include the
-actual migration/preview origin before the first real magic-link acceptance test.
+End-to-end email verification is still **unverified in production** because the project currently has zero real auth users/sessions and production main does not yet contain the gateway. Supabase Auth Site URL and Redirect URL are already configured for the production GitHub Pages domain; the first real magic-link acceptance test therefore waits for controlled publication of the migration.
 
 ## Public delivery boundary
 
@@ -136,8 +134,7 @@ sequence only after explicit consent. Visit Duration is accumulated separately f
 Active Engagement Time; active time pauses while hidden/unfocused or after 60 seconds of
 inactivity. No keystroke contents, pointer coordinates or browsing identity are recorded.
 
-Remaining gate: configure/confirm the real allowed Auth redirect URL, create the first
-verified account through the UI, and perform browser/Safari end-to-end checks. The private
+Remaining gate: controlled publication of the migration, creation of the first verified account through the UI, and browser/Safari end-to-end checks. The private
 `owner_account` table currently contains zero mappings, so the first verified account can
 resolve as Member but cannot resolve as Admin until Adam explicitly confirms the owner user
 and that user ID is mapped through the existing private owner mechanism. Until those steps
