@@ -41,14 +41,14 @@
  const contentBy=(...kinds)=>(bundle?.content||[]).filter(x=>kinds.includes(x.kind));
  function card(item){
   const p=progressMap().get(item.id);
-  return '<article class="learning-card member-resource"><span class="access-label">'+escape(item.evidence||'Member resource')+'</span><h3>'+escape(localized(item.title))+'</h3><div class="member-body">'+escape(localized(item.body)).replace(/\n/g,'<br>')+'</div><div class="member-actions"><button class="secondary" data-save-resource="'+escape(item.id)+'">'+(p?.completed?'COMPLETED':'SAVE PROGRESS')+'</button></div></article>';
+  return '<article class="learning-card member-resource"><span class="access-label">'+escape(item.evidence||'Member resource')+'</span><h3>'+escape(localized(item.title))+'</h3><div class="member-body">'+escape(localized(item.body)).replace(/\n/g,'<br>')+'</div><div class="member-actions"><button class="secondary" data-save-resource="'+escape(item.id)+'" '+(p?.completed?'disabled':'')+'>'+(p?.completed?'COMPLETED':'MARK COMPLETE')+'</button></div></article>';
  }
  function enhance(){
   renderStatus();
   if(!A.canReadMemberContent||!bundle)return;
   const c=category(),target=box();if(!target)return;
   if(c==='practical'){
-   target.innerHTML='<div class="content-heading"><div><h2>Practical Qualification</h2><p>Verified Member · server-scored assessment</p></div></div><div class="module-grid">'+bundle.quizBanks.map((row,i)=>{const b=row.bank||{},id=row.id;return '<button class="module" data-member-module="'+escape(id)+'" aria-pressed="'+selected.has(id)+'"><span class="module-index">'+String(b.index||i+1).padStart(2,'0')+'</span><span><span class="module-title">'+escape(localized(row.title)||localized(b.title)||id)+'</span><span class="module-meta">16-question bank · Verified Member</span></span><span aria-hidden="true">'+(selected.has(id)?'✓':'+')+'</span></button>';}).join('')+'</div><section class="content-row"><h2>Assessment history</h2><div class="learning-grid">'+((bundle.quizAttempts||[]).slice(0,4).map(a=>'<article class="learning-card"><h3>'+escape(a.modules.join(' + '))+'</h3><p>Score: '+escape(a.score)+'/16 · '+(a.passed?'PASS':'REVIEW')+'</p></article>').join('')||'<article class="learning-card"><p>No completed member assessment yet.</p></article>')+'</div></section>';
+   target.innerHTML='<div class="content-heading"><div><h2>Practical Qualification</h2><p>Verified Member · server-scored assessment</p></div></div><div class="module-grid">'+bundle.quizBanks.map((row,i)=>{const b=row.bank||{},id=row.id;return '<button class="module" data-member-module="'+escape(id)+'" aria-pressed="'+selected.has(id)+'"><span class="module-index">'+String(b.index||i+1).padStart(2,'0')+'</span><span><span class="module-title">'+escape(localized(row.title)||localized(b.title)||id)+'</span><span class="module-meta">16-question bank · Verified Member</span></span><span aria-hidden="true">'+(selected.has(id)?'✓':'+')+'</span></button>';}).join('')+'</div><section class="content-row"><h2>Assessment history</h2><div class="learning-grid">'+((bundle.quizAttempts||[]).slice(0,4).map(a=>'<article class="learning-card"><h3>'+escape(a.modules.join(' + '))+'</h3><p>Score: '+escape(a.score)+'/16 · '+(a.passed?'PASS':'REVIEW')+'</p></article>').join('')||'<article class="learning-card"><p>No completed member assessment yet.</p></article>')+'</div></section><section class="content-row"><h2>Rolling Stock Library</h2><div class="learning-grid">'+(contentBy('rolling-stock','rolling_stock').map(card).join('')||'<article class="learning-card"><p>No approved protected rolling-stock records have been published yet.</p></article>')+'</div></section>';
    const start=document.querySelector('#start-quiz');start.hidden=false;start.disabled=selected.size<1||selected.size>2;start.textContent=selected.size?'START QUIZ ('+selected.size+')':'SELECT 1–2 MODULES';
   }else{
    const start=document.querySelector('#start-quiz');if(start)start.hidden=true;
@@ -97,17 +97,17 @@
   '</div><section class="content-row"><h3>Member access controls</h3><div class="learning-grid">'+members.map(m=>'<article class="learning-card"><p><strong>'+escape(m.email)+'</strong></p><p>'+escape(m.role)+' · '+(m.enabled?'Enabled':'Disabled')+'</p><button class="secondary" data-admin-member="'+escape(m.user_id)+'" data-admin-enable="'+(!m.enabled)+'">'+(m.enabled?'DISABLE':'ENABLE')+'</button></article>').join('')+'</div></section>'+
   '<section class="content-row"><h3>Content control</h3><form id="admin-content-form" class="admin-content-form"><label>ID<input name="id" required></label><label>Kind<input name="kind" required></label><label>Evidence<input name="evidence" required></label><label>Title EN<input name="title_en" required></label><label>Title BM<input name="title_ms" required></label><label>Title 中文<input name="title_zh" required></label><label>Body EN<textarea name="body_en"></textarea></label><label>Body BM<textarea name="body_ms"></textarea></label><label>Body 中文<textarea name="body_zh"></textarea></label><label><input name="approved" type="checkbox"> Approved</label><button class="primary" type="submit">SAVE CONTENT</button></form><p id="admin-content-status" role="status"></p></section>';
  }
+ async function stopTracker(flushFirst=true){
+  if(!tracker)return;
+  const t=tracker;clearInterval(t.timer);
+  for(const [event,handler] of t.listeners)removeEventListener(event,handler);
+  removeEventListener('pagehide',t.pagehide);
+  document.removeEventListener('visibilitychange',t.visibility);
+  tracker=null;
+  if(flushFirst)await t.flush();
+ }
  async function startOrStopTracker(){
-  const stop=async flushFirst=>{
-   if(!tracker)return;
-   const t=tracker;clearInterval(t.timer);
-   for(const [event,handler] of t.listeners)removeEventListener(event,handler);
-   removeEventListener('pagehide',t.pagehide);
-   document.removeEventListener('visibilitychange',t.visibility);
-   tracker=null;
-   if(flushFirst)await t.flush();
-  };
-  if(!A.canReadMemberContent||!A.activityConsent){await stop(true);return;}
+  if(!A.canReadMemberContent||!A.activityConsent){await stopTracker(true);return;}
   if(tracker)return;
   const state={id:crypto.randomUUID(),seq:0,last:performance.now(),lastActivity:performance.now(),visit:0,active:0,listeners:[]};
   const activity=()=>{state.lastActivity=performance.now();};
@@ -126,11 +126,11 @@
   const ans=e.target.closest('[data-quiz-answer]');if(ans&&quiz&&!quiz.busy){quiz.answers.push({module:quiz.questions[quiz.index].module,question:quiz.questions[quiz.index].id,answer:Number(ans.dataset.quizAnswer)});quiz.index++;quiz.index>=16?finishQuiz():renderQuiz();return;}
   if(e.target.closest('[data-quiz-done]')){quiz=null;dialog.close();enhance();return;}
   if(e.target.closest('[data-member-close]')){dialog.close();return;}
-  if(e.target.closest('[data-logout]')){await startOrStopTracker();await A.logout();bundle=null;selected.clear();renderStatus();renderAuth();return;}
+  if(e.target.closest('[data-logout]')){await stopTracker(true);await A.logout();bundle=null;selected.clear();renderStatus();renderAuth();return;}
   if(e.target.closest('[data-auth-refresh]')){await A.refresh();renderAuth();return;}
   if(e.target.closest('[data-refresh-member]')){await loadBundle();renderAuth();return;}
   const consent=e.target.closest('[data-consent]');if(consent){await A.setActivityConsent(consent.dataset.consent==='true');await loadBundle();renderAuth();return;}
-  const save=e.target.closest('[data-save-resource]');if(save){await A.saveProgress(save.dataset.saveResource,0,false);await loadBundle();return;}
+  const save=e.target.closest('[data-save-resource]');if(save){await A.saveProgress(save.dataset.saveResource,1,true);await loadBundle();return;}
   const fileBtn=e.target.closest('[data-member-file]');if(fileBtn){const f=bundle?.files.find(x=>x.id===fileBtn.dataset.memberFile);if(f){const url=await A.signedFileUrl(f);if(url)window.open(url,'_blank','noopener,noreferrer');}return;}
   if(e.target.closest('[data-admin-dashboard]')){const host=dialog.querySelector('#admin-dashboard');host.hidden=false;host.textContent='Loading admin data…';try{const [summary,data]=await Promise.all([A.adminSummary(),A.fetchAdminData()]);renderAdminDashboard(summary,data);}catch(error){host.textContent=error.message||String(error);}return;}
   const memberToggle=e.target.closest('[data-admin-member]');if(memberToggle){try{await A.adminSetMemberEnabled(memberToggle.dataset.adminMember,memberToggle.dataset.adminEnable==='true');const [summary,data]=await Promise.all([A.adminSummary(),A.fetchAdminData()]);renderAdminDashboard(summary,data);}catch(error){const host=dialog.querySelector('#admin-dashboard');host.textContent=error.message||String(error);}return;}
