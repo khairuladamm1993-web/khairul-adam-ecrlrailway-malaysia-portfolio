@@ -1,3 +1,4 @@
+// CI validation-only trigger after GitHub account email verification; no runtime behavior change.
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
