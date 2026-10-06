@@ -308,7 +308,7 @@ for(const [width,height] of viewports){
           const reviewBefore=await evalValue(client,"window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length");
           await evalValue(client,`(()=>{document.querySelector('[data-owner-confirm]')?.click();return true})()`);
           await waitEval(client,"window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length===1");
-          await waitEval(client,"/6\\.22222/.test(document.querySelector('[data-map-detail]')?.textContent||'')");
+          await waitEval(client,"/6\\.22223/.test(document.querySelector('[data-map-detail]')?.textContent||'')");
           await evalValue(client,`(()=>{document.querySelector('[data-owner-history]')?.click();return true})()`);
           await waitEval(client,"document.querySelectorAll('[data-owner-restore]').length>=2");
           const historyState=await evalValue(client,`(()=>({rows:window.__locationHistory.length,baseline:window.__locationHistory.some(x=>x.action==='baseline'),publish:window.__locationHistory.some(x=>x.action==='publish')}))()`);
