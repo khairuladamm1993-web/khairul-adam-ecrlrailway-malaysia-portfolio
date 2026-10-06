@@ -68,7 +68,7 @@ function mockScript(role){
         {id:'roll-1',kind:'rolling-stock',title:{en:'Protected rolling stock'},body:{en:'Member data'},evidence:'member',approved:true},
         {id:'STN01',kind:'corridor',title:{en:'Kota Bharu'},body:{en:'Member corridor data',chainage:'CH000+670',location:{latitude:6.12345,longitude:102.54321,locationConfidence:'Validated Location',coordinateSource:'Validated project reference'}},evidence:'personal-field-reference',approved:true}
       ],
-      quiz_banks:[{id:'smoke',title:{en:'Smoke bank'},bank:{id:'smoke',index:1,title:{en:'Smoke bank'},questions:q},approved:true}],
+      quiz_banks:Array.from({length:10},(_,i)=>({id:'smoke-'+(i+1),title:{en:'Smoke bank '+(i+1)},bank:{id:'smoke-'+(i+1),index:i+1,title:{en:'Smoke bank '+(i+1)},questions:q.map((item,j)=>({...item,id:'smoke-'+(i+1)+'-'+j}))},approved:true})),
       member_files:[],member_progress:[],quiz_attempts:[],member_engagement:[],admin_audit:[],public_analytics_snapshots:[]
     };
     function builder(name){
@@ -198,6 +198,24 @@ for(const [width,height] of viewports){
       if(role==='admin'){
         await evalValue(client,`(()=>{document.querySelector('[data-admin-dashboard]')?.click();return true})()`);
         await waitEval(client,"!!document.querySelector('.admin-content-form')");
+      }
+      let practicalResult=null;
+      if(role!=='public'){
+        await waitEval(client,"document.querySelectorAll('#gateway-content .module[data-member-module]').length===10");
+        practicalResult=await evalValue(client,`(()=>{
+          const cards=[...document.querySelectorAll('#gateway-content .module[data-member-module]')];
+          const widths=cards.map(x=>x.getBoundingClientRect().width);
+          const visible=document.querySelector('#gateway-content')?.innerText||'';
+          return {
+            count:cards.length,
+            allPressed:cards.every(x=>x.getAttribute('aria-pressed')==='false'),
+            literalAttribute:/aria-pressed\\s*=\\s*["']?false["']?>/i.test(visible),
+            minWidth:Math.min(...widths),
+            titles:cards.map(x=>x.querySelector('.module-title')?.textContent?.trim()||'')
+          };
+        })()`);
+        const practicalOK=practicalResult.count===10&&practicalResult.allPressed&&!practicalResult.literalAttribute&&practicalResult.minWidth>=180&&practicalResult.titles.every(Boolean);
+        if(!practicalOK)failures.push({role,width,height,phase:'member-practical-modules',result:practicalResult});
       }
       if(role==='member'){
         await evalValue(client,`(()=>{document.querySelector('[data-category="corridor"]')?.click();return true})()`);
