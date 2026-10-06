@@ -9,36 +9,7 @@
  const LEAFLET_CSS_SRI='sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
  const TILE_URL='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
- // Coordinate projection only. It intentionally excludes protected station codes,
- // chainage, layouts and Member records. PL07 and both depots remain unmapped because
- // the earlier project positions were interpolated/estimated rather than validated.
- const points=Object.freeze([
-  ['Kota Bharu','STN',6.05136,102.23264,'public-reference'],
-  ['Pasir Puteh','STN',5.80648,102.36769,'public-reference'],
-  ['Jerteh','STN',5.70102,102.48321,'public-reference'],
-  ['Bandar Permaisuri','STN',5.52084,102.73814,'public-reference'],
-  ['Pekan Sg. Tong','PL',5.35123,102.89995,'public-reference'],
-  ['Kuala Terengganu','STN',5.17328,103.09777,'public-reference'],
-  ['Bukit Payung','PL',5.23269,103.10281,'public-reference'],
-  ['Dungun','STN',4.73388,103.38748,'public-reference'],
-  ['Kemasik','STN',4.50287,103.42200,'public-reference'],
-  ['Chukai','STN',4.24895,103.38249,'public-reference'],
-  ['Cherating','STN',4.15156,103.37487,'public-reference'],
-  ['Kuantan Port City Depot','Depot',null,null,'coordinate-pending'],
-  ['Kuantan Port City','STN',3.96685,103.34673,'public-reference'],
-  ['Kota SAS','STN',3.86503,103.29351,'public-reference'],
-  ['Paya Besar','STN',3.74690,103.12168,'public-reference'],
-  ['Felda Lepar','PL',3.67709,103.03001,'public-reference'],
-  ['Kampung Alur Gading','PL',3.61430,102.83280,'public-reference'],
-  ['Maran','STN',3.54089,102.66381,'public-reference'],
-  ['Chenor','PL',3.48992,102.58141,'public-reference'],
-  ['Temerloh','STN',3.44351,102.31911,'public-reference'],
-  ['Lanchang','PL',3.50746,102.19129,'public-reference'],
-  ['Bentong','STN',3.47825,101.91328,'public-reference'],
-  ['Alang Sedayu','PL',null,null,'coordinate-pending'],
-  ['Gombak North EMU Depot','Depot',null,null,'coordinate-pending'],
-  ['ITT Gombak','STN',3.23169,101.72284,'public-reference']
- ].map(([name,type,lat,lon,coordinateClass],index)=>Object.freeze({id:'ref-'+index,name,type,lat,lon,coordinateClass,phase:'current'})));
+ const points=()=>window.RailwayCorridorReference||[];
 
  let instance=null,loadPromise=null;
  const esc=v=>R?.escape?R.escape(String(v??'')):String(v??'').replace(/[&<>"']/g,'');
@@ -96,7 +67,7 @@
 
   const resultHost=host.querySelector('[data-map-results]'),detailHost=host.querySelector('[data-map-detail]');
   const input=host.querySelector('[data-map-search]'),focusBtn=host.querySelector('[data-map-focus]');
-  const visible=()=>points.filter(p=>p.phase==='current'&&(state.filter==='All'||p.type===state.filter)).filter(p=>{
+  const visible=()=>points().filter(p=>p.phase==='current'&&(state.filter==='All'||p.type===state.filter)).filter(p=>{
    if(!state.query)return true;const overlay=memberOverlay(p),hay=[p.name,overlay?.code,overlay?.chainage].filter(Boolean).join(' ');return normalize(hay).includes(normalize(state.query));
   });
   const note=p=>p.coordinateClass==='public-reference'?'Public-reference coordinate · not survey/GIS':'Exact map coordinate withheld pending validation';
@@ -130,7 +101,7 @@
   }
   input.addEventListener('input',()=>{state.query=input.value;renderResults();},{signal});
   host.querySelector('.map-filters').addEventListener('click',e=>{const b=e.target.closest('[data-map-filter]');if(!b)return;state.filter=b.dataset.mapFilter;host.querySelectorAll('[data-map-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderResults();fit();},{signal});
-  resultHost.addEventListener('click',e=>{const b=e.target.closest('[data-map-point]');if(!b)return;const p=points.find(x=>x.id===b.dataset.mapPoint);if(!p)return;renderDetail(p);renderResults();if(Number.isFinite(p.lat)&&Number.isFinite(p.lon))state.map.setView([p.lat,p.lon],10);},{signal});
+  resultHost.addEventListener('click',e=>{const b=e.target.closest('[data-map-point]');if(!b)return;const p=points().find(x=>x.id===b.dataset.mapPoint);if(!p)return;renderDetail(p);renderResults();if(Number.isFinite(p.lat)&&Number.isFinite(p.lon))state.map.setView([p.lat,p.lon],10);},{signal});
   host.querySelector('[data-map-fit]').addEventListener('click',fit,{signal});
   focusBtn.addEventListener('click',()=>{const p=state.selected;if(p&&Number.isFinite(p.lat)&&Number.isFinite(p.lon))state.map.setView([p.lat,p.lon],11);},{signal});
   const accessRefresh=async()=>{if(instance!==state)return;await ensureMemberData();if(instance===state){renderDetail(state.selected);renderResults();}};
@@ -154,5 +125,5 @@
   if(!instance)return;
   const old=instance;instance=null;old.controller.abort();try{old.map?.remove();}catch{}old.markers.clear();
  }
- window.RailwayMap=Object.freeze({mount,unmount,get mounted(){return Boolean(instance);},referenceCount:points.length});
+ window.RailwayMap=Object.freeze({mount,unmount,get mounted(){return Boolean(instance);},referenceCount(){return points().length}});
 })();
