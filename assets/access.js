@@ -140,10 +140,37 @@
   if(error)throw error;
   return true;
  }
+ async function adminPublishLocation(values){
+  if(!snapshot().canAdmin)throw new Error('Admin access required.');
+  const {data,error}=await requireClient().rpc('admin_publish_location',{
+   p_asset_id:values.assetId,
+   p_latitude:values.latitude==null?null:Number(values.latitude),
+   p_longitude:values.longitude==null?null:Number(values.longitude),
+   p_confidence:values.confidence,
+   p_source_note:values.sourceNote,
+   p_accuracy_m:values.accuracyM==null?null:Number(values.accuracyM)
+  });
+  if(error)throw error;
+  dataCache=null;
+  return data;
+ }
+ async function adminLocationHistory(assetId){
+  if(!snapshot().canAdmin)throw new Error('Admin access required.');
+  const {data,error}=await requireClient().rpc('admin_location_history',{p_asset_id:assetId||null});
+  if(error)throw error;
+  return data||[];
+ }
+ async function adminRestoreLocation(versionId,sourceNote){
+  if(!snapshot().canAdmin)throw new Error('Admin access required.');
+  const {data,error}=await requireClient().rpc('admin_restore_location',{p_version_id:Number(versionId),p_source_note:String(sourceNote||'')});
+  if(error)throw error;
+  dataCache=null;
+  return data;
+ }
  window.RailwayAccess=Object.freeze({
   get level(){return state.level;},get status(){return state.status;},get canReadMemberContent(){return state.level==='member'||state.level==='admin';},get canAdmin(){return state.level==='admin';},
   get email(){return state.email;},get error(){return state.error;},get activityConsent(){return consent;},get cachedData(){return dataCache;},
-  init,refresh:validateSession,sendMagicLink,logout,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,snapshot
+  init,refresh:validateSession,sendMagicLink,logout,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,adminPublishLocation,adminLocationHistory,adminRestoreLocation,snapshot
  });
  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',()=>init(),{once:true}):init();
 })();
