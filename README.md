@@ -59,7 +59,5 @@ source-tree root as a purported protected member environment.
 
 Frontend Supabase session wiring is implemented on this migration branch only. Public
 preview builds deliberately remove the Supabase runtime and member UI, so preview
-analytics/auth cannot reach production. Before claiming end-to-end PASS, configure or
-confirm the real Supabase Auth redirect URL, complete the first verified email login,
-then map Adam's confirmed user ID into the private owner mapping for admin access.
+analytics/auth cannot reach production. Supabase Auth Site URL and Redirect URL are configured for the production GitHub Pages domain. Before claiming end-to-end PASS, complete the first verified email login after the controlled migration publish, then map Adam's confirmed user ID into the private owner mapping for admin access.
 `app_private.owner_account` is currently empty, so no account can resolve as admin yet.
