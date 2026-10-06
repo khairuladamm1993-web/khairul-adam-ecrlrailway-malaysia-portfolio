@@ -75,6 +75,13 @@ function mockScript(role){
       const b={select(){return b},eq(){return b},order(){return b},limit(){return b},maybeSingle(){return Promise.resolve({data:rows[name]?.[0]||null,error:null})},then(resolve,reject){return Promise.resolve({data:rows[name]||[],error:null}).then(resolve,reject)}};
       return b;
     }
+    window.L={
+      map(el){return {_el:el,setView(){return this},fitBounds(){return this},invalidateSize(){},remove(){el.replaceChildren()}}}, 
+      tileLayer(){return {addTo(){return this}}},
+      divIcon(options){return options},
+      marker(){return {addTo(){return this},bindTooltip(){return this},on(){return this},remove(){}}},
+      latLngBounds(coords){return {coords}}
+    };
     window.supabase={createClient(){return{
       auth:{
         async getSession(){return {data:{session:role==='public'?null:{access_token:'smoke'}},error:null}},
@@ -168,8 +175,24 @@ for(const [width,height] of viewports){
         };
       })()`);
       const ok=result.docOverflow<=1&&result.dialogOverflow<=1&&result.left>=-1&&result.right<=width+1&&result.minControl>=42;
-      if(!ok)failures.push({role,width,height,result});
-      else console.log(`PASS ${role} ${width}x${height}`);
+      if(!ok)failures.push({role,width,height,phase:'member-dialog',result});
+      await evalValue(client,`(()=>{document.querySelector('#member-dialog')?.close();document.querySelector('[data-category="map"]')?.click();return true})()`);
+      await waitEval(client,"document.querySelector('#railway-map-mount')?.dataset.mapReady==='true'");
+      const mapResult=await evalValue(client,`(()=>{
+        const m=document.querySelector('.map-module'),canvas=document.querySelector('.map-canvas');
+        const controls=[...m.querySelectorAll('button,input')].filter(x=>{const b=x.getBoundingClientRect();return b.width>0&&b.height>0});
+        return {
+          docOverflow:document.documentElement.scrollWidth-window.innerWidth,
+          moduleOverflow:m.scrollWidth-m.clientWidth,
+          canvasHeight:canvas.getBoundingClientRect().height,
+          minControl:Math.min(...controls.map(x=>x.getBoundingClientRect().height)),
+          lazyScript:!!document.querySelector('script[data-railway-map-module]'),
+          order:[...document.querySelectorAll('#categories [data-category]')].map(x=>x.dataset.category).join(',')
+        };
+      })()`);
+      const mapOK=mapResult.docOverflow<=1&&mapResult.moduleOverflow<=1&&mapResult.canvasHeight>=280&&mapResult.minControl>=42&&mapResult.lazyScript&&mapResult.order==='practical,ebook,corridor,map,future,news';
+      if(!mapOK)failures.push({role,width,height,phase:'map',result:mapResult});
+      if(ok&&mapOK)console.log(`PASS ${role} ${width}x${height}`);
     }finally{
       client.close();
       try{await fetch(`http://127.0.0.1:${debugPort}/json/close/${target.id}`);}catch{}
