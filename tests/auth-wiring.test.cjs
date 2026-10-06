@@ -111,5 +111,7 @@ test('member gateway resets public header and cleans engagement lifecycle',()=>{
  assert(memberSource.includes("removeEventListener(event,handler)"));
  assert(memberSource.includes("addEventListener('pagehide',state.pagehide)"));
  assert(memberSource.includes("document.addEventListener('visibilitychange',state.visibility)"));
- assert(memberSource.includes("await startOrStopTracker();await A.logout()"));
+ assert(memberSource.includes("Rolling Stock Library"));
+ assert(memberSource.includes("A.saveProgress(save.dataset.saveResource,1,true)"));
+ assert(memberSource.includes("await stopTracker(true);await A.logout()"));
 });
