@@ -1,0 +1,44 @@
+/* Palette shared by the existing screens. Theme preference is applied early by theme.js; first visit defaults Light. */
+:root{color-scheme:dark;--bg:#09131b;--surface:#12212b;--surface-soft:#0e1c25;--text:#eef5f8;--white:#eef5f8;--muted:#b6c4cd;--line:#31444f;--cyan:#68cde5;--green:#85e6ac;--selected:#183946;--good:#183c2b;--bad:#472c34;--dock:#0c1923f5}
+:root[data-theme=light]{color-scheme:light;--bg:#f3f6f7;--surface:#fff;--surface-soft:#e8eff1;--text:#182e3a;--white:#182e3a;--muted:#465e6b;--line:#cbd6dc;--cyan:#086d87;--green:#146b42;--selected:#d9eef2;--good:#e0f2e6;--bad:#fbe5e7;--dock:#f3f6f7f5}
+html,body{background:var(--bg);color:var(--text)}
+.language-dock{gap:2px;padding-top:calc(3px + env(safe-area-inset-top,0px));padding-bottom:3px;background:var(--dock);border-bottom:0}
+.language-options{gap:0;padding:0;background:transparent;border:0}
+.language-options button,.pinyin-toggle,.theme-toggle{min-width:44px;min-height:44px;padding:3px 5px;font:600 11px/1.25 system-ui,sans-serif;color:var(--text);border:0;border-radius:5px;background:transparent;cursor:pointer;touch-action:manipulation}
+.language-options button[aria-pressed=true]{background:var(--selected);color:var(--cyan)}
+.pinyin-toggle,.theme-toggle{font-size:10px}.theme-toggle{max-width:104px}.theme-toggle .pinyin{font-size:9px}
+body[data-screen=welcome] .language-dock{background:transparent;width:auto}
+body[data-screen=welcome] .language-options,body[data-screen=welcome] .theme-toggle,body[data-screen=welcome] .pinyin-toggle{background:var(--dock)}
+body[data-screen=welcome] .hero{--text:#f4f8fb;--muted:#eef3f6;--green:#97f0b6;--cyan:#83d9f2;color:var(--text)}
+body[data-screen=welcome] .panel{text-shadow:0 1px 3px #000b;background:rgba(4,13,20,.20);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);border-color:#d6edf633}
+body[data-screen=welcome] .panel .btn{text-shadow:none}
+body[data-screen=welcome] .rail-grid,body[data-screen=welcome] .arc{display:none}
+body[data-screen=welcome] .hero dialog{background:var(--surface);color:var(--white);text-shadow:none}
+[data-theme=light] body[data-screen=welcome] .hero dialog{--white:#182e3a;--muted:#465e6b}
+.modal-inner p{color:var(--muted)}.modal-close{background:var(--surface-soft);color:var(--text)}
+.gateway-header,.categories{background:transparent;border:0;padding-left:0;padding-right:0}
+.gateway-shell{gap:16px}.gateway-header{padding-top:12px;padding-bottom:16px}
+.module,.learning-card{background:var(--surface);border-color:transparent;box-shadow:none}
+.module[aria-pressed=true]{background:var(--selected);border-color:var(--cyan)}
+.categories button{background:var(--surface);color:var(--text)}
+.categories button[aria-selected=true]{background:var(--selected);color:var(--cyan);border-color:var(--cyan)}
+.secondary,.destination-controls button,.quiz-languages button,.answer-options button{background:var(--surface-soft);color:var(--text)}
+.destination-controls [aria-pressed=true]{background:var(--selected);color:var(--cyan)}
+.primary{background:var(--green);color:var(--bg)}
+body[data-screen=welcome] .primary{color:#082618}
+dialog{background:var(--surface);color:var(--text);border-color:var(--line)}
+.feedback{color:var(--text)}.answer-options .correct{background:var(--good)}.answer-options .incorrect{background:var(--bad)}
+.result-review,#selection-notice{color:var(--text)}
+.nav-wrap{background:var(--dock);border-color:var(--line)}
+body[data-screen=portfolio] .experience-card,body[data-screen=portfolio] .lab-panel,body[data-screen=portfolio] .mentors,body[data-screen=portfolio] .activity-table{background:var(--surface);border-color:var(--line);box-shadow:none}
+body[data-screen=portfolio] .section{border-color:var(--line)}
+body[data-screen=portfolio] p,body[data-screen=portfolio] li,body[data-screen=portfolio] .micro,body[data-screen=portfolio] .eyebrow,body[data-screen=portfolio] th,body[data-screen=portfolio] td{color:var(--muted)}
+body[data-screen=portfolio] h2,body[data-screen=portfolio] h3{color:var(--text)}
+body[data-screen=portfolio] .cyan,body[data-screen=portfolio] .category-number,body[data-screen=portfolio] .step,body[data-screen=portfolio] .text-link{color:var(--cyan)}
+body[data-screen=portfolio] .badge,body[data-screen=portfolio] .green{color:var(--green)}
+[data-theme=light] body[data-screen=portfolio] nav{background:var(--dock)}
+.references-shell{max-width:1120px;margin:auto;padding:calc(92px + env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) calc(40px + env(safe-area-inset-bottom,0px)) max(22px,env(safe-area-inset-left,0px))}
+.references-shell header{max-width:760px;margin-bottom:22px}.references-shell .learning-grid{gap:18px}.references-shell h2{font-size:19px}.reference-back{display:flex;gap:12px;margin-bottom:22px}.reference-back .quiet{margin:0}.references-shell li{margin-bottom:8px;font-size:14px;line-height:1.6}
+@media(max-width:420px){.language-dock{padding-left:6px;padding-right:6px}.theme-toggle{max-width:80px}.language-options button{min-width:44px}.gateway-shell{padding-top:calc(100px + env(safe-area-inset-top,0px))}}
+/* Override the legacy portfolio-specific dock so light-mode controls stay legible. */
+body[data-screen=portfolio] .language-dock{background:var(--dock);border-bottom:0;min-height:50px}
