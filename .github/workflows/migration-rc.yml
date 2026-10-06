@@ -12,7 +12,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout migration branch
         uses: actions/checkout@v4
@@ -25,5 +25,16 @@ jobs:
         run: npm ci
       - name: Run portfolio test suite
         run: npm test
-      - name: Validate preview builder syntax
-        run: python3 -m py_compile scripts/build-preview.py
+      - name: Build production artifact
+        run: npm run build:production
+      - name: Smoke production artifact in Chromium
+        run: npm run smoke:production
+      - name: Validate artifact builders
+        run: python3 -m py_compile scripts/build-production.py scripts/build-preview.py
+      - name: Upload production candidate artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: railway-production-candidate
+          path: dist-production/
+          if-no-files-found: error
+          retention-days: 7
