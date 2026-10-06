@@ -200,7 +200,7 @@ test('Verified Member renderer uses plain escaping inside module attributes',()=
   const member=fs.readFileSync(path.join(dir,'assets','member-gateway.js'),'utf8');
   assert(member.includes("const escape=v=>R.escape(String(v??''));"));
   assert(!member.includes("const escape=v=>h(String(v??''));"));
-  assert(member.includes('data-member-module="'+escape(id)+'"'));
-  assert(member.includes('aria-pressed="'+selected.has(id)+'"'));
+  assert(member.includes("data-member-module=\"'+escape(id)+'\""));
+  assert(member.includes("aria-pressed=\"'+selected.has(id)+'\""));
   fs.rmSync(dir,{recursive:true,force:true});
 });
