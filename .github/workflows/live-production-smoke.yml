@@ -30,7 +30,6 @@ jobs:
           0de458b8199fe255d99c6d0ee12736f12be4503e83e483e136217e6698f1c10b assets/map-gateway.js
           b5ac8a8e2aadc0fe731b5249da958ff7f907f932af3df390b101d775388cec95 assets/master-content.js
           177f8453ce80673b5eeb647cafb0d3d196e403779e329db90a5c15cb13888ee7 assets/master.css
-          215678726ab81109ae00633975deaf59a30e7e5c0aab22665faaa14c49c5e763 assets/member-gateway.js
           ead8056168fe4b6ecebbd719d491d23fe9f5a3268d6380146ab2fcf9c3a7498b assets/module-previews.js
           1b762517a0ea29e8b03c62fbcebce91c1f88732742c526b00d89685d541bf579 assets/owner-map.js
           58f73be49a412235e2d319ce2d473bc7d6356352e44d792dc6d8b6d5958067dc assets/portfolio.css
@@ -66,7 +65,12 @@ jobs:
           grep -q "rpc('admin_publish_location'" /tmp/live-assets_access.js
           grep -q "rpc('admin_location_history'" /tmp/live-assets_access.js
           grep -q "rpc('admin_restore_location'" /tmp/live-assets_access.js
-          echo 'Live byte parity, GEMAC correction, protected-path and Admin-gate scan: PASS'
+          curl -fsSL --retry 4 --retry-delay 2 "${BASE}assets/member-gateway.js" -o /tmp/live-assets_member-gateway.js
+          grep -Fq "const escape=v=>R.escape(String(v??''));" /tmp/live-assets_member-gateway.js
+          ! grep -Fq "const escape=v=>h(String(v??''));" /tmp/live-assets_member-gateway.js
+          grep -Fq 'data-member-module="'+escape(id)+'"' /tmp/live-assets_member-gateway.js
+          grep -Fq 'aria-pressed="'+selected.has(id)+'"' /tmp/live-assets_member-gateway.js
+          echo 'Live byte parity, Member renderer fix, GEMAC correction, protected-path and Admin-gate scan: PASS'
 
       - name: Public fail-closed MAP and responsive browser smoke
         shell: bash
