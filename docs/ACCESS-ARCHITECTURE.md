@@ -12,11 +12,11 @@ actual migration/preview origin before the first real magic-link acceptance test
 
 ## Public delivery boundary
 
-`gateway.html` loads title-only module previews and short public editorial summaries.
-It does not request quiz questions, corridor data, map pixels, development details,
-member records or an admin API. `RailwayAccess` is an immutable PUBLIC/pending view
-model, not an authorization mechanism. Neither storage nor URL parameters can
-unlock content. Public portfolio, News directory and References remain accessible.
+`gateway.html` loads title-only module previews and short public editorial summaries
+before authentication. It does not request quiz questions, corridor data, map pixels,
+development details or member/admin records until `RailwayAccess` resolves a live
+server-authorized member/admin role. Neither storage nor URL parameters can unlock
+content. Public portfolio, News directory and References remain accessible.
 
 The existing quiz banks and controller are retained unchanged in source for tests
 and a future server-authorized bundle. The preview build explicitly excludes
@@ -81,12 +81,14 @@ CDN and member UI, replaces `access.js` with a Public-only stub and keeps
 - Rolling Stock Library: title-only CR200J teaser. No unsupported FXD3-J equivalence or
   exact specification added. Full approved records need source validation before upload.
 
-## Admin areas (planned, not fake dashboards)
+## Admin areas
 
-Visitor statistics; member registrations; aggregate quiz usage/results; content and
-roles; rolling-stock/station records; News/Insights/References; Coming Soon;
-simulator/project status; security/activity logs. Admin UI should be delivered only
-through authenticated owner access. Never embed example counts that look like live data.
+A compact authenticated admin panel is now implemented and rendered only after
+`account_role()` returns `admin`. It loads `admin_summary()` plus RLS-protected member,
+quiz, engagement, audit, public analytics snapshot and content rows. Member enable/disable
+uses `admin_set_member_enabled(...)`; content changes use `admin_save_content(...)`.
+No example counts are embedded. Broader rolling-stock/station/news/project management
+screens remain future work and must reuse the same server-authorized boundary.
 
 ## Engagement analytics and privacy contract
 
@@ -135,6 +137,9 @@ Active Engagement Time; active time pauses while hidden/unfocused or after 60 se
 inactivity. No keystroke contents, pointer coordinates or browsing identity are recorded.
 
 Remaining gate: configure/confirm the real allowed Auth redirect URL, create the first
-verified account through the UI, and perform browser/Safari end-to-end checks. Until that
-happens, email delivery, callback exchange, session restore and admin ownership are
+verified account through the UI, and perform browser/Safari end-to-end checks. The private
+`owner_account` table currently contains zero mappings, so the first verified account can
+resolve as Member but cannot resolve as Admin until Adam explicitly confirms the owner user
+and that user ID is mapped through the existing private owner mechanism. Until those steps
+happen, email delivery, callback exchange, real session restore and admin ownership are
 implemented but cannot honestly be marked production-validated.
