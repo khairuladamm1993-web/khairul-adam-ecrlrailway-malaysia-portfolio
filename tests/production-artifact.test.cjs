@@ -25,7 +25,7 @@ function walk(dir){
 test('production artifact excludes retained legacy quiz/protected assets',()=>{
   const dir=build('build-production.py','railway-production-');
   for(const name of ['questions.js','gateway.js','quiz-core.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),false,name);
-  for(const name of ['access.js','public-gateway.js','member-gateway.js','module-previews.js','analytics.js','map-gateway.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),true,name);
+  for(const name of ['access.js','public-gateway.js','member-gateway.js','module-previews.js','analytics.js','map-gateway.js','corridor-reference.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),true,name);
   const textFiles=walk(dir).filter(p=>/\.(?:html|js|css|md|xml|txt)$/i.test(p));
   const all=textFiles.map(p=>fs.readFileSync(p,'utf8')).join('\n');
   assert(!all.includes('window.RailwayModules='));
@@ -73,17 +73,20 @@ test('MAP is lazy, marker-only and contains no protected Corridor registry',()=>
   const html=fs.readFileSync(path.join(dir,'gateway.html'),'utf8');
   const gateway=fs.readFileSync(path.join(dir,'assets','public-gateway.js'),'utf8');
   const map=fs.readFileSync(path.join(dir,'assets','map-gateway.js'),'utf8');
+  const registry=fs.readFileSync(path.join(dir,'assets','corridor-reference.js'),'utf8');
   assert(!html.includes('map-gateway.js'));
   assert(!html.includes('leaflet'));
   assert(!html.includes('tile.openstreetmap.org'));
   assert(gateway.includes("s.src='assets/map-gateway.js'"));
   assert(map.includes('leaflet@1.9.4'));
   assert(map.includes('tile.openstreetmap.org/{z}/{x}/{y}.png'));
-  assert(!/\bSTN\d{2}\b/.test(map));
-  assert(!/\bCH\s*\d{1,3}\+\d{3}\b/.test(map));
-  for(const token of ['totalTrackLength','turnoutCount','TrackLine(','MapPolyline','L.polyline'])assert(!map.includes(token),token);
-  assert(map.includes("['Alang Sedayu','PL',null,null,'coordinate-pending']"));
-  assert(map.includes("['Kuantan Port City Depot','Depot',null,null,'coordinate-pending']"));
-  assert(map.includes("['Gombak North EMU Depot','Depot',null,null,'coordinate-pending']"));
+  assert(map.includes('window.RailwayCorridorReference'));
+  assert(!map.includes("['Kota Bharu','STN'"));
+  assert(!/\bSTN\d{2}\b/.test(registry));
+  assert(!/\bCH\s*\d{1,3}\+\d{3}\b/.test(registry));
+  for(const token of ['totalTrackLength','turnoutCount','TrackLine(','MapPolyline','L.polyline'])assert(!map.includes(token)&&!registry.includes(token),token);
+  assert(registry.includes("['Alang Sedayu','PL',null,null,'coordinate-pending']"));
+  assert(registry.includes("['Kuantan Port City Depot','Depot',null,null,'coordinate-pending']"));
+  assert(registry.includes("['Gombak North EMU Depot','Depot',null,null,'coordinate-pending']"));
   fs.rmSync(dir,{recursive:true,force:true});
 });
