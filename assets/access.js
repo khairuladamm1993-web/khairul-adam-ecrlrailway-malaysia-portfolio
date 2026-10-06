@@ -3,12 +3,12 @@
  'use strict';
  const PROJECT_URL='https://kfudisbzdgsefdjoopzu.supabase.co';
  const PUBLISHABLE_KEY='sb_publishable_1Diyg-QnCNMJXIY2g0RdCg_ToWFuq0V';
- let client=null,authSubscription=null,consent=false,dataCache=null;
+ let client=null,authSubscription=null,consent=false,dataCache=null,userId=null;
  let state={level:'public',status:'initializing',canReadMemberContent:false,canAdmin:false,email:null,error:null};
  const emit=()=>window.dispatchEvent(new CustomEvent('railway-access-change',{detail:snapshot()}));
  const snapshot=()=>Object.freeze({...state,canReadMemberContent:state.level==='member'||state.level==='admin',canAdmin:state.level==='admin'});
  const set=(patch)=>{state={...state,...patch};emit();return snapshot();};
- const failClosed=(status='public',error=null)=>{consent=false;dataCache=null;return set({level:'public',status,canReadMemberContent:false,canAdmin:false,email:null,error:error?String(error):null});};
+ const failClosed=(status='public',error=null)=>{consent=false;dataCache=null;userId=null;return set({level:'public',status,canReadMemberContent:false,canAdmin:false,email:null,error:error?String(error):null});};
  const requireClient=()=>{
   if(client)return client;
   if(!window.supabase?.createClient)throw new Error('Supabase client library unavailable');
@@ -22,6 +22,7 @@
    if(sessionError||!session)return failClosed(sessionError?'session-error':'public',sessionError);
    const {data:{user},error:userError}=await c.auth.getUser();
    if(userError||!user)return failClosed('invalid-session',userError||'No valid user');
+   userId=user.id;
    const {data:role,error:roleError}=await c.rpc('account_role');
    if(roleError||!['member','admin'].includes(role))return failClosed(roleError?'role-error':'public',roleError);
    const profile=await c.from('member_profiles').select('email,role,enabled,activity_consent_at,privacy_version').maybeSingle();
@@ -57,7 +58,7 @@
   if(!snapshot().canReadMemberContent)throw new Error('Verified member session required.');
   const c=requireClient();
   const [profile,content,banks,files,progress,attempts]=await Promise.all([
-   c.from('member_profiles').select('user_id,email,role,display_name,enabled,activity_consent_at,privacy_version,last_member_activity').maybeSingle(),
+   c.from('member_profiles').select('user_id,email,role,display_name,enabled,activity_consent_at,privacy_version,last_member_activity').eq('user_id',userId).maybeSingle(),
    c.from('member_content').select('id,kind,title,body,evidence,approved,updated_at').eq('approved',true).order('kind').order('id'),
    c.from('quiz_banks').select('id,title,bank,approved,updated_at').eq('approved',true).order('id'),
    c.from('member_files').select('id,bucket_id,object_path,approved,artwork_signature').eq('approved',true).order('id'),
@@ -105,6 +106,21 @@
   if(error)throw error;
   return true;
  }
+ async function fetchAdminData(){
+  if(!snapshot().canAdmin)throw new Error('Admin access required.');
+  const c=requireClient();
+  const [members,attempts,engagement,audit,snapshots,content]=await Promise.all([
+   c.from('member_profiles').select('user_id,email,role,display_name,enabled,created_at,last_sign_in,last_member_activity').order('created_at',{ascending:false}).limit(100),
+   c.from('quiz_attempts').select('user_id,modules,score,passed,attempted_at').order('attempted_at',{ascending:false}).limit(100),
+   c.from('member_engagement').select('user_id,section,visit_seconds,active_seconds,created_at').order('created_at',{ascending:false}).limit(100),
+   c.from('admin_audit').select('id,actor,action,target,created_at').order('created_at',{ascending:false}).limit(100),
+   c.from('public_analytics_snapshots').select('period_start,period_end,source,metrics,imported_at').order('imported_at',{ascending:false}).limit(20),
+   c.from('member_content').select('id,kind,title,evidence,approved,updated_at').order('updated_at',{ascending:false}).limit(100)
+  ]);
+  const results={members,attempts,engagement,audit,snapshots,content};
+  for(const result of Object.values(results))if(result.error)throw result.error;
+  return Object.fromEntries(Object.entries(results).map(([k,v])=>[k,v.data||[]]));
+ }
  async function adminSummary(){
   if(!snapshot().canAdmin)throw new Error('Admin access required.');
   const {data,error}=await requireClient().rpc('admin_summary');
@@ -127,7 +143,7 @@
  window.RailwayAccess=Object.freeze({
   get level(){return state.level;},get status(){return state.status;},get canReadMemberContent(){return state.level==='member'||state.level==='admin';},get canAdmin(){return state.level==='admin';},
   get email(){return state.email;},get error(){return state.error;},get activityConsent(){return consent;},get cachedData(){return dataCache;},
-  init,refresh:validateSession,sendMagicLink,logout,fetchMemberBundle,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,snapshot
+  init,refresh:validateSession,sendMagicLink,logout,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,snapshot
  });
  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',()=>init(),{once:true}):init();
 })();
