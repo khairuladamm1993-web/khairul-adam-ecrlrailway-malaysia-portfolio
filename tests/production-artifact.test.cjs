@@ -157,3 +157,25 @@ test('MAP remains marker-only after Owner editing support',()=>{
     assert(!src.includes('MapPolyline'));
   }
 });
+
+test('Owner MAP server migration keeps writes admin-authorized and history private',()=>{
+  const migration=fs.readFileSync(path.join(root,'supabase/migrations/20261007_owner_map_location_management.sql'),'utf8');
+  assert(migration.includes('app_private.map_location_versions'));
+  assert(migration.includes("app_private.account_role()<>'admin'"));
+  assert(migration.includes("action in ('baseline','publish','rollback')"));
+  assert(migration.includes('owner_user_id uuid not null'));
+  assert(migration.includes('source_note text not null'));
+  assert(migration.includes('revoke all on table app_private.map_location_versions from public, anon, authenticated'));
+  assert(migration.includes('revoke execute on function public.admin_publish_location'));
+  assert(migration.includes('grant execute on function public.admin_publish_location'));
+  assert(migration.includes('Baseline captured before first Owner location change'));
+  assert(migration.includes('Changing a validated project coordinate requires reclassification'));
+  assert(migration.includes('Changing an engineering/survey coordinate requires reclassification'));
+});
+
+test('personal field coordinate stays protected from the public-safe projection',()=>{
+  const registry=fs.readFileSync(path.join(root,'assets/corridor-reference.js'),'utf8');
+  assert(registry.includes("['Pekan Sg. Tong','PL',null,null,'Pending Validation']"));
+  assert(!registry.includes('5.35123'));
+  assert(!registry.includes('102.89995'));
+});
