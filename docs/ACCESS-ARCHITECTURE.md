@@ -140,3 +140,46 @@ resolve as Member but cannot resolve as Admin until Adam explicitly confirms the
 and that user ID is mapped through the existing private owner mechanism. Until those steps
 happen, email delivery, callback exchange, real session restore and admin ownership are
 implemented but cannot honestly be marked production-validated.
+
+
+## Owner MAP location management — 7 October 2026
+
+MAP location writes remain server-authorized. Public and ordinary Verified Members never
+receive location-edit controls. The Owner module (`assets/owner-map.js`) is loaded only
+after MAP is opened and `RailwayAccess.canAdmin` is true.
+
+Owner workflow:
+
+`Edit → Draft Coordinate → Review → Owner Confirm → Publish`
+
+Draft marker movement, map taps and device geolocation remain in browser memory until
+explicit confirmation. Device location uses one-shot `navigator.geolocation.getCurrentPosition`;
+there is no automatic request on page load, no `watchPosition`, no background tracking,
+and no persistence merely because permission was granted. Reported browser accuracy is
+displayed to Owner and consumer-device GPS is never described as engineering/survey GIS.
+
+Canonical writes use the existing approved `member_content` Corridor row through
+`admin_publish_location(...)`. The RPC validates a live Admin/Owner role server-side.
+Detailed Owner evidence notes and location history are stored only in
+`app_private.map_location_versions`, which is not granted to Public/Member roles.
+Member-visible `coordinateSource` is reduced to a generic approved source label.
+
+The first Owner publish for an asset captures a baseline history version. Every publish
+records previous/new coordinates, previous/new confidence, Owner user ID, timestamp,
+source note and optional device accuracy. `admin_restore_location(...)` restores a prior
+approved version while creating a new rollback history entry; history is never rewritten.
+
+The Owner field editor may assign:
+- Personal Field-Validated Location
+- Public Reference Location
+- Pending Validation
+
+Existing higher `Validated Location` or `Engineering/Survey Validated Location`
+classification may be preserved only when its coordinate is unchanged. A changed higher-
+class coordinate must be explicitly reclassified; the Owner UI cannot newly assert
+engineering/survey status.
+
+Public-safe MAP projection remains separate from protected evidence. PL01's Personal
+Field-Validated coordinate is intentionally absent from the public-safe registry. Public
+Reference and Pending markers may use clearly labelled approximate/reference positions;
+only validated confidence classes are described as exact.
