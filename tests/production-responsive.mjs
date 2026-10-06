@@ -176,6 +176,10 @@ for(const [width,height] of viewports){
     }
   }
 }
-server.close();chrome.kill('SIGTERM');fs.rmSync(profile,{recursive:true,force:true});
+server.close();
+const exited=new Promise(resolve=>chrome.once('exit',resolve));
+chrome.kill('SIGTERM');
+await Promise.race([exited,sleep(3000)]);
+try{fs.rmSync(profile,{recursive:true,force:true,maxRetries:8,retryDelay:100});}catch{}
 if(failures.length){console.error(JSON.stringify(failures,null,2));process.exit(1);}
 console.log(`Responsive production artifact smoke: ${roles.length*viewports.length}/${roles.length*viewports.length} PASS`);
