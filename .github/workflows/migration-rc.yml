@@ -1,0 +1,29 @@
+name: Migration RC validation
+
+on:
+  push:
+    branches:
+      - migration/full-portfolio
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout migration branch
+        uses: actions/checkout@v4
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked test dependencies
+        run: npm ci
+      - name: Run portfolio test suite
+        run: npm test
+      - name: Validate preview builder syntax
+        run: python3 -m py_compile scripts/build-preview.py
