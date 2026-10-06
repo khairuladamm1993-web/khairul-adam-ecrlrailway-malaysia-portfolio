@@ -26,14 +26,28 @@ const server=http.createServer((req,res)=>{
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const sitePort=server.address().port;
-const debugPort=9333;
 const profile=fs.mkdtempSync(path.join(os.tmpdir(),'railway-chrome-'));
 const chrome=spawn(findChrome(),[
-  '--headless=new','--no-sandbox','--disable-gpu',`--remote-debugging-port=${debugPort}`,
+  '--headless=new','--no-sandbox','--disable-gpu','--remote-debugging-address=127.0.0.1','--remote-debugging-port=0',
   `--user-data-dir=${profile}`,'about:blank'
 ],{stdio:['ignore','ignore','pipe']});
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let stderr='';
+const devtoolsUrl=new Promise((resolve,reject)=>{
+  chrome.stderr.setEncoding('utf8');
+  chrome.stderr.on('data',chunk=>{
+    stderr+=chunk;
+    const m=stderr.match(/DevTools listening on (ws:\/\/[^\s]+)/);
+    if(m)resolve(m[1]);
+  });
+  chrome.once('exit',code=>reject(new Error('Chrome exited before CDP was ready ('+code+'): '+stderr.slice(-2000))));
+});
+const browserWs=await Promise.race([
+  devtoolsUrl,
+  new Promise((_,reject)=>setTimeout(()=>reject(new Error('Timed out waiting for Chrome CDP: '+stderr.slice(-2000))),15000))
+]);
+const debugPort=new URL(browserWs).port;
 async function json(url,options){
   let last;
   for(let i=0;i<80;i++){
@@ -42,7 +56,6 @@ async function json(url,options){
   }
   throw last||new Error('CDP unavailable');
 }
-await json(`http://127.0.0.1:${debugPort}/json/version`);
 
 function mockScript(role){
   return `(()=>{
