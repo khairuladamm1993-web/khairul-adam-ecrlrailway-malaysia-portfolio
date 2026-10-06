@@ -209,7 +209,7 @@ for(const [width,height] of viewports){
           kota.click();
         }
         const markerFocus=window.__railwayMapCalls.setView.at(-1)||null;
-        if(role!=='public'){
+        if(${JSON.stringify(role)}!=='public'){
           window.__railwayMapCalls.setView.length=0;
           focus?.click();
         }
