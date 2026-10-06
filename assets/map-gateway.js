@@ -43,8 +43,16 @@
  }
  function effective(point){
   const overlay=memberOverlay(point),loc=overlay?.location;
-  if(loc?.locationConfidence===VALID&&finite(loc.lat)&&finite(loc.lon)){
-   return {...point,lat:Number(loc.lat),lon:Number(loc.lon),locationConfidence:VALID,coordinateSource:loc.coordinateSource||'Validated project reference',overlay};
+  if(loc){
+   if(loc.locationConfidence===VALID&&finite(loc.lat)&&finite(loc.lon)){
+    return {...point,lat:Number(loc.lat),lon:Number(loc.lon),locationConfidence:VALID,coordinateSource:loc.coordinateSource||'Validated project reference',overlay};
+   }
+   if(loc.locationConfidence===PUBLIC&&finite(loc.lat)&&finite(loc.lon)){
+    return {...point,lat:Number(loc.lat),lon:Number(loc.lon),locationConfidence:PUBLIC,coordinateSource:loc.coordinateSource||'Public reference / locality source',overlay};
+   }
+   if(loc.locationConfidence===PENDING){
+    return {...point,lat:null,lon:null,locationConfidence:PENDING,coordinateSource:loc.coordinateSource||'Pending validation',overlay};
+   }
   }
   return {...point,locationConfidence:allowedConfidence(point.locationConfidence),coordinateSource:point.coordinateSource||null,overlay};
  }
