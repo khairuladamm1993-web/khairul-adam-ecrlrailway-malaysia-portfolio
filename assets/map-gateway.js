@@ -1,4 +1,4 @@
-/* Lazy MAP projection. Exact railway markers are rendered only for canonical records classified Validated Location. */
+/* Lazy MAP projection. Exact railway markers are rendered only for canonical records in an approved validated confidence class. */
 (()=>{
  'use strict';
  if(window.RailwayMap)return;
