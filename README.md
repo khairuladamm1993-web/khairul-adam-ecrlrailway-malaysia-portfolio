@@ -38,14 +38,28 @@ Existing production-compatible counters and Worker endpoint are preserved. Cross
 
 ## Master correction / public-access checkpoint
 
-The public gateway now defaults to Light Mode (stored preferences still win), with
-News / Insights / References rows and locked member previews. Authentication is
-pending; no user can sign in or unlock full material in this build. The 160-question
-quiz implementation is preserved and regression-tested using a **test-only fixture**.
-It is not loaded by the public gateway. See `docs/ACCESS-ARCHITECTURE.md` for the
-private-content deployment gate and known public-repository limitation.
+The public gateway defaults to Light Mode (stored preferences still win), with
+News / Insights / References rows and locked public previews. Phase 2 now wires the
+migration frontend to Supabase Auth using the browser-safe publishable key. A user
+remains Public until a live verified session passes `account_role()`; member/admin
+writes use controlled RPCs. The first real email callback/session has not yet been
+production-validated because the project currently has no auth users. The retained
+legacy 160-question implementation remains regression-tested through a test-only
+fixture, while authenticated assessments load approved banks from Supabase and submit
+answers to `submit_quiz(...)` for server-side scoring. See
+`docs/ACCESS-ARCHITECTURE.md` for the exact security and rollout boundary.
 
 For isolated public preview, build into a NEW empty directory:
 `python3 scripts/build-preview.py /absolute/path/to/new-preview/public`.
 This excludes legacy member quiz assets and disables analytics. Do not serve the
 source-tree root as a purported protected member environment.
+
+
+## Phase 2 current gate — 6 October 2026
+
+Frontend Supabase session wiring is implemented on this migration branch only. Public
+preview builds deliberately remove the Supabase runtime and member UI, so preview
+analytics/auth cannot reach production. Before claiming end-to-end PASS, configure or
+confirm the real Supabase Auth redirect URL, complete the first verified email login,
+then map Adam's confirmed user ID into the private owner mapping for admin access.
+`app_private.owner_account` is currently empty, so no account can resolve as admin yet.
