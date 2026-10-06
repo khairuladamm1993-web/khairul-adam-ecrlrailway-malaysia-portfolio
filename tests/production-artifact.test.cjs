@@ -25,7 +25,7 @@ function walk(dir){
 test('production artifact excludes retained legacy quiz/protected assets',()=>{
   const dir=build('build-production.py','railway-production-');
   for(const name of ['questions.js','gateway.js','quiz-core.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),false,name);
-  for(const name of ['access.js','public-gateway.js','member-gateway.js','module-previews.js','analytics.js','map-gateway.js','corridor-reference.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),true,name);
+  for(const name of ['access.js','public-gateway.js','member-gateway.js','module-previews.js','analytics.js','map-gateway.js','corridor-reference.js','owner-map.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),true,name);
   const textFiles=walk(dir).filter(p=>/\.(?:html|js|css|md|xml|txt)$/i.test(p));
   const all=textFiles.map(p=>fs.readFileSync(p,'utf8')).join('\n');
   assert(!all.includes('window.RailwayModules='));
@@ -64,7 +64,7 @@ test('preview artifact remains analytics- and authentication-isolated',()=>{
   assert(access.includes("status:'preview-public-only'"));
   assert.equal(analytics.trim(),'/* Preview only: analytics submission disabled. */');
   assert(headers.includes("connect-src 'none'"));
-  for(const name of ['questions.js','gateway.js','quiz-core.js','member-gateway.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),false,name);
+  for(const name of ['questions.js','gateway.js','quiz-core.js','member-gateway.js','owner-map.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),false,name);
   fs.rmSync(dir,{recursive:true,force:true});
 });
 
@@ -89,11 +89,11 @@ test('MAP is lazy, marker-only and contains no protected Corridor registry',()=>
   assert(registry.includes("['Bukit Payung','PL',5.23269,103.10281,'Public Reference Location']"));
   assert(registry.includes("['Felda Lepar','PL',3.67709,103.03001,'Public Reference Location']"));
   assert(registry.includes("['Kampung Alur Gading','PL',3.61430,102.83280,'Public Reference Location']"));
-  assert(registry.includes("['Chenor','PL',null,null,'Pending Validation']"));
-  assert(registry.includes("['Lanchang','PL',null,null,'Pending Validation']"));
-  assert(registry.includes("['Alang Sedayu','PL',null,null,'Pending Validation']"));
-  assert(registry.includes("['Kuantan Port City Depot','Depot',null,null,'Pending Validation']"));
-  assert(registry.includes("['Gombak North EMU Depot','Depot',null,null,'Pending Validation']"));
+  assert(registry.includes("['Chenor','PL',3.48992,102.58141,'Public Reference Location']"));
+  assert(registry.includes("['Lanchang','PL',3.50746,102.19129,'Pending Validation']"));
+  assert(registry.includes("['Alang Sedayu','PL',3.28426,101.76345,'Pending Validation']"));
+  assert(registry.includes("['Kuantan Port City Depot','Depot',3.97450,103.33750,'Pending Validation']"));
+  assert(registry.includes("['Gombak North EMU Depot','Depot',3.25918,101.74407,'Pending Validation']"));
   fs.rmSync(dir,{recursive:true,force:true});
 });
 
@@ -103,18 +103,18 @@ test('MAP exact-location contract classifies coordinates and never shifts marker
   const registry=fs.readFileSync(path.join(dir,'assets','corridor-reference.js'),'utf8');
   assert(registry.includes("'Public Reference Location'"));
   assert(registry.includes("'Pending Validation'"));
-  assert(map.includes("const VALID='Validated Location',PUBLIC='Public Reference Location',PENDING='Pending Validation'"));
-  assert(map.includes("r?.locationConfidence===VALID"));
+  assert(map.includes("const VALID='Validated Location',PERSONAL='Personal Field-Validated Location',ENGINEERING='Engineering/Survey Validated Location',PUBLIC='Public Reference Location',PENDING='Pending Validation'"));
+  assert(map.includes("[VALID,PERSONAL,ENGINEERING].includes(r?.locationConfidence)"));
   assert(map.includes("marker=state.leaflet.marker([Number(r.lat),Number(r.lon)]"));
   assert(map.includes("state.map.setView([Number(r.lat),Number(r.lon)],zoom)"));
-  assert(!map.includes('setLatLng('));
+  assert(map.includes("const mappable=r=>finite(r?.lat)&&finite(r?.lon)"));
   assert(!map.includes('MapPolyline'));
   assert(!map.includes('L.polyline'));
   assert(!map.includes('.polyline('));
   assert(!map.includes("state.map.on('zoom"));
   assert(!map.includes("state.map.on('move"));
   assert(map.includes("Public Reference Location · locality/reference position only; not an exact railway or survey/GIS coordinate."));
-  assert(map.includes("Pending Validation · no exact railway location is rendered."));
+  assert(map.includes("Pending Validation · temporary/reference position only when coordinates are available; never exact."));
   fs.rmSync(dir,{recursive:true,force:true});
 });
 
@@ -122,5 +122,38 @@ test('canonical Corridor confidence overrides the public-safe projection',()=>{
   const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
   assert(map.includes("if(loc.locationConfidence===PUBLIC&&finite(loc.lat)&&finite(loc.lon))"));
   assert(map.includes("if(loc.locationConfidence===PENDING)"));
-  assert(map.includes("lat:null,lon:null,locationConfidence:PENDING"));
+  assert(map.includes("lat:finite(loc.lat)?Number(loc.lat):null,lon:finite(loc.lon)?Number(loc.lon):null,locationConfidence:PENDING"));
+});
+
+test('Owner MAP runtime is lazy, admin-gated and never persists device location automatically',()=>{
+  const dir=build('build-production.py','railway-production-');
+  const map=fs.readFileSync(path.join(dir,'assets','map-gateway.js'),'utf8');
+  const owner=fs.readFileSync(path.join(dir,'assets','owner-map.js'),'utf8');
+  const access=fs.readFileSync(path.join(dir,'assets','access.js'),'utf8');
+  const html=fs.readFileSync(path.join(dir,'gateway.html'),'utf8');
+  assert(!html.includes('owner-map.js'));
+  assert(map.includes("if(!A?.canAdmin||!state.map)return"));
+  assert(map.includes("s.src='assets/owner-map.js'"));
+  assert(owner.includes("navigator.geolocation.getCurrentPosition"));
+  assert(!owner.includes('watchPosition'));
+  assert(owner.includes("if(!mounted||!A.canAdmin)return"));
+  assert(owner.includes("if(!window.confirm('Publish this approved location to the canonical Corridor record?'))return"));
+  assert(owner.includes("A.adminPublishLocation"));
+  assert(owner.includes("A.adminLocationHistory"));
+  assert(owner.includes("A.adminRestoreLocation"));
+  assert(access.includes("rpc('admin_publish_location'"));
+  assert(access.includes("rpc('admin_location_history'"));
+  assert(access.includes("rpc('admin_restore_location'"));
+  assert(!/getCurrentPosition\s*\([^)]*adminPublishLocation/s.test(owner));
+  fs.rmSync(dir,{recursive:true,force:true});
+});
+
+test('MAP remains marker-only after Owner editing support',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
+  for(const src of [map,owner]){
+    assert(!src.includes('L.polyline'));
+    assert(!src.includes('.polyline('));
+    assert(!src.includes('MapPolyline'));
+  }
 });
