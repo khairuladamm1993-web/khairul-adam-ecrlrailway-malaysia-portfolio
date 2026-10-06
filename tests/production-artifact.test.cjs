@@ -194,3 +194,13 @@ test('personal field coordinate stays protected from the public-safe projection'
   assert(!registry.includes('5.35123'));
   assert(!registry.includes('102.89995'));
 });
+
+test('Verified Member renderer uses plain escaping inside module attributes',()=>{
+  const dir=build('build-production.py','railway-production-');
+  const member=fs.readFileSync(path.join(dir,'assets','member-gateway.js'),'utf8');
+  assert(member.includes("const escape=v=>R.escape(String(v??''));"));
+  assert(!member.includes("const escape=v=>h(String(v??''));"));
+  assert(member.includes('data-member-module="'+escape(id)+'"'));
+  assert(member.includes('aria-pressed="'+selected.has(id)+'"'));
+  fs.rmSync(dir,{recursive:true,force:true});
+});
