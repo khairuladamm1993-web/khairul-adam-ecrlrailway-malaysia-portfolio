@@ -1,0 +1,144 @@
+name: Live production smoke
+
+on:
+  push:
+    branches:
+      - production-live-smoke-0be37c14
+
+permissions:
+  contents: read
+
+jobs:
+  live-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify live bytes and protected paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://khairuladamm1993-web.github.io/khairul-adam-ecrlrailway-malaysia-portfolio/'
+          cat >/tmp/expected.sha256 <<'EOF'
+          bfbb461fd8f969b54755977fa130524b70b6765f9c29ee1ce154db52a963f711 PRIVACY.md
+          01324885991f664d516dcc0015c4b12e8d0e438a9dd172232106cffa36920dee assets/access.js
+          0498a356aaf402d524bd69636bd537fda0d032f439f62cd703b8cdfddd31c4c9 assets/analytics.js
+          31d9592d185fc2d69a8d24bef4d7e92cf946e86bf97415a9c8df5dd62e70d7b1 assets/corridor-reference.js
+          575c9814cefed8cd28b08944278d53b88f72d2931a048d686406ad5703c9d58b assets/gateway.css
+          6a4d20a0d1ea85587e265dc3a1139c27ae65d4ca846bdaf9bc032defff094191 assets/i18n.js
+          85847d57ea9804c000ea183c2e9f38677f285a875f672a36381d707f4b638350 assets/identity-translations.js
+          bd570d015c83753481cc61b6e12a1faf62156f0f4788fc869a6aae80726b2ecf assets/language.css
+          0de458b8199fe255d99c6d0ee12736f12be4503e83e483e136217e6698f1c10b assets/map-gateway.js
+          b5ac8a8e2aadc0fe731b5249da958ff7f907f932af3df390b101d775388cec95 assets/master-content.js
+          177f8453ce80673b5eeb647cafb0d3d196e403779e329db90a5c15cb13888ee7 assets/master.css
+          215678726ab81109ae00633975deaf59a30e7e5c0aab22665faaa14c49c5e763 assets/member-gateway.js
+          ead8056168fe4b6ecebbd719d491d23fe9f5a3268d6380146ab2fcf9c3a7498b assets/module-previews.js
+          1b762517a0ea29e8b03c62fbcebce91c1f88732742c526b00d89685d541bf579 assets/owner-map.js
+          58f73be49a412235e2d319ce2d473bc7d6356352e44d792dc6d8b6d5958067dc assets/portfolio.css
+          318920f6c658febf3c0bfc8df438d661c3625536498a01f1ecbab7587a7ebdc8 assets/portfolio.js
+          9a882ebacec8fb1516362d0b67ece96820684e09824b84410b0a28464425fabf assets/public-gateway.js
+          fabd30d5c79262f9b968a38a86b06afb483b3223206c4be32439fb975ffa433f assets/railway-original.jpeg
+          b2c180e1630137485eb1ddd3e40bc11c5b14dc878dab48acbd014b852170e6b8 assets/theme.css
+          239a00a199a302cbe2fadafd12cc52cc0b80ae2642fc9d55f9fc74518a62329d assets/theme.js
+          6fd952f806c53ded2d75b30a1d4252271d629099b0e62f86d9d00ed7a89ed055 assets/translations.js
+          7dca71821366655d72582b746d6aed0ef2d5665d6713787f179c17c61c8001dc assets/ui-translations.js
+          c132004a42c392dfc7cfc21e306761b214086e276295f26b94d40265bca8efac gateway.html
+          d625987bd1518cf0649b86b08c92644689dd8055cff589b11128ca18ba2b9840 index.html
+          0a80823d331e365abaf8b6e3343cde4f993dcf3a648ae185da388ca36658c29d portfolio.html
+          8e0a26134dd02c004081e90f7fe5282b7a3925d187f046e3930b62d35aec1a2f references.html
+          0642340fb31185b3adf0eb0459b7e84f37de704c5395b71466059170eda080a6 robots.txt
+          541455b1b2d89c6e55389cab0db215dc4ee4a1ce097e04036b70d9395684894a sitemap.xml
+          EOF
+          while read -r expected path; do
+            out="/tmp/live-$(echo "$path" | tr '/' '_')"
+            curl -fsSL --retry 4 --retry-delay 2 "${BASE}${path}" -o "$out"
+            actual=$(sha256sum "$out" | awk '{print $1}')
+            test "$actual" = "$expected" || { echo "HASH FAIL $path $actual"; exit 1; }
+          done </tmp/expected.sha256
+          for path in assets/questions.js assets/gateway.js assets/quiz-core.js package.json README.md tests/production-artifact.test.cjs supabase/migrations/20261007_owner_map_location_management.sql; do
+            code=$(curl -sSL -o /tmp/probe -w '%{http_code}' "${BASE}${path}")
+            test "$code" = 404 || { echo "FORBIDDEN PATH EXPOSED $path HTTP $code"; exit 1; }
+          done
+          grep -q 'GEMAC Engineering Machinery Co., Ltd.' /tmp/live-references.html
+          grep -q '金鹰重型工程机械股份有限公司' /tmp/live-references.html
+          ! grep -q 'GEMAX' /tmp/live-references.html
+          grep -q "if(!A?.canAdmin||!state.map)return" /tmp/live-assets_map-gateway.js
+          grep -q "if(!mounted||!A.canAdmin)return" /tmp/live-assets_owner-map.js
+          grep -q "rpc('admin_publish_location'" /tmp/live-assets_access.js
+          grep -q "rpc('admin_location_history'" /tmp/live-assets_access.js
+          grep -q "rpc('admin_restore_location'" /tmp/live-assets_access.js
+          echo 'Live byte parity, GEMAC correction, protected-path and Admin-gate scan: PASS'
+
+      - name: Public fail-closed MAP and responsive browser smoke
+        shell: bash
+        run: |
+          node <<'NODE'
+          (async()=>{
+          const fs=require('fs'),{spawn,spawnSync}=require('child_process');
+          const BASE='https://khairuladamm1993-web.github.io/khairul-adam-ecrlrailway-malaysia-portfolio/';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          function findChrome(){for(const bin of ['google-chrome','google-chrome-stable','chromium','chromium-browser']){const r=spawnSync('which',[bin],{encoding:'utf8'});if(r.status===0)return r.stdout.trim();}throw new Error('Chrome/Chromium not found');}
+          const profile=fs.mkdtempSync('/tmp/live-pages-chrome-');
+          const chrome=spawn(findChrome(),['--headless=new','--no-sandbox','--disable-gpu','--remote-debugging-address=127.0.0.1','--remote-debugging-port=0','--user-data-dir='+profile,'about:blank'],{stdio:['ignore','ignore','pipe']});
+          let stderr='';
+          const browserWs=new Promise((resolve,reject)=>{chrome.stderr.setEncoding('utf8');chrome.stderr.on('data',chunk=>{stderr+=chunk;const m=stderr.match(/DevTools listening on (ws:\/\/[^\s]+)/);if(m)resolve(m[1]);});chrome.once('exit',code=>reject(new Error('Chrome exited '+code+' '+stderr.slice(-1000))));});
+          const wsUrl=await Promise.race([browserWs,new Promise((_,rej)=>setTimeout(()=>rej(new Error('CDP timeout '+stderr.slice(-1000))),15000))]);
+          const port=new URL(wsUrl).port;
+          let pageInfo;
+          for(let i=0;i<50;i++){
+            try{
+              const r=await fetch('http://127.0.0.1:'+port+'/json/list');
+              const a=await r.json();
+              pageInfo=a.find(x=>x.type==='page'&&(x.url==='about:blank'||x.url.startsWith('http')));
+              if(pageInfo)break;
+            }catch{}
+            await sleep(100);
+          }
+          if(!pageInfo)throw new Error('No CDP page');
+          const ws=new WebSocket(pageInfo.webSocketDebuggerUrl);
+          await new Promise((res,rej)=>{ws.addEventListener('open',res,{once:true});ws.addEventListener('error',rej,{once:true});});
+          let id=1;const pending=new Map();
+          ws.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(m.error.message)):p.resolve(m.result);}});
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=id++;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const ev=async expression=>{
+            const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});
+            if(r.exceptionDetails){
+              const detail={expression,text:r.exceptionDetails.text,description:r.exceptionDetails.exception&&r.exceptionDetails.exception.description,line:r.exceptionDetails.lineNumber,column:r.exceptionDetails.columnNumber};
+              throw new Error('CDP eval failed '+JSON.stringify(detail));
+            }
+            return r.result&&r.result.value;
+          };
+          async function wait(expression,timeout=12000){
+            const start=Date.now();
+            while(Date.now()-start<timeout){if(await ev(expression))return;await sleep(120);}
+            const diag=await ev("({href:location.href,title:document.title,ready:document.readyState,body:(document.body&&document.body.innerText||'').slice(0,500),scripts:[...document.scripts].map(s=>s.src||'inline')})");
+            throw new Error('wait timeout '+expression+' '+JSON.stringify(diag));
+          }
+          await send('Page.enable');await send('Runtime.enable');
+          for(const pair of [[390,844],[768,1024],[1440,900]]){
+            const width=pair[0],height=pair[1];
+            await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:width<700});
+            await send('Page.navigate',{url:BASE+'gateway.html?liveSmoke='+Date.now()});
+            await wait("location.href.includes('/gateway.html')");
+            await wait("document.readyState==='complete'");
+            await wait("!!document.querySelector('#categories [data-category=\"map\"]')");
+            await wait("window.RailwayAccess && window.RailwayAccess.status!=='initializing'");
+            const initial=await ev("(()=>({overflow:document.documentElement.scrollWidth-innerWidth,order:[...document.querySelectorAll('#categories [data-category]')].map(x=>x.dataset.category).join(','),level:window.RailwayAccess&&window.RailwayAccess.level,canAdmin:window.RailwayAccess&&window.RailwayAccess.canAdmin,canRead:window.RailwayAccess&&window.RailwayAccess.canReadMemberContent,login:/magic link|member access|secure sign-in/i.test(document.body.innerText),owner:!!document.querySelector('[data-owner-map-slot]')||/EDIT LOCATION|MY CURRENT LOCATION/.test(document.body.innerText),mapScript:!!document.querySelector('script[data-railway-map-module]')}))()");
+            if(initial.overflow>2)throw new Error('overflow '+width+' '+initial.overflow);
+            if(initial.order!=='practical,ebook,corridor,map,future,news')throw new Error('gateway order '+initial.order);
+            if(initial.level!=='public'||initial.canAdmin!==false||initial.canRead!==false)throw new Error('fail-closed boundary '+JSON.stringify(initial));
+            if(!initial.login)throw new Error('Member login entry missing');
+            if(initial.owner)throw new Error('Owner controls exposed publicly');
+            if(initial.mapScript)throw new Error('MAP loaded before selection');
+            await ev("document.querySelector('#categories [data-category=\"map\"]').click();true");
+            await wait("!!document.querySelector('script[data-railway-map-module]')");
+            await wait("document.querySelector('#railway-map-mount')&&document.querySelector('#railway-map-mount').dataset.mapReady==='true'",15000);
+            const mapped=await ev("(()=>({overflow:document.documentElement.scrollWidth-innerWidth,mapScript:!!document.querySelector('script[data-railway-map-module]'),ownerScript:!!document.querySelector('script[data-railway-owner-map]'),owner:/EDIT LOCATION|MY CURRENT LOCATION/.test(document.body.innerText),markerCount:document.querySelectorAll('.leaflet-marker-icon').length,noPolyline:document.body.innerText.includes('No route line / no polyline')}))()");
+            if(mapped.overflow>2||!mapped.mapScript||mapped.ownerScript||mapped.owner||mapped.markerCount<1||!mapped.noPolyline)throw new Error('MAP live smoke '+width+' '+JSON.stringify(mapped));
+            await ev("document.querySelector('#categories [data-category=\"corridor\"]').click();true");
+            await wait("window.RailwayMap&&window.RailwayMap.mounted===false");
+            console.log('PASS live viewport '+width+'x'+height);
+          }
+          ws.close();chrome.kill('SIGTERM');
+          console.log('Live Public/Member-entry/Admin-boundary/MAP responsive smoke: PASS');
+          })().catch(error=>{console.error(error);process.exit(1);});
+          NODE
