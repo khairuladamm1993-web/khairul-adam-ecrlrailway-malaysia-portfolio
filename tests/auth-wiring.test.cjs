@@ -11,7 +11,7 @@ function builder(result={data:[],error:null}){
  b.then=(resolve)=>Promise.resolve(result).then(resolve);
  return b;
 }
-function makeClient({session={access_token:'x'},user={email:'member@example.com'},role='member',profile={data:{email:'member@example.com',activity_consent_at:null},error:null},rpcError=null}={}){
+function makeClient({session={access_token:'x'},user={id:'11111111-1111-4111-8111-111111111111',email:'member@example.com'},role='member',profile={data:{email:'member@example.com',activity_consent_at:null},error:null},rpcError=null}={}){
  const calls=[];
  const client={
   calls,
@@ -58,6 +58,12 @@ test('server admin role unlocks admin capability',async()=>{
  const {A}=await load({role:'admin'});
  assert.equal(A.level,'admin');assert.equal(A.canReadMemberContent,true);assert.equal(A.canAdmin,true);
 });
+test('session profile lookup is scoped to authenticated user',async()=>{
+ const {client}=await load({role:'admin'});
+ assert(source.includes(".eq('user_id',userId).maybeSingle()"));
+ assert(client.calls.some(x=>x[0]==='from'&&x[1]==='member_profiles'));
+});
+
 test('admin RPC is denied to member and allowed to admin',async()=>{
  const member=await load({role:'member'});
  await assert.rejects(()=>member.A.adminSummary(),/Admin access required/);
@@ -97,4 +103,13 @@ test('role RPC error fails closed',async()=>{
 test('auth wiring uses only publishable browser key and server role resolution',()=>{
  assert(source.includes('sb_publishable_'));assert(!/service_role|service-role|secret_key/.test(source));
  assert(source.includes("rpc('account_role')"));assert(!/localStorage.*role|URLSearchParams.*role/.test(source));
+});
+
+test('member gateway resets public header and cleans engagement lifecycle',()=>{
+ const memberSource=fs.readFileSync(path.join(root,'assets/member-gateway.js'),'utf8');
+ assert(memberSource.includes("else el.innerHTML='<span class=\"access-label\">Public</span>"));
+ assert(memberSource.includes("removeEventListener(event,handler)"));
+ assert(memberSource.includes("addEventListener('pagehide',state.pagehide)"));
+ assert(memberSource.includes("document.addEventListener('visibilitychange',state.visibility)"));
+ assert(memberSource.includes("await startOrStopTracker();await A.logout()"));
 });
