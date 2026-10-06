@@ -147,6 +147,9 @@ test('Owner MAP runtime is lazy, admin-gated and never persists device location 
   assert(access.includes("rpc('admin_location_history'"));
   assert(access.includes("rpc('admin_restore_location'"));
   assert(!/getCurrentPosition\s*\([^)]*adminPublishLocation/s.test(owner));
+  assert(owner.includes("Number.isFinite(rawAccuracy)&&rawAccuracy>=0?rawAccuracy:null"));
+  assert(owner.includes("Current device accuracy: not reported by browser"));
+  assert(!owner.includes("accuracy:Number(pos.coords.accuracy)||0"));
   fs.rmSync(dir,{recursive:true,force:true});
 });
 
