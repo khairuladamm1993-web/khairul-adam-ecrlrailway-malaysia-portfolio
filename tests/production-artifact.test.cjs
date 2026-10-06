@@ -85,6 +85,12 @@ test('MAP is lazy, marker-only and contains no protected Corridor registry',()=>
   assert(!/\bSTN\d{2}\b/.test(registry));
   assert(!/\bCH\s*\d{1,3}\+\d{3}\b/.test(registry));
   for(const token of ['totalTrackLength','turnoutCount','TrackLine(','MapPolyline','L.polyline'])assert(!map.includes(token)&&!registry.includes(token),token);
+  assert(registry.includes("['Pekan Sg. Tong','PL',null,null,'Pending Validation']"));
+  assert(registry.includes("['Bukit Payung','PL',5.23269,103.10281,'Public Reference Location']"));
+  assert(registry.includes("['Felda Lepar','PL',3.67709,103.03001,'Public Reference Location']"));
+  assert(registry.includes("['Kampung Alur Gading','PL',3.61430,102.83280,'Public Reference Location']"));
+  assert(registry.includes("['Chenor','PL',null,null,'Pending Validation']"));
+  assert(registry.includes("['Lanchang','PL',null,null,'Pending Validation']"));
   assert(registry.includes("['Alang Sedayu','PL',null,null,'Pending Validation']"));
   assert(registry.includes("['Kuantan Port City Depot','Depot',null,null,'Pending Validation']"));
   assert(registry.includes("['Gombak North EMU Depot','Depot',null,null,'Pending Validation']"));
@@ -110,4 +116,11 @@ test('MAP exact-location contract classifies coordinates and never shifts marker
   assert(map.includes("Public Reference Location · locality/reference position only; not an exact railway or survey/GIS coordinate."));
   assert(map.includes("Pending Validation · no exact railway location is rendered."));
   fs.rmSync(dir,{recursive:true,force:true});
+});
+
+test('canonical Corridor confidence overrides the public-safe projection',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  assert(map.includes("if(loc.locationConfidence===PUBLIC&&finite(loc.lat)&&finite(loc.lon))"));
+  assert(map.includes("if(loc.locationConfidence===PENDING)"));
+  assert(map.includes("lat:null,lon:null,locationConfidence:PENDING"));
 });
