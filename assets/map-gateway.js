@@ -51,7 +51,12 @@
     return {...point,lat:Number(loc.lat),lon:Number(loc.lon),locationConfidence:PUBLIC,coordinateSource:loc.coordinateSource||'Public reference / locality source',overlay};
    }
    if(loc.locationConfidence===PENDING){
-    return {...point,lat:finite(loc.lat)?Number(loc.lat):null,lon:finite(loc.lon)?Number(loc.lon):null,locationConfidence:PENDING,coordinateSource:loc.coordinateSource||'Pending validation',overlay};
+    return {...point,
+      lat:finite(loc.lat)?Number(loc.lat):(finite(point.lat)?Number(point.lat):null),
+      lon:finite(loc.lon)?Number(loc.lon):(finite(point.lon)?Number(point.lon):null),
+      locationConfidence:PENDING,
+      coordinateSource:loc.coordinateSource||point.coordinateSource||'Pending validation',
+      overlay};
    }
   }
   return {...point,locationConfidence:allowedConfidence(point.locationConfidence),coordinateSource:point.coordinateSource||null,overlay};
