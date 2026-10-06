@@ -58,6 +58,13 @@ test('server admin role unlocks admin capability',async()=>{
  const {A}=await load({role:'admin'});
  assert.equal(A.level,'admin');assert.equal(A.canReadMemberContent,true);assert.equal(A.canAdmin,true);
 });
+test('admin RPC is denied to member and allowed to admin',async()=>{
+ const member=await load({role:'member'});
+ await assert.rejects(()=>member.A.adminSummary(),/Admin access required/);
+ const admin=await load({role:'admin'});
+ const summary=await admin.A.adminSummary();
+ assert.equal(summary.members,1);
+});
 test('logout clears access back to Public',async()=>{
  const {A,client}=await load({role:'member'});await A.logout();
  assert.equal(A.level,'public');assert.equal(A.canReadMemberContent,false);
