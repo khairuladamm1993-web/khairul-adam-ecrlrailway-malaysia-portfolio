@@ -3,7 +3,7 @@ import pathlib, re, sys
 root=pathlib.Path(__file__).resolve().parents[1]
 out=pathlib.Path(sys.argv[1]).resolve(); out.mkdir(parents=True,exist_ok=True)
 if any(out.iterdir()): raise SystemExit('Use a fresh empty output directory.')
-excluded={'questions.js','quiz-core.js','gateway.js','member-gateway.js'}
+excluded={'questions.js','quiz-core.js','gateway.js','member-gateway.js','owner-map.js'}
 files=['index.html','gateway.html','portfolio.html','references.html','PRIVACY.md']+[str(p.relative_to(root)) for p in (root/'assets').iterdir() if p.is_file() and p.name not in excluded]
 for name in files:
     data=(root/name).read_bytes()
