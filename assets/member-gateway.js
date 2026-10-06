@@ -15,6 +15,7 @@
  function renderStatus(){
   const el=document.querySelector('#gateway-status');if(!el)return;
   if(A.canReadMemberContent)el.innerHTML='<span class="access-label">'+escape(statusText())+'</span><button class="member-entry" data-member>'+escape(A.email||'MEMBER SESSION')+'</button>';
+  else el.innerHTML='<span class="access-label">Public</span><button class="member-entry" data-member>LOGIN / MEMBER ACCESS</button>';
  }
  function renderAuth(){
   const controls='<div class="quiz-languages">'+['ms','en','zh'].map(l=>'<button data-auth-lang="'+l+'" aria-pressed="'+(R.language===l)+'">'+({ms:'BM',en:'EN',zh:'中文'})[l]+'</button>').join('')+(R.language==='zh'?'<button data-auth-pinyin>Pinyin '+(R.pinyin?'ON':'OFF')+'</button>':'')+'<button data-auth-theme>'+escape(window.RailwayTheme.value==='light'?'Dark Mode':'Light Mode')+'</button></div>';
@@ -97,13 +98,26 @@
   '<section class="content-row"><h3>Content control</h3><form id="admin-content-form" class="admin-content-form"><label>ID<input name="id" required></label><label>Kind<input name="kind" required></label><label>Evidence<input name="evidence" required></label><label>Title EN<input name="title_en" required></label><label>Title BM<input name="title_ms" required></label><label>Title 中文<input name="title_zh" required></label><label>Body EN<textarea name="body_en"></textarea></label><label>Body BM<textarea name="body_ms"></textarea></label><label>Body 中文<textarea name="body_zh"></textarea></label><label><input name="approved" type="checkbox"> Approved</label><button class="primary" type="submit">SAVE CONTENT</button></form><p id="admin-content-status" role="status"></p></section>';
  }
  async function startOrStopTracker(){
-  if(!A.canReadMemberContent||!A.activityConsent){if(tracker){clearInterval(tracker.timer);tracker=null;}return;}
+  const stop=async flushFirst=>{
+   if(!tracker)return;
+   const t=tracker;clearInterval(t.timer);
+   for(const [event,handler] of t.listeners)removeEventListener(event,handler);
+   removeEventListener('pagehide',t.pagehide);
+   document.removeEventListener('visibilitychange',t.visibility);
+   tracker=null;
+   if(flushFirst)await t.flush();
+  };
+  if(!A.canReadMemberContent||!A.activityConsent){await stop(true);return;}
   if(tracker)return;
-  const state={id:crypto.randomUUID(),seq:0,last:performance.now(),lastActivity:performance.now(),visit:0,active:0};
-  const activity=()=>{state.lastActivity=performance.now();};['pointerdown','keydown','scroll','touchstart'].forEach(e=>addEventListener(e,activity,{passive:true}));
+  const state={id:crypto.randomUUID(),seq:0,last:performance.now(),lastActivity:performance.now(),visit:0,active:0,listeners:[]};
+  const activity=()=>{state.lastActivity=performance.now();};
+  for(const event of ['pointerdown','keydown','scroll','touchstart']){addEventListener(event,activity,{passive:true});state.listeners.push([event,activity]);}
   const tick=()=>{const now=performance.now(),delta=Math.max(0,Math.min(35,(now-state.last)/1000));state.visit+=delta;if(!document.hidden&&document.hasFocus()&&now-state.lastActivity<60000)state.active+=delta;state.last=now;};
-  const flush=async()=>{tick();const visit=Math.floor(state.visit),active=Math.floor(state.active);if(!visit&&!active)return;state.visit-=visit;state.active-=active;try{await A.recordEngagement(state.id,category(),state.seq++,visit,active);}catch{}};
-  state.timer=setInterval(flush,30000);tracker=state;
+  state.flush=async()=>{tick();const visit=Math.floor(state.visit),active=Math.floor(state.active);if(!visit&&!active)return;state.visit-=visit;state.active-=active;try{await A.recordEngagement(state.id,category(),state.seq++,visit,active);}catch{state.visit+=visit;state.active+=active;}};
+  state.pagehide=()=>{state.flush();};
+  state.visibility=()=>{if(document.hidden)state.flush();else state.last=performance.now();};
+  addEventListener('pagehide',state.pagehide);document.addEventListener('visibilitychange',state.visibility);
+  state.timer=setInterval(state.flush,30000);tracker=state;
  }
  document.addEventListener('click',async e=>{
   const member=e.target.closest('[data-member]');if(member){e.preventDefault();e.stopImmediatePropagation();openAuth();return;}
@@ -112,7 +126,7 @@
   const ans=e.target.closest('[data-quiz-answer]');if(ans&&quiz&&!quiz.busy){quiz.answers.push({module:quiz.questions[quiz.index].module,question:quiz.questions[quiz.index].id,answer:Number(ans.dataset.quizAnswer)});quiz.index++;quiz.index>=16?finishQuiz():renderQuiz();return;}
   if(e.target.closest('[data-quiz-done]')){quiz=null;dialog.close();enhance();return;}
   if(e.target.closest('[data-member-close]')){dialog.close();return;}
-  if(e.target.closest('[data-logout]')){await A.logout();bundle=null;selected.clear();renderAuth();return;}
+  if(e.target.closest('[data-logout]')){await startOrStopTracker();await A.logout();bundle=null;selected.clear();renderStatus();renderAuth();return;}
   if(e.target.closest('[data-auth-refresh]')){await A.refresh();renderAuth();return;}
   if(e.target.closest('[data-refresh-member]')){await loadBundle();renderAuth();return;}
   const consent=e.target.closest('[data-consent]');if(consent){await A.setActivityConsent(consent.dataset.consent==='true');await loadBundle();renderAuth();return;}
