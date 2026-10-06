@@ -177,8 +177,14 @@
     map:state.map,
     leaflet:state.leaflet,
     getSelected:()=>state.selected,
-    getMarker:id=>state.markers.get(id)||null,
-    getRecord:id=>effective(points().find(x=>x.id===id)||state.selected||{}),
+    getMarker:id=>{
+     const base=points().find(x=>x.id===id||memberOverlay(x)?.code===id);
+     return state.markers.get(base?.id||id)||null;
+    },
+    getRecord:id=>{
+     const base=points().find(x=>x.id===id||memberOverlay(x)?.code===id);
+     return effective(base||state.selected||{});
+    },
     renderDetail,
     renderResults,
     focusStored,
