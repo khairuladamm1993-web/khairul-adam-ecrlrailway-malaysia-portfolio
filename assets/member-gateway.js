@@ -8,7 +8,7 @@
  const category=()=>document.querySelector('#categories [aria-selected="true"]')?.dataset.category||'practical';
  const lang=()=>R.language==='zh'?'zh':R.language==='en'?'en':'ms';
  const localized=(value)=>{if(value==null)return'';if(typeof value==='string')return value;return value[lang()]||value.en||value.ms||value.zh||'';};
- const escape=v=>h(String(v??''));
+ const escape=v=>R.escape(String(v??''));
  const dialog=document.createElement('dialog');dialog.id='member-dialog';dialog.setAttribute('aria-labelledby','member-dialog-title');dialog.innerHTML='<button type="button" class="quiet modal-dismiss" data-member-close>Close</button><div id="member-dialog-content"></div>';document.body.append(dialog);
  const body=()=>dialog.querySelector('#member-dialog-content');
  const statusText=()=>A.level==='admin'?'Admin':A.level==='member'?'Verified Member':'Public';
