@@ -314,6 +314,17 @@ test('auth convenience reuses Supabase sessions without weakening role resolutio
   fs.rmSync(dir,{recursive:true,force:true});
 });
 
+test('Light Mode typography polish remains local, system-font safe and layout-light',()=>{
+  const css=fs.readFileSync(path.join(root,'assets','master.css'),'utf8');
+  assert(css.includes('[data-theme=light] body[data-screen=portfolio] h2'));
+  assert(css.includes('[data-theme=light] body[data-screen=portfolio] h3'));
+  assert(css.includes('[data-theme=light] body[data-screen=portfolio] .muted'));
+  assert(css.includes('[data-theme=light] body[data-screen=modes] h1'));
+  assert(css.includes('[data-theme=light] body[data-screen=references] h1'));
+  assert(!/url\s*\([^)]*font/i.test(css));
+  assert(!/@font-face/i.test(css));
+});
+
 test('Gateway railway background polish is CSS-only and secondary',()=>{
   const css=fs.readFileSync(path.join(root,'assets','master.css'),'utf8');
   assert(css.includes('body[data-screen=modes]'));
