@@ -246,7 +246,9 @@ for(const [width,height] of viewports){
           canvasHeight:canvas.getBoundingClientRect().height,
           minControl:Math.min(...controls.map(x=>x.getBoundingClientRect().height)),
           lazyScript:!!document.querySelector('script[data-railway-map-module]'),
-          order:[...document.querySelectorAll('#categories [data-category]')].map(x=>x.dataset.category).join(',')
+          order:[...document.querySelectorAll('#categories [data-category]')].map(x=>x.dataset.category).join(','),
+          tileUrls:window.__railwayMapCalls.tileLayers.map(x=>x.url),
+          panes:window.__railwayMapCalls.panes.slice()
         };
       })()`);
       const expectedMarkers=role==='public'?0:1;
@@ -288,7 +290,7 @@ for(const [width,height] of viewports){
           JSON.stringify(exactResult.buttonFocus?.coords)===JSON.stringify(exactResult.before)&&exactResult.buttonFocus?.zoom===11&&
           exactResult.focusDisabled===false&&/STN01/.test(exactResult.detail)&&/CH000\+670/.test(exactResult.detail)&&
           /6\.12345/.test(exactResult.detail)&&/102\.54321/.test(exactResult.detail)&&/Validated Location/.test(exactResult.detail);
-      const mapOK=mapResult.docOverflow<=1&&mapResult.moduleOverflow<=1&&mapResult.canvasHeight>=280&&mapResult.minControl>=42&&mapResult.lazyScript&&mapResult.order==='practical,ebook,corridor,map,future,news';
+      const mapOK=mapResult.docOverflow<=1&&mapResult.moduleOverflow<=1&&mapResult.canvasHeight>=280&&mapResult.minControl>=42&&mapResult.lazyScript&&mapResult.order==='practical,ebook,corridor,map,future,news'&&mapResult.tileUrls.includes('https://tile.openstreetmap.org/{z}/{x}/{y}.png')&&mapResult.tileUrls.includes('https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png')&&mapResult.panes.includes('railwayBase')&&mapResult.panes.includes('railwayReference');
       if(!mapOK)failures.push({role,width,height,phase:'map',result:mapResult});
       if(!exactOK)failures.push({role,width,height,phase:'exact-location',result:exactResult});
 
