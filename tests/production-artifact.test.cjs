@@ -232,6 +232,18 @@ test('railway-first MAP styling keeps railway reference separate from canonical 
   }
 });
 
+test('MAP Malaysia identity badge is UI-only and outside the tile canvas',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  const css=fs.readFileSync(path.join(root,'assets','gateway.css'),'utf8');
+  assert(map.includes('map-identity-row'));
+  assert(map.includes('map-malaysia-badge'));
+  assert(map.includes('🇲🇾 <span>Malaysia</span>'));
+  assert(map.indexOf('map-identity-row')<map.indexOf('map-toolbar'));
+  assert(map.indexOf('map-identity-row')<map.indexOf('map-canvas-wrap'));
+  assert(css.includes('.map-malaysia-badge'));
+  assert(css.includes('[data-theme=light] .map-malaysia-badge'));
+});
+
 test('MAP coordinate parsing rejects null, blank, zero-zero and non-corridor outliers',()=>{
   const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
   assert(map.includes("typeof v==='string'&&v.trim()!==''"));
