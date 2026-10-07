@@ -214,7 +214,7 @@
  }
  window.RailwayAccess=Object.freeze({
   get level(){return state.level;},get status(){return state.status;},get canReadMemberContent(){return state.level==='member'||state.level==='admin';},get canAdmin(){return state.level==='admin';},
-  get email(){return state.email;},get error(){return state.error;},get activityConsent(){return consent;},get cachedData(){return dataCache;},
+  get email(){return state.email;},get error(){return state.error;},get retryAfterSeconds(){return state.retryAfterSeconds;},get activityConsent(){return consent;},get cachedData(){return dataCache;},
   init,refresh,sendMagicLink,logout,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,adminPublishLocation,adminLocationHistory,adminRestoreLocation,snapshot
  });
  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',()=>init(),{once:true}):init();
