@@ -317,6 +317,7 @@ for(const [width,height] of viewports){
             if(m){m.coords=[6.22223,102.66667];m.handlers.dragend?.({target:m.marker});}
             return true;
           })()`);
+          const draftState=await evalValue(client,"(()=>({storedStillOriginal:window.__railwayMapCalls.markers.some(x=>!x.removed&&!x.marker?.dragging?.enabled&&Math.abs(x.coords[0]-6.12345)<1e-8&&Math.abs(x.coords[1]-102.54321)<1e-8),draftAtProposed:window.__railwayMapCalls.markers.some(x=>!x.removed&&x.marker?.dragging?.enabled&&Math.abs(x.coords[0]-6.22223)<1e-8&&Math.abs(x.coords[1]-102.66667)<1e-8),controls:!!document.querySelector('[data-owner-reset]')&&!!document.querySelector('[data-owner-focus]')&&/Current stored location/.test(document.querySelector('[data-owner-workflow]')?.textContent||'')&&/Proposed draft location/.test(document.querySelector('[data-owner-workflow]')?.textContent||'')}))()");
           const draftBefore=await evalValue(client,"window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length");
           await evalValue(client,`(()=>{
             const f=document.querySelector('[data-owner-edit-form]');
@@ -347,7 +348,7 @@ for(const [width,height] of viewports){
             restoredMarker:window.__railwayMapCalls.markers.some(x=>!x.removed&&Math.abs(x.coords[0]-6.12345)<1e-8&&Math.abs(x.coords[1]-102.54321)<1e-8),
             detail:document.querySelector('[data-map-detail]')?.textContent||''
           }))()`);
-          ownerOK=ownerOK&&draftBefore===0&&reviewBefore===0&&historyState.rows>=2&&historyState.baseline&&historyState.publish&&ownerState.geo===1&&ownerState.publishCalls===1&&ownerState.restoreCalls===1&&ownerState.rollback&&ownerState.restoredMarker&&/6\.12345/.test(ownerState.detail);
+          ownerOK=ownerOK&&draftState.storedStillOriginal&&draftState.draftAtProposed&&draftState.controls&&draftBefore===0&&reviewBefore===0&&historyState.rows>=2&&historyState.baseline&&historyState.publish&&ownerState.geo===1&&ownerState.publishCalls===1&&ownerState.restoreCalls===1&&ownerState.rollback&&ownerState.restoredMarker&&/6\.12345/.test(ownerState.detail);
         }
         if(!ownerOK)failures.push({role,width,height,phase:'owner-workflow',result:preOwner});
       }
