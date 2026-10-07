@@ -66,7 +66,9 @@ function mockScript(role){
       member_profiles:[profile],
       member_content:[
         {id:'roll-1',kind:'rolling-stock',title:{en:'Protected rolling stock'},body:{en:'Member data'},evidence:'member',approved:true},
-        {id:'STN01',kind:'corridor',title:{en:'Kota Bharu'},body:{en:'Member corridor data',chainage:'CH000+670',location:{latitude:6.12345,longitude:102.54321,locationConfidence:'Validated Location',coordinateSource:'Validated project reference'}},evidence:'personal-field-reference',approved:true}
+        {id:'STN01',kind:'corridor',title:{en:'Kota Bharu'},body:{en:'Member corridor data',chainage:'CH000+670',location:{latitude:6.12345,longitude:102.54321,locationConfidence:'Validated Location',coordinateSource:'Validated project reference'}},evidence:'personal-field-reference',approved:true},
+        {id:'PL01',kind:'corridor',title:{en:'Pekan Sg. Tong'},body:{en:'Member corridor data',chainage:'CH115+180',location:{latitude:5.354361,longitude:102.902694,locationConfidence:'Personal Field-Validated Location',coordinateSource:'Owner-approved personal field reference; not engineering/survey GIS'}},evidence:'personal-field-reference',approved:true},
+        {id:'PL05',kind:'corridor',title:{en:'Chenor'},body:{en:'Member corridor data',chainage:'CH415+180',location:{latitude:3.473139,longitude:102.518833,locationConfidence:'Public Reference Location',coordinateSource:'Owner-approved public reference; provisional and not engineering/survey GIS'}},evidence:'personal-field-reference',approved:true}
       ],
       quiz_banks:Array.from({length:10},(_,i)=>({id:'smoke-'+(i+1),title:{en:'Smoke bank '+(i+1)},bank:{id:'smoke-'+(i+1),index:i+1,title:{en:'Smoke bank '+(i+1)},questions:q.map((item,j)=>({...item,id:'smoke-'+(i+1)+'-'+j}))},approved:true})),
       member_files:[],member_progress:[],quiz_attempts:[],member_engagement:[],admin_audit:[],public_analytics_snapshots:[]
@@ -280,6 +282,35 @@ for(const [width,height] of viewports){
       const viewportOK=viewportResult.initialCount>=1&&viewportResult.initial?.coords?.length>=20&&viewportResult.afterEmpty===viewportResult.initialCount&&/No matching Corridor records/.test(viewportResult.emptyMessage)&&viewportResult.afterFull===viewportResult.initialCount+1&&JSON.stringify(viewportResult.full?.coords)===JSON.stringify(viewportResult.initial?.coords)&&viewportResult.minLat>3&&viewportResult.maxLat<7&&viewportResult.minLon>101&&viewportResult.maxLon<104;
       if(!viewportOK)failures.push({role,width,height,phase:'map-corridor-viewport',result:viewportResult});
 
+      const plResult=await evalValue(client,`(()=>{
+        const input=document.querySelector('[data-map-search]');
+        input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));
+        document.querySelector('[data-map-filter="PL"]')?.click();
+        const active=window.__railwayMapCalls.markers.filter(x=>!x.removed);
+        const pl01Marker=active.some(x=>Math.abs(x.coords[0]-5.354361)<1e-8&&Math.abs(x.coords[1]-102.902694)<1e-8);
+        const pl05Marker=active.some(x=>Math.abs(x.coords[0]-3.473139)<1e-8&&Math.abs(x.coords[1]-102.518833)<1e-8);
+        let searchCount=null,focus=null,detail='';
+        if(${JSON.stringify(role)}!=='public'){
+          input.value='PL01';input.dispatchEvent(new Event('input',{bubbles:true}));
+          const rows=[...document.querySelectorAll('[data-map-point]')];
+          searchCount=rows.length;
+          window.__railwayMapCalls.setView.length=0;
+          rows[0]?.click();
+          document.querySelector('[data-map-focus]')?.click();
+          focus=window.__railwayMapCalls.setView.at(-1)||null;
+          detail=document.querySelector('[data-map-detail]')?.textContent||'';
+        }
+        input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));
+        document.querySelector('[data-map-filter="All"]')?.click();
+        return {pl01Marker,pl05Marker,searchCount,focus,detail};
+      })()`);
+      const plOK=role==='public'
+        ? !plResult.pl01Marker&&plResult.pl05Marker
+        : plResult.pl01Marker&&plResult.pl05Marker&&plResult.searchCount===1&&
+          JSON.stringify(plResult.focus?.coords)===JSON.stringify([5.354361,102.902694])&&plResult.focus?.zoom===11&&
+          /PL01/.test(plResult.detail)&&/Personal Field-Validated Location/.test(plResult.detail);
+      if(!plOK)failures.push({role,width,height,phase:'pl01-pl05-map',result:plResult});
+
       const mapResult=await evalValue(client,`(()=>{
         const m=document.querySelector('.map-module'),canvas=document.querySelector('.map-canvas');
         const controls=[...m.querySelectorAll('button,input')].filter(x=>{const b=x.getBoundingClientRect();return b.width>0&&b.height>0});
@@ -405,7 +436,7 @@ for(const [width,height] of viewports){
         logoutOK=loggedOut.form&&!loggedOut.admin&&loggedOut.otp===0&&loggedOut.status==='signed-out';
         if(!logoutOK)failures.push({role,width,height,phase:'logout-requires-reauth',result:loggedOut});
       }
-      if(ok&&viewportOK&&mapOK&&exactOK&&ownerOK&&logoutOK)console.log(`PASS ${role} ${width}x${height}`);
+      if(ok&&viewportOK&&plOK&&mapOK&&exactOK&&ownerOK&&logoutOK)console.log(`PASS ${role} ${width}x${height}`);
     }finally{
       client.close();
       try{await fetch(`http://127.0.0.1:${debugPort}/json/close/${target.id}`);}catch{}
