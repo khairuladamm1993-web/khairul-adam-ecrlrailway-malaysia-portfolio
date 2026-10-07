@@ -4,11 +4,11 @@
  const PROJECT_URL='https://kfudisbzdgsefdjoopzu.supabase.co';
  const PUBLISHABLE_KEY='sb_publishable_1Diyg-QnCNMJXIY2g0RdCg_ToWFuq0V';
  let client=null,authSubscription=null,consent=false,dataCache=null,userId=null,magicLinkInFlight=null;
- let state={level:'public',status:'initializing',canReadMemberContent:false,canAdmin:false,email:null,error:null};
+ let state={level:'public',status:'initializing',canReadMemberContent:false,canAdmin:false,email:null,error:null,retryAfterSeconds:null};
  const emit=()=>window.dispatchEvent(new CustomEvent('railway-access-change',{detail:snapshot()}));
  const snapshot=()=>Object.freeze({...state,canReadMemberContent:state.level==='member'||state.level==='admin',canAdmin:state.level==='admin'});
  const set=(patch)=>{state={...state,...patch};emit();return snapshot();};
- const failClosed=(status='public',error=null)=>{consent=false;dataCache=null;userId=null;return set({level:'public',status,canReadMemberContent:false,canAdmin:false,email:null,error:error?String(error):null});};
+ const failClosed=(status='public',error=null)=>{consent=false;dataCache=null;userId=null;return set({level:'public',status,canReadMemberContent:false,canAdmin:false,email:null,error:error?String(error):null,retryAfterSeconds:null});};
  const requireClient=()=>{
   if(client)return client;
   if(!window.supabase?.createClient)throw new Error('Supabase client library unavailable');
@@ -36,7 +36,7 @@
    const profile=await c.from('member_profiles').select('email,role,enabled,activity_consent_at,privacy_version').eq('user_id',userId).maybeSingle();
    if(profile.error)return failClosed('profile-error',profile.error.message);
    consent=Boolean(profile.data?.activity_consent_at);
-   return set({level:role,status:'authenticated',canReadMemberContent:true,canAdmin:role==='admin',email:user.email||profile.data?.email||null,error:null});
+   return set({level:role,status:'authenticated',canReadMemberContent:true,canAdmin:role==='admin',email:user.email||profile.data?.email||null,error:null,retryAfterSeconds:null});
   }catch(error){return failClosed('client-error',error);}
  };
  function verificationUrlError(){
@@ -62,7 +62,13 @@
    return resolved;
   }catch(error){return failClosed('client-error',error);}
  }
- const rateLimited=error=>Boolean(error&&(Number(error.status)===429||/rate.?limit|too many|email.*limit|security purposes/i.test(String(error.message||error))));
+ const rateLimitInfo=error=>{
+  const message=String(error?.message||error||'');
+  const limited=Boolean(error&&(Number(error.status)===429||/rate.?limit|too many|email.*limit|security purposes/i.test(message)));
+  const match=message.match(/after\s+(\d+)\s+seconds?/i);
+  const retryAfterSeconds=match?Number(match[1]):null;
+  return {limited,retryAfterSeconds,message:retryAfterSeconds!=null?'Too many verification requests. Please wait '+retryAfterSeconds+' seconds before requesting another link.':'Too many verification requests. Please wait before requesting another link.'};
+ };
  async function sendMagicLink(email){
   const normalized=String(email||'').trim().toLowerCase();
   if(!normalized||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized))throw new Error('Enter a valid email address.');
@@ -75,12 +81,20 @@
    const redirectTo=location.origin+location.pathname;
    const {error}=await c.auth.signInWithOtp({email:normalized,options:{emailRedirectTo:redirectTo,shouldCreateUser:true}});
    if(error){
-    if(rateLimited(error)){set({level:'public',status:'rate-limited',canReadMemberContent:false,canAdmin:false,email:normalized,error:'Too many verification requests. Please wait before requesting another link.'});throw error;}
-    set({level:'public',status:'auth-error',canReadMemberContent:false,canAdmin:false,email:normalized,error:String(error.message||error)});throw error;
+    const limited=rateLimitInfo(error);
+    if(limited.limited){set({level:'public',status:'rate-limited',canReadMemberContent:false,canAdmin:false,email:normalized,error:limited.message,retryAfterSeconds:limited.retryAfterSeconds});throw error;}
+    set({level:'public',status:'auth-error',canReadMemberContent:false,canAdmin:false,email:normalized,error:String(error.message||error),retryAfterSeconds:null});throw error;
    }
-   return set({level:'public',status:'verification-sent',canReadMemberContent:false,canAdmin:false,email:normalized,error:null});
+   return set({level:'public',status:'verification-sent',canReadMemberContent:false,canAdmin:false,email:normalized,error:null,retryAfterSeconds:null});
   })();
   try{return await magicLinkInFlight;}finally{magicLinkInFlight=null;}
+ }
+ async function refresh(){
+  const previous=snapshot();
+  const preserve=['verification-sent','rate-limited'].includes(previous.status);
+  const resolved=await validateSession();
+  if(resolved.canReadMemberContent||!preserve)return resolved;
+  return set({level:'public',status:previous.status,canReadMemberContent:false,canAdmin:false,email:previous.email,error:previous.error,retryAfterSeconds:previous.retryAfterSeconds??null});
  }
  async function logout(){
   try{if(client)await client.auth.signOut({scope:'local'});}finally{failClosed('signed-out');}
@@ -201,7 +215,7 @@
  window.RailwayAccess=Object.freeze({
   get level(){return state.level;},get status(){return state.status;},get canReadMemberContent(){return state.level==='member'||state.level==='admin';},get canAdmin(){return state.level==='admin';},
   get email(){return state.email;},get error(){return state.error;},get activityConsent(){return consent;},get cachedData(){return dataCache;},
-  init,refresh:validateSession,sendMagicLink,logout,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,adminPublishLocation,adminLocationHistory,adminRestoreLocation,snapshot
+  init,refresh,sendMagicLink,logout,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,adminPublishLocation,adminLocationHistory,adminRestoreLocation,snapshot
  });
  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',()=>init(),{once:true}):init();
 })();
