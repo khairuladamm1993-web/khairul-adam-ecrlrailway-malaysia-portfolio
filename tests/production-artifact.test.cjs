@@ -81,11 +81,19 @@ test('MAP is lazy, marker-only and contains no protected Corridor registry',()=>
   assert(gateway.includes("s.src='assets/map-gateway.js'"));
   assert(map.includes('leaflet@1.9.4'));
   assert(map.includes('tile.openstreetmap.org/{z}/{x}/{y}.png'));
+  assert(map.includes('tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png'));
+  assert(map.includes("Style: <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\""));
+  assert(map.includes('OpenRailwayMap'));
+  assert(map.includes("createPane?.('railwayBase')"));
+  assert(map.includes("createPane?.('railwayReference')"));
+  assert(map.includes('maxZoom:18'));
   assert(map.includes('window.RailwayCorridorReference'));
   assert(!map.includes("['Kota Bharu','STN'"));
   assert(!/\bSTN\d{2}\b/.test(registry));
   assert(!/\bCH\s*\d{1,3}\+\d{3}\b/.test(registry));
   for(const token of ['totalTrackLength','turnoutCount','TrackLine(','MapPolyline','L.polyline'])assert(!map.includes(token)&&!registry.includes(token),token);
+  assert(!html.includes('openrailwaymap.org'));
+  assert(!html.includes('tile.openstreetmap.org'));
   assert(registry.includes("['Pekan Sg. Tong','PL',null,null,'Pending Validation']"));
   assert(registry.includes("['Bukit Payung','PL',5.23269,103.10281,'Public Reference Location']"));
   assert(registry.includes("['Felda Lepar','PL',3.67709,103.03001,'Public Reference Location']"));
@@ -203,4 +211,36 @@ test('Verified Member renderer uses plain escaping inside module attributes',()=
   assert(member.includes("data-member-module=\"'+escape(id)+'\""));
   assert(member.includes("aria-pressed=\"'+selected.has(id)+'\""));
   fs.rmSync(dir,{recursive:true,force:true});
+});
+
+test('railway-first MAP styling keeps railway reference separate from canonical geometry',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  const css=fs.readFileSync(path.join(root,'assets','gateway.css'),'utf8');
+  assert(map.includes("RAIL_REFERENCE_TILE_URL='https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png'"));
+  assert(map.includes("pane:referencePane?'railwayReference':'overlayPane'"));
+  assert(map.includes('updateWhenIdle:true,keepBuffer:1,detectRetina:false'));
+  assert(css.includes('.leaflet-railway-base-pane .leaflet-tile'));
+  assert(css.includes('.leaflet-railway-reference-pane .leaflet-tile'));
+  assert(css.includes('grayscale(.78)'));
+  assert(css.includes('.railway-selected-marker .railway-map-pin'));
+  for(const src of [map,css]){
+    assert(!src.includes('L.polyline'));
+    assert(!src.includes('.polyline('));
+    assert(!src.includes('MapPolyline'));
+  }
+});
+
+test('Owner relocation preserves stored marker and edits a separate draft only',()=>{
+  const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
+  assert(owner.includes("title:'Proposed draft coordinate'"));
+  assert(owner.includes("s.draftMarker.dragging?.enable()"));
+  assert(owner.includes('FOCUS / CENTER SELECTED'));
+  assert(owner.includes('RESET DRAFT'));
+  assert(owner.includes('CANCEL DRAFT'));
+  assert(owner.includes('Current stored location'));
+  assert(owner.includes('Proposed draft location'));
+  assert(owner.includes('The stored marker remains fixed.'));
+  assert(!owner.includes("s.dragMarker=approved"));
+  assert(!owner.includes("approved.dragging?.enable()"));
+  assert(owner.includes("A.adminPublishLocation"));
 });
