@@ -98,7 +98,7 @@ test('MAP is lazy, marker-only and contains no protected Corridor registry',()=>
   assert(registry.includes("['Bukit Payung','PL',5.23269,103.10281,'Public Reference Location']"));
   assert(registry.includes("['Felda Lepar','PL',3.67709,103.03001,'Public Reference Location']"));
   assert(registry.includes("['Kampung Alur Gading','PL',3.61430,102.83280,'Public Reference Location']"));
-  assert(registry.includes("['Chenor','PL',3.48992,102.58141,'Public Reference Location']"));
+  assert(registry.includes("['Chenor','PL',3.473139,102.518833,'Public Reference Location']"));
   assert(registry.includes("['Lanchang','PL',3.50746,102.19129,'Pending Validation']"));
   assert(registry.includes("['Alang Sedayu','PL',3.28426,101.76345,'Pending Validation']"));
   assert(registry.includes("['Kuantan Port City Depot','Depot',3.97450,103.33750,'Pending Validation']"));
@@ -201,6 +201,8 @@ test('personal field coordinate stays protected from the public-safe projection'
   assert(registry.includes("['Pekan Sg. Tong','PL',null,null,'Pending Validation']"));
   assert(!registry.includes('5.35123'));
   assert(!registry.includes('102.89995'));
+  assert(!registry.includes('5.354361'));
+  assert(!registry.includes('102.902694'));
 });
 
 test('Verified Member renderer uses plain escaping inside module attributes',()=>{
