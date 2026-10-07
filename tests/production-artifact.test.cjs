@@ -272,3 +272,14 @@ test('auth convenience reuses Supabase sessions without weakening role resolutio
   assert(member.includes("A.canAdmin"));
   fs.rmSync(dir,{recursive:true,force:true});
 });
+
+test('Gateway railway background polish is CSS-only and secondary',()=>{
+  const css=fs.readFileSync(path.join(root,'assets','master.css'),'utf8');
+  assert(css.includes('body[data-screen=modes]'));
+  assert(css.includes('background-image:'));
+  assert(css.includes('repeating-linear-gradient'));
+  assert(css.includes('[data-theme=light] body[data-screen=modes]'));
+  const gatewayBlock=css.slice(css.indexOf('body[data-screen=modes]'),css.indexOf('[data-theme=light] body[data-screen=modes]'));
+  assert(!/url\s*\(/i.test(gatewayBlock));
+  assert(!/background(?:-image)?\s*:[^;]*(?:jpg|jpeg|png|webp|svg)/i.test(gatewayBlock));
+});
