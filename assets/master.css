@@ -38,6 +38,14 @@ body[data-screen=modes]{
 [data-theme=light] .nav-wrap{box-shadow:0 3px 12px #143c500b}
 [data-theme=light] .gateway-header{border-bottom:1px solid var(--line);border-radius:0}
 [data-theme=light] body[data-screen=portfolio] .experience-card,[data-theme=light] body[data-screen=portfolio] .lab-panel,[data-theme=light] body[data-screen=portfolio] .mentors{box-shadow:0 3px 12px #16334409}
+[data-theme=light] body[data-screen=portfolio] h2{font-weight:600;letter-spacing:-1.2px;color:#132c39}
+[data-theme=light] body[data-screen=portfolio] h3{font-weight:600;color:#193440}
+[data-theme=light] body[data-screen=portfolio] p,[data-theme=light] body[data-screen=portfolio] li{line-height:1.66}
+[data-theme=light] body[data-screen=portfolio] .muted,[data-theme=light] body[data-screen=portfolio] .mentor-foot,[data-theme=light] body[data-screen=portfolio] .lab-note{color:#405a67}
+[data-theme=light] body[data-screen=portfolio] .eyebrow,[data-theme=light] body[data-screen=portfolio] .micro,[data-theme=light] body[data-screen=portfolio] .category-number{font-weight:700;letter-spacing:.08em}
+[data-theme=light] body[data-screen=modes] h1,[data-theme=light] body[data-screen=references] h1{font-weight:700;color:#132c39}
+[data-theme=light] body[data-screen=modes] h2,[data-theme=light] body[data-screen=references] h2{font-weight:650;color:#17333f}
+[data-theme=light] body[data-screen=modes] p,[data-theme=light] body[data-screen=references] p{color:#405a67}
 [data-theme=light] dialog{box-shadow:0 18px 50px #102d3c24}
 [data-theme=light] dialog::backdrop{background:#18334070}
 .content-row{margin:0 0 25px}.content-row>h2{margin:0 0 14px}.content-row p{color:var(--muted)}.module-grid+.content-row{margin-top:25px}
