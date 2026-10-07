@@ -23,7 +23,7 @@
   ['Felda Lepar','PL',3.67709,103.03001,'Public Reference Location'],
   ['Kampung Alur Gading','PL',3.61430,102.83280,'Public Reference Location'],
   ['Maran','STN',3.54089,102.66381,'Public Reference Location'],
-  ['Chenor','PL',3.48992,102.58141,'Public Reference Location'],
+  ['Chenor','PL',3.473139,102.518833,'Public Reference Location'],
   ['Temerloh','STN',3.44351,102.31911,'Public Reference Location'],
   ['Lanchang','PL',3.50746,102.19129,'Pending Validation'],
   ['Bentong','STN',3.47825,101.91328,'Public Reference Location'],
