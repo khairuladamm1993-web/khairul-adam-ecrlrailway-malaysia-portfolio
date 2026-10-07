@@ -11,7 +11,7 @@ function builder(result={data:[],error:null}){
  b.then=(resolve)=>Promise.resolve(result).then(resolve);
  return b;
 }
-function makeClient({session={access_token:'x'},user={id:'11111111-1111-4111-8111-111111111111',email:'member@example.com'},role='member',profile={data:{email:'member@example.com',activity_consent_at:null},error:null},rpcError=null}={}){
+function makeClient({session={access_token:'x'},user={id:'11111111-1111-4111-8111-111111111111',email:'member@example.com'},role='member',profile={data:{email:'member@example.com',activity_consent_at:null},error:null},rpcError=null,otpError=null}={}){
  const calls=[];
  const client={
   calls,
@@ -19,7 +19,7 @@ function makeClient({session={access_token:'x'},user={id:'11111111-1111-4111-811
    async getSession(){return {data:{session},error:null}},
    async getUser(){return user?{data:{user},error:null}:{data:{user:null},error:{message:'invalid'}}},
    onAuthStateChange(){return {data:{subscription:{unsubscribe(){}}}}},
-   async signInWithOtp(args){calls.push(['signInWithOtp',args]);return {error:null}},
+   async signInWithOtp(args){calls.push(['signInWithOtp',args]);return {error:otpError}},
    async signOut(args){calls.push(['signOut',args]);return {error:null}}
   },
   async rpc(name,args){calls.push(['rpc',name,args]);if(rpcError)return {data:null,error:{message:rpcError}};if(name==='account_role')return {data:role,error:null};if(name==='admin_summary')return {data:{members:1},error:null};if(name==='submit_quiz')return {data:{score:12,passed:true},error:null};return {data:null,error:null}},
@@ -37,7 +37,7 @@ async function load(options={}){
  const events=[];
  const window={supabase:{createClient(){return client}},dispatchEvent(e){events.push(e)},addEventListener(){},removeEventListener(){}};
  const document={readyState:'complete',addEventListener(){}};
- const location={origin:'https://preview.example',pathname:'/gateway.html',search:'',hash:''};
+ const location={origin:'https://preview.example',pathname:'/gateway.html',search:options.locationSearch||'',hash:options.locationHash||''};
  const history={replaceState(){}};
  const context={window,document,location,history,URLSearchParams,CustomEvent:class{constructor(type,init){this.type=type;this.detail=init?.detail}},setTimeout,clearTimeout,console};
  vm.createContext(context);vm.runInContext(source,context);
@@ -116,4 +116,41 @@ test('member gateway resets public header and cleans engagement lifecycle',()=>{
  assert(memberSource.includes("Rolling Stock Library"));
  assert(memberSource.includes("A.saveProgress(save.dataset.saveResource,1,true)"));
  assert(memberSource.includes("await stopTracker(true);await A.logout()"));
+});
+
+
+test('concurrent Magic Link requests are deduplicated',async()=>{
+ const {A,client}=await load({session:null,user:null});
+ const p1=A.sendMagicLink('member@example.com');
+ const p2=A.sendMagicLink('member@example.com');
+ await Promise.all([p1,p2]);
+ assert.equal(client.calls.filter(x=>x[0]==='signInWithOtp').length,1);
+ assert.equal(A.status,'verification-sent');
+});
+
+test('precise Supabase retry hint is preserved when provided',async()=>{
+ const {A}=await load({session:null,user:null,otpError:{status:429,message:'For security purposes, you can only request this after 16 seconds.'}});
+ await assert.rejects(()=>A.sendMagicLink('member@example.com'));
+ assert.equal(A.status,'rate-limited');
+ assert.equal(A.retryAfterSeconds,16);
+ assert.match(A.error,/16 seconds/);
+ await A.refresh();
+ assert.equal(A.status,'rate-limited');
+ assert.equal(A.retryAfterSeconds,16);
+});
+
+test('generic email quota 429 does not invent a retry countdown',async()=>{
+ const {A}=await load({session:null,user:null,otpError:{status:429,message:'email rate limit exceeded',code:'over_email_send_rate_limit'}});
+ await assert.rejects(()=>A.sendMagicLink('member@example.com'));
+ assert.equal(A.status,'rate-limited');
+ assert.equal(A.retryAfterSeconds,null);
+ assert.equal(A.error,'Too many verification requests. Please wait before requesting another link.');
+});
+
+test('stale or expired Magic Link callback fails closed with useful message',async()=>{
+ const {A}=await load({session:null,user:null,locationSearch:'?error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired'});
+ assert.equal(A.level,'public');
+ assert.equal(A.status,'verification-failed');
+ assert.equal(A.canReadMemberContent,false);
+ assert.match(A.error,/expired|already been used/i);
 });
