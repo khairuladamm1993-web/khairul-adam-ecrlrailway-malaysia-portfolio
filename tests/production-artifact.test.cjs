@@ -244,3 +244,31 @@ test('Owner relocation preserves stored marker and edits a separate draft only',
   assert(!owner.includes("approved.dragging?.enable()"));
   assert(owner.includes("A.adminPublishLocation"));
 });
+
+test('auth convenience reuses Supabase sessions without weakening role resolution',()=>{
+  const dir=build('build-production.py','railway-production-');
+  const access=fs.readFileSync(path.join(dir,'assets','access.js'),'utf8');
+  const member=fs.readFileSync(path.join(dir,'assets','member-gateway.js'),'utf8');
+  assert(access.includes("persistSession:true"));
+  assert(access.includes("autoRefreshToken:true"));
+  assert(access.includes("detectSessionInUrl:true"));
+  assert(access.includes("c.auth.getSession()"));
+  assert(access.includes("c.auth.refreshSession()"));
+  assert(access.includes("c.rpc('account_role')"));
+  assert(access.includes("if(magicLinkInFlight)return magicLinkInFlight"));
+  assert(access.indexOf("const restored=await validateSession()")<access.indexOf("c.auth.signInWithOtp"));
+  assert(access.includes("status:'rate-limited'"));
+  assert(access.includes('Too many verification requests. Please wait before requesting another link.'));
+  assert(access.includes("status:'session-expired'"));
+  assert(access.includes("status:'verification-failed'"));
+  assert(access.includes("scope:'local'"));
+  assert(!/localStorage\.(?:setItem|removeItem)\([^)]*(?:token|access|session)/i.test(access));
+  assert(!/sessionStorage\.(?:setItem|removeItem)\([^)]*(?:token|access|session)/i.test(access));
+  assert(!access.includes('hardcoded admin'));
+  assert(member.includes("authSubmitting"));
+  assert(member.includes("CHECKING SAVED SESSION"));
+  assert(member.includes("Already signed in"));
+  assert(member.includes("OPEN ADMIN CONTROLS"));
+  assert(member.includes("A.canAdmin"));
+  fs.rmSync(dir,{recursive:true,force:true});
+});
