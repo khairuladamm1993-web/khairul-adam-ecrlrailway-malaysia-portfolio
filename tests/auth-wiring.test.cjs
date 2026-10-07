@@ -37,7 +37,9 @@ async function load(options={}){
  const events=[];
  const window={supabase:{createClient(){return client}},dispatchEvent(e){events.push(e)},addEventListener(){},removeEventListener(){}};
  const document={readyState:'complete',addEventListener(){}};
- const context={window,document,location:{origin:'https://preview.example',pathname:'/gateway.html'},CustomEvent:class{constructor(type,init){this.type=type;this.detail=init?.detail}},setTimeout,clearTimeout,console};
+ const location={origin:'https://preview.example',pathname:'/gateway.html',search:'',hash:''};
+ const history={replaceState(){}};
+ const context={window,document,location,history,URLSearchParams,CustomEvent:class{constructor(type,init){this.type=type;this.detail=init?.detail}},setTimeout,clearTimeout,console};
  vm.createContext(context);vm.runInContext(source,context);
  await new Promise(r=>setTimeout(r,5));
  return {A:window.RailwayAccess,client,events};
