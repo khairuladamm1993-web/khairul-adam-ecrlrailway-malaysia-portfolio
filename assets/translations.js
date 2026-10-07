@@ -644,15 +644,15 @@ window.railwayTranslations = {
     "zh": "照片",
     "py": "Zhàopiàn"
   },
-  "The next chapter starts in the field.": {
-    "ms": "Bab seterusnya bermula di lapangan.",
-    "zh": "下一篇章从现场开始。",
-    "py": "Xià yī piānzhāng cóng xiànchǎng kāishǐ."
+  "Reviewed field records will appear here.": {
+    "ms": "Rekod lapangan yang telah disemak akan dipaparkan di sini.",
+    "zh": "经审核的现场记录将在此展示。",
+    "py": "Jīng shěnhé de xiànchǎng jìlù jiāng zài cǐ zhǎnshì."
   },
-  "Documented activities and learning notes will be added here.": {
-    "ms": "Rekod aktiviti dan nota pembelajaran akan ditambah di sini.",
-    "zh": "活动记录和学习笔记将添加在此处。",
-    "py": "Huódòng jìlù hé xuéxí bǐjì jiāng tiānjiā zài cǐchù."
+  "Only public-safe, reviewed field activities and technical notes are published in this section.": {
+    "ms": "Hanya aktiviti lapangan dan nota teknikal yang telah disemak serta sesuai untuk paparan awam diterbitkan dalam bahagian ini.",
+    "zh": "本部分仅发布经审核且适合公开展示的现场活动与技术笔记。",
+    "py": "Běn bùfen jǐn fābù jīng shěnhé qiě shìhé gōngkāi zhǎnshì de xiànchǎng huódòng yǔ jìshù bǐjì."
   },
   "FIELD JOURNAL": {
     "ms": "JURNAL LAPANGAN",
@@ -724,15 +724,15 @@ window.railwayTranslations = {
     "zh": "通过铁路学习建立联系。",
     "py": "Tōngguò tiělù xuéxí jiànlì liánxì."
   },
-  "Contact details will be added here.": {
-    "ms": "Maklumat hubungan akan ditambah di sini.",
-    "zh": "联系方式将添加在此处。",
-    "py": "Liánxì fāngshì jiāng tiānjiā zài cǐchù."
+  "This public portfolio does not publish personal contact details.": {
+    "ms": "Portfolio awam ini tidak menerbitkan maklumat hubungan peribadi.",
+    "zh": "本公开作品集不发布个人联系方式。",
+    "py": "Běn gōngkāi zuòpǐnjí bù fābù gèrén liánxì fāngshì."
   },
-  "CONTACT INFORMATION FORTHCOMING": {
-    "ms": "MAKLUMAT HUBUNGAN AKAN DATANG",
-    "zh": "联系信息待更新",
-    "py": "Liánxì xìnxī dài gēngxīn"
+  "PUBLIC CONTACT DETAILS NOT LISTED": {
+    "ms": "MAKLUMAT HUBUNGAN AWAM TIDAK DISENARAIKAN",
+    "zh": "未公开列出联系方式",
+    "py": "Wèi gōngkāi lièchū liánxì fāngshì"
   },
   "Personal Railway Learning & Development": {
     "ms": "Pembelajaran & Pembangunan Kereta Api Peribadi",
