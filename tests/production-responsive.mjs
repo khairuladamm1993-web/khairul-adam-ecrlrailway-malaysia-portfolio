@@ -112,7 +112,7 @@ function mockScript(role){
         async refreshSession(){return {data:{session:sessionActive?{access_token:'smoke-refreshed',expires_at:Math.floor(Date.now()/1000)+3600}:null},error:sessionActive?null:{message:'expired'}}},
         async getUser(){return {data:{user:sessionActive?{id:profile.user_id,email:profile.email}:null},error:sessionActive?null:{message:'public'}}},
         onAuthStateChange(){return {data:{subscription:{unsubscribe(){}}}}},
-        async signInWithOtp(){window.__otpCalls++;if(window.__otpMode==='rate-limit')return {error:{message:'Email rate limit exceeded',status:429}};return {error:null}},
+        async signInWithOtp(){window.__otpCalls++;if(window.__otpMode==='rate-limit')return {error:{message:'For security purposes, you can only request this after 16 seconds.',status:429,code:'over_email_send_rate_limit'}};return {error:null}},
         async signOut(){sessionActive=false;return {error:null}}
       },
       async rpc(name,args={}){
@@ -211,8 +211,12 @@ for(const [width,height] of viewports){
           f.requestSubmit();f.requestSubmit();return true;
         })()`);
         await waitEval(client,"window.RailwayAccess.status==='rate-limited'");
-        const limited=await evalValue(client,"(()=>({otp:window.__otpCalls,disabled:document.querySelector('#member-auth-form button[type=submit]')?.disabled===true,text:document.querySelector('#member-dialog-content')?.textContent||''}))()");
-        if(limited.otp!==1||!limited.disabled||!/Too many verification requests/.test(limited.text))failures.push({role,width,height,phase:'magic-link-rate-limit',result:limited});
+        const limited=await evalValue(client,"(()=>({otp:window.__otpCalls,disabled:document.querySelector('#member-auth-form button[type=submit]')?.disabled===true,text:document.querySelector('#member-dialog-content')?.textContent||'',retry:window.RailwayAccess.snapshot().retryAfterSeconds}))()");
+        if(limited.otp!==1||!limited.disabled||limited.retry!==16||!/16 seconds/.test(limited.text))failures.push({role,width,height,phase:'magic-link-rate-limit',result:limited});
+        await evalValue(client,`(()=>{document.querySelector('[data-auth-refresh]')?.click();return true})()`);
+        await sleep(80);
+        const preserved=await evalValue(client,"(()=>({status:window.RailwayAccess.status,otp:window.__otpCalls,disabled:document.querySelector('#member-auth-form button[type=submit]')?.disabled===true}))()");
+        if(preserved.status!=='rate-limited'||preserved.otp!==1||!preserved.disabled)failures.push({role,width,height,phase:'rate-limit-state-preserved',result:preserved});
       }
       if(role==='admin'){
         await evalValue(client,`(()=>{document.querySelector('[data-admin-dashboard]')?.click();return true})()`);
