@@ -103,7 +103,9 @@
 
   const resultHost=host.querySelector('[data-map-results]'),detailHost=host.querySelector('[data-map-detail]');
   const input=host.querySelector('[data-map-search]'),focusBtn=host.querySelector('[data-map-focus]');
-  const visibleBase=()=>points().filter(p=>p.phase==='current'&&(state.filter==='All'||p.type===state.filter)).filter(p=>{
+  const corridorBase=()=>points().filter(p=>p.phase==='current');
+  const corridorRecords=()=>corridorBase().map(effective);
+  const visibleBase=()=>corridorBase().filter(p=>state.filter==='All'||p.type===state.filter).filter(p=>{
    if(!state.query)return true;const overlay=memberOverlay(p),hay=[p.name,overlay?.code,overlay?.chainage].filter(Boolean).join(' ');return normalize(hay).includes(normalize(state.query));
   });
   const visible=()=>visibleBase().map(effective);
@@ -173,14 +175,19 @@
    resultHost.innerHTML=rows.map(r=>{const o=r.overlay||{},meta=[r.type,o.code,o.chainage].filter(Boolean).join(' · ');return '<button type="button" data-map-point="'+r.id+'" aria-current="'+(state.selected?.id===r.id)+'"><strong>'+esc(r.name)+'</strong><span>'+esc(meta||r.type)+'</span><small>'+esc(r.locationConfidence)+' · '+esc(note(r))+'</small></button>';}).join('')||'<p class="map-empty">No matching Corridor records.</p>';
    syncMarkers();
   }
-  function fit(){
-   const coords=visible().filter(mappable).map(r=>[Number(r.lat),Number(r.lon)]);
-   if(coords.length)state.map.fitBounds(state.leaflet.latLngBounds(coords),{padding:[24,24],maxZoom:8});
+  function coordsFor(records){return records.filter(mappable).map(r=>[Number(r.lat),Number(r.lon)]);}
+  function fitRecords(records){
+   const coords=coordsFor(records);
+   if(!coords.length||!state.map)return false;
+   state.map.fitBounds(state.leaflet.latLngBounds(coords),{padding:[28,28],maxZoom:8});
+   return true;
   }
+  function fitCorridor(){return fitRecords(corridorRecords());}
+  function fitVisible(){return fitRecords(visible());}
   input.addEventListener('input',()=>{state.query=input.value;renderResults();},{signal});
-  host.querySelector('.map-filters').addEventListener('click',e=>{const b=e.target.closest('[data-map-filter]');if(!b)return;state.filter=b.dataset.mapFilter;host.querySelectorAll('[data-map-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderResults();fit();},{signal});
+  host.querySelector('.map-filters').addEventListener('click',e=>{const b=e.target.closest('[data-map-filter]');if(!b)return;state.filter=b.dataset.mapFilter;host.querySelectorAll('[data-map-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderResults();fitVisible();},{signal});
   resultHost.addEventListener('click',e=>{const b=e.target.closest('[data-map-point]');if(!b)return;const base=points().find(x=>x.id===b.dataset.mapPoint);if(!base)return;const r=effective(base);renderDetail(r);renderResults();if(mappable(r))focusStored(r);loadOwnerTools();},{signal});
-  host.querySelector('[data-map-fit]').addEventListener('click',fit,{signal});
+  host.querySelector('[data-map-fit]').addEventListener('click',fitCorridor,{signal});
   focusBtn.addEventListener('click',()=>focusStored(state.selected),{signal});
   let ownerPromise=null;
   function ownerContext(){
@@ -203,7 +210,7 @@
     async refreshCanonical(){
      await A.fetchMemberBundle();
      if(state.selected)state.selected=effective(points().find(x=>x.id===state.selected.id)||state.selected);
-     renderDetail(state.selected);renderResults();fit();loadOwnerTools(true);
+     renderDetail(state.selected);renderResults();fitCorridor();loadOwnerTools(true);
      return state.selected;
     }
    };
@@ -230,8 +237,7 @@
    if(referencePane){referencePane.style.zIndex='260';referencePane.style.pointerEvents='none';referencePane.classList.add('railway-reference-pane');}
    state.leaflet.tileLayer(TILE_URL,{pane:basePane?'railwayBase':'tilePane',maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',updateWhenIdle:true,keepBuffer:1,detectRetina:false}).addTo(state.map);
    state.leaflet.tileLayer(RAIL_REFERENCE_TILE_URL,{pane:referencePane?'railwayReference':'overlayPane',minZoom:5,maxZoom:19,attribution:'Style: <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener">CC-BY-SA 2.0</a> <a href="https://www.openrailwaymap.org/" target="_blank" rel="noopener">OpenRailwayMap</a>',updateWhenIdle:true,keepBuffer:1,detectRetina:false}).addTo(state.map);
-   state.map.setView([4.55,102.55],6);
-   renderResults();fit();renderDetail(null);
+   renderResults();fitCorridor();renderDetail(null);
    host.dataset.mapReady='true';
    host.dataset.validatedMarkers=String(visible().filter(exact).length);
    host.dataset.totalMarkers=String(visible().filter(mappable).length);
