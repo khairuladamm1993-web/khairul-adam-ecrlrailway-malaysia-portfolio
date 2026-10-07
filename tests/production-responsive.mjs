@@ -77,7 +77,7 @@ function mockScript(role){
     }
     let sessionActive=role!=='public';
     window.__otpCalls=0;window.__otpMode='success';
-    window.__railwayMapCalls={setView:[],markers:[],tileLayers:[],panes:[]};
+    window.__railwayMapCalls={setView:[],fitBounds:[],markers:[],tileLayers:[],panes:[]};
     window.__rpcCalls=[];
     window.__geoCalls=0;
     window.__locationHistory=[];
@@ -90,7 +90,7 @@ function mockScript(role){
     window.L={
       map(el){
         const handlers={},panes={};
-        return {_el:el,setView(coords,zoom){window.__railwayMapCalls.setView.push({coords:[...coords],zoom});return this},getZoom(){return 6},fitBounds(){return this},invalidateSize(){},remove(){},on(name,fn){handlers[name]=fn;return this},off(name,fn){if(handlers[name]===fn)delete handlers[name];return this},createPane(name){const pane={style:{},classList:{add(v){pane.className=v}}};panes[name]=pane;window.__railwayMapCalls.panes.push(name);return pane},_handlers:handlers,_panes:panes};
+        return {_el:el,setView(coords,zoom){window.__railwayMapCalls.setView.push({coords:[...coords],zoom});return this},getZoom(){return 6},fitBounds(bounds,options={}){window.__railwayMapCalls.fitBounds.push({coords:(bounds?.coords||[]).map(x=>[...x]),options});return this},invalidateSize(){},remove(){},on(name,fn){handlers[name]=fn;return this},off(name,fn){if(handlers[name]===fn)delete handlers[name];return this},createPane(name){const pane={style:{},classList:{add(v){pane.className=v}}};panes[name]=pane;window.__railwayMapCalls.panes.push(name);return pane},_handlers:handlers,_panes:panes};
       }, 
       tileLayer(url,options={}){window.__railwayMapCalls.tileLayers.push({url,options});return {addTo(){return this}}},
       divIcon(options){return options},
@@ -260,6 +260,26 @@ for(const [width,height] of viewports){
       if(!ok)failures.push({role,width,height,phase:'member-dialog',result});
       await evalValue(client,`(()=>{document.querySelector('#member-dialog')?.close();document.querySelector('[data-category="map"]')?.click();return true})()`);
       await waitEval(client,"document.querySelector('#railway-map-mount')?.dataset.mapReady==='true'");
+      const viewportResult=await evalValue(client,`(()=>{
+        const calls=window.__railwayMapCalls;
+        const initial=calls.fitBounds.at(-1)||null;
+        const initialCount=calls.fitBounds.length;
+        const input=document.querySelector('[data-map-search]');
+        input.value='__NO_CORRIDOR_MATCH__';input.dispatchEvent(new Event('input',{bubbles:true}));
+        document.querySelector('[data-map-filter="Depot"]')?.click();
+        const afterEmpty=calls.fitBounds.length;
+        const emptyMessage=document.querySelector('.map-empty')?.textContent||'';
+        document.querySelector('[data-map-fit]')?.click();
+        const afterFull=calls.fitBounds.length;
+        const full=calls.fitBounds.at(-1)||null;
+        input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));
+        document.querySelector('[data-map-filter="All"]')?.click();
+        const lats=(initial?.coords||[]).map(x=>x[0]),lons=(initial?.coords||[]).map(x=>x[1]);
+        return {initialCount,afterEmpty,afterFull,emptyMessage,initial,full,minLat:Math.min(...lats),maxLat:Math.max(...lats),minLon:Math.min(...lons),maxLon:Math.max(...lons)};
+      })()`);
+      const viewportOK=viewportResult.initialCount>=1&&viewportResult.initial?.coords?.length>=20&&viewportResult.afterEmpty===viewportResult.initialCount&&/No matching Corridor records/.test(viewportResult.emptyMessage)&&viewportResult.afterFull===viewportResult.initialCount+1&&JSON.stringify(viewportResult.full?.coords)===JSON.stringify(viewportResult.initial?.coords)&&viewportResult.minLat>3&&viewportResult.maxLat<7&&viewportResult.minLon>101&&viewportResult.maxLon<104;
+      if(!viewportOK)failures.push({role,width,height,phase:'map-corridor-viewport',result:viewportResult});
+
       const mapResult=await evalValue(client,`(()=>{
         const m=document.querySelector('.map-module'),canvas=document.querySelector('.map-canvas');
         const controls=[...m.querySelectorAll('button,input')].filter(x=>{const b=x.getBoundingClientRect();return b.width>0&&b.height>0});
@@ -385,7 +405,7 @@ for(const [width,height] of viewports){
         logoutOK=loggedOut.form&&!loggedOut.admin&&loggedOut.otp===0&&loggedOut.status==='signed-out';
         if(!logoutOK)failures.push({role,width,height,phase:'logout-requires-reauth',result:loggedOut});
       }
-      if(ok&&mapOK&&exactOK&&ownerOK&&logoutOK)console.log(`PASS ${role} ${width}x${height}`);
+      if(ok&&viewportOK&&mapOK&&exactOK&&ownerOK&&logoutOK)console.log(`PASS ${role} ${width}x${height}`);
     }finally{
       client.close();
       try{await fetch(`http://127.0.0.1:${debugPort}/json/close/${target.id}`);}catch{}
