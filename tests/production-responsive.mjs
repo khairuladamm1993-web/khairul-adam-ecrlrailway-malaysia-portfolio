@@ -75,6 +75,8 @@ function mockScript(role){
       const b={select(){return b},eq(){return b},order(){return b},limit(){return b},maybeSingle(){return Promise.resolve({data:rows[name]?.[0]||null,error:null})},then(resolve,reject){return Promise.resolve({data:rows[name]||[],error:null}).then(resolve,reject)}};
       return b;
     }
+    let sessionActive=role!=='public';
+    window.__otpCalls=0;window.__otpMode='success';
     window.__railwayMapCalls={setView:[],markers:[],tileLayers:[],panes:[]};
     window.__rpcCalls=[];
     window.__geoCalls=0;
@@ -106,10 +108,12 @@ function mockScript(role){
     };
     window.supabase={createClient(){return{
       auth:{
-        async getSession(){return {data:{session:role==='public'?null:{access_token:'smoke'}},error:null}},
-        async getUser(){return {data:{user:role==='public'?null:{id:profile.user_id,email:profile.email}},error:role==='public'?{message:'public'}:null}},
+        async getSession(){return {data:{session:sessionActive?{access_token:'smoke',expires_at:Math.floor(Date.now()/1000)+3600}:null},error:null}},
+        async refreshSession(){return {data:{session:sessionActive?{access_token:'smoke-refreshed',expires_at:Math.floor(Date.now()/1000)+3600}:null},error:sessionActive?null:{message:'expired'}}},
+        async getUser(){return {data:{user:sessionActive?{id:profile.user_id,email:profile.email}:null},error:sessionActive?null:{message:'public'}}},
         onAuthStateChange(){return {data:{subscription:{unsubscribe(){}}}}},
-        async signInWithOtp(){return {error:null}},async signOut(){return {error:null}}
+        async signInWithOtp(){window.__otpCalls++;if(window.__otpMode==='rate-limit')return {error:{message:'Email rate limit exceeded',status:429}};return {error:null}},
+        async signOut(){sessionActive=false;return {error:null}}
       },
       async rpc(name,args={}){
         window.__rpcCalls.push({name,args});
@@ -195,6 +199,21 @@ for(const [width,height] of viewports){
       await waitEval(client,role==='public'?"window.RailwayAccess&&window.RailwayAccess.level==='public'":`window.RailwayAccess&&window.RailwayAccess.level==='${role}'`);
       await evalValue(client,`(()=>{document.querySelector('#gateway-status [data-member]')?.click();return true})()`);
       await waitEval(client,"document.querySelector('#member-dialog')?.open===true");
+      if(role!=='public'){
+        const reuse=await evalValue(client,"(()=>({otp:window.__otpCalls,signed:/Already signed in/.test(document.querySelector('#member-dialog-content')?.textContent||''),form:!!document.querySelector('#member-auth-form')}))()");
+        if(reuse.otp!==0||!reuse.signed||reuse.form)failures.push({role,width,height,phase:'session-reuse',result:reuse});
+      }
+      if(role==='public'&&width===390&&height===844){
+        await evalValue(client,`(()=>{
+          window.__otpMode='rate-limit';
+          const f=document.querySelector('#member-auth-form');
+          f.querySelector('input[name=email]').value='member@example.com';
+          f.requestSubmit();f.requestSubmit();return true;
+        })()`);
+        await waitEval(client,"window.RailwayAccess.status==='rate-limited'");
+        const limited=await evalValue(client,"(()=>({otp:window.__otpCalls,disabled:document.querySelector('#member-auth-form button[type=submit]')?.disabled===true,text:document.querySelector('#member-dialog-content')?.textContent||''}))()");
+        if(limited.otp!==1||!limited.disabled||!/Too many verification requests/.test(limited.text))failures.push({role,width,height,phase:'magic-link-rate-limit',result:limited});
+      }
       if(role==='admin'){
         await evalValue(client,`(()=>{document.querySelector('[data-admin-dashboard]')?.click();return true})()`);
         await waitEval(client,"!!document.querySelector('.admin-content-form')");
@@ -352,7 +371,17 @@ for(const [width,height] of viewports){
         }
         if(!ownerOK)failures.push({role,width,height,phase:'owner-workflow',result:preOwner});
       }
-      if(ok&&mapOK&&exactOK&&ownerOK)console.log(`PASS ${role} ${width}x${height}`);
+      let logoutOK=true;
+      if(role==='member'&&width===390&&height===844){
+        await evalValue(client,`(()=>{document.querySelector('#gateway-status [data-member]')?.click();return true})()`);
+        await waitEval(client,"document.querySelector('#member-dialog')?.open===true");
+        await evalValue(client,`(()=>{document.querySelector('[data-logout]')?.click();return true})()`);
+        await waitEval(client,"window.RailwayAccess.level==='public'&&window.RailwayAccess.status==='signed-out'");
+        const loggedOut=await evalValue(client,"(()=>({form:!!document.querySelector('#member-auth-form'),admin:!!document.querySelector('[data-admin-dashboard]'),otp:window.__otpCalls,status:window.RailwayAccess.status}))()");
+        logoutOK=loggedOut.form&&!loggedOut.admin&&loggedOut.otp===0&&loggedOut.status==='signed-out';
+        if(!logoutOK)failures.push({role,width,height,phase:'logout-requires-reauth',result:loggedOut});
+      }
+      if(ok&&mapOK&&exactOK&&ownerOK&&logoutOK)console.log(`PASS ${role} ${width}x${height}`);
     }finally{
       client.close();
       try{await fetch(`http://127.0.0.1:${debugPort}/json/close/${target.id}`);}catch{}
