@@ -3,7 +3,7 @@
  'use strict';
  const PROJECT_URL='https://kfudisbzdgsefdjoopzu.supabase.co';
  const PUBLISHABLE_KEY='sb_publishable_1Diyg-QnCNMJXIY2g0RdCg_ToWFuq0V';
- let client=null,authSubscription=null,consent=false,dataCache=null,userId=null;
+ let client=null,authSubscription=null,consent=false,dataCache=null,userId=null,magicLinkInFlight=null;
  let state={level:'public',status:'initializing',canReadMemberContent:false,canAdmin:false,email:null,error:null};
  const emit=()=>window.dispatchEvent(new CustomEvent('railway-access-change',{detail:snapshot()}));
  const snapshot=()=>Object.freeze({...state,canReadMemberContent:state.level==='member'||state.level==='admin',canAdmin:state.level==='admin'});
@@ -18,9 +18,17 @@
  const validateSession=async()=>{
   try{
    const c=requireClient();
+   const previousAuthenticated=state.level==='member'||state.level==='admin'||state.status==='authenticated';
    const {data:{session},error:sessionError}=await c.auth.getSession();
-   if(sessionError||!session)return failClosed(sessionError?'session-error':'public',sessionError);
-   const {data:{user},error:userError}=await c.auth.getUser();
+   if(sessionError||!session)return failClosed(sessionError?'session-error':previousAuthenticated?'session-expired':'public',sessionError);
+   let liveSession=session;
+   const expiresAt=Number(session.expires_at||0)*1000;
+   if(expiresAt&&expiresAt<=Date.now()+60000&&typeof c.auth.refreshSession==='function'){
+    const refreshed=await c.auth.refreshSession();
+    if(refreshed.error||!refreshed.data?.session)return failClosed('session-expired',refreshed.error||'Session expired');
+    liveSession=refreshed.data.session;
+   }
+   const {data:{user},error:userError}=await c.auth.getUser(liveSession.access_token);
    if(userError||!user)return failClosed('invalid-session',userError||'No valid user');
    userId=user.id;
    const {data:role,error:roleError}=await c.rpc('account_role');
@@ -31,25 +39,48 @@
    return set({level:role,status:'authenticated',canReadMemberContent:true,canAdmin:role==='admin',email:user.email||profile.data?.email||null,error:null});
   }catch(error){return failClosed('client-error',error);}
  };
+ function verificationUrlError(){
+  const params=new URLSearchParams(location.search||'');
+  const hash=new URLSearchParams((location.hash||'').replace(/^#/,''));
+  const code=params.get('error_code')||hash.get('error_code')||'';
+  const description=params.get('error_description')||hash.get('error_description')||'';
+  if(!code&&!description)return null;
+  const expired=/expired|otp_expired|already.*used/i.test(code+' '+description);
+  try{history.replaceState(null,'',location.pathname);}catch{}
+  return expired?'Verification link is expired or has already been used. Request a new link.':'Verification could not be completed. Request a new link.';
+ }
  async function init(){
   try{
    const c=requireClient();
+   const urlError=verificationUrlError();
    if(!authSubscription){
     const {data}=c.auth.onAuthStateChange(()=>{setTimeout(()=>{validateSession();},0);});
     authSubscription=data?.subscription||null;
    }
-   return await validateSession();
+   const resolved=await validateSession();
+   if(urlError&&!resolved.canReadMemberContent)return set({level:'public',status:'verification-failed',canReadMemberContent:false,canAdmin:false,email:null,error:urlError});
+   return resolved;
   }catch(error){return failClosed('client-error',error);}
  }
+ const rateLimited=error=>Boolean(error&&(Number(error.status)===429||/rate.?limit|too many|email.*limit|security purposes/i.test(String(error.message||error))));
  async function sendMagicLink(email){
   const normalized=String(email||'').trim().toLowerCase();
   if(!normalized||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized))throw new Error('Enter a valid email address.');
-  const c=requireClient();
-  set({status:'sending',error:null});
-  const redirectTo=location.origin+location.pathname;
-  const {error}=await c.auth.signInWithOtp({email:normalized,options:{emailRedirectTo:redirectTo,shouldCreateUser:true}});
-  if(error){failClosed('auth-error',error.message);throw error;}
-  return set({level:'public',status:'verification-sent',email:normalized,error:null});
+  if(magicLinkInFlight)return magicLinkInFlight;
+  magicLinkInFlight=(async()=>{
+   const restored=await validateSession();
+   if(restored.canReadMemberContent)return restored;
+   const c=requireClient();
+   set({status:'sending',error:null,email:normalized});
+   const redirectTo=location.origin+location.pathname;
+   const {error}=await c.auth.signInWithOtp({email:normalized,options:{emailRedirectTo:redirectTo,shouldCreateUser:true}});
+   if(error){
+    if(rateLimited(error)){set({level:'public',status:'rate-limited',canReadMemberContent:false,canAdmin:false,email:normalized,error:'Too many verification requests. Please wait before requesting another link.'});throw error;}
+    set({level:'public',status:'auth-error',canReadMemberContent:false,canAdmin:false,email:normalized,error:String(error.message||error)});throw error;
+   }
+   return set({level:'public',status:'verification-sent',canReadMemberContent:false,canAdmin:false,email:normalized,error:null});
+  })();
+  try{return await magicLinkInFlight;}finally{magicLinkInFlight=null;}
  }
  async function logout(){
   try{if(client)await client.auth.signOut({scope:'local'});}finally{failClosed('signed-out');}
