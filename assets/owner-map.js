@@ -113,15 +113,9 @@
  }
  function enableDraftInteraction(){
   const s=mounted,d=s?.draft;if(!s||!d)return;
-  const approved=s.ctx.getMarker(d.assetId);
-  if(approved&&finite(d.latitude)&&finite(d.longitude)){
-   s.dragMarker=approved;
-   try{
-    approved.dragging?.enable();
-    approved.on('dragend',onDragEnd);
-   }catch{}
-  }else if(finite(d.latitude)&&finite(d.longitude)){
-   createDraftMarker();
+  if(finite(d.latitude)&&finite(d.longitude))createDraftMarker();
+  if(finite(d.previousLat)&&finite(d.previousLon)){
+   try{s.ctx.map.setView([d.previousLat,d.previousLon],Math.max(s.ctx.map.getZoom?.()||0,16));}catch{}
   }
   s.mapClick=e=>{if(!mounted?.draft||mounted.draft.stage!=='edit')return;setDraftCoordinate(e.latlng.lat,e.latlng.lng,null);};
   try{s.ctx.map.on('click',s.mapClick);}catch{}
@@ -129,22 +123,20 @@
  function createDraftMarker(){
   const s=mounted,d=s?.draft;if(!s||!d||!finite(d.latitude)||!finite(d.longitude))return;
   try{s.draftMarker?.remove();}catch{}
-  s.draftMarker=s.ctx.leaflet.marker([d.latitude,d.longitude],{icon:draftIcon(),draggable:true,keyboard:true,title:'Draft coordinate'}).addTo(s.ctx.map);
-  s.draftMarker.bindTooltip('Draft coordinate · not published',{direction:'top',offset:[0,-9]});
+  s.draftMarker=s.ctx.leaflet.marker([d.latitude,d.longitude],{icon:draftIcon(),draggable:true,keyboard:true,title:'Proposed draft coordinate'}).addTo(s.ctx.map);
+  s.draftMarker.bindTooltip('Proposed draft coordinate · not published',{direction:'top',offset:[0,-9]});
+  s.draftMarker.dragging?.enable();
   s.draftMarker.on('dragend',onDraftDragEnd);
- }
- function onDragEnd(e){
-  const p=e.target.getLatLng();setDraftCoordinate(p.lat,p.lng,null,false);
  }
  function onDraftDragEnd(e){
   const p=e.target.getLatLng();setDraftCoordinate(p.lat,p.lng,null,false);
  }
  function setDraftCoordinate(lat,lon,accuracy=null,moveMarker=true){
   const s=mounted,d=s?.draft;if(!s||!d)return;
+  if(d.stage==='edit')syncDraftForm();
   d.latitude=Number(lat);d.longitude=Number(lon);d.accuracyM=accuracy==null?null:Number(accuracy);d.stage='edit';
   if(moveMarker){
-   if(s.dragMarker?.setLatLng)s.dragMarker.setLatLng([d.latitude,d.longitude]);
-   else if(s.draftMarker?.setLatLng)s.draftMarker.setLatLng([d.latitude,d.longitude]);
+   if(s.draftMarker?.setLatLng)s.draftMarker.setLatLng([d.latitude,d.longitude]);
    else createDraftMarker();
   }
   render();
@@ -154,6 +146,21 @@
   if(!mounted.draft)beginEdit();
   if(!mounted?.draft)return;
   setDraftCoordinate(mounted.current.lat,mounted.current.lon,mounted.current.accuracy);
+ }
+ function resetDraft(){
+  const s=mounted,d=s?.draft;if(!s||!d)return;
+  d.latitude=finite(d.previousLat)?Number(d.previousLat):null;
+  d.longitude=finite(d.previousLon)?Number(d.previousLon):null;
+  d.accuracyM=null;d.stage='edit';
+  try{s.draftMarker?.remove();}catch{}s.draftMarker=null;
+  if(finite(d.latitude)&&finite(d.longitude))createDraftMarker();
+  render();
+ }
+ function focusSelectedForEdit(){
+  const s=mounted,d=s?.draft;if(!s||!d)return;
+  const lat=finite(d.previousLat)?Number(d.previousLat):(finite(d.latitude)?Number(d.latitude):null);
+  const lon=finite(d.previousLon)?Number(d.previousLon):(finite(d.longitude)?Number(d.longitude):null);
+  if(finite(lat)&&finite(lon))try{s.ctx.map.setView([lat,lon],16);}catch{}
  }
  function syncDraftForm(){
   const form=mounted?.slot.querySelector('[data-owner-edit-form]');if(!form||!mounted?.draft)return;
@@ -173,11 +180,14 @@
    '<label>Classification<select name="confidence">'+confidenceOptions(d.confidence)+'</select></label>'+
    '<label>Source / evidence note<textarea name="sourceNote" maxlength="2000" required placeholder="Describe the field pin, drawing, public reference or other evidence.">'+esc(d.sourceNote)+'</textarea></label>'+
    (d.accuracyM!=null?'<p class="'+(d.accuracyM>30?'owner-warning':'')+'">Device accuracy carried into draft: ±'+Math.round(d.accuracyM)+' m. Consumer GPS is not survey/GIS-grade.</p>':'<p class="owner-hint">Device accuracy was not reported. Treat this as field reference only unless supported by other evidence.</p>')+
-   '<p class="owner-hint">Drag the selected marker or tap a precise point on the map. Nothing is published until Owner Confirm.</p>'+
-   '<div class="owner-map-actions"><button type="submit">REVIEW DRAFT</button><button type="button" data-owner-cancel>CANCEL</button></div>'+
+   '<div class="owner-location-compare"><div><span>Current stored location</span><strong>'+esc(coord(d.previousLat)+', '+coord(d.previousLon))+'</strong></div><div><span>Proposed draft location</span><strong>'+esc(coord(d.latitude)+', '+coord(d.longitude))+'</strong></div></div>'+
+   '<p class="owner-hint">The stored marker remains fixed. Drag the yellow draft marker or tap a precise point on the map. Railway reference tiles are a visual editing aid only and do not change confidence automatically.</p>'+
+   '<div class="owner-map-actions"><button type="submit">REVIEW DRAFT</button><button type="button" data-owner-focus>FOCUS / CENTER SELECTED</button><button type="button" data-owner-reset>RESET DRAFT</button><button type="button" data-owner-cancel>CANCEL DRAFT</button></div>'+
    '</form>';
   const form=work.querySelector('[data-owner-edit-form]');
   form.addEventListener('submit',e=>{e.preventDefault();syncDraftForm();if(!finite(d.latitude)||!finite(d.longitude)){setMessage('A coordinate is required before review.',true);return;}if(d.sourceNote.length<4){setMessage('Add a source/evidence note before review.',true);return;}d.stage='review';renderDraft();});
+  work.querySelector('[data-owner-focus]')?.addEventListener('click',focusSelectedForEdit);
+  work.querySelector('[data-owner-reset]')?.addEventListener('click',resetDraft);
   work.querySelector('[data-owner-cancel]')?.addEventListener('click',()=>{cleanupDraft(true);mounted.draft=null;render();});
   for(const input of work.querySelectorAll('input[name=latitude],input[name=longitude]')){
    input.addEventListener('change',()=>{syncDraftForm();if(finite(d.latitude)&&finite(d.longitude))setDraftCoordinate(d.latitude,d.longitude,d.accuracyM);});
@@ -220,10 +230,7 @@
  function cleanupDraft(restoreApproved){
   const s=mounted,d=s?.draft;if(!s)return;
   if(s.mapClick){try{s.ctx.map.off('click',s.mapClick);}catch{}s.mapClick=null;}
-  if(s.dragMarker){
-   try{s.dragMarker.off('dragend',onDragEnd);s.dragMarker.dragging?.disable();if(restoreApproved&&d&&finite(d.previousLat)&&finite(d.previousLon))s.dragMarker.setLatLng([d.previousLat,d.previousLon]);}catch{}
-   s.dragMarker=null;
-  }
+  if(s.dragMarker){try{s.dragMarker.dragging?.disable();}catch{}s.dragMarker=null;}
   if(s.draftMarker){try{s.draftMarker.remove();}catch{}s.draftMarker=null;}
  }
  async function loadHistory(){
