@@ -75,7 +75,7 @@ function mockScript(role){
       const b={select(){return b},eq(){return b},order(){return b},limit(){return b},maybeSingle(){return Promise.resolve({data:rows[name]?.[0]||null,error:null})},then(resolve,reject){return Promise.resolve({data:rows[name]||[],error:null}).then(resolve,reject)}};
       return b;
     }
-    window.__railwayMapCalls={setView:[],markers:[]};
+    window.__railwayMapCalls={setView:[],markers:[],tileLayers:[],panes:[]};
     window.__rpcCalls=[];
     window.__geoCalls=0;
     window.__locationHistory=[];
@@ -87,10 +87,10 @@ function mockScript(role){
     }});
     window.L={
       map(el){
-        const handlers={};
-        return {_el:el,setView(coords,zoom){window.__railwayMapCalls.setView.push({coords:[...coords],zoom});return this},fitBounds(){return this},invalidateSize(){},remove(){},on(name,fn){handlers[name]=fn;return this},off(name,fn){if(handlers[name]===fn)delete handlers[name];return this},_handlers:handlers};
+        const handlers={},panes={};
+        return {_el:el,setView(coords,zoom){window.__railwayMapCalls.setView.push({coords:[...coords],zoom});return this},getZoom(){return 6},fitBounds(){return this},invalidateSize(){},remove(){},on(name,fn){handlers[name]=fn;return this},off(name,fn){if(handlers[name]===fn)delete handlers[name];return this},createPane(name){const pane={style:{},classList:{add(v){pane.className=v}}};panes[name]=pane;window.__railwayMapCalls.panes.push(name);return pane},_handlers:handlers,_panes:panes};
       }, 
-      tileLayer(){return {addTo(){return this}}},
+      tileLayer(url,options={}){window.__railwayMapCalls.tileLayers.push({url,options});return {addTo(){return this}}},
       divIcon(options){return options},
       marker(coords,options={}){
         const rec={coords:[...coords],handlers:{},removed:false,options};
