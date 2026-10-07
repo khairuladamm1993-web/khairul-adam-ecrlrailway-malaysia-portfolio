@@ -8,6 +8,7 @@
  const LEAFLET_JS_SRI='sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
  const LEAFLET_CSS_SRI='sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
  const TILE_URL='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+ const RAIL_REFERENCE_TILE_URL='https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png';
  const EXACT_ZOOM=11;
  const VALID='Validated Location',PERSONAL='Personal Field-Validated Location',ENGINEERING='Engineering/Survey Validated Location',PUBLIC='Public Reference Location',PENDING='Pending Validation';
  const points=()=>window.RailwayCorridorReference||[];
@@ -95,7 +96,7 @@
    '<div class="map-toolbar"><label class="map-search"><span>Search</span><input type="search" data-map-search placeholder="Station name; Member code / chainage when available" autocomplete="off"></label>'+
    '<div class="map-filters" role="group" aria-label="Map filters">'+['All','STN','PL','Depot'].map(x=>'<button type="button" data-map-filter="'+x+'" aria-pressed="'+(x==='All')+'">'+x+'</button>').join('')+'</div>'+
    '<div class="map-actions"><button type="button" data-map-fit>FIT FULL ROUTE</button><button type="button" data-map-focus disabled>FOCUS SELECTED</button></div></div>'+
-   '<div class="map-layout"><div class="map-canvas-wrap"><div class="map-canvas" data-map-canvas aria-label="Interactive Malaysia reference map"></div><p class="map-attribution-note">Exact railway markers require a validated confidence class. Public Reference and Pending markers are approximate/reference only, never survey/GIS-grade.</p></div>'+
+   '<div class="map-layout"><div class="map-canvas-wrap"><div class="map-canvas" data-map-canvas aria-label="Interactive Malaysia railway-first reference map"></div><p class="map-attribution-note">Railway context is a visual OpenStreetMap/OpenRailwayMap reference layer, not surveyed ECRL geometry. Exact asset markers still require a validated confidence class; Public Reference and Pending markers remain approximate/reference only.</p></div>'+
    '<aside class="map-side"><div data-map-detail class="map-detail"><span class="access-label">MAP</span><h3>Select an asset</h3><p>Choose a result to inspect coordinate confidence. Exact markers appear only for validated locations.</p></div><div class="map-results" data-map-results></div></aside></div>'+
    '<p class="study-boundary">No route line / no polyline. Manual pan or zoom never recalculates stored marker coordinates.</p>'+
    '</section>';
@@ -121,8 +122,14 @@
    state.map.setView([Number(r.lat),Number(r.lon)],zoom);
    return true;
   }
+  function syncSelectedMarker(){
+   for(const [id,marker] of state.markers){
+    const el=marker.getElement?.();
+    if(el)el.classList.toggle('railway-selected-marker',Boolean(state.selected&&id===state.selected.id));
+   }
+  }
   function renderDetail(r){
-   state.selected=r||null;focusBtn.disabled=!mappable(r);
+   state.selected=r||null;focusBtn.disabled=!mappable(r);syncSelectedMarker();
    if(!r){detailHost.innerHTML='<span class="access-label">MAP</span><h3>Select an asset</h3><p>Choose a result to inspect coordinate confidence. Exact markers appear only for validated locations.</p>';return;}
    const o=r.overlay||{};
    detailHost.innerHTML='<span class="access-label">'+esc(r.type)+'</span><h3>'+esc(r.name)+'</h3>'+
@@ -216,8 +223,13 @@
    await ensureMemberData();
    state.leaflet=await loadLeaflet();
    if(instance!==state||!host.isConnected)return;
-   state.map=state.leaflet.map(host.querySelector('[data-map-canvas]'),{zoomControl:true,attributionControl:true,preferCanvas:true,minZoom:5,maxZoom:15});
-   state.leaflet.tileLayer(TILE_URL,{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',updateWhenIdle:true,keepBuffer:1,detectRetina:false}).addTo(state.map);
+   state.map=state.leaflet.map(host.querySelector('[data-map-canvas]'),{zoomControl:true,attributionControl:true,preferCanvas:true,minZoom:5,maxZoom:18});
+   const basePane=state.map.createPane?.('railwayBase');
+   if(basePane){basePane.style.zIndex='200';basePane.classList.add('railway-basemap-pane');}
+   const referencePane=state.map.createPane?.('railwayReference');
+   if(referencePane){referencePane.style.zIndex='260';referencePane.style.pointerEvents='none';referencePane.classList.add('railway-reference-pane');}
+   state.leaflet.tileLayer(TILE_URL,{pane:basePane?'railwayBase':'tilePane',maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',updateWhenIdle:true,keepBuffer:1,detectRetina:false}).addTo(state.map);
+   state.leaflet.tileLayer(RAIL_REFERENCE_TILE_URL,{pane:referencePane?'railwayReference':'overlayPane',minZoom:5,maxZoom:19,attribution:'Style: <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener">CC-BY-SA 2.0</a> <a href="https://www.openrailwaymap.org/" target="_blank" rel="noopener">OpenRailwayMap</a>',updateWhenIdle:true,keepBuffer:1,detectRetina:false}).addTo(state.map);
    state.map.setView([4.55,102.55],6);
    renderResults();fit();renderDetail(null);
    host.dataset.mapReady='true';
