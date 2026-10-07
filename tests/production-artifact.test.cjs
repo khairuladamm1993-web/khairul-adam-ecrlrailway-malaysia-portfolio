@@ -232,6 +232,18 @@ test('railway-first MAP styling keeps railway reference separate from canonical 
   }
 });
 
+test('MAP coordinate parsing rejects null, blank, zero-zero and non-corridor outliers',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  assert(map.includes("typeof v==='string'&&v.trim()!==''"));
+  assert(map.includes("!(lat===0&&lon===0)"));
+  assert(map.includes("Number(r.lat)>=1&&Number(r.lat)<=7.5"));
+  assert(map.includes("Number(r.lon)>=99.5&&Number(r.lon)<=104.8"));
+  assert(map.includes("const mappable=r=>corridorSane(r)"));
+  assert(!map.includes("const mappable=r=>finite(r?.lat)&&finite(r?.lon)"));
+  const registry=fs.readFileSync(path.join(root,'assets','corridor-reference.js'),'utf8');
+  assert(registry.includes("['Pekan Sg. Tong','PL',null,null,'Pending Validation']"));
+});
+
 test('MAP viewport is corridor-first and empty filters never trigger a regional fallback',()=>{
   const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
   assert(map.includes("const corridorRecords=()=>corridorBase().map(effective)"));
