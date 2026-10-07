@@ -125,7 +125,7 @@ test('MAP exact-location contract classifies coordinates and never shifts marker
   assert(map.includes('loc.locationConfidence===PENDING'));
   assert(map.includes("marker=state.leaflet.marker([Number(r.lat),Number(r.lon)]"));
   assert(map.includes("state.map.setView([Number(r.lat),Number(r.lon)],zoom)"));
-  assert(map.includes("const mappable=r=>finite(r?.lat)&&finite(r?.lon)"));
+  assert(map.includes("const mappable=r=>corridorSane(r)"));
   assert(!map.includes('MapPolyline'));
   assert(!map.includes('L.polyline'));
   assert(!map.includes('.polyline('));
