@@ -259,7 +259,7 @@ test('auth convenience reuses Supabase sessions without weakening role resolutio
   assert(access.indexOf("const restored=await validateSession()")<access.indexOf("c.auth.signInWithOtp"));
   assert(access.includes("status:'rate-limited'"));
   assert(access.includes('Too many verification requests. Please wait before requesting another link.'));
-  assert(access.includes("status:'session-expired'"));
+  assert(access.includes("failClosed('session-expired'"));
   assert(access.includes("status:'verification-failed'"));
   assert(access.includes("scope:'local'"));
   assert(!/localStorage\.(?:setItem|removeItem)\([^)]*(?:token|access|session)/i.test(access));
