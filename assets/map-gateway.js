@@ -99,6 +99,7 @@
   const state={host,controller,map:null,leaflet:null,markers:new Map(),selected:null,filter:'All',query:'',ownerLoaded:false};
   instance=state;
   host.innerHTML='<section class="map-module" aria-label="ECRL reference map">'+
+   '<div class="map-identity-row"><span class="map-malaysia-badge" aria-label="Malaysia map context">🇲🇾 <span>Malaysia</span></span></div>'+
    '<div class="map-toolbar"><label class="map-search"><span>Search</span><input type="search" data-map-search placeholder="Station name; Member code / chainage when available" autocomplete="off"></label>'+
    '<div class="map-filters" role="group" aria-label="Map filters">'+['All','STN','PL','Depot'].map(x=>'<button type="button" data-map-filter="'+x+'" aria-pressed="'+(x==='All')+'">'+x+'</button>').join('')+'</div>'+
    '<div class="map-actions"><button type="button" data-map-fit>FIT FULL ROUTE</button><button type="button" data-map-focus disabled>FOCUS SELECTED</button></div></div>'+
