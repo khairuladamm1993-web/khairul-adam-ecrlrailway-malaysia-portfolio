@@ -18,7 +18,13 @@
  const normalize=v=>String(v||'').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,' ').trim();
  const bodyStrings=v=>v&&typeof v==='object'?Object.values(v).filter(x=>typeof x==='string'):[String(v||'')];
  const titleStrings=v=>v&&typeof v==='object'?Object.values(v).filter(x=>typeof x==='string'):[String(v||'')];
- const finite=v=>Number.isFinite(Number(v));
+ const finite=v=>typeof v==='number'?Number.isFinite(v):(typeof v==='string'&&v.trim()!==''&&Number.isFinite(Number(v)));
+ const numeric=v=>finite(v)?Number(v):null;
+ const legalPair=r=>{
+  const lat=numeric(r?.lat),lon=numeric(r?.lon);
+  return lat!==null&&lon!==null&&lat>=-90&&lat<=90&&lon>=-180&&lon<=180&&!(lat===0&&lon===0);
+ };
+ const corridorSane=r=>legalPair(r)&&Number(r.lat)>=1&&Number(r.lat)<=7.5&&Number(r.lon)>=99.5&&Number(r.lon)<=104.8;
  const allowedConfidence=v=>[VALID,PERSONAL,ENGINEERING,PUBLIC,PENDING].includes(v)?v:PENDING;
  const coordinateText=v=>finite(v)?Number(v).toFixed(5):'—';
 
@@ -26,7 +32,7 @@
   const raw=body&&typeof body==='object'?(body.location||body.mapLocation||null):null;
   if(!raw||typeof raw!=='object')return null;
   const confidence=allowedConfidence(raw.locationConfidence||raw.confidence);
-  const lat=finite(raw.latitude)?Number(raw.latitude):null,lon=finite(raw.longitude)?Number(raw.longitude):null;
+  const lat=numeric(raw.latitude),lon=numeric(raw.longitude);
   const source=String(raw.coordinateSource||raw.sourceType||raw.source||'').trim()||null;
   if([VALID,PERSONAL,ENGINEERING].includes(confidence)&&(!finite(lat)||!finite(lon)))return {lat:null,lon:null,locationConfidence:PENDING,coordinateSource:source||'Validated coordinate incomplete'};
   return {lat,lon,locationConfidence:confidence,coordinateSource:source};
@@ -62,8 +68,8 @@
   }
   return {...point,locationConfidence:allowedConfidence(point.locationConfidence),coordinateSource:point.coordinateSource||null,overlay};
  }
- const exact=r=>[VALID,PERSONAL,ENGINEERING].includes(r?.locationConfidence)&&finite(r.lat)&&finite(r.lon);
- const mappable=r=>finite(r?.lat)&&finite(r?.lon);
+ const exact=r=>[VALID,PERSONAL,ENGINEERING].includes(r?.locationConfidence)&&corridorSane(r);
+ const mappable=r=>corridorSane(r);
 
  async function ensureMemberData(){
   if(!A?.canReadMemberContent||A.cachedData)return;
