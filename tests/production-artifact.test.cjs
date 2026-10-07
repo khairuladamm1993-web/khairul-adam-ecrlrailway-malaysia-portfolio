@@ -221,13 +221,28 @@ test('railway-first MAP styling keeps railway reference separate from canonical 
   assert(map.includes('updateWhenIdle:true,keepBuffer:1,detectRetina:false'));
   assert(css.includes('.leaflet-railway-base-pane .leaflet-tile'));
   assert(css.includes('.leaflet-railway-reference-pane .leaflet-tile'));
-  assert(css.includes('grayscale(.78)'));
+  assert(css.includes('grayscale(.96)'));
+  assert(css.includes('opacity:.48!important'));
+  assert(css.includes('opacity:1!important'));
   assert(css.includes('.railway-selected-marker .railway-map-pin'));
   for(const src of [map,css]){
     assert(!src.includes('L.polyline'));
     assert(!src.includes('.polyline('));
     assert(!src.includes('MapPolyline'));
   }
+});
+
+test('MAP viewport is corridor-first and empty filters never trigger a regional fallback',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  assert(map.includes("const corridorRecords=()=>corridorBase().map(effective)"));
+  assert(map.includes('function fitCorridor(){return fitRecords(corridorRecords());}'));
+  assert(map.includes("[data-map-fit]').addEventListener('click',fitCorridor"));
+  assert(map.includes('renderResults();fitCorridor();renderDetail(null);'));
+  assert(map.includes('renderResults();fitVisible();'));
+  assert(map.includes("if(!coords.length||!state.map)return false"));
+  assert(!map.includes('setView([4.55,102.55],6)'));
+  assert(!map.includes('L.polyline'));
+  assert(!map.includes('.polyline('));
 });
 
 test('Owner relocation preserves stored marker and edits a separate draft only',()=>{
