@@ -320,11 +320,11 @@ test('Owner relocation preserves stored marker and edits a separate draft only',
   assert(owner.includes('FOCUS / CENTER SELECTED'));
   assert(owner.includes('RESET DRAFT'));
   assert(owner.includes('CANCEL DRAFT'));
-  assert(owner.includes('Current stored location'));
-  assert(owner.includes('Proposed draft location'));
-  assert(owner.includes('The stored marker remains fixed.'));
-  assert(owner.includes('Chainage context:'));
-  assert(owner.includes('it does not move or snap the draft marker'));
+  assert(owner.includes('CURRENT LOCATION'));
+  assert(owner.includes('PROPOSED LOCATION'));
+  assert(owner.includes('The CURRENT marker remains fixed.'));
+  assert(owner.includes('Chainage Context'));
+  assert(owner.includes('No auto-snap is applied.'));
   assert(!owner.includes("s.dragMarker=approved"));
   assert(!owner.includes("approved.dragging?.enable()"));
   assert(owner.includes("A.adminPublishLocation"));
