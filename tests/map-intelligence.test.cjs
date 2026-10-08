@@ -21,12 +21,8 @@ test('chainage bracket lookup resolves CH081 between Jerteh and Bandar Permaisur
   assert.equal(b.status,'bracket');
   assert.equal(b.previous.code,'STN03');
   assert.equal(b.next.code,'STN04');
-  const p=I.interpolateReference(b.previous,b.next,81);
-  assert(p);
-  assert.equal(Number(p.afterPreviousKm.toFixed(3)),29.550);
-  assert.equal(Number(p.beforeNextKm.toFixed(3)),7.220);
-  assert(p.lat<5.70102&&p.lat>5.52084);
-  assert(p.lon>102.48321&&p.lon<102.73814);
+  assert.equal(Number((81-b.previous.chainageKm).toFixed(3)),29.550);
+  assert.equal(Number((b.next.chainageKm-81).toFixed(3)),7.220);
 });
 
 test('chainage engine reports exact, out-of-range and missing-anchor states',()=>{
@@ -34,7 +30,7 @@ test('chainage engine reports exact, out-of-range and missing-anchor states',()=
   assert.equal(I.bracketChainage(anchors,10).status,'exact');
   assert.equal(I.bracketChainage(anchors,9).status,'out-of-range');
   assert.equal(I.bracketChainage([],15).status,'missing-anchors');
-  assert.equal(I.interpolateReference(anchors[0],anchors[1],25),null);
+  assert.equal(typeof I.interpolateReference,'undefined');
 });
 
 test('smart search normalization ranks approved aliases without literal-order dependence',()=>{
