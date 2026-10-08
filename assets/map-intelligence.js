@@ -88,7 +88,9 @@
   }
 
   function haversineMetres(aLat,aLon,bLat,bLon){
-    const values=[aLat,aLon,bLat,bLon].map(Number);
+    const raw=[aLat,aLon,bLat,bLon];
+    if(raw.some(v=>v===null||v===undefined||String(v).trim()===''))return null;
+    const values=raw.map(Number);
     if(!values.every(Number.isFinite))return null;
     const [lat1,lon1,lat2,lon2]=values,rad=x=>x*Math.PI/180,R=6371000;
     const dLat=rad(lat2-lat1),dLon=rad(lon2-lon1);
