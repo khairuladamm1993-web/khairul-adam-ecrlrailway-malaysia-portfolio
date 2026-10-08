@@ -16,6 +16,7 @@
  };
  const selectedCode=r=>r?.overlay?.code||null;
  const selectedName=r=>r?.name||'';
+ const selectedChainage=r=>r?.overlay?.chainage||null;
  const option=(v,label,selected)=>'<option value="'+esc(v)+'" '+(v===selected?'selected':'')+'>'+esc(label||v)+'</option>';
 
  function mount(ctx,slot,{force=false}={}){
@@ -103,7 +104,7 @@
   cleanupDraft(true);
   mounted.history=null;
   mounted.draft={
-   assetId:code,name:selectedName(r),previousLat:finite(r.lat)?Number(r.lat):null,previousLon:finite(r.lon)?Number(r.lon):null,
+   assetId:code,name:selectedName(r),chainage:selectedChainage(r),previousLat:finite(r.lat)?Number(r.lat):null,previousLon:finite(r.lon)?Number(r.lon):null,
    previousConfidence:r.locationConfidence||PENDING,
    latitude:finite(r.lat)?Number(r.lat):null,longitude:finite(r.lon)?Number(r.lon):null,
    confidence:r.locationConfidence||PENDING,sourceNote:'',accuracyM:null,stage:'edit'
@@ -176,6 +177,7 @@
   work.innerHTML='<form data-owner-edit-form class="owner-edit-form">'+
    '<h4>Edit → Draft Coordinate</h4>'+
    '<p><strong>'+esc(d.assetId)+' · '+esc(d.name)+'</strong></p>'+
+   (d.chainage?'<p class="owner-hint">Chainage context: <strong>'+esc(d.chainage)+'</strong> · reference aid only; it does not move or snap the draft marker.</p>':'<p class="owner-hint">Chainage context: unavailable / not validated for this asset.</p>')+
    '<div class="owner-coordinate-grid"><label>Latitude<input name="latitude" type="number" step="0.000001" value="'+(d.latitude??'')+'" required></label><label>Longitude<input name="longitude" type="number" step="0.000001" value="'+(d.longitude??'')+'" required></label></div>'+
    '<label>Classification<select name="confidence">'+confidenceOptions(d.confidence)+'</select></label>'+
    '<label>Source / evidence note<textarea name="sourceNote" maxlength="2000" required placeholder="Describe the field pin, drawing, public reference or other evidence.">'+esc(d.sourceNote)+'</textarea></label>'+
@@ -200,6 +202,7 @@
    '<h4>Review → Owner Confirm → Publish</h4>'+
    '<dl class="map-member-detail">'+
     '<div><dt>Asset</dt><dd>'+esc(d.assetId+' · '+d.name)+'</dd></div>'+
+    '<div><dt>Chainage context</dt><dd>'+esc(d.chainage||'—')+'</dd></div>'+
     '<div><dt>Previous coordinate</dt><dd>'+esc(coord(d.previousLat)+', '+coord(d.previousLon))+'</dd></div>'+
     '<div><dt>Proposed coordinate</dt><dd>'+esc(coord(d.latitude)+', '+coord(d.longitude))+'</dd></div>'+
     '<div><dt>Distance moved</dt><dd>'+(distance==null?'—':distance<1000?Math.round(distance)+' m':(distance/1000).toFixed(2)+' km')+'</dd></div>'+
