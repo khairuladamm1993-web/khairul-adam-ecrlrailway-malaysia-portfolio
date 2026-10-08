@@ -62,3 +62,28 @@ test('canonical calibration chainages resolve as exact anchors while non-anchor 
   assert.equal(ch81.next.code,'STN04');
   assert.equal(typeof I.interpolateReference,'undefined');
 });
+
+
+test('PL07 owner chainage context preserves linear order without using marker accuracy',()=>{
+  const anchors=[
+    {code:'STN16',name:'Bentong',chainageKm:484.600,locationConfidence:'Public Reference Location'},
+    {code:'PL07',name:'Alang Sedayu',chainageKm:515.725,locationConfidence:'Pending Validation'},
+    {code:'DEPOT-EMU',name:'Gombak North EMU Depot',chainageKm:519.750,locationConfidence:'Pending Validation'},
+    {code:'STN17',name:'ITT Gombak',chainageKm:524.160,locationConfidence:'Public Reference Location'}
+  ];
+  const x=I.chainageContext(anchors,515.725);
+  assert.equal(x.status,'exact');
+  assert.equal(x.anchor.code,'PL07');
+  assert.equal(x.previous.code,'STN16');
+  assert.equal(x.next.code,'DEPOT-EMU');
+  assert.equal(Number(x.afterPreviousKm.toFixed(3)),31.125);
+  assert.equal(Number(x.beforeNextKm.toFixed(3)),4.025);
+  assert.equal(x.next.locationConfidence,'Pending Validation');
+});
+
+test('movement diagnostic is geographic distance only and never changes chainage',()=>{
+  const metres=I.haversineMetres(3.28426,101.76345,3.28436,101.76345);
+  assert(metres>10&&metres<12);
+  assert.equal(I.haversineMetres(null,101,3,102),null);
+  assert.equal(typeof I.interpolateReference,'undefined');
+});
