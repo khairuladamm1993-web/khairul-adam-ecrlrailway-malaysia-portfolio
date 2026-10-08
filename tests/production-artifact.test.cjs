@@ -26,7 +26,7 @@ function walk(dir){
 test('production artifact excludes retained legacy quiz/protected assets',()=>{
   const dir=build('build-production.py','railway-production-');
   for(const name of ['questions.js','gateway.js','quiz-core.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),false,name);
-  for(const name of ['access.js','public-gateway.js','member-gateway.js','module-previews.js','analytics.js','map-gateway.js','corridor-reference.js','owner-map.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),true,name);
+  for(const name of ['access.js','public-gateway.js','member-gateway.js','module-previews.js','analytics.js','map-intelligence.js','map-gateway.js','corridor-reference.js','owner-map.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),true,name);
   const textFiles=walk(dir).filter(p=>/\.(?:html|js|css|md|xml|txt)$/i.test(p));
   const all=textFiles.map(p=>fs.readFileSync(p,'utf8')).join('\n');
   assert(!all.includes('window.RailwayModules='));
@@ -104,6 +104,36 @@ test('MAP is lazy, marker-only and contains no protected Corridor registry',()=>
   assert(registry.includes("['Kuantan Port City Depot','Depot',3.97450,103.33750,'Pending Validation']"));
   assert(registry.includes("['Gombak North EMU Depot','Depot',3.25918,101.74407,'Pending Validation']"));
   fs.rmSync(dir,{recursive:true,force:true});
+});
+
+test('MAP smart search resolves canonical aliases across filters and auto-focuses one result',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  const gateway=fs.readFileSync(path.join(root,'assets','public-gateway.js'),'utf8');
+  assert(gateway.includes("assets/map-intelligence.js"));
+  assert(map.includes("Pekan Sungai Tong"));
+  assert(map.includes("Kuantan Depot','Depot Kuantan','Depot KTN"));
+  assert(map.includes("if(code==='STN17'||name==='itt gombak')aliases.push('Gombak')"));
+  assert(map.includes("I.rankRecords(corridorRecords(),state.query,approvedAliases)"));
+  assert(map.includes("if(reveal&&r?.type&&['STN','PL','Depot'].includes(r.type))setFilter(r.type)"));
+  assert(map.includes("if(ranked.length===1||(ranked[0]&&ranked[1]&&ranked[0].score>ranked[1].score))selectAsset(ranked[0].record)"));
+  assert(!map.includes("normalize(hay).includes(normalize(state.query))"));
+});
+
+test('MAP chainage intelligence uses authenticated canonical anchors and conservative interpolation',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  const intelligence=fs.readFileSync(path.join(root,'assets','map-intelligence.js'),'utf8');
+  assert(map.includes("if(!A?.canReadMemberContent)return []"));
+  assert(map.includes("const chainageKm=I.parseChainage(record.overlay?.chainage)"));
+  assert(map.includes("I.bracketChainage(chainageAnchors(),km)"));
+  assert(map.includes("I.interpolateReference(bracket.previous,bracket.next,km)"));
+  assert(map.includes("Calculated Corridor Reference"));
+  assert(map.includes("Straight-line interpolation between stored chainage-anchor coordinates"));
+  assert(map.includes("not surveyed ECRL geometry"));
+  assert(intelligence.includes("parseChainage"));
+  assert(intelligence.includes("bracketChainage"));
+  assert(intelligence.includes("interpolateReference"));
+  assert(!map.includes('L.polyline'));
+  assert(!map.includes('.polyline('));
 });
 
 test('MAP exact-location contract classifies coordinates and never shifts markers',()=>{
