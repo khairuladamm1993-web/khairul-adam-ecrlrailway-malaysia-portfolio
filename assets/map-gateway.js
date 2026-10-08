@@ -165,9 +165,24 @@
     if(el)el.classList.toggle('railway-selected-marker',Boolean(state.selected&&id===state.selected.id));
    }
   }
+  function anchorText(a){return [a?.code,a?.name,I.formatChainage(a?.chainageKm)].filter(Boolean).join(' · ');}
   function renderDetail(r){
    state.selected=r||null;focusBtn.disabled=!mappable(r);syncSelectedMarker();
    if(!r){detailHost.innerHTML='<span class="access-label">MAP</span><h3>Select an asset</h3><p>Choose a result to inspect coordinate confidence. Exact markers appear only for validated locations.</p>';return;}
+   if(r.isChainageReference){
+    detailHost.innerHTML='<span class="access-label">CHAINAGE</span><h3>'+esc(r.name)+'</h3>'+
+     '<p><strong>Calculated Corridor Reference</strong></p>'+
+     '<dl class="map-member-detail">'+
+      '<div><dt>Previous anchor</dt><dd>'+esc(anchorText(r.previous))+'</dd></div>'+
+      '<div><dt>Next anchor</dt><dd>'+esc(anchorText(r.next))+'</dd></div>'+
+      '<div><dt>After previous</dt><dd>'+esc(r.afterPreviousKm.toFixed(3))+' km</dd></div>'+
+      '<div><dt>Before next</dt><dd>'+esc(r.beforeNextKm.toFixed(3))+' km</dd></div>'+
+      '<div><dt>Reference latitude</dt><dd>'+esc(coordinateText(r.lat))+'</dd></div>'+
+      '<div><dt>Reference longitude</dt><dd>'+esc(coordinateText(r.lon))+'</dd></div>'+
+      '<div><dt>Reference type</dt><dd>Calculated Corridor Reference</dd></div>'+
+     '</dl><p>Straight-line interpolation between stored chainage-anchor coordinates. This is a corridor-reference aid only, not surveyed ECRL geometry or an exact engineering location.</p>';
+    return;
+   }
    const o=r.overlay||{};
    detailHost.innerHTML='<span class="access-label">'+esc(r.type)+'</span><h3>'+esc(r.name)+'</h3>'+
     '<dl class="map-member-detail">'+
@@ -182,6 +197,20 @@
     '</dl><p>'+esc(note(r))+'</p>'+
     (A?.canReadMemberContent?'<p class="map-access-note">Approved Member Corridor data is merged at runtime only.</p>':'<p class="map-access-note">Public view · protected Corridor records are not loaded.</p>')+
     (A?.canAdmin?'<div class="owner-map-slot" data-owner-map-slot></div>':'');
+  }
+  function clearChainageMarker(){try{state.chainageMarker?.remove();}catch{}state.chainageMarker=null;}
+  function showChainageReference(r){
+   clearChainageMarker();
+   if(!r?.isChainageReference||!mappable(r)||!state.map)return;
+   const icon=state.leaflet.divIcon({className:'railway-map-divicon',html:'<span class="railway-chainage-reference-pin" aria-hidden="true"></span>',iconSize:[18,18],iconAnchor:[9,9]});
+   state.chainageMarker=state.leaflet.marker([Number(r.lat),Number(r.lon)],{icon,keyboard:true,title:r.name,riseOnHover:true}).addTo(state.map);
+   state.chainageMarker.bindTooltip(esc(r.name)+' · Calculated Corridor Reference',{direction:'top',offset:[0,-8],opacity:.94,className:'railway-map-label'});
+   state.chainageMarker.on('click',()=>renderDetail(r));
+  }
+  function selectAsset(r,{reveal=true}={}){
+   clearChainageMarker();state.chainageMode=false;
+   if(reveal&&r?.type&&['STN','PL','Depot'].includes(r.type))setFilter(r.type);
+   renderDetail(r);renderResults();if(mappable(r))focusStored(r);loadOwnerTools();
   }
   function syncMarkers(){
    const records=visible(),allowed=new Set(records.filter(mappable).map(r=>r.id));
@@ -219,10 +248,34 @@
   }
   function fitCorridor(){return fitRecords(corridorRecords());}
   function fitVisible(){return fitRecords(visible());}
-  input.addEventListener('input',()=>{state.query=input.value;renderResults();},{signal});
-  host.querySelector('.map-filters').addEventListener('click',e=>{const b=e.target.closest('[data-map-filter]');if(!b)return;state.filter=b.dataset.mapFilter;host.querySelectorAll('[data-map-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderResults();fitVisible();},{signal});
-  resultHost.addEventListener('click',e=>{const b=e.target.closest('[data-map-point]');if(!b)return;const base=points().find(x=>x.id===b.dataset.mapPoint);if(!base)return;const r=effective(base);renderDetail(r);renderResults();if(mappable(r))focusStored(r);loadOwnerTools();},{signal});
-  host.querySelector('[data-map-fit]').addEventListener('click',fitCorridor,{signal});
+  function chainageError(result){
+   clearChainageMarker();state.selected=null;focusBtn.disabled=true;
+   const label=I.formatChainage(result.chainageKm)||String(input.value||'').trim();
+   const message=!A?.canReadMemberContent?'Verified Member access is required for canonical chainage search.'
+    :result.status==='out-of-range'?'Chainage is outside the currently supported canonical anchor range.'
+    :result.status==='missing-anchors'||result.status==='missing-bracket'?'There are not enough supported chainage anchors for this location.'
+    :'Chainage reference could not be resolved safely.';
+   detailHost.innerHTML='<span class="access-label">CHAINAGE</span><h3>'+esc(label)+'</h3><p>'+esc(message)+'</p><p class="map-access-note">No coordinate was invented and the current corridor viewport is preserved.</p>';
+  }
+  function resolveInput(){
+   state.query=input.value.trim();clearChainageMarker();
+   const km=I.parseChainage(state.query);
+   if(state.query&&km!==null){
+    state.chainageMode=true;renderResults();
+    const result=resolveChainage(km);
+    if(result.kind==='asset'){state.chainageMode=false;state.query='';selectAsset(result.record);return;}
+    if(result.kind==='reference'){renderDetail(result);showChainageReference(result);focusStored(result,10);return;}
+    chainageError(result);return;
+   }
+   state.chainageMode=false;renderResults();
+   if(!state.query)return;
+   const ranked=rankedSearch();
+   if(ranked.length===1||(ranked[0]&&ranked[1]&&ranked[0].score>ranked[1].score))selectAsset(ranked[0].record);
+  }
+  input.addEventListener('input',resolveInput,{signal});
+  host.querySelector('.map-filters').addEventListener('click',e=>{const b=e.target.closest('[data-map-filter]');if(!b)return;setFilter(b.dataset.mapFilter);renderResults();fitVisible();},{signal});
+  resultHost.addEventListener('click',e=>{const b=e.target.closest('[data-map-point]');if(!b)return;const base=points().find(x=>x.id===b.dataset.mapPoint);if(!base)return;selectAsset(effective(base));},{signal});
+  host.querySelector('[data-map-fit]').addEventListener('click',()=>{clearChainageMarker();fitCorridor();},{signal});
   focusBtn.addEventListener('click',()=>focusStored(state.selected),{signal});
   let ownerPromise=null;
   function ownerContext(){
@@ -284,7 +337,7 @@
  }
  function unmount(){
   if(!instance)return;
-  const old=instance;instance=null;window.RailwayOwnerMap?.unmount();old.controller.abort();try{old.map?.remove();}catch{}old.markers.clear();
+  const old=instance;instance=null;window.RailwayOwnerMap?.unmount();old.controller.abort();try{old.chainageMarker?.remove();}catch{}try{old.map?.remove();}catch{}old.markers.clear();
  }
  window.RailwayMap=Object.freeze({mount,unmount,get mounted(){return Boolean(instance);},referenceCount(){return points().length}});
 })();
