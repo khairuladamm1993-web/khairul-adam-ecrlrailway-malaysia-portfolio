@@ -43,3 +43,22 @@ test('smart search normalization ranks approved aliases without literal-order de
   assert.equal(I.rankRecords(records,'DEPOT KTN',aliases)[0].record.name,'Kuantan Port City Depot');
   assert.equal(I.rankRecords(records,'gombak',aliases)[0].record.name,'ITT Gombak');
 });
+
+test('canonical calibration chainages resolve as exact anchors while non-anchor CH081 brackets safely',()=>{
+  const anchors=[
+    ['STN03',51.450],['STN04',88.220],['PL01',115.180],['STN05',145.990],['PL02',172.450],['STN06',207.400],
+    ['STN13',338.325],['PL03',353.242],['PL04',377.950],['STN14',396.900],['PL05',415.180],['STN15',433.250],
+    ['PL06',457.100],['STN16',484.600],['PL07',515.725],['DEPOT-EMU',519.750],['STN17',524.160]
+  ].map(([code,chainageKm])=>({code,chainageKm}));
+  for(const code of ['PL01','PL02','PL03','PL04','PL05','PL06','PL07','DEPOT-EMU']){
+    const a=anchors.find(x=>x.code===code);
+    const hit=I.bracketChainage(anchors,a.chainageKm);
+    assert.equal(hit.status,'exact',code);
+    assert.equal(hit.anchor.code,code);
+  }
+  const ch81=I.bracketChainage(anchors,81);
+  assert.equal(ch81.status,'bracket');
+  assert.equal(ch81.previous.code,'STN03');
+  assert.equal(ch81.next.code,'STN04');
+  assert.equal(typeof I.interpolateReference,'undefined');
+});
