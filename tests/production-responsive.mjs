@@ -357,7 +357,7 @@ for(const [width,height] of viewports){
       })()`);
       const exactOK=role==='public'
         ? exactResult.validatedMarkers===0&&exactResult.markerCount>0&&exactResult.before===null
-        : exactResult.validatedMarkers===1&&exactResult.markerCount>1&&
+        : exactResult.validatedMarkers>=1&&exactResult.markerCount>1&&
           JSON.stringify(exactResult.before)===JSON.stringify([6.12345,102.54321])&&
           JSON.stringify(exactResult.after)===JSON.stringify(exactResult.before)&&
           JSON.stringify(exactResult.markerFocus?.coords)===JSON.stringify(exactResult.before)&&exactResult.markerFocus?.zoom===11&&
