@@ -379,3 +379,40 @@ test('Gateway railway background polish is CSS-only and secondary',()=>{
   assert(!/url\s*\(/i.test(gatewayBlock));
   assert(!/background(?:-image)?\s*:[^;]*(?:jpg|jpeg|png|webp|svg)/i.test(gatewayBlock));
 });
+
+
+test('Owner relocation review exposes current-chainage-proposed without auto-snap or drag publish',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
+  assert(map.includes('getChainageContext:record=>ownerChainageContext(record||state.selected)'));
+  assert(owner.includes("title:'CURRENT stored coordinate'"));
+  assert(owner.includes('CURRENT LOCATION'));
+  assert(owner.includes('PROPOSED LOCATION'));
+  assert(owner.includes('Chainage confirms corridor position/order.'));
+  assert(owner.includes('No auto-snap is applied.'));
+  assert(owner.includes('REVIEW MODE: dragging or reviewing never writes canonical data.'));
+  const dragStart=owner.indexOf('function onDraftDragEnd');
+  const dragEnd=owner.indexOf('function setDraftCoordinate',dragStart);
+  assert(dragStart>=0&&dragEnd>dragStart);
+  assert(!owner.slice(dragStart,dragEnd).includes('adminPublishLocation'));
+  assert(!owner.includes('snapTo'));
+  assert(!owner.includes('interpolateReference'));
+});
+
+test('chainage anchors are linear catalogue references independent of marker coordinate validation',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  assert(map.includes(".filter(a=>Number.isFinite(a.chainageKm)).sort((a,b)=>a.chainageKm-b.chainageKm)"));
+  assert(!map.includes(".filter(a=>Number.isFinite(a.chainageKm)&&mappable(a.record))"));
+  assert(map.includes("const km=I.parseChainage(record?.overlay?.chainage)"));
+  assert(map.includes("return I.chainageContext(chainageAnchors(),km)"));
+});
+
+test('Owner relocation review remains scroll-reachable on tablet and mobile',()=>{
+  const css=fs.readFileSync(path.join(root,'assets','gateway.css'),'utf8');
+  assert(css.includes('@media(max-width:900px)'));
+  assert(css.includes('.map-side{max-height:none;overflow:visible}'));
+  assert(css.includes('@media(max-width:719px)'));
+  assert(css.includes('.owner-map-actions{display:grid;grid-template-columns:1fr}'));
+  assert(css.includes('.owner-chainage-context'));
+  assert(css.includes('.railway-stored-location-pin'));
+});
