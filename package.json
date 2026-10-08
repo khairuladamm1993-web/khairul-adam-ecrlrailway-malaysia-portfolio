@@ -2,7 +2,7 @@
   "name": "khairul-adam-portfolio-migration",
   "private": true,
   "scripts": {
-    "test": "node --test tests/auth-wiring.test.cjs tests/migration.test.cjs tests/production-artifact.test.cjs tests/analytics-extension.test.mjs analytics/original/analytics/client.test.mjs analytics/original/analytics/collector.test.mjs analytics/backend/worker.test.mjs",
+    "test": "node --test tests/auth-wiring.test.cjs tests/migration.test.cjs tests/production-artifact.test.cjs tests/map-intelligence.test.cjs tests/analytics-extension.test.mjs analytics/original/analytics/client.test.mjs analytics/original/analytics/collector.test.mjs analytics/backend/worker.test.mjs",
     "preview": "python3 -m http.server 8765",
     "build:production": "python3 scripts/build-production.py dist-production",
     "smoke:production": "node tests/production-responsive.mjs dist-production"
