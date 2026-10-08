@@ -51,10 +51,14 @@
       .sort((a,b)=>b.score-a.score||String(a.record?.name||'').localeCompare(String(b.record?.name||'')));
   }
 
+  function chainageRows(anchors){
+    return (anchors||[]).filter(a=>Number.isFinite(Number(a.chainageKm))).slice().sort((a,b)=>Number(a.chainageKm)-Number(b.chainageKm));
+  }
+
   function bracketChainage(anchors,km){
     const target=Number(km);
     if(!Number.isFinite(target))return {status:'invalid'};
-    const rows=(anchors||[]).filter(a=>Number.isFinite(Number(a.chainageKm))).slice().sort((a,b)=>Number(a.chainageKm)-Number(b.chainageKm));
+    const rows=chainageRows(anchors);
     if(!rows.length)return {status:'missing-anchors'};
     if(target<Number(rows[0].chainageKm)||target>Number(rows[rows.length-1].chainageKm))return {status:'out-of-range',first:rows[0],last:rows[rows.length-1]};
     const exact=rows.find(a=>Math.abs(Number(a.chainageKm)-target)<0.0005);
@@ -68,5 +72,29 @@
     return {status:'bracket',previous,next};
   }
 
-  return {normalizeText,parseChainage,formatChainage,searchScore,rankRecords,bracketChainage};
+  function chainageContext(anchors,km){
+    const target=Number(km),rows=chainageRows(anchors);
+    if(!Number.isFinite(target))return {status:'invalid'};
+    if(!rows.length)return {status:'missing-anchors'};
+    const index=rows.findIndex(a=>Math.abs(Number(a.chainageKm)-target)<0.0005);
+    if(index<0)return {status:'not-anchor',bracket:bracketChainage(rows,target)};
+    const anchor=rows[index],previous=rows[index-1]||null,next=rows[index+1]||null;
+    return {
+      status:'exact',
+      anchor,previous,next,
+      afterPreviousKm:previous?target-Number(previous.chainageKm):null,
+      beforeNextKm:next?Number(next.chainageKm)-target:null
+    };
+  }
+
+  function haversineMetres(aLat,aLon,bLat,bLon){
+    const values=[aLat,aLon,bLat,bLon].map(Number);
+    if(!values.every(Number.isFinite))return null;
+    const [lat1,lon1,lat2,lon2]=values,rad=x=>x*Math.PI/180,R=6371000;
+    const dLat=rad(lat2-lat1),dLon=rad(lon2-lon1);
+    const h=Math.sin(dLat/2)**2+Math.cos(rad(lat1))*Math.cos(rad(lat2))*Math.sin(dLon/2)**2;
+    return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));
+  }
+
+  return {normalizeText,parseChainage,formatChainage,searchScore,rankRecords,bracketChainage,chainageContext,haversineMetres};
 });
