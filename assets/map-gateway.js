@@ -134,7 +134,12 @@
    return corridorRecords().map(record=>{
     const chainageKm=I.parseChainage(record.overlay?.chainage);
     return {record,code:record.overlay?.code||null,name:record.name,type:record.type,chainageKm,lat:Number(record.lat),lon:Number(record.lon),locationConfidence:record.locationConfidence,coordinateSource:sourceText(record)};
-   }).filter(a=>Number.isFinite(a.chainageKm)&&mappable(a.record)).sort((a,b)=>a.chainageKm-b.chainageKm);
+   }).filter(a=>Number.isFinite(a.chainageKm)).sort((a,b)=>a.chainageKm-b.chainageKm);
+  }
+  function ownerChainageContext(record){
+   const km=I.parseChainage(record?.overlay?.chainage);
+   if(km===null)return {status:'unavailable'};
+   return I.chainageContext(chainageAnchors(),km);
   }
   function resolveChainage(km){
    const bracket=I.bracketChainage(chainageAnchors(),km);
@@ -284,6 +289,7 @@
      const base=points().find(x=>x.id===id||memberOverlay(x)?.code===id);
      return effective(base||state.selected||{});
     },
+    getChainageContext:record=>ownerChainageContext(record||state.selected),
     renderDetail,
     renderResults,
     focusStored,
