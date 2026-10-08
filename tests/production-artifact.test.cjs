@@ -120,19 +120,20 @@ test('MAP smart search resolves canonical aliases across filters and auto-focuse
   assert(!map.includes("normalize(hay).includes(normalize(state.query))"));
 });
 
-test('MAP chainage intelligence uses authenticated canonical anchors and conservative interpolation',()=>{
+test('MAP chainage intelligence uses authenticated canonical anchors and bracket-only fallback without fake geometry',()=>{
   const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
   const intelligence=fs.readFileSync(path.join(root,'assets','map-intelligence.js'),'utf8');
   assert(map.includes("if(!A?.canReadMemberContent)return []"));
   assert(map.includes("const chainageKm=I.parseChainage(record.overlay?.chainage)"));
   assert(map.includes("I.bracketChainage(chainageAnchors(),km)"));
-  assert(map.includes("I.interpolateReference(bracket.previous,bracket.next,km)"));
-  assert(map.includes("Calculated Corridor Reference"));
-  assert(map.includes("Straight-line interpolation between stored chainage-anchor coordinates"));
-  assert(map.includes("not surveyed ECRL geometry"));
+  assert(map.includes("kind:'bracket'"));
+  assert(map.includes("Calculated Corridor Reference — position unresolved"));
+  assert(map.includes("No queryable route geometry is available"));
+  assert(map.includes("Reference coordinate</dt><dd>Not calculated"));
   assert(intelligence.includes("parseChainage"));
   assert(intelligence.includes("bracketChainage"));
-  assert(intelligence.includes("interpolateReference"));
+  assert(!intelligence.includes("interpolateReference"));
+  assert(!map.includes("I.interpolateReference"));
   assert(!map.includes('L.polyline'));
   assert(!map.includes('.polyline('));
 });
@@ -300,6 +301,16 @@ test('MAP viewport is corridor-first and empty filters never trigger a regional 
   assert(!map.includes('setView([4.55,102.55],6)'));
   assert(!map.includes('L.polyline'));
   assert(!map.includes('.polyline('));
+});
+
+test('tablet MAP keeps Owner relocation panel visible without weakening admin gate',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  const css=fs.readFileSync(path.join(root,'assets','gateway.css'),'utf8');
+  assert(map.includes("if(!A?.canAdmin||!state.map)return"));
+  assert(map.includes("(A?.canAdmin?'<div class=\"owner-map-slot\" data-owner-map-slot></div>':'')"));
+  assert(css.includes('@media(max-width:900px)'));
+  assert(css.includes('.map-side{max-height:none;overflow:visible}'));
+  assert(css.includes('.map-results{max-height:260px}'));
 });
 
 test('Owner relocation preserves stored marker and edits a separate draft only',()=>{
