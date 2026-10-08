@@ -68,19 +68,5 @@
     return {status:'bracket',previous,next};
   }
 
-  function interpolateReference(previous,next,km){
-    const p=Number(previous?.chainageKm),n=Number(next?.chainageKm),target=Number(km);
-    const plat=Number(previous?.lat),plon=Number(previous?.lon),nlat=Number(next?.lat),nlon=Number(next?.lon);
-    if(![p,n,target,plat,plon,nlat,nlon].every(Number.isFinite)||n<=p||target<=p||target>=n)return null;
-    const ratio=(target-p)/(n-p);
-    return {
-      lat:plat+(nlat-plat)*ratio,
-      lon:plon+(nlon-plon)*ratio,
-      ratio,
-      afterPreviousKm:target-p,
-      beforeNextKm:n-target
-    };
-  }
-
-  return {normalizeText,parseChainage,formatChainage,searchScore,rankRecords,bracketChainage,interpolateReference};
+  return {normalizeText,parseChainage,formatChainage,searchScore,rankRecords,bracketChainage};
 });
