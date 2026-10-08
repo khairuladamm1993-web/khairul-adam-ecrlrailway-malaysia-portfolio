@@ -78,7 +78,8 @@ test('MAP is lazy, marker-only and contains no protected Corridor registry',()=>
   assert(!html.includes('map-gateway.js'));
   assert(!html.includes('leaflet'));
   assert(!html.includes('tile.openstreetmap.org'));
-  assert(gateway.includes("s.src='assets/map-gateway.js'"));
+  assert(gateway.includes("load('assets/map-intelligence.js'"));
+  assert(gateway.includes("load('assets/map-gateway.js'"));
   assert(map.includes('leaflet@1.9.4'));
   assert(map.includes('tile.openstreetmap.org/{z}/{x}/{y}.png'));
   assert(map.includes('tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png'));
@@ -311,6 +312,8 @@ test('Owner relocation preserves stored marker and edits a separate draft only',
   assert(owner.includes('Current stored location'));
   assert(owner.includes('Proposed draft location'));
   assert(owner.includes('The stored marker remains fixed.'));
+  assert(owner.includes('Chainage context:'));
+  assert(owner.includes('it does not move or snap the draft marker'));
   assert(!owner.includes("s.dragMarker=approved"));
   assert(!owner.includes("approved.dragging?.enable()"));
   assert(owner.includes("A.adminPublishLocation"));
