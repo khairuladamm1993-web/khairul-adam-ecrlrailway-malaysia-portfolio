@@ -293,7 +293,7 @@ test('MAP viewport is corridor-first and empty filters never trigger a regional 
   const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
   assert(map.includes("const corridorRecords=()=>corridorBase().map(effective)"));
   assert(map.includes('function fitCorridor(){return fitRecords(corridorRecords());}'));
-  assert(map.includes("[data-map-fit]').addEventListener('click',fitCorridor"));
+  assert(map.includes("[data-map-fit]').addEventListener('click',()=>{clearChainageMarker();fitCorridor();}"));
   assert(map.includes('renderResults();fitCorridor();renderDetail(null);'));
   assert(map.includes('renderResults();fitVisible();'));
   assert(map.includes("if(!coords.length||!state.map)return false"));
