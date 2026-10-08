@@ -2,7 +2,7 @@
 (()=>{
  'use strict';
  if(window.RailwayMap)return;
- const R=window.Railway,A=window.RailwayAccess;
+ const R=window.Railway,A=window.RailwayAccess,I=window.RailwayMapIntelligence;
  const LEAFLET_JS='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
  const LEAFLET_CSS='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
  const LEAFLET_JS_SRI='sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
@@ -96,7 +96,7 @@
   unmount();
   if(!host)return;
   const controller=new AbortController(),signal=controller.signal;
-  const state={host,controller,map:null,leaflet:null,markers:new Map(),selected:null,filter:'All',query:'',ownerLoaded:false};
+  const state={host,controller,map:null,leaflet:null,markers:new Map(),chainageMarker:null,selected:null,filter:'All',query:'',chainageMode:false,ownerLoaded:false};
   instance=state;
   host.innerHTML='<section class="map-module" aria-label="ECRL reference map">'+
    '<div class="map-identity-row"><span class="map-malaysia-badge" aria-label="Malaysia map context">🇲🇾 <span>Malaysia</span></span></div>'+
@@ -112,10 +112,38 @@
   const input=host.querySelector('[data-map-search]'),focusBtn=host.querySelector('[data-map-focus]');
   const corridorBase=()=>points().filter(p=>p.phase==='current');
   const corridorRecords=()=>corridorBase().map(effective);
-  const visibleBase=()=>corridorBase().filter(p=>state.filter==='All'||p.type===state.filter).filter(p=>{
-   if(!state.query)return true;const overlay=memberOverlay(p),hay=[p.name,overlay?.code,overlay?.chainage].filter(Boolean).join(' ');return normalize(hay).includes(normalize(state.query));
-  });
-  const visible=()=>visibleBase().map(effective);
+  function approvedAliases(r){
+   const o=r.overlay||{},aliases=[r.name,o.code,o.chainage];
+   const name=normalize(r.name),code=String(o.code||'').toUpperCase();
+   if(name==='pekan sg tong')aliases.push('Pekan Sungai Tong');
+   if(name==='kuantan port city depot')aliases.push('Kuantan Depot','Depot Kuantan','Depot KTN');
+   if(code==='STN17'||name==='itt gombak')aliases.push('Gombak');
+   return aliases.filter(Boolean);
+  }
+  function rankedSearch(){
+   if(!state.query||state.chainageMode)return [];
+   const ranked=I.rankRecords(corridorRecords(),state.query,approvedAliases);
+   if(ranked[0]?.score===100)return ranked.filter(x=>x.score===100);
+   return ranked;
+  }
+  const filtered=()=>corridorRecords().filter(r=>state.filter==='All'||r.type===state.filter);
+  const visible=()=>state.query&&!state.chainageMode?rankedSearch().map(x=>x.record):filtered();
+  const setFilter=type=>{state.filter=type;host.querySelectorAll('[data-map-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.mapFilter===type)));};
+  function chainageAnchors(){
+   if(!A?.canReadMemberContent)return [];
+   return corridorRecords().map(record=>{
+    const chainageKm=I.parseChainage(record.overlay?.chainage);
+    return {record,code:record.overlay?.code||null,name:record.name,type:record.type,chainageKm,lat:Number(record.lat),lon:Number(record.lon),locationConfidence:record.locationConfidence,coordinateSource:sourceText(record)};
+   }).filter(a=>Number.isFinite(a.chainageKm)&&mappable(a.record)).sort((a,b)=>a.chainageKm-b.chainageKm);
+  }
+  function resolveChainage(km){
+   const bracket=I.bracketChainage(chainageAnchors(),km);
+   if(bracket.status==='exact')return {kind:'asset',record:bracket.anchor.record,chainageKm:km};
+   if(bracket.status!=='bracket')return {kind:'error',status:bracket.status,bracket,chainageKm:km};
+   const calc=I.interpolateReference(bracket.previous,bracket.next,km);
+   if(!calc)return {kind:'error',status:'unresolved',bracket,chainageKm:km};
+   return {kind:'reference',id:'chainage-'+km.toFixed(3),type:'Chainage',name:I.formatChainage(km).replace('+','.'),chainageLabel:I.formatChainage(km),chainageKm:km,lat:calc.lat,lon:calc.lon,locationConfidence:'Calculated Corridor Reference',coordinateSource:'Straight-line interpolation between stored chainage-anchor coordinates; visual corridor reference only, not surveyed ECRL geometry.',previous:bracket.previous,next:bracket.next,...calc,isChainageReference:true};
+  }
   const note=r=>r.locationConfidence===PERSONAL
    ?'Personal Field-Validated Location · Owner-confirmed field reference; exact for this portfolio, not engineering/survey GIS.'
    :r.locationConfidence===ENGINEERING
