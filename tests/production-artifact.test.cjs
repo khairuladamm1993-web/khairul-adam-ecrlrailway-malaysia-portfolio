@@ -315,7 +315,7 @@ test('tablet MAP keeps Owner relocation panel visible without weakening admin ga
 
 test('Owner relocation preserves stored marker and edits a separate draft only',()=>{
   const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
-  assert(owner.includes("title:'Proposed draft coordinate'"));
+  assert(owner.includes("title:'PROPOSED coordinate'"));
   assert(owner.includes("s.draftMarker.dragging?.enable()"));
   assert(owner.includes('FOCUS / CENTER SELECTED'));
   assert(owner.includes('RESET DRAFT'));
