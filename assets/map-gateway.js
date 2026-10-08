@@ -139,10 +139,8 @@
   function resolveChainage(km){
    const bracket=I.bracketChainage(chainageAnchors(),km);
    if(bracket.status==='exact')return {kind:'asset',record:bracket.anchor.record,chainageKm:km};
-   if(bracket.status!=='bracket')return {kind:'error',status:bracket.status,bracket,chainageKm:km};
-   const calc=I.interpolateReference(bracket.previous,bracket.next,km);
-   if(!calc)return {kind:'error',status:'unresolved',bracket,chainageKm:km};
-   return {kind:'reference',id:'chainage-'+km.toFixed(3),type:'Chainage',name:I.formatChainage(km).replace('+','.'),chainageLabel:I.formatChainage(km),chainageKm:km,lat:calc.lat,lon:calc.lon,locationConfidence:'Calculated Corridor Reference',coordinateSource:'Straight-line interpolation between stored chainage-anchor coordinates; visual corridor reference only, not surveyed ECRL geometry.',previous:bracket.previous,next:bracket.next,...calc,isChainageReference:true};
+   if(bracket.status==='bracket')return {kind:'bracket',chainageKm:km,previous:bracket.previous,next:bracket.next,afterPreviousKm:km-bracket.previous.chainageKm,beforeNextKm:bracket.next.chainageKm-km};
+   return {kind:'error',status:bracket.status,bracket,chainageKm:km};
   }
   const note=r=>r.locationConfidence===PERSONAL
    ?'Personal Field-Validated Location · Owner-confirmed field reference; exact for this portfolio, not engineering/survey GIS.'
@@ -169,18 +167,16 @@
   function renderDetail(r){
    state.selected=r||null;focusBtn.disabled=!mappable(r);syncSelectedMarker();
    if(!r){detailHost.innerHTML='<span class="access-label">MAP</span><h3>Select an asset</h3><p>Choose a result to inspect coordinate confidence. Exact markers appear only for validated locations.</p>';return;}
-   if(r.isChainageReference){
+   if(r.isChainageBracket){
     detailHost.innerHTML='<span class="access-label">CHAINAGE</span><h3>'+esc(r.name)+'</h3>'+
-     '<p><strong>Calculated Corridor Reference</strong></p>'+
+     '<p><strong>Calculated Corridor Reference — position unresolved</strong></p>'+
      '<dl class="map-member-detail">'+
       '<div><dt>Previous anchor</dt><dd>'+esc(anchorText(r.previous))+'</dd></div>'+
       '<div><dt>Next anchor</dt><dd>'+esc(anchorText(r.next))+'</dd></div>'+
       '<div><dt>After previous</dt><dd>'+esc(r.afterPreviousKm.toFixed(3))+' km</dd></div>'+
       '<div><dt>Before next</dt><dd>'+esc(r.beforeNextKm.toFixed(3))+' km</dd></div>'+
-      '<div><dt>Reference latitude</dt><dd>'+esc(coordinateText(r.lat))+'</dd></div>'+
-      '<div><dt>Reference longitude</dt><dd>'+esc(coordinateText(r.lon))+'</dd></div>'+
-      '<div><dt>Reference type</dt><dd>Calculated Corridor Reference</dd></div>'+
-     '</dl><p>Straight-line interpolation between stored chainage-anchor coordinates. This is a corridor-reference aid only, not surveyed ECRL geometry or an exact engineering location.</p>';
+      '<div><dt>Reference coordinate</dt><dd>Not calculated</dd></div>'+
+     '</dl><p>The visible railway layer is raster reference context only. No queryable route geometry is available, so MAP does not invent a latitude/longitude point for this chainage.</p>';
     return;
    }
    const o=r.overlay||{};
@@ -199,14 +195,6 @@
     (A?.canAdmin?'<div class="owner-map-slot" data-owner-map-slot></div>':'');
   }
   function clearChainageMarker(){try{state.chainageMarker?.remove();}catch{}state.chainageMarker=null;}
-  function showChainageReference(r){
-   clearChainageMarker();
-   if(!r?.isChainageReference||!mappable(r)||!state.map)return;
-   const icon=state.leaflet.divIcon({className:'railway-map-divicon',html:'<span class="railway-chainage-reference-pin" aria-hidden="true"></span>',iconSize:[18,18],iconAnchor:[9,9]});
-   state.chainageMarker=state.leaflet.marker([Number(r.lat),Number(r.lon)],{icon,keyboard:true,title:r.name,riseOnHover:true}).addTo(state.map);
-   state.chainageMarker.bindTooltip(esc(r.name)+' · Calculated Corridor Reference',{direction:'top',offset:[0,-8],opacity:.94,className:'railway-map-label'});
-   state.chainageMarker.on('click',()=>renderDetail(r));
-  }
   function selectAsset(r,{reveal=true}={}){
    clearChainageMarker();state.chainageMode=false;
    if(reveal&&r?.type&&['STN','PL','Depot'].includes(r.type))setFilter(r.type);
@@ -264,7 +252,11 @@
     state.chainageMode=true;renderResults();
     const result=resolveChainage(km);
     if(result.kind==='asset'){state.chainageMode=false;state.query='';selectAsset(result.record);return;}
-    if(result.kind==='reference'){renderDetail(result);showChainageReference(result);focusStored(result,10);return;}
+    if(result.kind==='bracket'){
+     const bracketView={...result,id:'chainage-'+km.toFixed(3),type:'Chainage',name:I.formatChainage(km).replace('+','.'),locationConfidence:'Calculated Corridor Reference',isChainageBracket:true};
+     renderDetail(bracketView);
+     return;
+    }
     chainageError(result);return;
    }
    state.chainageMode=false;renderResults();
