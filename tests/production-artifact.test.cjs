@@ -416,3 +416,105 @@ test('Owner relocation review remains scroll-reachable on tablet and mobile',()=
   assert(css.includes('.owner-chainage-context'));
   assert(css.includes('.railway-stored-location-pin'));
 });
+
+
+test('Owner Chainage Guide is admin-only, nearby-only and never invents chainage map positions',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
+  const css=fs.readFileSync(path.join(root,'assets','gateway.css'),'utf8');
+  assert(map.includes("if(!A?.canAdmin||!state.map)return"));
+  assert(owner.includes('CHAINAGE GUIDE'));
+  assert(owner.includes('Nearby canonical anchors with supported coordinates only.'));
+  assert(owner.includes('for(const a of [x.previous,x.next])'));
+  assert(owner.includes("if(!r||!finite(r.lat)||!finite(r.lon)||!guideLabel(a))continue"));
+  assert(owner.includes("formatted.replace(/^CH/,'')"));
+  assert(css.includes('.owner-chainage-guide-label'));
+  assert(!owner.includes('interpolateReference'));
+  assert(!owner.includes('L.polyline'));
+  assert(!owner.includes('.polyline('));
+  assert(!owner.includes('snapTo'));
+});
+
+test('Owner Proposed marker drag updates draft live while Current and canonical chainage remain fixed',()=>{
+  const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
+  assert(owner.includes("s.draftMarker.on('drag',onDraftDrag)"));
+  assert(owner.includes("s.draftMarker.on('dragstart',()=>{try{s.ctx.map.dragging?.disable();}catch{}})"));
+  assert(owner.includes("try{mounted?.ctx?.map?.dragging?.enable();}catch{}"));
+  assert(owner.includes("d.latitude=Number(lat);d.longitude=Number(lon);d.accuracyM=null"));
+  assert(owner.includes("[data-proposed-lat]"));
+  assert(owner.includes("[data-proposed-lon]"));
+  assert(owner.includes("[data-proposed-moved]"));
+  const liveStart=owner.indexOf('function updateDraftLive');
+  const liveEnd=owner.indexOf('function onDraftDrag',liveStart);
+  const live=owner.slice(liveStart,liveEnd);
+  assert(!live.includes('previousLat='));
+  assert(!live.includes('previousLon='));
+  assert(!live.includes('d.chainage='));
+  assert(!live.includes('adminPublishLocation'));
+  assert(owner.includes("title:'CURRENT stored coordinate'"));
+  assert(owner.includes("title:'PROPOSED coordinate'"));
+  assert(owner.includes("'PROPOSED · '+d.assetId+(d.chainage?' · '+d.chainage:'')"));
+});
+
+test('Save Draft is local-only and Owner Confirm is the sole publish path',()=>{
+  const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
+  assert(owner.includes('SAVE DRAFT'));
+  assert(owner.includes("d.stage='saved'"));
+  assert(owner.includes('Draft Saved Locally'));
+  assert(owner.includes('REVIEW SAVED DRAFT'));
+  assert(owner.includes("d.stage='review'"));
+  const draftStart=owner.indexOf("form.addEventListener('submit'");
+  const savedStart=owner.indexOf('function renderSavedDraft');
+  assert(draftStart>=0&&savedStart>draftStart);
+  assert(!owner.slice(draftStart,savedStart).includes('adminPublishLocation'));
+  const confirmStart=owner.indexOf('async function confirmPublish');
+  assert(confirmStart>=0);
+  const confirm=owner.slice(confirmStart,owner.indexOf('function cleanupDraft',confirmStart));
+  assert(confirm.includes('A.adminPublishLocation'));
+  assert(!confirm.includes('chainage:'));
+  assert(owner.includes('Publishing requires the separate Owner Confirm action and backend admin authorization.'));
+});
+
+test('backend Owner publish API changes geographic fields only and has no chainage parameter',()=>{
+  const migration=fs.readFileSync(path.join(root,'supabase/migrations/20261007_owner_map_location_management.sql'),'utf8');
+  const access=fs.readFileSync(path.join(root,'assets','access.js'),'utf8');
+  assert(migration.includes('public.admin_publish_location(p_asset_id text,p_latitude double precision,p_longitude double precision,p_confidence text,p_source_note text,p_accuracy_m double precision default null)'));
+  assert(!migration.includes('admin_publish_location(p_asset_id text,p_chainage'));
+  const start=access.indexOf('async function adminPublishLocation');
+  const end=access.indexOf('async function adminLocationHistory',start);
+  const fn=access.slice(start,end);
+  assert(fn.includes('p_latitude'));
+  assert(fn.includes('p_longitude'));
+  assert(!fn.includes('p_chainage'));
+});
+
+test('DEPOT-EMU relocation explicitly permits off-mainline Owner review without snapping',()=>{
+  const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
+  assert(owner.includes("d.assetId==='DEPOT-EMU'"));
+  assert(owner.includes('Chainage identifies corridor reference position. Off-mainline facilities may be located on connected depot/access tracks.'));
+  assert(!owner.includes('snapToMainline'));
+  assert(!owner.includes('nearestRail'));
+  assert(!owner.includes('interpolateReference'));
+});
+
+test('Kuantan Depot retains normal relocation with no invented chainage',()=>{
+  const registry=fs.readFileSync(path.join(root,'assets/corridor-reference.js'),'utf8');
+  const owner=fs.readFileSync(path.join(root,'assets/owner-map.js'),'utf8');
+  assert(registry.includes("['Kuantan Port City Depot','Depot',3.97450,103.33750,'Pending Validation']"));
+  assert(owner.includes('Chainage unavailable / not validated.'));
+  assert(!registry.includes('DEPOT-KTN'));
+});
+
+test('iPad touch relocation keeps controls reachable and prevents map-pan fighting marker drag',()=>{
+  const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
+  const css=fs.readFileSync(path.join(root,'assets','gateway.css'),'utf8');
+  assert(owner.includes("s.draftMarker.on('dragstart'"));
+  assert(owner.includes("s.ctx.map.dragging?.disable()"));
+  assert(owner.includes("mounted?.ctx?.map?.dragging?.enable()"));
+  assert(css.includes('.railway-draft-location-pin'));
+  assert(css.includes('touch-action:none'));
+  assert(css.includes('@media(max-width:900px)'));
+  assert(css.includes('.map-side{max-height:none;overflow:visible}'));
+  assert(css.includes('@media(max-width:719px)'));
+  assert(css.includes('.owner-guide-toggle{align-items:flex-start;flex-direction:column}'));
+});
