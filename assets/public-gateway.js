@@ -17,7 +17,13 @@
  const ensureMap=()=>{
   if(window.RailwayMap)return Promise.resolve(window.RailwayMap);
   if(mapLoader)return mapLoader;
-  mapLoader=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='assets/map-gateway.js';s.async=true;s.dataset.railwayMapModule='1';s.onload=()=>window.RailwayMap?resolve(window.RailwayMap):reject(new Error('Map module unavailable'));s.onerror=()=>reject(new Error('Map module failed to load'));document.head.append(s);});
+  const load=(src,attr,ready)=>new Promise((resolve,reject)=>{
+   if(ready())return resolve();
+   const existing=document.querySelector('script['+attr+']');
+   if(existing){existing.addEventListener('load',()=>ready()?resolve():reject(new Error(src+' unavailable')),{once:true});existing.addEventListener('error',reject,{once:true});return;}
+   const s=document.createElement('script');s.src=src;s.async=true;s.setAttribute(attr,'1');s.onload=()=>ready()?resolve():reject(new Error(src+' unavailable'));s.onerror=()=>reject(new Error(src+' failed to load'));document.head.append(s);
+  });
+  mapLoader=(async()=>{await load('assets/map-intelligence.js','data-railway-map-intelligence',()=>Boolean(window.RailwayMapIntelligence));await load('assets/map-gateway.js','data-railway-map-module',()=>Boolean(window.RailwayMap));return window.RailwayMap;})();
   return mapLoader;
  };
  const mountMap=()=>ensureMap().then(m=>m.mount(document.querySelector('#railway-map-mount'))).catch(error=>{const host=document.querySelector('#railway-map-mount');if(host)host.innerHTML='<article class="learning-card"><h2>MAP</h2><p>'+R.escape(error.message||error)+'</p></article>';});
