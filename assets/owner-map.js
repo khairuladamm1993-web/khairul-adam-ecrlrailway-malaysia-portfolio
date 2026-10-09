@@ -25,7 +25,7 @@
   if(!A?.canAdmin||!slot){unmount();return;}
   if(mounted&&mounted.slot===slot&&!force){render();return;}
   unmount();
-  mounted={ctx,slot,draft:null,current:null,currentMarker:null,storedMarker:null,draftMarker:null,guideMarkers:[],dragMarker:null,mapClick:null,history:null,busy:false};
+  mounted={ctx,slot,draft:null,current:null,currentMarker:null,storedMarker:null,draftMarker:null,estimatedGuideMarker:null,guideMarkers:[],dragMarker:null,mapClick:null,history:null,busy:false};
   render();
  }
  function unmount(){
@@ -33,6 +33,7 @@
   cleanupDraft(true);
   try{s.currentMarker?.remove();}catch{}
   try{s.storedMarker?.remove();}catch{}
+  try{s.estimatedGuideMarker?.remove();}catch{}
   clearGuideMarkers();
   mounted=null;
  }
@@ -97,6 +98,21 @@
  function guideIcon(label){
   return mounted.ctx.leaflet.divIcon({className:'railway-map-divicon owner-chainage-guide-icon',html:'<span class="owner-chainage-guide-label">'+esc(label)+'</span>',iconSize:[1,1],iconAnchor:[0,0]});
  }
+ function estimatedGuideIcon(){
+  return mounted.ctx.leaflet.divIcon({className:'railway-map-divicon',html:'<span class="railway-estimated-guide-pin" aria-hidden="true"></span>',iconSize:[18,18],iconAnchor:[9,9]});
+ }
+ function drawEstimatedGuide(){
+  const s=mounted,d=s?.draft;if(!s||!d)return;
+  try{s.estimatedGuideMarker?.remove();}catch{}s.estimatedGuideMarker=null;
+  const g=s.ctx.getEstimatedGuide?.(record());
+  if(!d.guideEnabled||!g||!finite(g.lat)||!finite(g.lon))return;
+  s.estimatedGuideMarker=s.ctx.leaflet.marker([Number(g.lat),Number(g.lon)],{
+   icon:estimatedGuideIcon(),keyboard:false,interactive:false,title:'ESTIMATED CH REFERENCE',pane:'chainageGuide'
+  }).addTo(s.ctx.map);
+  s.estimatedGuideMarker.bindTooltip('ESTIMATED CH REFERENCE · '+d.assetId+(d.chainage?' · '+d.chainage:''),{
+   permanent:true,direction:'right',offset:[8,0],className:'railway-map-label owner-estimated-guide-label'
+  });
+ }
  function clearGuideMarkers(){
   const s=mounted;if(!s)return;
   for(const marker of s.guideMarkers||[])try{marker.remove();}catch{}
@@ -115,14 +131,14 @@
   for(const a of [x.previous,x.next]){
    const r=a?.record;
    if(!r||!finite(r.lat)||!finite(r.lon)||!guideLabel(a))continue;
-   const marker=s.ctx.leaflet.marker([Number(r.lat),Number(r.lon)],{icon:guideIcon(guideLabel(a)),keyboard:false,interactive:false,title:'Chainage guide '+guideLabel(a)}).addTo(s.ctx.map);
+   const marker=s.ctx.leaflet.marker([Number(r.lat),Number(r.lon)],{icon:guideIcon(guideLabel(a)),keyboard:false,interactive:false,title:'Chainage guide '+guideLabel(a),pane:'chainageGuide'}).addTo(s.ctx.map);
    s.guideMarkers.push(marker);
   }
  }
  function drawStoredMarker(){
   const s=mounted,d=s?.draft;if(!s||!d||!finite(d.previousLat)||!finite(d.previousLon))return;
   try{s.storedMarker?.remove();}catch{}
-  s.storedMarker=s.ctx.leaflet.marker([d.previousLat,d.previousLon],{icon:storedIcon(),keyboard:false,title:'CURRENT stored coordinate',interactive:false}).addTo(s.ctx.map);
+  s.storedMarker=s.ctx.leaflet.marker([d.previousLat,d.previousLon],{icon:storedIcon(),keyboard:false,title:'CURRENT stored coordinate',interactive:false,pane:'canonicalAssets'}).addTo(s.ctx.map);
   s.storedMarker.bindTooltip('CURRENT · '+d.assetId+(d.chainage?' · '+d.chainage:''),{permanent:true,direction:'top',offset:[0,-10],className:'railway-map-label'});
  }
  function drawCurrentMarker(){
@@ -150,6 +166,7 @@
   enableDraftInteraction();
   drawStoredMarker();
   drawChainageGuide();
+  drawEstimatedGuide();
   render();
  }
  function enableDraftInteraction(){
@@ -164,7 +181,7 @@
  function createDraftMarker(){
   const s=mounted,d=s?.draft;if(!s||!d||!finite(d.latitude)||!finite(d.longitude))return;
   try{s.draftMarker?.remove();}catch{}
-  s.draftMarker=s.ctx.leaflet.marker([d.latitude,d.longitude],{icon:draftIcon(),draggable:true,keyboard:true,title:'PROPOSED coordinate'}).addTo(s.ctx.map);
+  s.draftMarker=s.ctx.leaflet.marker([d.latitude,d.longitude],{icon:draftIcon(),draggable:true,keyboard:true,title:'PROPOSED coordinate',pane:'proposedEdit'}).addTo(s.ctx.map);
   s.draftMarker.bindTooltip('PROPOSED · '+d.assetId+(d.chainage?' · '+d.chainage:''),{permanent:true,direction:'top',offset:[0,-9],className:'railway-map-label'});
   s.draftMarker.dragging?.enable();
   s.draftMarker.on('dragstart',()=>{try{s.ctx.map.dragging?.disable();}catch{}});
@@ -201,6 +218,7 @@
   }
   render();
   drawChainageGuide();
+  drawEstimatedGuide();
  }
  function useCurrentLocation(){
   if(!mounted?.current||!A.canAdmin)return;
@@ -251,6 +269,28 @@
   const distance=I?.haversineMetres?I.haversineMetres(d.previousLat,d.previousLon,d.latitude,d.longitude):haversine(d.previousLat,d.previousLon,d.latitude,d.longitude);
   return distance==null?'—':distance<1000?distance.toFixed(distance<10?1:0)+' m':(distance/1000).toFixed(3)+' km';
  }
+ function evidenceMarkup(d){
+  const meta=mounted?.ctx?.getAssetMetadata?.(record())||{};
+  const rows=[
+   ['Coordinate origin',meta.coordinateOrigin],['Chainage source',meta.chainageSource],['Topology source',meta.topologySource],
+   ['Reviewed',meta.reviewedAt],['Reviewed by',meta.reviewedBy]
+  ].filter(([,v])=>v!==null&&v!==undefined&&String(v).trim()!=='');
+  const survey=meta.surveySource;
+  if(survey)rows.push(['Survey/geospatial source','Attached metadata available — review evidence before Survey Validated classification']);
+  if(!rows.length&&!meta.evidence)return '';
+  return '<section class="owner-evidence"><h5>Source / Evidence Architecture</h5>'+
+   (rows.length?'<dl class="map-member-detail">'+rows.map(([k,v])=>'<div><dt>'+esc(k)+'</dt><dd>'+esc(v)+'</dd></div>').join('')+'</dl>':'')+
+   (meta.evidence?'<p class="owner-hint">Approved evidence metadata is attached to this canonical asset identity.</p>':'')+
+   '</section>';
+ }
+ function ownerLegend(){
+  return '<div class="owner-map-legend" aria-label="Owner map state legend"><span data-state="canonical">Canonical</span><span data-state="calculated">Calculated Reference</span><span data-state="pending">Pending Validation</span><span data-state="field">Field Validated</span><span data-state="survey">Survey Validated</span><span data-state="proposed">Proposed Draft</span></div>';
+ }
+ function estimatedGuideMarkup(d){
+  const g=mounted?.ctx?.getEstimatedGuide?.(record());
+  if(!g)return '<p class="owner-hint">Estimated CH reference coordinate: unavailable. Chainage remains panel/bracket context only; no map position is invented.</p>';
+  return '<p class="owner-hint"><strong>ESTIMATED CH REFERENCE</strong> · '+esc(coord(g.lat)+', '+coord(g.lon))+' · '+esc(g.method)+(g.source?' · '+esc(g.source):'')+'. Temporary reference only; never canonical or survey-grade.</p>';
+ }
  function renderDraft(){
   const d=mounted.draft,work=mounted.slot.querySelector('[data-owner-workflow]');if(!work)return;
   if(d.stage==='saved'){renderSavedDraft();return;}
@@ -258,8 +298,9 @@
   work.innerHTML='<form data-owner-edit-form class="owner-edit-form">'+
    '<h4>Edit → Draft Coordinate</h4>'+
    '<p><strong>'+esc(d.assetId)+' · '+esc(d.name)+'</strong></p>'+
+   ownerLegend()+
    '<div class="owner-guide-toggle"><span><strong>CHAINAGE GUIDE</strong><small>Nearby canonical anchors with supported coordinates only.</small></span><button type="button" data-owner-guide aria-pressed="'+String(d.guideEnabled)+'">'+(d.guideEnabled?'GUIDE ON':'GUIDE OFF')+'</button></div>'+
-   chainageContextMarkup(d)+
+   estimatedGuideMarkup(d)+chainageContextMarkup(d)+evidenceMarkup(d)+
    (d.assetId==='DEPOT-EMU'?'<p class="owner-warning-note"><strong>Off-mainline facility:</strong> Chainage identifies corridor reference position. Off-mainline facilities may be located on connected depot/access tracks.</p>':'')+
    '<div class="owner-coordinate-grid"><label>Latitude<input name="latitude" type="number" step="0.000001" value="'+(d.latitude??'')+'" required></label><label>Longitude<input name="longitude" type="number" step="0.000001" value="'+(d.longitude??'')+'" required></label></div>'+
    '<label>Classification<select name="confidence">'+confidenceOptions(d.confidence)+'</select></label>'+
@@ -270,8 +311,8 @@
    '<div class="owner-map-actions"><button type="submit">SAVE DRAFT</button><button type="button" data-owner-focus>FOCUS / CENTER SELECTED</button><button type="button" data-owner-reset>RESET DRAFT</button><button type="button" data-owner-cancel>CANCEL DRAFT</button></div>'+
    '</form>';
   const form=work.querySelector('[data-owner-edit-form]');
-  form.addEventListener('submit',e=>{e.preventDefault();syncDraftForm();if(!finite(d.latitude)||!finite(d.longitude)){setMessage('A coordinate is required before saving the draft.',true);return;}if(d.sourceNote.length<4){setMessage('Add a source/evidence note before saving the draft.',true);return;}d.stage='saved';renderDraft();drawChainageGuide();});
-  work.querySelector('[data-owner-guide]')?.addEventListener('click',()=>{syncDraftForm();d.guideEnabled=!d.guideEnabled;renderDraft();drawChainageGuide();});
+  form.addEventListener('submit',e=>{e.preventDefault();syncDraftForm();if(!finite(d.latitude)||!finite(d.longitude)){setMessage('A coordinate is required before saving the draft.',true);return;}if(d.sourceNote.length<4){setMessage('Add a source/evidence note before saving the draft.',true);return;}d.stage='saved';renderDraft();drawChainageGuide();drawEstimatedGuide();});
+  work.querySelector('[data-owner-guide]')?.addEventListener('click',()=>{syncDraftForm();d.guideEnabled=!d.guideEnabled;renderDraft();drawChainageGuide();drawEstimatedGuide();});
   work.querySelector('[data-owner-focus]')?.addEventListener('click',focusSelectedForEdit);
   work.querySelector('[data-owner-reset]')?.addEventListener('click',resetDraft);
   work.querySelector('[data-owner-cancel]')?.addEventListener('click',()=>{cleanupDraft(true);mounted.draft=null;render();});
@@ -281,22 +322,22 @@
  }
  function renderSavedDraft(){
   const d=mounted.draft,work=mounted.slot.querySelector('[data-owner-workflow]');if(!work)return;
-  work.innerHTML='<div class="owner-review owner-saved-draft"><h4>Draft Saved Locally</h4>'+
+  work.innerHTML='<div class="owner-review owner-saved-draft"><h4>Draft Saved Locally</h4>'+ownerLegend()+
    '<p class="owner-hint">No canonical coordinate has been changed. Review the saved draft before Owner Confirm becomes available.</p>'+
    '<dl class="map-member-detail"><div><dt>Asset</dt><dd>'+esc(d.assetId+' · '+d.name)+'</dd></div><div><dt>Canonical chainage</dt><dd>'+esc(d.chainage||'—')+'</dd></div>'+
    '<div><dt>Current coordinate</dt><dd>'+esc(coord(d.previousLat)+', '+coord(d.previousLon))+'</dd></div><div><dt>Proposed coordinate</dt><dd>'+esc(coord(d.latitude)+', '+coord(d.longitude))+'</dd></div>'+
    '<div><dt>Moved</dt><dd>'+esc(movementText(d))+'</dd></div><div><dt>Classification</dt><dd>'+esc(d.confidence)+'</dd></div></dl>'+
-   chainageContextMarkup(d)+(d.assetId==='DEPOT-EMU'?'<p class="owner-warning-note">Chainage identifies corridor reference position. Off-mainline facilities may be located on connected depot/access tracks.</p>':'')+
+   estimatedGuideMarkup(d)+chainageContextMarkup(d)+evidenceMarkup(d)+(d.assetId==='DEPOT-EMU'?'<p class="owner-warning-note">Chainage identifies corridor reference position. Off-mainline facilities may be located on connected depot/access tracks.</p>':'')+
    '<div class="owner-map-actions"><button type="button" data-owner-review>REVIEW SAVED DRAFT</button><button type="button" data-owner-back>BACK TO EDIT</button><button type="button" data-owner-cancel>CANCEL DRAFT</button></div></div>';
   work.querySelector('[data-owner-review]')?.addEventListener('click',()=>{d.stage='review';renderDraft();clearGuideMarkers();});
-  work.querySelector('[data-owner-back]')?.addEventListener('click',()=>{d.stage='edit';renderDraft();drawChainageGuide();});
+  work.querySelector('[data-owner-back]')?.addEventListener('click',()=>{d.stage='edit';renderDraft();drawChainageGuide();drawEstimatedGuide();});
   work.querySelector('[data-owner-cancel]')?.addEventListener('click',()=>{cleanupDraft(true);mounted.draft=null;render();});
  }
  function renderReview(){
   const d=mounted.draft,work=mounted.slot.querySelector('[data-owner-workflow]');
   const distance=I?.haversineMetres?I.haversineMetres(d.previousLat,d.previousLon,d.latitude,d.longitude):haversine(d.previousLat,d.previousLon,d.latitude,d.longitude);
   work.innerHTML='<div class="owner-review">'+
-   '<h4>Review → Owner Confirm → Publish</h4>'+
+   '<h4>Review → Owner Confirm → Publish</h4>'+ownerLegend()+
    '<h5>CURRENT LOCATION</h5><dl class="map-member-detail">'+
     '<div><dt>Asset</dt><dd>'+esc(d.assetId+' · '+d.name)+'</dd></div>'+
     '<div><dt>Coordinate</dt><dd>'+esc(coord(d.previousLat)+', '+coord(d.previousLon))+'</dd></div>'+
@@ -316,7 +357,7 @@
    '<p class="owner-hint">REVIEW MODE: dragging or reviewing never writes canonical data. Publishing requires the separate Owner Confirm action and backend admin authorization.</p>'+
    '<div class="owner-map-actions"><button type="button" data-owner-confirm>PUBLISH — OWNER CONFIRM</button><button type="button" data-owner-back>BACK TO EDIT</button><button type="button" data-owner-cancel>CANCEL</button></div>'+
    '</div>';
-  work.querySelector('[data-owner-back]')?.addEventListener('click',()=>{d.stage='saved';renderDraft();drawChainageGuide();});
+  work.querySelector('[data-owner-back]')?.addEventListener('click',()=>{d.stage='saved';renderDraft();drawChainageGuide();drawEstimatedGuide();});
   work.querySelector('[data-owner-cancel]')?.addEventListener('click',()=>{cleanupDraft(true);mounted.draft=null;render();});
   work.querySelector('[data-owner-confirm]')?.addEventListener('click',confirmPublish);
  }
@@ -337,6 +378,7 @@
   if(s.dragMarker){try{s.dragMarker.dragging?.disable();}catch{}s.dragMarker=null;}
   if(s.draftMarker){try{s.draftMarker.remove();}catch{}s.draftMarker=null;}
   if(s.storedMarker){try{s.storedMarker.remove();}catch{}s.storedMarker=null;}
+  if(s.estimatedGuideMarker){try{s.estimatedGuideMarker.remove();}catch{}s.estimatedGuideMarker=null;}
   clearGuideMarkers();
   try{s.ctx.map.dragging?.enable();}catch{}
  }
