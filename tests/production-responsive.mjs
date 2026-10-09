@@ -399,6 +399,9 @@ for(const [width,height] of viewports){
             f.querySelector('[name=sourceNote]').value='CI field GPS confirmation';
             f.requestSubmit();return true;
           })()`);
+          await waitEval(client,"!!document.querySelector('[data-owner-review]')");
+          const savedBefore=await evalValue(client,"window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length");
+          await evalValue(client,`(()=>{document.querySelector('[data-owner-review]')?.click();return true})()`);
           await waitEval(client,"!!document.querySelector('[data-owner-confirm]')");
           const reviewBefore=await evalValue(client,"window.__rpcCalls.filter(x=>x.name==='admin_publish_location').length");
           await evalValue(client,`(()=>{document.querySelector('[data-owner-confirm]')?.click();return true})()`);
