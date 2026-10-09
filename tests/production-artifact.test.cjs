@@ -518,3 +518,126 @@ test('iPad touch relocation keeps controls reachable and prevents map-pan fighti
   assert(css.includes('@media(max-width:719px)'));
   assert(css.includes('.owner-guide-toggle{align-items:flex-start;flex-direction:column}'));
 });
+
+
+test('survey-grade-ready MAP keeps one canonical identity with extensible metadata only',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  assert(map.includes("const item=rows.find(x=>x.approved!==false&&x.kind==='corridor'"));
+  assert(map.includes('meta:assetMetadata(item.body,item.evidence)'));
+  assert(map.includes('assetMeta:overlay.meta||null'));
+  assert(map.includes('function topologyPayload(body)'));
+  assert(map.includes('function assetMetadata(body,evidence)'));
+  assert(!map.includes('surveyCorridorRecords'));
+  assert(!map.includes('topologyCorridorRecords'));
+  assert(!map.includes('duplicateCorridor'));
+});
+
+test('canonical chainage and geographic coordinate remain independent fields',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
+  assert(map.includes("const chainage=typeof item.body?.chainage==='string'?item.body.chainage"));
+  assert(map.includes('location:locationPayload(item.body)'));
+  assert(owner.includes('Chainage remains '));
+  const dragStart=owner.indexOf('function updateDraftLive');
+  const dragEnd=owner.indexOf('function onDraftDrag',dragStart);
+  const drag=owner.slice(dragStart,dragEnd);
+  assert(drag.includes('d.latitude=Number(lat);d.longitude=Number(lon)'));
+  assert(!drag.includes('d.chainage='));
+  const publishStart=owner.indexOf('async function confirmPublish');
+  const publishEnd=owner.indexOf('function cleanupDraft',publishStart);
+  assert(!owner.slice(publishStart,publishEnd).includes('chainage:'));
+});
+
+test('estimated chainage reference is a separate Owner-only noncanonical state',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
+  assert(map.includes('function estimatedGuidePayload(body)'));
+  assert(map.includes("confidence:CALCULATED,canonical:false,surveyGrade:false"));
+  assert(map.includes("new Set(['survey-georeferenced','approved-engineering-alignment','supported-reference-geometry'])"));
+  assert(owner.includes("title:'ESTIMATED CH REFERENCE'"));
+  assert(owner.includes('Temporary reference only; never canonical or survey-grade.'));
+  assert(owner.includes("pane:'chainageGuide'"));
+  const guideStart=owner.indexOf('function drawEstimatedGuide');
+  const guideEnd=owner.indexOf('function clearGuideMarkers',guideStart);
+  assert(!owner.slice(guideStart,guideEnd).includes('adminPublishLocation'));
+});
+
+test('missing guide or survey geometry stays unresolved rather than invented',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
+  assert(map.includes('if(!raw)return null'));
+  assert(map.includes('if(!finite(lat)||!finite(lon)||!method||!supported.has(method))return null'));
+  assert(owner.includes('Estimated CH reference coordinate: unavailable.'));
+  assert(owner.includes('no map position is invented.'));
+  assert(map.includes('Reference coordinate</dt><dd>Not calculated'));
+  assert(!map.includes('interpolateReference'));
+  assert(!owner.includes('interpolateReference'));
+  assert(!map.includes('L.polyline'));
+  assert(!owner.includes('L.polyline'));
+});
+
+test('future survey and topology layers are logically separate and empty by default',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  for(const token of ["base:'BASE MAP'","railwayReference:'RAILWAY REFERENCE'","canonical:'CANONICAL ASSETS'","chainageGuide:'CHAINAGE GUIDE'","proposed:'PROPOSED EDIT'","survey:'FUTURE SURVEY LAYER'","topology:'FUTURE TOPOLOGY LAYER'"])assert(map.includes(token),token);
+  assert(map.includes("createPane?.('canonicalAssets')"));
+  assert(map.includes("createPane?.('surveyGeometry')"));
+  assert(map.includes("createPane?.('topologyGeometry')"));
+  assert(map.includes("createPane?.('chainageGuide')"));
+  assert(map.includes("createPane?.('proposedEdit')"));
+  assert(map.includes("pane:'canonicalAssets'"));
+  assert(!map.includes('addSurveyGeometry('));
+  assert(!map.includes('addTopologyGeometry('));
+});
+
+test('station detail architecture tolerates absent topology and renders only supported fields',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  assert(map.includes("const t=r?.assetMeta?.topology;if(!t)return ''"));
+  for(const field of ['trackCount','platformCount','trackIds','lineIds','platformIds','siding','depotAccess','freightLine','passengerLine','turnoutSequence','connectionDirection','trackFunction','usableLength','maxConsistNote','schematicSource','layoutSource','topologyConfidence'])assert(map.includes(field),field);
+  assert(map.includes('<h4>Basic</h4>'));
+  assert(map.includes('<h4>Operational Detail</h4>'));
+  assert(map.includes('<h4>Schematic / Topology</h4>'));
+});
+
+test('survey evidence metadata can attach to existing asset without creating a second asset record',()=>{
+  const map=fs.readFileSync(path.join(root,'assets','map-gateway.js'),'utf8');
+  assert(map.includes('surveySource:survey||null'));
+  assert(map.includes('reviewedAt:textOrNull'));
+  assert(map.includes('reviewedBy:textOrNull'));
+  assert(map.includes('coordinateOrigin:textOrNull'));
+  assert(map.includes('chainageSource:textOrNull'));
+  assert(map.includes('topologySource:textOrNull'));
+  assert(map.includes('evidence:evidence??body?.evidence??null'));
+  assert(map.includes('estimatedGuide:estimatedGuidePayload(body)'));
+});
+
+test('Owner confidence UI cannot auto-promote Pending drag to survey-grade',()=>{
+  const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
+  assert(owner.includes('const values=[PERSONAL,PUBLIC,PENDING]'));
+  assert(owner.includes("if([VALID,ENGINEERING].includes(current)&&!values.includes(current))values.unshift(current)"));
+  const dragStart=owner.indexOf('function updateDraftLive');
+  const dragEnd=owner.indexOf('function onDraftDrag',dragStart);
+  assert(!owner.slice(dragStart,dragEnd).includes('confidence='));
+  assert(owner.includes('do not change confidence automatically')||owner.includes('do not change confidence automatically'.replace('do not','do not')));
+});
+
+test('Owner legend distinguishes canonical calculated pending field survey and proposed states',()=>{
+  const owner=fs.readFileSync(path.join(root,'assets','owner-map.js'),'utf8');
+  const css=fs.readFileSync(path.join(root,'assets','gateway.css'),'utf8');
+  for(const label of ['Canonical','Calculated Reference','Pending Validation','Field Validated','Survey Validated','Proposed Draft'])assert(owner.includes(label),label);
+  assert(css.includes('.owner-map-legend'));
+  assert(css.includes('[data-state=proposed]'));
+  assert(css.includes('.railway-estimated-guide-pin'));
+});
+
+test('public production artifact contains no embedded protected survey, topology or evidence dataset',()=>{
+  const dir=build('build-production.py','railway-production-');
+  const registry=fs.readFileSync(path.join(dir,'assets','corridor-reference.js'),'utf8');
+  assert(!registry.includes('surveySource'));
+  assert(!registry.includes('topologySource'));
+  assert(!registry.includes('estimatedChainageReference'));
+  assert(!registry.includes('stationTopology'));
+  assert(!registry.includes('depotTopology'));
+  const map=fs.readFileSync(path.join(dir,'assets','map-gateway.js'),'utf8');
+  assert(map.includes("Approved Member Corridor data is merged at runtime only."));
+  fs.rmSync(dir,{recursive:true,force:true});
+});
