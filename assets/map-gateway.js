@@ -282,7 +282,7 @@
     const confidenceClass=exact(r)?'map-confidence-exact':r.locationConfidence===PUBLIC?'map-confidence-reference':'map-confidence-pending';
     const cls='railway-map-pin map-pin-'+r.type.toLowerCase()+' '+confidenceClass;
     const icon=state.leaflet.divIcon({className:'railway-map-divicon',html:'<span class="'+cls+'" aria-hidden="true"></span>',iconSize:[18,18],iconAnchor:[9,9]});
-    marker=state.leaflet.marker([Number(r.lat),Number(r.lon)],{icon,keyboard:true,title:r.name,riseOnHover:true}).addTo(state.map);
+    marker=state.leaflet.marker([Number(r.lat),Number(r.lon)],{icon,keyboard:true,title:r.name,riseOnHover:true,pane:'canonicalAssets'}).addTo(state.map);
     marker._railwayConfidence=r.locationConfidence;
     marker.bindTooltip(esc(r.name)+' · '+esc(r.locationConfidence),{direction:'top',offset:[0,-8],opacity:.92,className:'railway-map-label'});
     marker.on('click',()=>{const fresh=effective(points().find(x=>x.id===r.id)||r);renderDetail(fresh);renderResults();focusStored(fresh);loadOwnerTools();});
