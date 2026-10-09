@@ -10,7 +10,11 @@
  const TILE_URL='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
  const RAIL_REFERENCE_TILE_URL='https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png';
  const EXACT_ZOOM=11;
- const VALID='Validated Location',PERSONAL='Personal Field-Validated Location',ENGINEERING='Engineering/Survey Validated Location',PUBLIC='Public Reference Location',PENDING='Pending Validation';
+ const VALID='Validated Location',PERSONAL='Personal Field-Validated Location',ENGINEERING='Engineering/Survey Validated Location',PUBLIC='Public Reference Location',PENDING='Pending Validation',CALCULATED='Calculated Corridor Reference';
+ const MAP_LAYERS=Object.freeze({
+  base:'BASE MAP',railwayReference:'RAILWAY REFERENCE',canonical:'CANONICAL ASSETS',
+  chainageGuide:'CHAINAGE GUIDE',proposed:'PROPOSED EDIT',survey:'FUTURE SURVEY LAYER',topology:'FUTURE TOPOLOGY LAYER'
+ });
  const points=()=>window.RailwayCorridorReference||[];
 
  let instance=null,loadPromise=null;
@@ -37,6 +41,39 @@
   if([VALID,PERSONAL,ENGINEERING].includes(confidence)&&(!finite(lat)||!finite(lon)))return {lat:null,lon:null,locationConfidence:PENDING,coordinateSource:source||'Validated coordinate incomplete'};
   return {lat,lon,locationConfidence:confidence,coordinateSource:source};
  }
+ function plainObject(v){return v&&typeof v==='object'&&!Array.isArray(v)?v:null;}
+ function textOrNull(v){const s=typeof v==='string'?v.trim():'';return s||null;}
+ function topologyPayload(body){
+  const raw=plainObject(body?.topology||body?.stationTopology||body?.depotTopology);
+  if(!raw)return null;
+  const allowed=['trackCount','platformCount','trackIds','lineIds','platformIds','siding','depotAccess','freightLine','passengerLine','turnoutSequence','connectionDirection','trackFunction','usableLength','maxConsistNote','schematicSource','layoutSource','topologyConfidence'];
+  const out={};
+  for(const key of allowed)if(raw[key]!==undefined&&raw[key]!==null&&raw[key]!=='')out[key]=raw[key];
+  return Object.keys(out).length?out:null;
+ }
+ function estimatedGuidePayload(body){
+  const raw=plainObject(body?.estimatedChainageReference||body?.chainageGuide||body?.mapGuide);
+  if(!raw)return null;
+  const lat=numeric(raw.latitude),lon=numeric(raw.longitude),method=textOrNull(raw.method),source=textOrNull(raw.source||raw.sourceNote);
+  const supported=new Set(['survey-georeferenced','approved-engineering-alignment','supported-reference-geometry']);
+  if(!finite(lat)||!finite(lon)||!method||!supported.has(method))return null;
+  return {lat:Number(lat),lon:Number(lon),method,source,confidence:CALCULATED,canonical:false,surveyGrade:false};
+ }
+ function assetMetadata(body,evidence){
+  const geo=plainObject(body?.geospatial||body?.geoMeta||body?.locationMetadata)||{};
+  const survey=plainObject(body?.surveySource||body?.survey||body?.geospatialSource);
+  return {
+   reviewedAt:textOrNull(geo.reviewedAt||body?.reviewedAt),
+   reviewedBy:textOrNull(geo.reviewedBy||body?.reviewedBy),
+   coordinateOrigin:textOrNull(geo.coordinateOrigin||body?.coordinateOrigin),
+   chainageSource:textOrNull(geo.chainageSource||body?.chainageSource),
+   topologySource:textOrNull(geo.topologySource||body?.topologySource),
+   surveySource:survey||null,
+   topology:topologyPayload(body),
+   estimatedGuide:estimatedGuidePayload(body),
+   evidence:evidence??body?.evidence??null
+  };
+ }
  function memberOverlay(point){
   if(!A?.canReadMemberContent)return null;
   const rows=A.cachedData?.content||[];
@@ -46,16 +83,16 @@
   const bodyText=bodyStrings(item.body).join(' ');
   const chainage=typeof item.body?.chainage==='string'?item.body.chainage:(bodyText.match(/\bCH\s*\d{1,3}\s*[+]\s*\d{3}\b/i)||[])[0]||null;
   const code=/^(?:STN|PL|DEPOT|EMU|GNU)[A-Z0-9-]*$/i.test(String(item.id||''))?String(item.id):null;
-  return {code,chainage,title:item.title,body:item.body,evidence:item.evidence,location:locationPayload(item.body)};
+  return {code,chainage,title:item.title,body:item.body,evidence:item.evidence,location:locationPayload(item.body),meta:assetMetadata(item.body,item.evidence)};
  }
  function effective(point){
   const overlay=memberOverlay(point),loc=overlay?.location;
   if(loc){
    if([VALID,PERSONAL,ENGINEERING].includes(loc.locationConfidence)&&finite(loc.lat)&&finite(loc.lon)){
-    return {...point,lat:Number(loc.lat),lon:Number(loc.lon),locationConfidence:loc.locationConfidence,coordinateSource:loc.coordinateSource||'Validated project reference',overlay};
+    return {...point,lat:Number(loc.lat),lon:Number(loc.lon),locationConfidence:loc.locationConfidence,coordinateSource:loc.coordinateSource||'Validated project reference',assetMeta:overlay.meta||null,overlay};
    }
    if(loc.locationConfidence===PUBLIC&&finite(loc.lat)&&finite(loc.lon)){
-    return {...point,lat:Number(loc.lat),lon:Number(loc.lon),locationConfidence:PUBLIC,coordinateSource:loc.coordinateSource||'Public reference / locality source',overlay};
+    return {...point,lat:Number(loc.lat),lon:Number(loc.lon),locationConfidence:PUBLIC,coordinateSource:loc.coordinateSource||'Public reference / locality source',assetMeta:overlay.meta||null,overlay};
    }
    if(loc.locationConfidence===PENDING){
     return {...point,
@@ -63,10 +100,10 @@
       lon:finite(loc.lon)?Number(loc.lon):(finite(point.lon)?Number(point.lon):null),
       locationConfidence:PENDING,
       coordinateSource:loc.coordinateSource||point.coordinateSource||'Pending validation',
-      overlay};
+      assetMeta:overlay.meta||null,overlay};
    }
   }
-  return {...point,locationConfidence:allowedConfidence(point.locationConfidence),coordinateSource:point.coordinateSource||null,overlay};
+  return {...point,locationConfidence:allowedConfidence(point.locationConfidence),coordinateSource:point.coordinateSource||null,assetMeta:overlay?.meta||null,overlay};
  }
  const exact=r=>[VALID,PERSONAL,ENGINEERING].includes(r?.locationConfidence)&&corridorSane(r);
  const mappable=r=>corridorSane(r);
@@ -96,7 +133,7 @@
   unmount();
   if(!host)return;
   const controller=new AbortController(),signal=controller.signal;
-  const state={host,controller,map:null,leaflet:null,markers:new Map(),chainageMarker:null,selected:null,filter:'All',query:'',chainageMode:false,ownerLoaded:false};
+  const state={host,controller,map:null,leaflet:null,markers:new Map(),chainageMarker:null,selected:null,filter:'All',query:'',chainageMode:false,ownerLoaded:false,layers:{...MAP_LAYERS}};
   instance=state;
   host.innerHTML='<section class="map-module" aria-label="ECRL reference map">'+
    '<div class="map-identity-row"><span class="map-malaysia-badge" aria-label="Malaysia map context">🇲🇾 <span>Malaysia</span></span></div>'+
@@ -169,6 +206,30 @@
    }
   }
   function anchorText(a){return [a?.code,a?.name,I.formatChainage(a?.chainageKm)].filter(Boolean).join(' · ');}
+  function safeArray(v){return Array.isArray(v)?v.filter(x=>x!==null&&x!==undefined&&String(x).trim()!==''):[];}
+  function topologyValue(v){return Array.isArray(v)?v.join(', '):typeof v==='boolean'?(v?'Yes':'No'):String(v);}
+  function renderOperationalDetail(r){
+   const t=r?.assetMeta?.topology;if(!t)return '';
+   const rows=[
+    ['Track count',t.trackCount],['Platforms',t.platformCount],['Track / line IDs',[...safeArray(t.trackIds),...safeArray(t.lineIds)]],
+    ['Platform IDs',safeArray(t.platformIds)],['Siding',t.siding],['Depot access',t.depotAccess],['Freight line',t.freightLine],
+    ['Passenger line',t.passengerLine],['Connection direction',t.connectionDirection],['Track function',t.trackFunction],
+    ['Usable length',t.usableLength],['Max consist / wagon note',t.maxConsistNote]
+   ].filter(([,v])=>!(v===undefined||v===null||v===''||(Array.isArray(v)&&!v.length)));
+   if(!rows.length)return '';
+   return '<section class="map-detail-level"><h4>Operational Detail</h4><dl class="map-member-detail">'+rows.map(([k,v])=>'<div><dt>'+esc(k)+'</dt><dd>'+esc(topologyValue(v))+'</dd></div>').join('')+'</dl></section>';
+  }
+  function renderTopologyDetail(r){
+   const t=r?.assetMeta?.topology;if(!t)return '';
+   const source=t.schematicSource||t.layoutSource||r.assetMeta?.topologySource;
+   const seq=t.turnoutSequence;
+   if(!source&&!seq&&!t.topologyConfidence)return '';
+   return '<section class="map-detail-level"><h4>Schematic / Topology</h4><dl class="map-member-detail">'+
+    (seq?'<div><dt>Turnout sequence</dt><dd>'+esc(topologyValue(seq))+'</dd></div>':'')+
+    (t.topologyConfidence?'<div><dt>Topology confidence</dt><dd>'+esc(t.topologyConfidence)+'</dd></div>':'')+
+    (source?'<div><dt>Layout source</dt><dd>'+esc(source)+'</dd></div>':'')+
+    '</dl></section>';
+  }
   function renderDetail(r){
    state.selected=r||null;focusBtn.disabled=!mappable(r);syncSelectedMarker();
    if(!r){detailHost.innerHTML='<span class="access-label">MAP</span><h3>Select an asset</h3><p>Choose a result to inspect coordinate confidence. Exact markers appear only for validated locations.</p>';return;}
@@ -186,7 +247,7 @@
    }
    const o=r.overlay||{};
    detailHost.innerHTML='<span class="access-label">'+esc(r.type)+'</span><h3>'+esc(r.name)+'</h3>'+
-    '<dl class="map-member-detail">'+
+    '<section class="map-detail-level"><h4>Basic</h4><dl class="map-member-detail">'+
      '<div><dt>Code</dt><dd>'+esc(o.code||'—')+'</dd></div>'+
      '<div><dt>Name</dt><dd>'+esc(r.name)+'</dd></div>'+
      '<div><dt>Category</dt><dd>'+esc(r.type)+'</dd></div>'+
@@ -195,7 +256,8 @@
      '<div><dt>Longitude</dt><dd>'+esc(coordinateText(r.lon))+'</dd></div>'+
      '<div><dt>Location confidence</dt><dd>'+esc(r.locationConfidence)+'</dd></div>'+
      '<div><dt>Coordinate source</dt><dd>'+esc(sourceText(r))+'</dd></div>'+
-    '</dl><p>'+esc(note(r))+'</p>'+
+    '</dl></section><p>'+esc(note(r))+'</p>'+
+    (A?.canReadMemberContent?renderOperationalDetail(r)+renderTopologyDetail(r):'')+
     (A?.canReadMemberContent?'<p class="map-access-note">Approved Member Corridor data is merged at runtime only.</p>':'<p class="map-access-note">Public view · protected Corridor records are not loaded.</p>')+
     (A?.canAdmin?'<div class="owner-map-slot" data-owner-map-slot></div>':'');
   }
@@ -290,6 +352,9 @@
      return effective(base||state.selected||{});
     },
     getChainageContext:record=>ownerChainageContext(record||state.selected),
+    getEstimatedGuide:record=>(record||state.selected)?.assetMeta?.estimatedGuide||null,
+    getAssetMetadata:record=>(record||state.selected)?.assetMeta||null,
+    layerNames:MAP_LAYERS,
     renderDetail,
     renderResults,
     focusStored,
@@ -321,6 +386,16 @@
    if(basePane){basePane.style.zIndex='200';basePane.classList.add('railway-basemap-pane');}
    const referencePane=state.map.createPane?.('railwayReference');
    if(referencePane){referencePane.style.zIndex='260';referencePane.style.pointerEvents='none';referencePane.classList.add('railway-reference-pane');}
+   const canonicalPane=state.map.createPane?.('canonicalAssets');
+   if(canonicalPane){canonicalPane.style.zIndex='420';canonicalPane.classList.add('railway-canonical-pane');}
+   const surveyPane=state.map.createPane?.('surveyGeometry');
+   if(surveyPane){surveyPane.style.zIndex='360';surveyPane.style.pointerEvents='none';surveyPane.classList.add('railway-survey-pane');}
+   const topologyPane=state.map.createPane?.('topologyGeometry');
+   if(topologyPane){topologyPane.style.zIndex='380';topologyPane.style.pointerEvents='none';topologyPane.classList.add('railway-topology-pane');}
+   const chainageGuidePane=state.map.createPane?.('chainageGuide');
+   if(chainageGuidePane){chainageGuidePane.style.zIndex='440';chainageGuidePane.classList.add('railway-chainage-guide-pane');}
+   const proposedPane=state.map.createPane?.('proposedEdit');
+   if(proposedPane){proposedPane.style.zIndex='460';proposedPane.classList.add('railway-proposed-pane');}
    state.leaflet.tileLayer(TILE_URL,{pane:basePane?'railwayBase':'tilePane',maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',updateWhenIdle:true,keepBuffer:1,detectRetina:false}).addTo(state.map);
    state.leaflet.tileLayer(RAIL_REFERENCE_TILE_URL,{pane:referencePane?'railwayReference':'overlayPane',minZoom:5,maxZoom:19,attribution:'Style: <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener">CC-BY-SA 2.0</a> <a href="https://www.openrailwaymap.org/" target="_blank" rel="noopener">OpenRailwayMap</a>',updateWhenIdle:true,keepBuffer:1,detectRetina:false}).addTo(state.map);
    renderResults();fitCorridor();renderDetail(null);
