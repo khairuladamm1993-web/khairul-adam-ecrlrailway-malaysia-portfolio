@@ -154,3 +154,29 @@ test('stale or expired Magic Link callback fails closed with useful message',asy
  assert.equal(A.canReadMemberContent,false);
  assert.match(A.error,/expired|already been used/i);
 });
+
+
+test('Public and Member cannot read Admin analytics while Admin can reach protected read path',async()=>{
+ const pub=await load({session:null});
+ await assert.rejects(()=>pub.A.adminSummary(),/Admin access required/);
+ await assert.rejects(()=>pub.A.fetchAdminData(),/Admin access required/);
+ const member=await load({role:'member'});
+ await assert.rejects(()=>member.A.adminSummary(),/Admin access required/);
+ await assert.rejects(()=>member.A.fetchAdminData(),/Admin access required/);
+ const admin=await load({role:'admin'});
+ const summary=await admin.A.adminSummary();
+ assert.equal(summary.members,1);
+ await admin.A.fetchAdminData();
+ assert(admin.client.calls.some(x=>x[0]==='from'&&x[1]==='public_analytics_snapshots'));
+});
+
+test('client-side role tampering cannot mutate frozen RailwayAccess authorization state',async()=>{
+ const member=await load({role:'member'});
+ assert.equal(Object.isFrozen(member.A),true);
+ assert.equal(member.A.canAdmin,false);
+ try{member.A.canAdmin=true;}catch{}
+ try{member.A.level='admin';}catch{}
+ assert.equal(member.A.canAdmin,false);
+ assert.equal(member.A.level,'member');
+ await assert.rejects(()=>member.A.adminSummary(),/Admin access required/);
+});
