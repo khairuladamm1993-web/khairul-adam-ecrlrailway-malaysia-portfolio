@@ -9,10 +9,10 @@ window.railwayTranslations = {
     "zh": "语言",
     "py": "Yǔyán"
   },
-  "Welcome to Adam’s railway portfolio": {
-    "ms": "Selamat datang ke portfolio kereta api Adam",
-    "zh": "欢迎来到 Adam 的铁路作品集",
-    "py": "Huānyíng láidào Adam de tiělù zuòpǐnjí"
+  "Welcome to the MR-S10 railway portfolio": {
+    "ms": "Selamat datang ke portfolio kereta api MR-S10",
+    "zh": "欢迎来到 MR-S10 铁路作品集",
+    "py": "Huānyíng láidào MR-S10 tiělù zuòpǐnjí"
   },
   "Original field photograph of a track laying machine and railway maintenance machinery alongside electrified tracks": {
     "ms": "Foto lapangan asal mesin pemasang landasan dan jentera penyelenggaraan kereta api di sisi landasan berelektrik",
@@ -289,10 +289,10 @@ window.railwayTranslations = {
     "zh": "从每一次经历中积累。",
     "py": "Cóng měi yí cì jīnglì zhōng jīlěi."
   },
-  "I’m Khairul Adam. I’m building practical railway operations knowledge through training, field exposure, self-study and independent simulator development.": {
-    "ms": "Saya Khairul Adam. Saya membina pengetahuan praktikal operasi kereta api melalui latihan, pendedahan lapangan, pembelajaran kendiri dan pembangunan simulator secara bebas.",
-    "zh": "我是 Khairul Adam。我通过培训、现场实践、自学和独立开发仿真程序，积累铁路运营的实践知识。",
-    "py": "Wǒ shì Khairul Adam. Wǒ tōngguò péixùn, xiànchǎng shíjiàn, zìxué hé dúlì kāifā fǎngzhēn chéngxù, jīlěi tiělù yùnyíng de shíjiàn zhīshi."
+  "MR-S10 documents practical railway field experience, operations development, technical study and self-developed simulator work.": {
+    "ms": "MR-S10 merekod pengalaman lapangan kereta api, perkembangan operasi, kajian teknikal dan kerja simulator yang dibangunkan sendiri.",
+    "zh": "MR-S10记录铁路现场经验、运营发展、技术研究及自主开发的模拟器工作。",
+    "py": "MR-S10 jìlù tiělù xiànchǎng jīngyàn, yùnyíng fāzhǎn, jìshù yánjiū jí zìzhǔ kāifā de mónǐqì gōngzuò."
   },
   "From technical learning in China to practical experience in Malaysia, each step connects what I learn with how the railway works.": {
     "ms": "Daripada pembelajaran teknikal di China hingga pengalaman praktikal di Malaysia, setiap langkah menghubungkan ilmu yang saya pelajari dengan cara kereta api beroperasi.",
@@ -754,10 +754,10 @@ window.railwayTranslations = {
     "zh": "个人铁路历程。",
     "py": "Gèrén tiělù lìchéng."
   },
-  "This is Khairul Adam’s portfolio of railway learning, operational development and independent simulator work.": {
-    "ms": "Ini ialah portfolio Khairul Adam tentang pembelajaran kereta api, pembangunan operasi dan kerja simulator kendiri.",
-    "zh": "这是 Khairul Adam 的作品集，展示铁路学习、运营能力发展和独立仿真工作。",
-    "py": "Zhè shì Khairul Adam de zuòpǐnjí, zhǎnshì tiělù xuéxí, yùnyíng nénglì fāzhǎn hé dúlì fǎngzhēn gōngzuò."
+  "MR-S10 is an independent railway field, operations and technical-development project.": {
+    "ms": "MR-S10 ialah projek bebas berkaitan lapangan kereta api, operasi dan pembangunan teknikal.",
+    "zh": "MR-S10是一个独立的铁路现场、运营与技术开发项目。",
+    "py": "MR-S10 shì yīgè dúlì de tiělù xiànchǎng, yùnyíng yǔ jìshù kāifā xiàngmù."
   },
   "It connects technical learning in Liuzhou, China with practical field experience in Malaysia, ongoing operations study and the personal ECRL Train Simulator Lab.": {
     "ms": "Ia menghubungkan pembelajaran teknikal di Liuzhou, China dengan pengalaman praktikal di Malaysia, pengajian operasi berterusan dan ECRL Train Simulator Lab peribadi.",
