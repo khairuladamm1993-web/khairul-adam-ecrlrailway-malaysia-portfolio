@@ -641,3 +641,51 @@ test('public production artifact contains no embedded protected survey, topology
   assert(map.includes("Approved Member Corridor data is merged at runtime only."));
   fs.rmSync(dir,{recursive:true,force:true});
 });
+
+
+test('MR-S10 is the primary visible identity while personal name stays contextual',()=>{
+  const dir=build('build-production.py','railway-production-');
+  const index=fs.readFileSync(path.join(dir,'index.html'),'utf8');
+  const gateway=fs.readFileSync(path.join(dir,'gateway.html'),'utf8');
+  const portfolio=fs.readFileSync(path.join(dir,'portfolio.html'),'utf8');
+  const refs=fs.readFileSync(path.join(dir,'references.html'),'utf8');
+  assert(index.includes('<title>MR-S10 | Railway Portfolio Malaysia</title>'));
+  assert(index.includes('<p class="eyebrow">MR-S10</p>'));
+  assert(!index.includes('<h1>Adam</h1>'));
+  assert(gateway.includes('<title>MR-S10 | Railway Operations &amp; Technical Gateway</title>'));
+  assert(gateway.includes('<div class="kicker">MR-S10 '));
+  assert(!gateway.includes('KHAIRUL ADAM'));
+  assert(portfolio.includes('<title>MR-S10 | Railway Portfolio</title>'));
+  assert(portfolio.includes('class="nav-brand">MR-S10'));
+  assert(portfolio.includes('<h2>About the Project Owner</h2>'));
+  assert(portfolio.includes('<strong>Khairul Adam</strong> develops MR-S10'));
+  assert(portfolio.includes('PROJECT OWNER · KHAIRUL ADAM'));
+  assert(portfolio.includes('By 阿当93'));
+  assert(refs.includes('<title>MR-S10 | Railway Project References</title>'));
+  assert(refs.includes('<div class="kicker">MR-S10</div>'));
+  assert(!refs.includes('Equipment references supplied by Khairul Adam'));
+  fs.rmSync(dir,{recursive:true,force:true});
+});
+
+test('site-wide Admin Analytics remains absent for Public and Member UI paths',()=>{
+  const member=fs.readFileSync(path.join(root,'assets','member-gateway.js'),'utf8');
+  const access=fs.readFileSync(path.join(root,'assets','access.js'),'utf8');
+  assert(member.includes("+(A.canAdmin?'<button class=\"primary\" data-admin-dashboard>OPEN ADMIN CONTROLS</button>':'')+"));
+  assert(member.includes("+(A.canAdmin?'<section class=\"learning-card\"><h3>Owner / Admin</h3>"));
+  assert(member.includes("if(e.target.closest('[data-admin-dashboard]'))"));
+  assert(access.includes("async function fetchAdminData(){\n  if(!snapshot().canAdmin)throw new Error('Admin access required.');"));
+  assert(access.includes("async function adminSummary(){\n  if(!snapshot().canAdmin)throw new Error('Admin access required.');"));
+  assert(access.includes("get canAdmin(){return state.level==='admin';}"));
+});
+
+test('production artifact embeds no real Admin analytics payload or historical totals',()=>{
+  const dir=build('build-production.py','railway-production-');
+  const textFiles=walk(dir).filter(p=>/\.(?:html|js|css|md|xml|txt)$/i.test(p));
+  const all=textFiles.map(p=>fs.readFileSync(p,'utf8')).join('\n');
+  assert(!/public_analytics_snapshots\s*=\s*\[\s*\{/.test(all));
+  assert(!/admin_audit\s*=\s*\[\s*\{/.test(all));
+  assert(!/historical[_ -]?visitor[_ -]?totals\s*[:=]/i.test(all));
+  assert(!/service[_-]?role/i.test(all));
+  assert(!/sb_secret_/i.test(all));
+  fs.rmSync(dir,{recursive:true,force:true});
+});
