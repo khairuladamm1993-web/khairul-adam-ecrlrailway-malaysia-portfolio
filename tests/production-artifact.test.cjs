@@ -336,7 +336,9 @@ test('auth convenience reuses Supabase sessions without weakening role resolutio
   const member=fs.readFileSync(path.join(dir,'assets','member-gateway.js'),'utf8');
   assert(access.includes("persistSession:true"));
   assert(access.includes("autoRefreshToken:true"));
-  assert(access.includes("detectSessionInUrl:true"));
+  assert(access.includes("detectSessionInUrl:false"));
+  assert(access.includes("exchangeCodeForSession"));
+  assert(access.includes("const redirectTo=location.origin+location.pathname"));
   assert(access.includes("c.auth.getSession()"));
   assert(access.includes("c.auth.refreshSession()"));
   assert(access.includes("c.rpc('account_role')"));
