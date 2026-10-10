@@ -12,10 +12,11 @@
  const dialog=document.createElement('dialog');dialog.id='member-dialog';dialog.setAttribute('aria-labelledby','member-dialog-title');dialog.innerHTML='<button type="button" class="quiet modal-dismiss" data-member-close>Close</button><div id="member-dialog-content"></div>';document.body.append(dialog);
  const body=()=>dialog.querySelector('#member-dialog-content');
  const statusText=()=>A.level==='admin'?'Admin':A.level==='member'?'Verified Member':'Public';
+ function pendingAccess(){return ['initializing','exchanging-code','restoring-session','validating-user','role-pending'].includes(A.status);}
  function renderStatus(){
   const el=document.querySelector('#gateway-status');if(!el)return;
   if(A.canReadMemberContent)el.innerHTML='<span class="access-label">'+escape(statusText())+'</span><button class="member-entry" data-member title="'+escape(A.canAdmin?'Open Owner/Admin controls':'Open Member controls')+'">'+escape(A.email||'MEMBER SESSION')+'</button>';
-  else if(A.status==='initializing')el.innerHTML='<span class="access-label">Session</span><button class="member-entry" type="button" disabled>CHECKING SAVED SESSION…</button>';
+  else if(pendingAccess())el.innerHTML='<span class="access-label">Session</span><button class="member-entry" type="button" disabled>CHECKING VERIFIED SESSION…</button>';
   else el.innerHTML='<span class="access-label">Public</span><button class="member-entry" data-member>LOGIN / MEMBER ACCESS</button>';
  }
  function renderAuth(){
@@ -23,8 +24,8 @@
   let inner='';
   if(A.canReadMemberContent){
    inner='<h2 id="member-dialog-title">'+escape(statusText())+'</h2><p class="access-label">Already signed in · '+escape(A.email||'Verified session')+'</p><p>Your saved Supabase session was restored and your access level was resolved by the backend.</p><div class="member-actions"><button class="secondary" data-refresh-member>REFRESH MEMBER DATA</button>'+(A.canAdmin?'<button class="primary" data-admin-dashboard>OPEN ADMIN CONTROLS</button>':'')+'<button class="quiet" data-logout>LOG OUT</button></div><section class="learning-card member-consent"><h3>Member activity analytics</h3><p>Visit Duration and Active Engagement Time are recorded separately. Active time pauses while hidden or after 60 seconds without interaction.</p><button class="secondary" data-consent="'+(!A.activityConsent)+'">'+(A.activityConsent?'DISABLE ACTIVITY CONSENT':'ENABLE ACTIVITY CONSENT')+'</button></section>'+(A.canAdmin?'<section class="learning-card"><h3>Owner / Admin</h3><p>Admin controls are available only because the current authenticated session resolved as admin through account_role().</p><div id="admin-dashboard" hidden></div></section>':'');
-  }else if(A.status==='initializing'){
-   inner='<h2 id="member-dialog-title">Checking saved session</h2><p class="access-label">Session restore</p><p>Please wait while the existing Supabase session is checked. A new verification email is not required unless this session is no longer valid.</p>';
+  }else if(pendingAccess()){
+   inner='<h2 id="member-dialog-title">Checking verified session</h2><p class="access-label">Session and role validation</p><p>Please wait while the verified Supabase session and backend access role are resolved. A new verification email is not required unless this session is definitively unavailable.</p>';
   }else if(A.status==='verification-sent'){
    inner='<h2 id="member-dialog-title">Check your email</h2><p class="access-label">Verification link sent</p><p>Open the one-time Supabase email link for '+escape(A.email||'your address')+'. Access remains Public until a valid confirmed session is returned and account_role() approves it.</p><button class="secondary" data-auth-refresh>CHECK SESSION</button>';
   }else{
