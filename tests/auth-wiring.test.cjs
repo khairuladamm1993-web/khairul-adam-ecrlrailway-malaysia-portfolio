@@ -11,7 +11,7 @@ function builder(result={data:[],error:null}){
  b.then=(resolve)=>Promise.resolve(result).then(resolve);
  return b;
 }
-function makeClient({session={access_token:'x'},exchangeSession=null,exchangeError=null,user={id:'11111111-1111-4111-8111-111111111111',email:'member@example.com'},role='member',profile={data:{email:'member@example.com',activity_consent_at:null},error:null},rpcError=null,otpError=null}={}){
+function makeClient({session={access_token:'x'},exchangeSession=null,exchangeError=null,user={id:'11111111-1111-4111-8111-111111111111',email:'member@example.com'},role='member',profile={data:{email:'member@example.com',enabled:true,activity_consent_at:null},error:null},rpcError=null,otpError=null}={}){
  const calls=[];let activeSession=session,authHandler=null;
  const client={
   calls,
@@ -241,4 +241,33 @@ test('Verified Member login copy is secure and contains no IC/passport wording',
  assert(member.includes('SEND VERIFICATION LINK'));
  assert(member.includes('Access is granted after successful email verification.'));
  assert(!/IC or passport|passport is required/i.test(member));
+});
+
+
+test('post-verify hydration keeps authenticated callback pending until role resolution completes',()=>{
+ const member=fs.readFileSync(path.join(root,'assets/member-gateway.js'),'utf8');
+ const access=fs.readFileSync(path.join(root,'assets/access.js'),'utf8');
+ assert(member.includes("['initializing','exchanging-code','restoring-session','validating-user','role-pending'].includes(A.status)"));
+ assert(member.includes('CHECKING VERIFIED SESSION…'));
+ assert(access.includes("set({status:'validating-user'"));
+ assert(access.includes("set({status:'role-pending'"));
+ assert(access.indexOf("getUser(liveSession.access_token)")<access.indexOf("rpc('account_role')"));
+});
+
+test('public gateway renderer cannot overwrite authenticated role status',()=>{
+ const publicGateway=fs.readFileSync(path.join(root,'assets/public-gateway.js'),'utf8');
+ assert(publicGateway.includes("if(!window.RailwayAccess)document.querySelector('#gateway-status').innerHTML"));
+});
+
+test('disabled profile fails closed even when backend role string is admin',async()=>{
+ const {A}=await load({role:'admin',profile:{data:{email:'owner@example.com',enabled:false,activity_consent_at:null},error:null}});
+ assert.equal(A.level,'public');
+ assert.equal(A.canAdmin,false);
+ assert.equal(A.status,'role-denied');
+});
+
+test('session hydration is serialized to avoid concurrent role races',()=>{
+ assert(source.includes('hydrationPromise'));
+ assert(source.includes('if(hydrationPromise)return hydrationPromise'));
+ assert(source.includes('finally{hydrationPromise=null;}'));
 });
