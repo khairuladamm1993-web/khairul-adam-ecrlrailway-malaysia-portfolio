@@ -39,7 +39,7 @@
   if(category!=='map')window.RailwayMap?.unmount();
   document.querySelector('#categories').innerHTML=categories.map(([id,title])=>`<button role="tab" aria-selected="${id===category}" data-category="${id}">${h(title)}</button>`).join('');
   document.querySelector('#categories').setAttribute('role','tablist');
-  document.querySelector('#gateway-status').innerHTML=`<span class="access-label">${h('Public')}</span><button class="member-entry" data-member>${h('LOGIN / MEMBER ACCESS')}</button>`;
+  if(!window.RailwayAccess)document.querySelector('#gateway-status').innerHTML=`<span class="access-label">${h('Public')}</span><button class="member-entry" data-member>${h('LOGIN / MEMBER ACCESS')}</button>`;
   document.querySelector('#destinations').innerHTML=destinations.map(([id,title])=>`<button data-mode="${id}" aria-pressed="${id===destination}">${h(title)}</button>`).join('');
   document.querySelector('#enter-portfolio').href='portfolio.html#'+destination;
   document.querySelector('#start-quiz').hidden=true;
