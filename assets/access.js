@@ -12,7 +12,7 @@
  const requireClient=()=>{
   if(client)return client;
   if(!window.supabase?.createClient)throw new Error('Supabase client library unavailable');
-  client=window.supabase.createClient(PROJECT_URL,PUBLISHABLE_KEY,{auth:{flowType:'pkce',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  client=window.supabase.createClient(PROJECT_URL,PUBLISHABLE_KEY,{auth:{flowType:'pkce',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
   return client;
  };
  const validateSession=async()=>{
@@ -39,6 +39,9 @@
    return set({level:role,status:'authenticated',canReadMemberContent:true,canAdmin:role==='admin',email:user.email||profile.data?.email||null,error:null,retryAfterSeconds:null});
   }catch(error){return failClosed('client-error',error);}
  };
+ function cleanAuthCallback(){
+  try{history.replaceState(null,'',location.pathname);}catch{}
+ }
  function verificationUrlError(){
   const params=new URLSearchParams(location.search||'');
   const hash=new URLSearchParams((location.hash||'').replace(/^#/,''));
@@ -46,21 +49,63 @@
   const description=params.get('error_description')||hash.get('error_description')||'';
   if(!code&&!description)return null;
   const expired=/expired|otp_expired|already.*used/i.test(code+' '+description);
-  try{history.replaceState(null,'',location.pathname);}catch{}
+  cleanAuthCallback();
   return expired?'Verification link is expired or has already been used. Request a new link.':'Verification could not be completed. Request a new link.';
+ }
+ function callbackCode(){
+  const params=new URLSearchParams(location.search||'');
+  return params.get('code')||'';
+ }
+ function callbackFailure(error){
+  const message=String(error?.message||error||'');
+  if(/code verifier|code_verifier|pkce/i.test(message))return {status:'pkce-exchange-failed',message:'Secure sign-in callback could not be completed on this browser. Request a new verification link from this exact site and use only the newest link.'};
+  if(/expired|otp_expired|already.*used|invalid.*code/i.test(message))return {status:'verification-failed',message:'Verification link is expired or has already been used. Request a new link.'};
+  if(/fetch|network|timeout|connection/i.test(message))return {status:'auth-network-error',message:'Authentication backend could not be reached. Check the connection and try again.'};
+  return {status:'pkce-exchange-failed',message:'Secure sign-in callback could not be completed. Request a new verification link and keep the login on this site.'};
+ }
+ async function exchangeCallback(c,code){
+  if(!code)return null;
+  set({level:'public',status:'exchanging-code',canReadMemberContent:false,canAdmin:false,error:null,retryAfterSeconds:null});
+  if(typeof c.auth.exchangeCodeForSession!=='function'){
+   cleanAuthCallback();
+   return failClosed('pkce-exchange-failed','Secure sign-in callback is unavailable in the current authentication client.');
+  }
+  const {data,error}=await c.auth.exchangeCodeForSession(code);
+  cleanAuthCallback();
+  if(error){
+   const failure=callbackFailure(error);
+   return failClosed(failure.status,failure.message);
+  }
+  if(!data?.session)return failClosed('session-restore-failed','Verification succeeded but no session was restored. Request a new verification link.');
+  return data.session;
+ }
+ function handleAuthEvent(event,session){
+  if(event==='SIGNED_OUT'){failClosed('signed-out');return;}
+  if(!['SIGNED_IN','INITIAL_SESSION','TOKEN_REFRESHED'].includes(event))return;
+  if(!session&&event!=='INITIAL_SESSION')return;
+  if(state.status!=='authenticated')set({status:'restoring-session',error:null,retryAfterSeconds:null});
+  setTimeout(()=>{validateSession();},0);
  }
  async function init(){
   try{
    const c=requireClient();
    const urlError=verificationUrlError();
+   if(urlError)return failClosed('verification-failed',urlError);
+   const code=callbackCode();
+   if(code){
+    const exchanged=await exchangeCallback(c,code);
+    if(!exchanged||state.status==='pkce-exchange-failed'||state.status==='verification-failed'||state.status==='session-restore-failed'||state.status==='auth-network-error')return snapshot();
+   }
    if(!authSubscription){
-    const {data}=c.auth.onAuthStateChange(()=>{setTimeout(()=>{validateSession();},0);});
+    const {data}=c.auth.onAuthStateChange(handleAuthEvent);
     authSubscription=data?.subscription||null;
    }
-   const resolved=await validateSession();
-   if(urlError&&!resolved.canReadMemberContent)return set({level:'public',status:'verification-failed',canReadMemberContent:false,canAdmin:false,email:null,error:urlError});
-   return resolved;
-  }catch(error){return failClosed('client-error',error);}
+   return await validateSession();
+  }catch(error){
+   const message=String(error?.message||error||'');
+   const network=/fetch|network|timeout|connection/i.test(message);
+   return failClosed(network?'auth-network-error':'client-error',network?'Authentication backend could not be reached. Check the connection and try again.':error);
+  }
  }
  const rateLimitInfo=error=>{
   const message=String(error?.message||error||'');
