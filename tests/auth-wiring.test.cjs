@@ -11,8 +11,8 @@ function builder(result={data:[],error:null}){
  b.then=(resolve)=>Promise.resolve(result).then(resolve);
  return b;
 }
-function makeClient({session={access_token:'x'},user={id:'11111111-1111-4111-8111-111111111111',email:'member@example.com'},role='member',profile={data:{email:'member@example.com',activity_consent_at:null},error:null},rpcError=null,otpError=null}={}){
- const calls=[];
+function makeClient({session={access_token:'x'},exchangeSession=null,exchangeError=null,user={id:'11111111-1111-4111-8111-111111111111',email:'member@example.com'},role='member',profile={data:{email:'member@example.com',activity_consent_at:null},error:null},rpcError=null,otpError=null}={}){
+ const calls=[];let activeSession=session,authHandler=null;
  const client={
   calls,
   auth:{
@@ -37,7 +37,7 @@ async function load(options={}){
  const events=[];
  const window={supabase:{createClient(){return client}},dispatchEvent(e){events.push(e)},addEventListener(){},removeEventListener(){}};
  const document={readyState:'complete',addEventListener(){}};
- const location={origin:'https://preview.example',pathname:'/gateway.html',search:options.locationSearch||'',hash:options.locationHash||''};
+ const location={origin:options.origin||'https://preview.example',pathname:options.pathname||'/gateway.html',search:options.locationSearch||'',hash:options.locationHash||''};
  const history={replaceState(){}};
  const context={window,document,location,history,URLSearchParams,CustomEvent:class{constructor(type,init){this.type=type;this.detail=init?.detail}},setTimeout,clearTimeout,console};
  vm.createContext(context);vm.runInContext(source,context);
@@ -179,4 +179,64 @@ test('client-side role tampering cannot mutate frozen RailwayAccess authorizatio
  assert.equal(member.A.canAdmin,false);
  assert.equal(member.A.level,'member');
  await assert.rejects(()=>member.A.adminSummary(),/Admin access required/);
+});
+
+
+test('Magic Link uses the exact runtime-origin gateway callback with no Production hardcode',async()=>{
+ const {A,client}=await load({session:null,user:null,origin:'https://khairul-adam-portfolio-preview-safe-g02iyscec.vercel.app'});
+ await A.sendMagicLink('owner@example.com');
+ const call=client.calls.find(x=>x[0]==='signInWithOtp');
+ assert(call);
+ assert.equal(call[1].options.emailRedirectTo,'https://khairul-adam-portfolio-preview-safe-g02iyscec.vercel.app/gateway.html');
+ assert(!call[1].options.emailRedirectTo.includes('github.io'));
+});
+
+test('PKCE callback exchanges code before role hydration and resolves Owner as Admin',async()=>{
+ const {A,client}=await load({session:null,exchangeSession:{access_token:'callback',expires_at:Math.floor(Date.now()/1000)+3600},role:'admin',locationSearch:'?code=fresh-preview-code'});
+ assert.equal(A.level,'admin');
+ assert.equal(A.status,'authenticated');
+ assert.equal(A.canAdmin,true);
+ const exchangeIndex=client.calls.findIndex(x=>x[0]==='exchangeCodeForSession');
+ const roleIndex=client.calls.findIndex(x=>x[0]==='rpc'&&x[1]==='account_role');
+ assert(exchangeIndex>=0&&roleIndex>exchangeIndex);
+});
+
+test('PKCE callback failure is distinct and fail-closed',async()=>{
+ const {A}=await load({session:null,user:null,exchangeError:{message:'PKCE code verifier not found'},locationSearch:'?code=bad-code'});
+ assert.equal(A.level,'public');
+ assert.equal(A.canAdmin,false);
+ assert.equal(A.status,'pkce-exchange-failed');
+ assert.match(A.error,/callback|verification link/i);
+});
+
+test('Admin session refresh persistence re-runs backend role resolution without new Magic Link',async()=>{
+ const {A,client}=await load({role:'admin'});
+ const beforeOtp=client.calls.filter(x=>x[0]==='signInWithOtp').length;
+ const beforeRole=client.calls.filter(x=>x[0]==='rpc'&&x[1]==='account_role').length;
+ await A.refresh();
+ assert.equal(A.level,'admin');
+ assert.equal(A.canAdmin,true);
+ assert.equal(client.calls.filter(x=>x[0]==='signInWithOtp').length,beforeOtp);
+ assert(client.calls.filter(x=>x[0]==='rpc'&&x[1]==='account_role').length>beforeRole);
+});
+
+test('auth state events hydrate signed-in sessions and SIGNED_OUT removes Admin',async()=>{
+ const {A,client}=await load({role:'admin'});
+ assert.equal(A.level,'admin');
+ client.auth.emit('TOKEN_REFRESHED');
+ await new Promise(r=>setTimeout(r,5));
+ assert.equal(A.level,'admin');
+ client.auth.emit('SIGNED_OUT',null);
+ assert.equal(A.level,'public');
+ assert.equal(A.status,'signed-out');
+ assert.equal(A.canAdmin,false);
+});
+
+test('Verified Member login copy is secure and contains no IC/passport wording',()=>{
+ const member=fs.readFileSync(path.join(root,'assets/member-gateway.js'),'utf8');
+ assert(member.includes('Secure email verification'));
+ assert(member.includes('Enter your email to receive a secure verification link.'));
+ assert(member.includes('SEND VERIFICATION LINK'));
+ assert(member.includes('Access is granted after successful email verification.'));
+ assert(!/IC or passport|passport is required/i.test(member));
 });
