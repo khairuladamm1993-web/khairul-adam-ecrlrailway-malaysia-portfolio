@@ -353,7 +353,7 @@ test('auth convenience reuses Supabase sessions without weakening role resolutio
   assert(!/sessionStorage\.(?:setItem|removeItem)\([^)]*(?:token|access|session)/i.test(access));
   assert(!access.includes('hardcoded admin'));
   assert(member.includes("authSubmitting"));
-  assert(member.includes("CHECKING SAVED SESSION"));
+  assert(member.includes("CHECKING VERIFIED SESSION"));
   assert(member.includes("Already signed in"));
   assert(member.includes("OPEN ADMIN CONTROLS"));
   assert(member.includes("A.canAdmin"));
