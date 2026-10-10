@@ -16,11 +16,13 @@ function makeClient({session={access_token:'x'},exchangeSession=null,exchangeErr
  const client={
   calls,
   auth:{
-   async getSession(){return {data:{session},error:null}},
+   async getSession(){return {data:{session:activeSession},error:null}},
    async getUser(){return user?{data:{user},error:null}:{data:{user:null},error:{message:'invalid'}}},
-   onAuthStateChange(){return {data:{subscription:{unsubscribe(){}}}}},
+   onAuthStateChange(cb){authHandler=cb;calls.push(['onAuthStateChange']);return {data:{subscription:{unsubscribe(){}}}}},
+   async exchangeCodeForSession(code){calls.push(['exchangeCodeForSession',code]);if(exchangeError)return {data:{session:null},error:exchangeError};activeSession=exchangeSession||{access_token:'callback',expires_at:Math.floor(Date.now()/1000)+3600};return {data:{session:activeSession},error:null}},
    async signInWithOtp(args){calls.push(['signInWithOtp',args]);return {error:otpError}},
-   async signOut(args){calls.push(['signOut',args]);return {error:null}}
+   async signOut(args){calls.push(['signOut',args]);activeSession=null;authHandler?.('SIGNED_OUT',null);return {error:null}},
+   emit(event,nextSession=activeSession){authHandler?.(event,nextSession)}
   },
   async rpc(name,args){calls.push(['rpc',name,args]);if(rpcError)return {data:null,error:{message:rpcError}};if(name==='account_role')return {data:role,error:null};if(name==='admin_summary')return {data:{members:1},error:null};if(name==='submit_quiz')return {data:{score:12,passed:true},error:null};return {data:null,error:null}},
   from(name){
