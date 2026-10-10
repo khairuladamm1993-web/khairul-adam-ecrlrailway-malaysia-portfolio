@@ -52,7 +52,7 @@ test('no session resolves Public and never unlocks protected content',async()=>{
 });
 test('invalid session fails closed to Public',async()=>{
  const {A}=await load({user:null});
- assert.equal(A.level,'public');assert.equal(A.status,'invalid-session');assert.equal(A.canReadMemberContent,false);
+ assert.equal(A.level,'public');assert.equal(A.status,'get-user-failed');assert.equal(A.canReadMemberContent,false);
 });
 test('server member role unlocks member only',async()=>{
  const {A}=await load({role:'member'});
