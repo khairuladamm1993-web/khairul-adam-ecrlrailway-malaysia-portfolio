@@ -17,7 +17,11 @@
   const el=document.querySelector('#gateway-status');if(!el)return;
   if(A.canReadMemberContent)el.innerHTML='<span class="access-label">'+escape(statusText())+'</span><button class="member-entry" data-member title="'+escape(A.canAdmin?'Open Owner/Admin controls':'Open Member controls')+'">'+escape(A.email||'MEMBER SESSION')+'</button>';
   else if(pendingAccess())el.innerHTML='<span class="access-label">Session</span><button class="member-entry" type="button" disabled>CHECKING VERIFIED SESSION…</button>';
-  else el.innerHTML='<span class="access-label">Public</span><button class="member-entry" data-member>LOGIN / MEMBER ACCESS</button>';
+  else {
+   const callbackError=['pkce-exchange-failed','verification-failed','session-restore-failed','session-expired','role-error','role-denied','profile-error','get-user-failed','auth-network-error','client-error'].includes(A.status);
+   el.innerHTML='<span class="access-label">Public</span><button class="member-entry" data-member>LOGIN / MEMBER ACCESS</button>'+
+    (callbackError?'<p class="auth-error" role="alert">Sign-in could not be completed ('+escape(A.status)+'). Open Member Access to review the error.</p>':'');
+  }
  }
  function renderAuth(){
   const controls='<div class="quiz-languages">'+['ms','en','zh'].map(l=>'<button data-auth-lang="'+l+'" aria-pressed="'+(R.language===l)+'">'+({ms:'BM',en:'EN',zh:'中文'})[l]+'</button>').join('')+(R.language==='zh'?'<button data-auth-pinyin>Pinyin '+(R.pinyin?'ON':'OFF')+'</button>':'')+'<button data-auth-theme>'+escape(window.RailwayTheme.value==='light'?'Dark Mode':'Light Mode')+'</button></div>';
