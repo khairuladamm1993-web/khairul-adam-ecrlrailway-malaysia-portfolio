@@ -713,5 +713,5 @@ test('Admin diagnostics are rendered only inside the authenticated Admin dashboa
   assert(member.includes("A.level"));
   assert(member.includes("A.status"));
   assert(member.includes("host===canonical?'CANONICAL':'NON-CANONICAL'"));
-  assert(member.indexOf("adminDiagnostic()")>member.indexOf("function renderAdminDashboard"));
+  assert(member.includes("host.innerHTML='<div class=\"learning-grid admin-grid\">'+adminDiagnostic()+"));
 });
