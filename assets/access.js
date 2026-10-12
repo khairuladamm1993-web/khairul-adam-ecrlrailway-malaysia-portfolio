@@ -62,7 +62,9 @@
   const hash=new URLSearchParams((location.hash||'').replace(/^#/,''));
   const code=params.get('error_code')||hash.get('error_code')||'';
   const description=params.get('error_description')||hash.get('error_description')||'';
-  if(!code&&!description)return null;
+  const error=params.get('error')||hash.get('error')||'';
+  const unsupported=hash.has('access_token')||hash.has('refresh_token')||hash.has('code')||params.has('token_hash');
+  if(!code&&!description&&!error&&!unsupported)return null;
   const expired=/expired|otp_expired|already.*used/i.test(code+' '+description);
   cleanAuthCallback();
   return expired?'Verification link is expired or has already been used. Request a new link.':'Verification could not be completed. Request a new link.';
@@ -85,8 +87,13 @@
    cleanAuthCallback();
    return failClosed('pkce-exchange-failed','Secure sign-in callback is unavailable in the current authentication client.');
   }
-  const {data,error}=await c.auth.exchangeCodeForSession(code);
-  cleanAuthCallback();
+  let result;
+  try{result=await c.auth.exchangeCodeForSession(code);}
+  catch(error){
+   const failure=callbackFailure(error);
+   return failClosed(failure.status,failure.message);
+  }finally{cleanAuthCallback();}
+  const {data,error}=result;
   if(error){
    const failure=callbackFailure(error);
    return failClosed(failure.status,failure.message);

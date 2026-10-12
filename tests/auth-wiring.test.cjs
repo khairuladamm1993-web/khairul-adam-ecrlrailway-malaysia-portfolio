@@ -11,7 +11,7 @@ function builder(result={data:[],error:null}){
  b.then=(resolve)=>Promise.resolve(result).then(resolve);
  return b;
 }
-function makeClient({session={access_token:'x'},exchangeSession=null,exchangeError=null,user={id:'11111111-1111-4111-8111-111111111111',email:'member@example.com'},role='member',profile={data:{email:'member@example.com',enabled:true,activity_consent_at:null},error:null},rpcError=null,otpError=null}={}){
+function makeClient({session={access_token:'x'},exchangeSession=null,exchangeError=null,exchangeThrow=null,user={id:'11111111-1111-4111-8111-111111111111',email:'member@example.com'},role='member',profile={data:{email:'member@example.com',enabled:true,activity_consent_at:null},error:null},rpcError=null,otpError=null}={}){
  const calls=[];let activeSession=session,authHandler=null;
  const client={
   calls,
@@ -19,7 +19,7 @@ function makeClient({session={access_token:'x'},exchangeSession=null,exchangeErr
    async getSession(){return {data:{session:activeSession},error:null}},
    async getUser(){return user?{data:{user},error:null}:{data:{user:null},error:{message:'invalid'}}},
    onAuthStateChange(cb){authHandler=cb;calls.push(['onAuthStateChange']);return {data:{subscription:{unsubscribe(){}}}}},
-   async exchangeCodeForSession(code){calls.push(['exchangeCodeForSession',code]);if(exchangeError)return {data:{session:null},error:exchangeError};activeSession=exchangeSession||{access_token:'callback',expires_at:Math.floor(Date.now()/1000)+3600};return {data:{session:activeSession},error:null}},
+   async exchangeCodeForSession(code){if(exchangeThrow)throw new Error(exchangeThrow);calls.push(['exchangeCodeForSession',code]);if(exchangeError)return {data:{session:null},error:exchangeError};activeSession=exchangeSession||{access_token:'callback',expires_at:Math.floor(Date.now()/1000)+3600};return {data:{session:activeSession},error:null}},
    async signInWithOtp(args){calls.push(['signInWithOtp',args]);return {error:otpError}},
    async signOut(args){calls.push(['signOut',args]);activeSession=null;authHandler?.('SIGNED_OUT',null);return {error:null}},
    emit(event,nextSession=activeSession){authHandler?.(event,nextSession)}
@@ -40,11 +40,11 @@ async function load(options={}){
  const window={supabase:{createClient(){return client}},dispatchEvent(e){events.push(e)},addEventListener(){},removeEventListener(){}};
  const document={readyState:'complete',addEventListener(){}};
  const location={origin:options.origin||'https://preview.example',pathname:options.pathname||'/gateway.html',search:options.locationSearch||'',hash:options.locationHash||''};
- const history={replaceState(){}};
+ const history={replaceState(){location.search='';location.hash='';}};
  const context={window,document,location,history,URLSearchParams,CustomEvent:class{constructor(type,init){this.type=type;this.detail=init?.detail}},setTimeout,clearTimeout,console};
  vm.createContext(context);vm.runInContext(source,context);
  await new Promise(r=>setTimeout(r,5));
- return {A:window.RailwayAccess,client,events};
+ return {A:window.RailwayAccess,client,events,location};
 }
 test('no session resolves Public and never unlocks protected content',async()=>{
  const {A}=await load({session:null});
@@ -273,4 +273,41 @@ test('session hydration is serialized to avoid concurrent role races',()=>{
  assert(source.includes('hydrationPromise'));
  assert(source.includes('if(hydrationPromise)return hydrationPromise'));
  assert(source.includes('finally{hydrationPromise=null;}'));
+});
+
+
+test('thrown exchange errors are sanitized and callback credentials removed',async()=>{
+ const {A,location}=await load({session:null,locationSearch:'?code=sensitive-code',exchangeThrow:'unexpected sensitive-code access_token=secret'});
+ assert.equal(A.level,'public');
+ assert.equal(A.status,'pkce-exchange-failed');
+ assert.equal(location.search,'');
+ assert(!/sensitive-code|access_token|secret/.test(A.error));
+});
+test('error-only fragment is visible and removed, with no exchange',async()=>{
+ const {A,client,location}=await load({session:null,locationHash:'#error=access_denied'});
+ assert.equal(A.status,'verification-failed');
+ assert.equal(location.hash,'');
+ assert(!client.calls.some(x=>x[0]==='exchangeCodeForSession'));
+});
+test('unsupported token fragment fails closed and removes credentials',async()=>{
+ const {A,location}=await load({session:null,locationHash:'#access_token=secret&refresh_token=private'});
+ assert.equal(A.status,'verification-failed');
+ assert.equal(A.level,'public');
+ assert.equal(location.hash,'');
+ assert(!/secret|private/.test(A.error));
+});
+test('Yahoo-style confirmed signup callback gets Member only and survives refresh in mock',async()=>{
+ const {A,client}=await load({session:null,role:'member',locationSearch:'?code=signup-code'});
+ assert.equal(A.level,'member');
+ await A.refresh();
+ assert.equal(A.level,'member');
+ assert.equal(A.canAdmin,false);
+ await assert.rejects(()=>A.adminSummary(),/Admin access required/);
+ assert(!client.calls.some(x=>x[0]==='signInWithOtp'));
+});
+test('expired callback cannot authorize member',async()=>{
+ const {A,location}=await load({session:null,locationSearch:'?code=expired-code',exchangeError:{message:'invalid code: expired'}});
+ assert.equal(A.status,'verification-failed');
+ assert.equal(A.canReadMemberContent,false);
+ assert.equal(location.search,'');
 });
