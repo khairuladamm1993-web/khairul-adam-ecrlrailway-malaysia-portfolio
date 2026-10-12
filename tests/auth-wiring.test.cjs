@@ -111,7 +111,10 @@ test('auth wiring uses only publishable browser key and server role resolution',
 
 test('member gateway resets public header and cleans engagement lifecycle',()=>{
  const memberSource=fs.readFileSync(path.join(root,'assets/member-gateway.js'),'utf8');
- assert(memberSource.includes("else el.innerHTML='<span class=\"access-label\">Public</span>"));
+ assert(memberSource.includes('Public</span><button class="member-entry"'));
+ assert(memberSource.includes('Sign-in could not be completed'));
+ assert(memberSource.includes('role="alert"'));
+ assert(memberSource.includes('includes(A.status)'));
  assert(memberSource.includes("removeEventListener(event,handler)"));
  assert(memberSource.includes("addEventListener('pagehide',state.pagehide)"));
  assert(memberSource.includes("document.addEventListener('visibilitychange',state.visibility)"));
