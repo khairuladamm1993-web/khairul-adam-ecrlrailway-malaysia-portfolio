@@ -691,3 +691,27 @@ test('production artifact embeds no real Admin analytics payload or historical t
   assert(!/sb_secret_/i.test(all));
   fs.rmSync(dir,{recursive:true,force:true});
 });
+
+
+test('production build generates non-sensitive MR-S10 build metadata',()=>{
+  const dir=build('build-production.py','railway-production-');
+  const info=fs.readFileSync(path.join(dir,'assets','build-info.js'),'utf8');
+  assert(info.includes('window.MRS10BuildInfo=Object.freeze('));
+  assert(info.includes('"application":"MR-S10"'));
+  assert(info.includes('"version":"Pre-V1.0"'));
+  assert(info.includes('"canonicalHost":"khairul-adam-portfolio-preview-safe.vercel.app"'));
+  assert(!/sb_secret_|service[_-]?role|access_token|refresh_token/i.test(info));
+  fs.rmSync(dir,{recursive:true,force:true});
+});
+
+test('Admin diagnostics are rendered only inside the authenticated Admin dashboard',()=>{
+  const member=fs.readFileSync(path.join(root,'assets','member-gateway.js'),'utf8');
+  const gateway=fs.readFileSync(path.join(root,'gateway.html'),'utf8');
+  assert(gateway.includes('<script src="assets/build-info.js"></script>'));
+  assert(member.includes('function adminDiagnostic()'));
+  assert(member.includes('Preview Diagnostics'));
+  assert(member.includes("A.level"));
+  assert(member.includes("A.status"));
+  assert(member.includes("host===canonical?'CANONICAL':'NON-CANONICAL'"));
+  assert(member.indexOf("adminDiagnostic()")>member.indexOf("function renderAdminDashboard"));
+});
