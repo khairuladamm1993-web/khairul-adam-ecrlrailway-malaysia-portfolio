@@ -4,7 +4,7 @@ The repository may retain legacy quiz fixtures for regression/migration history,
 production artifact must never publish them. Authenticated Member content is fetched at
 runtime from Supabase after server-authorized role resolution.
 """
-import pathlib, re, shutil, sys
+import datetime, json, os, pathlib, re, shutil, subprocess, sys
 
 root=pathlib.Path(__file__).resolve().parents[1]
 out=pathlib.Path(sys.argv[1] if len(sys.argv)>1 else root/"dist-production").resolve()
@@ -41,11 +41,38 @@ for name in forbidden_assets:
 
 required_assets={
     "access.js","public-gateway.js","member-gateway.js","module-previews.js",
-    "analytics.js","gateway.css","theme.js","theme.css","i18n.js","map-intelligence.js","map-gateway.js","corridor-reference.js","owner-map.js"
+    "analytics.js","gateway.css","theme.js","theme.css","i18n.js","map-intelligence.js","map-gateway.js","corridor-reference.js","owner-map.js","build-info.js"
 }
 missing=sorted(name for name in required_assets if not (out/"assets"/name).exists())
 if missing:
     raise SystemExit("Missing required authenticated/public runtime assets: "+", ".join(missing))
+
+
+# Generate non-sensitive build metadata for the Admin-only diagnostic view.
+# This intentionally contains no tokens, credentials, user data or analytics payloads.
+def git_sha():
+    env_sha=os.environ.get("VERCEL_GIT_COMMIT_SHA") or os.environ.get("GITHUB_SHA")
+    if env_sha:
+        return env_sha
+    try:
+        return subprocess.check_output(["git","rev-parse","HEAD"],cwd=root,text=True).strip()
+    except Exception:
+        return None
+
+build_info={
+    "application":"MR-S10",
+    "version":"Pre-V1.0",
+    "environment":os.environ.get("VERCEL_ENV") or ("CI" if os.environ.get("CI") else "LOCAL"),
+    "gitSha":git_sha(),
+    "deploymentId":os.environ.get("VERCEL_DEPLOYMENT_ID"),
+    "deploymentUrl":os.environ.get("VERCEL_URL"),
+    "buildTimestamp":datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00","Z"),
+    "canonicalHost":"khairul-adam-portfolio-preview-safe.vercel.app"
+}
+(out/"assets"/"build-info.js").write_text(
+    "window.MRS10BuildInfo=Object.freeze("+json.dumps(build_info,separators=(",",":"))+");\n",
+    encoding="utf-8"
+)
 
 # Guard against accidentally embedding the retained legacy bank in another public file.
 protected_markers=(b"window.RailwayModules=",b"df8b_inspection-1",b'"correct":0')
