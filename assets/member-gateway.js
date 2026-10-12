@@ -92,11 +92,27 @@
   }catch(error){body().innerHTML='<h2 id="member-dialog-title">Assessment not saved</h2><p class="auth-error">'+escape(error.message||error)+'</p><p>No local score is treated as authoritative.</p><button class="secondary" data-quiz-done>CLOSE</button>';}
  }
 
+ function adminDiagnostic(){
+  const b=window.MRS10BuildInfo||{},host=location.host,canonical=b.canonicalHost||'';
+  const canonicalStatus=canonical&&host===canonical?'CANONICAL':'NON-CANONICAL';
+  const shortSha=b.gitSha?String(b.gitSha).slice(0,12):'Unavailable';
+  const deployment=b.deploymentId||b.deploymentUrl||'Unavailable';
+  const built=b.buildTimestamp||'Unavailable';
+  return '<article class="learning-card"><h3>Preview Diagnostics</h3>'+
+   '<p><strong>Environment:</strong> '+escape(String(b.environment||'UNKNOWN').toUpperCase())+'</p>'+
+   '<p><strong>Application:</strong> '+escape(b.application||'MR-S10')+' · '+escape(b.version||'Unavailable')+'</p>'+
+   '<p><strong>Git SHA:</strong> <code>'+escape(shortSha)+'</code></p>'+
+   '<p><strong>Deployment:</strong> <code>'+escape(deployment)+'</code></p>'+
+   '<p><strong>Build timestamp:</strong> '+escape(built)+'</p>'+
+   '<p><strong>Canonical Preview:</strong> '+escape(canonicalStatus)+(canonical?' · '+escape(canonical):'')+'</p>'+
+   '<p><strong>Authentication:</strong> '+escape(A.level)+' · '+escape(A.status)+'</p>'+
+   '</article>';
+ }
  function renderAdminDashboard(summary,data){
   const host=dialog.querySelector('#admin-dashboard');if(!host)return;
   const members=data.members||[],audit=(data.audit||[]).slice(0,8),snapshots=(data.snapshots||[]).slice(0,3);
   host.hidden=false;
-  host.innerHTML='<div class="learning-grid admin-grid">'+
+  host.innerHTML='<div class="learning-grid admin-grid">'+adminDiagnostic()+
    '<article class="learning-card"><h3>Registrations</h3><p>'+members.length+' member profile(s)</p><p>Quiz attempts: '+escape(summary.quiz_attempts??0)+'</p></article>'+
    '<article class="learning-card"><h3>Engagement</h3><p>Member sessions: '+escape(summary.member_sessions??0)+'</p><p>Average visit: '+escape(Math.round(summary.average_visit_seconds||0))+' s</p><p>Active engagement: '+escape(Math.round(summary.active_engagement_seconds||0))+' s</p></article>'+
    '<article class="learning-card"><h3>Visitor analytics snapshots</h3><p>'+snapshots.length+' recent snapshot(s) loaded.</p><pre class="admin-summary">'+escape(JSON.stringify(snapshots,null,2))+'</pre></article>'+
