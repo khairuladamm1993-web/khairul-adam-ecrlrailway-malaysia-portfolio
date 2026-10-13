@@ -12,7 +12,7 @@
 .asia-map-switch{--mrs10-glass:rgba(244,248,251,.72);--mrs10-glass-active:rgba(224,235,241,.87);--mrs10-glass-border:rgba(38,68,83,.18);--mrs10-glass-text:#17313e;--mrs10-glass-shadow:0 8px 26px rgba(24,49,65,.08)}
 .asia-map-switch-controls button,.asia-country-switch button{background:var(--mrs10-glass);color:var(--mrs10-glass-text);border:1px solid var(--mrs10-glass-border);box-shadow:var(--mrs10-glass-shadow);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:12px;transition:background .15s ease}
 .asia-map-switch-controls button[aria-pressed="true"],.asia-country-switch button[aria-pressed="true"]{background:var(--mrs10-glass-active);color:#112e3d;border-color:rgba(37,80,105,.34)}
-.asia-map-switch :is(.map-toolbar,.map-side,.map-identity-row){position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important}
+.asia-map-switch [data-asia-ecrl]:not(.mrs10-owner-visible) :is(.map-toolbar,.map-side,.map-identity-row){position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important}
 .asia-map-switch .map-layout{display:block!important;min-width:0}
 .asia-map-switch .map-canvas-wrap{width:100%;background:rgba(229,239,242,.45);border:1px solid var(--mrs10-glass-border);border-radius:14px;overflow:hidden}
 .asia-map-switch .map-canvas{height:min(68vh,670px);min-height:340px;background:#e8f1f1}
@@ -26,3 +26,7 @@
 .asia-map-switch .leaflet-control-zoom a{background:rgba(250,252,253,.83);color:#193846;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 @media(max-width:600px){.asia-map-switch-controls{gap:.35rem}.asia-map-switch-controls button{flex:1 1 125px;font-size:11px;padding:.55rem .35rem}.asia-country-switch button{flex:1 1 75px;font-size:12px}.asia-map-switch .map-canvas,.asia-map-switch [data-asia-canvas]{height:66svh!important;min-height:360px!important}}
 @media(prefers-reduced-motion:reduce){.asia-map-switch-controls button,.asia-country-switch button{transition:none}}
+
+/* Owner editing remains a functional visible workspace, not part of the public minimalist MAP. */
+.asia-map-switch [data-asia-ecrl].mrs10-owner-visible .map-layout{display:grid!important;grid-template-columns:minmax(0,2fr) minmax(260px,.8fr)!important}
+@media(max-width:900px){.asia-map-switch [data-asia-ecrl].mrs10-owner-visible .map-layout{grid-template-columns:minmax(0,1fr)!important}}
