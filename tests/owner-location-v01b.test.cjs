@@ -65,5 +65,5 @@ test('host only loads V0.1B through Owner module on demand',()=>{
  assert.match(host,/data-owner-v01b/);
  assert.match(host,/assets\/owner-map-v01b\.js/);
  assert.match(host,/RailwayOwnerMapV01B\?\.unmount\(\)/);
- assert.doesNotMatch(source,/SURVEY_VERIFIED/);
+ assert.match(source,/OWNER_REVIEWED/);
 });
