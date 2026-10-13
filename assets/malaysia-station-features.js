@@ -12,7 +12,7 @@
   return records.filter(r=>{
     if(!r||r.type!=='STN'||r.locationConfidence!=='Public Reference Location')return false;
     if(!Number.isFinite(r.lat)||!Number.isFinite(r.lon)||r.lat<1||r.lat>7.5||r.lon<99.5||r.lon>105)return false;
-    if(typeof r.id!=='string'||!/^ref-\\d+$/.test(r.id)||seen.has(r.id))return false;
+    if(typeof r.id!=='string'||!/^ref-[0-9]+$/.test(r.id)||seen.has(r.id))return false;
     seen.add(r.id);return true;
   }).map(r=>({
     type:'Feature',
