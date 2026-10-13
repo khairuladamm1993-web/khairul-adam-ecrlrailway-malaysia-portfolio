@@ -34,6 +34,8 @@ jobs:
         run: node --test tests/asia-map-minimal.test.cjs
       - name: Test V0.4.2 vetted railway feature popups
         run: node --test tests/asia-info-overlay.test.cjs
+      - name: Test V0.5 three-country viewport selector
+        run: node --test tests/asia-country-switch.test.cjs
       - name: Run existing MR-S10 regression suite
         run: npm test
       - name: Build isolated production-shaped artifact

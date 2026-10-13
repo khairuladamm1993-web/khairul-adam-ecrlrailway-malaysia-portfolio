@@ -3,6 +3,8 @@
 'use strict';
 if(window.MRS10AsiaMapUI)return;
 let active=null,infoLoader=null;
+// Country centers are navigation presets only, never station or track geometry.
+const countryViews=Object.freeze({malaysia:{center:[4.2,102.5],zoom:6},thailand:{center:[15.1,101],zoom:6},china:{center:[34.5,104.2],zoom:4}});
 function ensureInfoOverlay(){if(window.MRS10AsiaInfoOverlay)return Promise.resolve(window.MRS10AsiaInfoOverlay);if(infoLoader)return infoLoader;infoLoader=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='assets/asia-info-overlay.js';s.async=true;s.onload=()=>window.MRS10AsiaInfoOverlay?resolve(window.MRS10AsiaInfoOverlay):reject(Error('Overlay unavailable'));s.onerror=()=>reject(Error('Overlay script unavailable'));document.head.append(s)}).catch(e=>{infoLoader=null;throw e});return infoLoader;}
 function unmount(){
  if(!active)return;
@@ -21,6 +23,7 @@ function mount(host,railway){
   '<button type="button" data-asia-view="ecrl" aria-pressed="true">ECRL CORRIDOR MAP</button>'+
   '<button type="button" data-asia-view="asia" aria-pressed="false">ASIA RAILWAY NETWORK</button></div>'+
   '<div data-asia-ecrl></div><div data-asia-panel hidden><p class="study-boundary">Asian railway context layer: OpenRailwayMap visual reference. Track locations, names and operating status are not independently verified in this module; no ECRL route is inferred.</p>'+
+  '<div class="asia-country-switch" role="group" aria-label="Explore railway by country"><button type="button" data-asia-country="malaysia" aria-pressed="true">🇲🇾 Malaysia</button><button type="button" data-asia-country="thailand" aria-pressed="false">🇹🇭 Thailand</button><button type="button" data-asia-country="china" aria-pressed="false">🇨🇳 China</button></div>'+
   '<div data-asia-canvas role="img" aria-label="Asia railway reference map" style="height:min(58vh,520px);min-height:310px"></div>'+
   '<p class="study-boundary">Tap verified station or track features for details when source-backed geometry is available. Raster reference tracks are not selectable.</p></div>';
  host.replaceChildren(wrapper);
@@ -46,7 +49,7 @@ function mount(host,railway){
     const rail=m.createPane('asiaRailways');rail.style.zIndex='350';rail.style.pointerEvents='none';
     window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{pane:'asiaMutedRoads',maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(m);
     window.L.tileLayer('https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',{pane:'asiaRailways',maxZoom:19,attribution:'OpenRailwayMap railway reference'}).addTo(m);
-    m.setView([4.2,102.5],6);
+    m.setView(countryViews.malaysia.center,countryViews.malaysia.zoom);
     // V0.4.2 accepts only independently sourced vector data; empty until vetted data is provided.
     ensureInfoOverlay().then(api=>{if(active===state&&state.current==='asia'&&state.asia===m)state.info=api.mount(window.L,m,[]);}).catch(()=>{});
     // Source-backed vector overlays can be added later; raster railway pixels have no feature identity.
@@ -62,6 +65,12 @@ function mount(host,railway){
   state.current=view;
   wrapper.querySelectorAll('[data-asia-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.asiaView===view)));
  }
+ panel.querySelector('.asia-country-switch').addEventListener('click',e=>{
+  const b=e.target.closest('[data-asia-country]');if(!b||!panel.contains(b)||state.current!=='asia'||!state.asia)return;
+  const country=countryViews[b.dataset.asiaCountry];if(!country)return;
+  state.asia.setView(country.center,country.zoom);
+  panel.querySelectorAll('[data-asia-country]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+ });
  wrapper.querySelector('.asia-map-switch-controls').addEventListener('click',e=>{
   const button=e.target.closest('[data-asia-view]');if(button&&wrapper.contains(button))show(button.dataset.asiaView);
  });

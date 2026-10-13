@@ -5,3 +5,5 @@
 .asia-map-switch-controls button:focus-visible{outline:3px solid #20a7bf;outline-offset:2px}
 [data-asia-panel][hidden],[data-asia-ecrl][hidden]{display:none!important}
 [data-asia-canvas]{width:100%;border:1px solid #739baa;border-radius:10px;overflow:hidden}
+
+.asia-country-switch{display:flex;gap:.4rem;flex-wrap:wrap;margin:.45rem 0 .75rem}.asia-country-switch button{min-height:44px;flex:1 1 95px;padding:.55rem .65rem;border:1px solid #739baa;border-radius:9px;background:transparent;color:inherit;font-weight:600;cursor:pointer}.asia-country-switch button[aria-pressed="true"]{border-color:#007b9c;background:#e8f9ff;color:#102936}.asia-country-switch button:focus-visible{outline:3px solid #20a7bf;outline-offset:2px}
