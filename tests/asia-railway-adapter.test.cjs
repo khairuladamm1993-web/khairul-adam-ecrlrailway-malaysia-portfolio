@@ -1,0 +1,10 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const A=require('../assets/asia-railway-adapter.js');
+const feature=(id)=>({type:'Feature',geometry:{type:'LineString',coordinates:[[101.1,3.1],[101.2,3.2]]},properties:{name:'Test railway',type:'Rail',source:'OpenStreetMap',sourceId:id,sourceUrl:'https://www.openstreetmap.org/way/'+id}});
+test('no features without verified source identification',()=>{assert.equal(A.approved([{type:'Feature',geometry:feature('1').geometry,properties:{}}]).length,0)});
+test('no invented geometry: reject empty line and invalid coordinate',()=>{assert.equal(A.approved([{...feature('1'),geometry:{type:'LineString',coordinates:[[101,3]]}}, {...feature('2'),geometry:{type:'LineString',coordinates:[[400,3],[101,3]]}}]).length,0)});
+test('source IDs deduplicated, geometry preserved',()=>{const input=feature('1'),r=A.approved([input,input]);assert.equal(r.length,1);assert.deepEqual(r[0].geometry,input.geometry)});
+test('no owner or canonical payload leaks into adapter',()=>{const r=A.approved([{...feature('1'),properties:{...feature('1').properties,ownerDraft:'secret',chainageKm:338.325,accessToken:'secret'}}]);assert.equal(r.length,1);assert.equal('ownerDraft'in r[0].properties,false);assert.equal('chainageKm'in r[0].properties,false)});
+test('bounded count and opt-in mount/unmount on separate map',()=>{const f=Array.from({length:950},(_,i)=>feature(String(i)));assert.equal(A.approved(f).length,900);const map={addLayer(x){this.layer=x},removeLayer(x){assert.equal(this.layer,x)}};const L={geoJSON(d){return {addTo(m){m.addLayer(this)}}}};const handle=A.mount({leaflet:L,map,features:f});assert.equal(handle.featureCount,900);handle.unmount()});
+test('must explicitly supply map',()=>assert.throws(()=>A.mount({}),/separate Leaflet map/));
