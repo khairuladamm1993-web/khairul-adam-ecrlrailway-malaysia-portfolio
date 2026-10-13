@@ -1,0 +1,6 @@
+const test=require('node:test'),assert=require('node:assert/strict');const O=require('../assets/asia-info-overlay.js');
+const point={type:'Feature',geometry:{type:'Point',coordinates:[101.69,3.14]},properties:{name:'Example station',network:'MRT',operator:'Example',sourceId:'example1',sourceUrl:'https://www.openstreetmap.org/node/1',source:'OSM'}};
+test('accepts only sourced point/line features',()=>{assert(O.accepts(point));assert(!O.accepts({...point,properties:{name:'X'}}));assert(!O.accepts({...point,geometry:{type:'Point',coordinates:[300,1]}}))});
+test('popup escapes untrusted metadata',()=>{const f={...point,properties:{...point.properties,name:'<script>alert(1)</script>'}};assert(!O.renderPopup(f).includes('<script>'));assert(O.renderPopup(f).includes('&lt;script&gt;'))});
+test('popup distinguishes station from track alignment',()=>{assert(O.renderPopup(point).includes('Station'));const f={...point,geometry:{type:'LineString',coordinates:[[101,3],[102,4]]}};assert(O.renderPopup(f).includes('Track alignment'))});
+test('no fabricated data when no vetted features',()=>{let received;const map={removeLayer(){}};const L={geoJSON(data){received=data;return {addTo(){}}}};const h=O.mount(L,map,[]);assert.equal(h.featureCount,0);assert.equal(received.features.length,0)});

@@ -2,17 +2,19 @@
 (()=>{
 'use strict';
 if(window.MRS10AsiaMapUI)return;
-let active=null;
+let active=null,infoLoader=null;
+function ensureInfoOverlay(){if(window.MRS10AsiaInfoOverlay)return Promise.resolve(window.MRS10AsiaInfoOverlay);if(infoLoader)return infoLoader;infoLoader=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='assets/asia-info-overlay.js';s.async=true;s.onload=()=>window.MRS10AsiaInfoOverlay?resolve(window.MRS10AsiaInfoOverlay):reject(Error('Overlay unavailable'));s.onerror=()=>reject(Error('Overlay script unavailable'));document.head.append(s)}).catch(e=>{infoLoader=null;throw e});return infoLoader;}
 function unmount(){
  if(!active)return;
  const old=active;active=null;
+ try{old.info?.unmount();}catch{}
  try{old.asia?.remove();}catch{}
  try{old.railway?.unmount();}catch{}
  if(old.host){delete old.host.dataset.mapReady;delete old.host.dataset.validatedMarkers;delete old.host.dataset.totalMarkers;old.host.replaceChildren();}
 }
 function mount(host,railway){
  unmount();if(!host||!railway?.mount||!railway?.unmount)return;
- const state={host,railway,asia:null,current:'ecrl'};active=state;
+ const state={host,railway,asia:null,info:null,current:'ecrl'};active=state;
  const wrapper=document.createElement('section');
  wrapper.className='asia-map-switch';
  wrapper.innerHTML='<div class="asia-map-switch-controls" role="group" aria-label="Railway map view">'+
@@ -45,11 +47,14 @@ function mount(host,railway){
     window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{pane:'asiaMutedRoads',maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(m);
     window.L.tileLayer('https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',{pane:'asiaRailways',maxZoom:19,attribution:'OpenRailwayMap railway reference'}).addTo(m);
     m.setView([4.2,102.5],6);
+    // V0.4.2 accepts only independently sourced vector data; empty until vetted data is provided.
+    ensureInfoOverlay().then(api=>{if(active===state&&state.current==='asia'&&state.asia===m)state.info=api.mount(window.L,m,[]);}).catch(()=>{});
     // Source-backed vector overlays can be added later; raster railway pixels have no feature identity.
     // Do not fabricate stations, track alignment coordinates, names, or clickable raster popups.
     requestAnimationFrame(()=>{if(active===state&&state.asia===m)m.invalidateSize(false)});
    }catch(e){panel.querySelector('[data-asia-canvas]').textContent='Railway reference map unavailable: '+String(e.message||e);}
   }else{
+   try{state.info?.unmount();}catch{}state.info=null;
    try{state.asia?.remove();}catch{}state.asia=null;
    panel.hidden=true;ecrl.hidden=false;
    state.current='ecrl';mountEcrl();
