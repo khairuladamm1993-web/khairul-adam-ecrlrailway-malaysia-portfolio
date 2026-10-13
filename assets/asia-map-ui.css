@@ -1,0 +1,7 @@
+/* Stage 3 isolated selector; original MAP classes untouched. */
+.asia-map-switch-controls{display:flex;gap:.5rem;flex-wrap:wrap;margin:0 0 1rem}
+.asia-map-switch-controls button{flex:1 1 190px;min-height:44px;border:1px solid #47798a;border-radius:9px;padding:.7rem;font-weight:700;cursor:pointer;background:#102936;color:#e8f9ff}
+.asia-map-switch-controls button[aria-pressed="true"]{background:#e8f9ff;color:#102936;border-color:#007b9c}
+.asia-map-switch-controls button:focus-visible{outline:3px solid #20a7bf;outline-offset:2px}
+[data-asia-panel][hidden],[data-asia-ecrl][hidden]{display:none!important}
+[data-asia-canvas]{width:100%;border:1px solid #739baa;border-radius:10px;overflow:hidden}

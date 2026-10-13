@@ -26,7 +26,24 @@
   mapLoader=(async()=>{await load('assets/map-intelligence.js','data-railway-map-intelligence',()=>Boolean(window.RailwayMapIntelligence));await load('assets/map-gateway.js','data-railway-map-module',()=>Boolean(window.RailwayMap));return window.RailwayMap;})();
   return mapLoader;
  };
- const mountMap=()=>ensureMap().then(m=>m.mount(document.querySelector('#railway-map-mount'))).catch(error=>{const host=document.querySelector('#railway-map-mount');if(host)host.innerHTML='<article class="learning-card"><h2>MAP</h2><p>'+R.escape(error.message||error)+'</p></article>';});
+ const mountMap=()=>ensureMap().then(async m=>{
+  const host=document.querySelector('#railway-map-mount');if(!host)return;
+  await ensureAsiaUI();
+  if(!host.isConnected||category!=='map')return;
+  window.MRS10AsiaMapUI.mount(host,m);
+ }).catch(error=>{const host=document.querySelector('#railway-map-mount');if(host&&category==='map')host.innerHTML='<article class="learning-card"><h2>MAP</h2><p>'+R.escape(error.message||error)+'</p></article>';});
+ let asiaUILoader=null;
+ const ensureAsiaUI=()=>{
+  if(window.MRS10AsiaMapUI)return Promise.resolve();
+  if(asiaUILoader)return asiaUILoader;
+  asiaUILoader=new Promise((resolve,reject)=>{
+   const script=document.createElement('script');script.src='assets/asia-map-ui.js';script.async=true;script.dataset.asiaMapUi='1';
+   script.onload=()=>window.MRS10AsiaMapUI?resolve():reject(new Error('Asia MAP UI unavailable'));
+   script.onerror=()=>reject(new Error('Asia MAP UI could not load'));
+   document.head.append(script);
+  }).catch(e=>{asiaUILoader=null;throw e;});
+  return asiaUILoader;
+ };
  function renderDetail(){
   const body=document.querySelector('#detail-content');
   const controls=`<div class="quiz-languages">${['ms','en','zh'].map(l=>`<button data-detail-lang="${l}" aria-pressed="${R.language===l}">${({ms:'BM',en:'EN',zh:'中文'})[l]}</button>`).join('')}${R.language==='zh'?`<button data-detail-pinyin aria-pressed="${R.pinyin}">Pinyin ${R.pinyin?'ON':'OFF'}</button>`:''}<button data-detail-theme>${h(window.RailwayTheme.value==='light'?'Dark Mode':'Light Mode')}</button></div>`;
@@ -36,7 +53,7 @@
  }
  function openDetail(detail,selector){currentDetail=detail;returnSelector=selector;renderDetail();if(!dialog.open)dialog.showModal();dialog.scrollTop=0;dialog.querySelector('[data-close]').focus();}
  function render(){
-  if(category!=='map')window.RailwayMap?.unmount();
+  if(category!=='map'){window.MRS10AsiaMapUI?.unmount();window.RailwayMap?.unmount();}
   document.querySelector('#categories').innerHTML=categories.map(([id,title])=>`<button role="tab" aria-selected="${id===category}" data-category="${id}">${h(title)}</button>`).join('');
   document.querySelector('#categories').setAttribute('role','tablist');
   if(!window.RailwayAccess)document.querySelector('#gateway-status').innerHTML=`<span class="access-label">${h('Public')}</span><button class="member-entry" data-member>${h('LOGIN / MEMBER ACCESS')}</button>`;
