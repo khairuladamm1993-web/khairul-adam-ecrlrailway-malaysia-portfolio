@@ -49,7 +49,7 @@ test('reset proposal returns to CURRENT',()=>{
  const h=mock();h.app.RailwayOwnerMapV01B.mount(h.ctx,h.slot);h.set('lat','3.68');h.set('lon','103.04');h.click('apply');h.click('reset');assert.match(h.slot.innerHTML,/PROPOSED<\/strong>: 3\.677090, 103\.030010/);
 });
 test('GPS permission is deferred until explicit click; clear removes in-memory fix',()=>{
- const h=mock();h.app.RailwayOwnerMapV01B.mount(h.ctx,h.slot);assert.equal(h.requests,0);h.click('gps');assert.equal(h.requests,1);assert.match(h.slot.innerHTML,/GPS reported accuracy: 12\.0 m/);h.click('gpsclear');assert.match(h.slot.innerHTML,/GPS cleared/);
+ const h=mock();h.app.RailwayOwnerMapV01B.mount(h.ctx,h.slot);assert.equal(h.requests,0);h.click('gps');assert.equal(h.requests,1);assert.match(h.slot.innerHTML,/GPS reported accuracy: 12\.0 m/);assert.match(h.slot.innerHTML,/GPS<\/strong>: 3\.680000, 103\.040000/);h.click('gpsclear');assert.match(h.slot.innerHTML,/GPS cleared/);
 });
 test('save and review are mock only, never canonical publish',()=>{
  const h=mock();h.app.RailwayOwnerMapV01B.mount(h.ctx,h.slot);h.set('note','Reference observation');h.click('save');assert.match(h.slot.innerHTML,/Mock saved: 1/);h.click('approve');assert.match(h.slot.innerHTML,/Mock review events: 1/);assert.doesNotMatch(source,/adminPublishLocation|adminRestoreLocation|\bfetch\s*\(|sendBeacon\s*\(|localStorage|sessionStorage|service_role/);
