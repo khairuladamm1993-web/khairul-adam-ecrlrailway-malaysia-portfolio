@@ -57,6 +57,7 @@ function mount(host,railway){
    const features=await api.load(b,{signal:controller.signal});
    if(controller.signal.aborted||version!==state.osmVersion||active!==state||state.asia!==m)return;
    const overlay=await ensureInfoOverlay();if(controller.signal.aborted||version!==state.osmVersion)return;
+   if(state.country!=='malaysia'||controller.signal.aborted||version!==state.osmVersion)return;
    state.osmInfo=overlay.mount(window.L,m,features);
    status.textContent=features.length+' public station references in this area (OpenStreetMap; not official operator verification).';
   }catch(e){if(!controller.signal.aborted&&active===state&&version===state.osmVersion)status.textContent='Station data unavailable; OpenRailwayMap remains usable.';}
@@ -99,6 +100,7 @@ function mount(host,railway){
   const b=e.target.closest('[data-asia-country]');if(!b||!panel.contains(b)||state.current!=='asia'||!state.asia)return;
   const country=countryViews[b.dataset.asiaCountry];if(!country)return;
   state.country=b.dataset.asiaCountry;
+  state.osmAbort?.abort();state.osmVersion++;
   state.asia.setView(country.center,country.zoom);
   refreshStations(state.asia);
   panel.querySelectorAll('[data-asia-country]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));

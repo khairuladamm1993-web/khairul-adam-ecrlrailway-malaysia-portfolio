@@ -136,6 +136,7 @@
   const state={host,controller,map:null,leaflet:null,markers:new Map(),chainageMarker:null,selected:null,filter:'All',query:'',chainageMode:false,ownerLoaded:false,layers:{...MAP_LAYERS}};
   instance=state;
   host.classList.toggle('mrs10-owner-visible',Boolean(A?.canAdmin));
+  host.classList.toggle('mrs10-public-minimal',!A?.canAdmin);
   host.innerHTML='<section class="map-module" aria-label="ECRL reference map">'+
    '<div class="map-identity-row"><span class="map-malaysia-badge" aria-label="Malaysia map context">🇲🇾 <span>Malaysia</span></span></div>'+
    '<div class="map-toolbar"><label class="map-search"><span>Search</span><input type="search" data-map-search placeholder="Station name; Member code / chainage when available" autocomplete="off"></label>'+
@@ -148,6 +149,8 @@
 
   const resultHost=host.querySelector('[data-map-results]'),detailHost=host.querySelector('[data-map-detail]');
   const input=host.querySelector('[data-map-search]'),focusBtn=host.querySelector('[data-map-focus]');
+  const updateAccessibleControls=()=>{const owner=Boolean(A?.canAdmin);host.classList.toggle('mrs10-owner-visible',owner);host.classList.toggle('mrs10-public-minimal',!owner);for(const element of host.querySelectorAll('.map-toolbar,.map-side,.map-identity-row')){element.inert=!owner;if(owner)element.removeAttribute('aria-hidden');else element.setAttribute('aria-hidden','true');}};
+  updateAccessibleControls();
   const corridorBase=()=>points().filter(p=>p.phase==='current');
   const corridorRecords=()=>corridorBase().map(effective);
   function approvedAliases(r){
@@ -286,7 +289,9 @@
     marker=state.leaflet.marker([Number(r.lat),Number(r.lon)],{icon,keyboard:true,title:r.name,riseOnHover:true,pane:'canonicalAssets'}).addTo(state.map);
     marker._railwayConfidence=r.locationConfidence;
     marker.bindTooltip(esc(r.name)+' · '+esc(r.locationConfidence),{direction:'top',offset:[0,-8],opacity:.92,className:'railway-map-label'});
-     marker.bindPopup?.('<div class="mrs10-station-popup"><strong>'+esc(r.name)+'</strong><span>'+esc(r.type)+' · ECRL</span><small>'+esc(r.locationConfidence)+'</small></div>',{maxWidth:245,autoPan:true,closeButton:true,className:'mrs10-glass-popup'});
+     const p=r.overlay||{},publicSource=r.locationConfidence===PUBLIC;
+     const sourceLink=publicSource?'<a href="https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/blob/609cbbbfcfc7e848f8c5f94c41e5152fba5115d6/assets/corridor-reference.js" target="_blank" rel="noopener noreferrer">Public ECRL reference source</a>':'<span>Project location record · source not publicly linked</span>';
+     marker.bindPopup?.('<div class="mrs10-station-popup"><strong>'+esc(r.name)+'</strong><span>'+esc([p.code,r.type,'ECRL'].filter(Boolean).join(' · '))+'</span><small>'+esc(r.locationConfidence)+'</small><small>'+esc(publicSource?'Approximate locality only · not surveyed':'Refer to location confidence classification')+'</small>'+sourceLink+'</div>',{maxWidth:260,autoPan:true,closeButton:true,className:'mrs10-glass-popup'});
     marker.on('click',()=>{const fresh=effective(points().find(x=>x.id===r.id)||r);renderDetail(fresh);renderResults();focusStored(fresh);loadOwnerTools();});
     state.markers.set(r.id,marker);
    }
@@ -376,7 +381,7 @@
    ownerPromise=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='assets/owner-map.js';s.async=true;s.dataset.railwayOwnerMap='1';s.onload=()=>window.RailwayOwnerMap?resolve(window.RailwayOwnerMap):reject(new Error('Owner MAP tools unavailable'));s.onerror=reject;document.head.append(s);});
    ownerPromise.then(m=>{if(instance===state&&A.canAdmin){m.mount(ownerContext(),host.querySelector('[data-owner-map-slot]'),{force:true});state.ownerLoaded=true;}}).catch(()=>{});
   }
-  const accessRefresh=async()=>{if(instance!==state)return;await ensureMemberData();if(instance===state){state.selected=state.selected?effective(points().find(x=>x.id===state.selected.id)||state.selected):null;renderDetail(state.selected);renderResults();if(A.canAdmin)loadOwnerTools(true);else window.RailwayOwnerMap?.unmount();}};
+  const accessRefresh=async()=>{if(instance!==state)return;await ensureMemberData();if(instance===state){updateAccessibleControls();state.selected=state.selected?effective(points().find(x=>x.id===state.selected.id)||state.selected):null;renderDetail(state.selected);renderResults();if(A.canAdmin)loadOwnerTools(true);else window.RailwayOwnerMap?.unmount();}};
   window.addEventListener('railway-access-change',accessRefresh,{signal});
 
   try{
