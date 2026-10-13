@@ -30,6 +30,8 @@ jobs:
         run: node --test tests/asia-map-ui.test.cjs
       - name: Test V0.4 Malaysia catalogue
         run: node --test tests/malaysia-network-catalogue.test.cjs
+      - name: Test V0.4.1 uncluttered railway map
+        run: node --test tests/asia-map-minimal.test.cjs
       - name: Run existing MR-S10 regression suite
         run: npm test
       - name: Build isolated production-shaped artifact
