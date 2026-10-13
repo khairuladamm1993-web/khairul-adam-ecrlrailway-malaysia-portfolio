@@ -10,4 +10,4 @@ test('R1 prevents keyboard access to hidden controls',()=>{assert(map.includes('
 test('R1 refreshes owner controls on access change',()=>assert(map.includes('if(instance===state){updateAccessibleControls();')));
 test('R1 supports dark glass and fallback',()=>{assert(css.includes(':root[data-theme="dark"] .asia-map-switch'));assert(css.includes('@supports not ((backdrop-filter:'));});
 test('R1 popup limits public source to public reference',()=>{assert(map.includes('Public ECRL reference source'));assert(map.includes('Project location record · source not publicly linked'));});
-test('R1 guards late Malaysia station results',()=>{assert(ui.includes("if(state.country!=='malaysia'||controller.signal.aborted"));assert(ui.includes('state.osmAbort?.abort();state.osmVersion++;'));});
+test('R1 guards late Malaysia station results',()=>{assert(asia.includes("if(state.country!=='malaysia'||controller.signal.aborted"));assert(asia.includes('state.osmAbort?.abort();state.osmVersion++;'));});
