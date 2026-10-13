@@ -41,7 +41,7 @@ for name in forbidden_assets:
 
 required_assets={
     "access.js","public-gateway.js","member-gateway.js","module-previews.js",
-    "analytics.js","gateway.css","theme.js","theme.css","i18n.js","map-intelligence.js","map-gateway.js","corridor-reference.js","owner-map.js","build-info.js"
+    "analytics.js","gateway.css","theme.js","theme.css","i18n.js","map-intelligence.js","map-gateway.js","corridor-reference.js","owner-map.js","owner-map-v01b.js","build-info.js"
 }
 missing=sorted(name for name in required_assets if not (out/"assets"/name).exists())
 if missing:
