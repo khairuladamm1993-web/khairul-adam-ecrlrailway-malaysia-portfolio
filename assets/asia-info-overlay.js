@@ -7,6 +7,7 @@ const pair=p=>Array.isArray(p)&&p.length>=2&&Number.isFinite(p[0])&&Number.isFin
 function accepts(f){
  const g=f?.geometry,p=f?.properties;
  if(f?.type!=='Feature'||!g||!p||!/^https:\/\//.test(p.sourceUrl||'')||!p.sourceId||!p.name)return false;
+ try{if(new URL(p.sourceUrl).protocol!=='https:')return false}catch{return false}
  if(g.type==='Point')return pair(g.coordinates);
  return g.type==='LineString'&&Array.isArray(g.coordinates)&&g.coordinates.length>=2&&g.coordinates.every(pair);
 }
