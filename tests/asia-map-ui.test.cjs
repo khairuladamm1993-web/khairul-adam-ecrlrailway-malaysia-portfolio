@@ -8,3 +8,6 @@ test('Asia lazy-loaded only in MAP',()=>{assert.match(js,/const mountMap=\(\)=>e
 test('leave original MAP engine unchanged as independent module',()=>{assert.match(map,/window\.RailwayMap=Object\.freeze\(\{mount,unmount/);});
 test('Asia map created separately with no fabricated vectors',()=>{assert.match(ui,/window\.L\.map\(wrapper\.querySelector/);assert.doesNotMatch(ui,/L\.polyline|L\.geoJSON|L\.marker/);});
 test('navigation unmounts Asia state',()=>{assert.match(js,/window\.MRS10AsiaMapUI\?\.unmount\(\)/);});
+
+test('outer MAP host mirrors original map readiness and marker counts after async mount',()=>{for(const key of ['mapReady','validatedMarkers','totalMarkers'])assert.match(ui,new RegExp('host\\.dataset\\.'+key+'=ecrl\\.dataset\\.'+key));});
+test('switch away clears stale ECRL readiness',()=>assert.match(ui,/railway\.unmount\(\);delete host\.dataset\.mapReady/));

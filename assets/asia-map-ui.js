@@ -8,7 +8,7 @@ function unmount(){
  const old=active;active=null;
  try{old.asia?.remove();}catch{}
  try{old.railway?.unmount();}catch{}
- old.host?.replaceChildren();
+ if(old.host){delete old.host.dataset.mapReady;delete old.host.dataset.validatedMarkers;delete old.host.dataset.totalMarkers;old.host.replaceChildren();}
 }
 function mount(host,railway){
  unmount();if(!host||!railway?.mount||!railway?.unmount)return;
@@ -23,10 +23,19 @@ function mount(host,railway){
   '<p class="study-boundary">This view is a visual reference only. No interactive approved railway geometries have been loaded.</p></div>';
  host.replaceChildren(wrapper);
  const ecrl=wrapper.querySelector('[data-asia-ecrl]'),panel=wrapper.querySelector('[data-asia-panel]');
+ function mountEcrl(){
+  delete host.dataset.mapReady;
+  return Promise.resolve(railway.mount(ecrl)).then(()=>{
+   if(active!==state||state.current!=='ecrl')return;
+   host.dataset.mapReady=ecrl.dataset.mapReady||'error';
+   host.dataset.validatedMarkers=ecrl.dataset.validatedMarkers||'0';
+   host.dataset.totalMarkers=ecrl.dataset.totalMarkers||'0';
+  }).catch(()=>{if(active===state&&state.current==='ecrl'){host.dataset.mapReady='error';ecrl.textContent='ECRL map could not load.';}});
+ }
  function show(view){
   if(active!==state||state.current===view)return;
   if(view==='asia'){
-   railway.unmount();ecrl.hidden=true;panel.hidden=false;
+   railway.unmount();delete host.dataset.mapReady;delete host.dataset.validatedMarkers;delete host.dataset.totalMarkers;ecrl.hidden=true;panel.hidden=false;
    try{
     if(!window.L?.map||!window.L?.tileLayer)throw Error('Map library unavailable');
     const m=window.L.map(wrapper.querySelector('[data-asia-canvas]'),{zoomControl:true,attributionControl:true,preferCanvas:true,minZoom:3,maxZoom:17});
@@ -39,7 +48,7 @@ function mount(host,railway){
   }else{
    try{state.asia?.remove();}catch{}state.asia=null;
    panel.hidden=true;ecrl.hidden=false;
-   Promise.resolve(railway.mount(ecrl)).catch(()=>{if(active===state)ecrl.textContent='ECRL map could not load.'});
+   state.current='ecrl';mountEcrl();
   }
   state.current=view;
   wrapper.querySelectorAll('[data-asia-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.asiaView===view)));
@@ -47,7 +56,7 @@ function mount(host,railway){
  wrapper.querySelector('.asia-map-switch-controls').addEventListener('click',e=>{
   const button=e.target.closest('[data-asia-view]');if(button&&wrapper.contains(button))show(button.dataset.asiaView);
  });
- Promise.resolve(railway.mount(ecrl)).catch(()=>{if(active===state)ecrl.textContent='ECRL map could not load.'});
+ mountEcrl();
 }
 window.MRS10AsiaMapUI=Object.freeze({mount,unmount,get mounted(){return Boolean(active)}});
 })();
