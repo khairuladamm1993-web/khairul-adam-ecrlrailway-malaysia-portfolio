@@ -26,6 +26,8 @@ jobs:
         run: npm ci
       - name: Test isolated Asia adapter
         run: node --test tests/asia-railway-adapter.test.cjs
+      - name: Test isolated Stage 3 Asia MAP UI
+        run: node --test tests/asia-map-ui.test.cjs
       - name: Run existing MR-S10 regression suite
         run: npm test
       - name: Build isolated production-shaped artifact
