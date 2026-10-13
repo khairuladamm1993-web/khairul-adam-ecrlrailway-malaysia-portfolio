@@ -26,7 +26,7 @@ function walk(dir){
 test('production artifact excludes retained legacy quiz/protected assets',()=>{
   const dir=build('build-production.py','railway-production-');
   for(const name of ['questions.js','gateway.js','quiz-core.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),false,name);
-  for(const name of ['access.js','public-gateway.js','member-gateway.js','module-previews.js','analytics.js','map-intelligence.js','map-gateway.js','corridor-reference.js','owner-map.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),true,name);
+  for(const name of ['access.js','public-gateway.js','member-gateway.js','module-previews.js','analytics.js','map-intelligence.js','map-gateway.js','corridor-reference.js','owner-map.js','owner-map-v01b.js'])assert.equal(fs.existsSync(path.join(dir,'assets',name)),true,name);
   const textFiles=walk(dir).filter(p=>/\.(?:html|js|css|md|xml|txt)$/i.test(p));
   const all=textFiles.map(p=>fs.readFileSync(p,'utf8')).join('\n');
   assert(!all.includes('window.RailwayModules='));
