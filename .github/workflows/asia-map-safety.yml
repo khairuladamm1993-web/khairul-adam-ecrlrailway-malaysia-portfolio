@@ -40,6 +40,8 @@ jobs:
         run: node --test tests/malaysia-station-features.test.cjs
       - name: Test live public Malaysia station discovery
         run: node --test tests/malaysia-osm-stations.test.cjs
+      - name: Test one-shot glass MAP and tap popup
+        run: node --test tests/map-glass-tap.test.cjs
       - name: Run existing MR-S10 regression suite
         run: npm test
       - name: Build isolated production-shaped artifact

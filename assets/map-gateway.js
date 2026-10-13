@@ -285,7 +285,8 @@
     marker=state.leaflet.marker([Number(r.lat),Number(r.lon)],{icon,keyboard:true,title:r.name,riseOnHover:true,pane:'canonicalAssets'}).addTo(state.map);
     marker._railwayConfidence=r.locationConfidence;
     marker.bindTooltip(esc(r.name)+' · '+esc(r.locationConfidence),{direction:'top',offset:[0,-8],opacity:.92,className:'railway-map-label'});
-    marker.on('click',()=>{const fresh=effective(points().find(x=>x.id===r.id)||r);renderDetail(fresh);renderResults();focusStored(fresh);loadOwnerTools();});
+     marker.bindPopup('<div class="mrs10-station-popup"><strong>'+esc(r.name)+'</strong><span>'+esc(r.type)+' · ECRL</span><small>'+esc(r.locationConfidence)+'</small></div>',{maxWidth:245,autoPan:true,closeButton:true,className:'mrs10-glass-popup'});
+    marker.on('click',()=>{const fresh=effective(points().find(x=>x.id===r.id)||r);renderDetail(fresh);renderResults();loadOwnerTools();});
     state.markers.set(r.id,marker);
    }
   }
