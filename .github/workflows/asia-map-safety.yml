@@ -1,0 +1,52 @@
+name: Asia MAP integration safety
+on:
+  push:
+    branches:
+      - feature/map-asia-integration-safe
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out integration branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Test isolated Asia adapter
+        run: node --test tests/asia-railway-adapter.test.cjs
+      - name: Run existing MR-S10 regression suite
+        run: npm test
+      - name: Build isolated production-shaped artifact
+        run: npm run build:production
+      - name: Smoke test production-shaped artifact
+        run: npm run smoke:production
+      - name: Check script syntax and protected asset boundary
+        shell: bash
+        run: |
+          python3 -m py_compile scripts/build-production.py scripts/build-preview.py
+          test ! -f dist-production/assets/questions.js
+          test ! -f dist-production/assets/quiz-core.js
+          test ! -f dist-production/assets/gateway.js
+          if grep -REl 'asia-railway-adapter\.js|MRS10AsiaRailway' --include='*.html' --include='*.js' dist-production/index.html dist-production/gateway.html dist-production/portfolio.html dist-production/assets/map-gateway.js dist-production/assets/owner-map.js; then
+            echo 'ERROR: Asia adapter activated without UI safety approval'
+            exit 1
+          fi
+      - name: Upload evidence artifact only (never deploy)
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-map-stage2-evidence
+          path: dist-production/
+          retention-days: 7
+          if-no-files-found: error
