@@ -2,7 +2,8 @@
 (()=>{
 'use strict';
 if(window.MRS10AsiaMapUI)return;
-let active=null,infoLoader=null;
+let active=null,infoLoader=null,stationsLoader=null;
+function ensureMalaysiaStations(){if(window.MRS10MalaysiaStations)return Promise.resolve(window.MRS10MalaysiaStations);if(stationsLoader)return stationsLoader;stationsLoader=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='assets/malaysia-station-features.js';s.async=true;s.onload=()=>window.MRS10MalaysiaStations?resolve(window.MRS10MalaysiaStations):reject(Error('Station references unavailable'));s.onerror=()=>reject(Error('Station source unavailable'));document.head.append(s)}).catch(e=>{stationsLoader=null;throw e});return stationsLoader;}
 // Country centers are navigation presets only, never station or track geometry.
 const countryViews=Object.freeze({malaysia:{center:[4.2,102.5],zoom:6},thailand:{center:[15.1,101],zoom:6},china:{center:[34.5,104.2],zoom:4}});
 function ensureInfoOverlay(){if(window.MRS10AsiaInfoOverlay)return Promise.resolve(window.MRS10AsiaInfoOverlay);if(infoLoader)return infoLoader;infoLoader=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='assets/asia-info-overlay.js';s.async=true;s.onload=()=>window.MRS10AsiaInfoOverlay?resolve(window.MRS10AsiaInfoOverlay):reject(Error('Overlay unavailable'));s.onerror=()=>reject(Error('Overlay script unavailable'));document.head.append(s)}).catch(e=>{infoLoader=null;throw e});return infoLoader;}
@@ -50,8 +51,12 @@ function mount(host,railway){
     window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{pane:'asiaMutedRoads',maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(m);
     window.L.tileLayer('https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',{pane:'asiaRailways',maxZoom:19,attribution:'OpenRailwayMap railway reference'}).addTo(m);
     m.setView(countryViews.malaysia.center,countryViews.malaysia.zoom);
-    // V0.4.2 accepts only independently sourced vector data; empty until vetted data is provided.
-    ensureInfoOverlay().then(api=>{if(active===state&&state.current==='asia'&&state.asia===m)state.info=api.mount(window.L,m,[]);}).catch(()=>{});
+    // Use existing public-safe ECRL locality references, never canonical/member records or guessed KTMB stations.
+    Promise.all([ensureInfoOverlay(),ensureMalaysiaStations()]).then(([api,stationApi])=>{
+      if(active!==state||state.current!=='asia'||state.asia!==m)return;
+      const features=stationApi.fromPublicReference(window.RailwayCorridorReference||[]);
+      state.info=api.mount(window.L,m,features);
+    }).catch(()=>{});
     // Source-backed vector overlays can be added later; raster railway pixels have no feature identity.
     // Do not fabricate stations, track alignment coordinates, names, or clickable raster popups.
     requestAnimationFrame(()=>{if(active===state&&state.asia===m)m.invalidateSize(false)});

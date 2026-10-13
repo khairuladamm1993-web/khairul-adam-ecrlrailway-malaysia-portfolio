@@ -36,6 +36,8 @@ jobs:
         run: node --test tests/asia-info-overlay.test.cjs
       - name: Test V0.5 three-country viewport selector
         run: node --test tests/asia-country-switch.test.cjs
+      - name: Test Malaysia station icon data projection
+        run: node --test tests/malaysia-station-features.test.cjs
       - name: Run existing MR-S10 regression suite
         run: npm test
       - name: Build isolated production-shaped artifact
