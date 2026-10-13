@@ -30,6 +30,7 @@
  }
  function unmount(){
   const s=mounted;if(!s)return;
+  window.RailwayOwnerMapV01B?.unmount();
   cleanupDraft(true);
   try{s.currentMarker?.remove();}catch{}
   try{s.storedMarker?.remove();}catch{}
@@ -51,6 +52,7 @@
    '<div class="owner-map-head"><span class="access-label">OWNER / ADMIN</span><strong>Location Management</strong></div>'+
    '<div class="owner-map-actions"><button type="button" data-owner-geolocate>MY CURRENT LOCATION</button>'+
    (code?'<button type="button" data-owner-edit>EDIT LOCATION</button><button type="button" data-owner-history>LOCATION HISTORY</button>':'')+
+   (code&&['STN','PL'].includes(r?.type)?'<button type="button" data-owner-v01b>OPEN V0.1B MOCK REVIEW</button>':'')+
    '</div>'+
    (cur?'<div class="owner-current"><strong>Current Location</strong><span>'+coord(cur.lat)+', '+coord(cur.lon)+'</span>'+(cur.accuracy!=null?'<span>Current device accuracy: ±'+Math.round(cur.accuracy)+' m</span>':'<span>Current device accuracy: not reported by browser</span>')+(cur.accuracy!=null&&cur.accuracy>30?'<span class="owner-warning">Accuracy is poor for field confirmation. Review carefully before saving.</span>':'')+(code?'<button type="button" data-owner-use-current>USE CURRENT LOCATION FOR ASSET</button>':'')+'</div>':'<p class="owner-privacy">Device location is requested only when you tap the button. No background tracking or automatic persistence.</p>')+
    '<p data-owner-message class="owner-message" role="status"></p>'+
@@ -59,6 +61,7 @@
  }
  function render(){
   if(!mounted||!A.canAdmin)return;
+  window.RailwayOwnerMapV01B?.unmount();
   mounted.slot.innerHTML=baseControls();
   bindBase();
   if(mounted.draft)renderDraft();
@@ -68,8 +71,24 @@
   const slot=mounted.slot;
   slot.querySelector('[data-owner-geolocate]')?.addEventListener('click',requestCurrentLocation,{once:true});
   slot.querySelector('[data-owner-edit]')?.addEventListener('click',beginEdit,{once:true});
+  slot.querySelector('[data-owner-v01b]')?.addEventListener('click',openV01B,{once:true});
   slot.querySelector('[data-owner-history]')?.addEventListener('click',loadHistory,{once:true});
   slot.querySelector('[data-owner-use-current]')?.addEventListener('click',useCurrentLocation,{once:true});
+ }
+ function openV01B(){
+  const s=mounted,r=record();
+  if(!s||!A?.canAdmin||s.draft||!r||!['STN','PL'].includes(r.type))return;
+  const open=()=>{
+   if(mounted!==s||!A?.canAdmin||s.draft)return;
+   const workflow=s.slot.querySelector('[data-owner-workflow]');
+   if(!window.RailwayOwnerMapV01B?.mount(s.ctx,workflow,()=>render()))setMessage('Owner mock editor could not open. Select an asset with a valid coordinate.',true);
+  };
+  if(window.RailwayOwnerMapV01B){open();return;}
+  const script=document.createElement('script');
+  script.src='assets/owner-map-v01b.js';script.async=true;script.dataset.ownerV01b='1';
+  script.onload=open;
+  script.onerror=()=>{if(mounted===s)setMessage('V0.1B mock module unavailable.',true);};
+  document.head.appendChild(script);
  }
  function requestCurrentLocation(){
   if(!mounted||!A.canAdmin)return;
