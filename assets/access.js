@@ -4,11 +4,22 @@
  const PROJECT_URL='https://kfudisbzdgsefdjoopzu.supabase.co';
  const PUBLISHABLE_KEY='sb_publishable_1Diyg-QnCNMJXIY2g0RdCg_ToWFuq0V';
  let client=null,authSubscription=null,consent=false,dataCache=null,userId=null,magicLinkInFlight=null,hydrationPromise=null;
+ let authRevision=0;
  let state={level:'public',status:'initializing',canReadMemberContent:false,canAdmin:false,email:null,error:null,retryAfterSeconds:null};
  const emit=()=>window.dispatchEvent(new CustomEvent('railway-access-change',{detail:snapshot()}));
  const snapshot=()=>Object.freeze({...state,canReadMemberContent:state.level==='member'||state.level==='admin',canAdmin:state.level==='admin'});
  const set=(patch)=>{state={...state,...patch};emit();return snapshot();};
- const failClosed=(status='public',error=null)=>{consent=false;dataCache=null;userId=null;return set({level:'public',status,canReadMemberContent:false,canAdmin:false,email:null,error:error?String(error):null,retryAfterSeconds:null});};
+ const safeError=(status)=>({
+  'session-restore-failed':'The browser session could not be restored. Check the existing session on the original browser and site.',
+  'session-expired':'The saved session has expired. A new sign-in is required.',
+  'get-user-failed':'The saved session could not be validated by the authentication service.',
+  'role-error':'The backend access role could not be resolved. Check the existing session again.',
+  'role-denied':'The backend has not granted an enabled Member or Admin profile.',
+  'profile-error':'The Member profile could not be read securely.',
+  'client-error':'The authentication client could not complete the request.',
+  'auth-network-error':'Authentication backend could not be reached. Check the connection and try again.'
+ }[status]||'Protected data could not be loaded securely. Check the existing session again.');
+ const failClosed=(status='public',error=null)=>{consent=false;dataCache=null;userId=null;return set({level:'public',status,canReadMemberContent:false,canAdmin:false,email:null,error:error?(['pkce-exchange-failed','verification-failed'].includes(status)?String(error):safeError(status)):null,retryAfterSeconds:null});};
  const requireClient=()=>{
   if(client)return client;
   if(!window.supabase?.createClient)throw new Error('Supabase client library unavailable');
@@ -17,6 +28,7 @@
  };
  const validateSession=async(options={})=>{
   if(hydrationPromise)return hydrationPromise;
+  const revision=authRevision;
   hydrationPromise=(async()=>{
    try{
     const c=requireClient();
@@ -24,29 +36,35 @@
     const pending=Boolean(options.expectSession)||['exchanging-code','restoring-session','validating-user','role-pending'].includes(state.status);
     if(pending)set({status:'restoring-session',error:null,retryAfterSeconds:null});
     const {data:{session},error:sessionError}=await c.auth.getSession();
+    if(revision!==authRevision)return snapshot();
     if(sessionError)return failClosed('session-restore-failed',sessionError);
     if(!session)return failClosed(pending?'session-restore-failed':previousAuthenticated?'session-expired':'public',pending?'Verification succeeded but no browser session was restored.':null);
     let liveSession=session;
     const expiresAt=Number(session.expires_at||0)*1000;
     if(expiresAt&&expiresAt<=Date.now()+60000&&typeof c.auth.refreshSession==='function'){
      const refreshed=await c.auth.refreshSession();
+     if(revision!==authRevision)return snapshot();
      if(refreshed.error||!refreshed.data?.session)return failClosed('session-expired',refreshed.error||'Session expired');
      liveSession=refreshed.data.session;
     }
     set({status:'validating-user',error:null,retryAfterSeconds:null});
     const {data:{user},error:userError}=await c.auth.getUser(liveSession.access_token);
+    if(revision!==authRevision)return snapshot();
     if(userError||!user)return failClosed('get-user-failed',userError||'No valid user');
     userId=user.id;
     set({status:'role-pending',error:null,retryAfterSeconds:null});
     const {data:role,error:roleError}=await c.rpc('account_role');
+    if(revision!==authRevision)return snapshot();
     if(roleError)return failClosed('role-error',roleError);
     if(!['member','admin'].includes(role))return failClosed('role-denied','Authenticated account is not approved for Member or Admin access.');
     const profile=await c.from('member_profiles').select('email,role,enabled,activity_consent_at,privacy_version').eq('user_id',userId).maybeSingle();
+    if(revision!==authRevision)return snapshot();
     if(profile.error)return failClosed('profile-error',profile.error.message);
     if(!profile.data?.enabled)return failClosed('role-denied','Member profile is disabled or unavailable.');
     consent=Boolean(profile.data?.activity_consent_at);
     return set({level:role,status:'authenticated',canReadMemberContent:true,canAdmin:role==='admin',email:user.email||profile.data?.email||null,error:null,retryAfterSeconds:null});
    }catch(error){
+    if(revision!==authRevision)return snapshot();
     const message=String(error?.message||error||'');
     const network=/fetch|network|timeout|connection/i.test(message);
     return failClosed(network?'auth-network-error':'client-error',network?'Authentication backend could not be reached. Check the connection and try again.':error);
@@ -102,11 +120,16 @@
   return data.session;
  }
  function handleAuthEvent(event,session){
-  if(event==='SIGNED_OUT'){failClosed('signed-out');return;}
+  if(event==='SIGNED_OUT'){authRevision++;failClosed('signed-out');return;}
   if(!['SIGNED_IN','INITIAL_SESSION','TOKEN_REFRESHED'].includes(event))return;
   if(!session&&event!=='INITIAL_SESSION')return;
   if(state.status!=='authenticated')set({status:'restoring-session',error:null,retryAfterSeconds:null});
-  setTimeout(()=>{validateSession({expectSession:Boolean(session)});},0);
+  const revision=authRevision;
+  setTimeout(async()=>{
+   // An event for a newer session must not be swallowed by an older hydration.
+   if(hydrationPromise)await hydrationPromise;
+   if(revision===authRevision)validateSession({expectSession:Boolean(session)});
+  },0);
  }
  async function init(){
   try{
@@ -138,36 +161,50 @@
  };
  async function sendMagicLink(email){
   const normalized=String(email||'').trim().toLowerCase();
-  if(!normalized||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized))throw new Error('Enter a valid email address.');
+  if(!normalized||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)){set({status:'auth-error',error:'Enter a valid email address.'});throw new Error('Enter a valid email address.');}
   if(magicLinkInFlight)return magicLinkInFlight;
+  if(state.status==='rate-limited')throw new Error(state.error);
+  if(state.status==='verification-sent')return snapshot();
   magicLinkInFlight=(async()=>{
    const restored=await validateSession();
    if(restored.canReadMemberContent)return restored;
    const c=requireClient();
    set({status:'sending',error:null,email:normalized});
    const redirectTo=location.origin+location.pathname;
-   const {error}=await c.auth.signInWithOtp({email:normalized,options:{emailRedirectTo:redirectTo,shouldCreateUser:true}});
+   let response;
+   try{response=await c.auth.signInWithOtp({email:normalized,options:{emailRedirectTo:redirectTo,shouldCreateUser:true}});}
+   catch(error){
+    const network=/fetch|network|timeout|connection/i.test(String(error?.message||''));
+    failClosed(network?'auth-network-error':'client-error',true);
+    throw new Error(state.error);
+   }
+   const {error}=response;
    if(error){
     const limited=rateLimitInfo(error);
-    if(limited.limited){set({level:'public',status:'rate-limited',canReadMemberContent:false,canAdmin:false,email:normalized,error:limited.message,retryAfterSeconds:limited.retryAfterSeconds});throw error;}
-    set({level:'public',status:'auth-error',canReadMemberContent:false,canAdmin:false,email:normalized,error:String(error.message||error),retryAfterSeconds:null});throw error;
+    if(limited.limited){set({level:'public',status:'rate-limited',canReadMemberContent:false,canAdmin:false,email:normalized,error:limited.message,retryAfterSeconds:limited.retryAfterSeconds});throw new Error(limited.message);}
+    const message='The sign-in request could not be completed. Review the email address and check service availability before trying again.';
+    set({level:'public',status:'auth-error',canReadMemberContent:false,canAdmin:false,email:normalized,error:message,retryAfterSeconds:null});throw new Error(message);
    }
    return set({level:'public',status:'verification-sent',canReadMemberContent:false,canAdmin:false,email:normalized,error:null,retryAfterSeconds:null});
   })();
   try{return await magicLinkInFlight;}finally{magicLinkInFlight=null;}
  }
  async function refresh(){
+  const revision=authRevision;
   const previous=snapshot();
   const preserve=['verification-sent','rate-limited'].includes(previous.status);
   const resolved=await validateSession();
+  if(revision!==authRevision)return snapshot();
   if(resolved.canReadMemberContent||!preserve)return resolved;
   return set({level:'public',status:previous.status,canReadMemberContent:false,canAdmin:false,email:previous.email,error:previous.error,retryAfterSeconds:previous.retryAfterSeconds??null});
  }
  async function logout(){
+  authRevision++;failClosed('signed-out');
   try{if(client)await client.auth.signOut({scope:'local'});}finally{failClosed('signed-out');}
  }
  async function fetchMemberBundle(){
   if(!snapshot().canReadMemberContent)throw new Error('Verified member session required.');
+  const revision=authRevision;
   const c=requireClient();
   const [profile,content,banks,files,progress,attempts]=await Promise.all([
    c.from('member_profiles').select('user_id,email,role,display_name,enabled,activity_consent_at,privacy_version,last_member_activity').eq('user_id',userId).maybeSingle(),
@@ -177,8 +214,9 @@
    c.from('member_progress').select('resource_id,position,completed,updated_at').order('updated_at',{ascending:false}),
    c.from('quiz_attempts').select('id,client_attempt_id,modules,score,passed,attempted_at').order('attempted_at',{ascending:false}).limit(50)
   ]);
+  if(revision!==authRevision||!snapshot().canReadMemberContent)throw new Error('Member session changed; protected response discarded.');
   const results={profile,content,banks,files,progress,attempts};
-  for(const [name,result] of Object.entries(results))if(result.error){failClosed(name+'-fetch-error',result.error.message);throw result.error;}
+  for(const [name,result] of Object.entries(results))if(result.error){failClosed(name+'-fetch-error',true);throw new Error(safeError(name+'-fetch-error'));}
   consent=Boolean(profile.data?.activity_consent_at);
   dataCache={profile:profile.data,content:content.data||[],quizBanks:banks.data||[],files:files.data||[],progress:progress.data||[],quizAttempts:attempts.data||[]};
   return dataCache;

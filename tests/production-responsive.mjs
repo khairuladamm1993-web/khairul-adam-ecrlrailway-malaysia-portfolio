@@ -210,6 +210,7 @@ for(const [width,height] of viewports){
           window.__otpMode='rate-limit';
           const f=document.querySelector('#member-auth-form');
           f.querySelector('input[name=email]').value='member@example.com';
+          f.querySelector('input[name=email_confirm]').value='member@example.com';
           f.requestSubmit();f.requestSubmit();return true;
         })()`);
         await waitEval(client,"window.RailwayAccess.status==='rate-limited'");

@@ -3,7 +3,8 @@
  'use strict';
  const R=window.Railway,h=R.html,A=window.RailwayAccess;
  if(!R||!A)return;
- let bundle=null,loading=false,selected=new Set(),quiz=null,tracker=null,authSubmitting=false;
+ let bundle=null,loading=false,selected=new Set(),quiz=null,tracker=null,authSubmitting=false,bundleRevision=0;
+ let authEmail='',authConfirmEmail='',authInputError='';
  const box=()=>document.querySelector('#gateway-content');
  const category=()=>document.querySelector('#categories [aria-selected="true"]')?.dataset.category||'practical';
  const lang=()=>R.language==='zh'?'zh':R.language==='en'?'en':'ms';
@@ -39,13 +40,25 @@
    inner='<h2 id="member-dialog-title">Verified Member</h2><p class="access-label">'+escape(label)+'</p><p>'+escape(intro)+'</p><form id="member-auth-form"><label>Email<br><input name="email" type="email" autocomplete="email" required placeholder="name@example.com" value="'+escape(A.email||'')+'" '+(sending||rateLimited?'disabled':'')+'></label><button class="primary" type="submit" '+(sending||rateLimited?'disabled':'')+'>'+(sending?'SENDING…':'SEND VERIFICATION LINK')+'</button></form><p class="study-boundary">Access is granted after successful email verification.</p>'+(A.error&&!rateLimited&&!verificationFailed&&!pkceFailed&&!restoreFailed&&!roleFailed&&!networkFailed?'<p class="auth-error" role="alert">'+escape(A.error)+'</p>':'')+(rateLimited?'<p class="auth-error" role="alert">'+escape(A.error||'Too many verification requests. Please wait before requesting another link.')+'</p><button class="secondary" data-auth-refresh>CHECK EXISTING SESSION</button>':'')+((verificationFailed||pkceFailed||restoreFailed||roleFailed||networkFailed)&&A.error?'<p class="auth-error" role="alert">'+escape(A.error)+'</p>':'');
   }
   body().innerHTML=controls+inner;
+  const form=dialog.querySelector('#member-auth-form');
+  if(form){
+   const input=form.elements.email;
+   input.value=authEmail||input.value;
+   const label=document.createElement('label');label.textContent='Confirm email';
+   const confirm=document.createElement('input');confirm.name='email_confirm';confirm.type='email';confirm.required=true;confirm.autocomplete='off';confirm.value=authConfirmEmail;confirm.disabled=input.disabled;
+   label.append(document.createElement('br'),confirm);input.closest('label').after(label);
+   const note=document.createElement('p');note.textContent='Review both email entries before sending. A new address starts registration after email verification. Open the link in the same browser and site that requested it.';
+   form.prepend(note);
+   if(authInputError){const error=document.createElement('p');error.className='auth-error';error.setAttribute('role','alert');error.textContent=authInputError;form.append(error);}
+  }
  }
  function openAuth(){renderAuth();if(!dialog.open)dialog.showModal();dialog.scrollTop=0;dialog.querySelector('[data-member-close]')?.focus();}
  async function loadBundle(){
   if(!A.canReadMemberContent){bundle=null;return;}
   if(loading)return;loading=true;
-  try{bundle=await A.fetchMemberBundle();startOrStopTracker();enhance();}
-  catch(error){bundle=null;console.error('Member data unavailable',error);renderStatus();}
+  const revision=bundleRevision;
+  try{const loaded=await A.fetchMemberBundle();if(revision!==bundleRevision||!A.canReadMemberContent)return;bundle=loaded;startOrStopTracker();enhance();}
+  catch{bundle=null;renderStatus();}
   finally{loading=false;}
  }
  const progressMap=()=>new Map((bundle?.progress||[]).map(x=>[x.resource_id,x]));
@@ -165,8 +178,8 @@
   if(e.target.closest('[data-auth-pinyin]')){document.querySelector('.language-dock .pinyin-toggle')?.click();renderAuth();return;}
   if(e.target.closest('[data-auth-theme]')){window.RailwayTheme.toggle();renderAuth();return;}
  },true);
- dialog.addEventListener('submit',async e=>{if(e.target.id==='member-auth-form'){e.preventDefault();if(authSubmitting||A.status==='sending'||A.status==='rate-limited')return;const email=new FormData(e.target).get('email');authSubmitting=true;renderAuth();try{await A.sendMagicLink(email);}catch{}finally{authSubmitting=false;renderAuth();}return;}if(e.target.id==='admin-content-form'){e.preventDefault();const f=new FormData(e.target),status=dialog.querySelector('#admin-content-status');status.textContent='Saving…';try{await A.adminSaveContent({id:f.get('id'),kind:f.get('kind'),evidence:f.get('evidence'),approved:f.get('approved')==='on',title:{en:f.get('title_en'),ms:f.get('title_ms'),zh:f.get('title_zh')},body:{en:f.get('body_en'),ms:f.get('body_ms'),zh:f.get('body_zh')}});status.textContent='Saved through admin_save_content().';}catch(error){status.textContent=error.message||String(error);}return;}});
- window.addEventListener('railway-access-change',()=>{renderStatus();renderAuth();if(A.canReadMemberContent)loadBundle();else{bundle=null;selected.clear();startOrStopTracker();}});
+ dialog.addEventListener('submit',async e=>{if(e.target.id==='member-auth-form'){e.preventDefault();if(authSubmitting||A.status==='sending'||A.status==='rate-limited')return;const data=new FormData(e.target);authEmail=String(data.get('email')||'').trim().toLowerCase();authConfirmEmail=String(data.get('email_confirm')||'').trim().toLowerCase();authInputError='';if(authEmail!==authConfirmEmail){authInputError='Email addresses do not match. Review both entries before sending.';renderAuth();return;}const email=authEmail;authSubmitting=true;renderAuth();try{await A.sendMagicLink(email);}catch{}finally{authSubmitting=false;renderAuth();}return;}if(e.target.id==='admin-content-form'){e.preventDefault();const f=new FormData(e.target),status=dialog.querySelector('#admin-content-status');status.textContent='Saving…';try{await A.adminSaveContent({id:f.get('id'),kind:f.get('kind'),evidence:f.get('evidence'),approved:f.get('approved')==='on',title:{en:f.get('title_en'),ms:f.get('title_ms'),zh:f.get('title_zh')},body:{en:f.get('body_en'),ms:f.get('body_ms'),zh:f.get('body_zh')}});status.textContent='Saved through admin_save_content().';}catch(error){status.textContent=error.message||String(error);}return;}});
+ window.addEventListener('railway-access-change',()=>{renderStatus();renderAuth();if(A.canReadMemberContent)loadBundle();else{bundleRevision++;bundle=null;quiz=null;selected.clear();startOrStopTracker();}});
  document.querySelector('#categories')?.addEventListener('click',()=>setTimeout(enhance,0));
  R.onLanguage(()=>setTimeout(()=>{enhance();if(dialog.open)quiz?renderQuiz():renderAuth();},0));
  renderStatus();if(A.canReadMemberContent)loadBundle();

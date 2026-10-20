@@ -35,9 +35,9 @@ function makeClient({session={access_token:'x'},exchangeSession=null,exchangeErr
  return client;
 }
 async function load(options={}){
- const client=makeClient(options);
+ const client=options.client||makeClient(options);
  const events=[];
- const window={supabase:{createClient(){return client}},dispatchEvent(e){events.push(e)},addEventListener(){},removeEventListener(){}};
+ const window={supabase:{createClient(url,key,config){client.calls.push(['createClient',config]);return client}},dispatchEvent(e){events.push(e)},addEventListener(){},removeEventListener(){}};
  const document={readyState:'complete',addEventListener(){}};
  const location={origin:options.origin||'https://preview.example',pathname:options.pathname||'/gateway.html',search:options.locationSearch||'',hash:options.locationHash||''};
  const history={replaceState(){location.search='';location.hash='';}};
@@ -310,4 +310,147 @@ test('expired callback cannot authorize member',async()=>{
  assert.equal(A.status,'verification-failed');
  assert.equal(A.canReadMemberContent,false);
  assert.equal(location.search,'');
+});
+
+const deferred=()=>{let resolve;const promise=new Promise(r=>{resolve=r});return {promise,resolve}};
+test('sign-out during role hydration cannot restore stale Admin access',async()=>{
+ const {A,client}=await load({role:'admin'}),gate=deferred(),entered=deferred();
+ const rpc=client.rpc;
+ client.rpc=async(name,args)=>{if(name==='account_role'){entered.resolve();await gate.promise;}return rpc(name,args);};
+ const refresh=A.refresh();await entered.promise;await A.logout();gate.resolve();await refresh;
+ assert.equal(A.level,'public');assert.equal(A.status,'signed-out');assert.equal(A.cachedData,null);
+});
+test('protected bundle finishing after sign-out is discarded',async()=>{
+ const {A,client}=await load(),gate=deferred();const from=client.from;
+ client.from=name=>name==='quiz_banks'?builder(gate.promise):from(name);
+ const request=A.fetchMemberBundle();await A.logout();gate.resolve({data:[{id:'private-bank'}],error:null});
+ await assert.rejects(()=>request,/session|access/i);assert.equal(A.cachedData,null);
+});
+test('backend auth errors never expose raw credentials or identity in access state',async()=>{
+ for(const stage of ['getSession','getUser','role','profile']){
+  const {A,client}=await load();const error={message:'credential=private-token member@example.com'};
+  if(stage==='getSession')client.auth.getSession=async()=>({data:{session:null},error});
+  if(stage==='getUser')client.auth.getUser=async()=>({data:{user:null},error});
+  if(stage==='role')client.rpc=async()=>({data:null,error});
+  if(stage==='profile')client.from=()=>builder({data:null,error});
+  await A.refresh();assert.equal(A.level,'public');assert.doesNotMatch(A.error,/private-token|member@example/);
+ }
+});
+test('invalid email is visible and makes no OTP request',async()=>{
+ const {A,client}=await load({session:null});await assert.rejects(()=>A.sendMagicLink('bad address'));
+ assert.equal(A.status,'auth-error');assert.match(A.error,/valid email/i);
+ assert.equal(client.calls.filter(c=>c[0]==='signInWithOtp').length,0);
+});
+test('a repeated sent-link request does not replace the pending PKCE verifier',async()=>{
+ const {A,client}=await load({session:null});await A.sendMagicLink('member@example.com');await A.sendMagicLink('member@example.com');
+ assert.equal(client.calls.filter(c=>c[0]==='signInWithOtp').length,1);
+});
+test('rate-limited access-layer requests do not send another OTP',async()=>{
+ const {A,client}=await load({session:null,otpError:{status:429,message:'email rate limit exceeded'}});
+ await assert.rejects(()=>A.sendMagicLink('member@example.com'));await assert.rejects(()=>A.sendMagicLink('member@example.com'));
+ assert.equal(client.calls.filter(c=>c[0]==='signInWithOtp').length,1);
+});
+test('approved automatic onboarding remains explicit; no email grants a role',async()=>{
+ const {A,client}=await load({session:null});await A.sendMagicLink('new@example.com');
+ assert.equal(client.calls.find(c=>c[0]==='signInWithOtp')[1].options.shouldCreateUser,true);
+ assert.equal(A.level,'public');assert.equal(A.canAdmin,false);
+});
+test('an expired stored session is refreshed before validating the user',async()=>{
+ const {A,client}=await load();let refreshed=0;
+ client.auth.getSession=async()=>({data:{session:{access_token:'expired',expires_at:1}},error:null});
+ client.auth.refreshSession=async()=>{refreshed++;return {data:{session:{access_token:'renewed'}},error:null}};
+ client.auth.getUser=async token=>{assert.equal(token,'renewed');return {data:{user:{id:'member-id'}},error:null}};
+ await A.refresh();assert.equal(refreshed,1);assert.equal(A.level,'member');
+ client.auth.refreshSession=async()=>({data:{session:null},error:{message:'expired'}});
+ await A.refresh();assert.equal(A.status,'session-expired');assert.equal(A.level,'public');
+});
+
+async function gateway(options={}){
+ const {JSDOM}=require('jsdom');
+ const dom=new JSDOM(fs.readFileSync(path.join(root,'gateway.html'),'utf8'),{url:'https://preview.example/gateway.html',runScripts:'outside-only'});
+ const w=dom.window,client=makeClient(options);
+ w.supabase={createClient:()=>client};w.RailwayTheme={value:'light',toggle(){}};
+ w.HTMLDialogElement.prototype.showModal=function(){this.open=true};
+ w.Railway={html:s=>String(s),text:s=>String(s),escape:s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),language:'en',onLanguage(){}};
+ w.RailwayModulePreviews=[];w.RailwayInsights=[];
+ for(const file of ['access.js','public-gateway.js','member-gateway.js'])w.eval(fs.readFileSync(path.join(root,'assets',file),'utf8'));
+ await new Promise(r=>setTimeout(r,25));
+ return {dom,w,client,A:w.RailwayAccess};
+}
+test('Gateway removes protected DOM and quiz controls immediately on session loss',async()=>{
+ const {dom,w,A}=await gateway();
+ try{
+  assert.match(w.document.querySelector('#gateway-status').textContent,/Verified Member/);
+  w.document.querySelector('#gateway-content').innerHTML='<p>PRIVATE-CONTENT</p>';
+  await A.logout();
+  assert.doesNotMatch(w.document.querySelector('#gateway-content').textContent,/PRIVATE-CONTENT/);
+  assert.equal(w.document.querySelector('#start-quiz').hidden,true);
+  assert.match(w.document.querySelector('#gateway-status').textContent,/Public/);
+ }finally{w.close()}
+});
+test('mismatched email confirmation sends no OTP and preserves entered address',async()=>{
+ const {dom,w,client}=await gateway({session:null});
+ try{
+  w.document.querySelector('[data-member]').click();
+  const form=w.document.querySelector('#member-auth-form');
+  form.elements.email.value='member@example.com';
+  assert(form.elements.email_confirm,'Confirmation field required before sending');
+  form.elements.email_confirm.value='typo@example.com';
+  form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));
+  await new Promise(r=>setTimeout(r,10));
+  assert.equal(client.calls.filter(c=>c[0]==='signInWithOtp').length,0);
+  assert.match(w.document.querySelector('#member-dialog').textContent,/addresses do not match/i);
+  assert.equal(w.document.querySelector('[name=email]').value,'member@example.com');
+ }finally{w.close()}
+});
+test('confirmed email retains automatic registration policy and sends once via Gateway',async()=>{
+ const {w,client}=await gateway({session:null});
+ try{
+  w.document.querySelector('[data-member]').click();const form=w.document.querySelector('#member-auth-form');
+  form.elements.email.value=' New@Example.com ';assert(form.elements.email_confirm);
+  form.elements.email_confirm.value='new@example.com';
+  form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));
+  await new Promise(r=>setTimeout(r,10));
+  assert.equal(client.calls.filter(c=>c[0]==='signInWithOtp').length,1);
+  assert.match(w.document.querySelector('#member-dialog').textContent,/Check your email/);
+ }finally{w.close()}
+});
+test('protected table rejection fails closed and never caches raw error or data',async()=>{
+ const {A,client}=await load();const from=client.from;
+ client.from=name=>name==='quiz_banks'?builder({data:null,error:{message:'private-token member@example.com'}}):from(name);
+ await assert.rejects(()=>A.fetchMemberBundle(),/securely/);
+ assert.equal(A.level,'public');assert.equal(A.cachedData,null);assert.doesNotMatch(A.error,/private-token|member@example/);
+});
+test('thrown OTP transport error leaves sending state with sanitized actionable feedback',async()=>{
+ const {A,client}=await load({session:null});
+ client.auth.signInWithOtp=async()=>{throw new Error('Network failed: private-token member@example.com')};
+ await assert.rejects(()=>A.sendMagicLink('member@example.com'),error=>!error.message.includes('private-token'));
+ assert.equal(A.status,'auth-network-error');assert.doesNotMatch(A.error,/private-token|member@example/);
+});
+test('fresh page restores SDK-held session and revalidates role without another email',async()=>{
+ const first=await load({role:'member'});const next=await load({client:first.client});
+ const config=first.client.calls.find(c=>c[0]==='createClient')[1].auth;
+ assert.equal(config.persistSession,true);assert.equal(config.autoRefreshToken,true);assert.equal(config.flowType,'pkce');
+ assert.equal(next.A.level,'member');assert.equal(next.A.canAdmin,false);
+ assert.equal(first.client.calls.filter(c=>c[0]==='signInWithOtp').length,0);
+ assert.equal(first.client.calls.filter(c=>c[0]==='rpc'&&c[1]==='account_role').length,2);
+});
+test('profile role or owner-like email cannot elevate server Member role',async()=>{
+ const {A}=await load({role:'member',user:{id:'member-id',email:'owner@example.com'},profile:{data:{role:'admin',enabled:true},error:null}});
+ assert.equal(A.level,'member');assert.equal(A.canAdmin,false);
+ for(const call of [()=>A.adminSummary(),()=>A.fetchAdminData(),()=>A.adminSetMemberEnabled('another-id',true),()=>A.adminSaveContent({}),()=>A.adminPublishLocation({}),()=>A.adminRestoreLocation(1,'test')])await assert.rejects(call,/Admin access required/);
+});
+test('SIGNED_IN arriving during an older empty-session read is revalidated after it completes',async()=>{
+ const {A,client}=await load({session:null}),gate=deferred(),entered=deferred();let reads=0;
+ client.auth.getSession=async()=>{if(++reads===1){entered.resolve();await gate.promise;return {data:{session:null},error:null}}return {data:{session:{access_token:'new-session'}},error:null}};
+ const older=A.refresh();await entered.promise;client.auth.emit('SIGNED_IN',{access_token:'new-session'});
+ await new Promise(r=>setTimeout(r,5));gate.resolve();await older;
+ await new Promise(r=>setTimeout(r,10));assert.equal(A.level,'member');assert.equal(A.status,'authenticated');
+});
+test('a queued auth event cannot rehydrate after a newer sign-out',async()=>{
+ const {A,client}=await load({role:'admin'}),gate=deferred(),entered=deferred();let reads=0;
+ client.auth.getSession=async()=>{reads++;entered.resolve();await gate.promise;return {data:{session:{access_token:'stale'}},error:null}};
+ const pending=A.refresh();await entered.promise;client.auth.emit('TOKEN_REFRESHED',{access_token:'stale'});
+ await new Promise(r=>setTimeout(r,5));client.auth.emit('SIGNED_OUT',null);gate.resolve();await pending;
+ await new Promise(r=>setTimeout(r,10));assert.equal(reads,1);assert.equal(A.level,'public');assert.equal(A.status,'signed-out');
 });

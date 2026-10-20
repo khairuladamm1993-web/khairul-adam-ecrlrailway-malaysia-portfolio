@@ -64,5 +64,12 @@
  dialog.querySelector('[data-close]').addEventListener('click',()=>dialog.close());
  // Native dialog traps focus and handles Escape. Explicit restoration survives language re-rendering.
  dialog.addEventListener('close',()=>{currentDetail=null;document.querySelector(returnSelector||'#gateway-status [data-member]')?.focus({preventScroll:true});});
+ // Clear already-rendered protected content as soon as access is revoked.
+ let hadMemberAccess=Boolean(window.RailwayAccess?.canReadMemberContent);
+ window.addEventListener('railway-access-change',()=>{
+  const hasMemberAccess=Boolean(window.RailwayAccess?.canReadMemberContent);
+  if(hadMemberAccess&&!hasMemberAccess)render();
+  hadMemberAccess=hasMemberAccess;
+ });
  R.onLanguage(render);render();
 })();
