@@ -342,6 +342,168 @@
           "image": {
             "status": "NEUTRAL PLACEHOLDER ONLY",
             "publication": "OWNER APPROVAL REQUIRED"
+          },
+          "primaryPurpose": {
+            "summary": "Engineering/construction flat wagon; separate from commercial container flat wagons.",
+            "verification": "GENERAL ENGINEERING REFERENCE",
+            "applications": [
+              "Engineering materials and construction equipment transport (configuration to be verified)"
+            ]
+          },
+          "bogieTypeAndAxleArrangement": {
+            "manufacturerModelType": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "bogieCount": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "axleCount": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "axleArrangement": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "maximumAxleLoad": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "newWheelDiameter": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "minimumServiceWheelDiameter": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "wheelbase": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "bogieCentreDistance": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "primarySuspension": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "secondarySuspension": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "axleboxBearings": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            }
+          },
+          "wheelsetAndSuspension": {
+            "description": "Wheelset, axlebox and suspension functions are general railway engineering concepts; fitted configuration is unconfirmed.",
+            "verification": "GENERAL ENGINEERING REFERENCE",
+            "fittedDetails": "MANUAL REQUIRED"
+          },
+          "brakingSystem": {
+            "systemType": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "brakeCylinders": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "brakeRigging": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "blocksOrPads": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "parkingBrake": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "workingPrinciple": "Brake actuation and force transmission require variant-specific confirmation; no test, adjustment or wear limits supplied.",
+            "verification": "GENERAL ENGINEERING REFERENCE"
+          },
+          "couplerAndDraftGear": {
+            "couplerType": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "draftGearType": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "workingPrinciple": "Vehicle coupling and longitudinal force absorption are generic engineering concepts; fitted components unverified.",
+            "verification": "GENERAL ENGINEERING REFERENCE"
+          },
+          "keyEquipmentAndPrinciples": {
+            "equipment": [
+              "Flat loading deck",
+              "Securing arrangements (configuration unverified)"
+            ],
+            "principles": "Loads carried on an open deck subject to verified securing and loading requirements.",
+            "verification": "GENERAL ENGINEERING REFERENCE",
+            "manufacturerAndModel": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "specificRatings": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            }
+          },
+          "inspectionAndMaintenanceConcepts": {
+            "scope": [
+              "Visual condition of bogies, wheels, axleboxes and suspension",
+              "Brake and coupler component condition",
+              "Load restraint and equipment condition",
+              "Record defects and refer to authorized manuals"
+            ],
+            "verification": "GENERAL ENGINEERING REFERENCE",
+            "inspectionIntervals": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "wearLimits": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "procedures": "MANUAL REQUIRED; not official ECRL maintenance instructions"
+          },
+          "referencesAndVerification": {
+            "technicalSources": [],
+            "sourceStatus": "MANUAL REQUIRED",
+            "notes": "No manufacturer nameplate, exact wagon manual, verified drawings or approved technical dimensions supplied.",
+            "fieldObservations": [],
+            "photoStatus": "NEUTRAL PLACEHOLDER ONLY; owner publication and rights review required"
           }
         },
         {
@@ -410,6 +572,194 @@
           "image": {
             "status": "NEUTRAL PLACEHOLDER ONLY",
             "publication": "OWNER APPROVAL REQUIRED"
+          },
+          "primaryPurpose": {
+            "summary": "Ballast carriage and controlled discharge; explain hopper body, discharge doors, bogies, air-brake concepts and safe inspection principles.",
+            "verification": "GENERAL ENGINEERING REFERENCE",
+            "applications": [
+              "Ballast transport",
+              "Controlled ballast discharge"
+            ]
+          },
+          "bogieTypeAndAxleArrangement": {
+            "manufacturerModelType": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "bogieCount": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "axleCount": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "axleArrangement": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "maximumAxleLoad": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "newWheelDiameter": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "minimumServiceWheelDiameter": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "wheelbase": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "bogieCentreDistance": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "primarySuspension": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "secondarySuspension": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "axleboxBearings": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            }
+          },
+          "wheelsetAndSuspension": {
+            "description": "Wheelset, axlebox and suspension functions are general railway engineering concepts; fitted configuration is unconfirmed.",
+            "verification": "GENERAL ENGINEERING REFERENCE",
+            "fittedDetails": "MANUAL REQUIRED"
+          },
+          "brakingSystem": {
+            "systemType": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "brakeCylinders": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "brakeRigging": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "blocksOrPads": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "parkingBrake": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "workingPrinciple": "Brake actuation and force transmission require variant-specific confirmation; no test, adjustment or wear limits supplied.",
+            "verification": "GENERAL ENGINEERING REFERENCE"
+          },
+          "couplerAndDraftGear": {
+            "couplerType": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "draftGearType": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "workingPrinciple": "Vehicle coupling and longitudinal force absorption are generic engineering concepts; fitted components unverified.",
+            "verification": "GENERAL ENGINEERING REFERENCE"
+          },
+          "keyEquipmentAndPrinciples": {
+            "equipment": [
+              "Hopper body",
+              "Discharge doors and controls"
+            ],
+            "principles": "Gravity-assisted ballast discharge is a general principle; actual outlet design and actuation MANUAL REQUIRED.",
+            "verification": "GENERAL ENGINEERING REFERENCE",
+            "manufacturerAndModel": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "specificRatings": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            }
+          },
+          "inspectionAndMaintenanceConcepts": {
+            "scope": [
+              "Visual condition of bogies, wheels, axleboxes and suspension",
+              "Brake and coupler component condition",
+              "Load restraint and equipment condition",
+              "Record defects and refer to authorized manuals"
+            ],
+            "verification": "GENERAL ENGINEERING REFERENCE",
+            "inspectionIntervals": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "wearLimits": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "procedures": "MANUAL REQUIRED; not official ECRL maintenance instructions"
+          },
+          "referencesAndVerification": {
+            "technicalSources": [],
+            "sourceStatus": "MANUAL REQUIRED",
+            "notes": "No manufacturer nameplate, exact wagon manual, verified drawings or approved technical dimensions supplied.",
+            "fieldObservations": [
+              {
+                "item": "wagonCount",
+                "reported": "45 wagons",
+                "evidence": "FIELD OBSERVATION / UNVERIFIED",
+                "source": "owner-reported archive filename"
+              },
+              {
+                "item": "approximateLength",
+                "reported": "12.1 m",
+                "evidence": "FIELD OBSERVATION / UNVERIFIED",
+                "source": "owner-reported archive filename"
+              },
+              {
+                "item": "payload",
+                "reported": "70 t",
+                "evidence": "FIELD OBSERVATION / UNVERIFIED",
+                "source": "owner-reported archive filename"
+              },
+              {
+                "item": "tare",
+                "reported": "23 t",
+                "evidence": "FIELD OBSERVATION / UNVERIFIED",
+                "source": "owner-reported archive filename"
+              }
+            ],
+            "photoStatus": "NEUTRAL PLACEHOLDER ONLY; owner publication and rights review required"
           }
         },
         {
@@ -475,6 +825,195 @@
           "image": {
             "status": "NEUTRAL PLACEHOLDER ONLY",
             "publication": "OWNER APPROVAL REQUIRED"
+          },
+          "primaryPurpose": {
+            "summary": "Positions rails ahead of a track-laying machine. Not a commercial container flat wagon.",
+            "verification": "GENERAL ENGINEERING REFERENCE",
+            "applications": [
+              "Rail positioning ahead of track-laying machine",
+              "Railway construction support"
+            ]
+          },
+          "bogieTypeAndAxleArrangement": {
+            "manufacturerModelType": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "bogieCount": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "axleCount": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "axleArrangement": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "maximumAxleLoad": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "newWheelDiameter": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "minimumServiceWheelDiameter": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "wheelbase": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "bogieCentreDistance": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "primarySuspension": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "secondarySuspension": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "axleboxBearings": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            }
+          },
+          "wheelsetAndSuspension": {
+            "description": "Wheelset, axlebox and suspension functions are general railway engineering concepts; fitted configuration is unconfirmed.",
+            "verification": "GENERAL ENGINEERING REFERENCE",
+            "fittedDetails": "MANUAL REQUIRED"
+          },
+          "brakingSystem": {
+            "systemType": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "brakeCylinders": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "brakeRigging": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "blocksOrPads": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "parkingBrake": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "workingPrinciple": "Brake actuation and force transmission require variant-specific confirmation; no test, adjustment or wear limits supplied.",
+            "verification": "GENERAL ENGINEERING REFERENCE"
+          },
+          "couplerAndDraftGear": {
+            "couplerType": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "draftGearType": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "workingPrinciple": "Vehicle coupling and longitudinal force absorption are generic engineering concepts; fitted components unverified.",
+            "verification": "GENERAL ENGINEERING REFERENCE"
+          },
+          "keyEquipmentAndPrinciples": {
+            "equipment": [
+              "Hydraulic boom (observed, unverified)",
+              "Onboard generator (observed, unverified)",
+              "Guarded working area (observed, unverified)"
+            ],
+            "principles": "Rail positioning by a hydraulic handling system; lifting capacity, controls, hydraulics and generator ratings MANUAL REQUIRED.",
+            "verification": "GENERAL ENGINEERING REFERENCE",
+            "manufacturerAndModel": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "specificRatings": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            }
+          },
+          "inspectionAndMaintenanceConcepts": {
+            "scope": [
+              "Visual condition of bogies, wheels, axleboxes and suspension",
+              "Brake and coupler component condition",
+              "Load restraint and equipment condition",
+              "Record defects and refer to authorized manuals"
+            ],
+            "verification": "GENERAL ENGINEERING REFERENCE",
+            "inspectionIntervals": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "wearLimits": {
+              "value": null,
+              "verification": "MANUAL REQUIRED",
+              "reference": null
+            },
+            "procedures": "MANUAL REQUIRED; not official ECRL maintenance instructions"
+          },
+          "referencesAndVerification": {
+            "technicalSources": [],
+            "sourceStatus": "MANUAL REQUIRED",
+            "notes": "No manufacturer nameplate, exact wagon manual, verified drawings or approved technical dimensions supplied.",
+            "fieldObservations": [
+              {
+                "item": "approximateLength",
+                "reported": "16 m",
+                "evidence": "FIELD OBSERVATION / UNVERIFIED",
+                "source": "owner-provided observation"
+              },
+              {
+                "item": "hydraulicBoom",
+                "reported": "present",
+                "evidence": "FIELD OBSERVATION / UNVERIFIED",
+                "source": "owner-reported field observation"
+              },
+              {
+                "item": "onboardGenerator",
+                "reported": "present",
+                "evidence": "FIELD OBSERVATION / UNVERIFIED",
+                "source": "owner-reported field observation"
+              },
+              {
+                "item": "fencedWorkingArea",
+                "reported": "present",
+                "evidence": "FIELD OBSERVATION / UNVERIFIED",
+                "source": "owner-reported field observation"
+              }
+            ],
+            "photoStatus": "NEUTRAL PLACEHOLDER ONLY; owner publication and rights review required"
           }
         }
       ]
