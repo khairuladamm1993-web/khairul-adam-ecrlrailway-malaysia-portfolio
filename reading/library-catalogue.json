@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "library": "MR-S10 Railway Knowledge Library",
+  "defaultLocale": "ms",
+  "locales": [
+    "ms",
+    "en",
+    "zh"
+  ],
+  "evidenceLabels": [
+    "VERIFIED",
+    "FIELD OBSERVATION",
+    "GENERAL ENGINEERING REFERENCE",
+    "MANUAL REQUIRED"
+  ],
+  "contentPolicy": "Public educational material; not official ECRL operating or maintenance instruction",
+  "groups": [
+    {
+      "id": "fundamentals",
+      "title": "Fundamentals & Operations",
+      "chapters": [
+        {
+          "id": "railway-fundamentals-01",
+          "title": "Railway Fundamentals",
+          "status": "available",
+          "path": "reading/railway-fundamentals-01.html",
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "track-geometry",
+          "title": "Track Geometry, Gauge, Cant & Twist",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "track-structure",
+          "title": "Rails, Sleepers, Ballast & Turnouts",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "signalling-occ",
+          "title": "Signalling, Movement Authority & OCC",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "timetable-regulation",
+          "title": "Planned Timetable & Live Regulation",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "yard-securing",
+          "title": "Freight Yard & Safe Vehicle Securing",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "maintenance-management",
+          "title": "Inspection & Maintenance Management",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        }
+      ]
+    },
+    {
+      "id": "machinery",
+      "title": "Machinery & Locomotives",
+      "chapters": [
+        {
+          "id": "spz200",
+          "title": "SPZ200 — Ballast Regulator",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "wd350",
+          "title": "WD350 — Dynamic Track Stabilizer",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "cdc16",
+          "title": "CDC16 — Turnout Tamping Machine",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "dc32",
+          "title": "DC32 — Tamping Machine",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "dcl32",
+          "title": "DCL32 — Continuous Tamping Machine",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "gmc48",
+          "title": "GMC48 — Rail Grinding Machine",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "eloco",
+          "title": "E-Loco — Electric Freight Locomotive",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "ccpg500a",
+          "title": "CCPG500A — Track Laying Machine",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "gc270",
+          "title": "GC270 — Engineering Railcar",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "df8b",
+          "title": "DF8B — Diesel-Electric Locomotive",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "jw7",
+          "title": "JW7 — Catenary Work Vehicle",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        }
+      ]
+    },
+    {
+      "id": "passenger",
+      "title": "Passenger & Test Rolling Stock",
+      "chapters": [
+        {
+          "id": "ecrl-emu",
+          "title": "ECRL Passenger EMU",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "cit-train",
+          "title": "CIT / Inspection & Test Train",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "traction-architecture",
+          "title": "Electric Traction, Auxiliary Power & Control",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "passenger-freight",
+          "title": "Passenger vs Freight Rolling-Stock Design",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        }
+      ]
+    },
+    {
+      "id": "wagons",
+      "title": "Freight & Engineering Wagons",
+      "chapters": [
+        {
+          "id": "container-flat",
+          "title": "Container Flat Wagon",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "general-flat",
+          "title": "General-Purpose Flat Wagon",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "ballast-hopper",
+          "title": "Ballast Hopper Wagon",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "gondola",
+          "title": "Open-Top / Gondola Wagon",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "box-wagon",
+          "title": "Covered Box Wagon",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "tank-wagon",
+          "title": "Tank Wagon",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "covered-hopper",
+          "title": "Covered Hopper Wagon",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "autorack",
+          "title": "Car Carrier / Autorack Wagon",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "steel-coil",
+          "title": "Steel Coil Wagon",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "heavy-load",
+          "title": "Heavy-Load & Special-Purpose Wagon",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "engineering-wagons",
+          "title": "Engineering & Maintenance Wagons",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        }
+      ]
+    },
+    {
+      "id": "strategy",
+      "title": "Freight Strategy & Investment",
+      "chapters": [
+        {
+          "id": "cargo-demand",
+          "title": "Freight Demand & Terminal Capability",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "wagon-investment",
+          "title": "Wagon Ownership, Leasing & CAPEX/OPEX",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "industrial-cases",
+          "title": "Kerteh, Kemaman, Kuantan, Port Klang & Automotive Case Studies",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "fleet-calculator",
+          "title": "Illustrative Wagon Fleet Calculator",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false
+        }
+      ]
+    }
+  ]
+}
