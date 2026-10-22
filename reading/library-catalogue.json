@@ -300,6 +300,182 @@
           "path": null,
           "review": "EDITORIAL DRAFT",
           "verifiedTechnicalClaims": false
+        },
+        {
+          "id": "fw-engineering-flat",
+          "title": "FW — Engineering Flat Wagon",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false,
+          "category": "engineering-construction-wagon",
+          "purpose": "Engineering/construction flat wagon; separate from commercial container flat wagons.",
+          "evidencePolicy": "FIELD OBSERVATION / UNVERIFIED; model-specific technical parameters MANUAL REQUIRED",
+          "observations": [],
+          "technicalSections": [
+            {
+              "title": "Construction, load handling and discharge",
+              "status": "GENERAL ENGINEERING REFERENCE"
+            },
+            {
+              "title": "Braking and maintenance concepts",
+              "status": "GENERAL ENGINEERING REFERENCE"
+            },
+            {
+              "sectionTitle": "Bogie, Wheelset & Running Gear",
+              "requiredTopics": [
+                "Bogie manufacturer, model and type",
+                "Bogie count and axle count",
+                "Axle arrangement and maximum axle load",
+                "New and minimum-service wheel diameter",
+                "Wheelbase and bogie centre distance",
+                "Primary and secondary suspension (if applicable)",
+                "Axlebox bearings",
+                "Brake rigging, blocks/pads and cylinders",
+                "Coupler and draft gear",
+                "Inspection points and maintenance requirements"
+              ],
+              "defaultEvidence": "MANUAL REQUIRED",
+              "policy": "No inferred wheel dimensions, load limits, wear tolerances, brake values or intervals; generic descriptions must be labelled GENERAL ENGINEERING REFERENCE."
+            }
+          ],
+          "image": {
+            "status": "NEUTRAL PLACEHOLDER ONLY",
+            "publication": "OWNER APPROVAL REQUIRED"
+          }
+        },
+        {
+          "id": "hw-hopper",
+          "title": "HW — Ballast Hopper Wagon",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false,
+          "category": "engineering-construction-wagon",
+          "purpose": "Ballast carriage and controlled discharge; explain hopper body, discharge doors, bogies, air-brake concepts and safe inspection principles.",
+          "evidencePolicy": "FIELD OBSERVATION / UNVERIFIED; model-specific technical parameters MANUAL REQUIRED",
+          "observations": [
+            {
+              "item": "wagonCount",
+              "reported": "45 wagons",
+              "evidence": "FIELD OBSERVATION / UNVERIFIED",
+              "source": "owner-reported archive filename"
+            },
+            {
+              "item": "approximateLength",
+              "reported": "12.1 m",
+              "evidence": "FIELD OBSERVATION / UNVERIFIED",
+              "source": "owner-reported archive filename"
+            },
+            {
+              "item": "payload",
+              "reported": "70 t",
+              "evidence": "FIELD OBSERVATION / UNVERIFIED",
+              "source": "owner-reported archive filename"
+            },
+            {
+              "item": "tare",
+              "reported": "23 t",
+              "evidence": "FIELD OBSERVATION / UNVERIFIED",
+              "source": "owner-reported archive filename"
+            }
+          ],
+          "technicalSections": [
+            {
+              "title": "Construction, load handling and discharge",
+              "status": "GENERAL ENGINEERING REFERENCE"
+            },
+            {
+              "title": "Braking and maintenance concepts",
+              "status": "GENERAL ENGINEERING REFERENCE"
+            },
+            {
+              "sectionTitle": "Bogie, Wheelset & Running Gear",
+              "requiredTopics": [
+                "Bogie manufacturer, model and type",
+                "Bogie count and axle count",
+                "Axle arrangement and maximum axle load",
+                "New and minimum-service wheel diameter",
+                "Wheelbase and bogie centre distance",
+                "Primary and secondary suspension (if applicable)",
+                "Axlebox bearings",
+                "Brake rigging, blocks/pads and cylinders",
+                "Coupler and draft gear",
+                "Inspection points and maintenance requirements"
+              ],
+              "defaultEvidence": "MANUAL REQUIRED",
+              "policy": "No inferred wheel dimensions, load limits, wear tolerances, brake values or intervals; generic descriptions must be labelled GENERAL ENGINEERING REFERENCE."
+            }
+          ],
+          "image": {
+            "status": "NEUTRAL PLACEHOLDER ONLY",
+            "publication": "OWNER APPROVAL REQUIRED"
+          }
+        },
+        {
+          "id": "track-laying-boom-flat",
+          "title": "Track-Laying Support Flat Wagon with Hydraulic Boom",
+          "status": "planned",
+          "path": null,
+          "review": "EDITORIAL DRAFT",
+          "verifiedTechnicalClaims": false,
+          "category": "engineering-construction-wagon",
+          "purpose": "Positions rails ahead of a track-laying machine. Not a commercial container flat wagon.",
+          "evidencePolicy": "FIELD OBSERVATION / UNVERIFIED; model-specific technical parameters MANUAL REQUIRED",
+          "observations": [
+            {
+              "item": "approximateLength",
+              "reported": "16 m",
+              "evidence": "FIELD OBSERVATION / UNVERIFIED",
+              "source": "owner-provided observation"
+            },
+            {
+              "item": "hydraulicBoom",
+              "reported": "present",
+              "evidence": "FIELD OBSERVATION / UNVERIFIED"
+            },
+            {
+              "item": "onboardGenerator",
+              "reported": "present",
+              "evidence": "FIELD OBSERVATION / UNVERIFIED"
+            },
+            {
+              "item": "fencedWorkingArea",
+              "reported": "present",
+              "evidence": "FIELD OBSERVATION / UNVERIFIED"
+            }
+          ],
+          "technicalSections": [
+            {
+              "title": "Construction, load handling and discharge",
+              "status": "GENERAL ENGINEERING REFERENCE"
+            },
+            {
+              "title": "Braking and maintenance concepts",
+              "status": "GENERAL ENGINEERING REFERENCE"
+            },
+            {
+              "sectionTitle": "Bogie, Wheelset & Running Gear",
+              "requiredTopics": [
+                "Bogie manufacturer, model and type",
+                "Bogie count and axle count",
+                "Axle arrangement and maximum axle load",
+                "New and minimum-service wheel diameter",
+                "Wheelbase and bogie centre distance",
+                "Primary and secondary suspension (if applicable)",
+                "Axlebox bearings",
+                "Brake rigging, blocks/pads and cylinders",
+                "Coupler and draft gear",
+                "Inspection points and maintenance requirements"
+              ],
+              "defaultEvidence": "MANUAL REQUIRED",
+              "policy": "No inferred wheel dimensions, load limits, wear tolerances, brake values or intervals; generic descriptions must be labelled GENERAL ENGINEERING REFERENCE."
+            }
+          ],
+          "image": {
+            "status": "NEUTRAL PLACEHOLDER ONLY",
+            "publication": "OWNER APPROVAL REQUIRED"
+          }
         }
       ]
     },
@@ -341,5 +517,38 @@
         }
       ]
     }
-  ]
+  ],
+  "engineeringWagonRequirements": {
+    "appliesTo": [
+      "fw-engineering-flat",
+      "hw-hopper",
+      "track-laying-boom-flat"
+    ],
+    "bogieSection": {
+      "sectionTitle": "Bogie, Wheelset & Running Gear",
+      "requiredTopics": [
+        "Bogie manufacturer, model and type",
+        "Bogie count and axle count",
+        "Axle arrangement and maximum axle load",
+        "New and minimum-service wheel diameter",
+        "Wheelbase and bogie centre distance",
+        "Primary and secondary suspension (if applicable)",
+        "Axlebox bearings",
+        "Brake rigging, blocks/pads and cylinders",
+        "Coupler and draft gear",
+        "Inspection points and maintenance requirements"
+      ],
+      "defaultEvidence": "MANUAL REQUIRED",
+      "policy": "No inferred wheel dimensions, load limits, wear tolerances, brake values or intervals; generic descriptions must be labelled GENERAL ENGINEERING REFERENCE."
+    },
+    "manualRequired": [
+      "manufacturer and variant",
+      "boom rated load and outreach",
+      "hydraulic pressures and flow",
+      "generator output",
+      "brake configuration and limits",
+      "axle and wheel measurements"
+    ],
+    "mediaPolicy": "Two reported HEIC images are NOT included. No publication without owner rights and photo review."
+  }
 }
