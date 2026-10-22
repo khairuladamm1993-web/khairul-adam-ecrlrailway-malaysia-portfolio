@@ -25,6 +25,8 @@ jobs:
         run: npm ci
       - name: Run portfolio test suite
         run: npm test
+      - name: Run Railway Knowledge Library catalogue tests
+        run: node --test tests/reading-library-framework.test.cjs
       - name: Build production artifact
         run: npm run build:production
       - name: Smoke production artifact in Chromium
