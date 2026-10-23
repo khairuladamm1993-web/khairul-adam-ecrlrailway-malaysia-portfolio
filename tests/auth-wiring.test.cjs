@@ -36,15 +36,15 @@ function makeClient({session={access_token:'x'},exchangeSession=null,exchangeErr
 }
 async function load(options={}){
  const client=makeClient(options);
- const events=[];
- const window={supabase:{createClient(){return client}},dispatchEvent(e){events.push(e)},addEventListener(){},removeEventListener(){}};
+ const events=[];const listeners={};
+ const window={supabase:{createClient(){return client}},dispatchEvent(e){events.push(e)},addEventListener(name,fn){listeners[name]=fn},removeEventListener(){}};
  const document={readyState:'complete',addEventListener(){}};
  const location={origin:options.origin||'https://preview.example',pathname:options.pathname||'/gateway.html',search:options.locationSearch||'',hash:options.locationHash||''};
  const history={replaceState(){location.search='';location.hash='';}};
  const context={window,document,location,history,URLSearchParams,CustomEvent:class{constructor(type,init){this.type=type;this.detail=init?.detail}},setTimeout,clearTimeout,console};
  vm.createContext(context);vm.runInContext(source,context);
  await new Promise(r=>setTimeout(r,5));
- return {A:window.RailwayAccess,client,events,location};
+ return {A:window.RailwayAccess,client,events,location,listeners};
 }
 test('no session resolves Public and never unlocks protected content',async()=>{
  const {A}=await load({session:null});
@@ -310,4 +310,26 @@ test('expired callback cannot authorize member',async()=>{
  assert.equal(A.status,'verification-failed');
  assert.equal(A.canReadMemberContent,false);
  assert.equal(location.search,'');
+});
+
+// BFCache can restore an old Public page after login in another tab.
+test('restored page revalidates the session without sending another Magic Link',async()=>{
+ const {A,client,listeners}=await load({session:null,role:'member'});
+ assert.equal(A.level,'public');
+ await client.auth.exchangeCodeForSession('test-only-session');
+ assert.equal(typeof listeners.pageshow,'function');
+ listeners.pageshow({persisted:true});
+ await new Promise(r=>setTimeout(r,10));
+ assert.equal(A.level,'member');
+ assert.equal(A.canAdmin,false);
+ assert(!client.calls.some(x=>x[0]==='signInWithOtp'));
+});
+test('restored page revokes stale Admin display after session removal',async()=>{
+ const {A,client,listeners}=await load({role:'admin'});
+ client.auth.onAuthStateChange(()=>{});
+ await client.auth.signOut();
+ listeners.pageshow({persisted:true});
+ await new Promise(r=>setTimeout(r,10));
+ assert.equal(A.level,'public');
+ assert.equal(A.canAdmin,false);
 });

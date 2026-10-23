@@ -11,3 +11,18 @@ test('R1 refreshes owner controls on access change',()=>assert(map.includes('if(
 test('R1 supports dark glass and fallback',()=>{assert(css.includes(':root[data-theme="dark"] .asia-map-switch'));assert(css.includes('@supports not ((backdrop-filter:'));});
 test('R1 popup limits public source to public reference',()=>{assert(map.includes('Public ECRL reference source'));assert(map.includes('Project location record · source not publicly linked'));});
 test('R1 guards late Malaysia station results',()=>{assert(asia.includes("if(state.country!=='malaysia'||controller.signal.aborted"));assert(asia.includes('state.osmAbort?.abort();state.osmVersion++;'));});
+
+test('public popup links to a readable reference with a real destination',()=>{
+ const {JSDOM}=require('jsdom');
+ const html=new JSDOM(fs.readFileSync('references.html','utf8'));
+ assert(map.includes('href="references.html#ecrl-location-reference"'));
+ assert(!map.includes('github.com/khairuladamm1993-web/'));
+ const section=html.window.document.querySelector('#ecrl-location-reference');
+ assert(section);assert.match(section.textContent,/not surveyed/);
+ const gateway=new JSDOM(fs.readFileSync('gateway.html','utf8'));
+ const link=gateway.window.document.querySelector('.gateway-portfolio-nav a');
+ assert.equal(link.getAttribute('href'),'portfolio.html#home');
+ assert(!link.hasAttribute('data-member'));
+ assert(gateway.window.document.querySelector('.gateway-portfolio-nav').compareDocumentPosition(gateway.window.document.querySelector('#gateway-content'))&4);
+ html.window.close();gateway.window.close();
+});

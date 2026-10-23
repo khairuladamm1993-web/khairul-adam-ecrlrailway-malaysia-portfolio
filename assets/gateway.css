@@ -49,3 +49,7 @@
 .owner-map-legend [data-state=proposed]{border-color:#ffcf33;color:#ffcf33}
 .railway-survey-pane,.railway-topology-pane{pointer-events:none}
 @media(max-width:719px){.owner-map-legend span{font-size:7px;padding:3px 5px}}
+
+/* Public portfolio remains reachable above every Gateway category. */
+.gateway-portfolio-nav{display:flex;flex-wrap:wrap;flex-shrink:0;gap:8px}
+.gateway-portfolio-nav a{min-height:44px}

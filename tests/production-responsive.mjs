@@ -199,6 +199,12 @@ for(const [width,height] of viewports){
       const loaded=client.once('Page.loadEventFired');
       await client.send('Page.navigate',{url:`http://127.0.0.1:${sitePort}/gateway.html`});await loaded;
       await waitEval(client,role==='public'?"window.RailwayAccess&&window.RailwayAccess.level==='public'":`window.RailwayAccess&&window.RailwayAccess.level==='${role}'`);
+      const portfolioNav=await evalValue(client,`(()=>{
+        const link=document.querySelector('.gateway-portfolio-nav a');
+        const rect=link?.getBoundingClientRect();
+        return {href:link?.getAttribute('href'),width:rect?.width,height:rect?.height,protected:link?.hasAttribute('data-member')};
+      })()`);
+      if(portfolioNav.href!=='portfolio.html#home'||portfolioNav.width<=0||portfolioNav.height<44||portfolioNav.protected)failures.push({role,width,height,phase:'public-portfolio-navigation',result:portfolioNav});
       await evalValue(client,`(()=>{document.querySelector('#gateway-status [data-member]')?.click();return true})()`);
       await waitEval(client,"document.querySelector('#member-dialog')?.open===true");
       if(role!=='public'){

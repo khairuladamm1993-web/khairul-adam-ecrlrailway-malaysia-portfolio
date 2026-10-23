@@ -290,7 +290,7 @@
     marker._railwayConfidence=r.locationConfidence;
     marker.bindTooltip(esc(r.name)+' · '+esc(r.locationConfidence),{direction:'top',offset:[0,-8],opacity:.92,className:'railway-map-label'});
      const p=r.overlay||{},publicSource=r.locationConfidence===PUBLIC;
-     const sourceLink=publicSource?'<a href="https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/blob/609cbbbfcfc7e848f8c5f94c41e5152fba5115d6/assets/corridor-reference.js" target="_blank" rel="noopener noreferrer">Public ECRL reference source</a>':'<span>Project location record · source not publicly linked</span>';
+     const sourceLink=publicSource?'<a href="references.html#ecrl-location-reference" target="_blank" rel="noopener noreferrer">Public ECRL reference source</a>':'<span>Project location record · source not publicly linked</span>';
      marker.bindPopup?.('<div class="mrs10-station-popup"><strong>'+esc(r.name)+'</strong><span>'+esc([p.code,r.type,'ECRL'].filter(Boolean).join(' · '))+'</span><small>'+esc(r.locationConfidence)+'</small><small>'+esc(publicSource?'Approximate locality only · not surveyed':'Refer to location confidence classification')+'</small>'+sourceLink+'</div>',{maxWidth:260,autoPan:true,closeButton:true,className:'mrs10-glass-popup'});
     marker.on('click',()=>{const fresh=effective(points().find(x=>x.id===r.id)||r);renderDetail(fresh);renderResults();focusStored(fresh);loadOwnerTools();});
     state.markers.set(r.id,marker);
