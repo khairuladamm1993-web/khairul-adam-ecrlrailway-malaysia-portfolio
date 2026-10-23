@@ -715,3 +715,48 @@ test('Admin diagnostics are rendered only inside the authenticated Admin dashboa
   assert(member.includes("host===canonical?'CANONICAL':'NON-CANONICAL'"));
   assert(member.includes("host.innerHTML='<div class=\"learning-grid admin-grid\">'+adminDiagnostic()+"));
 });
+
+for(const script of ['build-production.py','build-preview.py']) {
+  test(script+': approved reading files are packaged; planned chapters remain unpublished',()=>{
+    const dir=build(script,'railway-reading-');
+    try {
+      assert.deepEqual(fs.readdirSync(path.join(dir,'reading')).sort(),['index.html','library-catalogue.json','railway-fundamentals-01.html']);
+      for(const file of ['library-catalogue.json','railway-fundamentals-01.html'])
+        assert.deepEqual(fs.readFileSync(path.join(dir,'reading',file)),fs.readFileSync(path.join(root,'reading',file)));
+      const catalogue=JSON.parse(fs.readFileSync(path.join(dir,'reading/library-catalogue.json'),'utf8'));
+      const chapters=catalogue.groups.flatMap(g=>g.chapters);
+      assert.equal(chapters.length,40);
+      assert.deepEqual(chapters.filter(c=>c.status==='available').map(c=>c.path),['reading/railway-fundamentals-01.html']);
+      assert(chapters.filter(c=>c.status==='planned').every(c=>c.path===null));
+      const gateway=fs.readFileSync(path.join(dir,'assets/public-gateway.js'),'utf8');
+      assert(gateway.includes('reading/railway-fundamentals-01.html'));
+      const {JSDOM}=require(process.env.RAILWAY_JSDOM||'jsdom');
+      for(const file of ['index.html','railway-fundamentals-01.html']) {
+        const dom=new JSDOM(fs.readFileSync(path.join(dir,'reading',file),'utf8'));
+        for(const el of dom.window.document.querySelectorAll('[href],[src]')) {
+          const url=el.getAttribute('href')||el.getAttribute('src');
+          if(/^(?:https?:|mailto:|data:|#)/.test(url))continue;
+          assert(fs.existsSync(path.resolve(dir,'reading',url.split(/[?#]/)[0])),url);
+        }
+        dom.window.close();
+      }
+    } finally {fs.rmSync(dir,{recursive:true,force:true});}
+  });
+}
+
+test('public preview catalogue renders without network and preserves its restrictive CSP',async()=>{
+  const dir=build('build-preview.py','railway-reading-preview-');
+  let dom;
+  try {
+    assert.match(fs.readFileSync(path.join(dir,'_headers'),'utf8'),/connect-src 'none'/);
+    const {JSDOM}=require(process.env.RAILWAY_JSDOM||'jsdom');
+    let requests=0;
+    dom=new JSDOM(fs.readFileSync(path.join(dir,'reading/index.html'),'utf8'),{url:'https://preview.invalid/reading/index.html',runScripts:'dangerously',beforeParse(w){w.fetch=()=>{requests++;throw Error('Network forbidden');};}});
+    await new Promise(resolve=>setTimeout(resolve,0));
+    assert.equal(requests,0);
+    assert.equal(dom.window.document.querySelectorAll('.card').length,40);
+    assert.equal(dom.window.document.querySelectorAll('.card a').length,1);
+    assert.equal(dom.window.document.querySelector('.card a').getAttribute('href'),'../reading/railway-fundamentals-01.html');
+    assert.equal(dom.window.RailwayModules,undefined);
+  } finally {dom?.window.close();fs.rmSync(dir,{recursive:true,force:true});}
+});

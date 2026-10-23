@@ -14,7 +14,8 @@ if any(out.iterdir()):
 
 root_files=[
     ".nojekyll","index.html","gateway.html","portfolio.html","references.html",
-    "PRIVACY.md","robots.txt","sitemap.xml"
+    "PRIVACY.md","robots.txt","sitemap.xml",
+    "reading/index.html","reading/library-catalogue.json","reading/railway-fundamentals-01.html"
 ]
 forbidden_assets={"questions.js","quiz-core.js","gateway.js"}
 allowed_asset_suffixes={".js",".css",".jpeg",".jpg",".png",".webp",".svg",".gif",".ico"}
@@ -86,7 +87,7 @@ for p in out.rglob("*"):
 
 # Every local HTML script/style/link target must resolve inside the artifact.
 attr=re.compile(r'''(?:href|src)=["']([^"'#?]+)''')
-for page in out.glob("*.html"):
+for page in out.rglob("*.html"):
     text=page.read_text(encoding="utf-8")
     for url in attr.findall(text):
         if re.match(r"^(?:https?:|mailto:|data:|javascript:)",url):
