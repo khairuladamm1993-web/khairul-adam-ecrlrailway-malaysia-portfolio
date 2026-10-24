@@ -101,3 +101,26 @@ test('Safari fallback exposes a manual copyable, readonly issue prompt',()=>{
  assert(input.value.includes(issue.id));
  assert.equal(fallback.childNodes[0].tagName,'summary');
 });
+
+test('Slice 1 ChatGPT diagnostic is stored in GitHub registry, is honest about SHA and remains NO-GO',()=>{
+ const p=registry.projects.find(x=>x.id==='web-simulator');
+ const issue=p.issues.find(x=>x.id==='slice1-preview');
+ const d=issue.latestDiagnosis;
+ assert.equal(d.status,'BLOCKED');
+ assert.equal(d.releaseDecision,'NO-GO');
+ assert.equal(d.projectLive,false);
+ assert.equal(d.latestDeploymentState,'BLOCKED');
+ assert.equal(d.previousDeploymentState.startsWith('READY'),true);
+ assert.equal(d.slice1SourceSha,null);
+ assert.match(d.ownerDashboardReferenceNote,/NOT the Slice 1 source commit/);
+ assert.match(d.nextAction,/explicit Owner approval/);
+ assert.equal(d.changesMade,false);
+ const {api}=fixture();
+ const action=api.issueActions(p,issue);
+ const detail=action.childNodes.find(x=>x.className==='issue-latest-diagnosis');
+ assert(detail);
+ const prompt=api.promptFor(p,issue,api.evidence(p,issue));
+ assert(prompt.includes('NO-GO'));
+ assert(prompt.includes('SHA dashboard jangan dianggap commit Slice 1'));
+ assert.equal(registry.projects.flatMap(x=>x.issues||[]).length,7);
+});
