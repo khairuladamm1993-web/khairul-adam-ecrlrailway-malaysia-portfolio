@@ -161,7 +161,7 @@
    const payload=await res.json();
    if(payload.encoding!=='base64'||typeof payload.content!=='string'||typeof payload.sha!=='string')
     throw new Error('GitHub Registry payload invalid');
-   const buffer=Uint8Array.from(atob(payload.content.replace(/\\s/g,'')),c=>c.charCodeAt(0));
+   const buffer=Uint8Array.from(atob(payload.content.replace(/\s/g,'')),c=>c.charCodeAt(0));
    const parsed=validateRegistry(JSON.parse(new TextDecoder().decode(buffer)));
    if(parsed.checkpointSynchronization?.branch!==ref)
     throw new Error('Incorrect Registry branch');
