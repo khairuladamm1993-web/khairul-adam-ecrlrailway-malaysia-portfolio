@@ -51,17 +51,17 @@
       "code": "P01",
       "name": "MR-S10 Portfolio Website",
       "category": "website",
-      "phase": "R2 Owner Command Center development + separate Email OTP stabilization",
+      "phase": "R2.1 Owner Command Center Safari UAT improvements + separate Email OTP stabilization",
       "overall": "IN_PROGRESS",
       "nextDecision": "Confirm Owner OTP session, isolated dashboard UAT and secured Vercel token configuration; preserve Production",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
         {
           "type": "test",
-          "label": "Owner Dashboard R2 Node regression",
-          "value": "171/171 PASS — isolated Node",
+          "label": "Owner Dashboard R2.1 Node regression",
+          "value": "173/173 PASS — isolated Node",
           "verifiedOn": "2026-10-25",
-          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/feature/owner-command-center-r2-sync",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/fix/owner-r2-uats-clarity",
           "confidence": "tested-in-isolated-sandbox"
         },
         {
@@ -116,6 +116,13 @@
           "repo": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
           "ref": "feature/owner-command-center-r2-sync",
           "lastObservedSha": "c7654d0cfdc5d124e021326e05ecee9bbb00ea33"
+        },
+        {
+          "id": "owner-r21",
+          "label": "Owner Dashboard R2.1 QA",
+          "repo": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
+          "ref": "fix/owner-r2-uats-clarity",
+          "lastObservedSha": "f65f60f94df9b34b0e0bcb6ddf7f1793b20b1f75"
         }
       ],
       "deployments": [
