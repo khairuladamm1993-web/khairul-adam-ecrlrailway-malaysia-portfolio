@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111a">
+  <meta name="robots" content="noindex,nofollow">
+  <title>MRL’S10 | Owner Project Command Center (Development)</title>
+  <link rel="stylesheet" href="assets/owner-command-center.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
+  <script src="assets/access.js"></script>
+  <script defer src="assets/owner-command-center.js"></script>
+</head>
+<body>
+  <header class="topbar"><a href="gateway.html" class="back">← Gateway</a><span class="top-label">MRL’S10 / OWNER</span><span class="version">R1 · DEV</span></header>
+  <main class="shell">
+    <div id="auth-gate" role="status" aria-live="polite" class="auth-gate">
+      <div class="shield" aria-hidden="true">◆</div>
+      <h1>Project Command Center</h1>
+      <p id="gate-message">Verifying Supabase Owner/Admin session…</p>
+      <a href="gateway.html" class="gateway-link">Return to MR-S10 Gateway ↗</a>
+    </div>
+    <section id="dashboard" hidden aria-label="Owner project dashboard">
+      <div class="eyebrow">OWNER VIEW · VERIFIED EVIDENCE</div>
+      <div class="hero">
+        <div>
+          <h1>Project Command Center</h1>
+          <p>One place to monitor three development tracks. Evidence, not stale screenshots.</p>
+        </div>
+        <button id="refresh-dashboard" class="refresh" type="button">↻ Refresh sources</button>
+      </div>
+      <div class="refresh-note" role="status" id="refresh-state">Loading verified registry…</div>
+      <div class="kpis">
+        <article><div class="kpi-value" id="project-count">—</div><div class="kpi-label">Current projects</div></article>
+        <article><div class="kpi-value" id="future-count">—</div><div class="kpi-label">After approved merge</div></article>
+        <article><div class="kpi-value" id="issues-count">—</div><div class="kpi-label">Open blockers / unknowns</div></article>
+      </div>
+      <div class="section-head"><h2>Current development</h2><span id="registry-date" class="section-aside"></span></div>
+      <div class="project-grid" id="project-grid"></div>
+      <section class="evidence-panel">
+        <h2>Live GitHub evidence</h2>
+        <p class="support">Latest public source commits are checked when this page is opened or refreshed. This does not assert that Vercel has deployed them.</p>
+        <div id="github-live"></div>
+      </section>
+      <section class="evidence-panel">
+        <h2>Sync coverage &amp; audit</h2>
+        <div id="source-coverage"></div>
+        <p class="support">GitHub may be live. Vercel is currently a dated snapshot. App updates require a verified iPad checkpoint. ChatGPT decisions are not directly streamable from all past conversations.</p>
+      </section>
+      <section class="roadmap" id="roadmap"></section>
+      <footer>READ-ONLY DEVELOPMENT R1 · No deploy, database writes or approval actions · Never infer a PASS from an old checkpoint</footer>
+    </section>
+  </main>
+</body>
+</html>
