@@ -80,3 +80,28 @@ footer{font-size:.72rem;color:var(--sub);padding:24px 2px}
 .open-items summary{color:var(--warn);font-size:.78rem;font-weight:700;cursor:pointer}
 .open-items .facts{padding-top:8px}
 .open-items .fact .value{font-size:.78rem;line-height:1.4;font-weight:450;color:var(--sub)}
+
+/* R2.2 — executive scan, contextual issue resolution and evidence-first actions */
+.action-hub{background:var(--panel2);border:1px solid #325563;border-radius:17px;padding:16px;margin:0 0 25px}
+.action-hub h2{margin:0 0 4px}.action-hub>.support{margin:0 0 13px}
+.progress-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.progress-entry{display:flex;flex-direction:column;gap:7px;border:1px solid var(--edge);border-radius:11px;padding:11px;background:#0b1a24;min-width:0}
+.progress-entry .project-code{font-size:.68rem;line-height:1.5;overflow-wrap:anywhere}
+.progress-entry strong{font-size:.91rem;line-height:1.4;overflow-wrap:anywhere}
+.meta{font-size:.74rem;color:var(--sub);overflow-wrap:anywhere}
+.action-head{font-size:.98rem;margin:16px 0 8px}
+.action-groups{display:grid;gap:7px}
+.action-project{background:#0a1b27;border:1px solid var(--edge);border-radius:10px;padding:10px}
+.action-project>summary,.action-issue>summary{cursor:pointer;font-weight:700;font-size:.82rem;color:var(--accent)}
+.action-issue{margin:9px 0 0 8px;border-top:1px solid var(--edge);padding:9px 0 0 3px}
+.action-issue>summary{color:var(--warn);font-weight:650}
+.issue-description{font-size:.8rem;color:var(--sub);margin:8px 0}
+.issue-actions{display:flex;flex-direction:column;gap:7px;margin:9px 0 6px}
+.issue-evidence{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:.75rem}
+.chatgpt-issue{display:block;text-align:center;text-decoration:none;background:#17434f;border:1px solid #60a6b2;color:#e7fcff;padding:10px 12px;border-radius:10px;font-size:.78rem;font-weight:750;min-height:42px}
+.chatgpt-issue:hover{background:#1d5260}
+.issue-actions>.meta{line-height:1.35;margin:0}
+.open-items .issue-actions{margin-top:12px}
+.open-items .issue-actions .meta{font-weight:400}
+@media(max-width:870px){.progress-overview{grid-template-columns:1fr}}
+@media(max-width:560px){.action-hub{padding:12px}.progress-entry{padding:9px}.action-project{padding:9px}.action-issue>summary{font-size:.78rem}}
