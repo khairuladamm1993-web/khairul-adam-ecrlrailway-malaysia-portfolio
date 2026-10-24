@@ -106,6 +106,7 @@
  }
  function renderActionHub(registry,host){
   if(!host)return;
+  const policy=window.MRLCheckpointPolicy;
   host.replaceChildren();
   host.append(element('h2','','Ringkasan terbaru'));
   host.append(element('p','support','Lihat kemajuan → buka isu → semak bukti → teruskan di ChatGPT'));
@@ -126,7 +127,6 @@
    cards.append(a);
   }
   host.append(cards);
-  const policy=window.MRLCheckpointPolicy;
   const count=policy?policy.summary(registry).unresolved:registry.projects.reduce((n,p)=>n+(p.issues?.length||0),0);
   host.append(element('h3','action-head','Perlu tindakan · '+count+' isu'));
   const groups=element('div','action-groups');
