@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "MRL-S10 R2.3 checkpoint sync development — no issue automatically solved",
+  "register": "MRL’S10 R2.3 verified-checkpoint bridge candidate — Node 188/188 PASS; Safari handoff pending",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -42,7 +42,7 @@
       "id": "chatgpt",
       "label": "ChatGPT decisions",
       "sync": "verified-checkpoint",
-      "notes": "Not a raw chat-history sync. Verified milestones require writing a registry update via an approved connector workflow."
+      "notes": "Issue-specific authorized ChatGPT can write verified public-safe checkpoints to the R2.3 GitHub dev branch. Dashboard live-fetches Registry on Refresh; not an automatic all-chat transcript feed."
     }
   ],
   "projects": [
@@ -51,11 +51,19 @@
       "code": "P01",
       "name": "MR-S10 Portfolio Website",
       "category": "website",
-      "phase": "R2.2 Owner Dashboard clarity + ChatGPT issue handoff; Owner OTP stabilization separate",
+      "phase": "R2.3 Verified Checkpoint Synchronization + separate Owner OTP stabilization",
       "overall": "IN_PROGRESS",
-      "nextDecision": "Safari iPhone R2.2 UAT: expand one unresolved issue, verify evidence and ChatGPT issue handoff; Owner OTP & secure Vercel connection remain separate.",
+      "nextDecision": "Safari iPhone R2.3 UAT: ChatGPT issue handoff must write dev Registry directly, then Refresh reads verified checkpoint from GitHub. Real Owner OTP and secure Vercel bridge remain separate.",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
+        {
+          "type": "test",
+          "label": "Owner Dashboard R2.3 Node regression (isolated)",
+          "value": "188/188 PASS",
+          "verifiedOn": "2026-10-25",
+          "confidence": "tested-in-isolated-sandbox",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/feature/owner-r23-verified-checkpoint-sync"
+        },
         {
           "type": "test",
           "label": "Owner Dashboard R2.2 regression — isolated Node",
@@ -138,6 +146,13 @@
           "repo": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
           "ref": "feature/owner-command-center-r22-chatgpt-actions",
           "lastObservedSha": "d19fe2e57e51e7c061e7b43dea844fe40c3bae5b"
+        },
+        {
+          "id": "owner-r23",
+          "label": "Owner Dashboard R2.3",
+          "repo": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
+          "ref": "feature/owner-r23-verified-checkpoint-sync",
+          "lastObservedSha": "28fc730c5fbfea659150bc6115daae6c2a702925"
         }
       ],
       "deployments": [
@@ -462,7 +477,7 @@
     "mode": "connected-ChatGPT-can-commit-verified-checkpoints; dashboard-GitHub-API-refresh",
     "directAllChatHistory": false,
     "deliveryGuarantee": "Best effort in an issue-handoff ChatGPT chat with authorized GitHub write tool; not a native automatic transcript feed.",
-    "status": "DEV_IMPLEMENTED_PENDING_INDIVIDUAL_CHAT_UAT",
+    "status": "DEV_QA_PASS_PENDING_CHAT_WRITE_UAT",
     "publicSafeOnly": true,
     "requiredEvidence": "Direct source verification, timestamp, PASS tests evidence, clear Owner approval before READY_FOR_GO",
     "mutableScope": "Registry only on isolated development branch; no main/Production/Authed DB changes"
