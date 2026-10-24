@@ -226,7 +226,8 @@
         "destination": "future standalone MRL’S10 Simulation App",
         "state": "SEPARATE",
         "criterion": "Share validated railway data contract; do not merge Swift source into website"
-      }
+      },
+      "deployments": []
     }
   ]
 }
