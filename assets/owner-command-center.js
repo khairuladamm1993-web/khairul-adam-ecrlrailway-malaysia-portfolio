@@ -10,7 +10,7 @@
  const dashboard=document.getElementById('dashboard');
  const refreshButton=document.getElementById('refresh-dashboard');
  const $=id=>document.getElementById(id);
- let pending=false,lastAuthorized=false,refreshCount=0;
+ let pending=false,lastAuthorized=false,refreshCount=0,lastRefreshAt=0;
  const el=(tag,cls,value)=>{
   const node=document.createElement(tag);
   if(cls)node.className=cls;
@@ -210,7 +210,7 @@
  }
  async function refresh(){
   if(pending||!A?.canAdmin||A.status!=='authenticated')return;
-  pending=true;refreshButton.disabled=true;
+  pending=true;lastRefreshAt=Date.now();refreshButton.disabled=true;
   $('refresh-state').textContent='Reading evidence register…';
   try{
    const r=await loadRegistry();
@@ -230,7 +230,13 @@
  }
  refreshButton.addEventListener('click',()=>void refresh());
  window.addEventListener('railway-access-change',guard);
- document.addEventListener('visibilitychange',()=>{if(!document.hidden)guard();});
+ function resume(){
+  if(document.hidden)return;
+  guard();
+  if(A?.canAdmin&&A.status==='authenticated'&&Date.now()-lastRefreshAt>120000)void refresh();
+ }
+ document.addEventListener('visibilitychange',resume);
+ window.addEventListener('pageshow',event=>{if(event.persisted)resume();});
  if(A){guard();} // access.js manages its own initialization; event will update this view.
  else{message.textContent='MR-S10 authentication library unavailable. Return to Gateway.';}
 })();
