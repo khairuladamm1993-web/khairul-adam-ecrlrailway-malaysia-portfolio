@@ -50,7 +50,7 @@
  function renderProjects(registry){
   $('project-count').textContent=String(registry.projects.length);
   $('future-count').textContent=String(registry.consolidation?.futureProducts||'—');
-  $('issues-count').textContent=String(registry.projects.filter(p=>p.overall==='BLOCKED'||p.overall==='UNVERIFIED').length);
+  $('issues-count').textContent=String(registry.projects.reduce((n,p)=>n+(Array.isArray(p.issues)?p.issues.length:0),0));
   $('registry-date').textContent='Snapshot '+dateLabel(registry.capturedOn);
   const host=$('project-grid');host.replaceChildren();
   for(const project of registry.projects){
@@ -64,6 +64,19 @@
     facts.append(row);
    }
    card.append(facts);
+   const issues=project.issues||[];
+   if(issues.length){
+    const list=el('details','open-items');
+    const summary=el('summary','',issues.length+' unresolved checks · View');
+    list.append(summary);
+    const items=el('ul','facts');
+    for(const issue of issues){
+     const li=el('li','fact');
+     li.append(el('span','name',issue.kind+' · '+issue.label),el('span','value',issue.detail));
+     items.append(li);
+    }
+    list.append(items);card.append(list);
+   }
    if(project.facts.length>2){
     const details=el('details','extra-facts');
     details.append(el('summary','', 'All evidence · '+project.facts.length+' entries'));
@@ -153,10 +166,10 @@
     try{
      const run=await fetchGitHubCI(item,live.sha);
      if(!A.canAdmin)return;
-     ci.replaceChildren(el('span','', 'CI: '+run.state+' · '));
+     ci.replaceChildren(el('span','',run.state==='NO RUN'?'CI: NO RUN — not a test PASS':('CI: '+run.state+' · ')));
      const link=run.url?safeLink('Run details',run.url):null;
      if(link)ci.append(link);
-    }catch{ci.textContent='CI: UNVERIFIED (API or rate limit)';}
+    }catch{ci.textContent='CI: UNVERIFIED (API or rate limit; no PASS inferred)';}
     
    }catch{
     left.append(el('p','meta','Last observed SHA: '+item.lastObservedSha.slice(0,12)+' — not current-verified'));
