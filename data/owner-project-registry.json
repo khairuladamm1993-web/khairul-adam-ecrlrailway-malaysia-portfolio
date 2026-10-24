@@ -24,7 +24,7 @@
       "id": "vercel",
       "label": "Vercel",
       "sync": "snapshot",
-      "notes": "Deployment metadata from authorized read-only checks; not yet connected as a refreshable dashboard API."
+      "notes": "Dated snapshots; owner-authenticated live API adapter is coded, but remains NOT CONNECTED until isolated backend Vercel token provisioned and UAT passed."
     },
     {
       "id": "supabase",
@@ -51,11 +51,19 @@
       "code": "P01",
       "name": "MR-S10 Portfolio Website",
       "category": "website",
-      "phase": "Authentication stabilization + content",
+      "phase": "R2 Owner Command Center development + separate Email OTP stabilization",
       "overall": "IN_PROGRESS",
-      "nextDecision": "OTP isolated Auth/email-template UAT and Chromium responsive smoke",
+      "nextDecision": "Confirm Owner OTP session, isolated dashboard UAT and secured Vercel token configuration; preserve Production",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
+        {
+          "type": "test",
+          "label": "Owner Dashboard R2 Node regression",
+          "value": "171/171 PASS — isolated Node",
+          "verifiedOn": "2026-10-25",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/feature/owner-command-center-r2-sync",
+          "confidence": "tested-in-isolated-sandbox"
+        },
         {
           "type": "test",
           "label": "Node regression",
@@ -101,6 +109,13 @@
           "repo": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
           "ref": "fix/otp100-auth-isolated-r1",
           "lastObservedSha": "5d0f311a34d93cc9f03bd644d031155e5eab9b2f"
+        },
+        {
+          "id": "owner-r2",
+          "label": "Owner Dashboard R2",
+          "repo": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
+          "ref": "feature/owner-command-center-r2-sync",
+          "lastObservedSha": "c7654d0cfdc5d124e021326e05ecee9bbb00ea33"
         }
       ],
       "deployments": [
