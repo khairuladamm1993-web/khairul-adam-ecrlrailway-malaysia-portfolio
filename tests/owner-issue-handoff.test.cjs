@@ -88,3 +88,16 @@ test('Owner R2.2 presents progress, actions and evidence in that order',()=>{
  assert.equal(groups.childNodes.length,3);
  assert.equal(groups.childNodes.flatMap(group=>group.childNodes.filter(x=>x.className==='action-issue')).length,7);
 });
+
+test('Safari fallback exposes a manual copyable, readonly issue prompt',()=>{
+ const {api}=fixture();
+ const p=registry.projects[0],issue=p.issues[0];
+ const action=api.issueActions(p,issue);
+ const fallback=action.childNodes.find(x=>x.className==='issue-prompt-fallback');
+ assert(fallback);
+ const input=fallback.childNodes.find(x=>x.tagName==='textarea');
+ assert(input);
+ assert.equal(input.readOnly,true);
+ assert(input.value.includes(issue.id));
+ assert.equal(fallback.childNodes[0].tagName,'summary');
+});
