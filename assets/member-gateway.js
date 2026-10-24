@@ -49,7 +49,7 @@
    const label=document.createElement('label');label.textContent='Confirm email';
    const confirm=document.createElement('input');confirm.name='email_confirm';confirm.type='email';confirm.required=true;confirm.autocomplete='off';confirm.value=authConfirmEmail;confirm.disabled=input.disabled;
    label.append(document.createElement('br'),confirm);input.closest('label').after(label);
-   const note=document.createElement('p');note.textContent='Review both email entries before sending. A new address starts registration after email verification. Open the link in the same browser and site that requested it.';
+   const note=document.createElement('p');note.textContent='Review both email entries before sending. A new address starts registration after email verification. '+(A.emailOtpEnabled?'Enter the six-digit email code on this page; never open a sign-in link.':'Open the link in the same browser and site that requested it.');
    form.prepend(note);
    if(authInputError){const error=document.createElement('p');error.className='auth-error';error.setAttribute('role','alert');error.textContent=authInputError;form.append(error);}
   }
