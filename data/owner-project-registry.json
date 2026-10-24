@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "MRL’S10 R2.3 verified new-chat GitHub checkpoint write; Owner historical-review feedback; issue remains NO-GO",
+  "register": "MRL’S10 R2.3.1 owner-supplied Safari screenshot confirms GitHub RAW fallback LIVE and latest P02 action; Slice 1 remains BLOCKED/NO-GO",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -526,12 +526,31 @@
     "mode": "connected-ChatGPT-can-commit-verified-checkpoints; dashboard-GitHub-API-refresh",
     "directAllChatHistory": false,
     "deliveryGuarantee": "Best effort in an issue-handoff ChatGPT chat with authorized GitHub write tool; not a native automatic transcript feed.",
-    "status": "HANDOFF_GITHUB_WRITE_VERIFIED_2026-10-25_DASHBOARD_VISUAL_RECHECK_PENDING",
+    "status": "HANDOFF_GITHUB_WRITE_AND_R231_SAFARI_VISUAL_UAT_PASS_2026-10-25",
     "publicSafeOnly": true,
     "requiredEvidence": "Direct source verification, timestamp, PASS tests evidence, clear Owner approval before READY_FOR_GO",
     "mutableScope": "Registry only on isolated development branch; no main/Production/Authed DB changes",
     "latestVerifiedWriteCommit": "b977ef7790bf9c5fbb8a03ceb37b2741e0ce95c7",
     "latestVerifiedWriteIssueId": "slice1-preview",
-    "latestVerifiedWriteDate": "2026-10-25"
+    "latestVerifiedWriteDate": "2026-10-25",
+    "safariVisualUat": {
+      "version": "R2.3.1",
+      "checkedOn": "2026-10-25",
+      "observedAtLocal": "2026-10-25T06:08:00+08:00",
+      "result": "PASS_VISUAL",
+      "source": "Owner-provided Safari iPhone screenshots in ChatGPT; screenshots not published into public GitHub repository",
+      "observed": [
+        "R2.3.1 PUBLIC DEMO header visible",
+        "Refresh CHECK #3 shows Registry GitHub RAW (backup) LIVE",
+        "REGISTER LIVE indicates checkpoint can be read",
+        "P02 Slice 1 issue detail reflects previous Owner Activity Log and Usage/Billing review",
+        "Next action no longer requests repeating prior checks",
+        "P02 remains BLOCKED/NO-GO and original pause trigger remains unconfirmed"
+      ],
+      "sourceCodeBranch": "fix/owner-r23-safari-registry-freshness",
+      "sourceCodeCommit": "179fba6d78f0e737bc3c3421366a1f2b53985782",
+      "scope": "Safari visual checkpoint freshness only; not end-to-end production/Owner-auth or Slice 1 recovery UAT",
+      "outstanding": "GitHub Contents API primary fell back to raw GitHub; root reason for primary-path failure not established. Vercel deployment remains snapshot."
+    }
   }
 }
