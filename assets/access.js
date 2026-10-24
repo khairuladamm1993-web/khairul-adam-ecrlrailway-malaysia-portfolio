@@ -3,6 +3,9 @@
  'use strict';
  const PROJECT_URL='https://kfudisbzdgsefdjoopzu.supabase.co';
  const PUBLISHABLE_KEY='sb_publishable_1Diyg-QnCNMJXIY2g0RdCg_ToWFuq0V';
+ // Development-only UI pilot. Does not and cannot grant backend Member/Admin rights.
+ // Must stay OFF until isolated email-template and cap tests are complete.
+ const EMAIL_OTP_PILOT=window.MRS10AuthPilot?.emailOtp===true;
  let client=null,authSubscription=null,consent=false,dataCache=null,userId=null,magicLinkInFlight=null,hydrationPromise=null;
  let authRevision=0;
  let state={level:'public',status:'initializing',canReadMemberContent:false,canAdmin:false,email:null,error:null,retryAfterSeconds:null};
@@ -189,6 +192,37 @@
   })();
   try{return await magicLinkInFlight;}finally{magicLinkInFlight=null;}
  }
+
+ async function verifyEmailOtp(email,token){
+  if(!EMAIL_OTP_PILOT)throw new Error('Email OTP is not enabled on this build.');
+  const normalized=String(email||'').trim().toLowerCase();
+  const code=String(token||'').trim();
+  if(!normalized||normalized!==state.email||!['verification-sent','otp-verification-failed'].includes(state.status))
+   throw new Error('Request email verification on this page before entering a code.');
+  if(!/^[0-9]{6}$/.test(code)){
+   const message='Enter the six-digit verification code.';
+   set({level:'public',status:'otp-verification-failed',canReadMemberContent:false,canAdmin:false,email:normalized,error:message,retryAfterSeconds:null});
+   throw new Error(message);
+  }
+  const c=requireClient();
+  set({level:'public',status:'verifying-otp',canReadMemberContent:false,canAdmin:false,email:normalized,error:null,retryAfterSeconds:null});
+  let response;
+  try{response=await c.auth.verifyOtp({email:normalized,token:code,type:'email'});}
+  catch(error){
+   const message=/network|timeout|fetch/i.test(String(error?.message||''))?'Authentication backend unavailable. Check the connection.':'Verification could not be completed. Check the code.';
+   set({level:'public',status:'otp-verification-failed',canReadMemberContent:false,canAdmin:false,email:normalized,error:message,retryAfterSeconds:null});
+   throw new Error(message);
+  }
+  if(response?.error||!response?.data?.session){
+   const message='Verification code invalid, expired or already used.';
+   set({level:'public',status:'otp-verification-failed',canReadMemberContent:false,canAdmin:false,email:normalized,error:message,retryAfterSeconds:null});
+   throw new Error(message);
+  }
+  // No frontend role assignment: server must approve session, role and enabled profile.
+  const resolved=await validateSession({expectSession:true});
+  if(!resolved.canReadMemberContent)throw new Error('Email verified, but Member access was not authorized by the server.');
+  return resolved;
+ }
  async function refresh(){
   const revision=authRevision;
   const previous=snapshot();
@@ -319,8 +353,8 @@
  }
  window.RailwayAccess=Object.freeze({
   get level(){return state.level;},get status(){return state.status;},get canReadMemberContent(){return state.level==='member'||state.level==='admin';},get canAdmin(){return state.level==='admin';},
-  get email(){return state.email;},get error(){return state.error;},get retryAfterSeconds(){return state.retryAfterSeconds;},get activityConsent(){return consent;},get cachedData(){return dataCache;},
-  init,refresh,sendMagicLink,logout,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,adminPublishLocation,adminLocationHistory,adminRestoreLocation,snapshot
+  get email(){return state.email;},get error(){return state.error;},get retryAfterSeconds(){return state.retryAfterSeconds;},get activityConsent(){return consent;},get cachedData(){return dataCache;},get emailOtpEnabled(){return EMAIL_OTP_PILOT;},
+  init,refresh,sendMagicLink,verifyEmailOtp,logout,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,adminPublishLocation,adminLocationHistory,adminRestoreLocation,snapshot
  });
  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',()=>init(),{once:true}):init();
 })();
