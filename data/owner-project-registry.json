@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "MRL’S10 R2.4 single-site Owner Command Center integration checkpoint; no Production merge; Provider sync limits stated",
+  "register": "MRL’S10 single-domain Owner Gateway R2.4 staging verified HTTP 200; Node 198/198 PASS; real Owner Auth/other automatic source sync pending",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -568,8 +568,8 @@
     "catalogue": "14/14 PASS",
     "integratedArtifact": "PASS",
     "isolatedStagingUrl": "https://mrs10-r24-single-gateway-preview.vercel.app/gateway.html",
-    "stagingHttpSmoke": "PASS",
-    "ownerAuthUat": "PENDING",
+    "stagingHttpSmoke": "PASS (Gateway, Dashboard, access scripts, public-safe Registry)",
+    "ownerAuthUat": "PENDING; isolated preview hostname not verified in Supabase Auth allowlist",
     "canonicalPreviewDeployment": "UNCHANGED",
     "productionMerge": "NOT_APPROVED",
     "sync": {
@@ -578,6 +578,17 @@
       "swift": "CHECKPOINT_ONLY",
       "chatgpt": "ISSUE_SPECIFIC_AUTHORIZED_CHECKPOINT_WRITE"
     },
-    "targetProducts": 2
+    "targetProducts": 2,
+    "sourceCommit": "d093e97188693d29183a64859f20dd17f5f70942",
+    "isolatedPreviewDeployment": "dpl_zaTPbuukk3EhZkiY4yVoZQTKein2",
+    "autoReadRefresh": "Every 10 minutes while authenticated Owner dashboard stays open; also manual Refresh and Safari resume",
+    "accessPolicy": "Owner navigation only after verified Admin role; main Dashboard independently gates rendering",
+    "pending": [
+      "Owner OTP same-origin verification",
+      "Authenticated Safari UAT",
+      "Vercel secure live backend environment",
+      "Swift app approved data export/publishing mechanism",
+      "Owner review for canonical release"
+    ]
   }
 }
