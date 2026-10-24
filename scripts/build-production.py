@@ -52,7 +52,7 @@ for name in forbidden_assets:
         raise SystemExit(f"Forbidden production asset present: assets/{name}")
 
 required_assets={
-    "access.js","public-gateway.js","member-gateway.js","owner-command-center.js","owner-issue-handoff.js","owner-checkpoint-policy.js","owner-center-shortcut.js","owner-command-center.css","module-previews.js",
+    "access.js","public-gateway.js","member-gateway.js","owner-command-center.js","owner-issue-handoff.js","owner-checkpoint-policy.js","owner-center-shortcut.js","owner-two-way-workflow.js","owner-command-center.css","module-previews.js",
     "analytics.js","gateway.css","theme.js","theme.css","i18n.js","map-intelligence.js","map-gateway.js","corridor-reference.js","owner-map.js","owner-map-v01b.js","build-info.js"
 }
 missing=sorted(name for name in required_assets if not (out/"assets"/name).exists())
