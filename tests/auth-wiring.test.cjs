@@ -11,7 +11,7 @@ function builder(result={data:[],error:null}){
  b.then=(resolve)=>Promise.resolve(result).then(resolve);
  return b;
 }
-function makeClient({session={access_token:'x'},exchangeSession=null,exchangeError=null,exchangeThrow=null,user={id:'11111111-1111-4111-8111-111111111111',email:'member@example.com'},role='member',profile={data:{email:'member@example.com',enabled:true,activity_consent_at:null},error:null},rpcError=null,otpError=null}={}){
+function makeClient({session={access_token:'x'},exchangeSession=null,exchangeError=null,exchangeThrow=null,user={id:'11111111-1111-4111-8111-111111111111',email:'member@example.com'},role='member',profile={data:{email:'member@example.com',enabled:true,activity_consent_at:null},error:null},rpcError=null,otpError=null,otpVerifyError=null}={}){
  const calls=[];let activeSession=session,authHandler=null;
  const client={
   calls,
@@ -21,6 +21,7 @@ function makeClient({session={access_token:'x'},exchangeSession=null,exchangeErr
    onAuthStateChange(cb){authHandler=cb;calls.push(['onAuthStateChange']);return {data:{subscription:{unsubscribe(){}}}}},
    async exchangeCodeForSession(code){if(exchangeThrow)throw new Error(exchangeThrow);calls.push(['exchangeCodeForSession',code]);if(exchangeError)return {data:{session:null},error:exchangeError};activeSession=exchangeSession||{access_token:'callback',expires_at:Math.floor(Date.now()/1000)+3600};return {data:{session:activeSession},error:null}},
    async signInWithOtp(args){calls.push(['signInWithOtp',args]);return {error:otpError}},
+   async verifyOtp(args){calls.push(['verifyOtp',args]);if(otpVerifyError)return {data:{session:null},error:otpVerifyError};activeSession={access_token:'verified-otp',expires_at:Math.floor(Date.now()/1000)+3600};return {data:{session:activeSession},error:null}},
    async signOut(args){calls.push(['signOut',args]);activeSession=null;authHandler?.('SIGNED_OUT',null);return {error:null}},
    emit(event,nextSession=activeSession){authHandler?.(event,nextSession)}
   },
@@ -37,7 +38,7 @@ function makeClient({session={access_token:'x'},exchangeSession=null,exchangeErr
 async function load(options={}){
  const client=options.client||makeClient(options);
  const events=[];
- const window={supabase:{createClient(url,key,config){client.calls.push(['createClient',config]);return client}},dispatchEvent(e){events.push(e)},addEventListener(){},removeEventListener(){}};
+ const window={MRS10AuthPilot:options.otpPilot?{emailOtp:true}:undefined,supabase:{createClient(url,key,config){client.calls.push(['createClient',config]);return client}},dispatchEvent(e){events.push(e)},addEventListener(){},removeEventListener(){}};
  const document={readyState:'complete',addEventListener(){}};
  const location={origin:options.origin||'https://preview.example',pathname:options.pathname||'/gateway.html',search:options.locationSearch||'',hash:options.locationHash||''};
  const history={replaceState(){location.search='';location.hash='';}};
@@ -250,7 +251,7 @@ test('Verified Member login copy is secure and contains no IC/passport wording',
 test('post-verify hydration keeps authenticated callback pending until role resolution completes',()=>{
  const member=fs.readFileSync(path.join(root,'assets/member-gateway.js'),'utf8');
  const access=fs.readFileSync(path.join(root,'assets/access.js'),'utf8');
- assert(member.includes("['initializing','exchanging-code','restoring-session','validating-user','role-pending'].includes(A.status)"));
+ assert(member.includes("['initializing','exchanging-code','restoring-session','validating-user','role-pending','verifying-otp'].includes(A.status)"));
  assert(member.includes('CHECKING VERIFIED SESSION…'));
  assert(access.includes("set({status:'validating-user'"));
  assert(access.includes("set({status:'role-pending'"));
@@ -453,4 +454,55 @@ test('a queued auth event cannot rehydrate after a newer sign-out',async()=>{
  const pending=A.refresh();await entered.promise;client.auth.emit('TOKEN_REFRESHED',{access_token:'stale'});
  await new Promise(r=>setTimeout(r,5));client.auth.emit('SIGNED_OUT',null);gate.resolve();await pending;
  await new Promise(r=>setTimeout(r,10));assert.equal(reads,1);assert.equal(A.level,'public');assert.equal(A.status,'signed-out');
+});
+
+
+test('OTP pilot is OFF by default on all existing builds',async()=>{
+ const {A}=await load({session:null});
+ assert.equal(A.emailOtpEnabled,false);
+ await assert.rejects(()=>A.verifyEmailOtp('member@example.com','123456'),/not enabled/);
+});
+test('OTP pilot grants Member only after verified session and backend role',async()=>{
+ const {A,client}=await load({session:null,role:'member',otpPilot:true});
+ await A.sendMagicLink('newmember@example.com');
+ const result=await A.verifyEmailOtp('newmember@example.com','123456');
+ assert.equal(result.level,'member');assert.equal(result.canAdmin,false);
+ const v=client.calls.find(c=>c[0]==='verifyOtp');assert(v);
+ assert.equal(v[1].type,'email');assert.equal(v[1].email,'newmember@example.com');
+ assert(client.calls.some(c=>c[0]==='rpc'&&c[1]==='account_role'));
+ assert.equal(client.calls.filter(c=>c[0]==='signInWithOtp').length,1);
+});
+test('OTP pilot gives mapped Owner Admin only via backend role',async()=>{
+ const {A,client}=await load({session:null,role:'admin',otpPilot:true});
+ await A.sendMagicLink('owner@example.com');
+ await A.verifyEmailOtp('owner@example.com','654321');
+ assert.equal(A.canAdmin,true);
+ assert(client.calls.some(c=>c[0]==='rpc'&&c[1]==='account_role'));
+});
+test('OTP pilot rejects malformed codes without calling verify endpoint',async()=>{
+ const {A,client}=await load({session:null,otpPilot:true});
+ await A.sendMagicLink('member@example.com');
+ await assert.rejects(()=>A.verifyEmailOtp('member@example.com','1234'),/six-digit/);
+ assert.equal(A.level,'public');
+ assert.equal(client.calls.filter(c=>c[0]==='verifyOtp').length,0);
+});
+test('OTP pilot expired code fails closed, preserves email and prevents duplicate send',async()=>{
+ const {A,client}=await load({session:null,otpPilot:true,otpVerifyError:{message:'Token invalid'}});
+ await A.sendMagicLink('member@example.com');
+ await assert.rejects(()=>A.verifyEmailOtp('member@example.com','123456'),/invalid|expired/);
+ assert.equal(A.canReadMemberContent,false);assert.equal(A.canAdmin,false);
+ assert.equal(A.status,'otp-verification-failed');assert.equal(A.email,'member@example.com');
+ assert.equal(client.calls.filter(c=>c[0]==='signInWithOtp').length,1);
+});
+test('OTP pilot verified email cannot bypass missing server Member role',async()=>{
+ const {A}=await load({session:null,role:'public',otpPilot:true});
+ await A.sendMagicLink('unapproved@example.com');
+ await assert.rejects(()=>A.verifyEmailOtp('unapproved@example.com','123456'),/not authorized/);
+ assert.equal(A.level,'public');assert.equal(A.canAdmin,false);
+});
+test('OTP pilot prevents verification without matching requested email',async()=>{
+ const {A,client}=await load({session:null,otpPilot:true});
+ await A.sendMagicLink('member@example.com');
+ await assert.rejects(()=>A.verifyEmailOtp('other@example.com','123456'),/Request email verification/);
+ assert.equal(client.calls.filter(c=>c[0]==='verifyOtp').length,0);
 });
