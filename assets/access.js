@@ -317,10 +317,17 @@
   dataCache=null;
   return data;
  }
+ // Only usable inside a previously server-approved Admin session.
+ // The backend independently validates the JWT and account_role() again.
+ async function ownerDashboardAccessToken(){
+  if(!snapshot().canAdmin||state.status!=='authenticated')return null;
+  const {data,error}=await requireClient().auth.getSession();
+  return error?null:(data?.session?.access_token||null);
+ }
  window.RailwayAccess=Object.freeze({
   get level(){return state.level;},get status(){return state.status;},get canReadMemberContent(){return state.level==='member'||state.level==='admin';},get canAdmin(){return state.level==='admin';},
   get email(){return state.email;},get error(){return state.error;},get retryAfterSeconds(){return state.retryAfterSeconds;},get activityConsent(){return consent;},get cachedData(){return dataCache;},
-  init,refresh,sendMagicLink,logout,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,adminPublishLocation,adminLocationHistory,adminRestoreLocation,snapshot
+  init,refresh,sendMagicLink,logout,ownerDashboardAccessToken,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,adminPublishLocation,adminLocationHistory,adminRestoreLocation,snapshot
  });
  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',()=>init(),{once:true}):init();
 })();
