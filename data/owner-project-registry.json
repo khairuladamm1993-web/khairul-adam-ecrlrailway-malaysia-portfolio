@@ -59,7 +59,7 @@
         {
           "type": "test",
           "label": "Owner Dashboard R2.2 regression — isolated Node",
-          "value": "177/177 PASS",
+          "value": "178/178 PASS",
           "verifiedOn": "2026-10-25",
           "confidence": "tested-in-isolated-sandbox",
           "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/feature/owner-command-center-r22-chatgpt-actions"
@@ -137,7 +137,7 @@
           "label": "Owner Dashboard R2.2",
           "repo": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
           "ref": "feature/owner-command-center-r22-chatgpt-actions",
-          "lastObservedSha": "78827706d277f3960929b911508960a9b5eadc48"
+          "lastObservedSha": "d19fe2e57e51e7c061e7b43dea844fe40c3bae5b"
         }
       ],
       "deployments": [
