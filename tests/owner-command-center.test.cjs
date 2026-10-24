@@ -95,7 +95,7 @@ test('Safari R2 UAT issue count includes unresolved checks across every project'
  assert.equal(registry.projects.find(p=>p.id==='portfolio').issues.length,3);
  assert(issues.every(i=>i.kind&&i.label&&i.detail&&i.basis));
  assert.match(read('owner-command-center.html'),/Unresolved checks/);
- assert.match(source,/reduce\(\(n,p\)=>n\+\(Array\.isArray\(p\.issues\)/);
+ assert.match(source,/POLICY\.summary\(registry\)\.unresolved/);
 });
 test('GitHub Actions with no run must never be labeled CI PASS',()=>{
  assert.match(source,/NO RUN — not a test PASS/);
