@@ -113,9 +113,16 @@
   for(const p of registry.projects){
    const a=element('article','progress-entry');
    a.append(element('span','project-code',p.code+' · '+p.name));
+   const verified=(p.issues||[]).filter(i=>policy?.classifyIssue(i).isResolved)
+    .sort((a,b)=>Date.parse(b.resolution.verifiedAt)-Date.parse(a.resolution.verifiedAt));
+   const newest=verified[0];
    const latest=(p.facts||[])[0];
-   a.append(element('strong','',latest?.value||'BELUM DISAHKAN'));
-   a.append(element('span','meta','Rekod '+(latest?.verifiedOn||'tidak diketahui')+' · checkpoint, bukan bukti live'));
+   a.append(element('strong','',newest?
+    (policy.classifyIssue(newest).label+' · '+newest.label):
+    (latest?.value||'BELUM DISAHKAN')));
+   a.append(element('span','meta',newest?
+    ('Verified '+newest.resolution.verifiedAt+' · UAT & evidence retained'):
+    ('Rekod '+(latest?.verifiedOn||'tidak diketahui')+' · checkpoint, bukan bukti live')));
    cards.append(a);
   }
   host.append(cards);
