@@ -42,3 +42,46 @@ body[data-screen=portfolio] .badge,body[data-screen=portfolio] .green{color:var(
 @media(max-width:420px){.language-dock{padding-left:6px;padding-right:6px}.theme-toggle{max-width:80px}.language-options button{min-width:44px}.gateway-shell{padding-top:calc(100px + env(safe-area-inset-top,0px))}}
 /* Override the legacy portfolio-specific dock so light-mode controls stay legible. */
 body[data-screen=portfolio] .language-dock{background:var(--dock);border-bottom:0;min-height:50px}
+
+/* R2.4 accessibility recovery: same theme tokens across interactive maps, reading and navigation.
+   Override legacy dark hard-coded map controls under light scheme. */
+body[data-screen="modes"] .language-dock{
+ position:relative;top:auto;right:auto;width:100%;max-width:none;
+ z-index:5;justify-content:flex-end;flex-wrap:wrap;
+ padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 8px;
+ background:var(--dock);border-bottom:1px solid var(--line);
+}
+body[data-screen="modes"] .gateway-shell{padding-top:12px}
+body[data-screen="modes"] .language-options button,
+body[data-screen="modes"] .theme-toggle{font-size:13px;min-height:44px;padding:8px 10px}
+body[data-screen="modes"] .language-options button[aria-pressed="true"]{color:var(--text);background:var(--selected);outline:1px solid var(--cyan)}
+body[data-screen="modes"] .theme-toggle{max-width:none}
+body[data-screen="modes"] .learning-card a.primary,
+body[data-screen="modes"] .gateway-actions a.primary,
+body[data-screen="modes"] .gateway-actions button.primary{color:#082617;background:#93e0b1;border-color:#44976b;font-weight:800;text-shadow:none;opacity:1}
+:root[data-theme="light"] body[data-screen="modes"] .learning-card a.primary,
+:root[data-theme="light"] body[data-screen="modes"] .gateway-actions a.primary{color:#ffffff;background:#17643f;border-color:#125235}
+body[data-screen="modes"] .learning-card a.primary:hover,
+body[data-screen="modes"] .gateway-actions a.primary:hover{text-decoration:underline}
+:root[data-theme="light"] body[data-screen="modes"] .map-search input,
+:root[data-theme="light"] body[data-screen="modes"] .map-filters button,
+:root[data-theme="light"] body[data-screen="modes"] .map-actions button,
+:root[data-theme="light"] body[data-screen="modes"] .map-results button{
+ background:#fff;color:#19313d;border-color:#9eb5c1;opacity:1
+}
+:root[data-theme="light"] body[data-screen="modes"] .map-search input::placeholder{color:#4d6470;opacity:1}
+:root[data-theme="light"] body[data-screen="modes"] .map-filters button[aria-pressed="true"]{
+ background:#d4edf4;color:#075775;border:2px solid #14718c
+}
+:root[data-theme="light"] body[data-screen="modes"] .map-actions button:disabled{color:#5a6570;background:#e3e7e9;border-color:#b1bdc4;opacity:1}
+:root[data-theme="light"] body[data-screen="modes"] .map-canvas-wrap,
+:root[data-theme="light"] body[data-screen="modes"] .map-side{background:#fff;border-color:var(--line)}
+:root[data-theme="light"] body[data-screen="modes"] .map-attribution-note{color:#2b4654;background:#edf3f5}
+:root[data-theme="light"] body[data-screen="modes"] .map-malaysia-badge{color:#213743;background:#fff}
+:root[data-theme="light"] body[data-screen="modes"] .learning-card a:not(.primary){color:#075b75}
+@media(max-width:600px){
+ body[data-screen="modes"] .language-dock{justify-content:center;gap:4px;padding:8px 10px}
+ body[data-screen="modes"] .language-options{flex-shrink:0}
+ body[data-screen="modes"] .language-options button{min-width:44px;padding:7px}
+ body[data-screen="modes"] .gateway-shell{padding-top:12px}
+}
