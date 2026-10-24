@@ -318,6 +318,18 @@
   guard();
   if(A?.canAdmin&&A.status==='authenticated'&&Date.now()-lastRefreshAt>120000)void refresh();
  }
+ // Read-only auto-monitoring while this dashboard is open; browsers may suspend background tabs.
+ // Never poll private sources as Public/Member and never change any deployment or database.
+ const AUTO_REFRESH_MS=10*60*1000;
+ let autoTimer=null;
+ if(typeof setInterval==='function'){
+  autoTimer=setInterval(()=>{
+   if(document.hidden||!A?.canAdmin||A.status!=='authenticated'||pending)return;
+   if(Date.now()-lastRefreshAt>=AUTO_REFRESH_MS)void refresh();
+  },AUTO_REFRESH_MS);
+ }
+ if(autoTimer&&typeof clearInterval==='function')
+  window.addEventListener('pagehide',()=>clearInterval(autoTimer));
  document.addEventListener('visibilitychange',resume);
  window.addEventListener('pageshow',event=>{if(event.persisted)resume();});
  if(A){guard();} // access.js manages its own initialization; event will update this view.
