@@ -96,7 +96,7 @@ test('dashboard live-reads GitHub registry and clearly marks snapshot fallback',
  assert(js.includes('SNAPSHOT / NOT LIVE'));
  assert(js.includes('data/owner-project-registry.json'));
  assert(html.includes('assets/owner-checkpoint-policy.js'));
- assert(html.includes('R2.3'));
+ assert(html.includes('R2.5'));
  assert.equal(registry.checkpointSynchronization.branch,branch);
  assert.equal(registry.checkpointSynchronization.directAllChatHistory,false);
 });
