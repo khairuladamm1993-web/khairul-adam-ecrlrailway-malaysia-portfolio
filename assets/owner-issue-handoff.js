@@ -29,13 +29,16 @@
   return null;
  }
  function promptFor(project,issue,proof){
+  const lifecycle=window.MRLCheckpointPolicy?.classifyIssue(issue);
   const text=[
    'MRL’S10 — SAMBUNG PENYELESAIAN ISU TANPA RESTART',
    'Projek: '+project.name+' ('+project.code+')',
    'ID isu: '+issue.id,
-   'Isu: '+issue.label+' ['+issue.kind+']',
-   'Rekod terakhir (mungkin snapshot): '+issue.detail,
-   ...(issue.latestDiagnosis?[
+   'Isu: '+issue.label+' ['+(lifecycle?.isResolved?lifecycle.label:issue.kind)+']',
+   'Status terkini: '+(lifecycle?.isResolved?
+    (issue.resolution?.summary||lifecycle.label+' — validated proof in Registry'):
+    issue.detail),
+   ...(issue.latestDiagnosis&&!lifecycle?.isResolved?[
     'Checkpoint ('+issue.latestDiagnosis.checkedOn+'): '+issue.latestDiagnosis.releaseDecision+'; '+issue.latestDiagnosis.rootCause,
     'Tindakan seterusnya: '+issue.latestDiagnosis.nextAction,
     'Sumber SHA Slice 1 belum disahkan; SHA dashboard jangan dianggap commit Slice 1.'
@@ -59,13 +62,14 @@
  }
  function issueActions(project,issue){
   const proof=evidence(project,issue);
+  const life=window.MRLCheckpointPolicy?.classifyIssue(issue);
   const container=element('div','issue-actions');
   const evidenceRow=element('div','issue-evidence');
   if(proof)evidenceRow.append(link(proof.label,proof.url));
   else evidenceRow.append(element('span','meta','Bukti teknikal khusus belum disahkan'));
   evidenceRow.append(link('Lihat rekod isu',registryLink));
   container.append(evidenceRow);
-  if(issue.latestDiagnosis){
+  if(issue.latestDiagnosis&&!life?.isResolved){
    const diagnosis=issue.latestDiagnosis;
    const result=element('div','issue-latest-diagnosis');
    result.append(element('strong','', 'Latest diagnosis · '+diagnosis.checkedOn+' · '+diagnosis.releaseDecision));
@@ -75,10 +79,10 @@
     result.append(element('p','meta','Slice 1 source SHA: not verified. Dashboard SHA is a separate project.'));
    container.append(result);
   }
-  const life=window.MRLCheckpointPolicy?.classifyIssue(issue);
   if(life?.isResolved){
    const summary=element('div','issue-latest-diagnosis');
    summary.append(element('strong','',life.label+' · '+(issue.resolution?.verifiedAt||'date unverified')));
+   summary.append(element('p','meta',issue.resolution?.summary||'Closure verified by QA evidence; see proof links.'));
    for(const e of issue.resolution?.evidence||[]){
     if(e.url&&/^https:\/\//.test(e.url))summary.append(link('Bukti '+e.type,e.url));
    }
@@ -155,7 +159,7 @@
      const details=element('details','action-issue');
      details.dataset.issueId=issue.id;
      details.append(element('summary','',policy.classifyIssue(issue).label+' · '+issue.label));
-     details.append(element('p','issue-description',issue.detail),issueActions(p,issue));
+     details.append(element('p','issue-description',issue.resolution?.summary||'Verified closure; see evidence.'),issueActions(p,issue));
      group.append(details);
     }
     completed.append(group);
