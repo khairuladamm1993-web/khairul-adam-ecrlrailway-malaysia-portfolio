@@ -53,7 +53,9 @@
   $('future-count').textContent=String(registry.consolidation?.futureProducts||'—');
   $('issues-count').textContent=String(POLICY?POLICY.summary(registry).unresolved:registry.projects.reduce((n,p)=>n+(p.issues?.length||0),0));
   $('registry-date').textContent=(isLive?'GitHub Registry · ':'Fallback snapshot · ')+dateLabel(registry.capturedOn);
-  window.MRLIssueHandoff?.renderActionHub(registry,$('action-hub'));
+  const hub=$('action-hub');
+  if(isLive)window.MRLIssueHandoff?.renderActionHub(registry,hub);
+  else if(hub)hub.replaceChildren(el('p','stale-project-warning','LIVE REGISTRY UNAVAILABLE · Historical issues and decisions are not actionable until verified. Retry Refresh sources.'));
   const host=$('project-grid');host.replaceChildren();
   for(const project of registry.projects){
    const card=el('article','project');
@@ -80,8 +82,8 @@
     const items=el('ul','facts');
     for(const issue of active){
      const li=el('li','fact');
-     li.append(el('span','name',issue.kind+' · '+issue.label),el('span','value',issue.detail));
-     const action=window.MRLIssueHandoff?.issueActions(project,issue);
+     li.append(el('span','name',(isLive?'':'HISTORICAL · ')+issue.kind+' · '+issue.label),el('span','value',issue.detail));
+     const action=isLive?window.MRLIssueHandoff?.issueActions(project,issue):null;
      if(action)li.append(action);
      items.append(li);
     }
@@ -95,7 +97,7 @@
      const item=el('li','fact');
      item.append(el('span','name',POLICY.classifyIssue(issue).label+' · '+issue.label));
      item.append(el('span','value',issue.resolution?.summary||'Closure validated by QA evidence; see links below.'));
-     const proof=window.MRLIssueHandoff?.issueActions(project,issue);
+     const proof=isLive?window.MRLIssueHandoff?.issueActions(project,issue):null;
      if(proof)item.append(proof);
      list.append(item);
     }
