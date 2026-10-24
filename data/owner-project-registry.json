@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "MRL-S10 R2.2 verified Owner diagnosis feedback checkpoint",
+  "register": "MRL-S10 R2.3 checkpoint sync development — no issue automatically solved",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -162,21 +162,60 @@
           "kind": "PENDING",
           "label": "Owner/Admin Safari login",
           "detail": "Session persistence after OTP is not yet verified; do not claim authenticated Owner dashboard is available.",
-          "basis": "Owner Safari login"
+          "basis": "Owner Safari login",
+          "resolution": {
+            "state": "OPEN",
+            "tests": "NOT_PASS",
+            "verifiedAt": null,
+            "evidence": [],
+            "releaseGates": {
+              "ci": "NOT_PASS",
+              "safariUat": "NOT_PASS",
+              "security": "NOT_PASS",
+              "deployment": "NOT_PASS",
+              "ownerApproval": "NOT_APPROVED"
+            }
+          }
         },
         {
           "id": "chromium-smoke",
           "kind": "BLOCKED",
           "label": "Chromium responsive smoke",
           "detail": "Browser missing in the isolated test sandbox; standalone smoke is not PASS.",
-          "basis": "Chromium smoke"
+          "basis": "Chromium smoke",
+          "resolution": {
+            "state": "OPEN",
+            "tests": "NOT_PASS",
+            "verifiedAt": null,
+            "evidence": [],
+            "releaseGates": {
+              "ci": "NOT_PASS",
+              "safariUat": "NOT_PASS",
+              "security": "NOT_PASS",
+              "deployment": "NOT_PASS",
+              "ownerApproval": "NOT_APPROVED"
+            }
+          }
         },
         {
           "id": "vercel-bridge",
           "kind": "NOT_CONNECTED",
           "label": "Read-only Vercel dashboard bridge",
           "detail": "Code drafted, but server-side credentials and isolated Owner UAT are not complete.",
-          "basis": "Vercel source connection"
+          "basis": "Vercel source connection",
+          "resolution": {
+            "state": "OPEN",
+            "tests": "NOT_PASS",
+            "verifiedAt": null,
+            "evidence": [],
+            "releaseGates": {
+              "ci": "NOT_PASS",
+              "safariUat": "NOT_PASS",
+              "security": "NOT_PASS",
+              "deployment": "NOT_PASS",
+              "ownerApproval": "NOT_APPROVED"
+            }
+          }
         }
       ]
     },
@@ -288,6 +327,19 @@
             "slice1SourceSha": null,
             "changesMade": false,
             "nextAction": "Read Vercel project-paused Activity Log and account/spend status. Request explicit Owner approval before any resume, unpause, redeploy or release."
+          },
+          "resolution": {
+            "state": "OPEN",
+            "tests": "NOT_PASS",
+            "verifiedAt": null,
+            "evidence": [],
+            "releaseGates": {
+              "ci": "NOT_PASS",
+              "safariUat": "NOT_PASS",
+              "security": "NOT_PASS",
+              "deployment": "NOT_PASS",
+              "ownerApproval": "NOT_APPROVED"
+            }
           }
         },
         {
@@ -295,7 +347,20 @@
           "kind": "UNVERIFIED",
           "label": "Full Corridor viewer release UAT",
           "detail": "Horizontal corridor viewer has not passed the full independent release acceptance.",
-          "basis": "Full corridor horizontal viewer"
+          "basis": "Full corridor horizontal viewer",
+          "resolution": {
+            "state": "OPEN",
+            "tests": "NOT_PASS",
+            "verifiedAt": null,
+            "evidence": [],
+            "releaseGates": {
+              "ci": "NOT_PASS",
+              "safariUat": "NOT_PASS",
+              "security": "NOT_PASS",
+              "deployment": "NOT_PASS",
+              "ownerApproval": "NOT_APPROVED"
+            }
+          }
         }
       ]
     },
@@ -344,21 +409,62 @@
           "kind": "UNVERIFIED",
           "label": "Swift Simulator train/signal/RSP synchronization",
           "detail": "No recent verified UAT checkpoint for active train movement and synchronized visualization.",
-          "basis": "Train display / movement"
+          "basis": "Train display / movement",
+          "resolution": {
+            "state": "OPEN",
+            "tests": "NOT_PASS",
+            "verifiedAt": null,
+            "evidence": [],
+            "releaseGates": {
+              "ci": "NOT_PASS",
+              "safariUat": "NOT_PASS",
+              "security": "NOT_PASS",
+              "deployment": "NOT_PASS",
+              "ownerApproval": "NOT_APPROVED"
+            }
+          }
         },
         {
           "id": "swift-sync",
           "kind": "NOT_CONNECTED",
           "label": "Swift iPad automated checkpoint publishing",
           "detail": "No approved Swift Playgrounds data publisher exists.",
-          "basis": "Automatic iPad sync"
+          "basis": "Automatic iPad sync",
+          "resolution": {
+            "state": "OPEN",
+            "tests": "NOT_PASS",
+            "verifiedAt": null,
+            "evidence": [],
+            "releaseGates": {
+              "ci": "NOT_PASS",
+              "safariUat": "NOT_PASS",
+              "security": "NOT_PASS",
+              "deployment": "NOT_PASS",
+              "ownerApproval": "NOT_APPROVED"
+            }
+          }
         }
       ]
     }
   ],
   "metrics": {
-    "openIssuePolicy": "Counts unresolved tracked items, not just projects with BLOCKED/UNVERIFIED status.",
+    "openIssuePolicy": "Count OPEN after strict evidence-check classification; SOLVED requires direct PASS proof; READY_FOR_GO requires all release gates plus Owner approval.",
     "outstandingItems": 7,
-    "projectsRequiringAttention": 3
+    "projectsRequiringAttention": 3,
+    "solved": 0,
+    "readyForGo": 0
+  },
+  "checkpointSynchronization": {
+    "version": "R2.3",
+    "repository": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
+    "branch": "feature/owner-r23-verified-checkpoint-sync",
+    "path": "data/owner-project-registry.json",
+    "mode": "connected-ChatGPT-can-commit-verified-checkpoints; dashboard-GitHub-API-refresh",
+    "directAllChatHistory": false,
+    "deliveryGuarantee": "Best effort in an issue-handoff ChatGPT chat with authorized GitHub write tool; not a native automatic transcript feed.",
+    "status": "DEV_IMPLEMENTED_PENDING_INDIVIDUAL_CHAT_UAT",
+    "publicSafeOnly": true,
+    "requiredEvidence": "Direct source verification, timestamp, PASS tests evidence, clear Owner approval before READY_FOR_GO",
+    "mutableScope": "Registry only on isolated development branch; no main/Production/Authed DB changes"
   }
 }
