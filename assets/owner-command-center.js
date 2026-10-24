@@ -48,11 +48,11 @@
    !r.projects.every(p=>p.id&&p.name&&Array.isArray(p.facts)&&Array.isArray(p.deployments)))throw new Error('Registry incomplete or invalid');
   return r;
  }
- function renderProjects(registry){
+ function renderProjects(registry,isLive){
   $('project-count').textContent=String(registry.projects.length);
   $('future-count').textContent=String(registry.consolidation?.futureProducts||'—');
   $('issues-count').textContent=String(POLICY?POLICY.summary(registry).unresolved:registry.projects.reduce((n,p)=>n+(p.issues?.length||0),0));
-  $('registry-date').textContent='Snapshot '+dateLabel(registry.capturedOn);
+  $('registry-date').textContent=(isLive?'GitHub Registry · ':'Fallback snapshot · ')+dateLabel(registry.capturedOn);
   window.MRLIssueHandoff?.renderActionHub(registry,$('action-hub'));
   const host=$('project-grid');host.replaceChildren();
   for(const project of registry.projects){
@@ -65,6 +65,7 @@
     solved.length?'SOLVED':project.overall);
    const top=el('div','project-top');top.append(el('span','project-code',project.code),badge(stage));
    card.append(top,el('h3','',project.name),el('p','phase',project.phase));
+   if(!isLive)card.append(el('p','stale-project-warning','SNAPSHOT ONLY — live status and next action not verified.'));
    const facts=el('ul','facts');
    for(const f of project.facts.slice(0,1)){
     const row=el('li','fact');
@@ -121,7 +122,7 @@
    }
    const next=el('div','next');
    next.append(el('div','label','NEXT VERIFIED ACTION'),
-    el('p','',active.length?project.nextDecision:
+    el('p','',!isLive?'Live Registry temporarily unavailable. Do not repeat old instructions; retry Refresh to verify the current next action.':active.length?project.nextDecision:
      'Semua isu direkodkan sebagai SOLVED atau READY FOR GO mengikut bukti. Semak kelulusan Owner sebelum apa-apa pelepasan.'));
    card.append(next);
    const links=el('div','links');
@@ -150,27 +151,41 @@
  }
  // GitHub Registry is the source of truth: no redeploy needed for a verified checkpoint commit.
  // Uses only public repository data; never place secrets or sensitive Owner records in the registry.
+ // Live GitHub Registry has priority. GitHub API may rate-limit public Safari traffic:
+ // retry through the public raw branch endpoint before falling back to a local build snapshot.
  async function loadRegistry(){
   const repo='khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio';
   const ref='feature/owner-r23-verified-checkpoint-sync';
   const path='data/owner-project-registry.json';
-  const api='https://api.github.com/repos/'+repo+'/contents/'+path+'?ref='+encodeURIComponent(ref);
+  const url='https://api.github.com/repos/'+repo+'/contents/'+path+'?ref='+encodeURIComponent(ref)+'&_mrl='+Date.now();
+  const sourceProblems=[];
+  const verify=(value)=>{
+   const parsed=validateRegistry(value);
+   if(parsed.checkpointSynchronization?.branch!==ref)throw new Error('Registry branch mismatch');
+   return parsed;
+  };
   try{
-   const res=await fetch(api,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
-   if(!res.ok)throw new Error('GitHub HTTP '+res.status);
+   const res=await fetch(url,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+   if(!res.ok)throw new Error('API HTTP '+res.status);
    const payload=await res.json();
    if(payload.encoding!=='base64'||typeof payload.content!=='string'||typeof payload.sha!=='string')
-    throw new Error('GitHub Registry payload invalid');
+    throw new Error('Invalid API format');
    const buffer=Uint8Array.from(atob(payload.content.replace(/\s/g,'')),c=>c.charCodeAt(0));
-   const parsed=validateRegistry(JSON.parse(new TextDecoder().decode(buffer)));
-   if(parsed.checkpointSynchronization?.branch!==ref)
-    throw new Error('Incorrect Registry branch');
-   return {data:parsed,live:true,sha:payload.sha};
-  }catch(error){
-   const response=await fetch('data/owner-project-registry.json',{cache:'no-store',credentials:'same-origin'});
-   if(!response.ok)throw new Error('GitHub Registry unavailable; bundled snapshot missing (HTTP '+response.status+')');
-   return {data:validateRegistry(await response.json()),live:false,error:String(error?.message||error)};
-  }
+   const parsed=verify(JSON.parse(new TextDecoder().decode(buffer)));
+   return {data:parsed,live:true,source:'GitHub Contents API',sha:payload.sha};
+  }catch(error){sourceProblems.push(String(error?.message||error));}
+  try{
+   // Public-safe registry only. No Owner session, token, private email or JWT in this URL.
+   const raw='https://raw.githubusercontent.com/'+repo+'/'+ref+'/'+path+'?_mrl='+Date.now();
+   const response=await fetch(raw,{cache:'no-store',headers:{Accept:'application/json'}});
+   if(!response.ok)throw new Error('Raw HTTP '+response.status);
+   const parsed=verify(await response.json());
+   return {data:parsed,live:true,source:'GitHub RAW (backup)',sha:parsed.checkpointSynchronization?.latestVerifiedWriteCommit||null};
+  }catch(error){sourceProblems.push(String(error?.message||error));}
+  const response=await fetch('data/owner-project-registry.json',{cache:'no-store',credentials:'same-origin'});
+  if(!response.ok)throw new Error('GitHub unavailable and bundled snapshot missing (HTTP '+response.status+')');
+  return {data:validateRegistry(await response.json()),live:false,source:'LOCAL SNAPSHOT',
+   error:sourceProblems.join('; ')};
  }
  async function fetchPublicGitHub(item){
   const url='https://api.github.com/repos/'+item.repo+'/commits/'+encodeURIComponent(item.ref);
@@ -275,14 +290,20 @@
    const result=await loadRegistry();
    const r=result.data;
    if(!A.canAdmin)return;
-   renderProjects(r);renderSourceCoverage(r);
-   $('refresh-state').textContent=(result.live?'Registry GitHub LIVE (verified file fetched)':'REGISTRY SNAPSHOT (GitHub unavailable)')+' · GitHub commits/CI loading · Vercel and Swift not live-linked';
+   renderProjects(r,result.live);renderSourceCoverage(r);
+   const sync=$('registry-sync-status');
+   if(sync){
+    sync.dataset.mode=result.live?'live':'snapshot';
+    sync.textContent=result.live?'REGISTER LIVE · '+result.source+' · Latest checkpoint can be read':
+     'SNAPSHOT STALE · Both GitHub readers unavailable; old actions must not be treated as current.';
+   }
+   $('refresh-state').textContent=(result.live?'Registry LIVE from '+result.source:'REGISTRY SNAPSHOT — no live verification')+' · GitHub commits/CI loading · Vercel and Swift not live-linked';
    await renderGitHub(r);
    const vercelLive=await renderVercel();
    if(A.canAdmin){
     refreshCount++;
     const time=new Date().toLocaleString('en-MY',{timeZone:'Asia/Kuala_Lumpur',hour:'2-digit',minute:'2-digit',hour12:false});
-    $('refresh-state').textContent='CHECK #'+refreshCount+' · '+time+' MYT · Registry '+(result.live?'GitHub LIVE':'SNAPSHOT / NOT LIVE')+' · Vercel '+(vercelLive?'live':'snapshot')+' · Swift checkpoint · ChatGPT checkpoint via authorized GitHub connector only';
+    $('refresh-state').textContent='CHECK #'+refreshCount+' · '+time+' MYT · Registry '+(result.live?result.source+' LIVE':'SNAPSHOT / NOT LIVE')+' · Vercel '+(vercelLive?'live':'snapshot')+' · Swift checkpoint · ChatGPT checkpoint via authorized GitHub connector only';
    }
   }catch(error){
    $('refresh-state').textContent='UNVERIFIED: '+String(error?.message||error)+' — old snapshots are not treated as live.';
