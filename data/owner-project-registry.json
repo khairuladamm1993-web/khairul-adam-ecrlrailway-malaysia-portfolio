@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "MRL-S10 R2.2 verified development checkpoint",
+  "register": "MRL-S10 R2.2 verified Owner diagnosis feedback checkpoint",
   "capturedOn": "2026-10-25",
-  "observationType": "2026-10-25 evidence-led snapshot; GitHub commits/Actions live on open, Vercel and Swift dated",
+  "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
   "consolidation": {
     "currentProducts": 3,
@@ -187,9 +187,17 @@
       "category": "website",
       "phase": "Independent corridor development — no merge yet",
       "overall": "BLOCKED",
-      "nextDecision": "Review why Slice 1 latest Preview is BLOCKED; do not unpause, redeploy or promote automatically",
-      "updatePolicy": "Vercel snapshot only until owner-approved read-only bridge",
+      "nextDecision": "NO-GO: Read project-paused Vercel Activity Log and account/spend state; request explicit Owner approval before resuming Slice 1. No code/deploy/db mutations.",
+      "updatePolicy": "Vercel verified as BLOCKED on 25 Oct 2026; dated snapshot until authenticated live bridge enabled",
       "facts": [
+        {
+          "type": "diagnostic",
+          "label": "Slice 1 checkpoint — ChatGPT handoff R2.2",
+          "value": "NO-GO · latest Vercel deployment BLOCKED; root trigger unconfirmed",
+          "verifiedOn": "2026-10-25",
+          "confidence": "live-vercel-state-confirmed; pause-trigger-unverified",
+          "evidence": "https://ecrl-slice1-metadata-r1-preview.vercel.app"
+        },
         {
           "type": "test",
           "label": "PL03–PL04 V0.3 R1",
@@ -224,7 +232,7 @@
           "name": "Slice 1",
           "status": "BLOCKED — snapshot",
           "verifiedOn": "2026-10-25",
-          "source": "Vercel read-only lookup",
+          "source": "Vercel read-only project/deployment verification 2026-10-25; project live false, latest BLOCKED",
           "url": "https://ecrl-slice1-metadata-r1-preview.vercel.app",
           "production": false
         },
@@ -253,8 +261,34 @@
           "id": "slice1-preview",
           "kind": "BLOCKED",
           "label": "Slice 1 isolated Preview",
-          "detail": "Last read-only deployment evidence reports BLOCKED; do not auto-unpause.",
-          "basis": "Slice 1 latest Preview"
+          "detail": "25 Oct diagnostic: Slice 1 Vercel project not live; latest deployment BLOCKED; original pause trigger unconfirmed. NO-GO; no changes made.",
+          "basis": "Slice 1 latest Preview",
+          "latestDiagnosis": {
+            "checkedOn": "2026-10-25",
+            "recordType": "ChatGPT R2.2 issue-handoff diagnostic; independently rechecked Vercel project and deployments",
+            "status": "BLOCKED",
+            "releaseDecision": "NO-GO",
+            "rootCause": "Vercel Slice 1 project is not live and latest deployment is BLOCKED. The original pause trigger remains unconfirmed.",
+            "vercelProjectId": "prj_81dgAh0E2Fnppz1hWLt62mCgGTlD",
+            "projectLive": false,
+            "latestDeploymentId": "dpl_6wkeTrTzoBG3EeHHUiXAwv9yTCJT",
+            "latestDeploymentState": "BLOCKED",
+            "previousDeploymentId": "dpl_5QKSDzQZymeX53Ez16yVdfVRhHvE",
+            "previousDeploymentState": "READY (historical; not proof of live)",
+            "originalDiagnosticClaims": {
+              "sourceFileMetadata": "5/5 matching — stated in diagnostic; not independently rechecked in this feedback write",
+              "sourceQA": "45/45 historical PASS; not rerun",
+              "currentBranchCI": "0 runs found — stated in diagnostic; not independently rechecked in this feedback write",
+              "safariUAT": "BLOCKED",
+              "originalPauseTrigger": "UNCONFIRMED"
+            },
+            "evidenceSource": "Vercel read-only project and deployment lookups on 2026-10-25; screenshot of ChatGPT diagnostic supplied by Owner",
+            "ownerDashboardReferenceSha": "46511d7705d36029f857868d1a3b25846384dd83",
+            "ownerDashboardReferenceNote": "This is MR-S10 dashboard commit, NOT the Slice 1 source commit.",
+            "slice1SourceSha": null,
+            "changesMade": false,
+            "nextAction": "Read Vercel project-paused Activity Log and account/spend status. Request explicit Owner approval before any resume, unpause, redeploy or release."
+          }
         },
         {
           "id": "full-corridor-uat",
