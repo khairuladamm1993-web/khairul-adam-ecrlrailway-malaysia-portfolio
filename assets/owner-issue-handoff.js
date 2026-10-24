@@ -35,6 +35,11 @@
    'ID isu: '+issue.id,
    'Isu: '+issue.label+' ['+issue.kind+']',
    'Rekod terakhir (mungkin snapshot): '+issue.detail,
+   ...(issue.latestDiagnosis?[
+    'Checkpoint ('+issue.latestDiagnosis.checkedOn+'): '+issue.latestDiagnosis.releaseDecision+'; '+issue.latestDiagnosis.rootCause,
+    'Tindakan seterusnya: '+issue.latestDiagnosis.nextAction,
+    'Sumber SHA Slice 1 belum disahkan; SHA dashboard jangan dianggap commit Slice 1.'
+   ]:[]),
    'Bukti khusus: '+(proof?.url||'Belum ada bukti teknikal langsung yang disahkan'),
    'Registry projek (snapshot): '+registryLink,
    'Buka sumber projek yang disambungkan jika tersedia. Semak commit, deployment dan ujian semasa; jangan menganggap snapshot sebagai status live.',
@@ -52,6 +57,16 @@
   else evidenceRow.append(element('span','meta','Bukti teknikal khusus belum disahkan'));
   evidenceRow.append(link('Lihat rekod isu',registryLink));
   container.append(evidenceRow);
+  if(issue.latestDiagnosis){
+   const diagnosis=issue.latestDiagnosis;
+   const result=element('div','issue-latest-diagnosis');
+   result.append(element('strong','', 'Latest diagnosis · '+diagnosis.checkedOn+' · '+diagnosis.releaseDecision));
+   result.append(element('p','meta',diagnosis.rootCause));
+   result.append(element('p','meta','Next: '+diagnosis.nextAction));
+   if(diagnosis.slice1SourceSha==null)
+    result.append(element('p','meta','Slice 1 source SHA: not verified. Dashboard SHA is a separate project.'));
+   container.append(result);
+  }
   const prompt=promptFor(project,issue,proof);
   const action=link('Selesaikan dengan ChatGPT','https://chatgpt.com/?q='+encodeURIComponent(prompt),'chatgpt-issue');
   action.dataset.issueId=issue.id;
