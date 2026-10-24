@@ -1,0 +1,232 @@
+{
+  "schemaVersion": "1.0.0",
+  "register": "MRL-S10 verified development checkpoint",
+  "capturedOn": "2026-10-25",
+  "observationType": "evidence-led snapshot; not live for all sources",
+  "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
+  "consolidation": {
+    "currentProducts": 3,
+    "futureProducts": 2,
+    "threshold": "only after Web Simulator independent UAT + data/schema/quality gates pass",
+    "futureWeb": "MRL’S10 — Malaysia Railway Link Section 10 (proposed website brand)",
+    "futureApp": "MRL’S10 Train Simulation App (Swift Playgrounds)",
+    "domain": "www.mrls10.my",
+    "domainStatus": "proposed; registration and availability unverified"
+  },
+  "sources": [
+    {
+      "id": "github",
+      "label": "GitHub",
+      "sync": "live-on-open",
+      "notes": "GitHub public commit metadata can be fetched without secrets; a commit is evidence of source, not of deployment success."
+    },
+    {
+      "id": "vercel",
+      "label": "Vercel",
+      "sync": "snapshot",
+      "notes": "Deployment metadata from authorized read-only checks; not yet connected as a refreshable dashboard API."
+    },
+    {
+      "id": "supabase",
+      "label": "Supabase",
+      "sync": "not-connected",
+      "notes": "Owner authorization uses backend account_role(); telemetry and Auth modifications are outside this dashboard."
+    },
+    {
+      "id": "swift",
+      "label": "Swift Playgrounds",
+      "sync": "checkpoint",
+      "notes": "App builds live on iPad; no validated app-to-dashboard automatic publisher yet."
+    },
+    {
+      "id": "chatgpt",
+      "label": "ChatGPT decisions",
+      "sync": "verified-checkpoint",
+      "notes": "Not a raw chat-history sync. Verified milestones require writing a registry update via an approved connector workflow."
+    }
+  ],
+  "projects": [
+    {
+      "id": "portfolio",
+      "code": "P01",
+      "name": "MR-S10 Portfolio Website",
+      "category": "website",
+      "phase": "Authentication stabilization + content",
+      "overall": "IN_PROGRESS",
+      "nextDecision": "OTP isolated Auth/email-template UAT and Chromium responsive smoke",
+      "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
+      "facts": [
+        {
+          "type": "test",
+          "label": "Node regression",
+          "value": "165/165 PASS",
+          "verifiedOn": "2026-10-25",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/fix/otp100-auth-isolated-r1",
+          "confidence": "tested-in-isolated-sandbox"
+        },
+        {
+          "type": "test",
+          "label": "Catalogue",
+          "value": "14/14 PASS",
+          "verifiedOn": "2026-10-25",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/fix/otp100-auth-isolated-r1",
+          "confidence": "tested-in-isolated-sandbox"
+        },
+        {
+          "type": "limit",
+          "label": "Chromium smoke",
+          "value": "BLOCKED — Chromium unavailable in test sandbox",
+          "verifiedOn": "2026-10-25",
+          "confidence": "confirmed"
+        },
+        {
+          "type": "auth",
+          "label": "Owner Safari login",
+          "value": "NOT YET PASS",
+          "verifiedOn": "2026-10-25",
+          "confidence": "confirmed"
+        }
+      ],
+      "liveGithub": [
+        {
+          "id": "portfolio-main",
+          "label": "Public main",
+          "repo": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
+          "ref": "main",
+          "lastObservedSha": "3a2f3b958d6090acdbc5e080b61e46aa8b5415f3"
+        },
+        {
+          "id": "portfolio-otp",
+          "label": "OTP development",
+          "repo": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
+          "ref": "fix/otp100-auth-isolated-r1",
+          "lastObservedSha": "5d0f311a34d93cc9f03bd644d031155e5eab9b2f"
+        }
+      ],
+      "deployments": [
+        {
+          "name": "Canonical Preview",
+          "status": "READY — snapshot",
+          "verifiedOn": "2026-10-25",
+          "source": "Vercel read-only lookup",
+          "url": "https://khairul-adam-portfolio-preview-safe.vercel.app/gateway.html",
+          "production": false
+        }
+      ],
+      "links": [
+        {
+          "name": "MR-S10 Preview",
+          "url": "https://khairul-adam-portfolio-preview-safe.vercel.app/gateway.html"
+        }
+      ]
+    },
+    {
+      "id": "web-simulator",
+      "code": "P02",
+      "name": "ECRL Web Simulator",
+      "category": "website",
+      "phase": "Independent corridor development — no merge yet",
+      "overall": "BLOCKED",
+      "nextDecision": "Review why Slice 1 latest Preview is BLOCKED; do not unpause, redeploy or promote automatically",
+      "updatePolicy": "Vercel snapshot only until owner-approved read-only bridge",
+      "facts": [
+        {
+          "type": "test",
+          "label": "PL03–PL04 V0.3 R1",
+          "value": "FROZEN baseline; older Safari review 9/9 PASS",
+          "verifiedOn": "2026-10-25",
+          "confidence": "historical-baseline"
+        },
+        {
+          "type": "test",
+          "label": "Slice 1 source QA",
+          "value": "45/45 PASS — historical source test",
+          "verifiedOn": "2026-10-25",
+          "confidence": "historical-baseline"
+        },
+        {
+          "type": "deploy",
+          "label": "Slice 1 latest Preview",
+          "value": "BLOCKED",
+          "verifiedOn": "2026-10-25",
+          "confidence": "read-only-vercel-snapshot"
+        },
+        {
+          "type": "uat",
+          "label": "Full corridor horizontal viewer",
+          "value": "NOT RELEASE-VERIFIED",
+          "verifiedOn": "2026-10-25",
+          "confidence": "unverified"
+        }
+      ],
+      "deployments": [
+        {
+          "name": "Slice 1",
+          "status": "BLOCKED — snapshot",
+          "verifiedOn": "2026-10-25",
+          "source": "Vercel read-only lookup",
+          "url": "https://ecrl-slice1-metadata-r1-preview.vercel.app",
+          "production": false
+        },
+        {
+          "name": "PL03–PL04 Safari Review",
+          "status": "READY — snapshot",
+          "verifiedOn": "2026-10-25",
+          "source": "Vercel read-only lookup",
+          "url": "https://pl03-pl04-v03-r1-safari-review.vercel.app",
+          "production": false
+        }
+      ],
+      "links": [
+        {
+          "name": "Slice 1 project",
+          "url": "https://vercel.com"
+        }
+      ],
+      "integration": {
+        "destination": "future P01 / SIMULATION module",
+        "state": "ON HOLD",
+        "criterion": "Independent Preview UAT + matching corridor manifest + no regression"
+      }
+    },
+    {
+      "id": "swift-app",
+      "code": "P03",
+      "name": "ECRL Swift Simulator App",
+      "category": "app",
+      "phase": "Swift Playgrounds V3.4.4 candidate",
+      "overall": "UNVERIFIED",
+      "nextDecision": "Obtain and validate latest iPad ZIP/checkpoint and pass synchronized train/signal/RSP/Front Visual UAT",
+      "updatePolicy": "Only user-reviewed iPad checkpoint; ChatGPT cannot silently inspect local Swift Playgrounds",
+      "facts": [
+        {
+          "type": "candidate",
+          "label": "Candidate version",
+          "value": "V3.4.4 — Settings & Diagnostics / Performance Recovery",
+          "verifiedOn": "2026-10-13",
+          "confidence": "historical-checkpoint"
+        },
+        {
+          "type": "uat",
+          "label": "Train display / movement",
+          "value": "UNVERIFIED in current candidate",
+          "verifiedOn": "2026-10-13",
+          "confidence": "historical-checkpoint"
+        },
+        {
+          "type": "sync",
+          "label": "Automatic iPad sync",
+          "value": "NOT CONNECTED",
+          "verifiedOn": "2026-10-25",
+          "confidence": "confirmed"
+        }
+      ],
+      "links": [],
+      "integration": {
+        "destination": "future standalone MRL’S10 Simulation App",
+        "state": "SEPARATE",
+        "criterion": "Share validated railway data contract; do not merge Swift source into website"
+      }
+    }
+  ]
+}
