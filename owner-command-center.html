@@ -12,7 +12,7 @@
   <script defer src="assets/owner-command-center.js"></script>
 </head>
 <body>
-  <header class="topbar"><a href="gateway.html" class="back">← Gateway</a><span class="top-label">MRL’S10 / OWNER</span><span class="version">R1 · DEV</span></header>
+  <header class="topbar"><a href="gateway.html" class="back">← Gateway</a><span class="top-label">MRL’S10 / OWNER</span><span class="version">R2 · DEV</span></header>
   <main class="shell">
     <div id="auth-gate" role="status" aria-live="polite" class="auth-gate">
       <div class="shield" aria-hidden="true">◆</div>
@@ -25,11 +25,16 @@
       <div class="hero">
         <div>
           <h1>Project Command Center</h1>
-          <p>One place to monitor three development tracks. Evidence, not stale screenshots.</p>
+          <p>Three projects. One verified development view.</p>
         </div>
         <button id="refresh-dashboard" class="refresh" type="button">↻ Refresh sources</button>
       </div>
       <div class="refresh-note" role="status" id="refresh-state">Loading verified registry…</div>
+      <div class="trust-strip" role="note">
+       <span><b class="trust-live">● LIVE</b> GitHub commits &amp; Actions</span>
+       <span><b class="trust-snapshot">● SNAPSHOT</b> Swift / Vercel fallback</span>
+       <span><b>● UNVERIFIED</b> No evidence</span>
+      </div>
       <div class="kpis">
         <article><div class="kpi-value" id="project-count">—</div><div class="kpi-label">Current projects</div></article>
         <article><div class="kpi-value" id="future-count">—</div><div class="kpi-label">After approved merge</div></article>
@@ -42,13 +47,18 @@
         <p class="support">Latest public source commits are checked when this page is opened or refreshed. This does not assert that Vercel has deployed them.</p>
         <div id="github-live"></div>
       </section>
+      <section class="evidence-panel" id="vercel-panel">
+        <h2>Vercel deployment status</h2>
+        <p class="support">Live only after secure Owner backend connection. READY does not prove the URL works.</p>
+        <div id="vercel-live" role="status">Checking secure connection…</div>
+      </section>
       <section class="evidence-panel">
         <h2>Sync coverage &amp; audit</h2>
         <div id="source-coverage"></div>
         <p class="support">GitHub may be live. Vercel is currently a dated snapshot. App updates require a verified iPad checkpoint. ChatGPT decisions are not directly streamable from all past conversations.</p>
       </section>
       <section class="roadmap" id="roadmap"></section>
-      <footer>READ-ONLY DEVELOPMENT R1 · No deploy, database writes or approval actions · Never infer a PASS from an old checkpoint</footer>
+      <footer>READ-ONLY DEVELOPMENT R2 · No deploy, database writes or approval actions · Never infer a PASS from an old checkpoint</footer>
     </section>
   </main>
 </body>
