@@ -293,6 +293,16 @@
    const r=result.data;
    if(!A.canAdmin)return;
    renderProjects(r,result.live);renderSourceCoverage(r);
+   const two=$('two-way-state');
+   if(two){
+    const state=window.MRLTwoWayWorkflow?.audit(r,result.live?
+      (result.source==='GitHub Contents API'?'LIVE_GITHUB_API':'LIVE_GITHUB_RAW'):
+      'LOCAL_SNAPSHOT');
+    two.dataset.mode=state?.live?'live':'snapshot';
+    two.textContent=state?.live?
+      'REGISTRY LIVE · '+result.source+' · '+state.total+' tracked issues · Cross-chat checkpoint readable':
+      'SYNC UNVERIFIED · GitHub live registry not reachable; no chat write can be confirmed from this snapshot';
+   }
    const sync=$('registry-sync-status');
    if(sync){
     sync.dataset.mode=result.live?'live':'snapshot';
