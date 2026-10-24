@@ -116,3 +116,9 @@ footer{font-size:.72rem;color:var(--sub);padding:24px 2px}
 .completed-checks>summary{cursor:pointer;font-size:.8rem;font-weight:750}
 .completed-checks .action-groups{margin-top:10px}
 .sync-explanation{font-size:.72rem;color:var(--sub);border-left:3px solid #426877;padding:5px 10px;margin-bottom:12px;line-height:1.5}
+
+/* R2.3.1 Safari freshness recovery: fail-closed status */
+.registry-sync-status{padding:10px 12px;margin:8px 0 12px;border:1px solid var(--edge);border-radius:10px;font:700 .77rem/1.4 ui-monospace,monospace;background:#0b2530;color:var(--accent)}
+.registry-sync-status[data-mode="live"]{border-color:#3d7765;background:#0a2829;color:var(--good)}
+.registry-sync-status[data-mode="snapshot"]{border-color:#a67b49;background:#302419;color:var(--warn)}
+.stale-project-warning{font-size:.77rem;font-weight:750;line-height:1.45;padding:8px 10px;border-radius:9px;background:#38291c;color:#f1c782;border:1px solid #856540}
