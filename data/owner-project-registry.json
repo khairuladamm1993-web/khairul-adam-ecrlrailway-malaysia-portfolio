@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "MRL’S10 R2.3.1 owner-supplied Safari screenshot confirms GitHub RAW fallback LIVE and latest P02 action; Slice 1 remains BLOCKED/NO-GO",
+  "register": "MRL’S10 R2.4 single-site Owner Command Center integration checkpoint; no Production merge; Provider sync limits stated",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -51,11 +51,19 @@
       "code": "P01",
       "name": "MR-S10 Portfolio Website",
       "category": "website",
-      "phase": "R2.3 Verified Checkpoint Synchronization + separate Owner OTP stabilization",
+      "phase": "R2.4 single-domain MR-S10 Owner Gateway integration; Owner OTP UAT and Vercel/Swift sync gates remain",
       "overall": "IN_PROGRESS",
-      "nextDecision": "Safari iPhone R2.3 UAT: ChatGPT issue handoff must write dev Registry directly, then Refresh reads verified checkpoint from GitHub. Real Owner OTP and secure Vercel bridge remain separate.",
+      "nextDecision": "One-domain Owner Dashboard integration: isolated staging HTTP smoke passed and 198/198 Node PASS. Confirm real Owner OTP and session persistence on an authorized hostname before canonical Preview/Production release. Vercel live bridge requires protected backend credentials; Swift requires approved app checkpoint publisher.",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
+        {
+          "type": "test",
+          "label": "R2.4 Single MR-S10 Owner Gateway isolated regression",
+          "value": "198/198 PASS — single-site Gateway/Admin Dashboard",
+          "verifiedOn": "2026-10-25",
+          "confidence": "tested-in-isolated-sandbox",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/feature/mrs10-r24-single-owner-gateway"
+        },
         {
           "type": "test",
           "label": "Owner Dashboard R2.3 Node regression (isolated)",
@@ -552,5 +560,24 @@
       "scope": "Safari visual checkpoint freshness only; not end-to-end production/Owner-auth or Slice 1 recovery UAT",
       "outstanding": "GitHub Contents API primary fell back to raw GitHub; root reason for primary-path failure not established. Vercel deployment remains snapshot."
     }
+  },
+  "integrationR24": {
+    "branch": "feature/mrs10-r24-single-owner-gateway",
+    "lastTestedOn": "2026-10-25",
+    "testedFullNode": "198/198 PASS",
+    "catalogue": "14/14 PASS",
+    "integratedArtifact": "PASS",
+    "isolatedStagingUrl": "https://mrs10-r24-single-gateway-preview.vercel.app/gateway.html",
+    "stagingHttpSmoke": "PASS",
+    "ownerAuthUat": "PENDING",
+    "canonicalPreviewDeployment": "UNCHANGED",
+    "productionMerge": "NOT_APPROVED",
+    "sync": {
+      "githubRegistry": "LIVE_ON_OPEN_REFRESH_AND_WHILE_OWNER_DASHBOARD_ACTIVE",
+      "vercel": "NOT_CONNECTED",
+      "swift": "CHECKPOINT_ONLY",
+      "chatgpt": "ISSUE_SPECIFIC_AUTHORIZED_CHECKPOINT_WRITE"
+    },
+    "targetProducts": 2
   }
 }
