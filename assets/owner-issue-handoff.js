@@ -49,6 +49,7 @@
    'Mula dengan diagnosis baca sahaja. Buat pembaikan yang selamat hanya dalam development branch terasing jika dibenarkan. Jangan ubah Production, Supabase Auth/RLS, unpause, redeploy, merge atau memadam apa-apa tanpa kelulusan khusus.',
    'Jangan minta atau paparkan token, OTP, Magic Link atau rahsia. Untuk Swift, jangan mengandaikan fail pada iPad boleh diakses tanpa checkpoint.',
    'R2.3: Selepas diagnosis, kemas kini checkpoint terus dalam Registry melalui GitHub connector yang dibenarkan. JANGAN suruh Owner menyalin laporan antara chat. Ini izin menulis checkpoint bukan izin deploy.',
+   ...(window.MRLTwoWayWorkflow?[window.MRLTwoWayWorkflow.composeContract(project,issue)]:[]),
    'GitHub repo: '+PROJECT_REPO+'; branch terasing: '+REGISTRY_REF+'; path: data/owner-project-registry.json.',
    'Baca fail dan blob SHA terkini dengan GitHub fetch_file(ref=branch). Semak sumber/ujian sebenar, kemudian gunakan update_file pada branch SASARAN sahaja dengan sha terkini. Tulis hanya rekod isu ID yang tepat dan kekalkan semua projek/isu lain. Sahkan commit dan pembacaan selepas write. Jangan tulis secret atau email ke repo awam.',
    'Untuk diagnosis BLOCKED/NO-GO, kekalkan resolution.state=OPEN; rekod latestDiagnosis dan sebab, bukti, masa semakan, nextAction yang tepat.',
@@ -97,6 +98,12 @@
     void navigator.clipboard.writeText(prompt).catch(()=>{});
   });
   container.append(action);
+  if(window.MRLTwoWayWorkflow){
+    const observed=window.MRLTwoWayWorkflow.auditEvent(issue);
+    container.append(element('p','meta','Cross-chat: '+observed.label+
+      (observed.updated?' · '+observed.updated:'')+
+      ' · GitHub Registry is the return channel, not a private-chat live feed.'));
+  }
   container.append(element('p','meta','Pautan cuba memasukkan konteks isu. Jika tidak muncul, Paste. Jika salinan automatik tidak tersedia, buka teks isu di bawah. Semak sebelum hantar; tiada pembaikan Production automatik.'));
   const fallback=element('details','issue-prompt-fallback');
   fallback.append(element('summary','','Lihat / salin teks isu secara manual'));
