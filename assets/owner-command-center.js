@@ -150,6 +150,6 @@
  refreshButton.addEventListener('click',()=>void refresh());
  window.addEventListener('railway-access-change',guard);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)guard();});
- if(A){guard();if(typeof A.init==='function'&&A.status==='initializing')void A.init().then(guard).catch(guard);}
+ if(A){guard();} // access.js manages its own initialization; event will update this view.
  else{message.textContent='MR-S10 authentication library unavailable. Return to Gateway.';}
 })();
