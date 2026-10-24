@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "MRL-S10 verified development checkpoint",
+  "register": "MRL-S10 R2.2 verified development checkpoint",
   "capturedOn": "2026-10-25",
-  "observationType": "evidence-led snapshot; not live for all sources",
+  "observationType": "2026-10-25 evidence-led snapshot; GitHub commits/Actions live on open, Vercel and Swift dated",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
   "consolidation": {
     "currentProducts": 3,
@@ -51,11 +51,19 @@
       "code": "P01",
       "name": "MR-S10 Portfolio Website",
       "category": "website",
-      "phase": "R2.1 Owner Command Center Safari UAT improvements + separate Email OTP stabilization",
+      "phase": "R2.2 Owner Dashboard clarity + ChatGPT issue handoff; Owner OTP stabilization separate",
       "overall": "IN_PROGRESS",
-      "nextDecision": "Confirm Owner OTP session, isolated dashboard UAT and secured Vercel token configuration; preserve Production",
+      "nextDecision": "Safari iPhone R2.2 UAT: expand one unresolved issue, verify evidence and ChatGPT issue handoff; Owner OTP & secure Vercel connection remain separate.",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
+        {
+          "type": "test",
+          "label": "Owner Dashboard R2.2 regression — isolated Node",
+          "value": "177/177 PASS",
+          "verifiedOn": "2026-10-25",
+          "confidence": "tested-in-isolated-sandbox",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/feature/owner-command-center-r22-chatgpt-actions"
+        },
         {
           "type": "test",
           "label": "Owner Dashboard R2.1 Node regression",
@@ -123,6 +131,13 @@
           "repo": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
           "ref": "fix/owner-r2-uats-clarity",
           "lastObservedSha": "f65f60f94df9b34b0e0bcb6ddf7f1793b20b1f75"
+        },
+        {
+          "id": "owner-r22",
+          "label": "Owner Dashboard R2.2",
+          "repo": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
+          "ref": "feature/owner-command-center-r22-chatgpt-actions",
+          "lastObservedSha": "78827706d277f3960929b911508960a9b5eadc48"
         }
       ],
       "deployments": [
