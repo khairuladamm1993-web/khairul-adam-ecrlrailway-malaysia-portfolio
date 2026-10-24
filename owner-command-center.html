@@ -14,7 +14,7 @@
   <script defer src="assets/owner-command-center.js"></script>
 </head>
 <body>
-  <header class="topbar"><a href="gateway.html" class="back">← Gateway</a><span class="top-label">MRL’S10 / OWNER</span><span class="version">R2.3 · DEV</span></header>
+  <header class="topbar"><a href="gateway.html" class="back">← Gateway</a><span class="top-label">MRL’S10 / OWNER</span><span class="version">R2.3.1 · DEV</span></header>
   <main class="shell">
     <div id="auth-gate" role="status" aria-live="polite" class="auth-gate">
       <div class="shield" aria-hidden="true">◆</div>
@@ -32,6 +32,7 @@
         <button id="refresh-dashboard" class="refresh" type="button">↻ Refresh sources</button>
       </div>
       <div class="refresh-note" role="status" id="refresh-state">Loading verified registry…</div>
+      <div id="registry-sync-status" class="registry-sync-status" role="status" aria-live="polite" data-mode="pending">VERIFYING REGISTRY SOURCE…</div>
       <div class="sync-explanation">Registry source: GitHub development branch · Checked on Refresh. SOLVED/READY requires verified evidence. No automatic Production deployment.</div>
       <div class="trust-strip" role="note">
        <span><b class="trust-live">● LIVE</b> GitHub commits &amp; Actions</span>
@@ -62,7 +63,7 @@
         <p class="support">GitHub may be live. Vercel is currently a dated snapshot. App updates require a verified iPad checkpoint. ChatGPT decisions are not directly streamable from all past conversations.</p>
       </section>
       <section class="roadmap" id="roadmap"></section>
-      <footer>READ-ONLY DEVELOPMENT R2.3 · No deploy, database writes or approval actions · Never infer a PASS from an old checkpoint</footer>
+      <footer>READ-ONLY DEVELOPMENT R2.3.1 · No deploy, database writes or approval actions · Never infer a PASS from an old checkpoint</footer>
     </section>
   </main>
 </body>
