@@ -5,6 +5,7 @@
 (()=>{
  'use strict';
  const A=window.RailwayAccess;
+ const POLICY=window.MRLCheckpointPolicy;
  const gate=document.getElementById('auth-gate');
  const message=document.getElementById('gate-message');
  const dashboard=document.getElementById('dashboard');
@@ -50,13 +51,19 @@
  function renderProjects(registry){
   $('project-count').textContent=String(registry.projects.length);
   $('future-count').textContent=String(registry.consolidation?.futureProducts||'—');
-  $('issues-count').textContent=String(registry.projects.reduce((n,p)=>n+(Array.isArray(p.issues)?p.issues.length:0),0));
+  $('issues-count').textContent=String(POLICY?POLICY.summary(registry).unresolved:registry.projects.reduce((n,p)=>n+(p.issues?.length||0),0));
   $('registry-date').textContent='Snapshot '+dateLabel(registry.capturedOn);
   window.MRLIssueHandoff?.renderActionHub(registry,$('action-hub'));
   const host=$('project-grid');host.replaceChildren();
   for(const project of registry.projects){
    const card=el('article','project');
-   const top=el('div','project-top');top.append(el('span','project-code',project.code),badge(project.overall));
+   const issues=project.issues||[];
+   const active=issues.filter(i=>!POLICY?.classifyIssue(i).isResolved);
+   const solved=issues.filter(i=>POLICY?.classifyIssue(i).isResolved);
+   const stage=active.length?project.overall:
+    (solved.length&&solved.every(i=>POLICY.classifyIssue(i).state==='READY_FOR_GO')?'READY_FOR_GO':
+    solved.length?'SOLVED':project.overall);
+   const top=el('div','project-top');top.append(el('span','project-code',project.code),badge(stage));
    card.append(top,el('h3','',project.name),el('p','phase',project.phase));
    const facts=el('ul','facts');
    for(const f of project.facts.slice(0,1)){
@@ -65,13 +72,12 @@
     facts.append(row);
    }
    card.append(facts);
-   const issues=project.issues||[];
-   if(issues.length){
+   if(active.length){
     const list=el('details','open-items');
-    const summary=el('summary','',issues.length+' unresolved checks · View');
+    const summary=el('summary','',active.length+' unresolved checks · View');
     list.append(summary);
     const items=el('ul','facts');
-    for(const issue of issues){
+    for(const issue of active){
      const li=el('li','fact');
      li.append(el('span','name',issue.kind+' · '+issue.label),el('span','value',issue.detail));
      const action=window.MRLIssueHandoff?.issueActions(project,issue);
@@ -79,6 +85,20 @@
      items.append(li);
     }
     list.append(items);card.append(list);
+   }
+   if(solved.length){
+    const archive=el('details','completed-checks');
+    archive.append(el('summary','', solved.length+' SOLVED / READY FOR GO · Verified'));
+    const list=el('ul','facts');
+    for(const issue of solved){
+     const item=el('li','fact');
+     item.append(el('span','name',POLICY.classifyIssue(issue).label+' · '+issue.label));
+     item.append(el('span','value',issue.detail));
+     const proof=window.MRLIssueHandoff?.issueActions(project,issue);
+     if(proof)item.append(proof);
+     list.append(item);
+    }
+    archive.append(list);card.append(archive);
    }
    if(project.facts.length>1){
     const details=el('details','extra-facts');
@@ -99,7 +119,11 @@
     row.append(label);
     card.append(row);
    }
-   const next=el('div','next');next.append(el('div','label','NEXT VERIFIED ACTION'),el('p','',project.nextDecision));card.append(next);
+   const next=el('div','next');
+   next.append(el('div','label','NEXT VERIFIED ACTION'),
+    el('p','',active.length?project.nextDecision:
+     'Semua isu direkodkan sebagai SOLVED atau READY FOR GO mengikut bukti. Semak kelulusan Owner sebelum apa-apa pelepasan.'));
+   card.append(next);
    const links=el('div','links');
    for(const l of project.links||[]){const link=safeLink(l.name,l.url);if(link)links.append(link);}
    if(links.childNodes.length)card.append(links);
@@ -124,10 +148,29 @@
    row.append(left,right);host.append(row);
   }
  }
+ // GitHub Registry is the source of truth: no redeploy needed for a verified checkpoint commit.
+ // Uses only public repository data; never place secrets or sensitive Owner records in the registry.
  async function loadRegistry(){
-  const response=await fetch('data/owner-project-registry.json',{cache:'no-store',credentials:'same-origin'});
-  if(!response.ok)throw new Error('Registry unavailable (HTTP '+response.status+')');
-  return validateRegistry(await response.json());
+  const repo='khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio';
+  const ref='feature/owner-r23-verified-checkpoint-sync';
+  const path='data/owner-project-registry.json';
+  const api='https://api.github.com/repos/'+repo+'/contents/'+path+'?ref='+encodeURIComponent(ref);
+  try{
+   const res=await fetch(api,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+   if(!res.ok)throw new Error('GitHub HTTP '+res.status);
+   const payload=await res.json();
+   if(payload.encoding!=='base64'||typeof payload.content!=='string'||typeof payload.sha!=='string')
+    throw new Error('GitHub Registry payload invalid');
+   const buffer=Uint8Array.from(atob(payload.content.replace(/\\s/g,'')),c=>c.charCodeAt(0));
+   const parsed=validateRegistry(JSON.parse(new TextDecoder().decode(buffer)));
+   if(parsed.checkpointSynchronization?.branch!==ref)
+    throw new Error('Incorrect Registry branch');
+   return {data:parsed,live:true,sha:payload.sha};
+  }catch(error){
+   const response=await fetch('data/owner-project-registry.json',{cache:'no-store',credentials:'same-origin'});
+   if(!response.ok)throw new Error('GitHub Registry unavailable; bundled snapshot missing (HTTP '+response.status+')');
+   return {data:validateRegistry(await response.json()),live:false,error:String(error?.message||error)};
+  }
  }
  async function fetchPublicGitHub(item){
   const url='https://api.github.com/repos/'+item.repo+'/commits/'+encodeURIComponent(item.ref);
@@ -229,16 +272,17 @@
   pending=true;lastRefreshAt=Date.now();refreshButton.disabled=true;
   $('refresh-state').textContent='Reading evidence register…';
   try{
-   const r=await loadRegistry();
+   const result=await loadRegistry();
+   const r=result.data;
    if(!A.canAdmin)return;
    renderProjects(r);renderSourceCoverage(r);
-   $('refresh-state').textContent='Registry snapshot: '+dateLabel(r.capturedOn)+' · GitHub check in progress · Vercel and Swift are not live-linked';
+   $('refresh-state').textContent=(result.live?'Registry GitHub LIVE (verified file fetched)':'REGISTRY SNAPSHOT (GitHub unavailable)')+' · GitHub commits/CI loading · Vercel and Swift not live-linked';
    await renderGitHub(r);
    const vercelLive=await renderVercel();
    if(A.canAdmin){
     refreshCount++;
     const time=new Date().toLocaleString('en-MY',{timeZone:'Asia/Kuala_Lumpur',hour:'2-digit',minute:'2-digit',hour12:false});
-    $('refresh-state').textContent='CHECK #'+refreshCount+' · '+time+' MYT · GitHub checked · Vercel '+(vercelLive?'live':'snapshot only')+' · Swift checkpoint · ChatGPT feed not connected';
+    $('refresh-state').textContent='CHECK #'+refreshCount+' · '+time+' MYT · Registry '+(result.live?'GitHub LIVE':'SNAPSHOT / NOT LIVE')+' · Vercel '+(vercelLive?'live':'snapshot')+' · Swift checkpoint · ChatGPT checkpoint via authorized GitHub connector only';
    }
   }catch(error){
    $('refresh-state').textContent='UNVERIFIED: '+String(error?.message||error)+' — old snapshots are not treated as live.';
