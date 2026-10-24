@@ -44,7 +44,22 @@
   document.querySelector('#enter-portfolio').href='portfolio.html#'+destination;
   document.querySelector('#start-quiz').hidden=true;
   if(category==='practical')box.innerHTML=`<div class="content-heading"><div><h2>${h('Module previews')}</h2><p>${h('Full quiz — Member Access')}</p></div></div><div class="module-grid">${window.RailwayModulePreviews.map(m=>`<button class="module" data-preview-module="${m.id}" data-member><span class="module-index">${String(m.index).padStart(2,'0')}</span><span><span class="module-title">${h(m.title)}</span><span class="module-meta">${h('16-question bank')} · ${h('Verified Member access')}</span></span><span aria-hidden="true">↗</span></button>`).join('')}</div><section class="content-row"><h2>${h('Rolling Stock Library')}</h2><article class="learning-card"><h3>CR200J</h3><p>${h('ECRL passenger rolling stock')}</p><p>${h('Full rolling-stock specification — Member Access')}</p>${accessButton()}</article></section>`;
-  else if(category==='ebook')box.innerHTML=`<section class="content-row"><h2>${h('E-BOOK TRAIN OPERATION')}</h2><article class="learning-card"><span class="access-label">PUBLIC · EDITORIAL DRAFT</span><h3>Railway Fundamentals — Bab 01</h3><p>Pengenalan sistem kereta api: infrastruktur, rolling stock, signalling, operasi dan glosari BM / EN / 中文.</p><a class="primary" href="reading/railway-fundamentals-01.html">BACA BAB 01 ↗</a></article></section>`;
+  else if(category==='ebook'){
+   const language=['ms','en','zh'].includes(R.language)?R.language:'ms';
+   const labels={
+    ms:{status:'AWAM · DRAF EDITORIAL',title:'Asas Kereta Api — Bab 01',
+      description:'Pengenalan sistem kereta api: infrastruktur, rolling stock, signalling, operasi dan glosari BM / EN / 中文.',
+      action:'BACA BAB 01'},
+    en:{status:'PUBLIC · EDITORIAL DRAFT',title:'Railway Fundamentals — Chapter 01',
+      description:'An introduction to railway systems: infrastructure, rolling stock, signalling, operations and a trilingual glossary.',
+      action:'READ CHAPTER 01'},
+    zh:{status:'公开 · 编辑草稿',title:'铁路基础知识 — 第01章',
+      description:'铁路系统简介：基础设施、轨道车辆、信号、运营及三语术语表。',
+      action:'阅读第01章'}
+   };
+   const copy=labels[language];
+   box.innerHTML=`<section class="content-row"><h2>${h('E-BOOK TRAIN OPERATION')}</h2><article class="learning-card"><span class="access-label">${R.escape(copy.status)}</span><h3>${R.escape(copy.title)}</h3><p>${R.escape(copy.description)}</p><a class="primary" href="reading/railway-fundamentals-01.html?lang=${language}">${R.escape(copy.action)} ↗</a></article></section>`;
+  }
   else if(category==='corridor')box.innerHTML=`<section class="content-row"><h2>${h('ECRL STATIONS & CORRIDOR')}</h2><article class="learning-card locked-card"><h3>${h('Corridor Master Overview')}</h3><div class="map-placeholder" role="img" aria-label="${R.escape(R.text('Protected image pending secure member storage.'))}"><span>${h('Verified Member access')}</span></div><p>${h('Personal corridor compilation / working reference. Not an official engineering drawing.')}</p><p>${h('Protected image pending secure member storage.')}</p>${accessButton('LOGIN TO VIEW FULL CORRIDOR')}</article></section><section class="content-row"><h2>${h('Station & facility details')}</h2><p>${h('Station codes, approved chainage, section groups and facility details will be available to verified members.')}</p>${boundary()}</section>`;
   else if(category==='map'){box.innerHTML='<section class="content-row"><div class="content-heading"><div><h2>'+h('MAP')+'</h2><p>'+h('Visual projection of approved Corridor references. No route line.')+'</p></div></div><div id="railway-map-mount" class="railway-map-mount" aria-live="polite"><article class="learning-card"><p>'+h('Loading map on demand…')+'</p></article></div></section>';setTimeout(mountMap,0);}
   else if(category==='future')box.innerHTML=`<article class="learning-card locked-card"><h2>${h('COMING SOON')}</h2><p class="access-label">${h('Restricted Development Preview — Verified Member Access')}</p><p>${h('Development details are reserved for verified members.')}</p>${accessButton()}</article>`;
