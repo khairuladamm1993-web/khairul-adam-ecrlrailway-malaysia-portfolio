@@ -9,10 +9,11 @@
   <link rel="stylesheet" href="assets/owner-command-center.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
   <script src="assets/access.js"></script>
+  <script defer src="assets/owner-issue-handoff.js"></script>
   <script defer src="assets/owner-command-center.js"></script>
 </head>
 <body>
-  <header class="topbar"><a href="gateway.html" class="back">← Gateway</a><span class="top-label">MRL’S10 / OWNER</span><span class="version">R2 · DEV</span></header>
+  <header class="topbar"><a href="gateway.html" class="back">← Gateway</a><span class="top-label">MRL’S10 / OWNER</span><span class="version">R2.2 · DEV</span></header>
   <main class="shell">
     <div id="auth-gate" role="status" aria-live="polite" class="auth-gate">
       <div class="shield" aria-hidden="true">◆</div>
@@ -33,13 +34,14 @@
       <div class="trust-strip" role="note">
        <span><b class="trust-live">● LIVE</b> GitHub commits &amp; Actions</span>
        <span><b class="trust-snapshot">● SNAPSHOT</b> Swift / Vercel fallback</span>
-       <span><b>● UNVERIFIED</b> No evidence</span>
+       <span><b>● UNVERIFIED</b> No current verified evidence</span>
       </div>
       <div class="kpis">
         <article><div class="kpi-value" id="project-count">—</div><div class="kpi-label">Current projects</div></article>
         <article><div class="kpi-value" id="future-count">—</div><div class="kpi-label">After approved merge</div></article>
         <article><div class="kpi-value" id="issues-count">—</div><div class="kpi-label">Unresolved checks</div></article>
       </div>
+      <section class="action-hub" id="action-hub" aria-label="Latest progress and issues requiring action"></section>
       <div class="section-head"><h2>Current development</h2><span id="registry-date" class="section-aside"></span></div>
       <div class="project-grid" id="project-grid"></div>
       <section class="evidence-panel">
@@ -58,7 +60,7 @@
         <p class="support">GitHub may be live. Vercel is currently a dated snapshot. App updates require a verified iPad checkpoint. ChatGPT decisions are not directly streamable from all past conversations.</p>
       </section>
       <section class="roadmap" id="roadmap"></section>
-      <footer>READ-ONLY DEVELOPMENT R2 · No deploy, database writes or approval actions · Never infer a PASS from an old checkpoint</footer>
+      <footer>READ-ONLY DEVELOPMENT R2.2 · No deploy, database writes or approval actions · Never infer a PASS from an old checkpoint</footer>
     </section>
   </main>
 </body>
