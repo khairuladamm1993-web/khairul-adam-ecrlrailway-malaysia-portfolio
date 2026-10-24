@@ -47,7 +47,12 @@
   return {live,source:live?source:'SNAPSHOT',total,roundTrip:'NOT_PROVEN_BY_BROWSER_ALONE'};
  }
  function composeContract(project,issue){
-  if(!project?.id||!issue?.id)throw Error('Missing project or issue');
+  if(!/^[a-z][a-z0-9-]{0,63}$/.test(project?.id||'')||
+     !/^[a-z][a-z0-9-]{0,63}$/.test(issue?.id||''))
+   throw Error('Invalid project or issue identifier');
+  const currentOrigin=typeof root.location?.origin==='string'&&
+   /^https:\/\//.test(root.location.origin)?root.location.origin:
+   'https://mrs10-r24-single-gateway-preview.vercel.app';
   return [
    'R2.5 CROSS-CHAT VERIFIED TWO-WAY WORKFLOW — only for '+project.id+' / '+issue.id+'.',
    'Workflow direction A: Dashboard supplied issue ID and current public Registry context, NOT access to other private ChatGPT conversations.',
@@ -61,7 +66,7 @@
    'Never send credentials, OTP, Magic Link, user email, or private chat transcript into the public Registry.',
    'No production deploy, unpause, merge, database/RLS/auth modification or Swift app mutation without explicit separate approval.',
    'After a successful GitHub write, re-read Registry and report the real commit SHA plus issue ID, result and source. If not written, say SYNC BLOCKED. Never claim automatic synchronization from conversation text alone.',
-   'Return-to-dashboard: https://mrs10-r24-single-gateway-preview.vercel.app/owner-command-center.html ; Safari Refresh reads latest GitHub Registry once Owner access is authorized.'
+   'Return-to-dashboard: '+currentOrigin+'/owner-command-center.html ; Safari Refresh reads latest GitHub Registry once Owner access is authorized.'
   ].join('\n');
  }
  function auditEvent(issue){
