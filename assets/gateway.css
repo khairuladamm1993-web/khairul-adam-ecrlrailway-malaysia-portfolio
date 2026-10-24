@@ -49,3 +49,10 @@
 .owner-map-legend [data-state=proposed]{border-color:#ffcf33;color:#ffcf33}
 .railway-survey-pane,.railway-topology-pane{pointer-events:none}
 @media(max-width:719px){.owner-map-legend span{font-size:7px;padding:3px 5px}}
+
+/* Same MR-S10 gateway, Owner-only monitoring navigation. Hidden until live role check. */
+.gateway-identity-tools{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.owner-center-shortcut{display:inline-flex;justify-content:center;align-items:center;min-height:44px;padding:10px 14px;border:1px solid var(--line,#365b69);border-radius:10px;background:#173843;color:#a6e6ee;text-decoration:none;font-size:.75rem;font-weight:750;letter-spacing:.03em;text-align:center}
+.owner-center-shortcut[hidden]{display:none!important}
+.owner-center-shortcut:focus-visible{outline:2px solid #a6e6ee;outline-offset:3px}
+@media(max-width:650px){.gateway-identity-tools{align-items:stretch;width:100%}.owner-center-shortcut{width:100%}}
