@@ -315,14 +315,14 @@
           "id": "slice1-preview",
           "kind": "BLOCKED",
           "label": "Slice 1 isolated Preview",
-          "detail": "25 Oct diagnostic: Slice 1 Vercel project not live; latest deployment BLOCKED; original pause trigger unconfirmed. NO-GO; no changes made.",
+          "detail": "25 Oct 2026 connector recheck: Vercel project live=false; latest deployment BLOCKED, earlier READY is historical only. Five Vercel source-file entries match between deployments; Slice 1 Git source commit and current CI/UAT remain unverified. Original pause trigger and account/spend cause unconfirmed. NO-GO; no deployment or source changes.",
           "basis": "Slice 1 latest Preview",
           "latestDiagnosis": {
             "checkedOn": "2026-10-25",
-            "recordType": "ChatGPT R2.2 issue-handoff diagnostic; independently rechecked Vercel project and deployments",
+            "recordType": "R2.3 authorized connector-based diagnostic checkpoint (Vercel/GitHub read-only; Registry update only)",
             "status": "BLOCKED",
             "releaseDecision": "NO-GO",
-            "rootCause": "Vercel Slice 1 project is not live and latest deployment is BLOCKED. The original pause trigger remains unconfirmed.",
+            "rootCause": "Confirmed current blocker: Vercel project live=false and latest deployment BLOCKED. Original project-pause trigger is UNCONFIRMED; do not infer billing or technical root cause.",
             "vercelProjectId": "prj_81dgAh0E2Fnppz1hWLt62mCgGTlD",
             "projectLive": false,
             "latestDeploymentId": "dpl_6wkeTrTzoBG3EeHHUiXAwv9yTCJT",
@@ -330,18 +330,55 @@
             "previousDeploymentId": "dpl_5QKSDzQZymeX53Ez16yVdfVRhHvE",
             "previousDeploymentState": "READY (historical; not proof of live)",
             "originalDiagnosticClaims": {
-              "sourceFileMetadata": "5/5 matching — stated in diagnostic; not independently rechecked in this feedback write",
-              "sourceQA": "45/45 historical PASS; not rerun",
-              "currentBranchCI": "0 runs found — stated in diagnostic; not independently rechecked in this feedback write",
-              "safariUAT": "BLOCKED",
+              "sourceFileMetadata": "5/5 identical Vercel source file names and UIDs independently rechecked on 2026-10-25",
+              "sourceQA": "45/45 historical PASS only; current source tests not rerun",
+              "currentBranchCI": "Current Slice 1 branch/SHA CI not independently verified; not PASS",
+              "safariUAT": "BLOCKED — live deployment unavailable",
               "originalPauseTrigger": "UNCONFIRMED"
             },
-            "evidenceSource": "Vercel read-only project and deployment lookups on 2026-10-25; screenshot of ChatGPT diagnostic supplied by Owner",
+            "evidenceSource": "Vercel connected project + deployment + source file inventory; GitHub R2.3 branch and source reference; 2026-10-25",
             "ownerDashboardReferenceSha": "46511d7705d36029f857868d1a3b25846384dd83",
             "ownerDashboardReferenceNote": "This is MR-S10 dashboard commit, NOT the Slice 1 source commit.",
             "slice1SourceSha": null,
             "changesMade": false,
-            "nextAction": "Read Vercel project-paused Activity Log and account/spend status. Request explicit Owner approval before any resume, unpause, redeploy or release."
+            "nextAction": "Owner to inspect Vercel project pause Activity Log and account/billing/spend limits to establish the original trigger. Verify the independent Slice 1 source commit and CI evidence; request explicit Owner approval before resume/unpause/redeploy/release. No Production, Supabase, deployment or source change authorized.",
+            "checkedAt": "2026-10-24T21:30:51.358Z",
+            "latestDeploymentCreatedAt": "2026-10-14T00:01:34.371Z",
+            "previousDeploymentCreatedAt": "2026-10-13T02:55:15.911Z",
+            "sourceFileInventory": "5/5 deployment source entries identical by file UID (connection-registry.json, corridor-data.json, index.html, styles.css, viewer.js); this is not a Git source SHA or source test PASS.",
+            "sourceFileMetadata": "5/5 names and UIDs matched on latest and previous deployment through Vercel list_deployment_files",
+            "gitSourceVerification": "UNVERIFIED: Vercel deployment has no reported Git commit/source SHA, and provided repository is MR-S10 dashboard rather than verified Slice 1 source.",
+            "sourceQaVerification": "HISTORICAL_ONLY: 45/45 previously reported, not rerun against a verified Slice 1 source checkout.",
+            "ciVerification": "UNVERIFIED: no verified Slice 1 source SHA to associate with current CI runs.",
+            "safariUat": "BLOCKED: current Slice 1 deployment unavailable; no live Safari PASS evidence.",
+            "activityLog": "NOT VERIFIED: project-paused Activity Log entries unavailable through available Vercel connector operations; Owner dashboard review required.",
+            "teamPlan": "hobby (Vercel team context); plan alone does not explain pause",
+            "accountSpendStatus": "UNVERIFIED: Vercel billing charge lookup returned 404 costs_not_found; cannot conclude spend, balance, or suspension cause.",
+            "originalPauseTrigger": "UNCONFIRMED",
+            "supportingEvidence": [
+              {
+                "url": "https://vercel.com/1993khairuladam-3016/ecrl-slice1-metadata-r1-preview/6wkeTrTzoBG3EeHHUiXAwv9yTCJT",
+                "checkedOn": "2026-10-25",
+                "result": "CONFIRMED latest BLOCKED; project live=false from project lookup"
+              },
+              {
+                "url": "https://vercel.com/1993khairuladam-3016/ecrl-slice1-metadata-r1-preview/5QKSDzQZymeX53Ez16yVdfVRhHvE",
+                "checkedOn": "2026-10-25",
+                "result": "CONFIRMED earlier READY historical; 5 source UIDs match latest"
+              },
+              {
+                "url": "https://ecrl-slice1-metadata-r1-preview.vercel.app",
+                "checkedOn": "2026-10-25",
+                "result": "Affected URL; NOT a confirmed PASS or currently live"
+              },
+              {
+                "url": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/feature/owner-r23-verified-checkpoint-sync",
+                "checkedOn": "2026-10-25",
+                "result": "CONFIRMED Registry development branch, not Slice 1 source SHA"
+              }
+            ],
+            "projectChangesMade": false,
+            "registryCheckpointOnly": true
           },
           "resolution": {
             "state": "OPEN",
