@@ -3,7 +3,7 @@ import json, pathlib, re, sys
 root=pathlib.Path(__file__).resolve().parents[1]
 out=pathlib.Path(sys.argv[1]).resolve(); out.mkdir(parents=True,exist_ok=True)
 if any(out.iterdir()): raise SystemExit('Use a fresh empty output directory.')
-excluded={'questions.js','quiz-core.js','gateway.js','member-gateway.js','owner-map.js','owner-command-center.js','owner-command-center.css'}
+excluded={'questions.js','quiz-core.js','gateway.js','member-gateway.js','owner-map.js','owner-command-center.js','owner-issue-handoff.js','owner-command-center.css'}
 files=['index.html','gateway.html','portfolio.html','references.html','PRIVACY.md','reading/index.html','reading/library-catalogue.json','reading/railway-fundamentals-01.html']+[str(p.relative_to(root)) for p in (root/'assets').iterdir() if p.is_file() and p.name not in excluded]
 for name in files:
     data=(root/name).read_bytes()
