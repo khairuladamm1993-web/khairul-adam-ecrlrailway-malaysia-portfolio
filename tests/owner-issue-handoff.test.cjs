@@ -78,7 +78,7 @@ test('Owner R2.2 presents progress, actions and evidence in that order',()=>{
  const github=html.indexOf('id="github-live"');
  assert(progress>0&&progress<projects&&projects<github);
  assert(html.includes('assets/owner-issue-handoff.js'));
- assert(html.includes('R2.3'));
+ assert(html.includes('R2.5'));
  const {api,make}=fixture();
  const host=make('section');
  api.renderActionHub(registry,host);
