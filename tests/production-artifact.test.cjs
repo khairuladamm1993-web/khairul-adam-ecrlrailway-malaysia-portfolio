@@ -720,7 +720,7 @@ for(const script of ['build-production.py','build-preview.py']) {
   test(script+': approved reading files are packaged; planned chapters remain unpublished',()=>{
     const dir=build(script,'railway-reading-');
     try {
-      assert.deepEqual(fs.readdirSync(path.join(dir,'reading')).sort(),['index.html','library-catalogue.json','railway-fundamentals-01.html']);
+      assert.deepEqual(fs.readdirSync(path.join(dir,'reading')).sort(),['chapter-01-i18n.js','index.html','library-catalogue.json','railway-fundamentals-01.html']);
       for(const file of ['library-catalogue.json','railway-fundamentals-01.html'])
         assert.deepEqual(fs.readFileSync(path.join(dir,'reading',file)),fs.readFileSync(path.join(root,'reading',file)));
       const catalogue=JSON.parse(fs.readFileSync(path.join(dir,'reading/library-catalogue.json'),'utf8'));
