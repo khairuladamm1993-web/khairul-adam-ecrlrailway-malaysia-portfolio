@@ -47,7 +47,7 @@ test('dashboard offers read-only refresh and never writes or deploys',()=>{
 function fixture(level='public'){
  const nodes=new Map(),listeners={};let requests=0;
  const element=()=>({
-  hidden:false,disabled:false,textContent:'',dataset:{},childNodes:[],classList:{add(){}},
+  hidden:false,disabled:false,textContent:'',dataset:{},style:{},childNodes:[],classList:{add(){}},
   addEventListener(name,cb){this['on'+name]=cb;},append(...a){this.childNodes.push(...a);},
   replaceChildren(...a){this.childNodes=a;},setAttribute(){},
  });
