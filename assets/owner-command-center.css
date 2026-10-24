@@ -122,3 +122,11 @@ footer{font-size:.72rem;color:var(--sub);padding:24px 2px}
 .registry-sync-status[data-mode="live"]{border-color:#3d7765;background:#0a2829;color:var(--good)}
 .registry-sync-status[data-mode="snapshot"]{border-color:#a67b49;background:#302419;color:var(--warn)}
 .stale-project-warning{font-size:.77rem;font-weight:750;line-height:1.45;padding:8px 10px;border-radius:9px;background:#38291c;color:#f1c782;border:1px solid #856540}
+
+/* R2.5 cross-chat verified two-way workflow status — reader only */
+.two-way-panel{background:var(--panel2);border:1px solid var(--edge);border-radius:14px;padding:14px;margin:0 0 15px}
+.two-way-panel h2{font-size:1.02rem;margin-bottom:5px}
+#two-way-state{font:.74rem/1.45 ui-monospace,monospace;padding:9px 11px;border-radius:8px;background:#132d37;color:var(--accent);border:1px solid #427887;overflow-wrap:anywhere}
+#two-way-state[data-mode="live"]{color:var(--good);border-color:#3d7765;background:#0a2829}
+#two-way-state[data-mode="snapshot"]{color:var(--warn);border-color:#a67b49;background:#302419}
+.two-way-panel>.support{font-size:.76rem;line-height:1.45;margin-top:8px}
