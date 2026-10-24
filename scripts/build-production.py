@@ -15,7 +15,7 @@ if any(out.iterdir()):
 root_files=[
     ".nojekyll","index.html","gateway.html","owner-command-center.html","portfolio.html","references.html",
     "PRIVACY.md","robots.txt","sitemap.xml",
-    "reading/index.html","reading/library-catalogue.json","reading/railway-fundamentals-01.html"
+    "reading/index.html","reading/library-catalogue.json","reading/railway-fundamentals-01.html","reading/chapter-01-i18n.js"
 ]
 forbidden_assets={"questions.js","quiz-core.js","gateway.js"}
 allowed_asset_suffixes={".js",".css",".jpeg",".jpg",".png",".webp",".svg",".gif",".ico"}
