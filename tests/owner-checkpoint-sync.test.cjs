@@ -107,3 +107,25 @@ test('R2.3 does not silently authorize production / forced release',()=>{
  const m=JSON.stringify(registry);
  assert.doesNotMatch(m,/sb_secret_|eyJhbGciOi/);
 });
+
+test('resolved Slice 1 presentation supersedes historical NO-GO while preserving history in Registry',()=>{
+ const p=JSON.parse(JSON.stringify(registry.projects[1]));
+ const issue=p.issues.find(x=>x.id==='slice1-preview');
+ issue.resolution={state:'SOLVED',tests:'PASS',verifiedAt:now,
+  summary:'Confirmed safe technical recovery in isolated QA only.',
+  evidence:[evidence[0]],releaseGates:{}};
+ const w={MRLCheckpointPolicy:policy};
+ const doc={createElement:tag=>({tagName:tag,childNodes:[],dataset:{},listeners:{},
+   textContent:'',value:'',append(...xs){this.childNodes.push(...xs)},
+   setAttribute(k,v){this[k]=v},addEventListener(n,fn){this.listeners[n]=fn}})};
+ vm.runInNewContext(read('assets/owner-issue-handoff.js'),{window:w,document:doc,encodeURIComponent,console});
+ const prompt=w.MRLIssueHandoff.promptFor(p,issue,w.MRLIssueHandoff.evidence(p,issue));
+ assert(prompt.includes('[SOLVED'));
+ assert(!prompt.includes('Checkpoint (2026-10-25): NO-GO'));
+ const box=w.MRLIssueHandoff.issueActions(p,issue);
+ const summary=box.childNodes.find(x=>x.className==='issue-latest-diagnosis');
+ assert(summary);
+ assert(summary.childNodes.some(x=>String(x.textContent).includes('SOLVED')));
+ assert(!summary.childNodes.some(x=>String(x.textContent).includes('NO-GO')));
+ assert.equal(issue.latestDiagnosis.releaseDecision,'NO-GO'); // historical record retained, not current status
+});
