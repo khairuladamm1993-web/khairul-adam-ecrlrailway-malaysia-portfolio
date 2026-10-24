@@ -73,3 +73,12 @@ test('Owner module is within MR-S10 repository and does not provide auto deploy 
  assert.match(read('assets/owner-issue-handoff.js'),/owner-r23-verified-checkpoint-sync/);
  assert.match(dashboard,/No deploy, database writes or approval actions/);
 });
+
+test('Owner dashboard auto-refreshes read-only sources only while authenticated and visible',()=>{
+ const script=read('assets/owner-command-center.js');
+ assert.match(script,/AUTO_REFRESH_MS=10\*60\*1000/);
+ assert.match(script,/document\.hidden\|\|!A\?\.canAdmin\|\|A\.status!=='authenticated'\|\|pending/);
+ assert.match(script,/Date\.now\(\)-lastRefreshAt>=AUTO_REFRESH_MS/);
+ assert.match(script,/window\.addEventListener\('pagehide'/);
+ assert.doesNotMatch(script,/\bPOST\b|\bPATCH\b|\bDELETE\b/);
+});
