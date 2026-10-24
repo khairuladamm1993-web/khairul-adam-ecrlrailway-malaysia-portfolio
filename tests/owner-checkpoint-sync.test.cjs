@@ -92,7 +92,7 @@ test('dashboard live-reads GitHub registry and clearly marks snapshot fallback',
  const html=read('owner-command-center.html');
  assert(js.includes('api.github.com/repos/'));
  assert(js.includes('contents/'));
- assert(js.includes('GITHUB_LIVE')||js.includes('GitHub LIVE'));
+ assert(js.includes('Registry LIVE from ') && js.includes('SNAPSHOT STALE'));
  assert(js.includes('SNAPSHOT / NOT LIVE'));
  assert(js.includes('data/owner-project-registry.json'));
  assert(html.includes('assets/owner-checkpoint-policy.js'));
