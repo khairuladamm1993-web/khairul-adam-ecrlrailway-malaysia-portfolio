@@ -105,3 +105,7 @@ footer{font-size:.72rem;color:var(--sub);padding:24px 2px}
 .open-items .issue-actions .meta{font-weight:400}
 @media(max-width:870px){.progress-overview{grid-template-columns:1fr}}
 @media(max-width:560px){.action-hub{padding:12px}.progress-entry{padding:9px}.action-project{padding:9px}.action-issue>summary{font-size:.78rem}}
+
+.issue-prompt-fallback{border-top:1px solid var(--edge);padding-top:6px}
+.issue-prompt-fallback summary{font-size:.75rem;color:var(--sub);cursor:pointer}
+.issue-prompt-text{display:block;width:100%;font:12px/1.4 ui-monospace,SFMono-Regular,monospace;margin-top:8px;resize:vertical;border:1px solid var(--edge);border-radius:9px;padding:10px;background:#07131c;color:var(--text);-webkit-user-select:text;user-select:text}
