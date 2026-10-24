@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "MRL’S10 R2.3 verified-checkpoint bridge candidate — Node 188/188 PASS; Safari handoff pending",
+  "register": "MRL’S10 R2.3 verified new-chat GitHub checkpoint write; Owner historical-review feedback; issue remains NO-GO",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -241,7 +241,7 @@
       "category": "website",
       "phase": "Independent corridor development — no merge yet",
       "overall": "BLOCKED",
-      "nextDecision": "NO-GO: Read project-paused Vercel Activity Log and account/spend state; request explicit Owner approval before resuming Slice 1. No code/deploy/db mutations.",
+      "nextDecision": "No repeat of previously attempted Activity Log/Usage review. Missing evidence: a dated, attributable project-pause event/reason (or Vercel Support confirmation). Keep Slice 1 paused, BLOCKED/NO-GO until that evidence is obtained and Owner separately approves any recovery action.",
       "updatePolicy": "Vercel verified as BLOCKED on 25 Oct 2026; dated snapshot until authenticated live bridge enabled",
       "facts": [
         {
@@ -315,7 +315,7 @@
           "id": "slice1-preview",
           "kind": "BLOCKED",
           "label": "Slice 1 isolated Preview",
-          "detail": "25 Oct 2026 connector recheck: Vercel project live=false; latest deployment BLOCKED, earlier READY is historical only. Five Vercel source-file entries match between deployments; Slice 1 Git source commit and current CI/UAT remain unverified. Original pause trigger and account/spend cause unconfirmed. NO-GO; no deployment or source changes.",
+          "detail": "25 Oct live check: project live=false; latest deployment BLOCKED. Owner reports Activity Log and Usage/Billing were previously reviewed; original pause trigger not verified. No repeat diagnosis requested. NO-GO, no source/deployment changes.",
           "basis": "Slice 1 latest Preview",
           "latestDiagnosis": {
             "checkedOn": "2026-10-25",
@@ -341,7 +341,7 @@
             "ownerDashboardReferenceNote": "This is MR-S10 dashboard commit, NOT the Slice 1 source commit.",
             "slice1SourceSha": null,
             "changesMade": false,
-            "nextAction": "Owner to inspect Vercel project pause Activity Log and account/billing/spend limits to establish the original trigger. Verify the independent Slice 1 source commit and CI evidence; request explicit Owner approval before resume/unpause/redeploy/release. No Production, Supabase, deployment or source change authorized.",
+            "nextAction": "No repeat of previously attempted Activity Log/Usage review. Missing evidence: a dated, attributable project-pause event/reason (or Vercel Support confirmation). Keep Slice 1 paused, BLOCKED/NO-GO until that evidence is obtained and Owner separately approves any recovery action.",
             "checkedAt": "2026-10-24T21:30:51.358Z",
             "latestDeploymentCreatedAt": "2026-10-14T00:01:34.371Z",
             "previousDeploymentCreatedAt": "2026-10-13T02:55:15.911Z",
@@ -378,7 +378,8 @@
               }
             ],
             "projectChangesMade": false,
-            "registryCheckpointOnly": true
+            "registryCheckpointOnly": true,
+            "ownerReviewNote": "Owner reported these checks were previously done; connector still cannot verify the initiating pause event. Usage costs_not_found (404) is inconclusive, not proof of billing cause."
           },
           "resolution": {
             "state": "OPEN",
@@ -392,6 +393,17 @@
               "deployment": "NOT_PASS",
               "ownerApproval": "NOT_APPROVED"
             }
+          },
+          "ownerReviewFeedback": {
+            "reportedOn": "2026-10-25",
+            "source": "Owner statement in ChatGPT conversation; user-attested, not independent Activity Log evidence",
+            "previouslyReviewed": [
+              "Vercel Project Activity Log",
+              "Vercel Usage/Billing"
+            ],
+            "ownerReportsRepetition": "Owner reports previously completing review; repeating the same request would not add evidence.",
+            "result": "Original pause trigger still unconfirmed; no authorization to resume, unpause, redeploy or release.",
+            "verification": "OWNER-REPORTED_ONLY"
           }
         },
         {
@@ -514,9 +526,12 @@
     "mode": "connected-ChatGPT-can-commit-verified-checkpoints; dashboard-GitHub-API-refresh",
     "directAllChatHistory": false,
     "deliveryGuarantee": "Best effort in an issue-handoff ChatGPT chat with authorized GitHub write tool; not a native automatic transcript feed.",
-    "status": "DEV_QA_PASS_PENDING_CHAT_WRITE_UAT",
+    "status": "HANDOFF_GITHUB_WRITE_VERIFIED_2026-10-25_DASHBOARD_VISUAL_RECHECK_PENDING",
     "publicSafeOnly": true,
     "requiredEvidence": "Direct source verification, timestamp, PASS tests evidence, clear Owner approval before READY_FOR_GO",
-    "mutableScope": "Registry only on isolated development branch; no main/Production/Authed DB changes"
+    "mutableScope": "Registry only on isolated development branch; no main/Production/Authed DB changes",
+    "latestVerifiedWriteCommit": "b977ef7790bf9c5fbb8a03ceb37b2741e0ce95c7",
+    "latestVerifiedWriteIssueId": "slice1-preview",
+    "latestVerifiedWriteDate": "2026-10-25"
   }
 }
