@@ -52,13 +52,14 @@
   $('future-count').textContent=String(registry.consolidation?.futureProducts||'—');
   $('issues-count').textContent=String(registry.projects.reduce((n,p)=>n+(Array.isArray(p.issues)?p.issues.length:0),0));
   $('registry-date').textContent='Snapshot '+dateLabel(registry.capturedOn);
+  window.MRLIssueHandoff?.renderActionHub(registry,$('action-hub'));
   const host=$('project-grid');host.replaceChildren();
   for(const project of registry.projects){
    const card=el('article','project');
    const top=el('div','project-top');top.append(el('span','project-code',project.code),badge(project.overall));
    card.append(top,el('h3','',project.name),el('p','phase',project.phase));
    const facts=el('ul','facts');
-   for(const f of project.facts.slice(0,2)){
+   for(const f of project.facts.slice(0,1)){
     const row=el('li','fact');
     row.append(el('span','name',f.label+' · '+dateLabel(f.verifiedOn)),el('span','value',f.value));
     facts.append(row);
@@ -73,15 +74,17 @@
     for(const issue of issues){
      const li=el('li','fact');
      li.append(el('span','name',issue.kind+' · '+issue.label),el('span','value',issue.detail));
+     const action=window.MRLIssueHandoff?.issueActions(project,issue);
+     if(action)li.append(action);
      items.append(li);
     }
     list.append(items);card.append(list);
    }
-   if(project.facts.length>2){
+   if(project.facts.length>1){
     const details=el('details','extra-facts');
-    details.append(el('summary','', 'All evidence · '+project.facts.length+' entries'));
+    details.append(el('summary','', 'Historical QA & all evidence · '+project.facts.length+' entries'));
     const extra=el('ul','facts');
-    for(const item of project.facts.slice(2)){
+    for(const item of project.facts.slice(1)){
      const entry=el('li','fact');
      entry.append(el('span','name',item.label+' · '+dateLabel(item.verifiedOn)),el('span','value',item.value));
      extra.append(entry);
