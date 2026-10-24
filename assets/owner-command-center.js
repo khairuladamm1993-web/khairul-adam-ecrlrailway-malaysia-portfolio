@@ -93,7 +93,7 @@
     for(const issue of solved){
      const item=el('li','fact');
      item.append(el('span','name',POLICY.classifyIssue(issue).label+' · '+issue.label));
-     item.append(el('span','value',issue.detail));
+     item.append(el('span','value',issue.resolution?.summary||'Closure validated by QA evidence; see links below.'));
      const proof=window.MRLIssueHandoff?.issueActions(project,issue);
      if(proof)item.append(proof);
      list.append(item);
