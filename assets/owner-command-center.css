@@ -109,3 +109,10 @@ footer{font-size:.72rem;color:var(--sub);padding:24px 2px}
 .issue-prompt-fallback{border-top:1px solid var(--edge);padding-top:6px}
 .issue-prompt-fallback summary{font-size:.75rem;color:var(--sub);cursor:pointer}
 .issue-prompt-text{display:block;width:100%;font:12px/1.4 ui-monospace,SFMono-Regular,monospace;margin-top:8px;resize:vertical;border:1px solid var(--edge);border-radius:9px;padding:10px;background:#07131c;color:var(--text);-webkit-user-select:text;user-select:text}
+
+/* R2.3 evidence-driven status transitions */
+.pill[data-state="SOLVED"],.pill[data-state="READY_FOR_GO"]{color:var(--good);border-color:#4c7465}
+.completed-checks{border-top:1px solid var(--edge);margin-top:9px;padding:9px 0;color:var(--good)}
+.completed-checks>summary{cursor:pointer;font-size:.8rem;font-weight:750}
+.completed-checks .action-groups{margin-top:10px}
+.sync-explanation{font-size:.72rem;color:var(--sub);border-left:3px solid #426877;padding:5px 10px;margin-bottom:12px;line-height:1.5}
