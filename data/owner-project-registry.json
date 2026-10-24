@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "MRL’S10 single-domain Owner Gateway R2.4 staging verified HTTP 200; Node 198/198 PASS; real Owner Auth/other automatic source sync pending",
+  "register": "R2.4 theme accessibility + Chapter 01 BM/EN/Chinese staging published; automatic QA PASS, Safari visual UAT pending",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -51,11 +51,19 @@
       "code": "P01",
       "name": "MR-S10 Portfolio Website",
       "category": "website",
-      "phase": "R2.4 single-domain MR-S10 Owner Gateway integration; Owner OTP UAT and Vercel/Swift sync gates remain",
+      "phase": "R2.4 integrated MR-S10 Owner Gateway plus Light/Dark contrast and trilingual Chapter 01 QA",
       "overall": "IN_PROGRESS",
-      "nextDecision": "One-domain Owner Dashboard integration: isolated staging HTTP smoke passed and 198/198 Node PASS. Confirm real Owner OTP and session persistence on an authorized hostname before canonical Preview/Production release. Vercel live bridge requires protected backend credentials; Swift requires approved app checkpoint publisher.",
+      "nextDecision": "Safari iPhone UAT: verify Light/Dark control contrast (Map toolbar and Read Chapter 01) and complete Chapter 01 text in BM, EN and 中文. Only then consider visual defect SOLVED. Owner/Admin login, Vercel live bridge and Swift checkpoint publisher remain separate.",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
+        {
+          "type": "test",
+          "label": "R2.4 Safari contrast and Chapter 01 multilingual build",
+          "value": "208/208 Node PASS · 14/14 Catalogue PASS · isolated staging HTTP PASS",
+          "verifiedOn": "2026-10-25",
+          "confidence": "automated-tested; Safari visual UAT pending",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/fix/mrs10-r24-contrast-reading-i18n"
+        },
         {
           "type": "test",
           "label": "R2.4 Single MR-S10 Owner Gateway isolated regression",
@@ -589,6 +597,20 @@
       "Vercel secure live backend environment",
       "Swift app approved data export/publishing mechanism",
       "Owner review for canonical release"
-    ]
+    ],
+    "safariReadingContrastFix": {
+      "sourceBranch": "fix/mrs10-r24-contrast-reading-i18n",
+      "commitSha": "78d89c7b1895ad961d524db438abc7e908c56e14",
+      "qaNode": "208/208 PASS",
+      "qaCatalogue": "14/14 PASS",
+      "automatedArticleLanguageTests": "10/10 PASS",
+      "buildProduction": "PASS",
+      "buildPublicPreview": "PASS",
+      "isolatedStageHttp": "PASS — Gateway/Theme/E-Book/Article/Language JS/Owner Dashboard",
+      "isolatedPreviewUrl": "https://mrs10-r24-single-gateway-preview.vercel.app/gateway.html",
+      "safariVisualUat": "PENDING",
+      "outstanding": "Confirm contrast and language on actual Safari; authentication callback not enabled on isolated staging.",
+      "scope": "R2.4 dev/staging only; no main merge, no MR-S10 Production or Supabase Auth changes"
+    }
   }
 }
