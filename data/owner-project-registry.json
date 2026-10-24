@@ -133,6 +133,29 @@
           "name": "MR-S10 Preview",
           "url": "https://khairul-adam-portfolio-preview-safe.vercel.app/gateway.html"
         }
+      ],
+      "issues": [
+        {
+          "id": "owner-auth-safari",
+          "kind": "PENDING",
+          "label": "Owner/Admin Safari login",
+          "detail": "Session persistence after OTP is not yet verified; do not claim authenticated Owner dashboard is available.",
+          "basis": "Owner Safari login"
+        },
+        {
+          "id": "chromium-smoke",
+          "kind": "BLOCKED",
+          "label": "Chromium responsive smoke",
+          "detail": "Browser missing in the isolated test sandbox; standalone smoke is not PASS.",
+          "basis": "Chromium smoke"
+        },
+        {
+          "id": "vercel-bridge",
+          "kind": "NOT_CONNECTED",
+          "label": "Read-only Vercel dashboard bridge",
+          "detail": "Code drafted, but server-side credentials and isolated Owner UAT are not complete.",
+          "basis": "Vercel source connection"
+        }
       ]
     },
     {
@@ -202,7 +225,23 @@
         "destination": "future P01 / SIMULATION module",
         "state": "ON HOLD",
         "criterion": "Independent Preview UAT + matching corridor manifest + no regression"
-      }
+      },
+      "issues": [
+        {
+          "id": "slice1-preview",
+          "kind": "BLOCKED",
+          "label": "Slice 1 isolated Preview",
+          "detail": "Last read-only deployment evidence reports BLOCKED; do not auto-unpause.",
+          "basis": "Slice 1 latest Preview"
+        },
+        {
+          "id": "full-corridor-uat",
+          "kind": "UNVERIFIED",
+          "label": "Full Corridor viewer release UAT",
+          "detail": "Horizontal corridor viewer has not passed the full independent release acceptance.",
+          "basis": "Full corridor horizontal viewer"
+        }
+      ]
     },
     {
       "id": "swift-app",
@@ -242,7 +281,28 @@
         "state": "SEPARATE",
         "criterion": "Share validated railway data contract; do not merge Swift source into website"
       },
-      "deployments": []
+      "deployments": [],
+      "issues": [
+        {
+          "id": "train-visual-uat",
+          "kind": "UNVERIFIED",
+          "label": "Swift Simulator train/signal/RSP synchronization",
+          "detail": "No recent verified UAT checkpoint for active train movement and synchronized visualization.",
+          "basis": "Train display / movement"
+        },
+        {
+          "id": "swift-sync",
+          "kind": "NOT_CONNECTED",
+          "label": "Swift iPad automated checkpoint publishing",
+          "detail": "No approved Swift Playgrounds data publisher exists.",
+          "basis": "Automatic iPad sync"
+        }
+      ]
     }
-  ]
+  ],
+  "metrics": {
+    "openIssuePolicy": "Counts unresolved tracked items, not just projects with BLOCKED/UNVERIFIED status.",
+    "outstandingItems": 7,
+    "projectsRequiringAttention": 3
+  }
 }
