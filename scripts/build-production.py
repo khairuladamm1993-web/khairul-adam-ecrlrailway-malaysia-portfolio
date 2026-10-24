@@ -13,7 +13,7 @@ if any(out.iterdir()):
     raise SystemExit("Use a fresh empty production output directory.")
 
 root_files=[
-    ".nojekyll","index.html","gateway.html","portfolio.html","references.html",
+    ".nojekyll","index.html","gateway.html","owner-command-center.html","portfolio.html","references.html",
     "PRIVACY.md","robots.txt","sitemap.xml",
     "reading/index.html","reading/library-catalogue.json","reading/railway-fundamentals-01.html"
 ]
@@ -28,6 +28,17 @@ for name in root_files:
     dest.parent.mkdir(parents=True,exist_ok=True)
     shutil.copy2(src,dest)
 
+# Owner dashboard registry contains only public-safe project evidence. Never add private data.
+registry=root/"data"/"owner-project-registry.json"
+if not registry.exists():
+    raise SystemExit("Owner Command Center evidence registry missing")
+registry_data=json.loads(registry.read_text(encoding="utf-8"))
+if registry_data.get("schemaVersion")!="1.0.0" or len(registry_data.get("projects",[]))!=3:
+    raise SystemExit("Invalid Owner Command Center evidence registry")
+regdest=out/"data"/registry.name
+regdest.parent.mkdir(parents=True,exist_ok=True)
+shutil.copy2(registry,regdest)
+
 for src in (root/"assets").iterdir():
     if not src.is_file() or src.name in forbidden_assets or src.suffix.lower() not in allowed_asset_suffixes:
         continue
@@ -41,7 +52,7 @@ for name in forbidden_assets:
         raise SystemExit(f"Forbidden production asset present: assets/{name}")
 
 required_assets={
-    "access.js","public-gateway.js","member-gateway.js","module-previews.js",
+    "access.js","public-gateway.js","member-gateway.js","owner-command-center.js","owner-command-center.css","module-previews.js",
     "analytics.js","gateway.css","theme.js","theme.css","i18n.js","map-intelligence.js","map-gateway.js","corridor-reference.js","owner-map.js","owner-map-v01b.js","build-info.js"
 }
 missing=sorted(name for name in required_assets if not (out/"assets"/name).exists())
