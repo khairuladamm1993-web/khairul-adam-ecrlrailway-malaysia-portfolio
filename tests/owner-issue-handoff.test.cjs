@@ -113,7 +113,7 @@ test('Slice 1 ChatGPT diagnostic is stored in GitHub registry, is honest about S
  assert.equal(d.previousDeploymentState.startsWith('READY'),true);
  assert.equal(d.slice1SourceSha,null);
  assert.match(d.ownerDashboardReferenceNote,/NOT the Slice 1 source commit/);
- assert.match(d.nextAction,/explicit Owner approval/);
+ assert.match(d.nextAction,/Owner separately approves/);
  assert.equal(d.changesMade,false);
  const {api}=fixture();
  const action=api.issueActions(p,issue);
