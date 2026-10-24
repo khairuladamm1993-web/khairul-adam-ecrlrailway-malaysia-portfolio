@@ -61,7 +61,15 @@
     void navigator.clipboard.writeText(prompt).catch(()=>{});
   });
   container.append(action);
-  container.append(element('p','meta','Buka ChatGPT dengan konteks isu. Jika prompt tidak muncul, Paste teks yang disalin. Semak dahulu sebelum hantar; tiada tindakan Production automatik.'));
+  container.append(element('p','meta','Pautan cuba memasukkan konteks isu. Jika tidak muncul, Paste. Jika salinan automatik tidak tersedia, buka teks isu di bawah. Semak sebelum hantar; tiada pembaikan Production automatik.'));
+  const fallback=element('details','issue-prompt-fallback');
+  fallback.append(element('summary','','Lihat / salin teks isu secara manual'));
+  const textarea=element('textarea','issue-prompt-text');
+  textarea.value=prompt;textarea.readOnly=true;textarea.rows=7;
+  textarea.setAttribute('aria-label','Prompt ChatGPT untuk isu '+issue.label);
+  textarea.addEventListener('focus',()=>{if(typeof textarea.select==='function')textarea.select();});
+  fallback.append(textarea);
+  container.append(fallback);
   return container;
  }
  function renderActionHub(registry,host){
