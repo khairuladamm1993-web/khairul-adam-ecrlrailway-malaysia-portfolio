@@ -10,11 +10,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
   <script src="assets/access.js"></script>
   <script defer src="assets/owner-checkpoint-policy.js"></script>
+  <script defer src="assets/owner-two-way-workflow.js"></script>
   <script defer src="assets/owner-issue-handoff.js"></script>
   <script defer src="assets/owner-command-center.js"></script>
 </head>
 <body>
-  <header class="topbar"><a href="gateway.html" class="back">← Gateway</a><span class="top-label">MRL’S10 / OWNER</span><span class="version">R2.3.1 · DEV</span></header>
+  <header class="topbar"><a href="gateway.html" class="back">← Gateway</a><span class="top-label">MRL’S10 / OWNER</span><span class="version">R2.5 · DEV</span></header>
   <main class="shell">
     <div id="auth-gate" role="status" aria-live="polite" class="auth-gate">
       <div class="shield" aria-hidden="true">◆</div>
@@ -44,7 +45,12 @@
         <article><div class="kpi-value" id="future-count">—</div><div class="kpi-label">After approved merge</div></article>
         <article><div class="kpi-value" id="issues-count">—</div><div class="kpi-label">Unresolved checks</div></article>
       </div>
-      <section class="action-hub" id="action-hub" aria-label="Latest progress and issues requiring action"></section>
+      <section class="two-way-panel" aria-label="Cross-chat verified synchronization status">
+ <h2>Verified Two-Way Workflow · R2.5</h2>
+ <div id="two-way-state" role="status" aria-live="polite">Checking GitHub Registry…</div>
+ <p class="support">Dashboard → ChatGPT sends issue context. A connected and authorized ChatGPT session → GitHub may write a verified checkpoint. Refresh imports that record. This is not an automatic feed of private chats.</p>
+ </section>
+ <section class="action-hub" id="action-hub" aria-label="Latest progress and issues requiring action"></section>
       <div class="section-head"><h2>Current development</h2><span id="registry-date" class="section-aside"></span></div>
       <div class="project-grid" id="project-grid"></div>
       <section class="evidence-panel">
@@ -63,7 +69,7 @@
         <p class="support">GitHub may be live. Vercel is currently a dated snapshot. App updates require a verified iPad checkpoint. ChatGPT decisions are not directly streamable from all past conversations.</p>
       </section>
       <section class="roadmap" id="roadmap"></section>
-      <footer>READ-ONLY DEVELOPMENT R2.3.1 · No deploy, database writes or approval actions · Never infer a PASS from an old checkpoint</footer>
+      <footer>READ-ONLY DEVELOPMENT R2.5 · No deploy, database writes or approval actions · Never infer a PASS from an old checkpoint</footer>
     </section>
   </main>
 </body>
