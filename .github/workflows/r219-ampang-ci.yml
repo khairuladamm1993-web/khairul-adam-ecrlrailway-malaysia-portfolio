@@ -7,6 +7,8 @@ on:
       - 'assets/mrs10-r219-ampang-service.js'
       - 'ampang-line-r219.html'
       - 'assets/mrs10-r219-map-bridge.js'
+      - 'assets/mrs10-r219-ampang-gis.js'
+      - 'assets/mrs10-r219-ampang-gis-overlay.js'
       - 'tests/r219-ampang-orange-service.test.cjs'
       - '.github/workflows/r219-ampang-ci.yml'
   workflow_dispatch:
@@ -36,6 +38,8 @@ jobs:
           test -f "$RUNNER_TEMP/mrs10-r219-stage/ampang-line-r219.html"
           test -f "$RUNNER_TEMP/mrs10-r219-stage/assets/mrs10-r219-ampang-service.js"
           test -f "$RUNNER_TEMP/mrs10-r219-stage/assets/mrs10-r219-map-bridge.js"
+          test -f "$RUNNER_TEMP/mrs10-r219-stage/assets/mrs10-r219-ampang-gis.js"
+          test -f "$RUNNER_TEMP/mrs10-r219-stage/assets/mrs10-r219-ampang-gis-overlay.js"
           ! grep -q -i "<iframe" "$RUNNER_TEMP/mrs10-r219-stage/ampang-line-r219.html"
           grep -q "r219-map" "$RUNNER_TEMP/mrs10-r219-stage/ampang-line-r219.html"
           test -f "$RUNNER_TEMP/mrs10-r219-stage/map-language-lab.html"
@@ -46,5 +50,5 @@ jobs:
         shell: bash
         run: |
           test ! -f .env
-          ! grep -Eq '(GITHUB_TOKEN|SUPABASE_SERVICE_ROLE|VERCEL_TOKEN)' assets/mrs10-r219-ampang-service.js assets/mrs10-r219-map-bridge.js ampang-line-r219.html
+          ! grep -Eq '(GITHUB_TOKEN|SUPABASE_SERVICE_ROLE|VERCEL_TOKEN)' assets/mrs10-r219-ampang-service.js assets/mrs10-r219-map-bridge.js assets/mrs10-r219-ampang-gis.js assets/mrs10-r219-ampang-gis-overlay.js ampang-line-r219.html
           test -f map-language-lab.html
