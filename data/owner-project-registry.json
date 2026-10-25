@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "R2.8 Liuzhou English rail map issue unresolved user-approved Safari; new separate source-safe vector rails prototype staging READY and QA PASS (246/246), global Dark Mode still pending",
+  "register": "R2.9 Owner-approved LRVTC Guantang campus pin stored as OSM approximate campus centroid, 251/251 Node PASS; isolated staging READY; Safari UAT pending. Production and ECRL unchanged.",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -53,9 +53,17 @@
       "category": "website",
       "phase": "R2.5 + R2.6 integrated in MR-S10 single-domain isolated Unified Preview; Owner session/browser UAT pending",
       "overall": "IN_PROGRESS",
-      "nextDecision": "Owner Safari R2.8: with EN selected, Railway details OFF should show sourced vector rail lines if available and readable Liuzhou labels. ON restores native technical raster Chinese labels. If style provides no transportation source, fallback text warns unavailability. Keep item #5 PENDING until owner visual PASS. No canonical preview or Production merge.",
+      "nextDecision": "Owner Safari R2.9 UAT: open isolated MR-S10 Visitor Map, select China then the LRVTC Guantang Campus button. Verify one school pin and four-language popup at campus area, absent in Malaysia/Thailand, railway map unchanged. Remain NO-GO for Production merge. R2.8 English/Pinyin and map technical labels remain separate pending issues.",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
+        {
+          "type": "test",
+          "label": "R2.9 Owner-approved Guantang Campus education pin (isolated preview)",
+          "value": "1 optional China pin · 251/251 Node PASS · 14/14 Catalogue PASS · Preview READY · Safari PENDING",
+          "verifiedOn": "2026-10-25",
+          "confidence": "OSM campus-area centroid; not exact door or verified 2024 lodging",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/feature/mrs10-r29-lrvtc-guantang-campus-pin"
+        },
         {
           "type": "test",
           "label": "R2.8 Liuzhou English-readable visitor rail map isolated QA",
@@ -816,5 +824,33 @@
     "supabaseAuthRls": "UNCHANGED",
     "slice1": "UNCHANGED",
     "globalDarkModeUat": "PENDING"
+  },
+  "integrationR29": {
+    "checkedOn": "2026-10-25",
+    "project": "P01",
+    "ownerApproval": "2026-10-25 — Guantang Campus is approved as the MR-S10 college-location pin; prior South Gate/Heping Road is not used",
+    "title": "R2.9 LRVTC Guantang Campus reference pin",
+    "sourceBranch": "feature/mrs10-r29-lrvtc-guantang-campus-pin",
+    "sourceCommit": "3d9ddf280e5e10aa82e74a09d82bd793221ae6ab",
+    "college": "Liuzhou Railway Vocational Technical College · Guantang Campus / 柳州铁道职业技术学院",
+    "address": "No. 2 Wenyuan Road, Yufeng District, Liuzhou, Guangxi, China",
+    "coordinate": {
+      "type": "OSM campus-area approximate centroid, WGS84, NOT a verified building entrance",
+      "lat": 24.39864,
+      "long": 109.52917,
+      "osmWay": "631232606"
+    },
+    "mapScope": "Only one optional educational campus pin while China is selected; BM EN 中文 ไทย popup; focus map button",
+    "disclosure": "Do not publish user photos, trip documents, travel dates, personal data or private dorm location",
+    "qa": "251/251 Node PASS; 14/14 Catalogue PASS; both production and public artifact builders PASS",
+    "deploymentId": "dpl_CXessrUh9arLZ13GzaopzsKVHrqQ",
+    "stagingUrl": "https://mrs10-r29-guantang-campus-uat.vercel.app/map-language-lab.html",
+    "deploymentReady": "READY; 48/48 files, isolated staging",
+    "safariUat": "PENDING — owner needs to visually confirm pin after selecting China and focusing campus",
+    "canonUnifiedPreview": "UNCHANGED",
+    "production": "UNCHANGED",
+    "supabaseAuthRls": "UNCHANGED",
+    "ecrlOperationalMap": "UNCHANGED",
+    "remainingR29Scope": "Pinyin-first full-China place-label fallback, all stations, rail-level map sync, actual station/train route and gate location are not part of this pin checkpoint"
   }
 }
