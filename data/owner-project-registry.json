@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "R2.7 optional vector visitor map and explicit Chapter theme fix QA PASS 236/236, staging READY 48 assets; user Safari UAT pending. Unified R2.5+R2.6 alias not changed.",
+  "register": "R2.7 Safari localized visitor maps Malaysia Thailand China observed by Owner; numeric railway refs + low dark contrast remediation in separate development preview 241/241 PASS, Safari retest pending",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -53,9 +53,17 @@
       "category": "website",
       "phase": "R2.5 + R2.6 integrated in MR-S10 single-domain isolated Unified Preview; Owner session/browser UAT pending",
       "overall": "IN_PROGRESS",
-      "nextDecision": "Verify on Safari R2.7 separate staging: Light/Dark Chapter 01 honors saved theme and changes visuals; MapLibre visitor map responds to BM/EN/中文/ไทย location labels with English fallback when available. Keep old ECRL map and canonical staging stable until Owner confirms UAT. OpenFreeMap/CDN/network and WebGL require live verification.",
+      "nextDecision": "Safari iPhone R2.7 Visitor Contrast UAT: confirm default railway details OFF removes numeric references, toggle ON preserves railway overlay, Dark Mode text/buttons/attribution readable and Light Mode still clear. Do not merge or promote before visual evidence. A complete MR-S10 global Dark Mode accessibility audit remains open.",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
+        {
+          "type": "test",
+          "label": "R2.7 multilingual Visitor Map dark contrast and railway reference overlay toggle",
+          "value": "241/241 Node PASS · 14/14 Catalogue PASS · 48-file Preview READY · Safari UAT pending",
+          "verifiedOn": "2026-10-25",
+          "confidence": "development QA and deployment; user screenshot confirms older preview only",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/fix/mrs10-r27-visitor-contrast-railway-toggle"
+        },
         {
           "type": "test",
           "label": "R2.7 Chapter reader theme and multilingual vector map beta",
@@ -733,5 +741,49 @@
     "main": "UNCHANGED",
     "authRls": "UNCHANGED",
     "ecrlSlice1": "UNCHANGED"
+  },
+  "integrationR27SafariFollowUp": {
+    "checkedOn": "2026-10-25",
+    "project": "P01",
+    "component": "Multilingual Visitor Map",
+    "ownerSafariEvidence": {
+      "testedCountries": [
+        "Malaysia",
+        "Thailand",
+        "China"
+      ],
+      "selectedLocales": [
+        "ms",
+        "en",
+        "zh",
+        "th"
+      ],
+      "mapLoadAndZoom": "PASS per Owner screenshots",
+      "languageLabels": "PASS for locations shown in screenshots; not full catalogue coverage",
+      "railReferenceNumbers": "VISIBLE blue technical codes on railway overlay; visual readability defect",
+      "darkMode": "FAIL/PENDING Owner reports poor contrast; no full-page dark screenshot to quantify",
+      "globalSiteDarkMode": "NOT VERIFIED — separate from visitor-map specific remediation"
+    },
+    "sourceBranch": "fix/mrs10-r27-visitor-contrast-railway-toggle",
+    "sourceCommit": "9826141bac0290ce714ebae48209a1670c7f471e",
+    "fixes": [
+      "Visitor map defaults to raster railway detail OFF, can toggle technical rail overlay ON",
+      "Four-language descriptive railway-detail labels",
+      "Higher contrast Dark Mode controls, text, attribution and explicit theme button",
+      "Mobile safe-area header spacing",
+      "Existing MapLibre city name translation, ECRL geometry and source attribution retained"
+    ],
+    "qa": "241/241 Node PASS; 14/14 Catalogue PASS; isolated full artifact builder PASS",
+    "stageDeploymentId": "dpl_61FAzmYE4mutFaqtwuCxueBsUCqs",
+    "previewUrl": "https://mrs10-r27-visitor-contrast-uat.vercel.app/map-language-lab.html",
+    "stageReady": "READY",
+    "stageFiles": "48/48",
+    "projectSSO": "ENABLED, UNCHANGED",
+    "safariUat": "PENDING — map overlay toggle and real dark mode readability",
+    "previousR27Preview": "https://mrs10-r27-map-language-uat.vercel.app/map-language-lab.html remains unchanged",
+    "canonicalUnifiedPreview": "https://mrs10-r24-single-gateway-preview.vercel.app/gateway.html remains unchanged",
+    "production": "UNCHANGED",
+    "supabase": "UNCHANGED",
+    "ecrlSimulation": "UNCHANGED"
   }
 }
