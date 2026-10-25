@@ -2682,7 +2682,7 @@
     "issueId": "r217-kajang-green-identity-29-stations",
     "title": "R2.17 MRT Kajang 29-stop green service identity and source-backed POI accent",
     "checkedOn": "2026-10-26",
-    "state": "STAGING_READY_SAFARI_VISUAL_UAT_PENDING",
+    "state": "OWNER_KAJANG_GREEN_DARK_POPUP_PARTIAL_PASS_29_LIST_PENDING",
     "ownerApproval": "Owner approved applying MRT Kajang official green identity to all 29 station records, with MRT/KTM visibly distinguishable. This is not consent to Production merge or fabricated physical geometry.",
     "evidenceSources": [
       "https://www.mymrt.com.my/projects/kajang-line/",
@@ -2723,7 +2723,7 @@
       "deployment": "READY, isolated target staging",
       "artifact": "HTML and registry/map JS HTTP 200; excluded Member/quiz JS HTTP 404",
       "tests": "Color identity and dark contrast, 29 numbered list, exact green source POI filter, selection behaviour, country switch, no fabricated geometry",
-      "safari": "PENDING — Owner verify green 29-station Registry on iPhone, selection toggling and source-backed Kajang popup",
+      "safari": "PARTIAL PASS — Owner Safari screenshot 2026-10-26 04:14 MYT shows green Kajang POI, KG35 name, candidate 29/29, visible popup accent and physical-track caveat. 29 numbered green Registry stops, switching-country visibility, adjacent blue POI identity and popup header visibility not yet confirmed.",
       "notes": "Three earlier staging test runs failed newly authored harness/assertion (missing mock isStyleLoaded and cross-realm array comparison) and then caught a genuine country-switch highlight persistence bug; all fixed and final staging suite PASS."
     },
     "staging": {
@@ -2742,8 +2742,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "NO-GO for Production, integration and merge: staging source tests PASS but Owner Safari visual UAT not yet done; physical track alignment and station geolocation beyond exact sourced POIs remain unverified.",
-    "nextAction": "Owner opens R2.17 isolated staging on Safari iPhone, chooses Malaysia, expands Registry, selects MRT Kajang Line; verify green numbered 1 Kwasa Damansara through 29 Kajang and high-contrast dark mode. Optionally zoom near Kajang and tap exact KG35 station marker for green source identity candidate popup. Switch Thailand to ensure green highlight disappears. Do not assume all 29 map marker coordinates or physical track geometries are verified.",
+    "releaseDecision": "NO-GO Production/merge — initial source-backed Kajang Green POI and dark popup Safari UAT PARTIAL PASS, but 29-station green list and adjacent POI identity remain unverified; physical alignment audits and release gates remain open.",
+    "nextAction": "Owner Safari: confirm green numbered registry list 1 Kwasa Damansara to 29 Kajang under selected MRT Kajang route, including light and dark mode. Investigate nearby blue POI by independently tapping and recording source name before claiming KTM/duplicate. Review popup first heading visibility if persistent. Continue geospatial audit without fabricated physical way or station coordinates; do not merge to Production.",
     "boundaries": {
       "main": "UNCHANGED",
       "production": "UNCHANGED",
@@ -2752,6 +2752,31 @@
       "p03": "UNTOUCHED",
       "merge": "NOT DONE",
       "ownerScreenshots": "NOT PUBLISHED"
+    },
+    "ownerSafariKajangGreenUat": {
+      "observedAt": "2026-10-26T04:14:00+08:00",
+      "evidenceType": "Owner supplied Safari iPhone screenshot in conversation (not uploaded to public GitHub)",
+      "testContext": "R2.17 Malaysia map, Dark Mode, expanded fullscreen map, source-backed Kajang POI, URL shown only partially in Safari bar",
+      "acceptedResults": [
+        "Green station source-backed marker visible next to track rendering",
+        "KG35 Kajang original source name rendered",
+        "MRT · Kajang Line service stop 29/29 candidate match rendered",
+        "Green accent visible with readable light-on-dark popup text",
+        "Physical track unverified qualifier retained"
+      ],
+      "result": "PARTIAL_PASS_KAJANG_GREEN_POI_DARK_POPUP",
+      "notEstablished": [
+        "All 29 green numbered stations in scrollable Registry not shown in screenshot",
+        "On-map positions/green markers for remaining 27 stations not validated",
+        "Nearby teal/blue map POI identity not established; cannot assume KTM or duplicate",
+        "Popup first heading not visible in screenshot; inspect content overflow/focus before treating as verified",
+        "The Safari screenshot's shortened URL does not independently prove exact deployment SHA"
+      ],
+      "nextChecks": [
+        "Open 29-station Registry while MRT Kajang is selected and verify green styling for 1 Kwasa Damansara through 29 Kajang",
+        "For green and blue neighboring POIs, separately tap each and compare exact names/source attributes before classifying as duplicates or MRT/KTM",
+        "If popup title is inaccessible without manual scroll, log popup layout regression and fix in isolated dev branch"
+      ]
     }
   }
 }
