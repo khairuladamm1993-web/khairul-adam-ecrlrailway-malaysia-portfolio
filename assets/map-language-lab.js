@@ -15,6 +15,13 @@ const uiText={
  zh:{railOn:'铁路详情：开启',railOff:'铁路详情：关闭',railNote:'游客模式隐藏 OpenRailwayMap 技术图层。开启铁路详情可查看线路和参考编号。',themeLight:'切换至浅色模式',themeDark:'切换至深色模式',labelLayers:'支持语言切换的标签图层'},
  th:{railOn:'รายละเอียดรถไฟ: เปิด',railOff:'รายละเอียดรถไฟ: ปิด',railNote:'โหมดนักท่องเที่ยวซ่อนชั้นข้อมูลทางเทคนิคของ OpenRailwayMap เปิดรายละเอียดรถไฟเพื่อดูเส้นทางและรหัสอ้างอิง',themeLight:'เปลี่ยนเป็นโหมดสว่าง',themeDark:'เปลี่ยนเป็นโหมดมืด',labelLayers:'ชั้นป้ายชื่อที่รองรับภาษา'}
 };
+
+const railLegendI18n={
+ ms:{title:'Petunjuk warna railway',note:'Warna lapisan standard OpenRailwayMap sahaja. Garisan pada peta asas mungkin bukan railway; warna bukan pengesahan elektrifikasi atau kelajuan sebenar.',items:['Laluan utama','Rel laju (tag highspeed)','Laluan cabang','Metro / subway','Industri / spur','Rel lain / yard']},
+ en:{title:'Railway colour legend',note:'OpenRailwayMap standard layer only. Basemap lines may not be railway; these colours do not prove electrification or actual operating speeds.',items:['Main line','High-speed tagged rail','Branch line','Metro / subway','Industrial / spur','Other rail / yard']},
+ zh:{title:'铁路颜色图例',note:'仅适用于 OpenRailwayMap 标准图层。底图线条可能不是铁路；颜色不能证明电气化或实际运行速度。',items:['铁路干线','高速铁路标记','铁路支线','地铁','工业线 / 专用线','其他轨道 / 车场']},
+ th:{title:'คำอธิบายสีทางรถไฟ',note:'ใช้กับชั้นมาตรฐาน OpenRailwayMap เท่านั้น เส้นบนแผนที่พื้นฐานอาจไม่ใช่ทางรถไฟ และสีไม่ได้ยืนยันระบบไฟฟ้าหรือความเร็วจริง',items:['ทางรถไฟสายหลัก','รางที่ระบุว่าเป็นความเร็วสูง','ทางรถไฟสายรอง','รถไฟฟ้าใต้ดิน','รางอุตสาหกรรม / รางแยก','รางอื่น / ลานจอด']}
+};
 const readableRailLanguage={
  ms:{guide:'Liuzhou · nama railway dwibahasa',guideHint:'Rujukan nama daripada tangkap layar Owner; bukan pin lokasi stesen yang disahkan.',railLines:'Mod pelawat: garisan railway vektor tanpa nombor trek',railMissing:'Garisan railway vektor tidak tersedia dalam gaya peta ini.',technical:'Butiran teknikal ON: nombor trek dan nama pada imej OpenRailwayMap kekal dalam bahasa asal.'},
  en:{guide:'Liuzhou · bilingual railway names',guideHint:'Names identified from the Owner screenshot; not verified station coordinates.',railLines:'Visitor mode: vector railway lines without track numbers',railMissing:'Vector railway lines are unavailable in this map style.',technical:'Technical railway mode ON: track numbers and names on the OpenRailwayMap image remain in their original language.'},
@@ -67,12 +74,12 @@ function syncCampusPin(){
   pin.setAttribute('aria-label',campusText[lang].title);
   campusMarker=new maplibregl.Marker({element:pin,anchor:'bottom'})
    .setLngLat(LRVTC_CAMPUS.lngLat)
-   .setPopup(new maplibregl.Popup({offset:22,maxWidth:'290px'}).setDOMContent(makeCampusPopup()))
+   .setPopup(new maplibregl.Popup({offset:22,maxWidth:'255px'}).setDOMContent(makeCampusPopup()))
    .addTo(map);
  }else{
   const pin=campusMarker.getElement?.();
   if(pin){pin.title=campusText[lang].title;pin.setAttribute('aria-label',campusText[lang].title);}
-  campusMarker.setPopup(new maplibregl.Popup({offset:22,maxWidth:'290px'}).setDOMContent(makeCampusPopup()));
+  campusMarker.setPopup(new maplibregl.Popup({offset:22,maxWidth:'255px'}).setDOMContent(makeCampusPopup()));
  }
 }
 function setRailVisibility(){
@@ -82,6 +89,7 @@ function setRailVisibility(){
  const note=el('railway-note');if(note)note.textContent=railDetails?readableRailLanguage[lang].technical:uiText[lang].railNote;
  const quick=el('rail-mode-status');
  if(quick)quick.textContent=railDetails?readableRailLanguage[lang].technical:readableRailLanguage[lang].railLines;
+ const legend=el('railway-legend');if(legend)legend.hidden=!railDetails;
 
 }
 try{const v=localStorage.getItem('railway-language');if(locales.includes(v))lang=v;}catch{}
@@ -107,6 +115,10 @@ function render(){
  el('place-status').textContent=copy[lang][3];
  el('label-status').textContent=copy[lang][2];
  document.querySelectorAll('[data-locale]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.locale===lang)));
+ const legendCopy=railLegendI18n[lang];
+ const legendTitle=el('railway-legend-title');if(legendTitle)legendTitle.textContent=legendCopy.title;
+ const legendNote=el('railway-legend-note');if(legendNote)legendNote.textContent=legendCopy.note;
+ document.querySelectorAll('[data-rail-legend]').forEach(node=>{const i=Number(node.dataset.railLegend);if(Number.isInteger(i)&&i>=0&&i<legendCopy.items.length)node.textContent=legendCopy.items[i];});
  const guideTitle=el('liuzhou-title');if(guideTitle)guideTitle.textContent=readableRailLanguage[lang].guide;
  const guideHint=el('liuzhou-hint');if(guideHint)guideHint.textContent=readableRailLanguage[lang].guideHint;
  syncCampusPin();
