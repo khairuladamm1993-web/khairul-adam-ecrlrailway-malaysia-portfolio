@@ -2218,7 +2218,7 @@
     "issueId": "r216-kl-railway-track-station-registry-phase1",
     "title": "R2.16 Kuala Lumpur Railway Track & Station Registry — Phase 1",
     "checkedOn": "2026-10-26",
-    "state": "OWNER_SAFARI_ERL_PANEL_ORDER_PASS_OTHER_ROUTES_UAT_PENDING",
+    "state": "OWNER_SAFARI_ERL_AND_MRT_KAJANG_PANEL_PASS_FOLLOWUP_GATES_OPEN",
     "goal": "An auditable service-route and station source catalogue for the Kuala Lumpur / Klang Valley map pilot; physical track geometry and lane indexing are separate future evidence tasks.",
     "ownerApproval": "Owner explicitly approved transition to R2.16 with Kuala Lumpur first. No approval to merge or change Production.",
     "inheritedEvidence": {
@@ -2273,7 +2273,7 @@
       "staging": "READY with target staging and source commit verified",
       "previewHttp": "HTML, registry JS and map JS HTTP 200. Excluded member-gateway.js and questions.js HTTP 404",
       "tests": "Source confidence, 10 routes, verified ERL order, zero physical segments, negative geometry checks, collapsed panel, four-language and country visibility tested",
-      "safari": "PARTIAL PASS — Owner 2026-10-26 02:04 MYT iPhone Safari screenshot confirms KL registry panel, ERL KLIA Transit selection, all 6 stops in published order, visible operator-source link and 0 physical tracks. KTM/MRT unverified status and R2.16 popup regression still PENDING.",
+      "safari": "PARTIAL PANEL UAT PASS — Owner Safari ERL KLIA Transit six-stop ordering (02:04 MYT) and MRT Kajang Line unverified-order fallback (02:10 MYT) confirmed by screenshots. External source links, R2.16 popup regression and physical network completeness still pending.",
       "physicalTrackCoverage": "NOT STARTED — no authoritative lane identifiers/geometry yet",
       "browserNetwork": "Static registry script loaded before map module; no data fetch/connect-src dependency"
     },
@@ -2293,8 +2293,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "NO-GO Production/merge. Phase 1 ERL catalogue panel Safari visual PASS, but KTM/MRT UAT, source link navigation, station popup regression and complete physical topology still unverified. Source/build QA remains PASS.",
-    "nextAction": "Owner select one KTM or MRT route within the same isolated R2.16 staging panel and check explicit not-yet-verified station-order notice. No need to retest ERL sequence. Station tap regression can follow if needed; do not populate unverified physical lanes or merge.",
+    "releaseDecision": "HOLD / NO-GO — R2.16 Phase 1 Registry UI Safari ERL and MRT Kajang scenarios pass visually, but no physical track geometry or full sequence audit, source links and same-build popup regression remain unverified; no Production or merge approval.",
+    "nextAction": "Preserve ERL and MRT Kajang screenshot-based PASS. For remaining R2.16 Phase 1 QA, open an operator Source link and confirm official destination, and perform one railway station popup tap on the same R2.16 isolated staging to ensure no regression. Only then consider closing this scoped panel UAT; physical track geometry audit remains separate and open.",
     "boundaries": {
       "githubMain": "UNCHANGED",
       "production": "UNCHANGED",
@@ -2336,6 +2336,26 @@
         "Station popup regression in R2.16 not independently tested by this screenshot",
         "No individual physical track geometry, turnout, verified segment identifiers or complete Kuala Lumpur coverage",
         "Full station sequences beyond ERL KLIA Transit are not accepted"
+      ]
+    },
+    "ownerSafariMrtKajangUat": {
+      "observedAt": "2026-10-26T02:10:00+08:00",
+      "evidence": "Owner-provided iPhone Safari screenshot in this conversation. Personal screenshot not uploaded to public GitHub.",
+      "preview": "R2.16 isolated staging / Malaysia / English panel, map unchanged",
+      "route": "MRT · Kajang Line",
+      "result": "PASS_UNVERIFIED_STATION_ORDER_FALLBACK",
+      "observed": {
+        "routeSelection": "MRT · Kajang Line",
+        "disclaimer": "Full station order is not yet verified from source.",
+        "sourceLinks": "Source 1 and Source 2 visible; link navigation untested",
+        "registryCounts": "10 referenced routes · 6 ERL stops in verified order · 0 physical tracks verified",
+        "noStationSequenceInvented": true
+      },
+      "limits": [
+        "Only MRT Kajang Line fallback is shown; not all unverified route rows independently tested",
+        "The screenshot does not prove that source links open correctly",
+        "R2.16 station popup regression not yet independently tested",
+        "Physical track geometry, station-to-track association, lanes and complete KL network remain unverified"
       ]
     }
   }
