@@ -21,9 +21,60 @@ const readableRailLanguage={
  zh:{guide:'柳州 · 铁路地名对照',guideHint:'名称来自用户提供的截图，不代表经过核实的站点坐标。',railLines:'游客模式：铁路矢量线条，不显示股道编号',railMissing:'此地图样式不支持铁路矢量线条。',technical:'铁路详情开启：OpenRailwayMap 影像上的股道编号与地名仍使用原始语言。'},
  th:{guide:'หลิ่วโจว · ชื่อสถานที่รถไฟสองภาษา',guideHint:'ชื่อจากภาพหน้าจอของเจ้าของ ไม่ใช่พิกัดสถานีที่ผ่านการยืนยัน',railLines:'โหมดนักท่องเที่ยว: เส้นทางรถไฟแบบเวกเตอร์ ไม่มีหมายเลขราง',railMissing:'แผนที่นี้ไม่มีข้อมูลเส้นทางรถไฟแบบเวกเตอร์',technical:'เปิดรายละเอียดรถไฟ: หมายเลขรางและชื่อบนภาพ OpenRailwayMap ยังคงเป็นภาษาต้นฉบับ'}
 };
+// Campus reference centroid from OpenStreetMap way 631232606 (WGS84).
+// This is NOT a verified gate, building, or trainee accommodation position.
+const LRVTC_CAMPUS=Object.freeze({
+ id:'lrvtc-guantang-campus',name:'Liuzhou Railway Vocational Technical College',
+ alternate:'柳州铁道职业技术学院',campus:'Guantang Campus',
+ lngLat:Object.freeze([109.52917,24.39864]),osmWay:'631232606',
+ address:'No. 2 Wenyuan Road, Yufeng District, Liuzhou, Guangxi, China',
+ positionClass:'OSM campus-area reference, not surveyed entrance'
+});
+const campusText={
+ ms:{button:'🎓 LRVTC · Kampus Guantang',title:'LRVTC · Kampus Guantang',
+  note:'Pin rujukan kawasan kampus, bukan pintu masuk atau bangunan penginapan yang disahkan.'},
+ en:{button:'🎓 LRVTC · Guantang Campus',title:'LRVTC · Guantang Campus',
+  note:'Campus-area reference pin; not a verified gate or accommodation building.'},
+ zh:{button:'🎓 柳州铁道职业技术学院 · 官塘校区',title:'柳州铁道职业技术学院 · 官塘校区',
+  note:'仅供定位校区区域；不是经过核实的校门或住宿楼位置。'},
+ th:{button:'🎓 LRVTC · วิทยาเขตกวนถัง',title:'LRVTC · วิทยาเขตกวนถัง',
+  note:'หมุดอ้างอิงบริเวณวิทยาเขต ไม่ใช่ทางเข้าหรืออาคารที่พักที่ยืนยันตำแหน่งแล้ว'}
+};
 const el=id=>document.getElementById(id);
-let lang='ms',map=null,ready=false,railDetails=false;
+let lang='ms',map=null,ready=false,railDetails=false,activeRegion='malaysia',campusMarker=null;
 const railVisibility=on=>on?'visible':'none';
+function makeCampusPopup(){
+ const root=document.createElement('div');root.className='campus-popup';
+ const heading=document.createElement('strong');heading.textContent=campusText[lang].title;root.appendChild(heading);
+ const original=document.createElement('p');original.textContent=LRVTC_CAMPUS.alternate+' · Liǔzhōu Tiědào Zhíyè Jìshù Xuéyuàn';root.appendChild(original);
+ const address=document.createElement('p');address.textContent=LRVTC_CAMPUS.address;root.appendChild(address);
+ const note=document.createElement('small');note.textContent=campusText[lang].note;root.appendChild(note);
+ return root;
+}
+function syncCampusPin(){
+ const box=el('campus-location'),button=el('campus-focus');
+ const china=activeRegion==='china';
+ if(box)box.hidden=!china;
+ if(button)button.textContent=campusText[lang].button;
+ if(!china){
+  if(campusMarker){campusMarker.remove();campusMarker=null;}
+  return;
+ }
+ if(!map||!window.maplibregl?.Marker||!window.maplibregl?.Popup)return;
+ if(!campusMarker){
+  const pin=document.createElement('button');pin.type='button';pin.className='lrvtc-pin';
+  pin.textContent='🎓';pin.title=campusText[lang].title;
+  pin.setAttribute('aria-label',campusText[lang].title);
+  campusMarker=new maplibregl.Marker({element:pin,anchor:'bottom'})
+   .setLngLat(LRVTC_CAMPUS.lngLat)
+   .setPopup(new maplibregl.Popup({offset:22,maxWidth:'290px'}).setDOMContent(makeCampusPopup()))
+   .addTo(map);
+ }else{
+  const pin=campusMarker.getElement?.();
+  if(pin){pin.title=campusText[lang].title;pin.setAttribute('aria-label',campusText[lang].title);}
+  campusMarker.setPopup(new maplibregl.Popup({offset:22,maxWidth:'290px'}).setDOMContent(makeCampusPopup()));
+ }
+}
 function setRailVisibility(){
  if(map?.getLayer?.('mrl-railway'))map.setLayoutProperty('mrl-railway','visibility',railVisibility(railDetails));
  const button=el('railway-btn');
@@ -58,6 +109,7 @@ function render(){
  document.querySelectorAll('[data-locale]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.locale===lang)));
  const guideTitle=el('liuzhou-title');if(guideTitle)guideTitle.textContent=readableRailLanguage[lang].guide;
  const guideHint=el('liuzhou-hint');if(guideHint)guideHint.textContent=readableRailLanguage[lang].guideHint;
+ syncCampusPin();
  setRailVisibility();
  const countryNames={
   ms:['Malaysia','Thailand','China'],en:['Malaysia','Thailand','China'],
@@ -137,8 +189,16 @@ function init(){
  document.querySelectorAll('[data-region]').forEach(b=>b.addEventListener('click',()=>{
   const target=centers[b.dataset.region];
   if(target)map.flyTo({center:target[0],zoom:target[1],duration:600});
-  el('liuzhou-guide').hidden=b.dataset.region!=='china';
+  activeRegion=b.dataset.region;
+  el('liuzhou-guide').hidden=activeRegion!=='china';
+  syncCampusPin();
  }));
+ el('campus-focus').addEventListener('click',()=>{
+  activeRegion='china';syncCampusPin();
+  if(map)map.flyTo({center:LRVTC_CAMPUS.lngLat,zoom:13,duration:700});
+  if(campusMarker&&campusMarker.getPopup?.()&&!campusMarker.getPopup().isOpen?.())
+   campusMarker.togglePopup();
+ });
  el('theme-btn').addEventListener('click',()=>{
   const next=theme()==='dark'?'light':'dark';
   try{localStorage.setItem('railway-theme',next)}catch{}
@@ -149,7 +209,7 @@ function init(){
   if(e.key==='railway-language'&&locales.includes(e.newValue))setLanguage(e.newValue);
  });
 }
-if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText,transportationSource,railVectorLayer};
+if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText,transportationSource,railVectorLayer,LRVTC_CAMPUS,campusText};
 if(typeof document!=='undefined'){
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
  else init();
