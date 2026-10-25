@@ -13,8 +13,15 @@
   mrtKajangOverview:'https://www.mymrt.com.my/projects/kajang-line/',
   mrtKajangShortList:'https://www.mymrt.com.my/projects/kajang-line/stations/'
  });
+ // R2.17: sourced passenger-service branding, NOT an infrastructure-way style.
+ const kajangLineVisual=Object.freeze({
+  name:'Kajang Line Green',light:'#087D43',dark:'#50E2A0',
+  use:'SERVICE_AND_VERIFIED_STATION_REFERENCE_ONLY',
+  physicalAlignmentStatus:'UNVERIFIED'
+ });
  const route=(id,name,mode,operator,sourceKeys,stationSequence=[])=>Object.freeze({
   id,name,mode,operator,sourceUrls:sourceKeys.map(k=>sourceCatalogue[k]||k),
+  visualIdentity:id==='mrt-kajang'?kajangLineVisual:null,
   confidence:'OPERATOR_SERVICE_CONFIRMED',
   // These IDs are software registry IDs, NOT railway track or signal IDs.
   physicalTrackIds:[],vectorFeatureIds:[],geometry:null,
