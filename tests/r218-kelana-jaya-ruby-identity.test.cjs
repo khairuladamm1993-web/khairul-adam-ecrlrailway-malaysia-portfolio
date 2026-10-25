@@ -91,10 +91,11 @@ test('R2.18: source-coded KJ POI is ruby only on selected Malaysian service; Kaj
  assert.match(map.popup.node.textContent,/14\/37/);
  assert.match(map.popup.node.textContent,/candidate/);
  doc.getElementById('theme-btn').click();assert.equal(sel.value,'lrt-kelana-jaya');
- doc.querySelector('[data-region="thailand"]').click();assert.equal(layer.layout.visibility,'none');
- doc.querySelector('[data-region="china"]').click();assert.equal(layer.layout.visibility,'none');
+ doc.querySelector('[data-region="thailand"]').click();assert.equal(map.getLayer('mrl-kelana-code-poi').layout.visibility,'none');
+ doc.querySelector('[data-region="china"]').click();assert.equal(map.getLayer('mrl-kelana-code-poi').layout.visibility,'none');
  doc.querySelector('[data-region="malaysia"]').click();assert.equal(doc.getElementById('kl-registry').hidden,false);
  sel.value='mrt-kajang';sel.dispatchEvent(new w.Event('change'));
- assert.equal(kg.layout.visibility,'visible');assert.equal(layer.layout.visibility,'none');
+ assert.equal(map.getLayer('mrl-kajang-known-poi').layout.visibility,'visible');
+ assert.equal(map.getLayer('mrl-kelana-code-poi').layout.visibility,'none');
  w.close();
 });
