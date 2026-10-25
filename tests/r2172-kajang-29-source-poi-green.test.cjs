@@ -108,8 +108,12 @@ test('R2.17.2: KG13 popup shows 9/29 and marker becomes green when user selects 
  const{w,map,doc}=render(station('KG13 Pusat Bandar Damansara','Pusat Bandar Damansara'));
  const layer=map.getLayer('mrl-kajang-known-poi'),selector=doc.getElementById('kl-registry-route');
  assert(layer,'a source-POI filter layer must exist');
- const names=Array.from(layer.filter[3][2][1]);
- assert(names.includes('KG13 Pusat Bandar Damansara'));
+ // Inspect what MapLibre would actually paint, not a fixed nested-array index.
+ const passes=require('./helpers/kajang-filter-evaluator.cjs');
+ assert(passes(layer.filter,station('KG13 Pusat Bandar Damansara','Pusat Bandar Damansara')),
+  'source-matched KG13 must remain green');
+ assert(!passes(layer.filter,station('KG13 Pusat Bandar Damansara','KTM Kajang')),
+  'contradictory source POI must remain neutral');
  assert.equal(layer.layout.visibility,'none');
  selector.value='mrt-kajang';selector.dispatchEvent(new w.Event('change'));
  assert.equal(layer.layout.visibility,'visible');
