@@ -30,6 +30,9 @@ function launch(){
 }
 test('R2.15.1 visitors hide raster colour legend, while technical mode retains full 8-swatch legend',()=>{
  const{w,doc}=launch(),l=doc.getElementById('railway-legend'),toggle=doc.getElementById('railway-btn');
+ assert.equal(toggle.getAttribute('aria-pressed'),'false');
+ assert.equal(l.hidden,true);
+ toggle.click();
  assert.equal(toggle.getAttribute('aria-pressed'),'true');
  assert.equal(l.hidden,false);
  assert.equal(l.querySelectorAll('[data-rail-legend]').length,8);
@@ -48,7 +51,6 @@ test('R2.15.1 opens a shorter scrollable legend while keeping 44px palette contr
 });
 test('R2.15.1 genuine map tap reports no source-backed feature and never fabricates an operator',()=>{
  const{w,map,doc}=launch();
- doc.getElementById('railway-btn').click();
  const l=doc.getElementById('railway-legend');assert(l.hidden);
  assert.equal(typeof map.handlers.click,'function');
  map.handlers.click({point:{x:120,y:200},lngLat:{lng:101.7,lat:3.15}});
@@ -59,7 +61,7 @@ test('R2.15.1 genuine map tap reports no source-backed feature and never fabrica
 });
 test('R2.15.1 source-backed urban transit click still opens popup when real rendered feature is available',()=>{
  const{w,map,doc}=launch();
- doc.getElementById('railway-btn').click();
+ assert(doc.getElementById('railway-legend').hidden);
  map.queryRenderedFeatures=()=>[{layer:{id:'mrl-pilot-rail-hits'},properties:{class:'transit',subclass:'subway'}}];
  map.handlers.click({point:{x:130,y:220},lngLat:{lng:101.7,lat:3.15}});
  assert(map.popup?.node);
