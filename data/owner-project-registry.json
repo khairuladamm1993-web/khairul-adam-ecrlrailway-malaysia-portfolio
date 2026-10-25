@@ -1499,7 +1499,7 @@
     "project": "P01",
     "checkedOn": "2026-10-25",
     "title": "R2.14.1 Compact Mobile Controls & Half-Contrast Theme Icon",
-    "state": "STAGING_READY_SAFARI_UAT_PENDING",
+    "state": "PARTIAL_SAFARI_VISUAL_PASS_BOTTOM_POPUP_PENDING",
     "issueId": "r2141-compact-mobile-controls",
     "ownerDesignReference": "Owner-provided iPhone Control Center screenshot with half-light/half-dark appearance glyph, confirmed acceptable. Image not published to GitHub.",
     "branch": "feature/mrs10-r2141-compact-controls-contrast-icon",
@@ -1526,7 +1526,7 @@
       "html": "HTTP 200; compact theme icon and panel CSS present in staging output",
       "js": "HTTP 200; theme text overwrite removed; code panel overlap class present",
       "restrictedFiles": "404 for excluded questions.js and member-gateway.js",
-      "realSafari": "PENDING — visual size/theme tap and popup screen overlap require Owner iPhone test",
+      "realSafari": "PARTIAL VISUAL PASS — Owner 23:36 iPhone Safari screenshot confirms icon-only half-contrast theme control, compact language/country buttons, readable dark popup and no pilot-banner overlap. Lower code-result area near bottom Safari toolbar: full scroll/safe-area PENDING.",
       "rasterClick": "UNSUPPORTED — no change to OpenRailwayMap raster behavior",
       "chineseThaiLanguage": "PENDING — 中文 and ไทย R2.14 UAT not covered by previous screenshots"
     },
@@ -1546,8 +1546,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "NO-GO FOR PRODUCTION — source/staging PASS but Safari UAT not yet complete; no merge approved",
-    "nextAction": "Owner opens isolated R2.14.1 staging on Safari iPhone, checks 44px half-contrast theme icon in Light/Dark, compact BM/EN/中文/ไทย and Malaysia/Thailand/China buttons, China 🔢 44930 popup with no status overlap and scroll at normal/expanded map. Chinese and Thai text still require verification.",
+    "releaseDecision": "NO-GO FOR PRODUCTION — source/staging PASS, Owner Safari visual partial PASS; popup bottom scrolling, 中文/ไทย and overall UAT pending. No merge authorized.",
+    "nextAction": "On same Safari R2.14.1 tab, scroll within opened China 🔢 code card (44930) and verify pinyin plus reference link can be reached above Safari toolbar. Only if clipped, fix panel bottom safe area in a separate isolated development branch; 中文/ไทย tests later. Keep Production untouched.",
     "boundaries": {
       "production": "UNCHANGED",
       "gitHubMain": "UNCHANGED",
@@ -1556,6 +1556,28 @@
       "p03": "UNTOUCHED",
       "merge": "NOT PERFORMED",
       "personalImages": "NOT PUBLISHED"
+    },
+    "ownerSafariVisualEvidence": {
+      "checkedOn": "2026-10-25",
+      "screenshotTimeMYT": "23:36",
+      "mode": "Safari iPhone, EN selected, Dark Mode, China code lookup visible",
+      "source": "Owner screenshot in current ChatGPT conversation; screenshot not uploaded to public repository",
+      "confirmed": [
+        "Compact half-light/half-dark circular theme icon rendered at top-right",
+        "Four language buttons BM/EN/中文/ไทย visually compact and English selected",
+        "Three country buttons Malaysia/Thailand/China visually compact",
+        "Open China code lookup panel shows header, close control, input 44930 and sample-code buttons",
+        "Dark Mode panel and control text visually legible in captured viewport",
+        "Previously overlapping railway pilot banner not visible over open code panel"
+      ],
+      "gaps": [
+        "Lower code-result content appears at or below iPhone Safari bottom toolbar; full scrolling/reachability not demonstrated",
+        "A still screenshot does not verify theme toggle interaction or 44px physical target hit testing",
+        "中文 and ไทย display UAT still pending",
+        "Expanded-map/portrait-small-screen and lower popup safe-area behavior not fully confirmed",
+        "No direct vector station or railway click evidence in this screenshot"
+      ],
+      "classification": "PARTIAL_VISUAL_PASS; POPUP_BOTTOM_VISIBILITY_UAT_PENDING"
     }
   }
 }
