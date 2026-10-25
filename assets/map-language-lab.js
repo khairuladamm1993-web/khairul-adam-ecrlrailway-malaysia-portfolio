@@ -261,15 +261,36 @@ function installPilotVectorLayers(){
    const identity=api?.findRoute?.('mrt-kajang')?.visualIdentity;
    const candidates=api?.kajangPoiSourceNames;
    if(identity&&Array.isArray(candidates)&&candidates.length>=29){
-    map.addLayer({
-     id:'mrl-kajang-known-poi',type:'circle',source:poiSource,'source-layer':'poi',minzoom:10,
-     filter:['all',['==',['get','class'],'railway'],
-      ['in',['get','subclass'],['literal',['station','subway']]],
-      ['in',['get','name'],['literal',candidates]]],
-     layout:{visibility:'none'},
-     paint:{'circle-radius':6.3,'circle-color':identity.light,
-      'circle-stroke-color':'#FFFFFF','circle-stroke-width':2}
-    });
+    // R2.17.6: keep the GREEN visual filter consistent with the stronger
+    // popup matcher. A matching KG code/name with a contradictory English
+    // source field must NOT be painted green before the user taps the POI.
+    // All conditions are derived from the existing Registry crosswalk.
+    const matchedSources=candidates.map(rawName=>{
+     const match=api.matchSourcedKajangPoi?.({class:'railway',subclass:'station',name:rawName});
+     return match?{rawName,...match}:null;
+    }).filter(Boolean);
+    if(matchedSources.length===candidates.length){
+     const exactSourceFilter=['any',...matchedSources.map(entry=>{
+      const allowed=Array.from(new Set([
+       entry.stationName,entry.rawName,
+       ...matchedSources.filter(v=>v.stationId===entry.stationId)
+        .map(v=>v.rawName.slice(v.stationCode.length+1))
+      ].map(v=>String(v).toLowerCase())));
+      const validEnglish=key=>['any',['!', ['has',key]],
+       ['in',['downcase',['to-string',['get',key]]],['literal',allowed]]];
+      return ['all',['==',['get','name'],entry.rawName],
+       validEnglish('name:en'),validEnglish('name_en')];
+     })];
+     map.addLayer({
+      id:'mrl-kajang-known-poi',type:'circle',source:poiSource,'source-layer':'poi',minzoom:10,
+      filter:['all',['==',['get','class'],'railway'],
+       ['in',['get','subclass'],['literal',['station','subway']]],
+       exactSourceFilter],
+      layout:{visibility:'none'},
+      paint:{'circle-radius':6.3,'circle-color':identity.light,
+       'circle-stroke-color':'#FFFFFF','circle-stroke-width':2}
+     });
+    }
    }
   }catch(e){if(pilotDebug)writeRailTapDiagnostic('Kajang POI highlight setup error',String(e?.message||e).slice(0,80));}
  }
