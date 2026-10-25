@@ -23,7 +23,7 @@
    if(existing){existing.addEventListener('load',()=>ready()?resolve():reject(new Error(src+' unavailable')),{once:true});existing.addEventListener('error',reject,{once:true});return;}
    const s=document.createElement('script');s.src=src;s.async=true;s.setAttribute(attr,'1');s.onload=()=>ready()?resolve():reject(new Error(src+' unavailable'));s.onerror=()=>reject(new Error(src+' failed to load'));document.head.append(s);
   });
-  mapLoader=(async()=>{await load('assets/map-intelligence.js','data-railway-map-intelligence',()=>Boolean(window.RailwayMapIntelligence));await load('assets/map-gateway.js','data-railway-map-module',()=>Boolean(window.RailwayMap));return window.RailwayMap;})();
+  mapLoader=(async()=>{await load('assets/map-locale.js','data-railway-map-locale',()=>Boolean(window.RailwayMapLocale));await load('assets/map-intelligence.js','data-railway-map-intelligence',()=>Boolean(window.RailwayMapIntelligence));await load('assets/map-gateway.js','data-railway-map-module',()=>Boolean(window.RailwayMap));return window.RailwayMap;})();
   return mapLoader;
  };
  const mountMap=()=>ensureMap().then(m=>m.mount(document.querySelector('#railway-map-mount'))).catch(error=>{const host=document.querySelector('#railway-map-mount');if(host)host.innerHTML='<article class="learning-card"><h2>MAP</h2><p>'+R.escape(error.message||error)+'</p></article>';});
@@ -89,5 +89,16 @@
   if(hadMemberAccess&&!hasMemberAccess)render();
   hadMemberAccess=hasMemberAccess;
  });
- R.onLanguage(render);render();
+ R.onLanguage(()=>{
+  // Retain Leaflet viewport/markers when only the website language changes.
+  if(category==='map'&&window.RailwayMap?.mounted){
+   const title=box.querySelector('.content-heading h2'),subtitle=box.querySelector('.content-heading p');
+   if(title)title.innerHTML=h('MAP');
+   if(subtitle)subtitle.innerHTML=h('Visual projection of approved Corridor references. No route line.');
+   window.RailwayMapLocale?.apply(box,R.language);
+   if(dialog.open)renderDetail();
+   return;
+  }
+  render();
+ });render();
 })();
