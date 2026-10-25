@@ -78,7 +78,7 @@ test('R2.17: only exact source-backed KG16/KG35 map POIs turn green; no whole al
  assert.equal(layer.type,'circle');
  assert.equal(layer.source,'osm');
  assert.equal(layer['source-layer'],'poi');
- assert.deepEqual(layer.filter[3][2][1],['KG16 Pasar Seni','KG35 Kajang']);
+ assert.deepEqual(Array.from(layer.filter[3][2][1]),['KG16 Pasar Seni','KG35 Kajang']);
  assert.equal(layer.paint['circle-color'],'#087D43');
  assert.equal(layer.layout.visibility,'none');
  const selector=doc.getElementById('kl-registry-route');
