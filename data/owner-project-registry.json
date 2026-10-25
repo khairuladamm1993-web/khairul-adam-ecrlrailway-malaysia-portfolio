@@ -2581,5 +2581,90 @@
       "merge": "NOT PERFORMED",
       "ownerPersonalImages": "NOT PUBLISHED"
     }
+  },
+  "integrationR2163": {
+    "project": "P01",
+    "issueId": "r2163-kl-pilot-source-poi-crosswalk",
+    "title": "R2.16.3 Kuala Lumpur MRT Kajang vector station POI conservative crosswalk",
+    "checkedOn": "2026-10-26",
+    "state": "STAGING_READY_SAFARI_UAT_PENDING",
+    "purpose": "Cross-reference exact previously Owner-observed vector station code/name attributes against operator-verified Kajang service stop positions without assigning railway physical tracks, route relations, platforms or coordinates.",
+    "scope": "P01 Malaysia pilot map and service registry only; no production changes",
+    "inheritedEvidence": {
+      "kajangStops": "R2.16.1 operator-published ordered 29 stops, first Kwasa Damansara / last Kajang; Owner confirmed endpoints",
+      "physicalTrackAudit": "R2.16.2 standalone source audit remains separate and OPEN with zero verified infrastructure ways",
+      "ownerSafari": "Prior source-backed popup displayed KG16 Pasar Seni and KG35 Kajang; these source attributes are crosswalk candidate keys, not validated OSM infrastructure IDs"
+    },
+    "development": {
+      "branch": "feature/mrs10-r2163-poi-crosswalk-kajang",
+      "sourceBaseCommit": "64713ca3874c5eda65d8de070081345732d6109e",
+      "sourceCommit": "6f0f2c50f602c7a618ff1ae648db1bc43b33464e",
+      "changedFiles": [
+        "assets/railway-track-registry-kl.js",
+        "assets/map-language-lab.js",
+        "tests/r2162-source-poi-crosswalk.test.cjs",
+        "package.json"
+      ],
+      "implementation": [
+        "Exact KG16 Pasar Seni maps to MRT Kajang service stop 12/29 candidate",
+        "Exact KG35 Kajang maps to MRT Kajang service stop 29/29 candidate",
+        "Only actual MapLibre POI with class railway and subclass station; mismatched English name, generic station name, wrong mode or unknown code is explicitly rejected",
+        "Malaysia railPilot station popup displays small source-name candidate message and physical track unverified; no added buttons, overlay or invented geometry",
+        "China and Thailand popup behavior unchanged; all prior rail and station pilot click functionality retained",
+        "No verified OSM route relation, physical track way ID, coordinate, platform lane or station-to-way continuity assigned"
+      ]
+    },
+    "sourceAudit": {
+      "operator": [
+        "https://www.mymrt.com.my/projects/kajang-line/",
+        "https://www.mymrt.com.my/ms/ruang-acara/kajang/"
+      ],
+      "cartographic": [
+        "https://openmaptiles.org/docs/schema/",
+        "https://wiki.openstreetmap.org/wiki/Public_transport",
+        "https://wiki.openstreetmap.org/wiki/Relation:route"
+      ],
+      "status": "CANDIDATE_EXACT_CARTOGRAPHIC_LABEL_MATCH; not independently established physical route relation or way",
+      "verifiedPhysicalWayCount": 0,
+      "acceptedRelationIds": [],
+      "acceptedWayIds": [],
+      "note": "28 sequential stops links are passenger-service adjacency relationships and are not physical railway ways. No physical railway IDs or exact geometry have been inferred."
+    },
+    "qa": {
+      "node": "312/312 PASS, 0 FAIL 0 SKIP, staging SHA exact",
+      "catalogue": "14/14 PASS",
+      "build": "Staging READY, target staging only",
+      "publicArtifact": "HTTP 200 HTML map and two JS modules; excluded Member/quiz JS HTTP 404",
+      "newRegression": "5 tests for exact matches, unsupported-source rejection, real MapLibre click popup candidate, ambiguous POI blocking and China/Thailand isolation",
+      "safari": "PENDING — Owner verify a KG35 Kajang station click renders candidate 29/29 and the physical-track caveat",
+      "physicalGeometry": "NOT VERIFIED, no raw OSM way/relation candidates accepted"
+    },
+    "staging": {
+      "project": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_4ZCbWeV4GyhFcdr6g8A2p9oBgnGi",
+      "target": "staging",
+      "state": "READY",
+      "sourceSha": "6f0f2c50f602c7a618ff1ae648db1bc43b33464e",
+      "url": "https://mrs10-r211-mobile-map-k81n9qc27-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "protection": "Existing project protection unchanged"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO Production or merge; candidate popup Safari click not yet verified on this exact build; complete KL physical railway geometry and station-to-way links remain unverified; no owner release approval",
+    "nextAction": "Owner opens isolated R2.16.3 Safari staging Malaysia map, selects real station POI with source name KG35 Kajang and taps once. Confirm small popup candidate 29/29 and explicit physical-track-unverified caveat. Repeat only if needed for KG16 Pasar Seni 12/29. No further development of physical geometry until sourced OSM way/relation IDs and station topology are verified.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT PERFORMED",
+      "ownerImages": "NOT PUBLISHED"
+    }
   }
 }
