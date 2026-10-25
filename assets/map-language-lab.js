@@ -79,8 +79,26 @@ const pilotStationSubclasses=Object.freeze(['station','halt','subway','tram_stop
 function pilotEligibleStation(props){
  return !!props && props.class==='railway' && pilotStationSubclasses.includes(props.subclass);
 }
+// Official OpenMapTiles transportation.class: rail (conventional) or transit (urban).
+// Railway type is source-backed transportation.subclass, NEVER inferred from colour.
+const pilotRailSubclasses=Object.freeze(['rail','narrow_gauge','preserved','funicular','subway','light_rail','monorail','tram']);
+const railVectorFilter=['all',['in',['get','class'],['literal',['rail','transit']]],
+ ['in',['get','subclass'],['literal',pilotRailSubclasses]]];
 function pilotEligibleRail(props){
- return !!props && props.class==='rail';
+ return !!props && ((props.class==='rail' && ['rail','narrow_gauge','preserved','funicular'].includes(props.subclass)) ||
+  (props.class==='transit' && ['subway','light_rail','monorail','tram'].includes(props.subclass)));
+}
+function queryPilotVectorFeature(mapInstance,point,radius=12){
+ if(!mapInstance?.queryRenderedFeatures||!Number.isFinite(point?.x)||!Number.isFinite(point?.y))return null;
+ const layers=['mrl-pilot-stations','mrl-pilot-rail-hits'].filter(id=>!!mapInstance.getLayer?.(id));
+ if(!layers.length)return null;
+ const bounds=[[point.x-radius,point.y-radius],[point.x+radius,point.y+radius]];
+ let hits=[];
+ try{hits=mapInstance.queryRenderedFeatures(bounds,{layers})||[];}catch{return null;}
+ const station=hits.find(f=>f.layer?.id==='mrl-pilot-stations'&&pilotEligibleStation(f.properties));
+ if(station)return {kind:'station',feature:station};
+ const rail=hits.find(f=>f.layer?.id==='mrl-pilot-rail-hits'&&pilotEligibleRail(f.properties));
+ return rail?{kind:'rail',feature:rail}:null;
 }
 function pilotFeatureInfo(props,kind,locale){
  const p=props||{},l=pilotLocalized[locale]||pilotLocalized.en;
@@ -92,7 +110,7 @@ function pilotFeatureInfo(props,kind,locale){
  const pinyin=String(p['name:zh-Latn-pinyin']||p['name:zh-Latn']||'').trim();
  return {title,category:kind==='station'?l.station:l.rail,original:original&&original!==title?original:'',pinyin,subclass:String(p.subclass||'').trim(),source:l.source,localization:l, hasVerifiedEnglish:!!(english||latinOriginal)};
 }
-let pilotMode=false,pilotStationBound=false,pilotRailBound=false,pilotInfoPopup=null;
+let pilotMode=false,pilotTapBound=false,pilotInfoPopup=null;
 function pilotSourceForLayer(style,sourceLayer){
  const entry=style?.layers?.find(layer=>layer['source-layer']===sourceLayer && style.sources?.[layer.source]?.type==='vector');
  return entry?.source||null;
@@ -129,24 +147,28 @@ function installPilotVectorLayers(){
  if(railSource&&!map.getLayer('mrl-pilot-rail-hits')){
   try{
    map.addLayer({id:'mrl-pilot-rail-hits',type:'line',source:railSource,'source-layer':'transportation',minzoom:10,
-    filter:['==',['get','class'],'rail'],layout:{'line-cap':'round','line-join':'round'},
-    paint:{'line-color':'#000000','line-opacity':0.01,'line-width':12}});
+    filter:railVectorFilter,layout:{'line-cap':'round','line-join':'round'},
+    // Transparent but hit-testable line; 24px rendered width plus a bounded 12px map click query.
+    paint:{'line-color':'#000000','line-opacity':0.01,'line-width':24}});
    rails=true;
   }catch(e){rails=false;}
  }else rails=!!map.getLayer('mrl-pilot-rail-hits');
- if(stations&&!pilotStationBound){
-  map.on('click','mrl-pilot-stations',e=>{
-   const f=e.features?.find(x=>pilotEligibleStation(x.properties));if(f)popupFromPilotFeature(f,'station',e.lngLat);
+ if((stations||rails)&&!pilotTapBound){
+  map.on('click',e=>{
+   const hit=queryPilotVectorFeature(map,e.point,12);
+   if(hit){
+    popupFromPilotFeature(hit.feature,hit.kind,e.lngLat);
+    if(status)status.textContent=pilotLocalized[lang].title+' · '+(hit.kind==='station'?pilotLocalized[lang].station:pilotLocalized[lang].rail);
+   }else if(status){
+    const messages={ms:'Tiada ciri rel atau stesen vektor di titik ini. Zum masuk dan cuba rel lain.',
+       en:'No selectable vector rail or station at this point. Zoom in and try another segment.',
+       zh:'此处无可选矢量铁路或车站。请放大后尝试其他轨道。',
+       th:'ไม่มีข้อมูลรางหรือสถานีเวกเตอร์ที่จุดนี้ ลองซูมเข้าแล้วแตะรางอื่น'};
+    status.textContent=messages[lang]||messages.en;
+   }
   });
+  pilotTapBound=true;
  }
- if(rails&&!pilotRailBound){
-  map.on('click','mrl-pilot-rail-hits',e=>{
-   if(stations&&map.queryRenderedFeatures?.(e.point,{layers:['mrl-pilot-stations']})?.some(f=>pilotEligibleStation(f.properties)))return;
-   const f=e.features?.find(x=>pilotEligibleRail(x.properties));if(f)popupFromPilotFeature(f,'rail',e.lngLat);
-  });
- }
- if(stations)pilotStationBound=true;
- if(rails)pilotRailBound=true;
  if(status)status.textContent=pilotLocalized[lang].title+' · '+pilotLocalized[lang].tap+
   (!stations?' [station POI layer unavailable]':'')+(!rails?' [rail layer unavailable]':'');
  return stations||rails;
@@ -327,7 +349,7 @@ function transportationSource(style){
 }
 function railVectorLayer(source,dark){
  return {id:'mrl-readable-rail-lines',type:'line',source,'source-layer':'transportation',
-  minzoom:8,filter:['==',['get','class'],'rail'],
+  minzoom:8,filter:railVectorFilter,
   layout:{'line-cap':'round','line-join':'round'},
   paint:{'line-color':dark?'#87d8e8':'#247a97','line-opacity':0.87,
     'line-width':['interpolate',['linear'],['zoom'],8,0.8,14,1.9,18,3]}};
@@ -463,7 +485,7 @@ function init(){
   if(e.key==='railway-language'&&locales.includes(e.newValue))setLanguage(e.newValue);
  });
 }
-if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText,transportationSource,railVectorLayer,LRVTC_CAMPUS,campusText,pilotCenters,pilotEligibleStation,pilotEligibleRail,pilotFeatureInfo,pilotSourceForLayer,chinaRailCodeRecords,lookupChinaRailCode};
+if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText,transportationSource,railVectorLayer,LRVTC_CAMPUS,campusText,pilotCenters,pilotEligibleStation,pilotEligibleRail,pilotFeatureInfo,pilotSourceForLayer,railVectorFilter,queryPilotVectorFeature,chinaRailCodeRecords,lookupChinaRailCode};
 if(typeof document!=='undefined'){
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
  else init();
