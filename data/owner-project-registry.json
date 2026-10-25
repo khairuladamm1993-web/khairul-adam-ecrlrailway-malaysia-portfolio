@@ -871,14 +871,14 @@
     "classification": "Main orange #FF8100; highspeed red #FF0C00; branch yellow #DACA00; metro blue #0300C3; industrial/spur brown #87491D; other/yard black. Base-map purple roads are not necessarily railway. Colors do not prove electrification or operational speed.",
     "sourceDocumentation": "https://github.com/OpenRailwayMap/OpenRailwayMap/blob/master/styles/standard.mapcss",
     "QA": {
-      "sourceIntegrity": "2 files GitHub update/readback VERIFIED",
-      "staticChecks": "10/10 targeted structure checks PASS",
-      "nodeRegression": "NOT_RUN for R2.10; previous R2.9 251/251 PASS is historical only",
-      "catalogue": "NOT_RERUN; previous R2.9 14/14 PASS historical only",
-      "safariUat": "PENDING",
-      "fullDarkMode": "UNVERIFIED",
-      "deployment": "NOT_DEPLOYED",
-      "production": "UNCHANGED"
+      "sourceIntegrity": "VERIFIED: commit 79c7f86128134737576c05e7646fc9a9b12594b9 checked against GitHub and Vercel staging clone",
+      "nodeRegression": "251/251 PASS; 0 FAIL, 0 SKIP (2026-10-25 staging build)",
+      "catalogue": "14/14 PASS; 0 FAIL, 0 SKIP (2026-10-25 staging build)",
+      "staticChecks": "10/10 targeted preflight checks PASS, historical to source authoring session",
+      "build": "PASS: scripts/build-preview.py dist-r210-public; analytics and Member authentication excluded, connect-src blocked",
+      "deployedHttpSmoke": "PASS: HTML /map-language-lab.html 200, map JS 200 with railLegendI18n, forbidden questions.js 404, forbidden member-gateway.js 404",
+      "fullSafariUat": "PENDING — not executed by Owner",
+      "darkModeAcrossSite": "UNVERIFIED"
     },
     "vercelSnapshot": {
       "checkedOn": "2026-10-25",
@@ -887,11 +887,26 @@
       "hostProject": "mrs10-r24-single-gateway-preview",
       "priorR29Url": "https://mrs10-r29-guantang-campus-uat.vercel.app/map-language-lab.html",
       "fileInventory": "48 files",
-      "deploymentGitSha": "UNVERIFIED",
-      "newR210Preview": "NOT_CREATED"
+      "deploymentGitSha": "79c7f86128134737576c05e7646fc9a9b12594b9",
+      "newR210Preview": "https://mrs10-r210-rail-legend-5pw0lwjql-1993khairuladam-3016.vercel.app/map-language-lab.html",
+      "projectName": "mrs10-r210-rail-legend-uat",
+      "projectId": "prj_fFOS22vNJKjbrCduiAw14poBj6kP",
+      "deploymentId": "dpl_4jm6xZZVUefWdVLGfwo4tJaXQfSW",
+      "target": "staging",
+      "state": "READY",
+      "ssoProtection": "all — requires Vercel Authentication; no permanent bypass link published",
+      "httpStatus": "200",
+      "originalMR_S10Production": "UNCHANGED",
+      "firstIsolatedDeployment": {
+        "id": "dpl_8YihApVBFJ1TR3EDZnCbnowAx8Kx",
+        "target": "production",
+        "state": "READY",
+        "disclosure": "First deployment of NEW isolated project was automatically labeled production despite preview-only intent; fully under new isolated protected project, not pre-existing MR-S10 Production. No delete/promote/unpause/alias removal was performed.",
+        "protected": "Vercel Authentication enabled for all"
+      }
     },
-    "releaseDecision": "NOT_READY_FOR_GO",
+    "releaseDecision": "STAGING_READY_FOR_OWNER_SAFARI_UAT_ONLY; NOT_APPROVED_FOR_PRODUCTION_RELEASE",
     "ownerApproval": "LRVTC reference campus location only; no deploy, merge or production release approval",
-    "nextAction": "Verify exact R2.10 source with Node regression and catalogue and isolated artifact; obtain approval if deployment needed; Safari iPhone/iPad UAT for compact popup, 4 languages, collapsed legend, and dark mode. China pinyin overlays require validated name tags; technical raster labels cannot be translated."
+    "nextAction": "Owner opens isolated protected staging map URL, runs Safari iPhone/iPad checks for country China, pin and compact scrolling popup, language BM EN 中文 ไทย, railway details ON/OFF and collapsed legend, Dark Mode contrast. Request screenshots/observations to close Safari gate; no changes to existing Production, Supabase or P02/P03."
   }
 }
