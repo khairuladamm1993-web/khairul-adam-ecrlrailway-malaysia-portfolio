@@ -197,9 +197,15 @@ function popupFromPilotFeature(feature,kind,lngLat){
  }
  // R2.16.3: exact source-string crosswalk, not physical track assignment.
  // No route is inferred from rail colour, geometry proximity or generic place names.
+ let isKajangMatch=false;
  if(kind==='station'&&activeRegion==='malaysia'&&pilotMode){
   const candidate=window.MRS10KLRegistry?.matchSourcedKajangPoi?.(feature.properties);
   if(candidate){
+   // Operator-confirmed service name stays visible even when the vector-tile
+   // display label is shortened or the popup body scrolls on iPhone.
+   isKajangMatch=true;
+   title.textContent=candidate.stationName;
+   root.setAttribute('aria-label',candidate.stationName+' · '+candidate.routeName);
    const label=lang==='ms'?'Padanan nama peta (calon)':
     lang==='zh'?'地图名称对应（候选）':
     lang==='th'?'จับคู่ชื่อบนแผนที่ (เบื้องต้น)':'Map name match (candidate)';
@@ -215,7 +221,8 @@ function popupFromPilotFeature(feature,kind,lngLat){
   }
  }
  if(pilotInfoPopup)pilotInfoPopup.remove();
- pilotInfoPopup=new maplibregl.Popup({offset:12,maxWidth:'255px',className:'mrl-campus-popup'})
+ pilotInfoPopup=new maplibregl.Popup({offset:12,maxWidth:'255px',
+  className:'mrl-campus-popup'+(isKajangMatch?' mrl-kajang-matched-popup':'')})
   .setLngLat(lngLat).setDOMContent(root).addTo(map);
 }
 function installPilotVectorLayers(){
