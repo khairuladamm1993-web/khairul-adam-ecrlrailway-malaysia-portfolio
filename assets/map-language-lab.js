@@ -151,6 +151,52 @@ function installPilotVectorLayers(){
   (!stations?' [station POI layer unavailable]':'')+(!rails?' [rail layer unavailable]':'');
  return stations||rails;
 }
+// R2.14 reference catalogue: ONLY individually source-verified Chinese railway codes.
+// No inferred station positions, no translation of OpenRailwayMap raster characters.
+const chinaRailCodeRecords=Object.freeze({
+ '44906':Object.freeze({kind:'station',english:'Chengcun Railway Station',hanzi:'程村站',pinyin:'Chéngcūn Zhàn',source:'https://zh.wikipedia.org/wiki/程村站'}),
+ '44930':Object.freeze({kind:'station',english:"Rong'an Railway Station",hanzi:'融安站',pinyin:"Róng'ān Zhàn",source:'https://zh.wikipedia.org/wiki/融安站'}),
+ '44957':Object.freeze({kind:'station',english:'Rongshui Railway Station',hanzi:'融水站',pinyin:'Róngshuǐ Zhàn',source:'https://zh.wikipedia.org/wiki/融水站'}),
+ '0073':Object.freeze({kind:'line',english:'Hengyang–Liuzhou Railway',hanzi:'衡柳铁路',pinyin:'Héngliǔ Tiělù',source:'https://wiki.openstreetmap.org/wiki/Zh-hans:OpenRailwayMap/China_Railway_Line_Number'}),
+ '0081':Object.freeze({kind:'line',english:'Guizhou–Guangxi Railway',hanzi:'黔桂铁路',pinyin:'Qiánguì Tiělù',source:'https://wiki.openstreetmap.org/wiki/Zh-hans:OpenRailwayMap/China_Railway_Line_Number'})
+});
+function lookupChinaRailCode(value){
+ const key=typeof value==='string'?value.trim():'';
+ if(!/^(?:[0-9]{4}|[0-9]{5})$/.test(key))return null;
+ return Object.prototype.hasOwnProperty.call(chinaRailCodeRecords,key)?{code:key,...chinaRailCodeRecords[key]}:null;
+}
+const railCodeI18n={
+ ms:{button:'Kod railway China',title:'Kod railway China · pilot',hint:'Tekan kod contoh atau masukkan nombor 4/5 digit. Kod pada imej raster belum boleh ditekan terus.',search:'Cari',missing:'Kod belum disahkan dalam katalog pilot. Tiada nama direka.',kindStation:'Kod stesen (TMIS)',kindLine:'Nombor laluan',source:'Sumber rujukan',close:'Tutup'},
+ en:{button:'China railway codes',title:'China railway codes · pilot',hint:'Tap an example or enter a 4/5-digit code. Raster tile numbers are not directly clickable yet.',search:'Look up',missing:'Code not verified in this pilot catalogue; no name is invented.',kindStation:'Station code (TMIS)',kindLine:'Railway line number',source:'Reference source',close:'Close'},
+ zh:{button:'中国铁路代码',title:'中国铁路代码 · 测试',hint:'点击示例或输入4/5位代码。栅格图片上的数字暂时不能直接点击。',search:'查询',missing:'该代码尚未核实；不生成虚构名称。',kindStation:'车站代码（TMIS）',kindLine:'线路编号',source:'参考来源',close:'关闭'},
+ th:{button:'รหัสรถไฟจีน',title:'รหัสรถไฟจีน · ทดสอบ',hint:'แตะรหัสตัวอย่างหรือกรอก 4/5 หลัก ยังไม่สามารถแตะตัวเลขบนภาพแผนที่โดยตรง',search:'ค้นหา',missing:'รหัสนี้ยังไม่มีข้อมูลยืนยัน ไม่สร้างชื่อขึ้นเอง',kindStation:'รหัสสถานี TMIS',kindLine:'หมายเลขเส้นทางรถไฟ',source:'แหล่งอ้างอิง',close:'ปิด'}
+};
+function syncChinaCodeWidget(){
+ const show=pilotMode&&activeRegion==='china';
+ const button=el('china-code-trigger'),panel=el('china-code-panel');
+ if(button){button.hidden=!show;button.setAttribute('aria-label',railCodeI18n[lang].button);button.title=railCodeI18n[lang].button;}
+ if(!show&&panel)panel.hidden=true;
+ if(button&&!show)button.setAttribute('aria-expanded','false');
+ const l=railCodeI18n[lang];
+ for(const [id,value] of [['china-code-title',l.title],['china-code-hint',l.hint],['china-code-search',l.search],['china-code-close',l.close]]){
+  const node=el(id);if(node)node.textContent=value;
+ }
+ // Current evidence remains visible in the selected language; do not invent romanisation.
+ const current=el('china-code-result');
+ if(current&&current.dataset.code)showChinaRailCode(current.dataset.code);
+}
+function showChinaRailCode(raw){
+ const host=el('china-code-result');if(!host)return;
+ const result=lookupChinaRailCode(raw),l=railCodeI18n[lang];
+ host.replaceChildren();
+ host.dataset.code=typeof raw==='string'?raw.trim():'';
+ if(!result){host.textContent=l.missing;return;}
+ const heading=document.createElement('strong');heading.textContent=result.code+' · '+result.english;host.appendChild(heading);
+ for(const val of [result.kind==='station'?l.kindStation:l.kindLine,result.hanzi,result.pinyin]){
+  const p=document.createElement('p');p.textContent=val;host.appendChild(p);
+ }
+ const a=document.createElement('a');a.href=result.source;a.target='_blank';a.rel='noopener noreferrer';a.textContent=l.source;host.appendChild(a);
+}
 const el=id=>document.getElementById(id);
 let lang='ms',map=null,ready=false,railDetails=false,activeRegion='malaysia',campusMarker=null;
 const railVisibility=on=>on?'visible':'none';
@@ -221,7 +267,7 @@ function render(){
  const legendNote=el('railway-legend-note');if(legendNote)legendNote.textContent=legendCopy.note;
  const legendSummary=el('railway-legend-trigger');if(legendSummary){legendSummary.setAttribute('aria-label',legendCopy.title);legendSummary.title=legendCopy.title;}
  document.querySelectorAll('[data-rail-legend]').forEach(node=>{const i=Number(node.dataset.railLegend);if(Number.isInteger(i)&&i>=0&&i<legendCopy.items.length)node.lastElementChild.textContent=legendCopy.items[i];});
- renderLegendDetail();renderLegendRegion();
+ renderLegendDetail();renderLegendRegion();syncChinaCodeWidget();
  const pilotStatus=el('railway-pilot-status');
  if(pilotStatus && pilotMode){
   pilotStatus.hidden=false;
@@ -370,7 +416,7 @@ function init(){
   if(destination)map.flyTo({center:destination[0],zoom:destination[1],duration:600});
   if(pilotMode&&pilotInfoPopup){pilotInfoPopup.remove();pilotInfoPopup=null;}
   activeRegion=b.dataset.region;
-  renderLegendRegion();
+  renderLegendRegion();syncChinaCodeWidget();
   el('liuzhou-guide').hidden=activeRegion!=='china';
   syncCampusPin();
  }));
@@ -379,6 +425,16 @@ function init(){
   const i=Number(b.dataset.railLegend);
   if(Number.isInteger(i)&&i>=0&&i<railLegendI18n[lang].items.length){selectedRailLegend=i;renderLegendDetail();}
  }));
+ const codeTrigger=el('china-code-trigger'),codePanel=el('china-code-panel');
+ codeTrigger?.addEventListener('click',()=>{
+  if(!pilotMode||activeRegion!=='china')return;
+  codePanel.hidden=!codePanel.hidden;
+  codeTrigger.setAttribute('aria-expanded',String(!codePanel.hidden));
+  if(!codePanel.hidden)el('china-code-input')?.focus();
+ });
+ el('china-code-close')?.addEventListener('click',()=>{codePanel.hidden=true;codeTrigger.setAttribute('aria-expanded','false');codeTrigger.focus();});
+ el('china-code-form')?.addEventListener('submit',e=>{e.preventDefault();showChinaRailCode(el('china-code-input').value);});
+ document.querySelectorAll('[data-china-code]').forEach(b=>b.addEventListener('click',()=>{const code=b.dataset.chinaCode;el('china-code-input').value=code;showChinaRailCode(code);}));
  const mapLegend=el('railway-legend');
  if(mapLegend)mapLegend.addEventListener('toggle',()=>{if(mapLegend.open&&!railDetails){
   const note=el('railway-legend-note');if(note)note.textContent=railLegendI18n[lang].note;
@@ -393,7 +449,7 @@ function init(){
   if(e.key==='railway-language'&&locales.includes(e.newValue))setLanguage(e.newValue);
  });
 }
-if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText,transportationSource,railVectorLayer,LRVTC_CAMPUS,campusText,pilotCenters,pilotEligibleStation,pilotEligibleRail,pilotFeatureInfo,pilotSourceForLayer};
+if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText,transportationSource,railVectorLayer,LRVTC_CAMPUS,campusText,pilotCenters,pilotEligibleStation,pilotEligibleRail,pilotFeatureInfo,pilotSourceForLayer,chinaRailCodeRecords,lookupChinaRailCode};
 if(typeof document!=='undefined'){
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
  else init();
