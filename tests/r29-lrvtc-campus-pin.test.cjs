@@ -35,7 +35,7 @@ function setup(){
   constructor({element}){this.element=element;this.visible=false;this.removed=false;this.toggleCount=0;}
   setLngLat(p){this.coords=p;return this}
   setPopup(p){this.popup=p;return this}
-  addTo(m){this.visible=true;this.map=m;return this}
+  addTo(m){this.visible=true;this.map=m;m.marker=this;return this}
   getElement(){return this.element}
   getPopup(){return this.popup}
   remove(){this.removed=true;return this}
@@ -62,35 +62,35 @@ function setup(){
  maps[0].listeners['style.load']();
  return {w,map:maps[0]};
 }
-test('single campus pin appears only in China map and vanishes on Malaysia/Thailand',()=>{
- const {w,map}=setup();
- const focus=w.document.getElementById('campus-focus'),panel=w.document.getElementById('campus-location');
- assert(panel.hidden);
- w.document.querySelector('[data-region="china"]').click();
- assert.equal(panel.hidden,false);
- assert.match(focus.textContent,/LRVTC/);
- focus.click();
- assert.deepEqual(Array.from(map.lastFly.center),[109.52917,24.39864]);
- assert.equal(map.lastFly.zoom,13);
- w.document.querySelector('[data-region="thailand"]').click();
- assert.equal(panel.hidden,true);
- w.document.querySelector('[data-region="malaysia"]').click();
- assert.equal(panel.hidden,true);
+test('campus is an in-map icon only when China selected; no external focus button',()=>{
+ const {w,map}=setup(),d=w.document;
+ assert.equal(d.getElementById('campus-focus'),null);
+ assert.equal(d.getElementById('campus-location'),null);
+ assert.equal(map.marker,undefined);
+ d.querySelector('[data-region="china"]').click();
+ assert(map.marker?.visible);
+ assert.deepEqual(Array.from(map.marker.coords),[109.52917,24.39864]);
+ assert.equal(map.marker.getElement().textContent,'🎓');
+ assert.match(map.marker.getElement().getAttribute('aria-label'),/LRVTC/);
+ assert.match(map.marker.getPopup().node.textContent,/Wenyuan Road/);
+ d.querySelector('[data-region="thailand"]').click();
+ assert.equal(map.marker.removed,true);
+ w.close();
 });
-test('campus popup re-localizes and keeps college source address',()=>{
- const {w}=setup();
- w.document.querySelector('[data-region="china"]').click();
- w.document.querySelector('[data-locale="zh"]').click();
- assert.match(w.document.querySelector('#campus-focus').textContent,/柳州铁道职业技术学院/);
- w.document.querySelector('#campus-focus').click();
- assert(w.document.querySelector('#liuzhou-guide').hidden===false);
- w.document.querySelector('[data-locale="en"]').click();
- assert.match(w.document.querySelector('#campus-focus').textContent,/Guantang Campus/);
+test('campus marker and popup follow languages without fabricating a gate',()=>{
+ const {w,map}=setup(),d=w.document;
+ d.querySelector('[data-region="china"]').click();
+ d.querySelector('[data-locale="zh"]').click();
+ assert.match(map.marker.getElement().getAttribute('aria-label'),/柳州铁道职业技术学院/);
+ assert.match(map.marker.getPopup().node.textContent,/不是经过核实/);
+ d.querySelector('[data-locale="en"]').click();
+ assert.match(map.marker.getPopup().node.textContent,/not a verified gate/);
+ w.close();
 });
-test('ECRL coordinates and technical map remain separate; website retains 1 optional campus item',()=>{
+test('no extra campus coordinates, no ECRL geometry changes, popup stays MapLibre owned',()=>{
  const h=read('map-language-lab.html'),s=read('assets/map-language-lab.js');
- assert.equal((h.match(/id="campus-focus"/g)||[]).length,1);
- assert.match(h,/#campus-location\[hidden\]\{display:none\}/);
+ assert(!h.includes('id="campus-focus"'));
+ assert(!h.includes('id="campus-location"'));
  assert.match(s,/campusMarker\.remove\(\)/);
  assert.match(s,/maplibregl\.Marker/);
  assert.match(s,/maplibregl\.Popup/);
