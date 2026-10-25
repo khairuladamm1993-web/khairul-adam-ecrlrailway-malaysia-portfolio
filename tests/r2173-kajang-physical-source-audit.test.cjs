@@ -66,6 +66,34 @@ test('R2.17.3 public Overpass relation membership alone never verifies track top
  assert.equal(x.candidateOnly,true);assert.equal(x.geometryVerified,false);
  assert.equal(x.continuityVerified,false);
 });
+test('R2.17.3 mixed Selangor GIS must never paint KTM/LRT together with Kajang directions',()=>{
+ const feature=(name,osm_type,osm_id)=>({
+  attributes:{name,osm_type,osm_id,full_id:'r'+osm_id},
+  geometry:{paths:[[[101.7,3.1],[101.71,3.11]]]}
+ });
+ const data={features:[
+  feature('Laluan Kelana Jaya (Gombak → Putra Heights)','relation',1),
+  feature('Laluan Kajang (Kwasa Damansara → Kajang)','relation',8000326),
+  feature('Port Klang Line (northbound)','relation',2),
+  feature('Laluan Kajang (Kajang → Kwasa Damansara)','relation',3),
+  feature('Laluan Ampang (Sentul Timur → Ampang)','relation',4),
+  feature('Laluan Kajang (Semantan → Kajang)','relation',5)
+ ]};
+ const x=a.arcgisSummary(data,'selangor_mrt_kajang');
+ assert.equal(x.featureCount,6);
+ assert.equal(x.containsOtherRoutes,true);
+ assert.equal(x.kajangDirectedCandidateCount,2);
+ assert.equal(x.kajangDirectedCandidates.length,2);
+ assert(x.kajangDirectedCandidates.every(v=>v.name.startsWith('Laluan Kajang (')));
+ assert.deepEqual(x.kajangDirectedCandidates.map(v=>v.osmId),['8000326','3']);
+ assert(x.nonKajangRouteExamples.some(v=>v.includes('Kelana Jaya')));
+ assert(x.nonKajangRouteExamples.some(v=>v.includes('Ampang')));
+ assert(x.kajangDirectedUndeduplicatedLengthKm>0);
+ assert.deepEqual(x.kajangDirectedBounds,[101.7,3.1,101.71,3.11]);
+ assert.equal(x.geometryVerified,false);
+ assert.equal(x.fullCorridorCovered,false);
+ assert.match(x.gisKajangCaveat,/NOT distinct survey tracks/);
+});
 test('R2.17.3 remote endpoint failures are classified, not fabricated or silently accepted',async()=>{
  const x=await a.probe(a.endpoints[0],async()=>{throw Error('network unavailable')});
  assert.equal(x.status,'SOURCE_UNAVAILABLE');assert.equal(x.candidateOnly,true);assert.equal(x.geometryVerified,false);
