@@ -2865,12 +2865,12 @@
     "issueId": "r218-kelana-jaya-ruby-service-registry",
     "title": "R2.18 LRT Kelana Jaya 37-stop ruby service registry and conservative source-coded vector candidates",
     "checkedOn": "2026-10-26",
-    "state": "SOURCE_QA_PASS_STAGING_READY_SAFARI_UAT_PENDING",
+    "state": "OWNER_SAFARI_PARTIAL_PASS_DARK_I18N_FIX_STAGING_READY_RETEST_PENDING",
     "ownerApproval": "Owner authorized isolated R2.18 development and staging checks, NOT production merge or promotion.",
     "development": {
       "branch": "feature/mrs10-r218-kelana-jaya-ruby-identity",
       "baselineR217Sha": "5b507cf18e4c308ee1cb891ebe6a279b9f3d1671",
-      "sourceCommit": "1aec864daea46817c1283fc37108f280636771d7",
+      "sourceCommit": "68b2910a7aecb9442139b95b3cf4635c92424453",
       "changedFiles": [
         "assets/railway-track-registry-kl.js",
         "assets/map-language-lab.js",
@@ -2884,6 +2884,14 @@
         "feature/mrs10-r217-kajang-green-identity",
         "feature/mrs10-r219-ampang-orange-service-registry",
         "main"
+      ],
+      "previousSourceCommit": "1aec864daea46817c1283fc37108f280636771d7",
+      "lastFix": "R2.18.1 — detect actual OpenFreeMap dark place_* / water_name / highway_name_other labels; apply before style overlays and retry on idle. No physical geometry changes.",
+      "fixFiles": [
+        "assets/map-language-lab.js",
+        "tests/r2181-dark-map-language.test.cjs",
+        "tests/r28-readable-rail-liuzhou.test.cjs",
+        "package.json"
       ]
     },
     "sources": {
@@ -2909,29 +2917,30 @@
       "interchangeCaveat": "Service interchange is distinct from shared platform or track; do not infer from same names or nearby geometry."
     },
     "qa": {
-      "node": "322/322 PASS, 0 FAIL, 0 SKIP",
-      "catalogue": "14/14 PASS, 0 FAIL, 0 SKIP",
-      "githubActionsRunId": 40232319822,
-      "githubActionsUrl": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40232319822",
-      "testCommit": "1aec864daea46817c1283fc37108f280636771d7",
+      "node": "325/325 PASS, 0 FAIL 0 SKIP",
+      "catalogue": "14/14 PASS, 0 FAIL 0 SKIP",
+      "githubActionsRunId": 40234395508,
+      "githubActionsUrl": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40234395508",
+      "testCommit": "68b2910a7aecb9442139b95b3cf4635c92424453",
       "jsSyntax": "PASS",
-      "sourceCodeAndTheme": "PASS in Node jsdom and static CSS checks; real Safari unverified",
-      "securityArtifact": "PASS public preview builder; excludes Member/Owner/quiz assets, analytics/auth disabled; deployed Git source contents HTTP not independently audited",
-      "qaArtifactId": 12613073641,
+      "sourceCodeAndTheme": "PASS in Node/jsdom across Dark/Light style name-layer tests and deferred style-load retry; Owner Safari fix retest PENDING.",
+      "securityArtifact": "PASS source-only public artifact build; deployed HTTP inspection UNVERIFIED.",
+      "qaArtifactId": 12614416080,
       "artifactSha256": "404e994fe8a84e9b87409d35b39a6e9761badd25ebc3e16d3eaff984f132ec6e",
       "artifactDeployment": "NOT_DEPLOYED; separate QA ZIP"
     },
     "staging": {
       "project": "mrs10-r211-mobile-map-uat",
       "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
-      "deploymentId": "dpl_3BfapWD3LwKDsG8MN29VpV8DDEFW",
+      "deploymentId": "dpl_6F8zvbkYMh3iQyH43XqFyun2xDr8",
       "target": "staging",
       "state": "READY",
-      "sourceSha": "1aec864daea46817c1283fc37108f280636771d7",
-      "url": "https://mrs10-r211-mobile-map-mpo4fygvf-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "sourceSha": "68b2910a7aecb9442139b95b3cf4635c92424453",
+      "url": "https://mrs10-r211-mobile-map-1ssrgry0y-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
       "isolation": "Project live:false, no custom domains, Vercel Authentication all",
-      "responseSmoke": "BLOCKED/UNVERIFIED — protected web cannot retrieve deployment contents; Vercel deployment source file API 404 (Git-source file tree unavailable)",
-      "ownerSafari": "PENDING"
+      "responseSmoke": "UNVERIFIED — protected Vercel deployment HTTP content not directly read",
+      "ownerSafari": "PARTIAL_PASS previous staging; Dark zh/th retest pending on fixed staging",
+      "previousDeploymentId": "dpl_3BfapWD3LwKDsG8MN29VpV8DDEFW"
     },
     "integrationDependency": {
       "id": "r218-r219-shared-components",
@@ -2952,7 +2961,9 @@
       "verifiedAt": null,
       "evidence": [
         "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40232319822",
-        "https://vercel.com/1993khairuladam-3016/mrs10-r211-mobile-map-uat/3BfapWD3LwKDsG8MN29VpV8DDEFW"
+        "https://vercel.com/1993khairuladam-3016/mrs10-r211-mobile-map-uat/3BfapWD3LwKDsG8MN29VpV8DDEFW",
+        "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40234395508",
+        "https://vercel.com/1993khairuladam-3016/mrs10-r211-mobile-map-uat/6F8zvbkYMh3iQyH43XqFyun2xDr8"
       ],
       "releaseGates": {
         "ci": "PASS",
@@ -2960,13 +2971,28 @@
         "publicArtifact": "PASS_BUILD",
         "deployment": "PASS_STAGING_METADATA_ONLY",
         "httpSmoke": "UNVERIFIED",
-        "safariUat": "NOT_PASS",
+        "safariUat": "PARTIAL_PASS_PRE_FIX_FIXED_STAGING_RETEST_PENDING",
         "security": "PARTIAL_VERIFIED",
         "integratedR217R218R219": "NOT_TESTED",
         "ownerProductionApproval": "NOT_APPROVED"
       }
     },
-    "releaseDecision": "NO-GO merge/production; isolated staging source SHA target READY, Owner Safari UAT, deployment HTTP/security smoke and combined R2.17+R2.18+R2.19 integration remain pending.",
-    "nextAction": "Owner Safari: open isolated R2.18 URL, select LRT Kelana Jaya in Malaysia railPilot, confirm 37 ruby numbered stations KJ1–KJ37, popup code/contrast, theme and country isolation; capture no secrets. Separately audit Vercel-served HTTP file exposure and source vector POIs before any readiness gate. Do not merge/push Production."
+    "releaseDecision": "NO-GO merge/Production — R2.18.1 source QA 325/325 and staging READY, Owner Safari retest & HTTP source security smoke pending.",
+    "nextAction": "Owner Safari: open newest isolated staging in Malaysia; switch to Dark Mode and select 中文 then ไทย; compare visible localized place labels to Light Mode and check theme reload preserves locale. Already accepted checks do not need full repeat unless regressed.",
+    "ownerSafariFeedback": {
+      "observedOn": "2026-10-26",
+      "result": "PARTIAL_PASS_BEFORE_FIX",
+      "ownerStatement": "Other R2.18 checks reportedly OK. On Malaysia map Light Mode 中文/ไทย changed labels, Dark Mode 中文/ไทย did not visibly change.",
+      "fixedStagingRetest": "PENDING",
+      "note": "Owner confirmation is not independent HTTP/browser proof, or Production approval."
+    },
+    "defects": {
+      "r2181DarkI18n": {
+        "state": "DEV_FIX_QA_PASS_STAGING_READY_OWNER_RETEST_PENDING",
+        "rootCause": "Different OpenFreeMap style layer identifiers (Positron label_* vs Dark place_*) excluded from existing label selector; during style reload localization could be skipped.",
+        "remediation": "Match sourced dark-name layers, protect motorway references, queue locale application until map style is ready.",
+        "translatedDataLimit": "Actual Chinese/Thai place names are only available where the vector source contains them."
+      }
+    }
   }
 }
