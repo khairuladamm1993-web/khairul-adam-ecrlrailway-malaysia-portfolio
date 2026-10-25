@@ -7,6 +7,7 @@ const {JSDOM}=require('jsdom');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 const api=require('../assets/mrs10-r219-ampang-service.js');
 const viewer=read('ampang-line-r219.html');
+const mapBridge=read('assets/mrs10-r219-map-bridge.js');
 const existingMap=read('assets/map-language-lab.js');
 const existingRegistry=require('../assets/railway-track-registry-kl.js');
 
@@ -60,7 +61,9 @@ test('R2.19: exact-code candidate matching rejects fabricated, ambiguous and cro
  assert.equal(api.verifiedPoi({class:'railway',subclass:'subway',name:'AG13 Maluri'}),null);
 });
 test('R2.19: isolated viewer retains existing map with no App JS or shared registry rewrite',()=>{
- assert.match(viewer,/<iframe[^>]*map-language-lab\.html\?railPilot=1/);
+ assert.doesNotMatch(viewer,/<iframe\b/i);
+ assert.match(viewer,/id="r219-map"/);
+ assert.match(viewer,/assets\/mrs10-r219-map-bridge\.js/);
  assert.match(viewer,/<script src="\.\/assets\/mrs10-r219-ampang-service\.js"/);
  assert.doesNotMatch(viewer,/mrl-ampang-physical-alignment/);
  assert.match(viewer,/#A65100/);
@@ -106,14 +109,15 @@ test('R2.19: 18 tappable orange station references, source popup, four-language 
  w.close();
 });
 
-test('R2.19 Safari UX: orange registry precedes collapsed generic base map with explicit disclaimer',()=>{
+test('R2.19 Safari UX: same-page MapLibre map and one numbered orange service timeline',()=>{
  const d=boot().document;
- const registry=d.getElementById('registry'),mapPanel=d.getElementById('map-reference');
+ const registry=d.getElementById('registry'),mapPanel=d.getElementById('r219-map-shell');
  assert(registry&&mapPanel);
- assert(registry.compareDocumentPosition(mapPanel)&d.defaultView.Node.DOCUMENT_POSITION_FOLLOWING);
- assert.equal(mapPanel.open,false,'general map must not obscure the confirmed service registry by default');
- assert.match(d.getElementById('map-ref-note').textContent,/Titik biru ialah POI umum/);
- assert.match(mapPanel.querySelector('iframe').getAttribute('src'),/map-language-lab\.html\?railPilot=1/);
+ assert(mapPanel.compareDocumentPosition(registry)&d.defaultView.Node.DOCUMENT_POSITION_FOLLOWING);
+ assert.equal(d.querySelectorAll('iframe').length,0);
+ assert.match(d.getElementById('r219-map-note').textContent,/Lokasi Ampang belum disahkan/);
+ assert(d.getElementById('r219-expand'));
+ assert(d.getElementById('r219-region'));
  assert.equal(d.querySelectorAll('#station-list li').length,18);
  assert.equal(d.querySelectorAll('#station-list .shared-tag').length,11);
  assert.equal(d.querySelectorAll('#station-list li:nth-child(n+12) .shared-tag').length,0);
@@ -124,4 +128,32 @@ test('R2.19 Safari UX: orange registry precedes collapsed generic base map with 
   assert.equal(d.querySelectorAll('#station-list .shared-tag').length,11);
  }
  d.defaultView.close();
+});
+
+test('R2.19 MapLibre adapter: source-only map and exact candidate popup; no fabricated orange geometry',()=>{
+ assert.match(mapBridge,/new maplibre\.Map\(/);
+ assert.match(mapBridge,/styles\/.*positron/);
+ assert.match(mapBridge,/styles\/.*dark/);
+ assert.match(mapBridge,/map\.on\('click',stationPopup\)/);
+ assert.match(mapBridge,/map\.queryRenderedFeatures\(/);
+ assert.match(mapBridge,/api\.candidatePoi\(props\)/);
+ assert.match(mapBridge,/api\.verifiedPoi\(props\)/);
+ assert.match(mapBridge,/NO orange vector or line layer/);
+ assert.doesNotMatch(mapBridge,/mrl-ampang-physical-alignment/);
+ assert.doesNotMatch(mapBridge,/coordinates.*AG\d+\b/i);
+ const current=api.stationByCode('AG7');
+ assert.equal(current.name,'Masjid Jamek');
+ assert.equal(current.geometry,null);
+ assert.equal(api.verifiedPoi({class:'railway',subclass:'subway',name:'AG7 Masjid Jamek'}),null);
+});
+test('R2.19 MapLibre adapter: theme, locale, full-screen and region wired to native map',()=>{
+ for(const id of ['r219-map-shell','r219-expand','r219-region','r219-map','lang','theme'])
+  assert.match(viewer,new RegExp('id="'+id+'"'));
+ assert.match(viewer,/mrs10-r219-theme/);
+ assert.match(mapBridge,/map\.setStyle\(mapStyle\(\)\)/);
+ assert.match(mapBridge,/map\.flyTo\(/);
+ assert.match(mapBridge,/map\.resize\(\)/);
+ assert.match(mapBridge,/locale\?\.addEventListener\('change'/);
+ assert.match(mapBridge,/lastAppliedLang===language/);
+ assert.match(viewer,/--orange:#FFBB7B/);
 });
