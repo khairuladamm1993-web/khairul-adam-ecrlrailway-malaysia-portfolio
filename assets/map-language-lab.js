@@ -51,7 +51,7 @@ const el=id=>document.getElementById(id);
 let lang='ms',map=null,ready=false,railDetails=false,activeRegion='malaysia',campusMarker=null;
 const railVisibility=on=>on?'visible':'none';
 function makeCampusPopup(){
- const root=document.createElement('div');root.className='campus-popup';
+ const root=document.createElement('div');root.className='campus-popup';root.tabIndex=0;root.setAttribute('role','region');root.setAttribute('aria-label',campusText[lang].title);
  const heading=document.createElement('strong');heading.textContent=campusText[lang].title;root.appendChild(heading);
  const original=document.createElement('p');original.textContent=LRVTC_CAMPUS.alternate+' · Liǔzhōu Tiědào Zhíyè Jìshù Xuéyuàn';root.appendChild(original);
  const address=document.createElement('p');address.textContent=LRVTC_CAMPUS.address;root.appendChild(address);
@@ -74,12 +74,12 @@ function syncCampusPin(){
   pin.setAttribute('aria-label',campusText[lang].title);
   campusMarker=new maplibregl.Marker({element:pin,anchor:'bottom'})
    .setLngLat(LRVTC_CAMPUS.lngLat)
-   .setPopup(new maplibregl.Popup({offset:22,maxWidth:'255px'}).setDOMContent(makeCampusPopup()))
+   .setPopup(new maplibregl.Popup({offset:22,maxWidth:'255px',className:'mrl-campus-popup'}).setDOMContent(makeCampusPopup()))
    .addTo(map);
  }else{
   const pin=campusMarker.getElement?.();
   if(pin){pin.title=campusText[lang].title;pin.setAttribute('aria-label',campusText[lang].title);}
-  campusMarker.setPopup(new maplibregl.Popup({offset:22,maxWidth:'255px'}).setDOMContent(makeCampusPopup()));
+  campusMarker.setPopup(new maplibregl.Popup({offset:22,maxWidth:'255px',className:'mrl-campus-popup'}).setDOMContent(makeCampusPopup()));
  }
 }
 function setRailVisibility(){
@@ -122,6 +122,7 @@ function render(){
  const guideTitle=el('liuzhou-title');if(guideTitle)guideTitle.textContent=readableRailLanguage[lang].guide;
  const guideHint=el('liuzhou-hint');if(guideHint)guideHint.textContent=readableRailLanguage[lang].guideHint;
  syncCampusPin();
+ renderExpand();
  setRailVisibility();
  const countryNames={
   ms:['Malaysia','Thailand','China'],en:['Malaysia','Thailand','China'],
@@ -177,7 +178,38 @@ function overlay(){
  const first=map.getStyle().layers.find(x=>x.type==='symbol');
  map.addLayer({id:'mrl-railway',type:'raster',source:'mrl-railway',layout:{visibility:railVisibility(railDetails)},paint:{'raster-opacity':0.60}},first?.id);
 }
+const expandText={ms:['Besarkan peta','Keluar peta besar'],en:['Expand map','Exit expanded map'],zh:['展开地图','退出展开地图'],th:['ขยายแผนที่','ออกจากแผนที่ขยาย']};
+let expanded=false,expandState=null;
+function renderExpand(){
+ const button=el('map-expand');if(!button)return;
+ button.setAttribute('aria-expanded',String(expanded));
+ button.setAttribute('aria-label',expandText[lang][expanded?1:0]);
+ button.title=expandText[lang][expanded?1:0];
+ button.firstElementChild.textContent=expanded?'×':'⛶';
+}
+function setExpanded(value){
+ if(value===expanded)return;
+ const shell=el('map-shell'),body=document.body;
+ if(!shell)return;
+ if(value){
+  expandState={style:body.getAttribute('style'),x:window.scrollX,y:window.scrollY,
+   siblings:Array.from(shell.parentElement.children).filter(n=>n!==shell).map(n=>[n,n.hasAttribute('inert')])};
+  expandState.siblings.forEach(([n])=>n.setAttribute('inert',''));
+  body.style.position='fixed';body.style.top=-expandState.y+'px';body.style.left=-expandState.x+'px';body.style.width='100%';body.style.overflow='hidden';
+ }else if(expandState){
+  expandState.siblings.forEach(([n,wasInert])=>{if(!wasInert)n.removeAttribute('inert');});
+  if(expandState.style===null)body.removeAttribute('style');else body.setAttribute('style',expandState.style);
+ }
+ expanded=value;shell.classList.toggle('is-expanded',expanded);renderExpand();
+ // Resize the same instance: centre, zoom, marker/popup and layers remain intact.
+ map?.resize?.();
+ if(!value&&expandState){window.scrollTo(expandState.x,expandState.y);expandState=null;}
+ el('map-expand')?.focus({preventScroll:true});
+}
+function onMapKey(event){if(event.key==='Escape'&&expanded){event.preventDefault();setExpanded(false);}}
+function onViewportResize(){if(expanded)map?.resize?.();}
 function init(){
+
  render();updateTheme();
  if(!window.maplibregl?.Map){el('label-status').textContent='Vector map engine unavailable';return;}
  map=new maplibregl.Map({
@@ -186,6 +218,19 @@ function init(){
   pitchWithRotate:false,dragRotate:false,touchPitch:false
  });
  map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-left');
+ const expandButton=el('map-expand');
+ const toggleExpanded=()=>setExpanded(!expanded);
+ expandButton?.addEventListener('click',toggleExpanded);
+ document.addEventListener('keydown',onMapKey);
+ window.addEventListener('resize',onViewportResize);
+ window.visualViewport?.addEventListener('resize',onViewportResize);
+ map.on('remove',()=>{
+  setExpanded(false);
+  expandButton?.removeEventListener('click',toggleExpanded);
+  document.removeEventListener('keydown',onMapKey);
+  window.removeEventListener('resize',onViewportResize);
+  window.visualViewport?.removeEventListener('resize',onViewportResize);
+ });
  map.on('style.load',()=>{
   try{
    const rails=readableRails();
