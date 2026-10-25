@@ -43,7 +43,7 @@ test('R2.12 removes external college and legend controls but preserves map',()=>
  const legend=d.getElementById('railway-legend'),shell=d.getElementById('map-shell');
  assert(legend && shell.contains(legend));
  assert(legend.querySelector('summary'));
- assert.equal(legend.querySelectorAll('[data-rail-legend]').length,6);
+ assert.equal(legend.querySelectorAll('[data-rail-legend]').length,8);
  assert(d.getElementById('map-expand'));
  assert(d.getElementById('railway-btn'));
 });
@@ -85,7 +85,7 @@ test('R2.12 legend is informational and does not claim raster pickability or fab
  assert.match(script,/exact route name needs source evidence/);
  assert(!script.includes('queryRenderedFeatures('));
  assert(script.includes('tiles.openrailwaymap.org'));
- for(const c of ['#FF8100','#FF0C00','#DACA00','#0300C3','#87491D','#000000'])assert(html.includes(c),c);
+ for(const c of ['#FF8100','#FF0C00','#DACA00','#0300C3','#00BD14','#D877B8','#87491D','#000000'])assert(html.includes(c),c);
 });
 test('R2.12 retains Expand Map, the accessibility targets and project boundaries',()=>{
  for(const token of ['id="map-expand"','id="visitor-map"','#map-shell.is-expanded','44px','© OpenRailwayMap'])assert(html.includes(token),token);
