@@ -1858,7 +1858,7 @@
     "issueId": "r2153-style-load-pilot-layer-recovery",
     "checkedOn": "2026-10-26",
     "title": "R2.15.3 MapLibre style.load layer gating fix and Safari rail/station popup retest",
-    "state": "STAGING_READY_SAFARI_RETEST_PENDING",
+    "state": "RAIL_TAP_OWNER_SAFARI_PASS_STATION_LAYER_MISSING",
     "ownerSafariEvidence": {
       "observedTime": "2026-10-26 01:00 MYT",
       "evidence": "Owner iPhone Safari screenshot in ChatGPT conversation, not published to public repo",
@@ -1896,7 +1896,7 @@
       "build": "PASS — preview build excludes member authentication and analytics",
       "http": "HTTP 200 map and JavaScript, restricted member and quiz paths HTTP 404",
       "repro": "Automated test reproduces isStyleLoaded=false during style.load and asserts pilot layers installed, transit rail source-based popup and style reload resilience",
-      "safari": "PENDING — direct Owner tap on staging must show rail READY / station READY and popup or source-based no-hit diagnostic; not yet confirmed",
+      "safari": "PARTIAL PASS: 01:09 MYT owner Safari screenshot confirms source-backed popup for light_rail (rail READY; source features 1). Station layer MISSING and station tap UAT PENDING.",
       "coverage": "NOT VERIFIED — KL rail route completeness and exact station track identity remain open"
     },
     "staging": {
@@ -1914,8 +1914,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "NO-GO FOR PRODUCTION — corrected source/staging QA PASSED, live Safari tap and actual source coverage not yet verified; no merge authorised",
-    "nextAction": "Open R2.15.3 isolated staging on iPhone Safari (railPilot=1&railDebug=1), choose Malaysia and railway details OFF; tap one cyan vector line and capture rail READY/MISSING, station READY/MISSING, source features and actual popup if any. If still missing, inspect real style vector-source mapping/source layer and error rather than inventing track registry. Separate KL network completeness audit later.",
+    "releaseDecision": "HOLD / NO-GO: Source-backed rail tap on Safari PASS; station source missing and KL full track/station topology unverified; no merge.",
+    "nextAction": "Retest rail and station layers using isolated R2.15.4 station source fallback candidate. Do not repeat previously passed rail base touch unless checking for regression; require station READY plus actual sourced station popup, not an inferred station.",
     "boundaries": {
       "production": "UNCHANGED",
       "gitHubMain": "UNCHANGED",
@@ -1924,6 +1924,29 @@
       "p03": "UNTOUCHED",
       "merge": "NOT PERFORMED",
       "personalImages": "NOT PUBLISHED"
+    },
+    "ownerSafariRailTap": {
+      "observedAt": "2026-10-26T01:09:00+08:00",
+      "source": "Owner iPhone Safari screenshot in ChatGPT conversation (not uploaded to public GitHub)",
+      "locationContext": "Kuala Lumpur / Jalan Tun Sambanthan screenshot area",
+      "observedDiagnostic": "TOUCH 9 / MAP CLICK 1 · source features 1 / visible 1 / raw rail 4 · light_rail · rail READY / station MISSING",
+      "actualPopup": "English name unavailable; Rail segment; Category: light_rail; OpenMapTiles / OpenFreeMap data; not operational",
+      "confirmed": [
+        "MapLibre map click received",
+        "One matching rendered rail feature selected at last tap",
+        "Source-backed popup opened on real iPhone Safari",
+        "light_rail subtype displayed with honest fallback when English name absent"
+      ],
+      "notConfirmed": [
+        "POI station layer available",
+        "Station marker tap and sourced name",
+        "Which actual LRT service/line corresponds to clicked geometry",
+        "Complete Kuala Lumpur alignment or individual physical lane count"
+      ],
+      "interpretation": "raw rail 4 is number of rendered features within diagnostic query; NOT evidence of four distinct physical tracks",
+      "railTapResult": "PASS_ON_OWNER_SAFARI",
+      "stationLayerResult": "MISSING",
+      "outstanding": "Station source-layer recovery and real device UAT"
     }
   }
 }
