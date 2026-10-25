@@ -1,0 +1,4 @@
+{
+  "buildCommand": "npm test && python3 scripts/build-production.py dist-production",
+  "outputDirectory": "dist-production"
+}
