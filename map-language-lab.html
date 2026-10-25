@@ -89,11 +89,12 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ef
 .china-code-result{padding-top:7px;border-top:1px solid var(--line);overflow-wrap:anywhere}
 .china-code-result a{display:inline-block;color:var(--fg);text-decoration:underline;margin-top:6px}
 .railway-legend{position:absolute;z-index:8;left:10px;bottom:12px;margin:0;width:44px;max-width:calc(100% - 20px);color:var(--fg)}
+.railway-legend[hidden]{display:none}
 .railway-legend[open]{width:min(310px,calc(100% - 20px))}
 .railway-legend summary{list-style:none;cursor:pointer;display:grid;place-items:center;width:44px;height:44px;min-height:44px;border-radius:8px;border:1px solid #8aaabe;background:#eef5f8;color:#17313f;font-weight:700}
 .railway-legend summary::-webkit-details-marker{display:none}
 .railway-legend summary span{font-size:19px}
-.rail-legend-panel{margin-top:5px;max-height:min(62dvh,440px);overflow:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--card);color:var(--fg);box-shadow:0 3px 12px #0004}
+.rail-legend-panel{margin-top:5px;max-height:min(42dvh,320px);overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--card);color:var(--fg);box-shadow:0 3px 12px #0004}
 .rail-legend-region{color:var(--muted);font-size:12px;margin-top:3px}
 .rail-legend-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:9px 0}
 .rail-legend-row{display:flex;align-items:center;gap:7px;min-height:44px;text-align:left;font-weight:550;font-size:12px;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--fg);overflow-wrap:anywhere}
