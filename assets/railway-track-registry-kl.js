@@ -13,7 +13,10 @@
   mrtKajangOverview:'https://www.mymrt.com.my/projects/kajang-line/',
   mrtKajangShortList:'https://www.mymrt.com.my/projects/kajang-line/stations/',
   kelanaOperatorMap:'https://myrapid.com.my/wp-content/uploads/2021/07/28102018_Transit-Map.pdf',
-  kelanaCodesCrosscheck:'https://www.mtrec.name.my/network/kjl.html'
+  kelanaCodesCrosscheck:'https://www.mtrec.name.my/network/kjl.html',
+  pylStations:'https://www.mymrt.com.my/projects/putrajaya-line/stations/',
+  pylOverview:'https://www.mymrt.com.my/projects/putrajaya-line/',
+  pylCodeCrosscheck:'https://www.transportmalaysia.com/services/mrt-putrajaya-line/'
  });
  // R2.17: sourced passenger-service branding, NOT an infrastructure-way style.
  const kajangLineVisual=Object.freeze({
@@ -27,10 +30,15 @@
   use:'SERVICE_AND_SOURCE_CODED_POI_ONLY',physicalAlignmentStatus:'UNVERIFIED',
   sourceUrl:sourceCatalogue.rapid
  });
+ // R2.20: MRT Corp YELLOW hue; HEX below is UI approximation, not official colour specification.
+ const putrajayaIdentity=Object.freeze({name:'Putrajaya Line Yellow',light:'#E5B800',dark:'#FFE36C',
+  use:'SERVICE_AND_SOURCE_CODED_POI_CANDIDATES_ONLY',physicalAlignmentStatus:'UNVERIFIED',
+  colourAuthority:'OFFICIAL_YELLOW_HUE_UI_HEX_APPROXIMATION',sourceUrl:sourceCatalogue.pylOverview});
  const route=(id,name,mode,operator,sourceKeys,stationSequence=[])=>Object.freeze({
   id,name,mode,operator,sourceUrls:sourceKeys.map(k=>sourceCatalogue[k]||k),
   visualIdentity:id==='mrt-kajang'?kajangLineVisual:null,
-  serviceIdentity:id==='lrt-kelana-jaya'?kelanaLineServiceIdentity:null,
+  serviceIdentity:id==='lrt-kelana-jaya'?kelanaLineServiceIdentity:
+   id==='mrt-putrajaya'?putrajayaIdentity:null,
   confidence:'OPERATOR_SERVICE_CONFIRMED',
   // These IDs are software registry IDs, NOT railway track or signal IDs.
   physicalTrackIds:[],vectorFeatureIds:[],geometry:null,
@@ -121,6 +129,43 @@
   {id:'lrt-kj35',name:"Alam Megah",code:'KJ35',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
   {id:'lrt-kj36',name:"Subang Alam",code:'KJ36',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
   {id:'lrt-kj37',name:"Putra Heights",code:'KJ37',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  // R2.20: MRT Corp's 36 operational stops only (five provisionals excluded).
+  {id:'mrt-py01',name:"Kwasa Damansara",code:'PY01',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py03',name:"Kampung Selamat",code:'PY03',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py04',name:"Sungai Buloh",code:'PY04',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py05',name:"Damansara Damai",code:'PY05',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py06',name:"Sri Damansara Barat",code:'PY06',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py07',name:"Sri Damansara Sentral",code:'PY07',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py08',name:"Sri Damansara Timur",code:'PY08',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py09',name:"Metro Prima",code:'PY09',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py10',name:"Kepong Baru",code:'PY10',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py11',name:"Jinjang",code:'PY11',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py12',name:"Sri Delima",code:'PY12',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py13',name:"Kampung Batu",code:'PY13',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py14',name:"Kentonmen",code:'PY14',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py15',name:"Jalan Ipoh",code:'PY15',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py16',name:"Sentul Barat",code:'PY16',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py17',name:"Titiwangsa",code:'PY17',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py18',name:"Hospital Kuala Lumpur",code:'PY18',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py19',name:"Raja Uda",code:'PY19',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py20',name:"Ampang Park",code:'PY20',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py21',name:"Persiaran KLCC",code:'PY21',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py22',name:"Conlay",code:'PY22',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py23',name:"Tun Razak Exchange (TRX)",code:'PY23',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py24',name:"Chan Sow Lin",code:'PY24',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py27',name:"Kuchai",code:'PY27',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py28',name:"Taman Naga Emas",code:'PY28',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py29',name:"Sungai Besi",code:'PY29',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py31',name:"Serdang Raya Utara",code:'PY31',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py32',name:"Serdang Raya Selatan",code:'PY32',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py33',name:"Serdang Jaya",code:'PY33',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py34',name:"UPM",code:'PY34',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py36',name:"Taman Equine",code:'PY36',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py37',name:"Putra Permai",code:'PY37',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py38',name:"16 Sierra",code:'PY38',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py39',name:"Cyberjaya Utara",code:'PY39',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py40',name:"Cyberjaya City Centre",code:'PY40',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
+  {id:'mrt-py41',name:"Putrajaya Sentral",code:'PY41',sourceUrls:[sourceCatalogue.pylStations,sourceCatalogue.pylCodeCrosscheck],confidence:'MRT_CORP_ORDER_SECONDARY_PY_CODE_CROSSCHECK'},
   // Owner Safari screenshot confirms cartographic POI name only; no service attachment.
   {id:'poi-maharajalela',name:'Maharajalela',originalName:'MR3 Maharajalela',
    sourceUrls:['https://openmaptiles.org/docs/schema/'],confidence:'OWNER_SAFARI_VECTOR_POI',linkedRouteId:null},
@@ -142,7 +187,9 @@
     'mrt-muzium-negara','mrt-pasar-seni','mrt-merdeka','mrt-bukit-bintang','mrt-tun-razak-exchange','mrt-cochrane','mrt-maluri','mrt-taman-pertama','mrt-taman-midah','mrt-taman-mutiara',
     'mrt-taman-connaught','mrt-taman-suntex','mrt-sri-raya','mrt-bandar-tun-hussein-onn','mrt-batu-sebelas-cheras','mrt-bukit-dukung','mrt-sungai-jernih','mrt-stadium-kajang','mrt-kajang'
    ]),
-  route('mrt-putrajaya','MRT · Putrajaya Line','subway','Rapid Rail',['rapid']),
+  route('mrt-putrajaya','MRT · Putrajaya Line','subway','Rapid Rail',
+   ['pylStations','pylOverview','pylCodeCrosscheck','rapid'],
+   ['mrt-py01','mrt-py03','mrt-py04','mrt-py05','mrt-py06','mrt-py07','mrt-py08','mrt-py09','mrt-py10','mrt-py11','mrt-py12','mrt-py13','mrt-py14','mrt-py15','mrt-py16','mrt-py17','mrt-py18','mrt-py19','mrt-py20','mrt-py21','mrt-py22','mrt-py23','mrt-py24','mrt-py27','mrt-py28','mrt-py29','mrt-py31','mrt-py32','mrt-py33','mrt-py34','mrt-py36','mrt-py37','mrt-py38','mrt-py39','mrt-py40','mrt-py41']),
   route('monorail-kl','KL Monorail','monorail','Rapid Rail',['rapid','mot']),
   route('erl-klia-transit','ERL · KLIA Transit','rail','Express Rail Link',['erl'],
    ['kl-sentral','bandar-tasik-selatan','putrajaya-cyberjaya','salak-tinggi','klia-t1','klia-t2']),
@@ -155,7 +202,16 @@
   regionScope:'Service reference inventory; some terminus stations are outside Kuala Lumpur.',
   warning:'Not a surveyed network, route geometry, platform, operational track identity, chainage or signal plan.',
   sources:sourceCatalogue,routes,stations,physicalSegments:Object.freeze([]),
+  provisionalStations:Object.freeze([{"code":"PY02","name":"Rubber Research Institute (RRI)","serviceStatus":"NOT_OPERATIONAL","geometry":null},{"code":"PY25","name":"Bandar Malaysia Utara","serviceStatus":"NOT_OPERATIONAL","geometry":null},{"code":"PY26","name":"Bandar Malaysia Selatan","serviceStatus":"NOT_OPERATIONAL","geometry":null},{"code":"PY30","name":"Taman Teknologi","serviceStatus":"NOT_OPERATIONAL","geometry":null},{"code":"PY35","name":"Taman Universiti","serviceStatus":"NOT_OPERATIONAL","geometry":null}].map(s=>Object.freeze(s))),
   sourceAudit:Object.freeze({
+   mrtPutrajaya:{
+    operationalStops:36,provisionalStops:5,serviceAdjacencies:35,
+    codeStatus:'SECONDARY_DIRECTORY_CROSSCHECK_NOT_OFFICIAL_CODE_CERTIFICATION',
+    serviceColour:'YELLOW_OPERATOR_HUE_UI_HEX_APPROXIMATION',physicalTrackGeometry:'UNVERIFIED',
+    provisionalBasis:'MRT Corp overview confirms five provisional locations; station page includes two inactive names.',
+    officialReferences:[sourceCatalogue.pylStations,sourceCatalogue.pylOverview],
+    secondaryReferences:[sourceCatalogue.pylCodeCrosscheck]
+   },
    kelanaJaya:{
     stationCount:37,orderedServiceAdjacencies:36,
     stationOrderSource:'Rapid KL integrated transit map; operator service identity cross-checked with Ministry of Transport 37-stop Gombak–Putra Heights scope.',
@@ -193,7 +249,13 @@
       e.toStationId!==r.stationSequence[i+1]||e.relation!=='CONSECUTIVE_SERVICE_STOPS'||
       e.physicalTrackId!==null||e.geometry!==null))return false;
   }
-  return data.physicalSegments.length===0;
+  const pyl=data.routes.find(r=>r.id==='mrt-putrajaya');
+   if(pyl){
+    if(pyl.stationSequence.length!==36||pyl.serviceAdjacencies.length!==35)return false;
+    const reserved=new Set((data.provisionalStations||[]).map(s=>s.code));
+    if(reserved.size!==5||pyl.stationSequence.some(id=>reserved.has(data.stations.find(s=>s.id===id)?.code)))return false;
+   }
+   return data.physicalSegments.length===0;
  }
  function findRoute(id){return catalog.routes.find(r=>r.id===id)||null}
  // The two exact source strings below were observed in Owner Safari POI
@@ -286,6 +348,24 @@
    status:'CANDIDATE_EXACT_CODE_NAME_VECTOR_MATCH_NOT_OWNER_OBSERVED',
    physicalTrackId:null,geometry:null,relationId:null,routeGeometryStatus:'UNVERIFIED'});
  }
+ // Only exact code+name, NEVER generic shared interchange name. POI unverified until observed.
+ function matchSourcedPutrajayaPoi(props){
+  if(!props||props.class!=='railway'||!['station','subway'].includes(props.subclass))return null;
+  const raw=typeof props.name==='string'?props.name.trim():'';
+  const m=/^(PY(?:0?[1-9]|[1-3][0-9]|4[01])) (.+)$/.exec(raw);
+  if(!m)return null;
+  const code='PY'+String(Number(m[1].slice(2))).padStart(2,'0');
+  const entry=catalog.stations.find(s=>s.code===code&&s.id.startsWith('mrt-py'));
+  if(!entry||entry.name!==m[2])return null;
+  const english=String(props['name:en']||props.name_en||'').trim();
+  if(english&&english.toLowerCase()!==entry.name.toLowerCase()&&english.toLowerCase()!==raw.toLowerCase())return null;
+  const route=findRoute('mrt-putrajaya'),index=route?.stationSequence?.indexOf(entry.id);
+  if(index<0)return null;
+  return Object.freeze({routeId:route.id,routeName:route.name,stationId:entry.id,
+    stationName:entry.name,stationCode:code,stopPosition:index+1,stopCount:36,
+    status:'CANDIDATE_EXACT_PY_CODE_NAME_NOT_OWNER_TILE_CONFIRMED',
+    physicalTrackId:null,geometry:null,relationId:null,routeGeometryStatus:'UNVERIFIED'});
+ }
  const osmRelationAudit=Object.freeze({
   relationCandidateIds:Object.freeze([]),acceptedRelationIds:Object.freeze([]),
   acceptedWayIds:Object.freeze([]),verifiedPhysicalTracks:0,
@@ -294,7 +374,7 @@
    'https://wiki.openstreetmap.org/wiki/Relation:route']),
   currentStatus:'NO_OSM_RELATION_OR_TRACK_WAY_MATCH_VERIFIED'
  });
- const api=Object.freeze({catalog,validateRegistry,findRoute,matchSourcedKajangPoi,matchSourcedKelanaPoi,osmRelationAudit});
+ const api=Object.freeze({catalog,validateRegistry,findRoute,matchSourcedKajangPoi,matchSourcedKelanaPoi,matchSourcedPutrajayaPoi,osmRelationAudit});
  if(typeof module==='object'&&module.exports)module.exports=api;
  if(root)root.MRS10KLRegistry=api;
 })(typeof window!=='undefined'?window:null);
