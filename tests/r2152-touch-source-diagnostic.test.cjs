@@ -33,7 +33,11 @@ function browser(qs){
  class Map{
   constructor(){map=this;this.handlers={};this.layers=[];this.sources={};}
   addControl(){}
-  on(e,a){if(typeof a==='function')this.handlers[e]=a;}
+  on(e,a){
+   if(typeof a!=='function')return;
+   const prev=this.handlers[e];
+   this.handlers[e]=prev?(event=>{prev(event);a(event);}):a;
+  }
   getCanvasContainer(){return w.document.getElementById('visitor-map')}
   isStyleLoaded(){return true}
   getStyle(){return{layers:[{id:'base-rail',source:'osm','source-layer':'transportation',type:'line'},{id:'base-poi',source:'osm','source-layer':'poi',type:'circle'},{id:'label_city',type:'symbol',source:'osm',layout:{'text-field':['get','name']}},...this.layers],sources:{osm:{type:'vector'}}}}
