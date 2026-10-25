@@ -1272,7 +1272,7 @@
     "project": "P01",
     "checkedOn": "2026-10-25",
     "title": "R2.14 China Railway Code Explorer (source-backed opt-in pilot)",
-    "state": "REFERENCE_CONTENT_OWNER_CONFIRMED_APP_UAT_PENDING",
+    "state": "PARTIAL_APP_SAFARI_UAT_PASS_RELEASE_HOLD",
     "approvalScope": "Owner endorsed in-map China railway code explanations; staging pilot only, not production deployment or raster digit interaction",
     "sourceBaseline": "3dd28e8eb95bfb37e0fb63145add54c867aa256b",
     "branch": "feature/mrs10-r214-china-rail-code-lookup-pilot",
@@ -1339,7 +1339,7 @@
       "catalogue": "14/14 PASS; 0 FAIL 0 SKIP",
       "publicBuild": "PASS: user-facing preview only; analytics/member auth excluded",
       "privacy": "HTTP 200 for map HTML/JS, 404 for protected quiz and member gateway assets",
-      "browser": "REFERENCE CONTENT PARTIAL PASS, APP SAFARI UAT PENDING — current screenshots are Chinese Wikipedia pages, not MR-S10 lookup popup.",
+      "browser": "PARTIAL SAFARI UAT PASS — actual MR-S10 China code lookup 44930, 0073 and 44915 tested by Owner in 3 iPhone Safari screenshots (2026-10-25, 22:57-22:58 MYT). Other languages, Dark Mode, responsive panel, railway/station vector tapping remain PENDING.",
       "featureTap": "Direct tap on pre-rendered raster digits UNSUPPORTED; do not claim full code popup",
       "production": "UNCHANGED",
       "referenceNameMatches": "5/5 OWNER CONFIRMED for code/name reference matches (two Chinese Wikipedia screenshots, remaining three Owner-reported)."
@@ -1360,8 +1360,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "NO-GO FOR PRODUCTION; code reference owner validation 5/5, source QA PASS, app Safari lookup/unknown-code/contrast UAT not yet evidenced.",
-    "nextAction": "Owner opens R2.14 isolated staging, switches China, taps map 🔢, checks 44930 and 0073 (leading zero), enters unknown 44915, tests compact popup BM/EN and Dark Mode; screenshots or explicit in-app observations. Keep app Safari gate PENDING; do not claim raster digit clicking.",
+    "releaseDecision": "HOLD / NO-GO FOR PRODUCTION: 3/3 tested lookup interactions PASS, source regression/cat PASS; full language/theme/UX and railway feature UAT outstanding, no merge authorized.",
+    "nextAction": "Test BM, 中文, ไทย and Dark Mode with China 44930/0073 once, then improve overlapping notification / oversized code panel in separate isolated development branch. Preserve source references, no raster digit clicking claim. ECRL Leaflet / MapLibre integration should be staged separately only after Owner QA and explicit merge approval.",
     "protectedProjects": {
       "main": "UNTOUCHED",
       "production": "UNCHANGED",
@@ -1412,6 +1412,46 @@
       "scopeLimitation": "Five confirmations cover code/name reference content; not proof of in-map China 🔢 code lookup clicks, four-language UI, dark mode, unknown-code fallback, raster-number tapping or actual railway feature attribution.",
       "sourceCrosscheck": "R2.14 code catalogue still present in GitHub source; Vercel dpl_DnCB938zXPnRgYKuBb9RBbMHeAH9 target=staging state=READY exact source SHA 7e6f8285b0cdc9e2cdf9ed6ea23673f6a49f275f",
       "nextRequiredUat": "Owner test on-screen MR-S10 China 🔢 lookup: at least 44930, zero-prefixed 0073, unknown 44915, popup contrast and language; screenshots or explicit UI observations requested. No direct raster-digit tap claimed."
+    },
+    "ownerSafariAppUat": {
+      "checkedOn": "2026-10-25",
+      "testDevice": "Owner iPhone Safari",
+      "evidenceScope": "Three Owner-submitted screenshots of actual MR-S10 R2.14 map code lookup in China railPilot mode; screenshots retained in ChatGPT conversation, not copied into public GitHub",
+      "screenshotTimesMalaysia": [
+        "22:57",
+        "22:57",
+        "22:58"
+      ],
+      "checks": [
+        {
+          "input": "44930",
+          "result": "PASS",
+          "observed": "44930 · Rong'an Railway Station; Station code (TMIS); 融安站; Róng'ān Zhàn; Reference source link"
+        },
+        {
+          "input": "0073",
+          "result": "PASS",
+          "observed": "0073 · Hengyang–Liuzhou Railway; Railway line number; 衡柳铁路; Héngliǔ Tiělù; Reference source link; leading zero retained"
+        },
+        {
+          "input": "44915",
+          "result": "PASS",
+          "observed": "Code not verified in this pilot catalogue; no name is invented"
+        }
+      ],
+      "uiNotes": [
+        "Lookup panel overlays the rail-and-station-pilot notification banner in mobile viewport; prioritise smaller nonoverlapping layout",
+        "Light Mode EN text legible in screenshots",
+        "No direct click on an OpenRailwayMap raster code was attempted or is supported"
+      ],
+      "notTested": [
+        "Dark Mode contrast",
+        "Switch to BM, 中文, ไทย and inspect returned text",
+        "Different device widths and panel scrolling",
+        "Direct tapping of actual station/rail vector features in all three pilot regions",
+        "Unified ECRL Map integration"
+      ],
+      "conclusion": "PARTIAL_APP_SAFARI_UAT_PASS: 3/3 targeted China code lookup cases PASS; broad Safari acceptance remains PENDING"
     }
   }
 }
