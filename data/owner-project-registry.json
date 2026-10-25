@@ -2125,7 +2125,7 @@
     "issueId": "r2155-map-tap-versus-pan-diagnostic",
     "checkedOn": "2026-10-26",
     "title": "R2.15.5 Gesture-aware map tap diagnostics",
-    "state": "STAGING_READY_SAFARI_UAT_PENDING",
+    "state": "OWNER_SAFARI_UAT_PASS_FORMAL_EVIDENCE_GATE_OPEN",
     "reason": "Owner noticed diagnostic TOUCH increased while dragging/scrolling map. Prior implementation incremented on pointerdown, which is a gesture start (not proof of map click). Last Owner Liuzhou screenshot TOUCH 91 / MAP CLICK 1, LUORONG / 雒容 station popup confirmed.",
     "alreadyVerifiedSafari": {
       "Malaysia": "Maharajalela railway station, source-backed popup PASS; prior light_rail segment source-backed popup PASS",
@@ -2154,7 +2154,7 @@
       "catalogue": "14/14 PASS; 0 FAIL/SKIP",
       "artifact": "Map HTML and JS HTTP 200; Member/quiz excluded HTTP 404",
       "built": "READY target staging; exact SHA validated",
-      "safari": "PENDING — Owner confirm map pan changes PANS, not MAP TAPS, and real station click increments MAP TAPS",
+      "safari": "OWNER SAFARI VISUAL PASS — 2026-10-26 01:42 MYT screenshot: MAP TAPS 1 / PANS 1, source-backed Pasar Seni station popup, rail READY / station READY. Source tests 301/301 PASS; temporal gestures not independently observable from still image. Formal HTTPS-dated acceptance artifact not supplied.",
       "provenance": "Only MapLibre click/drag events, no station names fabricated and no raster click claim",
       "operations": "No Production, Supabase Auth/RLS, ECRL P02, Swift P03 or main change"
     },
@@ -2174,8 +2174,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "NO-GO — source and staging QA PASS, live Safari gesture verification pending; network coverage, track topology and integration remain OPEN. No merge or Production deployment authorized.",
-    "nextAction": "Owner opens new R2.15.5 isolated Safari staging, pans map once: PANS increases, MAP TAPS unchanged. Tap one already tested station symbol: MAP TAPS increases and source-backed popup appears. Then proceed to other regions only if meaningful; previously passed multilingual/rail station tests retained.",
+    "releaseDecision": "NO-GO FOR PRODUCTION OR MERGE — R2.15.5 scoped gesture counter fix visually PASS on Safari, but formal dated HTTPS UAT evidence requirement not met; full network coverage / registry, integration and release safety gates remain OPEN.",
+    "nextAction": "Preserve R2.15.5 Safari visual PASS. For formal SOLVED, attach or reference a dated HTTPS PASS/CONFIRMED Safari gesture evidence record (without personal image/secret data) and confirm tests, then update resolution. Next technical work: audit source-backed physical track and station topology for Kuala Lumpur before assigning lane/route IDs. Do not redeploy/merge/promote without Owner approval.",
     "boundaries": {
       "production": "UNCHANGED",
       "main": "UNCHANGED",
@@ -2184,6 +2184,33 @@
       "p03": "UNTOUCHED",
       "merge": "NOT DONE",
       "screenshots": "NOT PUBLISHED"
+    },
+    "ownerSafariGestureUat": {
+      "observedAt": "2026-10-26T01:42:00+08:00",
+      "evidenceType": "Owner-provided iPhone Safari screenshot in current conversation; image not publicly shared or uploaded to GitHub",
+      "scope": "R2.15.5 isolated staging preview, Kuala Lumpur at Pasar Seni, English interface",
+      "diagnostic": "MAP TAPS 1 / PANS 1 · Map tap received · source features 2 / visible 1 / raw rail 2 · subway · rail READY / station READY",
+      "stationPopup": {
+        "name": "Pasar Seni",
+        "category": "Railway station",
+        "subclass": "subway",
+        "sourceOriginalName": "KG16 Pasar Seni",
+        "source": "OpenMapTiles / OpenFreeMap data; not operational"
+      },
+      "observedPass": [
+        "Tap and pan event counts displayed separately (MAP TAPS 1 / PANS 1)",
+        "A MapLibre station tap opened source-backed Pasar Seni popup on Safari",
+        "Map layer diagnostic showed rail READY / station READY",
+        "Category subway and original source text KG16 Pasar Seni visible",
+        "Previously verified one-station examples in Malaysia, Thailand and China remain distinct evidence"
+      ],
+      "limits": [
+        "One still image cannot independently prove the exact temporal order of pan/tap; source tests check separate counters",
+        "The popup does not prove platform, physical rail track, station lineup or operational route data",
+        "Full network geometry, Bangkok and Liuzhou independent rail segment taps, integration and release gates remain open",
+        "Owner UAT screenshot is not a durable date-stamped public HTTPS PASS evidence artifact; formal resolution remains OPEN under registry requirements"
+      ],
+      "scopedVerdict": "OWNER_SAFARI_UAT_PASS_FOR_VISIBLE_MAP_TAPS_VS_PANS_AND_STATION_POPUP"
     }
   }
 }
