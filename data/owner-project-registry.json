@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "R2.6 staging READY but protected by Vercel SSO; Thai interface 117/341 shared strings, raster labels remain native; production unchanged",
+  "register": "R2.5+R2.6 combined on existing isolated MR-S10 Unified Preview; 230/230 Node PASS, Catalogue 14/14 PASS, deployment READY, Vercel SSO limits Safari, production untouched",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -51,11 +51,19 @@
       "code": "P01",
       "name": "MR-S10 Portfolio Website",
       "category": "website",
-      "phase": "R2.5 two-way workflow and R2.6 four-language foundation in independent development branches",
+      "phase": "R2.5 + R2.6 integrated in MR-S10 single-domain isolated Unified Preview; Owner session/browser UAT pending",
       "overall": "IN_PROGRESS",
-      "nextDecision": "R2.6: complete Thai interface coverage and validate BM/EN/ZH/TH Chapter 01 and live map on Safari. Raster base map labels require separately tested vector tile prototype. Do not mark entire website or map fully localized, and do not alter Production.",
+      "nextDecision": "Owner Safari: open the existing MR-S10 Unified Preview and check BM/EN/中文/ไทย controls plus Chapter 01. Vercel Authentication is enabled; do not request Supabase Magic Link until callback approved. R2.5 full two-way UAT and map raster place labels remain pending. No Production merge.",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
+        {
+          "type": "test",
+          "label": "R2.5 + R2.6 single MR-S10 Unified Preview integration",
+          "value": "230/230 Node PASS; 14/14 Catalogue PASS; staging 46-file deployment READY; Safari Auth UAT pending",
+          "verifiedOn": "2026-10-25",
+          "confidence": "automated tests plus deployment metadata; not Owner end-to-end UAT",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/feature/mrs10-r26-unified-integration"
+        },
         {
           "type": "test",
           "label": "R2.6 four-language Thai map and Chapter 01 development QA",
@@ -669,5 +677,29 @@
     "stagingState": "READY",
     "stagingAccess": "VERCEL_AUTH_PROTECTED (HTTP 302); Safari/public UAT not yet confirmed",
     "canonicalPreview": "UNCHANGED"
+  },
+  "integrationR25R26": {
+    "checkedOn": "2026-10-25",
+    "project": "P01",
+    "scope": "R2.5 Verified Two-Way Workflow plus R2.6 four-language foundation integrated into the existing MR-S10 isolated Unified Preview",
+    "sourceBranch": "feature/mrs10-r26-unified-integration",
+    "sourceCommit": "f8b9005ef8e8d41a8cc879184ad8fd2b86fcd3fa",
+    "nodeQa": "230/230 PASS",
+    "catalogueQa": "14/14 PASS",
+    "previewAndIntegratedBuild": "PASS",
+    "deployedArtifactFiles": "46/46 verified",
+    "deploymentId": "dpl_DnL1Zk7EqBU2V4BPrJDPtCWWQQ8G",
+    "previewUrl": "https://mrs10-r24-single-gateway-preview.vercel.app/gateway.html",
+    "aliasConfirmed": "mrs10-r24-single-gateway-preview.vercel.app points to dpl_DnL1Zk7EqBU2V4BPrJDPtCWWQQ8G",
+    "deploymentState": "READY",
+    "protection": "Vercel Authentication enabled; Safari public/Owner end-to-end UAT PENDING",
+    "r25": "Issue-specific ChatGPT handoff and authorized GitHub Registry write contract; NOT an automatic live feed of private chats",
+    "r26": "BM/EN/ZH/TH selectors; translated Chapter 01 and map-owned UI; Thai shared copy 117/341; basemap raster labels NOT localized",
+    "ownerLogin": "PENDING",
+    "production": "UNCHANGED",
+    "supabaseAuthRls": "UNCHANGED",
+    "ecrlSlice1": "UNCHANGED / BLOCKED / NO-GO",
+    "releaseDecision": "NO-GO to MR-S10 Production; isolated staging merged only",
+    "rollback": "Previous isolated staging alias deployment dpl_D5VGM9hWVrNgVicN7pQUfYHhkNAC"
   }
 }
