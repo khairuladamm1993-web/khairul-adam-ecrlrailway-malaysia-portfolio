@@ -23,9 +23,9 @@ test('R2.20 official 36-station sequence, five provisional stations excluded, no
 });
 test('R2.20 yellow theme identity and candidate matching never asserts actual track geometry',()=>{
  const r=api.findRoute('mrt-putrajaya'),match=api.matchSourcedPutrajayaPoi;
- assert.equal(r.serviceIdentity.light,'#E5B800');
+ assert.equal(r.serviceIdentity.light,'#FBCD20');
  assert.equal(r.serviceIdentity.dark,'#FFE36C');
- assert.match(r.serviceIdentity.colourAuthority,/HEX_APPROXIMATION/);
+ assert.match(r.serviceIdentity.colourAuthority,/SECONDARY_HEX_CROSSCHECK_NOT_OPERATOR_CERTIFIED/);
  assert.equal(r.geometry,null);
  for(const [raw,pos] of [['PY01 Kwasa Damansara',1],['PY3 Kampung Selamat',2],
    ['PY23 Tun Razak Exchange (TRX)',22],['PY41 Putrajaya Sentral',36]]){
@@ -41,7 +41,7 @@ test('R2.20 yellow theme identity and candidate matching never asserts actual tr
   {class:'railway',subclass:'station',name:'PY20 Ampang Park','name:en':'KJ9 Ampang Park'}]){
   assert.equal(match(props),null);
  }
- assert.match(html,/--py-yellow:#E5B800/);
+ assert.match(html,/--py-yellow:#FBCD20/);
  assert.match(html,/--py-text:#FFE36C/);
  assert(!script.includes('mrl-putrajaya-alignment'));
 });
@@ -82,7 +82,7 @@ test('R2.20 mobile UI: yellow 36 numbered stops and isolated source POIs in all 
  const py=map.getLayer('mrl-putrajaya-code-poi'),kj=map.getLayer('mrl-kelana-code-poi'),kg=map.getLayer('mrl-kajang-known-poi');
  assert(py&&kj&&kg);
  assert.equal(py.layout.visibility,'none');
- assert.equal(py.paint['circle-color'],'#E5B800');
+ assert.equal(py.paint['circle-color'],'#FBCD20');
  assert.equal(py.filter[3][2][1].length,72);
  sel.value='mrt-putrajaya';sel.dispatchEvent(new w.Event('change'));
  assert.equal(py.layout.visibility,'visible');

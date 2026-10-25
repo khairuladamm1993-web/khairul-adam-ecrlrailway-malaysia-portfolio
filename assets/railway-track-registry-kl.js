@@ -16,7 +16,8 @@
   kelanaCodesCrosscheck:'https://www.mtrec.name.my/network/kjl.html',
   pylStations:'https://www.mymrt.com.my/projects/putrajaya-line/stations/',
   pylOverview:'https://www.mymrt.com.my/projects/putrajaya-line/',
-  pylCodeCrosscheck:'https://www.transportmalaysia.com/services/mrt-putrajaya-line/'
+  pylCodeCrosscheck:'https://www.transportmalaysia.com/services/mrt-putrajaya-line/',
+  pylHexCrosscheck:'https://www.transportmalaysia.com/hex-codes-for-public-transport-services/'
  });
  // R2.17: sourced passenger-service branding, NOT an infrastructure-way style.
  const kajangLineVisual=Object.freeze({
@@ -30,10 +31,12 @@
   use:'SERVICE_AND_SOURCE_CODED_POI_ONLY',physicalAlignmentStatus:'UNVERIFIED',
   sourceUrl:sourceCatalogue.rapid
  });
- // R2.20: MRT Corp YELLOW hue; HEX below is UI approximation, not official colour specification.
- const putrajayaIdentity=Object.freeze({name:'Putrajaya Line Yellow',light:'#E5B800',dark:'#FFE36C',
+ // R2.20: operator YELLOW hue; hexadecimal cross-checked with secondary directory,
+// not a formally certified MRT Corp colour specification.
+ const putrajayaIdentity=Object.freeze({name:'Putrajaya Line Yellow',light:'#FBCD20',dark:'#FFE36C',
   use:'SERVICE_AND_SOURCE_CODED_POI_CANDIDATES_ONLY',physicalAlignmentStatus:'UNVERIFIED',
-  colourAuthority:'OFFICIAL_YELLOW_HUE_UI_HEX_APPROXIMATION',sourceUrl:sourceCatalogue.pylOverview});
+  colourAuthority:'OFFICIAL_YELLOW_HUE_SECONDARY_HEX_CROSSCHECK_NOT_OPERATOR_CERTIFIED',
+  sourceUrl:sourceCatalogue.pylOverview,colourCrosscheckUrl:sourceCatalogue.pylHexCrosscheck});
  const route=(id,name,mode,operator,sourceKeys,stationSequence=[])=>Object.freeze({
   id,name,mode,operator,sourceUrls:sourceKeys.map(k=>sourceCatalogue[k]||k),
   visualIdentity:id==='mrt-kajang'?kajangLineVisual:null,
@@ -207,7 +210,8 @@
    mrtPutrajaya:{
     operationalStops:36,provisionalStops:5,serviceAdjacencies:35,
     codeStatus:'SECONDARY_DIRECTORY_CROSSCHECK_NOT_OFFICIAL_CODE_CERTIFICATION',
-    serviceColour:'YELLOW_OPERATOR_HUE_UI_HEX_APPROXIMATION',physicalTrackGeometry:'UNVERIFIED',
+    serviceColour:'YELLOW_OPERATOR_HUE_SECONDARY_HEX_CROSSCHECK_FBCD20',physicalTrackGeometry:'UNVERIFIED',
+    colourCrosscheckUrl:sourceCatalogue.pylHexCrosscheck,
     provisionalBasis:'MRT Corp overview confirms five provisional locations; station page includes two inactive names.',
     officialReferences:[sourceCatalogue.pylStations,sourceCatalogue.pylOverview],
     secondaryReferences:[sourceCatalogue.pylCodeCrosscheck]
