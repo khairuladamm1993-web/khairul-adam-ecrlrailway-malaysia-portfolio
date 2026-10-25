@@ -170,6 +170,18 @@ function pilotSourceForLayer(style,sourceLayer){
  const entry=style?.layers?.find(layer=>layer['source-layer']===sourceLayer && style.sources?.[layer.source]?.type==='vector');
  return entry?.source||null;
 }
+// Some OpenFreeMap styles use a vector tileset for transportation while omitting
+// POI symbol layers from the current theme. Their omission from style.layers is
+// NOT proof the underlying vector source lacks the OpenMapTiles poi source-layer.
+// Re-use only that already-declared source; never create station coordinates.
+function pilotStationVectorSource(style){
+ const explicit=pilotSourceForLayer(style,'poi');
+ if(explicit)return {source:explicit,discovery:'styled-poi'};
+ const transport=pilotSourceForLayer(style,'transportation');
+ if(transport && style?.sources?.[transport]?.type==='vector')
+  return {source:transport,discovery:'shared-vector-source; poi content unverified'};
+ return {source:null,discovery:'no-vector-source'};
+}
 function popupFromPilotFeature(feature,kind,lngLat){
  if(!feature||!(kind==='station'?pilotEligibleStation(feature.properties):pilotEligibleRail(feature.properties)))return;
  const info=pilotFeatureInfo(feature.properties,kind,lang);
@@ -190,7 +202,7 @@ function installPilotVectorLayers(){
  // our readable rails and raster overlay mutate the style. Do not gate layer
  // installation on pending tile/render work; retry missing layers at idle.
  if(!pilotMode||!map?.getStyle?.()?.sources)return false;
- const style=map.getStyle(),railSource=transportationSource(style),poiSource=pilotSourceForLayer(style,'poi');
+ const style=map.getStyle(),railSource=transportationSource(style),stationSource=pilotStationVectorSource(style),poiSource=stationSource.source;
  const status=el('railway-pilot-status');
  let stations=false,rails=false;
  // A vector feature must exist before any popup can open: no synthetic station markers.
@@ -200,7 +212,12 @@ function installPilotVectorLayers(){
     filter:['all',['==',['get','class'],'railway'],['in',['get','subclass'],['literal',pilotStationSubclasses]]],
     paint:{'circle-radius':6,'circle-color':'#1F849E','circle-stroke-color':'#FFFFFF','circle-stroke-width':1.5}});
    stations=true;
-  }catch(e){stations=false;}
+  }catch(e){
+   stations=false;
+   // Diagnostics only. Missing POI source or invalid layer expressions remain
+   // distinct from lack of individual station records in loaded tiles.
+   if(pilotDebug)writeRailTapDiagnostic('Station layer setup error',String(e?.message||e).slice(0,120));
+ }
  }else stations=!!map.getLayer('mrl-pilot-stations');
  if(railSource&&!map.getLayer('mrl-pilot-rail-hits')){
   try{
@@ -231,6 +248,11 @@ function installPilotVectorLayers(){
  }
  if(status)status.textContent=pilotLocalized[lang].title+' · '+pilotLocalized[lang].tap+
   (!stations?' [station POI layer unavailable]':'')+(!rails?' [rail layer unavailable]':'');
+ if(pilotDebug && stations && stationSource.discovery!=='styled-poi'){
+  // Layer existence does not prove that any station record is available in a tile.
+  const diagnostic=el('railway-pilot-status');
+  if(diagnostic)diagnostic.textContent+=' [station source shared with railway; station data unverified]';
+ }
  return stations||rails;
 }
 // R2.14 reference catalogue: ONLY individually source-verified Chinese railway codes.
@@ -563,7 +585,7 @@ function init(){
   if(e.key==='railway-language'&&locales.includes(e.newValue))setLanguage(e.newValue);
  });
 }
-if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText,transportationSource,railVectorLayer,LRVTC_CAMPUS,campusText,pilotCenters,pilotEligibleStation,pilotEligibleRail,pilotFeatureInfo,pilotSourceForLayer,railVectorFilter,queryPilotVectorFeature,railTapProbe,chinaRailCodeRecords,lookupChinaRailCode};
+if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText,transportationSource,railVectorLayer,LRVTC_CAMPUS,campusText,pilotCenters,pilotEligibleStation,pilotEligibleRail,pilotFeatureInfo,pilotSourceForLayer,pilotStationVectorSource,railVectorFilter,queryPilotVectorFeature,railTapProbe,chinaRailCodeRecords,lookupChinaRailCode};
 if(typeof document!=='undefined'){
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
  else init();
