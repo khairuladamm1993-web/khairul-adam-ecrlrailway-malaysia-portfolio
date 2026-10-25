@@ -3944,5 +3944,103 @@
       "sourceBranches": "UNCHANGED"
     },
     "nextAction": "Owner test combined Preview: select Kajang, Kelana Jaya, Putrajaya and Ampang link; verify four language controls and Dark/Light. The user earlier reported all R2.20 checks OK; do not mistake that for integrated Preview PASS. Preserve Production NO-GO."
+  },
+  "integrationR2176": {
+    "project": "P01",
+    "issueId": "r2176-kajang-poi-source-filter-parity",
+    "title": "R2.17.6 — Kajang POI green source parity and isolated Preview QA",
+    "checkedOn": "2026-10-26",
+    "state": "ISOLATED_STAGING_READY_334_NODE_PASS_PUBLIC_ASSET_ISOLATION_PASS_OWNER_SAFARI_PENDING",
+    "rootCause": "The previous green MapLibre POI paint filter only checked railway class, subtype and exact KG source name, while the popup source matcher additionally rejected contradictory name:en. Such conflicting features could appear green without a valid MRT Kajang source-backed popup. Two older regression tests asserted the former nested filter array structure rather than actual source-filter behavior.",
+    "scope": "Preserve operator-confirmed 29-stop green registry, KG13 (9/29) and KG35 (29/29), correct false-green contradictions without asserting surveyed Kajang track geometry. No changes to other route modules or railway geometries.",
+    "implementation": {
+      "branch": "feature/mrs10-r2176-kajang-poi-source-guard",
+      "parentSha": "a23a17d0a51dbf94d944cab0015a99539aa7a084",
+      "finalSourceSha": "5fdd8613229cbff2fa4222349581760b5fb05a17",
+      "changes": [
+        "MapLibre green POI filter derives 29 code/name allowlist from existing Registry and validates both optional English source fields; conflicting KTM-labelled POIs are not painted green.",
+        "Semantic test evaluator replaces brittle AST-index assertions in existing R2.17/R2.17.2 source tests; all 29 code/name candidates remain eligible when valid.",
+        "Staging-only vercel.json gates deployment on full npm test, then uses scripts/build-preview.py rather than the Production artifact builder; excludes private Member/Admin and quiz assets."
+      ],
+      "changedFiles": [
+        "assets/map-language-lab.js",
+        "tests/r2175-kajang-popup-identity-clarity.test.cjs",
+        "tests/helpers/kajang-filter-evaluator.cjs",
+        "tests/r217-kajang-green-identity.test.cjs",
+        "tests/r2172-kajang-29-source-poi-green.test.cjs",
+        "vercel.json"
+      ],
+      "sourceCommitUrl": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/5fdd8613229cbff2fa4222349581760b5fb05a17"
+    },
+    "qa": {
+      "node": "334/334 PASS · 0 FAIL · 0 SKIP in Vercel build logs at final exact SHA",
+      "targetedSourceGuard": "PASS — conflicting source name:en/name_en stays non-green; valid KG13 and 29 Registry candidates remain eligible",
+      "assetHttp": {
+        "allowed200": [
+          "/map-language-lab.html?railPilot=1",
+          "/assets/map-language-lab.js",
+          "/assets/railway-track-registry-kl.js",
+          "/gateway.html"
+        ],
+        "excluded404": [
+          "/assets/member-gateway.js",
+          "/assets/questions.js",
+          "/assets/quiz-core.js",
+          "/assets/owner-command-center.js",
+          "/data/owner-project-registry.json"
+        ]
+      },
+      "catalogue": "14/14 previously recorded on R2.17.5; not separately rerun for R2.17.6",
+      "safari": "PENDING OWNER R2.17.6 visual UAT. Older R2.17.2 green KG13 marker and older R2.17.5 full-title Light Mode Safari checks remain historical scoped PASS; do not transfer that approval to this deployment.",
+      "livePhysicalWay": "UNVERIFIED; 0 accepted physical tracks",
+      "priorFailedBuild": "First npm test QA detected 2 brittle legacy filter-shape assertions; changed to semantic checks then 334/334 PASS.",
+      "priorAssetIsolation": "Earlier test-gated staging accidentally used production artifact builder and served member-gateway.js (HTTP 200), superseded by final Preview-built deployment where it returns HTTP 404."
+    },
+    "staging": {
+      "project": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_6yHvtfY2B7Zwd4ZwkqHgGC7cM4xr",
+      "exactSourceSha": "5fdd8613229cbff2fa4222349581760b5fb05a17",
+      "target": "staging",
+      "state": "READY",
+      "protectedBy": "Vercel Authentication ALL; existing project setting unchanged",
+      "url": "https://mrs10-r211-mobile-map-rdfw8g0fz-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "artifact": "scripts/build-preview.py; public-only, access stub, analytics disabled, protected assets excluded",
+      "note": "No Production-target release, no merge, no alias promotion."
+    },
+    "sourceEvidence": {
+      "kajangOfficialService": "https://www.mymrt.com.my/projects/kajang-line/",
+      "physicalAuditDependencies": [
+        "integrationR2173",
+        "integrationR2174"
+      ],
+      "osmCandidatesUnaccepted": [
+        "relation/8000326",
+        "way/778403716"
+      ],
+      "acceptedPhysicalWayIds": [],
+      "acceptedPhysicalGeometry": null,
+      "verifiedPhysicalTracks": 0,
+      "caveat": "GIS direction-service geometry is not physical OSM railway way proof; official GTFS source in historical R2.17.4 returned HTTP 406. Do not green-colour the full Kajang physical alignment or KTM."
+    },
+    "ownerSafari": {
+      "historical": "2026-10-26 05:41 MYT green KG13 9/29 popup partial PASS; 06:39 MYT full official KG13 name in Light Mode scoped PASS.",
+      "latestR2176": "PENDING",
+      "check": "Malaysia / MRT Kajang; KG13 Pusat Bandar Damansara 9/29 green and full title in Light + Dark, scroll sticky heading, nearby KTM Kajang remains neutral, no duplicate ambiguous green dot; compare Thailand/China isolation."
+    },
+    "releaseDecision": "NO-GO Production and physical-alignment release; isolated staging READY, Owner Safari still pending.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "r218": "UNTOUCHED",
+      "r219": "UNTOUCHED",
+      "r220": "UNTOUCHED",
+      "r221": "UNTOUCHED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT DONE"
+    },
+    "nextAction": "Owner iPhone Safari visual UAT on exact new staging; only advance physical line after current way-membership, topology, KTM separation, license and source geometry gates. Reconcile combined R2.18/R2.19/R2.20/R2.21 in separate integration QA, never auto-merge."
   }
 }
