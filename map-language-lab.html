@@ -69,6 +69,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ef
 .railway-legend summary::-webkit-details-marker{display:none}
 .railway-legend summary span{font-size:19px}
 .rail-legend-panel{margin-top:5px;max-height:min(62dvh,440px);overflow:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--card);color:var(--fg);box-shadow:0 3px 12px #0004}
+.rail-legend-region{color:var(--muted);font-size:12px;margin-top:3px}
 .rail-legend-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:9px 0}
 .rail-legend-row{display:flex;align-items:center;gap:7px;min-height:44px;text-align:left;font-weight:550;font-size:12px;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--fg);overflow-wrap:anywhere}
 .rail-legend-row[aria-pressed="true"]{outline:2px solid #2893b7}
@@ -98,14 +99,16 @@ await import('./assets/map-language-lab.js');
 <button type="button" data-region="thailand">🇹🇭 Thailand</button>
 <button type="button" data-region="china">🇨🇳 China</button></div>
 <div id="map-shell"><div id="visitor-map" role="region" aria-label="Multilingual visitor map"></div><div id="railway-pilot-status" class="railway-pilot-status" role="status" aria-live="polite" hidden></div><button id="map-expand" type="button" aria-label="Expand map" aria-expanded="false" aria-controls="visitor-map"><span aria-hidden="true">⛶</span></button><details id="railway-legend" class="railway-legend">
-<summary id="railway-legend-trigger" aria-label="Railway colour legend" title="Railway colour legend"><span aria-hidden="true">🎨</span></summary><div class="rail-legend-panel"><strong id="railway-legend-title">Railway colour legend</strong>
+<summary id="railway-legend-trigger" aria-label="Railway colour legend" title="Railway colour legend"><span aria-hidden="true">🎨</span></summary><div class="rail-legend-panel"><strong id="railway-legend-title">Railway colour legend</strong><div id="railway-legend-region" class="rail-legend-region">Malaysia</div>
 <div class="rail-legend-grid">
 <button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="0"><span class="rail-legend-swatch" aria-hidden="true" style="background:#FF8100"></span><span>Main line</span></button>
 <button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="1"><span class="rail-legend-swatch" aria-hidden="true" style="background:#FF0C00"></span><span>High-speed tagged rail</span></button>
 <button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="2"><span class="rail-legend-swatch" aria-hidden="true" style="background:#DACA00"></span><span>Branch line</span></button>
 <button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="3"><span class="rail-legend-swatch" aria-hidden="true" style="background:#0300C3"></span><span>Metro / subway</span></button>
-<button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="4"><span class="rail-legend-swatch" aria-hidden="true" style="background:#87491D"></span><span>Industrial / spur</span></button>
-<button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="5"><span class="rail-legend-swatch" aria-hidden="true" style="background:#000000"></span><span>Other rail / yard</span></button>
+<button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="4"><span class="rail-legend-swatch" aria-hidden="true" style="background:#00BD14"></span><span>Light rail / LRT</span></button>
+<button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="5"><span class="rail-legend-swatch" aria-hidden="true" style="background:#D877B8"></span><span>Tram</span></button>
+<button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="6"><span class="rail-legend-swatch" aria-hidden="true" style="background:#87491D"></span><span>Industrial / spur</span></button>
+<button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="7"><span class="rail-legend-swatch" aria-hidden="true" style="background:#000000"></span><span>Other rail / yard</span></button>
 </div>
 <div class="rail-legend-explanation" aria-live="polite"><strong id="rail-legend-selected-name">Main line</strong><p id="rail-legend-selected-note">Main railway corridor; exact route name needs source evidence.</p></div>
 <p id="railway-legend-note">For the OpenRailwayMap standard layer only.</p></div>
