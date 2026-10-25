@@ -30,7 +30,7 @@ function start(){
  w.scrollTo=()=>{};let map;
  class Map{
   constructor(){map=this;this.handlers={};this.layers=[];this.sources={osm:{type:'vector'}};}
-  addControl(){}on(e,fn){(this.handlers[e]??=[]).push(fn)}
+  addControl(){}isStyleLoaded(){return true}on(e,fn){(this.handlers[e]??=[]).push(fn)}
   fire(e,arg){for(const f of this.handlers[e]||[])f(arg||{})}
   getStyle(){return {sources:this.sources,layers:[
    {id:'rails-base',type:'line',source:'osm','source-layer':'transportation'},
