@@ -1852,5 +1852,78 @@
       "merge": "NOT PERFORMED",
       "ownerImages": "NOT PUBLISHED"
     }
+  },
+  "integrationR2153": {
+    "project": "P01",
+    "issueId": "r2153-style-load-pilot-layer-recovery",
+    "checkedOn": "2026-10-26",
+    "title": "R2.15.3 MapLibre style.load layer gating fix and Safari rail/station popup retest",
+    "state": "STAGING_READY_SAFARI_RETEST_PENDING",
+    "ownerSafariEvidence": {
+      "observedTime": "2026-10-26 01:00 MYT",
+      "evidence": "Owner iPhone Safari screenshot in ChatGPT conversation, not published to public repo",
+      "screenshotDiagnostic": "TOUCH 23 / MAP CLICK 18 · Map click received · source features 0 / visible 0 / raw rail 0 · unknown · layers missing",
+      "interpretation": "Pointer and MapLibre click listeners are receiving user interactions; source-backed selectable layers missing. Observed count is cumulative, not per-click success. Screenshots do not establish exact individual lane identity."
+    },
+    "rootCause": {
+      "state": "SOURCE_CODE_DEFECT_CONFIRMED_AS_PLAUSIBLE_EXPLANATION; SAFARI_RECOVERY_PENDING",
+      "exact": "installPilotVectorLayers returned early when map.isStyleLoaded() false. It was called during style.load after readableRails and overlay had mutated map sources/layers, so ongoing style/source work could keep isStyleLoaded false and suppress both pilot rail/POI click layers.",
+      "supportingDocs": [
+        "https://github.com/maplibre/maplibre-gl-js/issues/7327",
+        "https://github.com/maplibre/maplibre-gl-js/discussions/7240"
+      ],
+      "separateOpenIssue": "Incomplete KL track geometry, parallel physical lanes and station ordering are source/verified topology questions, not solved by layer lifecycle repair."
+    },
+    "development": {
+      "branch": "feature/mrs10-r2153-style-load-pilot-layer-recovery",
+      "parentCommit": "e2ffc69ba9c94f49e625142a59a54bbbd20d477b",
+      "sourceCommit": "f930906faf1913d140100ffa25879c6fa87bab7f",
+      "changedFiles": [
+        "assets/map-language-lab.js",
+        "tests/r2153-style-load-layer-recovery.test.cjs",
+        "package.json"
+      ],
+      "changeScope": [
+        "Remove premature isStyleLoaded guard for source-backed pilot layer installation after style.load",
+        "Retry only missing station/rail pilot layers during map idle; never duplicate existing layers or bind click handlers twice",
+        "Expose rail and station layer readiness independently in opt-in debug, without recording location or user data",
+        "Do not fabricate physical tracks, route IDs, operator attribution, station order or exact chainage"
+      ]
+    },
+    "qa": {
+      "node": "297/297 PASS, 0 FAIL/SKIP, exact staging source SHA",
+      "catalogue": "14/14 PASS",
+      "build": "PASS — preview build excludes member authentication and analytics",
+      "http": "HTTP 200 map and JavaScript, restricted member and quiz paths HTTP 404",
+      "repro": "Automated test reproduces isStyleLoaded=false during style.load and asserts pilot layers installed, transit rail source-based popup and style reload resilience",
+      "safari": "PENDING — direct Owner tap on staging must show rail READY / station READY and popup or source-based no-hit diagnostic; not yet confirmed",
+      "coverage": "NOT VERIFIED — KL rail route completeness and exact station track identity remain open"
+    },
+    "staging": {
+      "target": "staging",
+      "state": "READY",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_CnppXgMvZ6D11tqBa8dYz3yc8boX",
+      "sourceSha": "f930906faf1913d140100ffa25879c6fa87bab7f",
+      "url": "https://mrs10-r211-mobile-map-g7nus820l-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1&railDebug=1",
+      "protection": "Existing Vercel project protection unchanged"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO FOR PRODUCTION — corrected source/staging QA PASSED, live Safari tap and actual source coverage not yet verified; no merge authorised",
+    "nextAction": "Open R2.15.3 isolated staging on iPhone Safari (railPilot=1&railDebug=1), choose Malaysia and railway details OFF; tap one cyan vector line and capture rail READY/MISSING, station READY/MISSING, source features and actual popup if any. If still missing, inspect real style vector-source mapping/source layer and error rather than inventing track registry. Separate KL network completeness audit later.",
+    "boundaries": {
+      "production": "UNCHANGED",
+      "gitHubMain": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT PERFORMED",
+      "personalImages": "NOT PUBLISHED"
+    }
   }
 }
