@@ -2212,5 +2212,97 @@
       ],
       "scopedVerdict": "OWNER_SAFARI_UAT_PASS_FOR_VISIBLE_MAP_TAPS_VS_PANS_AND_STATION_POPUP"
     }
+  },
+  "integrationR216": {
+    "project": "P01",
+    "issueId": "r216-kl-railway-track-station-registry-phase1",
+    "title": "R2.16 Kuala Lumpur Railway Track & Station Registry — Phase 1",
+    "checkedOn": "2026-10-26",
+    "state": "STAGING_READY_SAFARI_UAT_PENDING",
+    "goal": "An auditable service-route and station source catalogue for the Kuala Lumpur / Klang Valley map pilot; physical track geometry and lane indexing are separate future evidence tasks.",
+    "ownerApproval": "Owner explicitly approved transition to R2.16 with Kuala Lumpur first. No approval to merge or change Production.",
+    "inheritedEvidence": {
+      "source": "R2.15.5 Owner Safari verified tap-vs-pan with a Pasar Seni source-backed station popup",
+      "countries": "Malaysia Maharajalela, Thailand Sam Yot, China Luorong sample station tap PASS on Owner Safari",
+      "note": "Prior feature checks preserved; source-reference registry does not imply full network topology"
+    },
+    "development": {
+      "branch": "feature/mrs10-r216-kl-track-station-registry-phase1",
+      "parentCommit": "85829c7eede472115e99b0441d0dabb18d9d6140",
+      "sourceCommit": "a7372247e7822f266438994b3499c7fbea88c03d",
+      "changedFiles": [
+        "assets/railway-track-registry-kl.js",
+        "assets/map-language-lab.js",
+        "map-language-lab.html",
+        "tests/r216-kl-rail-registry.test.cjs",
+        "package.json"
+      ],
+      "dataSummary": {
+        "operatorReferencedRoutes": 10,
+        "stationReferenceRecords": 8,
+        "erlTransitSequenceStops": 6,
+        "verifiedPhysicalSegments": 0
+      },
+      "features": [
+        "Source URLs and per-route confidence classifications, route IDs explicitly not physical track numbers",
+        "Six KLIA Transit stop IDs in operator-verified order, other full station sequences NOT_YET_VERIFIED",
+        "Maharajalela and Pasar Seni stored as source-backed Safari POI examples, not linked heuristically to physical tracks",
+        "Empty physicalSegments collection, null geometry and UNVERIFIED physicalTrackStatus prevent fabricated track/lane claims",
+        "Collapsed Railway Registry panel below the Malaysia pilot map; route selection shows references and only confirmed ERL station order",
+        "English route names retained across all four website languages without inventing translations; interface labels localized",
+        "Panel hidden for Thailand, China and ordinary non-pilot map; existing rail/station tap, language switch, theme and popup preserved"
+      ]
+    },
+    "provenance": {
+      "checkedOn": "2026-10-26",
+      "officialUrls": [
+        "https://www.ktmb.com.my/Komuter.html",
+        "https://myrapid.com.my/rodjejakplat/",
+        "https://www.mot.gov.my/en/land/infrastructure/current-rail-services",
+        "https://www.kliaekspres.com/products-fares/klia-transit/",
+        "https://www.kliaekspres.com/products-fares/klia-ekspres/"
+      ],
+      "technicalUrls": [
+        "https://openmaptiles.org/docs/schema/"
+      ],
+      "warning": "No full KL physical track geometry, turnout, accurate platform lane number, signal routes or verified station line-up has been established. Registry routes are service identities, not individual track identities."
+    },
+    "qa": {
+      "node": "306/306 PASS, 0 FAIL, 0 SKIP on exact staging SHA",
+      "catalogue": "14/14 PASS, 0 FAIL, 0 SKIP",
+      "staging": "READY with target staging and source commit verified",
+      "previewHttp": "HTML, registry JS and map JS HTTP 200. Excluded member-gateway.js and questions.js HTTP 404",
+      "tests": "Source confidence, 10 routes, verified ERL order, zero physical segments, negative geometry checks, collapsed panel, four-language and country visibility tested",
+      "safari": "PENDING — Owner needs check route selection, six ERL stop order and existing source-backed station popup on iPhone",
+      "physicalTrackCoverage": "NOT STARTED — no authoritative lane identifiers/geometry yet",
+      "browserNetwork": "Static registry script loaded before map module; no data fetch/connect-src dependency"
+    },
+    "staging": {
+      "project": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_CL37wufWzPhhNQWyaXzGo76iQbBP",
+      "target": "staging",
+      "state": "READY",
+      "sourceSha": "a7372247e7822f266438994b3499c7fbea88c03d",
+      "url": "https://mrs10-r211-mobile-map-bqcgfo1nj-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "protection": "Existing Vercel authentication settings unchanged"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO: source/build PASS and staging READY; Safari R2.16 UAT plus full topology/physical-track data verification and integration approval pending; no Production release authorized.",
+    "nextAction": "Owner opens R2.16 isolated Safari preview; select Malaysia, scroll below map and expand 'Kuala Lumpur Railway & Station Registry', select ERL KLIA Transit to inspect six published stops in order, then switch to KTM/MRT and verify explicit NOT_YET_VERIFIED status. Verify station popup still works. Later audit physical track/way identifiers and route-station associations from appropriate source before populating segment records; do not merge or claim complete KL coverage.",
+    "boundaries": {
+      "githubMain": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT PERFORMED",
+      "ownerPrivatePhotos": "NOT PUBLISHED"
+    }
   }
 }
