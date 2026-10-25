@@ -105,3 +105,23 @@ test('R2.19: 18 tappable orange station references, source popup, four-language 
  assert.equal(d.getElementById('details').open,false);
  w.close();
 });
+
+test('R2.19 Safari UX: orange registry precedes collapsed generic base map with explicit disclaimer',()=>{
+ const d=boot().document;
+ const registry=d.getElementById('registry'),mapPanel=d.getElementById('map-reference');
+ assert(registry&&mapPanel);
+ assert(registry.compareDocumentPosition(mapPanel)&d.defaultView.Node.DOCUMENT_POSITION_FOLLOWING);
+ assert.equal(mapPanel.open,false,'general map must not obscure the confirmed service registry by default');
+ assert.match(d.getElementById('map-ref-note').textContent,/Titik biru ialah POI umum/);
+ assert.match(mapPanel.querySelector('iframe').getAttribute('src'),/map-language-lab\.html\?railPilot=1/);
+ assert.equal(d.querySelectorAll('#station-list li').length,18);
+ assert.equal(d.querySelectorAll('#station-list .shared-tag').length,11);
+ assert.equal(d.querySelectorAll('#station-list li:nth-child(n+12) .shared-tag').length,0);
+ for(const l of ['en','zh','th']){
+  const select=d.getElementById('lang');select.value=l;select.dispatchEvent(new d.defaultView.Event('change'));
+  assert.notEqual(d.getElementById('map-ref-note').textContent,'');
+  assert.equal(d.querySelectorAll('#station-list li').length,18);
+  assert.equal(d.querySelectorAll('#station-list .shared-tag').length,11);
+ }
+ d.defaultView.close();
+});
