@@ -371,18 +371,18 @@ function applyLabels(){
 // A source-backed station popup does not prove that the station belongs to any selected route.
 const klRegistryLocales={
  ms:{summary:'Kuala Lumpur · Daftar laluan & stesen (Fasa 1)',warning:'Rujukan perkhidmatan sahaja. Jajaran fizikal, nombor trek dan susunan stesen perlu bukti berasingan.',
-  count:(r,n)=>r+' laluan rujukan · '+n+' stesen ERL disahkan mengikut turutan · 0 trek fizikal disahkan',
+  count:(r,n)=>r+' laluan rujukan · '+n+' turutan laluan disahkan · 0 trek fizikal disahkan',
   label:'Pilih laluan',notVerified:'Turutan semua stesen belum disahkan daripada sumber.',
   verified:'Turutan perhentian disahkan oleh operator. Ini bukan geometri landasan.',sources:'Sumber operator'},
  en:{summary:'Kuala Lumpur · Rail & Station Registry (Phase 1)',warning:'Service references only. Physical track geometry, IDs and most station orders remain unverified.',
-  count:(r,n)=>r+' referenced routes · '+n+' ERL stops in verified order · 0 physical tracks verified',
+  count:(r,n)=>r+' referenced routes · '+n+' verified service stop orders · 0 physical tracks verified',
   label:'Choose a route',notVerified:'Full station order is not yet verified from source.',
   verified:'Operator-confirmed stop order; not physical track geometry.',sources:'Operator sources'},
  zh:{summary:'吉隆坡 · 铁路线路与车站目录（第一阶段）',warning:'仅为线路资料。尚未核实实体轨道、轨道编号与大部分车站顺序。',
-  count:(r,n)=>r+' 条参考线路 · 已核实 '+n+' 个 ERL 车站的顺序 · 0 条实体轨道已核实',
+  count:(r,n)=>r+' 条参考线路 · '+n+' 条线路站序已核实 · 0 条实体轨道已核实',
   label:'选择线路',notVerified:'尚未从来源核实完整车站顺序。',verified:'运营方确认车站顺序；并非实体轨道图。',sources:'运营方来源'},
  th:{summary:'กัวลาลัมเปอร์ · ทะเบียนสายรถไฟและสถานี (ระยะที่ 1)',warning:'ข้อมูลอ้างอิงการให้บริการเท่านั้น ยังไม่ยืนยันแนวรางจริง หมายเลขราง และลำดับสถานีส่วนใหญ่',
-  count:(r,n)=>r+' สายอ้างอิง · ยืนยันลำดับ '+n+' สถานี ERL · ยังไม่ยืนยันรางจริง',
+  count:(r,n)=>r+' สายอ้างอิง · ยืนยันลำดับ '+n+' สาย · ยังไม่ยืนยันรางจริง',
   label:'เลือกสาย',notVerified:'ยังไม่ยืนยันลำดับสถานีทั้งหมดจากแหล่งข้อมูล',
   verified:'ผู้ให้บริการยืนยันลำดับจุดจอด ไม่ใช่แนวรางจริง',sources:'แหล่งข้อมูลผู้ให้บริการ'}
 };
@@ -394,8 +394,8 @@ function renderKLRegistry(){
  const local=klRegistryLocales[lang]||klRegistryLocales.en,registry=api.catalog;
  el('kl-registry-title').textContent=local.summary;
  el('kl-registry-warning').textContent=local.warning;
- const verifiedRoute=registry.routes.find(r=>r.stationSequenceStatus==='SOURCE_CONFIRMED');
- el('kl-registry-counts').textContent=local.count(registry.routes.length,verifiedRoute?.stationSequence.length||0);
+ const confirmed=registry.routes.filter(r=>r.stationSequenceStatus==='SOURCE_CONFIRMED');
+ el('kl-registry-counts').textContent=local.count(registry.routes.length,confirmed.length);
  el('kl-registry-route-label').textContent=local.label;
  const selector=el('kl-registry-route'),previous=selector.value;
  if(selector.options.length!==registry.routes.length){
