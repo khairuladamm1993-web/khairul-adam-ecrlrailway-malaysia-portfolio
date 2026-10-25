@@ -204,7 +204,11 @@ function popupFromPilotFeature(feature,kind,lngLat){
    // Operator-confirmed service name stays visible even when the vector-tile
    // display label is shortened or the popup body scrolls on iPhone.
    isKajangMatch=true;
-   title.textContent=candidate.stationName;
+   // Keep Chinese/Thai source translations when provided; otherwise show the
+   // operator-confirmed full name rather than a shortened cartographic title.
+   const translated=lang==='zh'?feature.properties['name:zh']:
+    lang==='th'?feature.properties['name:th']:null;
+   title.textContent=translated?info.title:candidate.stationName;
    root.setAttribute('aria-label',candidate.stationName+' · '+candidate.routeName);
    const label=lang==='ms'?'Padanan nama peta (calon)':
     lang==='zh'?'地图名称对应（候选）':
