@@ -1954,7 +1954,7 @@
     "issueId": "r2154-station-poi-source-recovery",
     "checkedOn": "2026-10-26",
     "title": "R2.15.4 Pilot station POI source selection fallback",
-    "state": "MALAYSIA_RAIL_AND_STATION_PASS_BANGKOK_STATION_PASS_CHINA_PENDING",
+    "state": "THREE_COUNTRY_STATION_SAFARI_PASS_RAIL_AND_NETWORK_AUDIT_OPEN",
     "reason": "Owner screenshot R2.15.3 confirmed rail READY and a valid light_rail popup, but station MISSING. Code previously picked POI source only from styled source-layer=poi references; if no POI style layer is present, existing vector tileset was not considered.",
     "development": {
       "branch": "feature/mrs10-r2154-station-poi-source-recovery",
@@ -1982,11 +1982,12 @@
       "catalogue": "14/14 PASS",
       "deployment": "READY target staging, exact source SHA",
       "artifact": "HTML and JS HTTP 200; excluded Member/quiz HTTP 404",
-      "safari": "PARTIAL MULTICOUNTRY UAT PASS — Malaysia sourced rail (light_rail) popup + Maharajalela station popup PASS on Owner Safari; Bangkok Sam Yot sourced railway station popup PASS (01:27 MYT 2026-10-26), rail/station READY. Bangkok rail-segment tap and Liuzhou actual rail/station tap not yet confirmed.",
+      "safari": "PARTIAL MULTICOUNTRY PASS: Malaysia station Maharajalela, Thailand station Sam Yot, China station LUORONG (雒容), all actual source-backed Safari iPhone popups. Rail tap verified Malaysia; Bangkok/China separate rail segment tap, physical track completeness, station sequence remain OPEN.",
       "previouslyPassed": "R2.15.3 and R2.15.4 Owner Safari rail segment source-backed popup PASS; station layer now READY but station selection UAT pending",
       "sourceIntegrity": "Source fallback uses existing vector ID, no invented geometries",
       "stationTap": "PASS — one selected source-backed station: Maharajalela; Original name MR3 Maharajalela; source OpenMapTiles / OpenFreeMap",
-      "bangkokStationTap": "PASS — Sam Yot | Original name: สามยอด | Category: subway | Owner Safari screenshots 01:27 MYT"
+      "bangkokStationTap": "PASS — Sam Yot | Original name: สามยอด | Category: subway | Owner Safari screenshots 01:27 MYT",
+      "liuzhouStationTap": "PASS Owner Safari screenshot at 2026-10-26 01:30 MYT: LUORONG / 雒容 / category station; rail READY / station READY."
     },
     "staging": {
       "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
@@ -2003,8 +2004,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "HOLD / NO-GO — Malaysia and Bangkok sourced station interactions partially verified; Beijing/Liuzhou wider data coverage, Bangkok rail click, China pilot, full KL route completeness and railway Track Registry still OPEN; no Production/merge approval.",
-    "nextAction": "Preserve already-passed Maharajalela and Sam Yot station UAT. Next test a sourced vector station symbol and one rail segment in Liuzhou, plus one real Bangkok rail segment separately if needed. Do not infer track lane numbers or the completeness of entire networks from the selected stations. Source-backed popup accuracy only within shown feature attributes.",
+    "releaseDecision": "HOLD / NO-GO — one sourced station click per country PASS; Malaysia rail segment popup PASS. Full network alignment, independent Bangkok/China rail taps, real station order, map integration and Production release still OPEN.",
+    "nextAction": "Do not repeat the three passed station tests. Simplify debug label to count actual map click events vs drag gestures; keep underlying pilot click logic and source data unchanged. Follow with sourced track/station registry audit and complete-network verification.",
     "boundaries": {
       "main": "UNCHANGED",
       "production": "UNCHANGED",
@@ -2089,6 +2090,34 @@
         "Liuzhou vector rail and station selection still pending",
         "raw rail 8 counts rendered features near click, not eight physical tracks"
       ]
-    }
+    },
+    "ownerLiuzhouStationTapUat": {
+      "observedAt": "2026-10-26T01:30:00+08:00",
+      "evidence": "Owner-supplied iPhone Safari screenshot in ChatGPT conversation. Image not published to public repository.",
+      "locationContext": "China / Liuzhou area, Luorong station, G78 visible nearby",
+      "result": "PASS_SOURCED_STATION_CLICK_FOR_LUORONG",
+      "station": {
+        "displayedName": "LUORONG",
+        "originalChinese": "雒容",
+        "category": "Railway station",
+        "class": "station",
+        "sourceLabel": "OpenMapTiles / OpenFreeMap data; not operational",
+        "pronunciationUnverified": true
+      },
+      "diagnostic": "TOUCH 91 / MAP CLICK 1 · source features 3 / visible 2 / raw rail 4 · rail · rail READY / station READY",
+      "conclusions": [
+        "One China railway station symbol can be tapped in Safari and opens a source-backed station popup",
+        "Both rail and station pilot layers READY",
+        "Raw TOUCH 91 counter counts pointerdown including pan/drag, not 91 purposeful station selections",
+        "Station source attributes are cartographic references, not railway operations database"
+      ],
+      "notConfirmed": [
+        "One standalone China rail segment tap not yet observed",
+        "Complete Liuzhou network or station lineup not established",
+        "Physical railway track IDs and alignment completeness are outside this pilot",
+        "Pinyin not displayed or independently verified for Luorong in supplied screenshot"
+      ]
+    },
+    "ownerDebugGestureNote": "Owner reports scrolling/panning increases raw TOUCH count. Code uses pointerdown on map canvas; this includes gesture starts and is not a count of real map clicks. Distinguish MAP CLICK count. Improve diagnostics in separate isolated R2.15.5 source branch."
   }
 }
