@@ -10,6 +10,7 @@ import io
 import json
 import math
 import urllib.request
+import urllib.error
 import zipfile
 
 URL = "https://api.data.gov.my/gtfs-static/prasarana?category=rapid-rail-kl"
@@ -108,6 +109,9 @@ def probe(opener=None):
         with opener(req,timeout=14) as res:
             data=res.read(MAX_ZIP_BYTES+1)
         return analyze(data)
+    except urllib.error.HTTPError as ex:
+        return {"source":URL,"licenseUrl":LICENSE,"status":"HTTP_SOURCE_UNAVAILABLE",
+            "httpStatus":ex.code,"serviceGeometryCandidate":False,"physicalTrackVerified":False}
     except (OSError, ValueError, RuntimeError, UnicodeError, zipfile.BadZipFile) as ex:
         return {"source":URL,"licenseUrl":LICENSE,"status":"SOURCE_UNAVAILABLE_OR_INVALID",
             "reason":type(ex).__name__[:35],"serviceGeometryCandidate":False,"physicalTrackVerified":False}
