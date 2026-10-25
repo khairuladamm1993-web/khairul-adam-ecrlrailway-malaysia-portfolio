@@ -209,6 +209,8 @@ function popupFromPilotFeature(feature,kind,lngLat){
     (lang==='ms'?'Trek fizikal belum disahkan':
       lang==='zh'?'实体轨道未核实':
       lang==='th'?'ยังไม่ยืนยันรางจริง':'Physical track unverified');
+   notice.className='kajang-match-notice';
+   root.classList.add('kajang-match');
    root.appendChild(notice);
   }
  }
@@ -238,6 +240,26 @@ function installPilotVectorLayers(){
    if(pilotDebug)writeRailTapDiagnostic('Station layer setup error',String(e?.message||e).slice(0,120));
  }
  }else stations=!!map.getLayer('mrl-pilot-stations');
+ // Highlight ONLY exact code+name POIs actually present in source tiles.
+ // The other 27 of 29 stations are green in the verified *ordered registry*,
+ // not fabricated as map coordinates or physical railway tracks.
+ if(poiSource&&!map.getLayer('mrl-kajang-known-poi')){
+  try{
+   const identity=window.MRS10KLRegistry?.findRoute?.('mrt-kajang')?.visualIdentity;
+   if(identity){
+    map.addLayer({
+     id:'mrl-kajang-known-poi',type:'circle',source:poiSource,'source-layer':'poi',minzoom:10,
+     filter:['all',['==',['get','class'],'railway'],
+      ['in',['get','subclass'],['literal',['station','subway']]],
+      ['in',['get','name'],['literal',['KG16 Pasar Seni','KG35 Kajang']]]],
+     layout:{visibility:'none'},
+     paint:{'circle-radius':5.5,'circle-color':identity.light,
+      'circle-stroke-color':'#FFFFFF','circle-stroke-width':2}
+    });
+   }
+  }catch(e){if(pilotDebug)writeRailTapDiagnostic('Kajang POI highlight setup error',String(e?.message||e).slice(0,80));}
+ }
+ syncKajangPoiHighlights();
  if(railSource&&!map.getLayer('mrl-pilot-rail-hits')){
   try{
    map.addLayer({id:'mrl-pilot-rail-hits',type:'line',source:railSource,'source-layer':'transportation',minzoom:10,
@@ -403,6 +425,12 @@ const klRegistryLocales={
   label:'เลือกสาย',notVerified:'ยังไม่ยืนยันลำดับสถานีทั้งหมดจากแหล่งข้อมูล',
   verified:'ผู้ให้บริการยืนยันลำดับจุดจอด ไม่ใช่แนวรางจริง',sources:'แหล่งข้อมูลผู้ให้บริการ'}
 };
+// R2.17: visual highlight follows selected service; never assume all map rail lines are Kajang.
+function syncKajangPoiHighlights(){
+ if(!pilotMode||!map?.getLayer?.('mrl-kajang-known-poi'))return;
+ const selected=activeRegion==='malaysia'&&el('kl-registry-route')?.value==='mrt-kajang';
+ try{map.setLayoutProperty('mrl-kajang-known-poi','visibility',selected?'visible':'none');}catch{}
+}
 function renderKLRegistry(){
  const box=el('kl-registry'),api=window.MRS10KLRegistry;
  if(!box)return;
@@ -422,8 +450,15 @@ function renderKLRegistry(){
  if(previous && api.findRoute(previous))selector.value=previous;
  const route=api.findRoute(selector.value)||registry.routes[0];
  if(!route)return;
+ box.dataset.route=route.id;
+ syncKajangPoiHighlights();
  el('kl-registry-route-name').textContent=route.name;
- el('kl-registry-route-status').textContent=route.stationSequenceStatus==='SOURCE_CONFIRMED'?local.verified:local.notVerified;
+ el('kl-registry-route-status').textContent=route.stationSequenceStatus==='SOURCE_CONFIRMED'?
+  local.verified+(route.id==='mrt-kajang'?
+    ' · '+(lang==='ms'?'Hijau = identiti laluan, bukan jajaran fizikal':
+      lang==='zh'?'绿色代表线路身份，并非实体轨道':
+      lang==='th'?'สีเขียวหมายถึงสายบริการ ไม่ใช่แนวรางจริง':
+      'Green = service identity, not physical alignment'):''):local.notVerified;
  const list=el('kl-registry-station-order');
  list.replaceChildren();
  if(route.stationSequenceStatus==='SOURCE_CONFIRMED'){
