@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "MRL’S10 R2.6 Phase A Thai and BM/EN/ZH map-control language groundwork; 225/225 automated PASS; 117/341 Thai shared strings; native raster city labels NOT localized",
+  "register": "R2.6 staging READY but protected by Vercel SSO; Thai interface 117/341 shared strings, raster labels remain native; production unchanged",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -663,6 +663,11 @@
     "safariUat": "PENDING",
     "ownerApprovalForRelease": "NOT_GRANTED",
     "production": "UNCHANGED",
-    "supabase": "UNCHANGED"
+    "supabase": "UNCHANGED",
+    "stagingDeploymentId": "dpl_8T52p8ewLHoRAPt7ujg5PCHViHQt",
+    "stagingUrl": "https://mrs10-r26-four-language-preview.vercel.app/gateway.html",
+    "stagingState": "READY",
+    "stagingAccess": "VERCEL_AUTH_PROTECTED (HTTP 302); Safari/public UAT not yet confirmed",
+    "canonicalPreview": "UNCHANGED"
   }
 }
