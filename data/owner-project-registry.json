@@ -3589,5 +3589,96 @@
       "p03": "UNTOUCHED",
       "merge": "NOT DONE"
     }
+  },
+  "integrationR2174": {
+    "project": "P01",
+    "issueId": "r2174-kajang-operator-gtfs-geometry-audit",
+    "title": "R2.17.4 — Official licensed Prasarana GTFS shape-source discovery and fail-closed geometry checks",
+    "checkedOn": "2026-10-26",
+    "state": "ISOLATED_STAGING_QA_PASS_OFFICIAL_GTFS_HTTP_406_GEOMETRY_BLOCKED",
+    "parent": {
+      "issueId": "r2173-kajang-real-physical-alignment-source-audit",
+      "sourceCommit": "eacf87062dacca0d85c1b7b96c99bbdedfefaf66",
+      "preserved": "Owner Safari 05:41 sourced green KG13 Pusat Bandar Damansara marker / MRT Kajang 9/29 popup partial PASS; 29 green service Registry intact"
+    },
+    "goal": "Investigate CC BY 4.0 Prasarana GTFS shapes for a separately labelled GREEN service-reference overlay; NEVER conflate it with surveyed physical tracks, OSM railway ways or KTM.",
+    "sourceEvidence": {
+      "officialGTFSDocs": "https://developer.data.gov.my/realtime-api/gtfs-static",
+      "endpoint": "https://api.data.gov.my/gtfs-static/prasarana?category=rapid-rail-kl",
+      "officialLicense": "https://developer.data.gov.my/faq",
+      "license": "CC BY 4.0 with attribution",
+      "historicalArchiveExample": "https://www.transit.land/feeds/f-rapid~rail~kl/versions/ba6dedba3db6f0c4002fab43a969f29ac0cc01e5",
+      "sourceObservation": "Official GTFS static docs expose ZIP feed; historic version shows shapes.txt, routes.txt, trips.txt, stops.txt, stop_times.txt. Historic contents cannot establish 2026-10-26 geometry.",
+      "liveFeed": {
+        "attempt": "Vercel staging 2026-10-26",
+        "httpStatus": 406,
+        "status": "HTTP_SOURCE_UNAVAILABLE",
+        "serviceGeometryCandidate": false,
+        "physicalTrackVerified": false,
+        "geometryReceived": false,
+        "rawFeedPersisted": false
+      },
+      "existingGIS": "R2.17.3 Selangor layer 15 mixed MRT/LRT/KTM direction geometries; no physical-way proof. Cannot use the entire layer for Kajang green.",
+      "acceptedPhysicalWayIds": [],
+      "acceptedRouteServiceGeometry": null
+    },
+    "development": {
+      "branch": "feature/mrs10-r2174-kajang-official-gtfs-geometry-audit",
+      "parentCommit": "eacf87062dacca0d85c1b7b96c99bbdedfefaf66",
+      "sourceCommit": "a9f81e19fd672d67b2f8b8098954f78f0cd3c988",
+      "changedFiles": [
+        "scripts/audit-kajang-gtfs-static.py",
+        "tests/r2174-gtfs-shape-audit.test.py",
+        "docs/r2174-kajang-gtfs-service-geometry-audit.md"
+      ],
+      "protectedFilesUnchanged": [
+        "assets/map-language-lab.js",
+        "assets/railway-track-registry-kl.js",
+        "map-language-lab.html",
+        "GitHub main"
+      ],
+      "behavior": "Read-only bounded (16 MB, 14-second) licensed operator GTFS ZIP metadata audit. Reject missing/corrupt shapes, multiple route candidates, non-Kajang geographic bounds, non-29 station count and implausible lengths. No coordinates imported, no physical route repaint or source-access token."
+    },
+    "qa": {
+      "sourceCommit": "a9f81e19fd672d67b2f8b8098954f78f0cd3c988",
+      "isolatedTarget": "staging",
+      "deploymentReady": "PASS",
+      "node": "npm test PASS in staging; previous R2.17.3 source QA 337/337 PASS; current deployment event view only contains final 100 events",
+      "python": "8/8 PASS",
+      "catalogue": "14/14 PASS",
+      "smoke": "map-language-lab.html, map-language-lab.js, railway-track-registry-kl.js HTTP 200; excluded member-gateway.js and questions.js HTTP 404",
+      "liveSource": "BLOCKED, HTTP 406 from official GTFS ZIP endpoint; no source-current route shapes reviewed",
+      "safari": "NOT REQUIRED FOR SOURCE-ONLY AUDIT; no visible map or station style change. Previous R2.17.2 Owner partial PASS retained."
+    },
+    "staging": {
+      "project": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_H4sbiihRHBJ7a4oHzN5zRhV5GZ2j",
+      "target": "staging",
+      "state": "READY",
+      "sourceSha": "a9f81e19fd672d67b2f8b8098954f78f0cd3c988",
+      "url": "https://mrs10-r211-mobile-map-g8njzf0a6-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "note": "This audit-only Preview retains original teal map railway; NOT a green-line implementation."
+    },
+    "resolution": {
+      "state": "OPEN",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO full Kajang physical-line green / NO-GO Production merge. Official GTFS live feed HTTP 406 blocks licensed current passenger-service shape; geometry, KTM separation and Owner line UAT missing. Do not fabricate alignment.",
+    "nextAction": "Investigate official GTFS HTTP 406 accept/header/caching/access conditions in read-only mode or obtain a legitimately archived licensed feed whose stop order and actual shape are verified for current 29-stop service. After source geometry and attribution validation, build a separate OPT-IN GREEN SERVICE-REFERENCE overlay, not asserted physical way; verify KTM separation and Owner Safari. Maintain separate physical-way topology audit.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "r2172": "PRESERVED",
+      "r2173": "PRESERVED",
+      "r218": "UNTOUCHED",
+      "r219": "UNTOUCHED",
+      "r220": "UNTOUCHED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT DONE"
+    }
   }
 }
