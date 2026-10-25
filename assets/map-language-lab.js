@@ -116,7 +116,7 @@ let pilotMode=false,pilotTapBound=false,pilotInfoPopup=null;
 // Query counts reflect rendered tile features, not authoritative station names or alignments.
 let pilotDebug=false,pilotPointerCount=0,pilotMapClickCount=0;
 function railTapProbe(mapInstance,point,radius=12){
- const out={selectable:0,visible:0,rawRail:0,subclass:'',hitLayer:false,visibleLayer:false};
+ const out={selectable:0,visible:0,rawRail:0,subclass:'',hitLayer:false,stationLayer:false,railLayer:false,visibleLayer:false};
  if(!Number.isFinite(point?.x)||!Number.isFinite(point?.y)||!mapInstance?.queryRenderedFeatures)return out;
  const bbox=[[point.x-radius,point.y-radius],[point.x+radius,point.y+radius]];
  const query=layers=>{
@@ -124,6 +124,8 @@ function railTapProbe(mapInstance,point,radius=12){
   catch{return[];}
  };
  const selectableIds=['mrl-pilot-stations','mrl-pilot-rail-hits'].filter(id=>!!mapInstance.getLayer?.(id));
+ out.stationLayer=selectableIds.includes('mrl-pilot-stations');
+ out.railLayer=selectableIds.includes('mrl-pilot-rail-hits');
  out.hitLayer=selectableIds.length>0;
  out.selectable=selectableIds.length?query(selectableIds).filter(f=>
   (f.layer?.id==='mrl-pilot-stations'&&pilotEligibleStation(f.properties))||
@@ -157,7 +159,8 @@ function attachPilotTouchDiagnostic(){
   pilotMapClickCount++;
   const d=railTapProbe(map,e.point);
   const info='source features '+d.selectable+' / visible '+d.visible+' / raw rail '+d.rawRail+
-   ' · '+(d.subclass||'unknown')+' · layers '+(d.hitLayer?'ready':'missing');
+   ' · '+(d.subclass||'unknown')+' · rail '+(d.railLayer?'READY':'MISSING')+
+   ' / station '+(d.stationLayer?'READY':'MISSING');
   writeRailTapDiagnostic('Map click received',info);
  });
  writeRailTapDiagnostic('Diagnostic armed');
@@ -183,7 +186,10 @@ function popupFromPilotFeature(feature,kind,lngLat){
   .setLngLat(lngLat).setDOMContent(root).addTo(map);
 }
 function installPilotVectorLayers(){
- if(!pilotMode||!map?.isStyleLoaded())return false;
+ // The map style exists at style.load, but isStyleLoaded() may be false after
+ // our readable rails and raster overlay mutate the style. Do not gate layer
+ // installation on pending tile/render work; retry missing layers at idle.
+ if(!pilotMode||!map?.getStyle?.()?.sources)return false;
  const style=map.getStyle(),railSource=transportationSource(style),poiSource=pilotSourceForLayer(style,'poi');
  const status=el('railway-pilot-status');
  let stations=false,rails=false;
@@ -494,6 +500,12 @@ function init(){
    el('rail-vector-note').textContent=rails?readableRailLanguage[lang].railLines:readableRailLanguage[lang].railMissing;
   }
   catch(e){el('label-status').textContent='Map style unavailable';}
+ });
+ // After setStyle or addSource the map can still have pending tiles at style.load.
+ // Retry only missing pilot layers at idle, when rendering has settled.
+ map.on('idle',()=>{
+  if(pilotMode&&(!map.getLayer('mrl-pilot-rail-hits')||!map.getLayer('mrl-pilot-stations')))
+   installPilotVectorLayers();
  });
  map.on('error',()=>{if(!ready)el('label-status').textContent='Vector map unavailable';});
  document.querySelectorAll('[data-locale]').forEach(b=>b.addEventListener('click',()=>{setLanguage(b.dataset.locale);updateTheme();}));
