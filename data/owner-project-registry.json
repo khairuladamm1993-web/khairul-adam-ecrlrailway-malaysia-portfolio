@@ -2885,12 +2885,12 @@
     "issueId": "r218-kelana-jaya-ruby-service-registry",
     "title": "R2.18 LRT Kelana Jaya 37-stop ruby service registry and conservative source-coded vector candidates",
     "checkedOn": "2026-10-26",
-    "state": "OWNER_SAFARI_PARTIAL_PASS_DARK_I18N_FIX_STAGING_READY_RETEST_PENDING",
+    "state": "OWNER_SAFARI_ZH_DARK_PASS_TH_DARK_FAIL_R2182_STAGING_RETEST_PENDING",
     "ownerApproval": "Owner authorized isolated R2.18 development and staging checks, NOT production merge or promotion.",
     "development": {
       "branch": "feature/mrs10-r218-kelana-jaya-ruby-identity",
       "baselineR217Sha": "5b507cf18e4c308ee1cb891ebe6a279b9f3d1671",
-      "sourceCommit": "68b2910a7aecb9442139b95b3cf4635c92424453",
+      "sourceCommit": "f7084ffb124fc8d0d2e58bace98f86bd376109c1",
       "changedFiles": [
         "assets/railway-track-registry-kl.js",
         "assets/map-language-lab.js",
@@ -2905,13 +2905,12 @@
         "feature/mrs10-r219-ampang-orange-service-registry",
         "main"
       ],
-      "previousSourceCommit": "1aec864daea46817c1283fc37108f280636771d7",
-      "lastFix": "R2.18.1 — detect actual OpenFreeMap dark place_* / water_name / highway_name_other labels; apply before style overlays and retry on idle. No physical geometry changes.",
+      "previousSourceCommit": "68b2910a7aecb9442139b95b3cf4635c92424453",
+      "lastFix": "R2.18.2: native name:th prioritized, 31 source-attested Malaysian place-name aliases when Thai missing; only OpenFreeMap 'place' source-layer, no railway or geometry changes.",
       "fixFiles": [
         "assets/map-language-lab.js",
         "tests/r2181-dark-map-language.test.cjs",
-        "tests/r28-readable-rail-liuzhou.test.cjs",
-        "package.json"
+        "tests/r28-readable-rail-liuzhou.test.cjs"
       ]
     },
     "sources": {
@@ -2937,30 +2936,31 @@
       "interchangeCaveat": "Service interchange is distinct from shared platform or track; do not infer from same names or nearby geometry."
     },
     "qa": {
-      "node": "325/325 PASS, 0 FAIL 0 SKIP",
-      "catalogue": "14/14 PASS, 0 FAIL 0 SKIP",
-      "githubActionsRunId": 40234395508,
-      "githubActionsUrl": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40234395508",
-      "testCommit": "68b2910a7aecb9442139b95b3cf4635c92424453",
+      "node": "327/327 PASS, 0 FAIL, 0 SKIP",
+      "catalogue": "14/14 PASS, 0 FAIL, 0 SKIP",
+      "githubActionsRunId": 40235385407,
+      "githubActionsUrl": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40235385407",
+      "testCommit": "f7084ffb124fc8d0d2e58bace98f86bd376109c1",
       "jsSyntax": "PASS",
-      "sourceCodeAndTheme": "PASS in Node/jsdom across Dark/Light style name-layer tests and deferred style-load retry; Owner Safari fix retest PENDING.",
-      "securityArtifact": "PASS source-only public artifact build; deployed HTTP inspection UNVERIFIED.",
-      "qaArtifactId": 12614416080,
-      "artifactSha256": "404e994fe8a84e9b87409d35b39a6e9761badd25ebc3e16d3eaff984f132ec6e",
-      "artifactDeployment": "NOT_DEPLOYED; separate QA ZIP"
+      "sourceCodeAndTheme": "PASS Node/jsdom: Thai source-attested place aliases Light/Dark, native name:th priority, unknown names unchanged, Thailand scope isolation. Safari current staging PENDING.",
+      "securityArtifact": "PASS public-only QA ZIP build; actual Git-source deployed HTTP inspection UNVERIFIED",
+      "qaArtifactId": 12614647855,
+      "artifactSha256": "NOT_RECALCULATED_FOR_R2182_ZIP",
+      "artifactDeployment": "NOT_DEPLOYED; separate QA ZIP",
+      "previousArtifactSha256": "404e994fe8a84e9b87409d35b39a6e9761badd25ebc3e16d3eaff984f132ec6e"
     },
     "staging": {
       "project": "mrs10-r211-mobile-map-uat",
       "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
-      "deploymentId": "dpl_6F8zvbkYMh3iQyH43XqFyun2xDr8",
+      "deploymentId": "dpl_9MzzqyHo7oTEZKBU4voAEg87zFHn",
       "target": "staging",
       "state": "READY",
-      "sourceSha": "68b2910a7aecb9442139b95b3cf4635c92424453",
-      "url": "https://mrs10-r211-mobile-map-1ssrgry0y-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "sourceSha": "f7084ffb124fc8d0d2e58bace98f86bd376109c1",
+      "url": "https://mrs10-r211-mobile-map-iwcxicxmy-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
       "isolation": "Project live:false, no custom domains, Vercel Authentication all",
-      "responseSmoke": "UNVERIFIED — protected Vercel deployment HTTP content not directly read",
-      "ownerSafari": "PARTIAL_PASS previous staging; Dark zh/th retest pending on fixed staging",
-      "previousDeploymentId": "dpl_3BfapWD3LwKDsG8MN29VpV8DDEFW"
+      "responseSmoke": "UNVERIFIED due to protected Vercel staging HTTP not separately inspected",
+      "ownerSafari": "R2.18.1 Chinese Dark PASS / Thai Dark FAIL; R2.18.2 fixed staging awaits Owner retest",
+      "previousDeploymentId": "dpl_6F8zvbkYMh3iQyH43XqFyun2xDr8"
     },
     "integrationDependency": {
       "id": "r218-r219-shared-components",
@@ -2983,7 +2983,9 @@
         "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40232319822",
         "https://vercel.com/1993khairuladam-3016/mrs10-r211-mobile-map-uat/3BfapWD3LwKDsG8MN29VpV8DDEFW",
         "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40234395508",
-        "https://vercel.com/1993khairuladam-3016/mrs10-r211-mobile-map-uat/6F8zvbkYMh3iQyH43XqFyun2xDr8"
+        "https://vercel.com/1993khairuladam-3016/mrs10-r211-mobile-map-uat/6F8zvbkYMh3iQyH43XqFyun2xDr8",
+        "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40235385407",
+        "https://vercel.com/1993khairuladam-3016/mrs10-r211-mobile-map-uat/9MzzqyHo7oTEZKBU4voAEg87zFHn"
       ],
       "releaseGates": {
         "ci": "PASS",
@@ -2991,27 +2993,40 @@
         "publicArtifact": "PASS_BUILD",
         "deployment": "PASS_STAGING_METADATA_ONLY",
         "httpSmoke": "UNVERIFIED",
-        "safariUat": "PARTIAL_PASS_PRE_FIX_FIXED_STAGING_RETEST_PENDING",
+        "safariUat": "R2181_ZH_PASS_TH_FAIL_R2182_THAI_RETEST_PENDING",
         "security": "PARTIAL_VERIFIED",
         "integratedR217R218R219": "NOT_TESTED",
         "ownerProductionApproval": "NOT_APPROVED"
       }
     },
-    "releaseDecision": "NO-GO merge/Production — R2.18.1 source QA 325/325 and staging READY, Owner Safari retest & HTTP source security smoke pending.",
-    "nextAction": "Owner Safari: open newest isolated staging in Malaysia; switch to Dark Mode and select 中文 then ไทย; compare visible localized place labels to Light Mode and check theme reload preserves locale. Already accepted checks do not need full repeat unless regressed.",
+    "releaseDecision": "NO-GO merge/Production; Thai dictionary source QA 327/327 PASS and isolated staging READY; Owner Safari retest, HTTP/security smoke and integrated QA pending.",
+    "nextAction": "Owner Safari on isolated R2.18.2 staging: Malaysia > Dark Mode > ไทย; check Kuala Lumpur (กัวลาลัมเปอร์), Selangor (สลังงอร์), Shah Alam (ชาห์อาลัม) and switch Light Mode; other unknown names remain original, not all stations localized. Chinese remains unchanged.",
     "ownerSafariFeedback": {
       "observedOn": "2026-10-26",
-      "result": "PARTIAL_PASS_BEFORE_FIX",
-      "ownerStatement": "Other R2.18 checks reportedly OK. On Malaysia map Light Mode 中文/ไทย changed labels, Dark Mode 中文/ไทย did not visibly change.",
-      "fixedStagingRetest": "PENDING",
-      "note": "Owner confirmation is not independent HTTP/browser proof, or Production approval."
+      "result": "PARTIAL_PASS_AFTER_R2181",
+      "chineseDarkMode": "PASS_REPORTED_BY_OWNER",
+      "thaiDarkMode": "FAIL_REPORTED_BY_OWNER",
+      "previousUnrelatedChecks": "PASS_REPORTED_BY_OWNER",
+      "r2182Retest": "PENDING",
+      "note": "UAT applies to previous staging; no claim that the newly deployed R2.18.2 passed Safari."
     },
     "defects": {
       "r2181DarkI18n": {
-        "state": "DEV_FIX_QA_PASS_STAGING_READY_OWNER_RETEST_PENDING",
+        "state": "PARTIAL_OWNER_UAT_ZH_PASS_TH_FAIL",
         "rootCause": "Different OpenFreeMap style layer identifiers (Positron label_* vs Dark place_*) excluded from existing label selector; during style reload localization could be skipped.",
         "remediation": "Match sourced dark-name layers, protect motorway references, queue locale application until map style is ready.",
         "translatedDataLimit": "Actual Chinese/Thai place names are only available where the vector source contains them."
+      },
+      "r2182ThaiMalaysiaFallback": {
+        "state": "SOURCE_QA_PASS_STAGING_READY_OWNER_SAFARI_RETEST_PENDING",
+        "finding": "Request for Thai labels succeeded at UI level but missing name:th or incomplete tile translations can produce unchanged Malaysian base-map labels; native tile language coverage not independently measured.",
+        "correction": "Source-attested fallback for 31 exact Malaysian geographic place names; prefer native name:th; source-language fallback for others; light/dark plus country tests.",
+        "knownLimit": "Not a wholesale Thai basemap conversion or translation of all railway station names.",
+        "sources": [
+          "https://image.mfa.go.th/mfa/0/N3nQs9OUac/Titles__Places__and_Translations/5._ชื่อประเทศ_เมืองหลวง_(ไทย-อังกฤษ)_ราชบัณฑิตยสถาน.pdf",
+          "https://cmgfthailand.psu.ac.th/?p=2619",
+          "https://th.wikipedia.org/wiki/กัวลาลัมเปอร์"
+        ]
       }
     }
   },
