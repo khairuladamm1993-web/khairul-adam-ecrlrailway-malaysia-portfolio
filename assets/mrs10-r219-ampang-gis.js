@@ -10,6 +10,14 @@
  const requestUrl=base+'/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=json';
  // Bounds reflect published source layer 1 extent, with a small validation margin.
  const bbox=Object.freeze({minLon:101.67,maxLon:101.79,minLat:3.10,maxLat:3.22});
+ // Observed LIVE by read-only GitHub Actions audit 40238891427 on 2026-10-26.
+ // Source has FID=16, STN_NAME=TITWANGSA (missing second i), STN_CODE=AG03.
+ // Preserve raw source; correct ONLY this exact tuple after bounding-box validation.
+ const sourceCorrection=Object.freeze({
+  fid:16,rawName:'TITWANGSA',rawCode:'AG03',
+  registryCode:'AG3',name:'Titiwangsa',
+  audit:'https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40238891427'
+ });
  function canonical(v){
   return typeof v==='string'?v.trim().toLowerCase()
    .replace(/\b(lrt|station|stesen|rapidkl|rapid kl)\b/g,'')
@@ -31,10 +39,15 @@
    const geometry=Array.isArray(geo.coordinates)&&geo.type==='Point'?{x:geo.coordinates[0],y:geo.coordinates[1]}:geo;
    const lon=geometry?.x,lat=geometry?.y;
    const cleanName=canonical(rawName.replace(/^AG(?:1[0-8]|[1-9])\s+/i,''));
-   const station=known.get(cleanName)||null;
-   const explicitCode=rawCode.match(/\bAG(?:1[0-8]|[1-9])\b/i)?.[0]?.toUpperCase()||'';
-   const nameCode=rawName.match(/^AG(?:1[0-8]|[1-9])\b/i)?.[0]?.toUpperCase()||'';
    const sourceId=p.OBJECTID??p.FID??p.objectid??p.ObjectID??p.id??null;
+   const corrected=(Number(sourceId)===sourceCorrection.fid &&
+     rawName.trim().toUpperCase()===sourceCorrection.rawName &&
+     rawCode.trim().toUpperCase()===sourceCorrection.rawCode);
+   const station=known.get(cleanName)||(corrected?stations.find(x=>x.serviceCode===sourceCorrection.registryCode):null);
+   // AG03 -> AG3, only when the exact witnessed source tuple was found.
+   const explicitCode=corrected?sourceCorrection.registryCode:
+    rawCode.match(/\bAG(?:1[0-8]|[1-9])\b/i)?.[0]?.toUpperCase()||'';
+   const nameCode=rawName.match(/^AG(?:1[0-8]|[1-9])\b/i)?.[0]?.toUpperCase()||'';
    if(!station||!Number.isFinite(lon)||!Number.isFinite(lat)||
       lon<bbox.minLon||lon>bbox.maxLon||lat<bbox.minLat||lat>bbox.maxLat||
       (explicitCode&&explicitCode!==station.serviceCode)||(nameCode&&nameCode!==station.serviceCode)){
@@ -45,6 +58,9 @@
    accepted.set(station.id,Object.freeze({
     id:station.id,name:station.name,code:station.serviceCode,order:station.order,
     sharedPassengerService:station.sharedPassengerService,sourceId,
+    sourceRawName:rawName,sourceRawCode:rawCode,
+    matchMethod:corrected?'OBSERVED_GIS_TYPO_AND_PADDED_CODE_FID16':'EXACT_STATION_NAME',
+    correctionEvidence:corrected?sourceCorrection.audit:null,
     coordinates:Object.freeze([lon,lat]),
     sourceLayer:base,confidence:'SECONDARY_GIS_CANDIDATE_SOURCE_BACKED_NOT_SURVEYED',
     physicalTrackStatus:'UNVERIFIED'
@@ -69,7 +85,7 @@
   }));
   return {type:'FeatureCollection',features};
  }
- const api=Object.freeze({sourceUrl:base,requestUrl,bbox,decode,toFeatureCollection,canonical});
+ const api=Object.freeze({sourceUrl:base,requestUrl,bbox,sourceCorrection,decode,toFeatureCollection,canonical});
  if(typeof module==='object'&&module.exports)module.exports=api;
  if(root)root.MRS10AmpangGISR219=api;
 })(typeof window!=='undefined'?window:null);
