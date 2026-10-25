@@ -114,7 +114,7 @@ let pilotMode=false,pilotTapBound=false,pilotInfoPopup=null;
 // R2.15.2 opt-in diagnostic only. It records no device location or persistent tracking.
 // Pointer count distinguishes an iOS touch that reaches the map canvas from the MapLibre click event.
 // Query counts reflect rendered tile features, not authoritative station names or alignments.
-let pilotDebug=false,pilotPointerCount=0,pilotMapClickCount=0;
+let pilotDebug=false,pilotMapClickCount=0,pilotPanCount=0;
 function railTapProbe(mapInstance,point,radius=12){
  const out={selectable:0,visible:0,rawRail:0,subclass:'',hitLayer:false,stationLayer:false,railLayer:false,visibleLayer:false};
  if(!Number.isFinite(point?.x)||!Number.isFinite(point?.y)||!mapInstance?.queryRenderedFeatures)return out;
@@ -143,27 +143,29 @@ function writeRailTapDiagnostic(stage,details){
  if(!pilotDebug)return;
  const node=el('rail-tap-diagnostic');if(!node)return;
  const suffix=details?' · '+details:'';
- node.textContent='TOUCH '+pilotPointerCount+' / MAP CLICK '+pilotMapClickCount+
+ // MapLibre click represents an actual selection tap; dragstart represents panning.
+ // Do not count pointerdown as a tap: pinch/scroll/drag also begin with pointerdown.
+ node.textContent='MAP TAPS '+pilotMapClickCount+' / PANS '+pilotPanCount+
   ' · '+stage+suffix;
  node.hidden=false;
 }
 function attachPilotTouchDiagnostic(){
  if(!pilotMode||!pilotDebug||!map)return;
- const host=map.getCanvasContainer?.()||map.getCanvas?.()?.parentElement;
- if(host?.addEventListener){
-  const hit=()=>{pilotPointerCount++;writeRailTapDiagnostic('Canvas pointer received; map click pending');};
-  host.addEventListener('pointerdown',hit,{capture:true,passive:true});
-  if(typeof window.PointerEvent==='undefined')host.addEventListener('touchstart',hit,{capture:true,passive:true});
- }
+ // `dragstart` is emitted only when MapLibre begins a drag; raw touch/pointer
+ // starts and webpage scrolling must not inflate the purposeful map tap counter.
+ map.on('dragstart',()=>{
+  pilotPanCount++;
+  writeRailTapDiagnostic('Map pan started; no tap counted');
+ });
  map.on('click',e=>{
   pilotMapClickCount++;
   const d=railTapProbe(map,e.point);
   const info='source features '+d.selectable+' / visible '+d.visible+' / raw rail '+d.rawRail+
    ' · '+(d.subclass||'unknown')+' · rail '+(d.railLayer?'READY':'MISSING')+
    ' / station '+(d.stationLayer?'READY':'MISSING');
-  writeRailTapDiagnostic('Map click received',info);
+  writeRailTapDiagnostic('Map tap received',info);
  });
- writeRailTapDiagnostic('Diagnostic armed');
+ writeRailTapDiagnostic('Diagnostic armed; only map clicks count as taps');
 }
 
 function pilotSourceForLayer(style,sourceLayer){
