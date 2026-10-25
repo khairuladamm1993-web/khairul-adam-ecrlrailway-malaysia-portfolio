@@ -1494,5 +1494,68 @@
       "evidenceType": "Owner-uploaded Safari iPhone screenshots in ChatGPT conversation; not copied to public GitHub repository",
       "conclusion": "PARTIAL SAFARI PASS: BM Light and Dark text contrast for 44930 lookup; responsive overlap still OPEN"
     }
+  },
+  "integrationR2141": {
+    "project": "P01",
+    "checkedOn": "2026-10-25",
+    "title": "R2.14.1 Compact Mobile Controls & Half-Contrast Theme Icon",
+    "state": "STAGING_READY_SAFARI_UAT_PENDING",
+    "issueId": "r2141-compact-mobile-controls",
+    "ownerDesignReference": "Owner-provided iPhone Control Center screenshot with half-light/half-dark appearance glyph, confirmed acceptable. Image not published to GitHub.",
+    "branch": "feature/mrs10-r2141-compact-controls-contrast-icon",
+    "baseCommit": "7e6f8285b0cdc9e2cdf9ed6ea23673f6a49f275f",
+    "sourceCommit": "09e7304e7e753603bec77c514e95cbfe2f66a8a4",
+    "sourceFiles": [
+      "map-language-lab.html",
+      "assets/map-language-lab.js",
+      "tests/r27-visitor-railway-dark-contrast.test.cjs",
+      "tests/r2141-compact-controls-contrast-icon.test.cjs",
+      "package.json"
+    ],
+    "changes": [
+      "Replace oversized theme text button with CSS half-contrast circular glyph; retain localized aria-label and tooltip plus aria-pressed state; 44px target",
+      "Reduce visual dimensions, padding and gaps for four language buttons and three country buttons; every control retains minimum 44px touch target",
+      "Shrink China code lookup panel width/height; 96% opacity for high-contrast light/dark panels with 12px background blur, vertical scrolling",
+      "Automatically hide rail-and-station pilot banner when code lookup is opened; restore on close, hide after leaving China; close railway legend while code panel opens",
+      "Preserve China code mappings, campus pin, railway legend and R2.11 map expand interactions"
+    ],
+    "qa": {
+      "automatedNode": "280/280 PASS, 0 FAIL, 0 SKIPPED, exact staging build logs",
+      "catalogue": "14/14 PASS, 0 FAIL, 0 SKIPPED",
+      "build": "PASS — scripts/build-preview.py dist-r2141-public, analytics/member excluded",
+      "html": "HTTP 200; compact theme icon and panel CSS present in staging output",
+      "js": "HTTP 200; theme text overwrite removed; code panel overlap class present",
+      "restrictedFiles": "404 for excluded questions.js and member-gateway.js",
+      "realSafari": "PENDING — visual size/theme tap and popup screen overlap require Owner iPhone test",
+      "rasterClick": "UNSUPPORTED — no change to OpenRailwayMap raster behavior",
+      "chineseThaiLanguage": "PENDING — 中文 and ไทย R2.14 UAT not covered by previous screenshots"
+    },
+    "staging": {
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "projectName": "mrs10-r211-mobile-map-uat",
+      "deploymentId": "dpl_4zokzxeZbyfhWVgMM83x9BnAU5DA",
+      "target": "staging",
+      "state": "READY",
+      "sourceSha": "09e7304e7e753603bec77c514e95cbfe2f66a8a4",
+      "url": "https://mrs10-r211-mobile-map-dr1nnbuo4-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "protection": "Existing project Vercel Authentication not modified"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO FOR PRODUCTION — source/staging PASS but Safari UAT not yet complete; no merge approved",
+    "nextAction": "Owner opens isolated R2.14.1 staging on Safari iPhone, checks 44px half-contrast theme icon in Light/Dark, compact BM/EN/中文/ไทย and Malaysia/Thailand/China buttons, China 🔢 44930 popup with no status overlap and scroll at normal/expanded map. Chinese and Thai text still require verification.",
+    "boundaries": {
+      "production": "UNCHANGED",
+      "gitHubMain": "UNCHANGED",
+      "supabase": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT PERFORMED",
+      "personalImages": "NOT PUBLISHED"
+    }
   }
 }
