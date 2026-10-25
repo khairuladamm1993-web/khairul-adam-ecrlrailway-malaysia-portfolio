@@ -27,7 +27,14 @@ h1{font-size:clamp(1.35rem,4vw,2.1rem);line-height:1.2}p{max-width:85ch}#label-s
 #theme-btn{padding:9px 15px;min-width:132px;font-weight:750}
 #railway-btn{width:auto;padding:9px 16px;font-weight:750}
 #visitor-map{outline:1px solid var(--line)}
-button:focus-visible,a:focus-visible{outline:3px solid #efa93e;outline-offset:3px}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #efa93e;outline-offset:3px}
+.rail-note,.liuzhou-guide{margin:12px 0;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--fg)}
+.liuzhou-guide summary{cursor:pointer;font-weight:750;min-height:35px}
+.bilingual{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.bilingual>div{padding:9px;border-radius:9px;border:1px solid var(--line)}
+.bilingual dt{font-size:1.35rem;font-weight:750}.bilingual dd{margin:3px 0 0}
+@media(max-width:500px){.bilingual{grid-template-columns:1fr}}
+
 @media(max-width:700px){main{padding-top:max(55px,env(safe-area-inset-top))}header{align-items:center}header a{max-width:55%;line-height:1.5}#theme-btn{min-width:124px}}
 </style>
 <script type="module">
@@ -48,5 +55,12 @@ await import('./assets/map-language-lab.js');
 <button type="button" data-region="thailand">🇹🇭 Thailand</button>
 <button type="button" data-region="china">🇨🇳 China</button></div>
 <div id="visitor-map" role="region" aria-label="Multilingual visitor map"></div>
+<p class="rail-note" id="rail-vector-note" role="status" aria-live="polite">Visitor mode: railway lines without technical labels</p>
+<details id="liuzhou-guide" class="liuzhou-guide" hidden>
+ <summary id="liuzhou-title">Liuzhou · bilingual railway names</summary>
+ <p id="liuzhou-hint">Names from Owner screenshot. Not validated geographic station coordinates.</p>
+ <dl class="bilingual"><div><dt>柳州</dt><dd>Liuzhou · Liǔzhōu</dd></div>
+ <div><dt>柳州南</dt><dd>Liuzhou South · Liǔzhōu Nán</dd></div></dl>
+ </details>
 <div class="notice"><strong id="label-status" role="status" aria-live="polite">Loading map…</strong><p id="place-status">Visitor reference only, not an ECRL operational map.</p>
 <p>© OpenMapTiles, © OpenStreetMap contributors; railway layer © OpenRailwayMap contributors. Language coverage depends on source place names; no railway coordinates are invented.</p></div></main></body></html>
