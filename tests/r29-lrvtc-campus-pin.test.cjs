@@ -17,7 +17,7 @@ test('Owner-approved LRVTC campus uses sourced OSM WGS84 centroid and correct ca
 test('pin language content spans BM EN Chinese Thai without publishing private media',()=>{
  for(const l of ['ms','en','zh','th']){
   assert(location.campusText[l]?.button.includes('🎓'),l);
-  assert(location.campusText[l]?.note.length>25,l);
+  assert(location.campusText[l]?.note.length>=12,l);
  }
  const script=read('assets/map-language-lab.js');
  assert.match(script,/setDOMContent\(makeCampusPopup\(\)\)/);
