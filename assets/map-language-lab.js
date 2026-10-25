@@ -85,5 +85,8 @@ function init(){
  });
 }
 if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy};
-if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',init);
+if(typeof document!=='undefined'){
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
+ else init();
+}
 })();
