@@ -230,6 +230,24 @@
   const chosen=['ms','en','zh','th'].includes(url)?url:stored;
   return ['ms','en','zh','th'].includes(chosen)?chosen:'ms';
  }
+ const themeLabels={
+  ms:{language:'Bahasa',light:'Mod Cerah',dark:'Mod Gelap'},
+  en:{language:'Language',light:'Light Mode',dark:'Dark Mode'},
+  zh:{language:'语言',light:'浅色模式',dark:'深色模式'},
+  th:{language:'ภาษา',light:'โหมดสว่าง',dark:'โหมดมืด'}
+ };
+ function labelTheme(){
+  const l=themeLabels[chooser.value]||themeLabels.ms;
+  const next=document.documentElement.dataset.theme==='dark'?'light':'dark';
+  const key=next==='light'?'light':'dark';
+  if(themeButton){
+   themeButton.textContent=l[key];
+   themeButton.setAttribute('aria-label',l[key]);
+   themeButton.setAttribute('aria-pressed',String(next==='dark'));
+  }
+  const label=document.querySelector('label[for="article-language"]');
+  if(label)label.textContent=l.language;
+ }
  function render(lang){
   const copy=translations[lang]||original;
   for(const sel of selectors){
@@ -245,6 +263,7 @@
   document.title=lang==='en'?'Chapter 01 · Introduction to Railway Systems | MR-S10':
     lang==='zh'?'第01章 · 铁路系统简介 | MR-S10':lang==='th'?'บทที่ 01 · ความรู้เบื้องต้นเกี่ยวกับระบบรถไฟ | MR-S10':'Bab 01 · Pengenalan Sistem Kereta Api | MR-S10';
   chooser.value=lang;
+  labelTheme();
   for(const option of Array.from(chooser.options))option.selected=option.value===lang;
   try{localStorage.setItem('railway-language',lang)}catch{}
   document.querySelector('meta[name="description"]')?.setAttribute('content',
@@ -255,8 +274,7 @@
  function setTheme(theme){
   const t=theme==='dark'?'dark':'light';
   document.documentElement.dataset.theme=t;
-  themeButton.textContent=t==='dark'?'Light Mode':'Dark Mode';
-  themeButton.setAttribute('aria-label',t==='dark'?'Switch to light mode':'Switch to dark mode');
+  labelTheme();
   try{localStorage.setItem('railway-theme',t)}catch{}
  }
  chooser.addEventListener('change',()=>{
