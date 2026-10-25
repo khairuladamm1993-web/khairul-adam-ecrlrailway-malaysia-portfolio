@@ -47,6 +47,15 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ef
 #visitor-map .mrl-campus-popup .maplibregl-popup-content{background:var(--popup-bg);color:var(--popup-fg);padding:44px 10px 9px;border-radius:10px;max-height:min(34dvh,170px)}
 #visitor-map .campus-popup{color:var(--popup-fg);line-height:1.35;font-size:13px;max-height:calc(min(34vh,170px) - 53px);max-height:calc(min(34dvh,170px) - 53px);overflow-y:auto;overflow-wrap:anywhere;overscroll-behavior:contain}
 #visitor-map .campus-popup p{color:var(--popup-fg);margin:4px 0}
+/* R2.17.5: mobile source-backed Kajang popup has a readable persistent
+   official station header; only this scoped popup gets extra body height. */
+#visitor-map .mrl-kajang-matched-popup .maplibregl-popup-content{max-height:min(44dvh,250px)}
+#visitor-map .mrl-kajang-matched-popup .campus-popup{max-height:calc(min(44dvh,250px) - 53px);scroll-padding-top:44px}
+#visitor-map .campus-popup.kajang-match>strong{
+ display:block;position:sticky;top:0;z-index:1;background:var(--popup-bg);
+ color:var(--kg-text);font-weight:800;padding:4px 0 6px;
+ box-shadow:0 1px 0 var(--popup-bg)
+}
 #visitor-map .campus-popup small{color:var(--popup-muted);display:block;font-size:12px;line-height:1.35}
 #visitor-map .mrl-campus-popup .maplibregl-popup-close-button{color:var(--popup-fg);background:var(--popup-bg);border:0;width:44px;height:44px;min-height:44px;padding:0;font-size:22px;right:0;top:0;display:grid;place-items:start center;line-height:28px}
 #visitor-map .mrl-campus-popup.maplibregl-popup-anchor-bottom .maplibregl-popup-tip,#visitor-map .mrl-campus-popup.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,#visitor-map .mrl-campus-popup.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip{border-top-color:var(--popup-bg)}
