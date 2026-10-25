@@ -147,7 +147,8 @@ test('R2.18.2: curated Thai aliases only in Malaysia place labels; themes preser
  doc.getElementById('theme-btn').click();
  assert.equal(evalMapName(map.getLayer('place_city').layout['text-field'],{'name_en':'Kuala Lumpur'}),'กัวลาลัมเปอร์');
  doc.querySelector('[data-region="thailand"]').click();
- assert.equal(evalMapName(map.getLayer('place_city').layout['text-field'],{'name_en':'Kuala Lumpur'}),'Kuala Lumpur');
+ // Outside Malaysia the native OpenMapTiles name:en key is used, without curated aliases.
+ assert.equal(evalMapName(map.getLayer('place_city').layout['text-field'],{'name:en':'Kuala Lumpur'}),'Kuala Lumpur');
  doc.querySelector('[data-region="malaysia"]').click();
  assert.equal(evalMapName(map.getLayer('place_city').layout['text-field'],{'name_en':'Kuala Lumpur'}),'กัวลาลัมเปอร์');
  doc.querySelector('[data-locale="zh"]').click();
