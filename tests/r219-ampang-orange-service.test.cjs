@@ -123,7 +123,7 @@ test('R2.19 Safari UX: same-page MapLibre map and one numbered orange service ti
  assert.equal(d.querySelectorAll('#station-list li:nth-child(n+12) .shared-tag').length,0);
  for(const l of ['en','zh','th']){
   const select=d.getElementById('lang');select.value=l;select.dispatchEvent(new d.defaultView.Event('change'));
-  assert.notEqual(d.getElementById('map-ref-note').textContent,'');
+  assert.notEqual(d.getElementById('r219-map-note').textContent,'');
   assert.equal(d.querySelectorAll('#station-list li').length,18);
   assert.equal(d.querySelectorAll('#station-list .shared-tag').length,11);
  }
