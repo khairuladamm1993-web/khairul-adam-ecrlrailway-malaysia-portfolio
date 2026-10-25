@@ -24,8 +24,16 @@ h1{font-size:clamp(1.35rem,4vw,2.1rem);line-height:1.2}p{max-width:85ch}#label-s
 :root[data-theme="dark"] .maplibregl-ctrl-attrib a{color:#aee8ff}
 :root[data-theme="dark"] .maplibregl-ctrl-group button{background:#eef5f8}
 :root[data-theme="dark"] .maplibregl-ctrl-group button .maplibregl-ctrl-icon{filter:none}
-#theme-btn{padding:9px 15px;min-width:132px;font-weight:750}
-#railway-btn{width:auto;padding:9px 16px;font-weight:750}
+/* R2.14.1: visual iOS-style half-light/half-dark glyph, accessible 44px touch target. */
+#theme-btn{width:44px;min-width:44px;height:44px;min-height:44px;padding:0;display:grid;place-items:center;flex:none;border-radius:11px}
+.theme-contrast-icon{display:block;width:21px;height:21px;border-radius:50%;background:linear-gradient(90deg,currentColor 0 50%,transparent 50% 100%);box-shadow:inset 0 0 0 2px currentColor}
+.controls[aria-label="Language selector"]{gap:5px;margin:8px 0}
+.controls[aria-label="Language selector"] button{min-width:44px;min-height:44px;height:44px;padding:2px 7px;font-size:13px;line-height:1.1;border-radius:9px}
+.controls[aria-label="Countries"]{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}
+.controls[aria-label="Countries"] button{min-width:0;min-height:44px;height:44px;padding:4px 6px;font-size:clamp(11px,3.3vw,13px);line-height:1.15;border-radius:9px;white-space:nowrap}
+.controls[aria-label="Map details"]{margin:7px 0}
+#railway-btn{width:auto;padding:7px 12px;font-size:13px;font-weight:750}
+
 #visitor-map{outline:1px solid var(--line)}
 button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #efa93e;outline-offset:3px}
 #campus-location[hidden]{display:none}
@@ -65,13 +73,17 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ef
 .bilingual dt{font-size:1.35rem;font-weight:750}.bilingual dd{margin:3px 0 0}
 .china-code-trigger[hidden],.china-code-panel[hidden]{display:none}
 .china-code-trigger{position:absolute;z-index:8;left:10px;bottom:66px;width:44px;height:44px;min-height:44px;padding:0;display:grid;place-items:center;background:#eef5f8;color:#17313f;border:1px solid #8aaabe;border-radius:8px;font-size:19px}
-.china-code-panel{position:absolute;z-index:10;left:10px;bottom:116px;width:min(285px,calc(100% - 20px));max-height:min(45dvh,330px);overflow:auto;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px;box-shadow:0 3px 12px #0004;font-size:13px}
+.china-code-panel{position:absolute;z-index:10;left:10px;bottom:116px;width:min(280px,calc(100% - 20px));max-height:min(40dvh,290px);overflow:auto;overscroll-behavior:contain;background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#19313e;border:1px solid #bdcbd1;border-radius:10px;padding:9px;box-shadow:0 3px 12px #0004;font-size:13px;line-height:1.4}
+:root[data-theme="dark"] .china-code-panel{background:rgba(20,46,62,.96);color:#f3faff;border-color:#8aaabe}
+.china-code-panel[hidden]{display:none}
+#map-shell.is-code-open .railway-pilot-status{display:none}
 .china-code-heading{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .china-code-heading button{font-size:12px;min-height:36px;padding:5px 9px}
-.china-code-panel p{color:var(--fg);margin:6px 0;line-height:1.45}
+.china-code-panel p{color:inherit;margin:5px 0;line-height:1.4}
 .china-code-form{display:grid;grid-template-columns:1fr auto;gap:6px}
 .china-code-label{grid-column:1/-1}
-.china-code-form input{min-width:0;padding:8px;border:1px solid var(--line);border-radius:6px;color:var(--fg);background:var(--card)}
+.china-code-form input{min-width:0;padding:8px;border:1px solid var(--line);border-radius:6px;color:var(--fg);background:var(--card);font-size:16px}
+.china-code-panel .china-code-result{color:inherit}
 .china-code-form button,.china-code-samples button{min-height:40px;padding:6px 9px;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:6px}
 .china-code-samples{display:flex;gap:7px;margin:8px 0}
 .china-code-result{padding-top:7px;border-top:1px solid var(--line);overflow-wrap:anywhere}
@@ -91,14 +103,14 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ef
 .rail-legend-explanation p,.railway-legend p{font-size:12px;color:var(--muted);line-height:1.4;margin:5px 0 0}
 @media(max-width:500px){.bilingual{grid-template-columns:1fr}}
 
-@media(max-width:700px){main{padding-top:max(55px,env(safe-area-inset-top))}header{align-items:center}header a{max-width:55%;line-height:1.5}#theme-btn{min-width:124px}}
+@media(max-width:700px){main{padding-top:max(55px,env(safe-area-inset-top))}header{align-items:center}header a{max-width:calc(100% - 56px);line-height:1.5}#theme-btn{min-width:44px}}
 </style>
 <script type="module">
 import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.mjs';
 window.maplibregl=maplibregl;
 await import('./assets/map-language-lab.js');
 </script></head>
-<body><main><header><a href="gateway.html">← MR-S10 Gateway</a><button id="theme-btn" type="button" aria-label="Switch to Dark Mode">Dark Mode</button></header>
+<body><main><header><a href="gateway.html">← MR-S10 Gateway</a><button id="theme-btn" type="button" aria-label="Switch to Dark Mode" title="Switch to Dark Mode" aria-pressed="false"><span class="theme-contrast-icon" aria-hidden="true"></span></button></header>
 <h1 id="lab-title">Multilingual visitor map · BETA</h1><p id="lab-info">Switch map place names where translations exist.</p>
 <div class="controls" aria-label="Language selector">
 <button data-locale="ms" aria-pressed="true">BM</button><button data-locale="en" aria-pressed="false">EN</button><button data-locale="zh" aria-pressed="false">中文</button><button data-locale="th" aria-pressed="false">ไทย</button></div>
