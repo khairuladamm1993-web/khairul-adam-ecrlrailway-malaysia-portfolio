@@ -198,7 +198,8 @@ function popupFromPilotFeature(feature,kind,lngLat){
  // R2.16.3: exact source-string crosswalk, not physical track assignment.
  // No route is inferred from rail colour, geometry proximity or generic place names.
  if(kind==='station'&&activeRegion==='malaysia'&&pilotMode){
-  const candidate=window.MRS10KLRegistry?.matchSourcedKajangPoi?.(feature.properties);
+  const candidate=window.MRS10KLRegistry?.matchSourcedKajangPoi?.(feature.properties)||
+   window.MRS10KLRegistry?.matchSourcedKelanaPoi?.(feature.properties);
   if(candidate){
    const label=lang==='ms'?'Padanan nama peta (calon)':
     lang==='zh'?'地图名称对应（候选）':
@@ -209,8 +210,8 @@ function popupFromPilotFeature(feature,kind,lngLat){
     (lang==='ms'?'Trek fizikal belum disahkan':
       lang==='zh'?'实体轨道未核实':
       lang==='th'?'ยังไม่ยืนยันรางจริง':'Physical track unverified');
-   notice.className='kajang-match-notice';
-   root.classList.add('kajang-match');
+   notice.className=candidate.routeId==='lrt-kelana-jaya'?'kelana-match-notice':'kajang-match-notice';
+   root.classList.add(candidate.routeId==='lrt-kelana-jaya'?'kelana-match':'kajang-match');
    root.appendChild(notice);
   }
  }
@@ -259,7 +260,22 @@ function installPilotVectorLayers(){
    }
   }catch(e){if(pilotDebug)writeRailTapDiagnostic('Kajang POI highlight setup error',String(e?.message||e).slice(0,80));}
  }
- syncKajangPoiHighlights();
+ // R2.18: renderer filters REAL vector POIs; it creates no station or track coordinates.
+ if(poiSource&&!map.getLayer('mrl-kelana-code-poi')){
+  try{
+   const identity=window.MRS10KLRegistry?.findRoute?.('lrt-kelana-jaya')?.serviceIdentity;
+   if(identity)map.addLayer({
+    id:'mrl-kelana-code-poi',type:'circle',source:poiSource,'source-layer':'poi',minzoom:10,
+    filter:['all',['==',['get','class'],'railway'],
+     ['in',['get','subclass'],['literal',['station','subway']]],
+     ['in',['get','name'],['literal',['KJ1 Gombak','KJ2 Taman Melati','KJ3 Wangsa Maju','KJ4 Sri Rampai','KJ5 Setiawangsa','KJ6 Jelatek','KJ7 Dato' Keramat','KJ8 Damai','KJ9 Ampang Park','KJ10 KLCC','KJ11 Kampung Baru','KJ12 Dang Wangi','KJ13 Masjid Jamek','KJ14 Pasar Seni','KJ15 KL Sentral','KJ16 Bangsar','KJ17 Abdullah Hukum','KJ18 Kerinchi','KJ19 Universiti','KJ20 Taman Jaya','KJ21 Asia Jaya','KJ22 Taman Paramount','KJ23 Taman Bahagia','KJ24 Kelana Jaya','KJ25 Lembah Subang','KJ26 Ara Damansara','KJ27 Glenmarie','KJ28 Subang Jaya','KJ29 SS15','KJ30 SS18','KJ31 USJ7','KJ32 Taipan','KJ33 Wawasan','KJ34 USJ21','KJ35 Alam Megah','KJ36 Subang Alam','KJ37 Putra Heights']]]],
+    layout:{visibility:'none'},
+    paint:{'circle-radius':5.5,'circle-color':identity.light,
+     'circle-stroke-color':'#FFFFFF','circle-stroke-width':2}
+   });
+  }catch(e){if(pilotDebug)writeRailTapDiagnostic('Kelana POI layer error',String(e?.message||e).slice(0,80));}
+ }
+ syncKajangPoiHighlights();syncKelanaPoiHighlights();
  if(railSource&&!map.getLayer('mrl-pilot-rail-hits')){
   try{
    map.addLayer({id:'mrl-pilot-rail-hits',type:'line',source:railSource,'source-layer':'transportation',minzoom:10,
@@ -431,11 +447,16 @@ function syncKajangPoiHighlights(){
  const selected=activeRegion==='malaysia'&&el('kl-registry-route')?.value==='mrt-kajang';
  try{map.setLayoutProperty('mrl-kajang-known-poi','visibility',selected?'visible':'none');}catch{}
 }
+function syncKelanaPoiHighlights(){
+ if(!pilotMode||!map?.getLayer?.('mrl-kelana-code-poi'))return;
+ const selected=activeRegion==='malaysia'&&el('kl-registry-route')?.value==='lrt-kelana-jaya';
+ try{map.setLayoutProperty('mrl-kelana-code-poi','visibility',selected?'visible':'none');}catch{}
+}
 function renderKLRegistry(){
  const box=el('kl-registry'),api=window.MRS10KLRegistry;
  if(!box)return;
  box.hidden=!pilotMode||activeRegion!=='malaysia'||!api?.validateRegistry?.();
- if(box.hidden){syncKajangPoiHighlights();return;}
+ if(box.hidden){syncKajangPoiHighlights();syncKelanaPoiHighlights();return;}
  const local=klRegistryLocales[lang]||klRegistryLocales.en,registry=api.catalog;
  el('kl-registry-title').textContent=local.summary;
  el('kl-registry-warning').textContent=local.warning;
@@ -451,19 +472,26 @@ function renderKLRegistry(){
  const route=api.findRoute(selector.value)||registry.routes[0];
  if(!route)return;
  box.dataset.route=route.id;
- syncKajangPoiHighlights();
+ syncKajangPoiHighlights();syncKelanaPoiHighlights();
  el('kl-registry-route-name').textContent=route.name;
  el('kl-registry-route-status').textContent=route.stationSequenceStatus==='SOURCE_CONFIRMED'?
   local.verified+(route.id==='mrt-kajang'?
     ' · '+(lang==='ms'?'Hijau = identiti laluan, bukan jajaran fizikal':
       lang==='zh'?'绿色代表线路身份，并非实体轨道':
       lang==='th'?'สีเขียวหมายถึงสายบริการ ไม่ใช่แนวรางจริง':
-      'Green = service identity, not physical alignment'):''):local.notVerified;
+      'Green = service identity, not physical alignment') :
+    route.id==='lrt-kelana-jaya'?' · '+(
+      lang==='ms'?'Ruby = identiti servis, bukan trek fizikal':
+      lang==='zh'?'红宝石色代表运营线路，并非实体轨道':
+      lang==='th'?'สีทับทิมแสดงสายบริการ ไม่ใช่แนวรางจริง':
+      'Ruby = service identity, not physical alignment') : ''):local.notVerified;
  const list=el('kl-registry-station-order');
  list.replaceChildren();
  if(route.stationSequenceStatus==='SOURCE_CONFIRMED'){
   const byId=new Map(registry.stations.map(st=>[st.id,st]));
-  route.stationSequence.forEach(id=>{const li=document.createElement('li');li.textContent=byId.get(id)?.name||'Unverified';list.appendChild(li);});
+  route.stationSequence.forEach(id=>{const li=document.createElement('li'),st=byId.get(id);
+   li.textContent=st?(route.id==='lrt-kelana-jaya'?st.code+' · ':'')+st.name:'Unverified';
+   list.appendChild(li);});
  }
  list.hidden=!route.stationSequence.length;
  const sources=el('kl-registry-sources');sources.replaceChildren();

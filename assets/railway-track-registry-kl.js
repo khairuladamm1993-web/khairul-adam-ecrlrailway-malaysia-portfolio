@@ -11,7 +11,9 @@
   erl:'https://www.kliaekspres.com/products-fares/klia-transit/',
   mrtKajangStations29:'https://www.mymrt.com.my/ms/ruang-acara/kajang/',
   mrtKajangOverview:'https://www.mymrt.com.my/projects/kajang-line/',
-  mrtKajangShortList:'https://www.mymrt.com.my/projects/kajang-line/stations/'
+  mrtKajangShortList:'https://www.mymrt.com.my/projects/kajang-line/stations/',
+  kelanaOperatorMap:'https://myrapid.com.my/wp-content/uploads/2021/07/28102018_Transit-Map.pdf',
+  kelanaCodesCrosscheck:'https://www.mtrec.name.my/network/kjl.html'
  });
  // R2.17: sourced passenger-service branding, NOT an infrastructure-way style.
  const kajangLineVisual=Object.freeze({
@@ -19,9 +21,16 @@
   use:'SERVICE_AND_VERIFIED_STATION_REFERENCE_ONLY',
   physicalAlignmentStatus:'UNVERIFIED'
  });
+ // R2.18: distinct ruby service identity. Rapid KL official service status lists D50032.
+ const kelanaLineServiceIdentity=Object.freeze({
+  name:'Kelana Jaya Ruby',light:'#D50032',dark:'#FF8CA5',
+  use:'SERVICE_AND_SOURCE_CODED_POI_ONLY',physicalAlignmentStatus:'UNVERIFIED',
+  sourceUrl:sourceCatalogue.rapid
+ });
  const route=(id,name,mode,operator,sourceKeys,stationSequence=[])=>Object.freeze({
   id,name,mode,operator,sourceUrls:sourceKeys.map(k=>sourceCatalogue[k]||k),
   visualIdentity:id==='mrt-kajang'?kajangLineVisual:null,
+  serviceIdentity:id==='lrt-kelana-jaya'?kelanaLineServiceIdentity:null,
   confidence:'OPERATOR_SERVICE_CONFIRMED',
   // These IDs are software registry IDs, NOT railway track or signal IDs.
   physicalTrackIds:[],vectorFeatureIds:[],geometry:null,
@@ -73,6 +82,45 @@
   {id:'mrt-sungai-jernih',name:"Sungai Jernih",sourceUrls:[sourceCatalogue.mrtKajangStations29,sourceCatalogue.mrtKajangOverview],confidence:'MRT_CORP_STATION_ORDER_CONFIRMED'},
   {id:'mrt-stadium-kajang',name:"Stadium Kajang",sourceUrls:[sourceCatalogue.mrtKajangStations29,sourceCatalogue.mrtKajangOverview],confidence:'MRT_CORP_STATION_ORDER_CONFIRMED'},
   {id:'mrt-kajang',name:"Kajang",sourceUrls:[sourceCatalogue.mrtKajangStations29,sourceCatalogue.mrtKajangOverview],confidence:'MRT_CORP_STATION_ORDER_CONFIRMED'},
+  // R2.18: 37 official service stops; KJ labels are cross-checked with independent
+  // station directory, not individually certified operator equipment identifiers.
+  {id:'lrt-kj1',name:"Gombak",code:'KJ1',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj2',name:"Taman Melati",code:'KJ2',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj3',name:"Wangsa Maju",code:'KJ3',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj4',name:"Sri Rampai",code:'KJ4',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj5',name:"Setiawangsa",code:'KJ5',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj6',name:"Jelatek",code:'KJ6',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj7',name:"Dato' Keramat",code:'KJ7',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj8',name:"Damai",code:'KJ8',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj9',name:"Ampang Park",code:'KJ9',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj10',name:"KLCC",code:'KJ10',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj11',name:"Kampung Baru",code:'KJ11',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj12',name:"Dang Wangi",code:'KJ12',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj13',name:"Masjid Jamek",code:'KJ13',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj14',name:"Pasar Seni",code:'KJ14',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj15',name:"KL Sentral",code:'KJ15',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj16',name:"Bangsar",code:'KJ16',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj17',name:"Abdullah Hukum",code:'KJ17',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj18',name:"Kerinchi",code:'KJ18',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj19',name:"Universiti",code:'KJ19',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj20',name:"Taman Jaya",code:'KJ20',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj21',name:"Asia Jaya",code:'KJ21',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj22',name:"Taman Paramount",code:'KJ22',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj23',name:"Taman Bahagia",code:'KJ23',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj24',name:"Kelana Jaya",code:'KJ24',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj25',name:"Lembah Subang",code:'KJ25',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj26',name:"Ara Damansara",code:'KJ26',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj27',name:"Glenmarie",code:'KJ27',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj28',name:"Subang Jaya",code:'KJ28',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj29',name:"SS15",code:'KJ29',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj30',name:"SS18",code:'KJ30',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj31',name:"USJ7",code:'KJ31',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj32',name:"Taipan",code:'KJ32',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj33',name:"Wawasan",code:'KJ33',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj34',name:"USJ21",code:'KJ34',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj35',name:"Alam Megah",code:'KJ35',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj36',name:"Subang Alam",code:'KJ36',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
+  {id:'lrt-kj37',name:"Putra Heights",code:'KJ37',sourceUrls:[sourceCatalogue.kelanaOperatorMap,sourceCatalogue.kelanaCodesCrosscheck],confidence:'SERVICE_SEQUENCE_MAP_WITH_SECONDARY_CODE_CROSSCHECK'},
   // Owner Safari screenshot confirms cartographic POI name only; no service attachment.
   {id:'poi-maharajalela',name:'Maharajalela',originalName:'MR3 Maharajalela',
    sourceUrls:['https://openmaptiles.org/docs/schema/'],confidence:'OWNER_SAFARI_VECTOR_POI',linkedRouteId:null},
@@ -82,7 +130,9 @@
  const routes=Object.freeze([
   route('ktm-batu-caves-pulau-sebang','KTM Komuter · Batu Caves – Pulau Sebang','rail','KTMB',['ktm','mot']),
   route('ktm-tanjung-malim-pelabuhan-klang','KTM Komuter · Tanjung Malim – Pelabuhan Klang','rail','KTMB',['ktm','mot']),
-  route('lrt-kelana-jaya','LRT · Kelana Jaya Line','light_rail','Rapid Rail',['rapid','mot']),
+  route('lrt-kelana-jaya','LRT · Kelana Jaya Line','light_rail','Rapid Rail',
+   ['rapid','mot','kelanaOperatorMap','kelanaCodesCrosscheck'],
+   ['lrt-kj1','lrt-kj2','lrt-kj3','lrt-kj4','lrt-kj5','lrt-kj6','lrt-kj7','lrt-kj8','lrt-kj9','lrt-kj10','lrt-kj11','lrt-kj12','lrt-kj13','lrt-kj14','lrt-kj15','lrt-kj16','lrt-kj17','lrt-kj18','lrt-kj19','lrt-kj20','lrt-kj21','lrt-kj22','lrt-kj23','lrt-kj24','lrt-kj25','lrt-kj26','lrt-kj27','lrt-kj28','lrt-kj29','lrt-kj30','lrt-kj31','lrt-kj32','lrt-kj33','lrt-kj34','lrt-kj35','lrt-kj36','lrt-kj37']),
   route('lrt-ampang','LRT · Ampang Line','light_rail','Rapid Rail',['rapid','mot']),
   route('lrt-sri-petaling','LRT · Sri Petaling Line','light_rail','Rapid Rail',['rapid','mot']),
   route('mrt-kajang','MRT · Kajang Line','subway','Rapid Rail',
@@ -106,6 +156,16 @@
   warning:'Not a surveyed network, route geometry, platform, operational track identity, chainage or signal plan.',
   sources:sourceCatalogue,routes,stations,physicalSegments:Object.freeze([]),
   sourceAudit:Object.freeze({
+   kelanaJaya:{
+    stationCount:37,orderedServiceAdjacencies:36,
+    stationOrderSource:'Rapid KL integrated transit map; operator service identity cross-checked with Ministry of Transport 37-stop Gombak–Putra Heights scope.',
+    codeStatus:'SECONDARY_DIRECTORY_CROSSCHECK_PENDING_OPERATOR_INDIVIDUAL_CODE_CONFIRMATION',
+    serviceColour:'#D50032',colourSource:sourceCatalogue.rapid,
+    physicalTrackGeometry:'UNVERIFIED',
+    poiMatching:'EXACT_KJ_CODE_PLUS_OFFICIAL_NAME_CANDIDATE_ONLY',
+    officialReferences:[sourceCatalogue.rapid,sourceCatalogue.mot,sourceCatalogue.kelanaOperatorMap],
+    secondaryReferences:[sourceCatalogue.kelanaCodesCrosscheck]
+   },
    mrtKajang:{
     stationCount:29,orderedServiceAdjacencies:28,
     acceptedBasis:'MRT Corp current line overview (29 stations; Kwasa Damansara–Kajang) cross-checked against the MRT Corp event-space station selector with 29 sequential entries.',
@@ -170,6 +230,62 @@
    relationId:null,routeGeometryStatus:'UNVERIFIED'
   });
  }
+ // R2.18: only an exact code-prefixed vector feature can become a candidate.
+ // No matching on name alone: KL Sentral and Pasar Seni are multimodal interchanges.
+ const kelanaLabels=Object.freeze([
+  Object.freeze({raw:"KJ1 Gombak",stationId:'lrt-kj1',name:"Gombak"}),
+  Object.freeze({raw:"KJ2 Taman Melati",stationId:'lrt-kj2',name:"Taman Melati"}),
+  Object.freeze({raw:"KJ3 Wangsa Maju",stationId:'lrt-kj3',name:"Wangsa Maju"}),
+  Object.freeze({raw:"KJ4 Sri Rampai",stationId:'lrt-kj4',name:"Sri Rampai"}),
+  Object.freeze({raw:"KJ5 Setiawangsa",stationId:'lrt-kj5',name:"Setiawangsa"}),
+  Object.freeze({raw:"KJ6 Jelatek",stationId:'lrt-kj6',name:"Jelatek"}),
+  Object.freeze({raw:"KJ7 Dato' Keramat",stationId:'lrt-kj7',name:"Dato' Keramat"}),
+  Object.freeze({raw:"KJ8 Damai",stationId:'lrt-kj8',name:"Damai"}),
+  Object.freeze({raw:"KJ9 Ampang Park",stationId:'lrt-kj9',name:"Ampang Park"}),
+  Object.freeze({raw:"KJ10 KLCC",stationId:'lrt-kj10',name:"KLCC"}),
+  Object.freeze({raw:"KJ11 Kampung Baru",stationId:'lrt-kj11',name:"Kampung Baru"}),
+  Object.freeze({raw:"KJ12 Dang Wangi",stationId:'lrt-kj12',name:"Dang Wangi"}),
+  Object.freeze({raw:"KJ13 Masjid Jamek",stationId:'lrt-kj13',name:"Masjid Jamek"}),
+  Object.freeze({raw:"KJ14 Pasar Seni",stationId:'lrt-kj14',name:"Pasar Seni"}),
+  Object.freeze({raw:"KJ15 KL Sentral",stationId:'lrt-kj15',name:"KL Sentral"}),
+  Object.freeze({raw:"KJ16 Bangsar",stationId:'lrt-kj16',name:"Bangsar"}),
+  Object.freeze({raw:"KJ17 Abdullah Hukum",stationId:'lrt-kj17',name:"Abdullah Hukum"}),
+  Object.freeze({raw:"KJ18 Kerinchi",stationId:'lrt-kj18',name:"Kerinchi"}),
+  Object.freeze({raw:"KJ19 Universiti",stationId:'lrt-kj19',name:"Universiti"}),
+  Object.freeze({raw:"KJ20 Taman Jaya",stationId:'lrt-kj20',name:"Taman Jaya"}),
+  Object.freeze({raw:"KJ21 Asia Jaya",stationId:'lrt-kj21',name:"Asia Jaya"}),
+  Object.freeze({raw:"KJ22 Taman Paramount",stationId:'lrt-kj22',name:"Taman Paramount"}),
+  Object.freeze({raw:"KJ23 Taman Bahagia",stationId:'lrt-kj23',name:"Taman Bahagia"}),
+  Object.freeze({raw:"KJ24 Kelana Jaya",stationId:'lrt-kj24',name:"Kelana Jaya"}),
+  Object.freeze({raw:"KJ25 Lembah Subang",stationId:'lrt-kj25',name:"Lembah Subang"}),
+  Object.freeze({raw:"KJ26 Ara Damansara",stationId:'lrt-kj26',name:"Ara Damansara"}),
+  Object.freeze({raw:"KJ27 Glenmarie",stationId:'lrt-kj27',name:"Glenmarie"}),
+  Object.freeze({raw:"KJ28 Subang Jaya",stationId:'lrt-kj28',name:"Subang Jaya"}),
+  Object.freeze({raw:"KJ29 SS15",stationId:'lrt-kj29',name:"SS15"}),
+  Object.freeze({raw:"KJ30 SS18",stationId:'lrt-kj30',name:"SS18"}),
+  Object.freeze({raw:"KJ31 USJ7",stationId:'lrt-kj31',name:"USJ7"}),
+  Object.freeze({raw:"KJ32 Taipan",stationId:'lrt-kj32',name:"Taipan"}),
+  Object.freeze({raw:"KJ33 Wawasan",stationId:'lrt-kj33',name:"Wawasan"}),
+  Object.freeze({raw:"KJ34 USJ21",stationId:'lrt-kj34',name:"USJ21"}),
+  Object.freeze({raw:"KJ35 Alam Megah",stationId:'lrt-kj35',name:"Alam Megah"}),
+  Object.freeze({raw:"KJ36 Subang Alam",stationId:'lrt-kj36',name:"Subang Alam"}),
+  Object.freeze({raw:"KJ37 Putra Heights",stationId:'lrt-kj37',name:"Putra Heights"})
+ ]);
+ function matchSourcedKelanaPoi(props){
+  if(!props||props.class!=='railway'||!['station','subway'].includes(props.subclass))return null;
+  const raw=typeof props.name==='string'?props.name.trim():'';
+  const recognized=kelanaLabels.find(x=>x.raw===raw);
+  if(!recognized)return null;
+  const en=String(props['name:en']||props.name_en||'').trim();
+  if(en && en.toLowerCase()!==recognized.name.toLowerCase() && en.toLowerCase()!==recognized.raw.toLowerCase())return null;
+  const service=findRoute('lrt-kelana-jaya');
+  const index=service.stationSequence.indexOf(recognized.stationId);
+  if(index<0)return null;
+  return Object.freeze({routeId:service.id,routeName:service.name,stationId:recognized.stationId,
+   stationName:recognized.name,stationCode:'KJ'+(index+1),stopPosition:index+1,stopCount:37,
+   status:'CANDIDATE_EXACT_CODE_NAME_VECTOR_MATCH_NOT_OWNER_OBSERVED',
+   physicalTrackId:null,geometry:null,relationId:null,routeGeometryStatus:'UNVERIFIED'});
+ }
  const osmRelationAudit=Object.freeze({
   relationCandidateIds:Object.freeze([]),acceptedRelationIds:Object.freeze([]),
   acceptedWayIds:Object.freeze([]),verifiedPhysicalTracks:0,
@@ -178,7 +294,7 @@
    'https://wiki.openstreetmap.org/wiki/Relation:route']),
   currentStatus:'NO_OSM_RELATION_OR_TRACK_WAY_MATCH_VERIFIED'
  });
- const api=Object.freeze({catalog,validateRegistry,findRoute,matchSourcedKajangPoi,osmRelationAudit});
+ const api=Object.freeze({catalog,validateRegistry,findRoute,matchSourcedKajangPoi,matchSourcedKelanaPoi,osmRelationAudit});
  if(typeof module==='object'&&module.exports)module.exports=api;
  if(root)root.MRS10KLRegistry=api;
 })(typeof window!=='undefined'?window:null);

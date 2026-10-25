@@ -142,6 +142,31 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ef
 #visitor-map .campus-popup.kajang-match .kajang-match-notice{
  border-left:3px solid var(--kg-green);padding-left:8px
 }
+
+/* R2.18: ruby KJ passenger-service identity only; no physical-track colouring. */
+:root{--kj-ruby:#D50032;--kj-text:#AD0029;--kj-on-ruby:#FFFFFF}
+:root[data-theme="dark"]{--kj-ruby:#D50032;--kj-text:#FF8CA5}
+.kl-registry[data-route="lrt-kelana-jaya"] #kl-registry-route-name{color:var(--kj-text)}
+.kl-registry[data-route="lrt-kelana-jaya"] #kl-registry-route-status{border-left:3px solid var(--kj-ruby);padding-left:10px}
+.kl-registry[data-route="lrt-kelana-jaya"] .kl-registry-stations{
+ list-style:none;counter-reset:kj-stop;margin-left:0;padding:4px 8px 4px 4px;
+ background:linear-gradient(var(--kj-ruby),var(--kj-ruby)) 19px 0/2px 100% no-repeat
+}
+.kl-registry[data-route="lrt-kelana-jaya"] .kl-registry-stations li{
+ list-style:none;counter-increment:kj-stop;display:flex;align-items:center;
+ min-height:39px;gap:10px;margin:0;font-weight:570;line-height:1.4
+}
+.kl-registry[data-route="lrt-kelana-jaya"] .kl-registry-stations li::before{
+ content:counter(kj-stop);display:grid;place-items:center;flex:0 0 30px;
+ width:30px;height:30px;border-radius:50%;background:var(--kj-ruby);
+ color:var(--kj-on-ruby);font-size:12px;font-weight:800;box-shadow:0 0 0 2px var(--card)
+}
+.kl-registry[data-route="lrt-kelana-jaya"] .kl-registry-stations li:first-child,
+.kl-registry[data-route="lrt-kelana-jaya"] .kl-registry-stations li:last-child{font-weight:800}
+#visitor-map .campus-popup.kelana-match>strong{color:var(--kj-text)}
+#visitor-map .campus-popup.kelana-match .kelana-match-notice{
+ border-left:3px solid var(--kj-ruby);padding-left:8px
+}
 </style>
 <script type="module">
 import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.mjs';
