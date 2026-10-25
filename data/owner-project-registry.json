@@ -1770,5 +1770,87 @@
       "merge": "NOT PERFORMED",
       "ownerImages": "NOT PUBLISHED"
     }
+  },
+  "integrationR2152": {
+    "project": "P01",
+    "issueId": "r2152-touch-event-source-diagnostics",
+    "checkedOn": "2026-10-26",
+    "title": "R2.15.2 Source-Backed Safari Touch Event and Rail Coverage Diagnostic",
+    "state": "STAGING_READY_SAFARI_EVENT_UAT_PENDING",
+    "ownerObservation": "2026-10-26 Owner iPhone Safari 00:39 screenshot in expanded railway map near central Kuala Lumpur: teal lines visible but owner reports no popup after tapping zoomed-in segments. Screenshot itself does not prove that a map click event fired.",
+    "verifiedConstraints": [
+      "Real rendered MapLibre data is necessary for queryRenderedFeatures to identify lines; automatic touch selection does not require pre-registering every physical track",
+      "For reliable route-to-station sequencing and physical track identity, a sourced registry of segment IDs, track vs service route, station nodes, linear order and provenance will be necessary",
+      "Existing OpenFreeMap transportation class rail/transit filters and OpenRailwayMap raster overlay do not prove complete KL rail track topology, yard lines, monorail/LRT/MRT/ERL or platform lanes",
+      "An operator/line cannot be inferred from cyan colour or from an unrelated raster label; original screenshot indicates no owner-observed popup"
+    ],
+    "diagnosis": "R2.15.1 real-device interaction remained unresolved after hiding palette; no tap-event telemetry existed, while automated click tests used mocks. Instrument an opt-in pointer/click and map-vector-render probe before altering physical topology or inventing geometry.",
+    "development": {
+      "branch": "feature/mrs10-r2152-touch-event-source-diagnostics",
+      "baseCommit": "b4ddf5d094c81a7b55db858868675950aa73a8b1",
+      "sourceCommit": "e2ffc69ba9c94f49e625142a59a54bbbd20d477b",
+      "touchedFiles": [
+        "assets/map-language-lab.js",
+        "map-language-lab.html",
+        "tests/r2152-touch-source-diagnostic.test.cjs",
+        "package.json"
+      ],
+      "debugParams": "railPilot=1&railDebug=1",
+      "behavior": [
+        "Opt-in mini diagnostic shows canvas pointer count and MapLibre click count; does not store exact coordinates",
+        "Source probe counts actual selectable pilot features, readable rail geometry, and rail-class feature records at a tapped pixel, without generating new lines or names",
+        "Existing popup handling, rail/transit filter, palette gating, four languages and LRVTC/CN code pilot preserved",
+        "No new user-facing controls or permanent telemetry on ordinary URL"
+      ]
+    },
+    "qa": {
+      "node": "294/294 PASS 0 FAIL 0 SKIPPED on exact staging SHA",
+      "catalogue": "14/14 PASS 0 FAIL 0 SKIPPED",
+      "build": "PASS — staging isolate; preview build excludes analytics and member authentication",
+      "http": "200 for HTML + JS with debug source, 404 for excluded Member/quiz assets",
+      "safari": "PENDING — actual iPhone pointer/map click/source diagnostic needed",
+      "railwayCoverage": "UNVERIFIED — no complete track topology or station order registry yet",
+      "issues": "First source staging build failed because test mock overwrote MapLibre click handlers; fixed mock to chain handlers, second build passed. Do not confuse test issue with production app diagnosis."
+    },
+    "staging": {
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_DDQ8ZSxGQ69wcSsQHVG5PoB2DUHF",
+      "target": "staging",
+      "state": "READY",
+      "sourceSha": "e2ffc69ba9c94f49e625142a59a54bbbd20d477b",
+      "url": "https://mrs10-r211-mobile-map-187rlefya-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1&railDebug=1",
+      "authProtection": "Existing Vercel project protection unchanged"
+    },
+    "proposedTrackRegistryFields": [
+      "segment_id",
+      "physical_track_id optional",
+      "source_way_or_relation_id optional",
+      "operator/service_route optional",
+      "from_station_id",
+      "to_station_id",
+      "sequence_with_direction",
+      "railway_subclass",
+      "geometry_source",
+      "geometry_verification_status",
+      "last_verified_at"
+    ],
+    "decision": "Do not populate unverified station order, exact yard/platform lanes, operator attribution or chainage from cartographic appearance. Design schema only until authoritative/source-verified features and real click behavior available.",
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "HOLD / NO-GO FOR PRODUCTION — source/staging tests pass, real Safari click debugging and rail coverage verification pending; no merge or ECRL Map integration approved",
+    "nextAction": "Owner opens isolated R2.15.2 Safari pilot debug, selects Malaysia with Railway details OFF, zooms into a clear cyan line and taps once. Screenshot debug pill TOUCH n / MAP CLICK n and source features x / visible y / raw rail z or unchanged banner. Determine event-vs-data cause before adding sourced segment registry. Never claim routes fully mapped.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabase": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT PERFORMED",
+      "ownerImages": "NOT PUBLISHED"
+    }
   }
 }
