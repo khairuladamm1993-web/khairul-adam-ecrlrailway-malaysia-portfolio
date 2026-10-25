@@ -1948,5 +1948,69 @@
       "stationLayerResult": "MISSING",
       "outstanding": "Station source-layer recovery and real device UAT"
     }
+  },
+  "integrationR2154": {
+    "project": "P01",
+    "issueId": "r2154-station-poi-source-recovery",
+    "checkedOn": "2026-10-26",
+    "title": "R2.15.4 Pilot station POI source selection fallback",
+    "state": "STAGING_READY_STATION_SAFARI_UAT_PENDING",
+    "reason": "Owner screenshot R2.15.3 confirmed rail READY and a valid light_rail popup, but station MISSING. Code previously picked POI source only from styled source-layer=poi references; if no POI style layer is present, existing vector tileset was not considered.",
+    "development": {
+      "branch": "feature/mrs10-r2154-station-poi-source-recovery",
+      "baseCommit": "f930906faf1913d140100ffa25879c6fa87bab7f",
+      "sourceCommit": "5e25581c6709a3899e7e3c394d3d32f78c329c62",
+      "touchedFiles": [
+        "assets/map-language-lab.js",
+        "tests/r2154-station-source-fallback.test.cjs",
+        "package.json"
+      ],
+      "changes": [
+        "Use explicitly referenced styled POI source when present; otherwise allow the existing transportation vector tileset as a candidate source for source-layer poi",
+        "Only show POI station/halt/subway/tram_stop features when supplied by actual OpenMapTiles vector tiles, never synthesize station markers or names",
+        "Leave a debug provenance warning when a source is shared but individual station data remains unverified; report addLayer errors only in opt-in debug",
+        "Preserve R2.15.3 working rail tap and earlier mobile theme, country/language switch, China code lookup"
+      ],
+      "sources": [
+        "https://github.com/openmaptiles/openmaptiles/blob/master/layers/poi/poi.yaml",
+        "https://openmaptiles.org/docs/schema/"
+      ],
+      "limitation": "A station circle layer being READY proves only that the MapLibre style accepted that layer. Real POI station feature availability and exact station name/coordinates need live Safari tile evidence."
+    },
+    "qa": {
+      "node": "301/301 PASS, 0 FAIL, 0 SKIPPED",
+      "catalogue": "14/14 PASS",
+      "deployment": "READY target staging, exact source SHA",
+      "artifact": "HTML and JS HTTP 200; excluded Member/quiz HTTP 404",
+      "safari": "PENDING — station symbol and source-backed popup not yet tested on owner iPhone",
+      "previouslyPassed": "R2.15.3 source-backed light_rail rail tap PASS on real Safari screenshot",
+      "sourceIntegrity": "Source fallback uses existing vector ID, no invented geometries"
+    },
+    "staging": {
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_6okUSvuJoxKbfXft8G11u15WEc8u",
+      "target": "staging",
+      "state": "READY",
+      "sourceSha": "5e25581c6709a3899e7e3c394d3d32f78c329c62",
+      "url": "https://mrs10-r211-mobile-map-j1iid6l81-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1&railDebug=1",
+      "protection": "Existing project settings unchanged"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "HOLD / NO-GO for Production and integration; station content on real Safari remains unverified and KL full topology incomplete",
+    "nextAction": "On iPhone Safari R2.15.4 staging Malaysia railPilot=1&railDebug=1, zoom near central Kuala Lumpur and check debug station READY/MISSING after one tap. If READY, zoom to a real sourced railway station icon and confirm station popup; station layer READY alone is not a source-data PASS. Also continue separate KL track alignment coverage audit with authoritative references before Track Registry.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabase": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT DONE",
+      "ownerScreenshots": "NOT PUBLISHED"
+    }
   }
 }
