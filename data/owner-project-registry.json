@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "MRL'S10 R2.5 two-way workflow Node regression 217/217 and Catalogue 14/14 PASS; staging READY but Vercel SSO protected; Owner cross-chat UAT pending",
+  "register": "MRL’S10 R2.6 Phase A Thai and BM/EN/ZH map-control language groundwork; 225/225 automated PASS; 117/341 Thai shared strings; native raster city labels NOT localized",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -51,11 +51,19 @@
       "code": "P01",
       "name": "MR-S10 Portfolio Website",
       "category": "website",
-      "phase": "R2.5 two-way ChatGPT ↔ GitHub Registry ↔ Owner Dashboard workflow; staged for Owner UAT",
+      "phase": "R2.5 two-way workflow and R2.6 four-language foundation in independent development branches",
       "overall": "IN_PROGRESS",
-      "nextDecision": "Confirm authenticated Owner Safari handoff from MR-S10 to a separately connected ChatGPT chat, verified GitHub Registry checkpoint write, and return Refresh showing that exact update. Staging Vercel SSO protection remains enabled; no production release or changes to Supabase Auth/RLS.",
+      "nextDecision": "R2.6: complete Thai interface coverage and validate BM/EN/ZH/TH Chapter 01 and live map on Safari. Raster base map labels require separately tested vector tile prototype. Do not mark entire website or map fully localized, and do not alter Production.",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
+        {
+          "type": "test",
+          "label": "R2.6 four-language Thai map and Chapter 01 development QA",
+          "value": "225/225 Node PASS · 14/14 Catalogue PASS · full translation UAT pending",
+          "verifiedOn": "2026-10-25",
+          "confidence": "isolated automated QA; incomplete site translation coverage",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/feature/mrs10-r26-four-language-foundation"
+        },
         {
           "type": "test",
           "label": "R2.5 Cross-Chat Verified Two-Way Workflow — development Node QA",
@@ -638,5 +646,23 @@
     "automaticSyncScope": "Dashboard reads GitHub registry on Refresh and scheduled browser checks while open. New cross-chat records require explicitly authorized GitHub write from that chat.",
     "sourceSafety": "Developer preview only. No MR-S10 Production merge, no Supabase Auth/RLS updates, no provider protection changes.",
     "targetProducts": 2
+  },
+  "integrationR26": {
+    "stage": "PHASE_A_DEV_QA_PASS",
+    "scope": "Four-language MR-S10: BM EN simplified Chinese Thai, shared locale state, chapter and website-owned map controls",
+    "branch": "feature/mrs10-r26-four-language-foundation",
+    "nodeQa": "225/225 PASS",
+    "catalogueQa": "14/14 PASS",
+    "productionArtifactBuild": "PASS (isolated)",
+    "publicArtifactBuild": "PASS (isolated)",
+    "sharedInterfaceThai": "117/341 keys translated, 224 keys have English fallback",
+    "chapter01Thai": "Full 30 source selectors translated; expert editorial review pending",
+    "mapUi": "Localized BM/EN/ZH/TH, preserving Leaflet viewport and ECRL coordinate integrity",
+    "mapRasterBaseLabels": "NOT LOCALIZED: legacy OSM/OpenRailwayMap raster images retain local-native text",
+    "vectorLocaleMap": "DESIGN_PENDING: evaluate vector map labels and fallback before release",
+    "safariUat": "PENDING",
+    "ownerApprovalForRelease": "NOT_GRANTED",
+    "production": "UNCHANGED",
+    "supabase": "UNCHANGED"
   }
 }
