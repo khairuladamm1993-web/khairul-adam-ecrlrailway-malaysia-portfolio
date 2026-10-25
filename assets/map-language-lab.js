@@ -195,7 +195,7 @@ function popupFromPilotFeature(feature,kind,lngLat){
   info.pinyin?info.localization.pinyin+': '+info.pinyin:'',info.source]){
   if(!line)continue;const node=document.createElement('p');node.textContent=line;root.appendChild(node);
  }
- // R2.16.2: exact source-string crosswalk, not physical track assignment.
+ // R2.16.3: exact source-string crosswalk, not physical track assignment.
  // No route is inferred from rail colour, geometry proximity or generic place names.
  if(kind==='station'&&activeRegion==='malaysia'&&pilotMode){
   const candidate=window.MRS10KLRegistry?.matchSourcedKajangPoi?.(feature.properties);
