@@ -114,3 +114,44 @@ test('R2.18.1: light/dark style reload preserves latest locale and station ident
  assert.equal(w.MRS10KLRegistry.catalog.physicalSegments.length,0);
  w.close();
 });
+
+function evalMapName(exp,feature){
+ if(!Array.isArray(exp))return exp;
+ if(exp[0]==='get')return Object.prototype.hasOwnProperty.call(feature,exp[1])?feature[exp[1]]:null;
+ if(exp[0]==='coalesce'){for(const value of exp.slice(1)){const item=evalMapName(value,feature);if(item!==null&&item!==undefined)return item;}return null}
+ if(exp[0]==='match'){const key=evalMapName(exp[1],feature);for(let i=2;i<exp.length-1;i+=2)if(key===exp[i])return evalMapName(exp[i+1],feature);return evalMapName(exp[exp.length-1],feature)}
+ throw Error('Unrecognised expression in deterministic fixture '+exp[0]);
+}
+test('R2.18.2: Thai source-attested Malaysia place names are visible if tile name:th is absent',()=>{
+ const {w,map,doc}=boot();
+ map.finishLoading();
+ doc.querySelector('[data-locale="th"]').click();
+ const expression=map.getLayer('place_city').layout['text-field'];
+ assert.equal(evalMapName(expression,{'name_en':'Kuala Lumpur','name':'Kuala Lumpur'}),'กัวลาลัมเปอร์');
+ assert.equal(evalMapName(expression,{'name_en':'Shah Alam','name':'Shah Alam'}),'ชาห์อาลัม');
+ assert.equal(evalMapName(expression,{'name_en':'Petaling Jaya','name':'Petaling Jaya'}),'เปอตาลิงจายา');
+ assert.equal(evalMapName(expression,{'name_en':'Selangor','name':'Selangor'}),'สลังงอร์');
+ assert.equal(evalMapName(expression,{'name':'Putrajaya'}),'ปุตราจายา');
+ assert.equal(evalMapName(expression,{'name_en':'Kuala Lumpur','name:th':'ชื่อไทยจากต้นฉบับ'}),'ชื่อไทยจากต้นฉบับ');
+ assert.equal(evalMapName(expression,{'name_en':'Unmapped Township','name':'Unmapped Township'}),'Unmapped Township');
+ assert.equal(map.getLayer('highway_name_motorway').layout['text-field'][1],'ref');
+ assert(!JSON.stringify(map.getLayer('water_name').layout['text-field']).includes('เปอตาลิงจายา'));
+ assert.equal(map.getLayer('mrl-kelana-alignment'),null);
+ w.close();
+});
+test('R2.18.2: curated Thai aliases only in Malaysia place labels; themes preserve source and city labels',()=>{
+ const {w,map,doc}=boot('light');map.finishLoading();
+ doc.querySelector('[data-locale="th"]').click();
+ const city=()=>map.getLayer('label_city').layout['text-field'];
+ assert.equal(evalMapName(city(),{'name_en':'Kuala Lumpur'}),'กัวลาลัมเปอร์');
+ doc.getElementById('theme-btn').click();
+ assert.equal(evalMapName(map.getLayer('place_city').layout['text-field'],{'name_en':'Kuala Lumpur'}),'กัวลาลัมเปอร์');
+ doc.querySelector('[data-region="thailand"]').click();
+ assert.equal(evalMapName(map.getLayer('place_city').layout['text-field'],{'name_en':'Kuala Lumpur'}),'Kuala Lumpur');
+ doc.querySelector('[data-region="malaysia"]').click();
+ assert.equal(evalMapName(map.getLayer('place_city').layout['text-field'],{'name_en':'Kuala Lumpur'}),'กัวลาลัมเปอร์');
+ doc.querySelector('[data-locale="zh"]').click();
+ assert(!JSON.stringify(map.getLayer('place_city').layout['text-field']).includes('กัวลาลัมเปอร์'));
+ assert.equal(w.document.documentElement.lang,'zh-Hans');
+ w.close();
+});

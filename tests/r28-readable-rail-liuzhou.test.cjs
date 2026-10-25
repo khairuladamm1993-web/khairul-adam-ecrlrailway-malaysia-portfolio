@@ -30,7 +30,7 @@ test('railway technical detail is optional; English names remain in vector layer
  assert.match(js,/applyLabels\(\);\s*const rails=readableRails\(\);\s*overlay\(\);setRailVisibility\(\)/);
  assert.match(js,/if\(labelUpdatePending\)applyLabels\(\)/);
  assert.match(js,/railDetails\?readableRailLanguage\[lang\]\.technical/);
- assert.match(js,/map\.setLayoutProperty\(layer\.id,'text-field',nameExpression\(lang\)\)/);
+ assert.match(js,/map\.setLayoutProperty\(layer\.id,'text-field',nameExpression\(lang,layer\)\)/);
  assert.match(html,/id="rail-vector-note"/);
 });
 test('Liuzhou English-Chinese name guide does not impersonate verified station coordinates',()=>{

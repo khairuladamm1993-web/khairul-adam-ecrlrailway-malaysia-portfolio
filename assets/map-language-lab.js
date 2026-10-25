@@ -7,7 +7,7 @@ const copy={
  ms:['Peta pelawat pelbagai bahasa · BETA','Pilih bahasa bagi nama tempat jika data tersedia.','Nama tempat mungkin tiada terjemahan.','Peta pelawat sahaja, bukan peta operasi ECRL.'],
  en:['Multilingual visitor map · BETA','Choose the language of place names when source data exists.','Not every location has a translated name.','Visitor reference only, not an ECRL operational map.'],
  zh:['多语言旅行地图 · 测试版','选择地名语言（如有源数据）。','部分地点没有相应的译名。','仅供旅行参考，并非 ECRL 运营地图。'],
- th:['แผนที่ท่องเที่ยวหลายภาษา · รุ่นทดสอบ','เลือกภาษาของชื่อสถานที่เมื่อมีข้อมูล','บางสถานที่ไม่มีชื่อที่แปลแล้ว','สำหรับการเดินทางเท่านั้น ไม่ใช่แผนที่เดินรถ ECRL']
+ th:['แผนที่ท่องเที่ยวหลายภาษา · รุ่นทดสอบ','เลือกภาษาของชื่อสถานที่เมื่อมีข้อมูล','ชื่อไทยจากข้อมูลแผนที่และชื่อเมืองที่มีแหล่งอ้างอิงเท่านั้น; ที่อื่นใช้ชื่อเดิม','สำหรับการเดินทางเท่านั้น ไม่ใช่แผนที่เดินรถ ECRL']
 };
 const uiText={
  ms:{railOn:'Butiran railway: AKTIF',railOff:'Butiran railway: MATI',railNote:'Mod pelawat menyembunyikan lapisan teknikal OpenRailwayMap. Aktifkan butiran railway untuk melihat laluan dan kod rujukan landasan.',themeLight:'Tukar ke Mod Cerah',themeDark:'Tukar ke Mod Gelap',labelLayers:'lapisan label dengan sokongan bahasa'},
@@ -407,10 +407,38 @@ function setRailVisibility(){
  }
 }
 try{const v=localStorage.getItem('railway-language');if(locales.includes(v))lang=v;}catch{}
-function nameExpression(locale){
+// R2.18.2 (Owner UAT): Source-attested Thai place names only, never station IDs
+// or unverified geometry. Thai Ministry of Foreign Affairs / Royal Institute:
+// https://image.mfa.go.th/mfa/0/N3nQs9OUac/Titles__Places__and_Translations/5._ชื่อประเทศ_เมืองหลวง_(ไทย-อังกฤษ)_ราชบัณฑิตยสถาน.pdf
+// Greater KL city names: https://cmgfthailand.psu.ac.th/?p=2619
+// Kuala Lumpur: https://th.wikipedia.org/wiki/กัวลาลัมเปอร์
+// Kajang: https://mapcarta.com/Kajang
+const thaiMalaysiaPlaces=Object.freeze({
+ 'Malaysia':'มาเลเซีย','Kuala Lumpur':'กัวลาลัมเปอร์',
+ 'Selangor':'สลังงอร์','Shah Alam':'ชาห์อาลัม',
+ 'Petaling Jaya':'เปอตาลิงจายา','Subang Jaya':'ซูบังจายา','Klang':'กลัง','Kajang':'กาจัง',
+ 'Putrajaya':'ปุตราจายา','Pahang':'ปะหัง','Kuantan':'กวนตัน',
+ 'Kelantan':'กลันตัน','Kota Bharu':'โกตาบารู',
+ 'Terengganu':'ตรังกานู','Kuala Terengganu':'กัวลาตรังกานู',
+ 'Johor':'ยะโฮร์','Johor Bahru':'ยะโฮร์บาห์รู',
+ 'Kedah':'เกดะห์','Alor Setar':'อลอร์สตาร์',
+ 'Melaka':'มะละกา','Malacca':'มะละกา','Penang':'ปีนัง','George Town':'จอร์จทาวน์',
+ 'Perak':'เประ','Ipoh':'อีโปห์','Negeri Sembilan':'เนกรีเซมบีลัน',
+ 'Seremban':'เซเรมบัน','Sabah':'ซาบาห์',
+ 'Kota Kinabalu':'โกตากินาบาลู','Sarawak':'ซาราวัก','Kuching':'กูชิง'
+});
+function nameExpression(locale,layer){
  const keys=locale==='ms'?['name:ms','name:en','name:latin','name']:
  locale==='en'?['name:en','name:latin','name']:['name:'+locale,'name:en','name:latin','name'];
- return ['coalesce',...keys.map(key=>['get',key])];
+ const native=['coalesce',...keys.map(key=>['get',key])];
+ // Native name:th always wins. Curated aliases are exact-string FALLBACK for
+ // Malaysian geographic "place" labels only; POIs, railway stations and routes
+ // retain source identities. No runtime translation service or fake coordinates.
+ if(locale!=='th'||activeRegion!=='malaysia'||layer?.['source-layer']!=='place')
+  return native;
+ const sourceName=['coalesce',['get','name:en'],['get','name_en'],['get','name:latin'],['get','name']];
+ return ['coalesce',['get','name:th'],
+  ['match',sourceName,...Object.entries(thaiMalaysiaPlaces).flat(),sourceName]];
 }
 // R2.18.1 Owner Safari: dark OpenFreeMap uses place_*, water_name and
 // highway_name_other; positron uses label_*, water_name_* and highway-name-*.
@@ -424,7 +452,7 @@ function applyLabels(){
  if(!map?.isStyleLoaded?.()){labelUpdatePending=true;return 0;}
  let n=0;
  for(const layer of map.getStyle().layers||[])
-  if(isNameLayer(layer)){map.setLayoutProperty(layer.id,'text-field',nameExpression(lang));n++;}
+  if(isNameLayer(layer)){map.setLayoutProperty(layer.id,'text-field',nameExpression(lang,layer));n++;}
  labelUpdatePending=false;
  el('label-status').textContent=(n?n+' '+uiText[lang].labelLayers+' · ':'')+copy[lang][2];
  return n;
@@ -688,6 +716,8 @@ function init(){
   if(destination)map.flyTo({center:destination[0],zoom:destination[1],duration:600});
   if(pilotMode&&pilotInfoPopup){pilotInfoPopup.remove();pilotInfoPopup=null;}
   activeRegion=b.dataset.region;
+  // Remove Malaysia-only Thai aliases immediately when browsing other regions.
+  if(lang==='th')applyLabels();
   renderLegendRegion();syncChinaCodeWidget();renderKLRegistry();
   el('liuzhou-guide').hidden=activeRegion!=='china';
   syncCampusPin();
