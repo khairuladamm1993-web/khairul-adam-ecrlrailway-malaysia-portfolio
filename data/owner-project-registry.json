@@ -338,7 +338,7 @@
           "id": "r219-ampang-orange-service-registry",
           "kind": "IN_PROGRESS",
           "label": "P01 R2.19 — LRT Ampang Line 18-station source-backed service registry",
-          "detail": "Owner Safari screenshot 2026-10-26 06:07 MYT: 17/18 matched orange GIS markers, AG3 absent, AG7 popup PASS. Direct GitHub Actions live ArcGIS audit run 40238891427 confirmed exact source FID16 STN_NAME='TITWANGSA' typo, STN_CODE='AG03' padded versus registry AG3 Titiwangsa, source geometry within published bounds. Narrow exception tied to exact tuple FID16/TITWANGSA/AG03 added on isolated R2.19 branch. New live audit 18/18 MATCHED, 0 missing, 0 rejected; strict wrong FID/name/code/out-of-bounds rejection tests PASS. Physical route track, OSM relations and operational geometry remain UNVERIFIED.",
+          "detail": "R2.19 visitor UI harmonized on isolated development branch after Owner screenshot request: MR-S10-style Gateway header, compact theme, BM/EN/中文/ไทย segmented language buttons, Malaysia/Thailand/China region tabs, concise GIS provenance/status and collapsible notes, with original clear Ampang native MapLibre map, 18 GIS orange POIs, 18 service stops and AG3 FID16 corrected match preserved. Only ampang-line-r219.html and tests/r219-ampang-orange-service.test.cjs modified; no shared MR-S10 map/registry sources, R2.18 or Production writes. Source live audit 18/18 PASS; 18/18 R2.19 + 318/318 MR-S10 tests PASS. Isolated staging READY. Owner Safari UAT on new UI pending.",
           "basis": "Prasarana/official transit sources; GitHub Actions 40233275721; Vercel live GET deployment metadata and build events; owner approval limited to isolated R2.19 target correction",
           "sourceUrls": [
             "https://www.prasarana.com.my/mobiliti/the-nations-first-lrt-line/",
@@ -349,7 +349,7 @@
           "development": {
             "branch": "feature/mrs10-r219-ampang-orange-service-registry",
             "parentCommit": "5b507cf18e4c308ee1cb891ebe6a279b9f3d1671",
-            "lastVerifiedCommit": "b1df7dc3ca701d27cc6ab2f250de146ec1ccd59a",
+            "lastVerifiedCommit": "91ec4914b75cd2c1da3efcf9e48123a08adebdcb",
             "files": [
               "assets/mrs10-r219-ampang-service.js",
               "ampang-line-r219.html",
@@ -366,18 +366,18 @@
           "evidence": {
             "source": "PASS",
             "structuredModuleChecks": "10/10 PASS using authenticated GitHub fetch and in-memory JS verification; NOT full Node CI",
-            "nodeTests": "PASS — 14/14 R2.19 and 318/318 existing MR-S10 regression (332 tests). GitHub Actions run 40239044933, source b1df7dc3ca701d27cc6ab2f250de146ec1ccd59a.",
-            "safari": "Owner older staging 17/18 GIS and AG7 popup evidenced by screenshot; corrected AG3 staging Safari UAT PENDING.",
+            "nodeTests": "PASS — 18/18 R2.19 source/UX tests + 318/318 MR-S10 regression tests, GitHub Actions 40240159718 at SHA 91ec4914b75cd2c1da3efcf9e48123a08adebdcb.",
+            "safari": "Owner prior screenshots: 18/18 marker status and visible orange route station markers on previous UI, AG7 popup previously evidenced; redesigned UI on new staging PENDING Safari UAT.",
             "mapPoi": "UNVERIFIED — zero source-verified AG cartographic POI crosswalks",
             "physicalAlignment": "UNVERIFIED — zero OSM route/way/track geometry",
-            "staging": "STAGING READY — project prj_xlweXyowjdvfr87gsAIEuIWsRkde deployment dpl_8MUnXyzNmboJHcPJuYUhfVC95dQ3 target staging commit b1df7dc3ca701d27cc6ab2f250de146ec1ccd59a Vercel Authentication ALL. Actual authenticated browser HTTP UAT pending.",
-            "staticArtifact": "PASS — Vercel staging build completed, GIS script assets staged, protected legacy quiz assets excluded via builder and CI",
+            "staging": "STAGING READY / metadata verified — project prj_xlweXyowjdvfr87gsAIEuIWsRkde; deployment dpl_2ZE6cUjAPuLk9XZ4qZC37iZf7roW; target staging; source SHA 91ec4914b75cd2c1da3efcf9e48123a08adebdcb; Vercel Authentication ALL; mobile Safari UI UAT pending.",
+            "staticArtifact": "PASS — GitHub CI staging artifact builder and Vercel deployment build; protected legacy gateway.js, questions.js and quiz-core.js excluded. Vercel direct deployment files listing returned 404, so direct per-file HTTP availability remains UNVERIFIED.",
             "security": "Source artifact scan and Vercel Authentication ALL metadata PASS; browser access and endpoint-by-endpoint UAT UNVERIFIED.",
-            "gis": "SOURCE_PASS — ArcGIS layer 1 18 point records, actual read-only live audit 18/18 reconciled, 0 rejected, 0 missing; FID16 raw TITWANGSA AG03 mapped precisely to AG3 Titiwangsa; public candidate GIS coordinates NOT operational survey. External API availability in Owner Safari unverified."
+            "gis": "SOURCE PASS — read-only live ArcGIS audit from CI 40240159718: 18/18 records matched, 0 missing, 0 rejected including exact observed AG3 TITWANGSA AG03 FID16 reconciliation. Public GIS candidates, not physical railway survey."
           },
           "resolution": {
             "state": "OPEN",
-            "tests": "SOURCE_18_OF_18_PASS_AUTOMATED_332_PASS_STAGING_READY_SAFARI_PENDING",
+            "tests": "SOURCE_18_OF_18_PASS_AUTOMATED_336_PASS_STAGING_READY_NEW_UI_SAFARI_PENDING",
             "verifiedAt": null,
             "evidence": [
               "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40233275721",
@@ -392,17 +392,19 @@
               "https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer/getEstimates",
               "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40238891427",
               "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40239044933",
-              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/b1df7dc3ca701d27cc6ab2f250de146ec1ccd59a"
+              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/b1df7dc3ca701d27cc6ab2f250de146ec1ccd59a",
+              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40240159718",
+              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/91ec4914b75cd2c1da3efcf9e48123a08adebdcb"
             ],
             "releaseGates": {
               "ci": "PASS",
-              "safariUat": "PARTIAL_17_OF_18_OLD_STAGING_NEW_AG3_FIX_PENDING",
+              "safariUat": "NEW_MR_S10_STYLE_UI_UNVERIFIED",
               "security": "PARTIAL_SOURCE_ARTIFACT_AND_SSO_ONLY",
               "deployment": "STAGING_READY_HTTP_UNVERIFIED",
               "ownerApproval": "ISOLATED_STAGING_APPROVED_NO_PRODUCTION_RELEASE"
             }
           },
-          "nextAction": "Owner Safari on new exact AG3 fix staging URL. Confirm status 18/18, AG3 orange marker between AG2 and AG4, tap AG3 popup Titiwangsa, AG7 popup and 18-entry sequence, pan/tap, dark/theme/language, country switch, production unaffected. Until Owner evidence, remain OPEN; geometry way relations and alignment UNVERIFIED. No automatic production merge.",
+          "nextAction": "Owner Safari UAT on R2.19 UI parity staging URL: check Gateway header, four segmented language buttons and synchronized GIS labels, three country tabs and source marker isolation, compact theme control, light/dark map and popup, status 18/18, orange AG3 / AG7 / AG18 source POI popup, correct mobile map drag/tap/fullscreen, 18 station timeline and shared SP flags; keep OPEN until explicitly verified. No automatic merge to main/Production.",
           "deploymentAudit": {
             "projectId": "prj_xlweXyowjdvfr87gsAIEuIWsRkde",
             "projectName": "mrs10-r219-ampang-orange-preview",
@@ -489,6 +491,23 @@
               "sourceSha": "b1df7dc3ca701d27cc6ab2f250de146ec1ccd59a",
               "safari": "UNVERIFIED_NEW_DEPLOYMENT",
               "production": "UNTOUCHED"
+            },
+            "mrS10VisualParityStaging": {
+              "projectId": "prj_xlweXyowjdvfr87gsAIEuIWsRkde",
+              "deploymentId": "dpl_2ZE6cUjAPuLk9XZ4qZC37iZf7roW",
+              "url": "https://mrs10-r219-ampang-orange-preview-1nbtry7pf-1993khairuladam-3016.vercel.app/ampang-line-r219.html",
+              "sourceSha": "91ec4914b75cd2c1da3efcf9e48123a08adebdcb",
+              "target": "staging",
+              "readyState": "READY",
+              "accessProtection": "Vercel Authentication ALL",
+              "qa": "GitHub 18/18 R2.19 + 318/318 MR-S10 PASS; source GIS 18/18 PASS; Vercel build completed with protected-asset exclusions",
+              "browserSafari": "UNVERIFIED",
+              "assetListing": "UNVERIFIED; Vercel files endpoint 404",
+              "modifiedFiles": [
+                "ampang-line-r219.html",
+                "tests/r219-ampang-orange-service.test.cjs"
+              ],
+              "safeSeparation": "No R2.18, shared registry/map source, main/Production, Supabase, P02 or P03 changes"
             }
           }
         }
