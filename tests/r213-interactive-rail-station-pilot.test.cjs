@@ -85,15 +85,26 @@ test('R2.13 country selectors focus 3 pilot cities, not arbitrary station coordi
  }
  w.close();
 });
-test('R2.13 station and rail clicks show SOURCE attributes without inventing railway identity',()=>{
- const {w,map}=loadPilot(true);
- const click=map.delegates['mrl-pilot-stations'],railClick=map.delegates['mrl-pilot-rail-hits'];
- assert.equal(typeof click,'function');assert.equal(typeof railClick,'function');
- click({features:[{properties:{class:'railway',subclass:'station',name:'柳州站','name:en':'Liuzhou Railway Station'}}],lngLat:{lng:109.4,lat:24.3}});
+test('R2.13/R2.15 map-level clicks show SOURCE station and rail attributes, with no invented identity',()=>{
+ const {w,map,doc}=loadPilot(true);
+ const click=map.handlers['click'];
+ assert.equal(typeof click,'function');
+ const point={x:150,y:210},lngLat={lng:109.4,lat:24.3};
+ map.queryRenderedFeatures=()=>[{
+  layer:{id:'mrl-pilot-stations'},
+  properties:{class:'railway',subclass:'station',name:'柳州站','name:en':'Liuzhou Railway Station'}
+ }];
+ click({point,lngLat});
  assert.match(map.lastPopup.node.textContent,/Liuzhou Railway Station/);
  assert.match(map.lastPopup.node.textContent,/柳州站/);
- railClick({features:[{properties:{class:'rail',subclass:'rail'}}],lngLat:{lng:109.4,lat:24.3},point:{x:1,y:2}});
+ map.queryRenderedFeatures=()=>[{
+  layer:{id:'mrl-pilot-rail-hits'},properties:{class:'rail',subclass:'rail'}
+ }];
+ click({point,lngLat});
  assert.match(map.lastPopup.node.textContent,/Nama English tidak tersedia/);
  assert.doesNotMatch(map.lastPopup.node.textContent,/High-speed railway/);
+ map.queryRenderedFeatures=()=>[];
+ click({point,lngLat});
+ assert.match(doc.getElementById('railway-pilot-status').textContent,/Tiada ciri/);
  w.close();
 });
