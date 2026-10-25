@@ -22,7 +22,7 @@ test('R2.16.1 operator sources confirm ERL and 29-stop MRT Kajang service sequen
  const route=api.findRoute('erl-klia-transit'),names=route.stationSequence.map(id=>api.catalog.stations.find(s=>s.id===id)?.name);
  assert.equal(route.stationSequenceStatus,'SOURCE_CONFIRMED');
  assert.deepEqual(names,['KL Sentral','Bandar Tasik Selatan','Putrajaya & Cyberjaya','Salak Tinggi','KLIA T1','KLIA T2']);
- assert.equal(api.catalog.routes.filter(x=>x.stationSequenceStatus==='SOURCE_CONFIRMED').length,3);
+ assert.equal(api.catalog.routes.filter(x=>x.stationSequenceStatus==='SOURCE_CONFIRMED').length,4);
  assert(api.catalog.routes.filter(x=>x.stationSequenceStatus==='NOT_YET_VERIFIED').every(x=>!x.stationSequence.length));
  const mapPois=api.catalog.stations.filter(s=>s.confidence==='OWNER_SAFARI_VECTOR_POI');
  assert.deepEqual(mapPois.map(x=>x.name),['Maharajalela','Pasar Seni']);
@@ -105,7 +105,7 @@ test('R2.16 registry stays collapsed and outside map; Malaysia pilot shows read-
  assert.equal(panel.open,false);
  assert.equal(map.contains(panel),false);
  assert.equal(select.options.length,10);
- assert.match(doc.getElementById('kl-registry-counts').textContent,/3 turutan laluan disahkan/);
+ assert.match(doc.getElementById('kl-registry-counts').textContent,/4 turutan laluan disahkan/);
  assert.match(doc.getElementById('kl-registry-counts').textContent,/0 trek fizikal disahkan/);
  assert.equal(doc.getElementById('kl-registry-station-order').hidden,true);
  select.value='erl-klia-transit';select.dispatchEvent(new w.Event('change'));
