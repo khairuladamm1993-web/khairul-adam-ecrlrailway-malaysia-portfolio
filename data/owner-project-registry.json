@@ -2218,7 +2218,7 @@
     "issueId": "r216-kl-railway-track-station-registry-phase1",
     "title": "R2.16 Kuala Lumpur Railway Track & Station Registry — Phase 1",
     "checkedOn": "2026-10-26",
-    "state": "OWNER_SAFARI_REGISTRY_AND_MYRAPID_SOURCE1_PASS_KL_TOPOLOGY_OPEN",
+    "state": "OWNER_SAFARI_PANEL_SOURCE1_STATION_POPUP_PASS_PHYSICAL_TRACK_AUDIT_OPEN",
     "goal": "An auditable service-route and station source catalogue for the Kuala Lumpur / Klang Valley map pilot; physical track geometry and lane indexing are separate future evidence tasks.",
     "ownerApproval": "Owner explicitly approved transition to R2.16 with Kuala Lumpur first. No approval to merge or change Production.",
     "inheritedEvidence": {
@@ -2273,9 +2273,10 @@
       "staging": "READY with target staging and source commit verified",
       "previewHttp": "HTML, registry JS and map JS HTTP 200. Excluded member-gateway.js and questions.js HTTP 404",
       "tests": "Source confidence, 10 routes, verified ERL order, zero physical segments, negative geometry checks, collapsed panel, four-language and country visibility tested",
-      "safari": "PARTIAL PASS — 2026-10-26 Owner Safari ERL six-stop sequence, MRT Kajang fallback, and MyRapid Source 1 navigation to myrapid.com.my displaying Kajang Line service status. Source 1 NOT validated as full Kajang ordered-station reference; on-build station popup and Source 2 remain untested.",
+      "safari": "PARTIAL SOURCE-REFERENCE PHASE1 SAFARI PASS — 2026-10-26 Owner screenshots show ERL six-stop order (02:04), MRT Kajang unverified-sequence fallback (02:10), MyRapid Source 1 navigation (02:15) and Kajang source-backed station popup on R2.16 build (02:23). Full track topology and sequence verification, Source 2, formal dated HTTPS evidence and release gates still OPEN.",
       "physicalTrackCoverage": "NOT STARTED — no authoritative lane identifiers/geometry yet",
-      "browserNetwork": "Static registry script loaded before map module; no data fetch/connect-src dependency"
+      "browserNetwork": "Static registry script loaded before map module; no data fetch/connect-src dependency",
+      "stationPopupRegression": "PASS — Owner Safari R2.16 screenshot 2026-10-26 02:23 MYT: Kajang | original KG35 Kajang | category subway | source disclaimer shown."
     },
     "staging": {
       "project": "mrs10-r211-mobile-map-uat",
@@ -2293,8 +2294,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "HOLD / NO-GO — R2.16 operator Source 1 link opens official MyRapid status page, but MRT Kajang station order lacks reconciled station-list evidence. Full physical track registry, station popup same-build regression and formal UAT still open.",
-    "nextAction": "Preserve Source 1 external navigation PASS. Perform one station popup tap on the same R2.16 preview to check regression; station-order curation may use official MRT Corp pages only after reconciling their station list against the current 29-station/Kwasa Damansara overview. Keep physical track geometries and IDs UNVERIFIED.",
+    "releaseDecision": "HOLD / NO-GO — Source/build and sampled R2.16 Safari panel/link/station popup checks PASS; do not merge or release. Physical track geometries, source-backed station line ordering beyond verified ERL, and formal acceptance requirements remain OPEN.",
+    "nextAction": "Preserve R2.16 Kajang station-popup regression PASS and previous ERL/MRT/MyRapid screenshot results. Next perform source-based audit of Kuala Lumpur line/station sequences and distinct physical track segments with verifiable source identifiers; no invented coordinates or track IDs. Optionally verify Source 2 if closing Phase 1 link QA. Retain Production, main, Supabase, P02 and P03 unchanged until explicit approval.",
     "boundaries": {
       "githubMain": "UNCHANGED",
       "production": "UNCHANGED",
@@ -2376,6 +2377,32 @@
       "improvedStationReferenceCandidate": "https://www.mymrt.com.my/projects/kajang-line/stations/",
       "referenceCaveat": "MRT Corp's station-list page supports named stations, but must be reconciled with project overview identifying Kwasa Damansara and 29 stations before any assertion that a complete current station sequence is verified.",
       "sourceAssessment": "Source 1 PASS as valid operator context; LIMITED for station sequence purpose."
+    },
+    "ownerSafariKajangStationPopupUat": {
+      "observedAt": "2026-10-26T02:23:00+08:00",
+      "evidence": "Owner-provided iPhone Safari screenshot in this conversation; personal image not published into public GitHub repository.",
+      "build": "R2.16 isolated staging, Malaysia; registry panel visibly present underneath the vector map",
+      "result": "PASS_SOURCE_BACKED_STATION_POPUP_NO_REGRESSION",
+      "observed": {
+        "displayedName": "Kajang",
+        "category": "Railway station",
+        "railwayClass": "subway",
+        "originalSourceName": "KG35 Kajang",
+        "sourceDisclaimer": "OpenMapTiles / OpenFreeMap data; not operational",
+        "mapMarkerTap": "Railway station popup visible at source-backed station marker"
+      },
+      "validConclusions": [
+        "R2.16 map interaction continues to open a station popup after the registry panel was added",
+        "Vector data source attributes and original source name are displayed",
+        "Registry panel below map and popup coexist in Owner Safari screenshot"
+      ],
+      "limits": [
+        "KG35 is shown as a cartographic source label, not a physical track ID",
+        "The image does not independently confirm full Kajang Line ordered-station sequence",
+        "No exact platform, turnout, physical lane/track geometry, or complete Kuala Lumpur rail network verified",
+        "External Source 2 link is still not tested on the Owner device",
+        "This screenshot is not a publicly hosted dated HTTPS PASS/CONFIRMED evidence artefact for formal SOLVED gating"
+      ]
     }
   }
 }
