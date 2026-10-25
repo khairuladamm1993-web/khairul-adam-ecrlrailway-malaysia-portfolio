@@ -61,14 +61,19 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ef
 .bilingual{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .bilingual>div{padding:9px;border-radius:9px;border:1px solid var(--line)}
 .bilingual dt{font-size:1.35rem;font-weight:750}.bilingual dd{margin:3px 0 0}
-.railway-legend[hidden]{display:none}
-.railway-legend{margin:8px 0 12px;padding:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:10px}
-.railway-legend summary{cursor:pointer;min-height:28px;font-weight:650;font-size:.88rem}
-.rail-legend-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;margin:10px 0 6px}
-.rail-legend-row{display:flex;align-items:center;gap:8px;font-size:.83rem}
-.rail-legend-swatch{width:26px;height:4px;flex:none;border-radius:3px;border:1px solid #8884}
-.railway-legend p{font-size:.75rem;color:var(--muted);line-height:1.4;margin:6px 0 0}
-@media(max-width:500px){.bilingual{grid-template-columns:1fr}.rail-legend-grid{grid-template-columns:1fr 1fr}}
+.railway-legend{position:absolute;z-index:8;left:10px;bottom:12px;margin:0;width:44px;max-width:calc(100% - 20px);color:var(--fg)}
+.railway-legend[open]{width:min(310px,calc(100% - 20px))}
+.railway-legend summary{list-style:none;cursor:pointer;display:grid;place-items:center;width:44px;height:44px;min-height:44px;border-radius:8px;border:1px solid #8aaabe;background:#eef5f8;color:#17313f;font-weight:700}
+.railway-legend summary::-webkit-details-marker{display:none}
+.railway-legend summary span{font-size:19px}
+.rail-legend-panel{margin-top:5px;max-height:min(62dvh,440px);overflow:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--card);color:var(--fg);box-shadow:0 3px 12px #0004}
+.rail-legend-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:9px 0}
+.rail-legend-row{display:flex;align-items:center;gap:7px;min-height:44px;text-align:left;font-weight:550;font-size:12px;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--fg);overflow-wrap:anywhere}
+.rail-legend-row[aria-pressed="true"]{outline:2px solid #2893b7}
+.rail-legend-swatch{width:24px;height:5px;flex:none;border-radius:3px;box-shadow:0 0 0 1px #8889}
+.rail-legend-explanation{border-top:1px solid var(--line);padding-top:8px;font-size:13px}
+.rail-legend-explanation p,.railway-legend p{font-size:12px;color:var(--muted);line-height:1.4;margin:5px 0 0}
+@media(max-width:500px){.bilingual{grid-template-columns:1fr}}
 
 @media(max-width:700px){main{padding-top:max(55px,env(safe-area-inset-top))}header{align-items:center}header a{max-width:55%;line-height:1.5}#theme-btn{min-width:124px}}
 </style>
@@ -85,26 +90,24 @@ await import('./assets/map-language-lab.js');
 <button type="button" id="railway-btn" aria-pressed="false" aria-controls="visitor-map">Railway details: OFF</button>
 </div>
 <p class="hint" id="railway-note">Visitor mode hides the technical railway overlay. Turn on railway details to view the rail routes and reference numbers.</p>
-<details id="railway-legend" class="railway-legend" hidden>
-<summary id="railway-legend-title">Railway colour legend</summary>
-<div class="rail-legend-grid">
-<div class="rail-legend-row"><span class="rail-legend-swatch" aria-hidden="true" style="background:#FF8100"></span><span data-rail-legend="0">Main line</span></div>
-<div class="rail-legend-row"><span class="rail-legend-swatch" aria-hidden="true" style="background:#FF0C00"></span><span data-rail-legend="1">High-speed tagged rail</span></div>
-<div class="rail-legend-row"><span class="rail-legend-swatch" aria-hidden="true" style="background:#DACA00"></span><span data-rail-legend="2">Branch line</span></div>
-<div class="rail-legend-row"><span class="rail-legend-swatch" aria-hidden="true" style="background:#0300C3"></span><span data-rail-legend="3">Metro / subway</span></div>
-<div class="rail-legend-row"><span class="rail-legend-swatch" aria-hidden="true" style="background:#87491D"></span><span data-rail-legend="4">Industrial / spur</span></div>
-<div class="rail-legend-row"><span class="rail-legend-swatch" aria-hidden="true" style="background:#000000"></span><span data-rail-legend="5">Other rail / yard</span></div>
-</div>
-<p id="railway-legend-note">For the OpenRailwayMap standard layer only.</p>
-</details>
+
 <div class="controls" aria-label="Countries">
 <button type="button" data-region="malaysia">🇲🇾 Malaysia</button>
 <button type="button" data-region="thailand">🇹🇭 Thailand</button>
 <button type="button" data-region="china">🇨🇳 China</button></div>
-<div id="campus-location" class="campus-location" hidden>
-<button type="button" id="campus-focus" aria-controls="visitor-map">🎓 LRVTC · Kampus Guantang</button>
+<div id="map-shell"><div id="visitor-map" role="region" aria-label="Multilingual visitor map"></div><button id="map-expand" type="button" aria-label="Expand map" aria-expanded="false" aria-controls="visitor-map"><span aria-hidden="true">⛶</span></button><details id="railway-legend" class="railway-legend">
+<summary id="railway-legend-trigger" aria-label="Railway colour legend" title="Railway colour legend"><span aria-hidden="true">🎨</span></summary><div class="rail-legend-panel"><strong id="railway-legend-title">Railway colour legend</strong>
+<div class="rail-legend-grid">
+<button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="0"><span class="rail-legend-swatch" aria-hidden="true" style="background:#FF8100"></span><span>Main line</span></button>
+<button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="1"><span class="rail-legend-swatch" aria-hidden="true" style="background:#FF0C00"></span><span>High-speed tagged rail</span></button>
+<button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="2"><span class="rail-legend-swatch" aria-hidden="true" style="background:#DACA00"></span><span>Branch line</span></button>
+<button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="3"><span class="rail-legend-swatch" aria-hidden="true" style="background:#0300C3"></span><span>Metro / subway</span></button>
+<button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="4"><span class="rail-legend-swatch" aria-hidden="true" style="background:#87491D"></span><span>Industrial / spur</span></button>
+<button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="5"><span class="rail-legend-swatch" aria-hidden="true" style="background:#000000"></span><span>Other rail / yard</span></button>
 </div>
-<div id="map-shell"><div id="visitor-map" role="region" aria-label="Multilingual visitor map"></div><button id="map-expand" type="button" aria-label="Expand map" aria-expanded="false" aria-controls="visitor-map"><span aria-hidden="true">⛶</span></button></div>
+<div class="rail-legend-explanation" aria-live="polite"><strong id="rail-legend-selected-name">Main line</strong><p id="rail-legend-selected-note">Main railway corridor; exact route name needs source evidence.</p></div>
+<p id="railway-legend-note">For the OpenRailwayMap standard layer only.</p></div>
+</details></div>
 <p class="rail-note" id="rail-vector-note" role="status" aria-live="polite">Visitor mode: railway lines without technical labels</p>
 <details id="liuzhou-guide" class="liuzhou-guide" hidden>
  <summary id="liuzhou-title">Liuzhou · bilingual railway names</summary>
