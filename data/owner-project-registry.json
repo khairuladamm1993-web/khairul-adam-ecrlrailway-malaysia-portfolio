@@ -1156,7 +1156,7 @@
     "project": "P01",
     "issue": "legend-colours-across-three-pilot-cities",
     "checkedOn": "2026-10-25",
-    "state": "PARTIAL_SAFARI_UI_PASS_RELEASE_HOLD",
+    "state": "PARTIAL_SAFARI_UI_PASS_READABILITY_OPEN",
     "resolution": {
       "state": "OPEN",
       "tests": "PASS_SOURCE_ONLY",
@@ -1182,8 +1182,8 @@
       "previewBuild": "PASS; public-only analytics and member excluded",
       "http": "200 map page and JS, 404 quiz and Member JS",
       "uiStructure": "Eight swatches, green/pink and city label verified present in published HTML",
-      "ownerSafari": "PARTIAL PASS — three Owner Safari screenshots show eight colour swatches and manual category explanation in Kuala Lumpur/Bangkok/Liuzhou. No proof of per-line classification, station click, dark mode or full Safari UAT. Legend panel consumes substantial map space.",
-      "actualRailwayFeatureAttribution": "UNVERIFIED — selecting a legend swatch does not identify a railway segment; no direct feature tap evidence supplied.",
+      "ownerSafari": "PARTIAL PASS — 3/3 zoomed pilot city maps show rail network visually; Thai and Hanzi readability NEEDS_IMPROVEMENT for BM/EN. Owner made NO railway/station taps; popup and per-feature classification remain NOT TESTED.",
+      "actualRailwayFeatureAttribution": "UNVERIFIED — screenshots show automatically rendered base/raster line imagery only; no user interaction or feature attribution.",
       "earlierFailedCandidate": "dpl_EYp47jFd7oYNfjW8jtHVVNDV9ykS and dpl_2za36gHJsENjWQVTGTWMziwgqW86 encountered outdated language test assertions; corrected without altering Production"
     },
     "staging": {
@@ -1194,8 +1194,8 @@
       "url": "https://mrs10-r211-mobile-map-pxh3fjhxk-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
       "sso": "Vercel Authentication all unchanged"
     },
-    "releaseDecision": "HOLD — UI legend manually interactive, source build PASS; direct map railway/station selection and compact layout need further Safari tests. No merge or Production release.",
-    "nextAction": "Pilot next test: tap an actual rail line or station symbol separately in each city and capture resulting source-backed popup or report no response. Improve expanded-map legend footprint only in a new isolated development branch after UI acceptance. Preserve eight canonical source colours; do not infer per-track class from manual swatch selection.",
+    "releaseDecision": "HOLD — eight-colour legend UI and three-city rail visibility evidenced; BM/EN Thai/Chinese names not consistently readable; direct vector railway/station interaction not verified. No Production release.",
+    "nextAction": "No further screenshot of legend needed. Next targeted Safari test: select BM or EN, tap one actual line and one station symbol in Kuala Lumpur/Bangkok/Liuzhou and report popup or no response; develop optional source-backed English/romanization labels without changing embedded raster tile text.",
     "boundaries": {
       "main": "UNCHANGED",
       "production": "UNCHANGED",
@@ -1232,6 +1232,40 @@
         "checkedOn": "2026-10-25"
       },
       "releaseDecision": "PARTIAL_SAFARI_UI_PASS_ONLY; actual railway feature/station interactivity and full UAT remain PENDING"
+    },
+    "ownerSafariRailVisibility": {
+      "checkedOn": "2026-10-25",
+      "evidenceType": "Three Owner-uploaded Safari iPhone screenshots at approximately 16:48 MYT, not republished in GitHub",
+      "observation": [
+        {
+          "city": "Kuala Lumpur",
+          "status": "VISIBLE",
+          "details": "Colour-coded railway alignments and Roman-letter labels, including KTM and Sri Petaling, visible at enlarged map zoom; no tap was performed"
+        },
+        {
+          "city": "Bangkok",
+          "status": "VISIBLE_LABEL_LANGUAGE_GAP",
+          "details": "Colour-coded alignments and Thai-script labels visible at zoom; user reports difficulty reading/pronouncing Thai"
+        },
+        {
+          "city": "Liuzhou",
+          "status": "VISIBLE_LABEL_LANGUAGE_GAP",
+          "details": "Railway alignments and Hanzi labels visible at zoom; user reports difficulty reading/pronouncing Chinese"
+        }
+      ],
+      "autoVisibleExplanation": "Map tiles/base style can render lines and labels automatically; this is NOT confirmation of vector rail or station click handlers and NOT automatic translation of raster text.",
+      "safariFindings": {
+        "railwayVisibleAtHigherZoom": "PARTIAL_PASS — Owner screenshots for 3 areas",
+        "localizedReadableLabelsBMEN": "NEEDS_IMPROVEMENT for Thailand and China",
+        "directTrackTap": "NOT_TESTED — Owner explicitly says no tap",
+        "stationIconTap": "NOT_TESTED",
+        "popupFromActualRailStation": "NOT_TESTED",
+        "exactRailwayClassification": "UNVERIFIED",
+        "pilotLegendPreviouslyPassed": "PRESERVED from earlier Owner screenshots",
+        "screenshotsPublicRepo": "NOT_UPLOADED"
+      },
+      "recommendedNextChange": "Isolated source-data-backed station/line label readability pilot: prioritize verified English/Latin name when BM/EN, original+verified romanization/pinyin in compact source-based popup when available, no invented station names, no assumption raster labels are translatable, reduce verbose status banner when expanded. Verify POI and rail data with real Safari taps.",
+      "uatDecision": "PARTIAL_VISUAL_PASS; multilingual readability improvement required; tap interaction UAT PENDING"
     }
   }
 }
