@@ -13,17 +13,36 @@ button[aria-pressed="true"]{border-color:#177b9a;background:#ceeaf3;color:#163f5
 :root[data-theme="dark"] button[aria-pressed="true"]{background:#284e5e;color:#e2f4fc}
 #visitor-map{height:clamp(390px,65vh,680px);border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .notice{margin:14px 0;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:9px}
-h1{font-size:clamp(1.35rem,4vw,2.1rem);line-height:1.2}p{max-width:85ch}#label-status{font-size:.88rem}
+h1{font-size:clamp(1.35rem,4vw,2.1rem);line-height:1.2}p{max-width:85ch}#label-status{font-size:.92rem}.hint{color:var(--muted);margin:0 0 12px;font-size:.93rem;line-height:1.55}
+:root{--muted:#415764;--active-bg:#c7eaf3;--active-fg:#113b4f}
+:root[data-theme="dark"]{--bg:#071821;--fg:#f3faff;--card:#142e3e;--line:#8aaabe;--muted:#d0e1ee;--active-bg:#27596d;--active-fg:#fff}
+:root[data-theme="dark"] button{color:#f4faff;background:#142f3f;border-color:#8aaabe}
+:root[data-theme="dark"] button[aria-pressed="true"]{background:#27596d;color:#fff;border:2px solid #8bd8ef}
+:root[data-theme="dark"] h1,:root[data-theme="dark"] p,:root[data-theme="dark"] #label-status{color:#f3faff}
+:root[data-theme="dark"] .hint{color:#d0e1ee}
+:root[data-theme="dark"] .maplibregl-ctrl-attrib{background:#152a36;color:#f5faff}
+:root[data-theme="dark"] .maplibregl-ctrl-attrib a{color:#aee8ff}
+:root[data-theme="dark"] .maplibregl-ctrl-group button{background:#eef5f8}
+:root[data-theme="dark"] .maplibregl-ctrl-group button .maplibregl-ctrl-icon{filter:none}
+#theme-btn{padding:9px 15px;min-width:132px;font-weight:750}
+#railway-btn{width:auto;padding:9px 16px;font-weight:750}
+#visitor-map{outline:1px solid var(--line)}
+button:focus-visible,a:focus-visible{outline:3px solid #efa93e;outline-offset:3px}
+@media(max-width:700px){main{padding-top:max(55px,env(safe-area-inset-top))}header{align-items:center}header a{max-width:55%;line-height:1.5}#theme-btn{min-width:124px}}
 </style>
 <script type="module">
 import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.mjs';
 window.maplibregl=maplibregl;
 await import('./assets/map-language-lab.js');
 </script></head>
-<body><main><header><a href="gateway.html">← MR-S10 Gateway</a><button id="theme-btn" type="button" aria-label="Dark Mode">☾</button></header>
+<body><main><header><a href="gateway.html">← MR-S10 Gateway</a><button id="theme-btn" type="button" aria-label="Switch to Dark Mode">Dark Mode</button></header>
 <h1 id="lab-title">Multilingual visitor map · BETA</h1><p id="lab-info">Switch map place names where translations exist.</p>
 <div class="controls" aria-label="Language selector">
 <button data-locale="ms" aria-pressed="true">BM</button><button data-locale="en" aria-pressed="false">EN</button><button data-locale="zh" aria-pressed="false">中文</button><button data-locale="th" aria-pressed="false">ไทย</button></div>
+<div class="controls" aria-label="Map details">
+<button type="button" id="railway-btn" aria-pressed="false" aria-controls="visitor-map">Railway details: OFF</button>
+</div>
+<p class="hint" id="railway-note">Visitor mode hides the technical railway overlay. Turn on railway details to view the rail routes and reference numbers.</p>
 <div class="controls" aria-label="Countries">
 <button type="button" data-region="malaysia">🇲🇾 Malaysia</button>
 <button type="button" data-region="thailand">🇹🇭 Thailand</button>
