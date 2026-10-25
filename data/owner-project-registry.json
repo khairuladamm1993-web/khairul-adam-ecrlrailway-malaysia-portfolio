@@ -960,14 +960,14 @@
       "One in-page expand/exit control, safe-area/dvh layout, background inert and scroll restoration, Escape, same MapLibre instance resize, cleanup on removal, four-language labels"
     ],
     "qa": {
-      "node": "256/256 PASS; exit 0; Node v24.19.0; local regression including 5 new R2.11 tests",
-      "catalogue": "14/14 PASS; exit 0",
-      "publicBuild": "PASS; exit 0; 39 files; map HTML/JS byte-identical to tested source",
+      "node": "256/256 PASS; R2.11 staging build Vercel log; no FAIL/SKIP",
+      "catalogue": "14/14 PASS; R2.11 staging build Vercel log; no FAIL/SKIP",
+      "publicBuild": "PASS; isolated Public Preview staging build",
       "publishedSourceIntegrity": "4/4 changed files byte-equal to GitHub commit; parent baseline verified",
-      "privacy": "Local protected asset exclusions PASS; remote questions.js and member-gateway.js HTTP 404; access.js public-only stub; analytics disabled",
+      "privacy": "PASS: map HTML/JS 200; protected quiz and Member bundle assets 404; auth and analytics disabled in public preview",
       "http": "Authenticated map HTML 200 and expected JS 200; anonymous map HTTP 302",
       "chromium": "NOT EXECUTED — no local Chromium",
-      "safari": "PENDING — no R2.11 real Safari evidence",
+      "safari": "PENDING — Owner Safari UAT needed",
       "githubActions": "NOT EXECUTED"
     },
     "deployment": {
@@ -989,8 +989,8 @@
       "secondAttempt": "NOT PERFORMED",
       "rootCause": "UNKNOWN why explicit staging request was reported as production; do not infer from live:false"
     },
-    "releaseDecision": "HOLD — source QA PASS, staging target gate FAIL; not ready for Owner Safari UAT or Production release",
-    "nextAction": "Investigate target mismatch read-only and verify a supported staging-only creation path before any separately approved replacement deployment. Preserve protected existing deployment; no auto-retry.",
+    "releaseDecision": "STAGING_READY_FOR_OWNER_SAFARI_UAT_ONLY — no production approval; earlier target mismatch remains historical",
+    "nextAction": "Owner opens verified staging /map-language-lab.html on Safari iPhone/iPad, tests Dark/Light popup contrast, responsive scroll, expanded map enter/exit, compact zoom buttons, languages and railway legend; submit evidence. Continue production release hold.",
     "preserved": {
       "R210": "unchanged",
       "main": "3a2f3b958d6090acdbc5e080b61e46aa8b5415f3; unchanged",
@@ -1000,6 +1000,43 @@
       "P03": "untouched",
       "campusCoordinates": "unchanged",
       "railwayLegend": "unchanged"
+    },
+    "verifiedStagingDeployment": {
+      "checkedOn": "2026-10-25",
+      "checkedAt": "2026-10-25T07:19:26.590Z",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "projectName": "mrs10-r211-mobile-map-uat",
+      "deploymentId": "dpl_71NTVUVCGU6ZAg6U59bMHQ8N9eGD",
+      "deploymentUrl": "https://mrs10-r211-mobile-map-cshmbbwpn-1993khairuladam-3016.vercel.app",
+      "safariUatUrl": "https://mrs10-r211-mobile-map-cshmbbwpn-1993khairuladam-3016.vercel.app/map-language-lab.html",
+      "targetRequested": "staging",
+      "targetReturned": "staging",
+      "readyState": "READY",
+      "sourceBranch": "feature/mrs10-r211-mobile-map-ux",
+      "sourceCommit": "1011a336809127a7e9b75a31aa67a2c71a18c705",
+      "projectLive": false,
+      "ssoProtection": "all; unchanged",
+      "sourceQA": {
+        "node": "256/256 PASS; fail=0 skipped=0 — current staging deployment Vercel build logs",
+        "catalogue": "14/14 PASS; fail=0 skipped=0 — current staging deployment Vercel build logs",
+        "previewBuild": "PASS — scripts/build-preview.py; public-only, analytics disabled",
+        "httpHtml": "200 (authorized deployment fetch)",
+        "httpMapJs": "200 (authorized deployment fetch)",
+        "privacyProtectedQuiz": "404",
+        "privacyMemberGateway": "404"
+      },
+      "uat": "PENDING — needs Owner Safari iPhone/iPad visual and interaction tests",
+      "firstMismatchedDeploymentPreservedAsHistory": "dpl_Cfw9ijKoKsHxBodGejjwwSme7C3T; target=production, state=READY; isolated project protected by SSO. Not canceled, deleted, promoted or paused",
+      "primaryProductionMR_S10": "UNCHANGED",
+      "gitHubMain": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "p02p03": "UNCHANGED",
+      "releaseApproval": "NOT APPROVED: staging QA only; production release remains NO-GO",
+      "sourceReferences": [
+        "https://vercel.com/1993khairuladam-3016/mrs10-r211-mobile-map-uat/71NTVUVCGU6ZAg6U59bMHQ8N9eGD",
+        "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/1011a336809127a7e9b75a31aa67a2c71a18c705"
+      ],
+      "targetMismatchRootCause": "UNCONFIRMED: previous first deployment mismatch; successful later staging deployment with existing project and branch ref does not prove original internal Vercel mechanism"
     }
   }
 }
