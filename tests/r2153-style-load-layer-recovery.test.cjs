@@ -64,7 +64,7 @@ test('R2.15.3 real rendered transit geometry responds to map click after the lay
  assert(map.lastPopup?.node);
  assert.match(map.lastPopup.node.textContent,/light_rail/);
  const debug=d.getElementById('rail-tap-diagnostic').textContent;
- assert.match(debug,/MAP CLICK 1/);
+ assert.match(debug,/MAP TAPS 1 \/ PANS 0/);
  assert.match(debug,/rail READY \/ station READY/);
  w.close();
 });
