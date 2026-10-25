@@ -3,8 +3,8 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),{JSDOM}=require('jsdom');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 const html=read('map-language-lab.html'),script=read('assets/map-language-lab.js');
-function setup(){
- const w=new JSDOM(html,{url:'https://preview.example/map-language-lab.html',runScripts:'outside-only'}).window;
+function setup(pilot=false){
+ const w=new JSDOM(html,{url:'https://preview.example/map-language-lab.html'+(pilot?'?railPilot=1':''),runScripts:'outside-only'}).window;
  const maps=[];w.scrollTo=()=>{};
  class Popup{constructor(options){this.options=options}setDOMContent(node){this.node=node;return this}isOpen(){return !!this.open}}
  class Marker{
