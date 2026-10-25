@@ -2885,7 +2885,7 @@
     "issueId": "r218-kelana-jaya-ruby-service-registry",
     "title": "R2.18 LRT Kelana Jaya 37-stop ruby service registry and conservative source-coded vector candidates",
     "checkedOn": "2026-10-26",
-    "state": "OWNER_SAFARI_ZH_DARK_PASS_TH_DARK_FAIL_R2182_STAGING_RETEST_PENDING",
+    "state": "OWNER_TARGETED_SAFARI_R2182_THAI_PASS_INTEGRATION_PENDING",
     "ownerApproval": "Owner authorized isolated R2.18 development and staging checks, NOT production merge or promotion.",
     "development": {
       "branch": "feature/mrs10-r218-kelana-jaya-ruby-identity",
@@ -2959,7 +2959,7 @@
       "url": "https://mrs10-r211-mobile-map-iwcxicxmy-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
       "isolation": "Project live:false, no custom domains, Vercel Authentication all",
       "responseSmoke": "UNVERIFIED due to protected Vercel staging HTTP not separately inspected",
-      "ownerSafari": "R2.18.1 Chinese Dark PASS / Thai Dark FAIL; R2.18.2 fixed staging awaits Owner retest",
+      "ownerSafari": "OWNER_TARGETED_PASS R2.18.2 Thai Malaysia Dark Mode; prior Chinese Dark Mode PASS; unrelated R2.18 checks accepted by Owner. Full browser/security audit not independently confirmed.",
       "previousDeploymentId": "dpl_6F8zvbkYMh3iQyH43XqFyun2xDr8"
     },
     "integrationDependency": {
@@ -2977,7 +2977,7 @@
     },
     "resolution": {
       "state": "OPEN",
-      "tests": "PASS_SOURCE_ONLY",
+      "tests": "PASS_SOURCE_QA_AND_OWNER_TARGETED_SAFARI",
       "verifiedAt": null,
       "evidence": [
         "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40232319822",
@@ -2993,22 +2993,24 @@
         "publicArtifact": "PASS_BUILD",
         "deployment": "PASS_STAGING_METADATA_ONLY",
         "httpSmoke": "UNVERIFIED",
-        "safariUat": "R2181_ZH_PASS_TH_FAIL_R2182_THAI_RETEST_PENDING",
+        "safariUat": "OWNER_TARGETED_PASS_ZH_DARK_R2181_AND_TH_DARK_R2182",
         "security": "PARTIAL_VERIFIED",
         "integratedR217R218R219": "NOT_TESTED",
         "ownerProductionApproval": "NOT_APPROVED"
       }
     },
-    "releaseDecision": "NO-GO merge/Production; Thai dictionary source QA 327/327 PASS and isolated staging READY; Owner Safari retest, HTTP/security smoke and integrated QA pending.",
-    "nextAction": "Owner Safari on isolated R2.18.2 staging: Malaysia > Dark Mode > ไทย; check Kuala Lumpur (กัวลาลัมเปอร์), Selangor (สลังงอร์), Shah Alam (ชาห์อาลัม) and switch Light Mode; other unknown names remain original, not all stations localized. Chinese remains unchanged.",
+    "releaseDecision": "NO-GO merge/Production. Owner targeted Safari Dark Mode locale checks Chinese PASS and Thai PASS on isolated staging. Source QA 327/327, catalogue 14/14 PASS. Protected deployed HTTP/security smoke and combined R2.17+R2.18+R2.19 integration gate pending; no explicit Production approval.",
+    "nextAction": "Preserve approved R2.18.2 staging as isolated UAT checkpoint. Before any integration/Production: reconcile current R2.17/R2.18/R2.19 branch SHAs, run merged source/conflict/QA and HTTP security verification; require separate Owner approval. No new deployment needed for the now-passed Thai fix.",
     "ownerSafariFeedback": {
       "observedOn": "2026-10-26",
       "result": "PARTIAL_PASS_AFTER_R2181",
       "chineseDarkMode": "PASS_REPORTED_BY_OWNER",
       "thaiDarkMode": "FAIL_REPORTED_BY_OWNER",
       "previousUnrelatedChecks": "PASS_REPORTED_BY_OWNER",
-      "r2182Retest": "PENDING",
-      "note": "UAT applies to previous staging; no claim that the newly deployed R2.18.2 passed Safari."
+      "r2182Retest": "PASS_OWNER_REPORTED_2026-10-26",
+      "note": "UAT applies to previous staging; no claim that the newly deployed R2.18.2 passed Safari.",
+      "r2182OwnerReply": "Ok done great 👍",
+      "r2182PassScope": "Targeted Owner Safari Malaysia Dark Mode Thai fallback response to Kuala Lumpur test request; confirmation inferred from Owner acknowledgement. No complete independent browser audit."
     },
     "defects": {
       "r2181DarkI18n": {
@@ -3018,7 +3020,7 @@
         "translatedDataLimit": "Actual Chinese/Thai place names are only available where the vector source contains them."
       },
       "r2182ThaiMalaysiaFallback": {
-        "state": "SOURCE_QA_PASS_STAGING_READY_OWNER_SAFARI_RETEST_PENDING",
+        "state": "OWNER_TARGETED_SAFARI_PASS",
         "finding": "Request for Thai labels succeeded at UI level but missing name:th or incomplete tile translations can produce unchanged Malaysian base-map labels; native tile language coverage not independently measured.",
         "correction": "Source-attested fallback for 31 exact Malaysian geographic place names; prefer native name:th; source-language fallback for others; light/dark plus country tests.",
         "knownLimit": "Not a wholesale Thai basemap conversion or translation of all railway station names.",
