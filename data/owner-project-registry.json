@@ -2218,7 +2218,7 @@
     "issueId": "r216-kl-railway-track-station-registry-phase1",
     "title": "R2.16 Kuala Lumpur Railway Track & Station Registry — Phase 1",
     "checkedOn": "2026-10-26",
-    "state": "STAGING_READY_SAFARI_UAT_PENDING",
+    "state": "OWNER_SAFARI_ERL_PANEL_ORDER_PASS_OTHER_ROUTES_UAT_PENDING",
     "goal": "An auditable service-route and station source catalogue for the Kuala Lumpur / Klang Valley map pilot; physical track geometry and lane indexing are separate future evidence tasks.",
     "ownerApproval": "Owner explicitly approved transition to R2.16 with Kuala Lumpur first. No approval to merge or change Production.",
     "inheritedEvidence": {
@@ -2273,7 +2273,7 @@
       "staging": "READY with target staging and source commit verified",
       "previewHttp": "HTML, registry JS and map JS HTTP 200. Excluded member-gateway.js and questions.js HTTP 404",
       "tests": "Source confidence, 10 routes, verified ERL order, zero physical segments, negative geometry checks, collapsed panel, four-language and country visibility tested",
-      "safari": "PENDING — Owner needs check route selection, six ERL stop order and existing source-backed station popup on iPhone",
+      "safari": "PARTIAL PASS — Owner 2026-10-26 02:04 MYT iPhone Safari screenshot confirms KL registry panel, ERL KLIA Transit selection, all 6 stops in published order, visible operator-source link and 0 physical tracks. KTM/MRT unverified status and R2.16 popup regression still PENDING.",
       "physicalTrackCoverage": "NOT STARTED — no authoritative lane identifiers/geometry yet",
       "browserNetwork": "Static registry script loaded before map module; no data fetch/connect-src dependency"
     },
@@ -2293,8 +2293,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "NO-GO: source/build PASS and staging READY; Safari R2.16 UAT plus full topology/physical-track data verification and integration approval pending; no Production release authorized.",
-    "nextAction": "Owner opens R2.16 isolated Safari preview; select Malaysia, scroll below map and expand 'Kuala Lumpur Railway & Station Registry', select ERL KLIA Transit to inspect six published stops in order, then switch to KTM/MRT and verify explicit NOT_YET_VERIFIED status. Verify station popup still works. Later audit physical track/way identifiers and route-station associations from appropriate source before populating segment records; do not merge or claim complete KL coverage.",
+    "releaseDecision": "NO-GO Production/merge. Phase 1 ERL catalogue panel Safari visual PASS, but KTM/MRT UAT, source link navigation, station popup regression and complete physical topology still unverified. Source/build QA remains PASS.",
+    "nextAction": "Owner select one KTM or MRT route within the same isolated R2.16 staging panel and check explicit not-yet-verified station-order notice. No need to retest ERL sequence. Station tap regression can follow if needed; do not populate unverified physical lanes or merge.",
     "boundaries": {
       "githubMain": "UNCHANGED",
       "production": "UNCHANGED",
@@ -2303,6 +2303,40 @@
       "p03": "UNTOUCHED",
       "merge": "NOT PERFORMED",
       "ownerPrivatePhotos": "NOT PUBLISHED"
+    },
+    "ownerSafariErLPhase1Uat": {
+      "observedAt": "2026-10-26T02:04:00+08:00",
+      "evidence": "Owner-provided iPhone Safari screenshot within this conversation, not uploaded to public repository.",
+      "preview": "R2.16 isolated staging, Malaysia, English interface; expanded KL Railway & Station Registry panel under map",
+      "outcome": "PARTIAL_PASS_VISIBLE_REGISTRY_AND_KLIA_TRANSIT_ORDER",
+      "observed": {
+        "selectedRoute": "ERL · KLIA Transit",
+        "registryCount": "10 referenced routes · 6 ERL stops in verified order · 0 physical tracks verified",
+        "stopSequence": [
+          "KL Sentral",
+          "Bandar Tasik Selatan",
+          "Putrajaya & Cyberjaya",
+          "Salak Tinggi",
+          "KLIA T1",
+          "KLIA T2"
+        ],
+        "routeDisclaimer": "Operator-confirmed stop order; not physical track geometry.",
+        "sourceLink": "Source 1 visible; successful opening not yet tested",
+        "railwayView": "Rail and station dots remain visible in the top of screenshot; tap regression not retested in this screenshot"
+      },
+      "verified": [
+        "Registry visible under the map and readable at iPhone viewport",
+        "English UI count and route selection displayed correctly",
+        "Six KLIA Transit stops displayed in published order",
+        "Physical-track count correctly remains zero with no fabricated alignment or station orders"
+      ],
+      "outstanding": [
+        "Switch from ERL to KTM or MRT to confirm unverified-route messaging on real Safari",
+        "Source 1 external navigation has not been exercised",
+        "Station popup regression in R2.16 not independently tested by this screenshot",
+        "No individual physical track geometry, turnout, verified segment identifiers or complete Kuala Lumpur coverage",
+        "Full station sequences beyond ERL KLIA Transit are not accepted"
+      ]
     }
   }
 }
