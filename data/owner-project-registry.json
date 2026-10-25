@@ -1272,7 +1272,7 @@
     "project": "P01",
     "checkedOn": "2026-10-25",
     "title": "R2.14 China Railway Code Explorer (source-backed opt-in pilot)",
-    "state": "STAGING_READY_SAFARI_UAT_PENDING",
+    "state": "REFERENCE_CONTENT_OWNER_CONFIRMED_APP_UAT_PENDING",
     "approvalScope": "Owner endorsed in-map China railway code explanations; staging pilot only, not production deployment or raster digit interaction",
     "sourceBaseline": "3dd28e8eb95bfb37e0fb63145add54c867aa256b",
     "branch": "feature/mrs10-r214-china-rail-code-lookup-pilot",
@@ -1339,9 +1339,10 @@
       "catalogue": "14/14 PASS; 0 FAIL 0 SKIP",
       "publicBuild": "PASS: user-facing preview only; analytics/member auth excluded",
       "privacy": "HTTP 200 for map HTML/JS, 404 for protected quiz and member gateway assets",
-      "browser": "Safari iPhone UAT PENDING; actual on-device code lookup not confirmed",
+      "browser": "REFERENCE CONTENT PARTIAL PASS, APP SAFARI UAT PENDING — current screenshots are Chinese Wikipedia pages, not MR-S10 lookup popup.",
       "featureTap": "Direct tap on pre-rendered raster digits UNSUPPORTED; do not claim full code popup",
-      "production": "UNCHANGED"
+      "production": "UNCHANGED",
+      "referenceNameMatches": "5/5 OWNER CONFIRMED for code/name reference matches (two Chinese Wikipedia screenshots, remaining three Owner-reported)."
     },
     "staging": {
       "projectName": "mrs10-r211-mobile-map-uat",
@@ -1359,8 +1360,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "NO-GO FOR PRODUCTION; pilot staging only; Safari UAT still pending",
-    "nextAction": "Owner selects China in R2.14 pilot, presses map 🔢 icon and verifies sample 44930 and leading-zero 0073 plus an unknown code. Check BM/EN and Dark Mode contrast, then screenshot. No raster digit click expected; separate future vector data investigation required.",
+    "releaseDecision": "NO-GO FOR PRODUCTION; code reference owner validation 5/5, source QA PASS, app Safari lookup/unknown-code/contrast UAT not yet evidenced.",
+    "nextAction": "Owner opens R2.14 isolated staging, switches China, taps map 🔢, checks 44930 and 0073 (leading zero), enters unknown 44915, tests compact popup BM/EN and Dark Mode; screenshots or explicit in-app observations. Keep app Safari gate PENDING; do not claim raster digit clicking.",
     "protectedProjects": {
       "main": "UNTOUCHED",
       "production": "UNCHANGED",
@@ -1368,6 +1369,49 @@
       "p02": "UNTOUCHED",
       "p03": "UNTOUCHED"
     },
-    "ownerImages": "No personal photos published"
+    "ownerImages": "No personal photos published",
+    "ownerReferenceValidation": {
+      "checkedOn": "2026-10-25",
+      "result": "OWNER_CONFIRMED_5_OF_5_REFERENCE_CODE_NAME_MATCHES",
+      "codeChecks": [
+        {
+          "code": "44906",
+          "result": "OWNER_CONFIRMED",
+          "english": "Chengcun Railway Station"
+        },
+        {
+          "code": "44930",
+          "result": "OWNER_CONFIRMED",
+          "english": "Rong'an Railway Station"
+        },
+        {
+          "code": "44957",
+          "result": "OWNER_CONFIRMED",
+          "english": "Rongshui Railway Station"
+        },
+        {
+          "code": "0073",
+          "result": "OWNER_CONFIRMED",
+          "english": "Hengyang–Liuzhou Railway"
+        },
+        {
+          "code": "0081",
+          "result": "OWNER_CONFIRMED",
+          "english": "Guizhou–Guangxi Railway"
+        }
+      ],
+      "visualEvidence": {
+        "screenshotsCount": 2,
+        "publicReferencePages": [
+          "https://zh.wikipedia.org/wiki/程村站",
+          "https://zh.wikipedia.org/wiki/融安站"
+        ],
+        "summary": "Owner Safari screenshots of Chinese Wikipedia station-reference pages: Chengcun (approx. 17:21 MYT) and Rong'an (approx. 17:23 MYT). Confirms station name/reference reading; other three code matches are Owner-reported without separate screenshots in this turn.",
+        "imagesUploadedToRepo": false
+      },
+      "scopeLimitation": "Five confirmations cover code/name reference content; not proof of in-map China 🔢 code lookup clicks, four-language UI, dark mode, unknown-code fallback, raster-number tapping or actual railway feature attribution.",
+      "sourceCrosscheck": "R2.14 code catalogue still present in GitHub source; Vercel dpl_DnCB938zXPnRgYKuBb9RBbMHeAH9 target=staging state=READY exact source SHA 7e6f8285b0cdc9e2cdf9ed6ea23673f6a49f275f",
+      "nextRequiredUat": "Owner test on-screen MR-S10 China 🔢 lookup: at least 44930, zero-prefixed 0073, unknown 44915, popup contrast and language; screenshots or explicit UI observations requested. No direct raster-digit tap claimed."
+    }
   }
 }
