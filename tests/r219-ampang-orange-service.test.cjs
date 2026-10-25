@@ -8,6 +8,8 @@ const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 const api=require('../assets/mrs10-r219-ampang-service.js');
 const viewer=read('ampang-line-r219.html');
 const mapBridge=read('assets/mrs10-r219-map-bridge.js');
+const ampangGIS=require('../assets/mrs10-r219-ampang-gis.js');
+const geoOverlay=read('assets/mrs10-r219-ampang-gis-overlay.js');
 const existingMap=read('assets/map-language-lab.js');
 const existingRegistry=require('../assets/railway-track-registry-kl.js');
 
@@ -156,4 +158,60 @@ test('R2.19 MapLibre adapter: theme, locale, full-screen and region wired to nat
  assert.match(mapBridge,/locale\?\.addEventListener\('change'/);
  assert.match(mapBridge,/lastAppliedLang===language/);
  assert.match(viewer,/--orange:#FFBB7B/);
+});
+
+test('R2.19: authoritative service sequence reconciles only individually sourced GIS point features',()=>{
+ assert.match(ampangGIS.sourceUrl,/SELANGOR_RAILWAY_MAP\/FeatureServer\/1$/);
+ assert.match(ampangGIS.requestUrl,/outSR=4326/);
+ const samples=api.stations.map((st,i)=>({
+  attributes:{STN_NAME:st.name,STN_CODE:st.serviceCode,OBJECTID:i+1},
+  geometry:{x:101.694+i*0.002,y:3.122+i*0.003}
+ }));
+ const result=ampangGIS.decode(samples,api);
+ assert.equal(result.ok,true);
+ assert.equal(result.matched,18);
+ assert.equal(result.missing,0);
+ assert.equal(result.reason,'SOURCE_MATCH_18_OF_18');
+ assert.deepEqual(result.data.map(x=>x.code),api.stations.map(x=>x.serviceCode));
+ assert.equal(result.data[0].confidence,'SECONDARY_GIS_CANDIDATE_SOURCE_BACKED_NOT_SURVEYED');
+ assert.equal(result.data[0].physicalTrackStatus,'UNVERIFIED');
+ const geo=ampangGIS.toFeatureCollection(result);
+ assert.equal(geo.type,'FeatureCollection');
+ assert.equal(geo.features.length,18);
+ assert.deepEqual(geo.features[0].geometry.coordinates,[101.694,3.122]);
+ // Test doubles only: synthetic locations above are not ever committed as production station coordinates.
+ assert.equal(api.stations[0].geometry,null);
+});
+test('R2.19: reject wrong service names, mixed AG codes, out-of-bounds points and duplicates',()=>{
+ const right={attributes:{STN_NAME:'Sentul Timur',STN_CODE:'AG1',OBJECTID:1},geometry:{x:101.70,y:3.17}};
+ const wrong=[
+  {attributes:{STN_NAME:'Gombak',STN_CODE:'KJ1'},geometry:{x:101.71,y:3.16}},
+  {attributes:{STN_NAME:'Sentul Timur',STN_CODE:'AG2'},geometry:{x:101.70,y:3.17}},
+  {attributes:{STN_NAME:'Sentul Timur',STN_CODE:'AG1'},geometry:{x:103.00,y:3.17}},
+  {attributes:{STN_NAME:'Sentul Timur',STN_CODE:'AG1'},geometry:{x:null,y:3.17}},
+  {attributes:{STN_NAME:'Sentul Timur',STN_CODE:'AG1'},geometry:null}
+ ];
+ const a=ampangGIS.decode([right,...wrong],api);
+ assert.equal(a.matched,1);assert.equal(a.missing,17);
+ assert.equal(a.rejected,5);
+ const dupe=ampangGIS.decode([right,{...right,attributes:{...right.attributes,OBJECTID:22}}],api);
+ assert.equal(dupe.matched,0);
+ assert.equal(dupe.missing,18);
+ assert.equal(ampangGIS.decode([],api).matched,0);
+ assert.equal(ampangGIS.toFeatureCollection(ampangGIS.decode([],api)).features.length,0);
+});
+test('R2.19: native GIS overlay preserves MapLibre tap, responsive popup and country/theme boundaries',()=>{
+ assert.match(viewer,/assets\/mrs10-r219-ampang-gis\.js/);
+ assert.match(viewer,/assets\/mrs10-r219-ampang-gis-overlay\.js/);
+ assert.match(viewer,/id="r219-gis-status"/);
+ assert.match(mapBridge,/MRS10AmpangGISOverlay\?\.at\?\.\(e\)/);
+ assert.match(mapBridge,/MRS10AmpangGISOverlay\?\.attach\?\./);
+ assert.match(mapBridge,/MRS10AmpangGISOverlay\?\.toggle\?\./);
+ assert.match(geoOverlay,/map\.on\('style\.load'/);
+ assert.match(geoOverlay,/source:'r219-ampang-gis-source'/);
+ assert.match(geoOverlay,/map\.fitBounds\(/);
+ assert.match(geoOverlay,/source location: public GIS|Sumber titik: GIS awam/);
+ assert.match(geoOverlay,/if\(!result\)/);
+ assert.doesNotMatch(geoOverlay,/openrailwaymap\.org\/standard/);
+ assert.equal(ampangGIS.decode([],api).missing,18);
 });
