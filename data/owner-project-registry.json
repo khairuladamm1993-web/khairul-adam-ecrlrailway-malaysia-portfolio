@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "R2.7 Safari localized visitor maps Malaysia Thailand China observed by Owner; numeric railway refs + low dark contrast remediation in separate development preview 241/241 PASS, Safari retest pending",
+  "register": "R2.8 Liuzhou English rail map issue unresolved user-approved Safari; new separate source-safe vector rails prototype staging READY and QA PASS (246/246), global Dark Mode still pending",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -53,9 +53,17 @@
       "category": "website",
       "phase": "R2.5 + R2.6 integrated in MR-S10 single-domain isolated Unified Preview; Owner session/browser UAT pending",
       "overall": "IN_PROGRESS",
-      "nextDecision": "Safari iPhone R2.7 Visitor Contrast UAT: confirm default railway details OFF removes numeric references, toggle ON preserves railway overlay, Dark Mode text/buttons/attribution readable and Light Mode still clear. Do not merge or promote before visual evidence. A complete MR-S10 global Dark Mode accessibility audit remains open.",
+      "nextDecision": "Owner Safari R2.8: with EN selected, Railway details OFF should show sourced vector rail lines if available and readable Liuzhou labels. ON restores native technical raster Chinese labels. If style provides no transportation source, fallback text warns unavailability. Keep item #5 PENDING until owner visual PASS. No canonical preview or Production merge.",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
+        {
+          "type": "test",
+          "label": "R2.8 Liuzhou English-readable visitor rail map isolated QA",
+          "value": "246/246 Node PASS · 14/14 Catalogue PASS · staging READY · Safari item #5 NOT APPROVED",
+          "verifiedOn": "2026-10-25",
+          "confidence": "isolated code QA; not independently verified on Safari",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/fix/mrs10-r28-readable-rail-liuzhou"
+        },
         {
           "type": "test",
           "label": "R2.7 multilingual Visitor Map dark contrast and railway reference overlay toggle",
@@ -785,5 +793,28 @@
     "production": "UNCHANGED",
     "supabase": "UNCHANGED",
     "ecrlSimulation": "UNCHANGED"
+  },
+  "integrationR28": {
+    "checkedOn": "2026-10-25",
+    "project": "P01",
+    "scope": "English-readable railway visitor map Liuzhou station names after owner rejected item #5 UAT",
+    "ownerFeedback": "Railway tracks shown but Chinese technical labels not readable in EN; station reference numbers are blue. Dark technical raster overlaps dark style.",
+    "sourceEvidence": "Owner Safari Liuzhou screenshots 10:55–10:59 MYT",
+    "rootCause": "OpenRailwayMap technical overlay is raster with immutable native-source labels and track_ref shields; MapLibre language setting changes only basemap vector labels",
+    "sourceBranch": "fix/mrs10-r28-readable-rail-liuzhou",
+    "sourceCommit": "f41e9ab579e6fda639090f736ed675e572e07efa",
+    "fix": "Try native vector transportation rails (class=rail) in visitor mode with EN/Chinese/Thai/Malay vector basemap place labels; original technical OpenRailwayMap can be toggled ON. Add bilingual text-only Liuzhou/柳州, Liuzhou South/柳州南 reference without fabricated station coordinates.",
+    "limitations": "Actual style vector rail source and railway corridor geometry must be Safari verified; raster railway detail labels cannot be individually translated. Localized station-name catalogue not complete.",
+    "qa": "246/246 Node PASS; 14/14 Catalogue PASS; 48-file isolated full build PASS",
+    "deploymentId": "dpl_4qDjTiomHwJqLyh4v6LQ42PjBNic",
+    "isolatedPreviewUrl": "https://mrs10-r28-liuzhou-readable-uat.vercel.app/map-language-lab.html",
+    "deploymentState": "READY",
+    "safariUat": "PENDING. Owner item #5 remains NOT APPROVED",
+    "oldR27Preview": "https://mrs10-r27-visitor-contrast-uat.vercel.app/map-language-lab.html unchanged",
+    "canonicalUnifiedPreview": "https://mrs10-r24-single-gateway-preview.vercel.app/gateway.html unchanged",
+    "production": "UNCHANGED",
+    "supabaseAuthRls": "UNCHANGED",
+    "slice1": "UNCHANGED",
+    "globalDarkModeUat": "PENDING"
   }
 }
