@@ -412,13 +412,20 @@ function nameExpression(locale){
  locale==='en'?['name:en','name:latin','name']:['name:'+locale,'name:en','name:latin','name'];
  return ['coalesce',...keys.map(key=>['get',key])];
 }
+// R2.18.1 Owner Safari: dark OpenFreeMap uses place_*, water_name and
+// highway_name_other; positron uses label_*, water_name_* and highway-name-*.
+// Do not rewrite motorway ref/shield labels (highway_name_motorway).
 const isNameLayer=layer=>layer?.type==='symbol'&&layer.layout?.['text-field']!=null&&
- /^(label_|water_name_|waterway_line_label|poi_|poi_transit|airport$|highway-name-)/.test(layer.id);
+ /^(label_|water_name(?:_|$)|waterway_line_label|poi_|poi_transit|airport$|highway-name-|place_|highway_name_other$)/.test(layer.id);
+let labelUpdatePending=false;
 function applyLabels(){
- if(!map||!map.isStyleLoaded())return 0;
+ // A style switch can be loading when the Owner selects a language.
+ // Retry once on idle instead of silently dropping the requested locale.
+ if(!map?.isStyleLoaded?.()){labelUpdatePending=true;return 0;}
  let n=0;
  for(const layer of map.getStyle().layers||[])
   if(isNameLayer(layer)){map.setLayoutProperty(layer.id,'text-field',nameExpression(lang));n++;}
+ labelUpdatePending=false;
  el('label-status').textContent=(n?n+' '+uiText[lang].labelLayers+' · ':'')+copy[lang][2];
  return n;
 }
@@ -654,8 +661,10 @@ function init(){
  });
  map.on('style.load',()=>{
   try{
+   // Localize names BEFORE additional raster/vector layers mutate style readiness.
+   applyLabels();
    const rails=readableRails();
-   overlay();applyLabels();setRailVisibility();ready=true;
+   overlay();setRailVisibility();ready=true;
    if(pilotMode)installPilotVectorLayers();
    el('label-status').dataset.ready='true';
    el('rail-vector-note').textContent=rails?readableRailLanguage[lang].railLines:readableRailLanguage[lang].railMissing;
@@ -665,6 +674,7 @@ function init(){
  // After setStyle or addSource the map can still have pending tiles at style.load.
  // Retry only missing pilot layers at idle, when rendering has settled.
  map.on('idle',()=>{
+  if(labelUpdatePending)applyLabels();
   if(pilotMode&&(!map.getLayer('mrl-pilot-rail-hits')||!map.getLayer('mrl-pilot-stations')))
    installPilotVectorLayers();
  });
