@@ -338,7 +338,7 @@
           "id": "r219-ampang-orange-service-registry",
           "kind": "IN_PROGRESS",
           "label": "P01 R2.19 — LRT Ampang Line 18-station source-backed service registry",
-          "detail": "R2.19 visitor UI harmonized on isolated development branch after Owner screenshot request: MR-S10-style Gateway header, compact theme, BM/EN/中文/ไทย segmented language buttons, Malaysia/Thailand/China region tabs, concise GIS provenance/status and collapsible notes, with original clear Ampang native MapLibre map, 18 GIS orange POIs, 18 service stops and AG3 FID16 corrected match preserved. Only ampang-line-r219.html and tests/r219-ampang-orange-service.test.cjs modified; no shared MR-S10 map/registry sources, R2.18 or Production writes. Source live audit 18/18 PASS; 18/18 R2.19 + 318/318 MR-S10 tests PASS. Isolated staging READY. Owner Safari UAT on new UI pending.",
+          "detail": "Owner accepted new MR-S10 style Ampang UI on Safari on 2026-10-26 ('Ok done, ngam ✅ i like'). UI visual acceptance PASS, previous screenshot source-GIS station markers 18/18 confirmed. GitHub latest R2.19 commit 91ec4914b75cd2c1da3efcf9e48123a08adebdcb; 18/18 R2.19 automated + 318/318 existing MR-S10 tests PASS, source GIS 18/18 matched. R2.19 isolated Vercel staging READY. Production NO-GO: integration with concurrent R2.18 remains untested and main diverged significantly. Do not merge/promote/deploy Production without integrated regression, security gate, and separate explicit release approval.",
           "basis": "Prasarana/official transit sources; GitHub Actions 40233275721; Vercel live GET deployment metadata and build events; owner approval limited to isolated R2.19 target correction",
           "sourceUrls": [
             "https://www.prasarana.com.my/mobiliti/the-nations-first-lrt-line/",
@@ -367,7 +367,7 @@
             "source": "PASS",
             "structuredModuleChecks": "10/10 PASS using authenticated GitHub fetch and in-memory JS verification; NOT full Node CI",
             "nodeTests": "PASS — 18/18 R2.19 source/UX tests + 318/318 MR-S10 regression tests, GitHub Actions 40240159718 at SHA 91ec4914b75cd2c1da3efcf9e48123a08adebdcb.",
-            "safari": "Owner prior screenshots: 18/18 marker status and visible orange route station markers on previous UI, AG7 popup previously evidenced; redesigned UI on new staging PENDING Safari UAT.",
+            "safari": "OWNER VISUAL/UI ACCEPTANCE PASS — owner confirmed MR-S10-style UI is satisfactory in latest Safari session on 2026-10-26. Earlier 18/18 AG map markers evidenced by screenshot. Full integration Safari UAT with R2.18/MR-S10 main still pending.",
             "mapPoi": "UNVERIFIED — zero source-verified AG cartographic POI crosswalks",
             "physicalAlignment": "UNVERIFIED — zero OSM route/way/track geometry",
             "staging": "STAGING READY / metadata verified — project prj_xlweXyowjdvfr87gsAIEuIWsRkde; deployment dpl_2ZE6cUjAPuLk9XZ4qZC37iZf7roW; target staging; source SHA 91ec4914b75cd2c1da3efcf9e48123a08adebdcb; Vercel Authentication ALL; mobile Safari UI UAT pending.",
@@ -377,7 +377,7 @@
           },
           "resolution": {
             "state": "OPEN",
-            "tests": "SOURCE_18_OF_18_PASS_AUTOMATED_336_PASS_STAGING_READY_NEW_UI_SAFARI_PENDING",
+            "tests": "AUTOMATED_PASS_336_OWNER_UI_VISUAL_PASS_INTEGRATION_UNVERIFIED",
             "verifiedAt": null,
             "evidence": [
               "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40233275721",
@@ -398,13 +398,13 @@
             ],
             "releaseGates": {
               "ci": "PASS",
-              "safariUat": "NEW_MR_S10_STYLE_UI_UNVERIFIED",
+              "safariUat": "OWNER_UI_VISUAL_PASS_COMBINED_MAP_INTEGRATION_PENDING",
               "security": "PARTIAL_SOURCE_ARTIFACT_AND_SSO_ONLY",
-              "deployment": "STAGING_READY_HTTP_UNVERIFIED",
-              "ownerApproval": "ISOLATED_STAGING_APPROVED_NO_PRODUCTION_RELEASE"
+              "deployment": "ISOLATED_STAGING_READY_PRODUCTION_NO_GO",
+              "ownerApproval": "OWNER_UI_ACCEPTED_NO_EXPLICIT_PRODUCTION_RELEASE_APPROVAL"
             }
           },
-          "nextAction": "Owner Safari UAT on R2.19 UI parity staging URL: check Gateway header, four segmented language buttons and synchronized GIS labels, three country tabs and source marker isolation, compact theme control, light/dark map and popup, status 18/18, orange AG3 / AG7 / AG18 source POI popup, correct mobile map drag/tap/fullscreen, 18 station timeline and shared SP flags; keep OPEN until explicitly verified. No automatic merge to main/Production.",
+          "nextAction": "Reconcile R2.18 Kelana Jaya and R2.19 Ampang on a separate integration branch without rewriting either source branch. Preserve shared infrastructure & route service identities. Re-run full MR-S10 authentication/map/security regression and Safari integration UAT before requesting explicit Owner GO to promote to MR-S10 Production. Keep main, Supabase Auth/RLS, R2.18, P02, P03 untouched.",
           "deploymentAudit": {
             "projectId": "prj_xlweXyowjdvfr87gsAIEuIWsRkde",
             "projectName": "mrs10-r219-ampang-orange-preview",
@@ -507,7 +507,11 @@
                 "ampang-line-r219.html",
                 "tests/r219-ampang-orange-service.test.cjs"
               ],
-              "safeSeparation": "No R2.18, shared registry/map source, main/Production, Supabase, P02 or P03 changes"
+              "safeSeparation": "No R2.18, shared registry/map source, main/Production, Supabase, P02 or P03 changes",
+              "ownerVisualApproval": "PASS (2026-10-26, user confirmation)",
+              "releaseApproval": "NOT_GRANTED",
+              "integrationWithR218": "UNVERIFIED",
+              "production": "NO_GO"
             }
           }
         }
