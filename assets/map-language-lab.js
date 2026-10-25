@@ -177,6 +177,7 @@ function syncChinaCodeWidget(){
  if(button){button.hidden=!show;button.setAttribute('aria-label',railCodeI18n[lang].button);button.title=railCodeI18n[lang].button;}
  if(!show&&panel)panel.hidden=true;
  if(button&&!show)button.setAttribute('aria-expanded','false');
+ el('map-shell')?.classList.toggle('is-code-open',show && !!panel && !panel.hidden);
  const l=railCodeI18n[lang];
  for(const [id,value] of [['china-code-title',l.title],['china-code-hint',l.hint],['china-code-search',l.search],['china-code-close',l.close]]){
   const node=el(id);if(node)node.textContent=value;
@@ -312,9 +313,10 @@ function theme(){
 function updateTheme(){
  const dark=theme()==='dark';
  document.documentElement.dataset.theme=dark?'dark':'light';
- el('theme-btn').textContent=dark?'☀':'☾';
- el('theme-btn').setAttribute('aria-label',dark?uiText[lang].themeLight:uiText[lang].themeDark);
- el('theme-btn').textContent=dark?uiText[lang].themeLight:uiText[lang].themeDark;
+ const btn=el('theme-btn'),label=dark?uiText[lang].themeLight:uiText[lang].themeDark;
+ btn.setAttribute('aria-label',label);
+ btn.setAttribute('title',label);
+ btn.setAttribute('aria-pressed',String(dark));
 }
 function transportationSource(style){
  // Source ID is derived from real OpenFreeMap style; no invented track geometry.
@@ -430,13 +432,25 @@ function init(){
   if(!pilotMode||activeRegion!=='china')return;
   codePanel.hidden=!codePanel.hidden;
   codeTrigger.setAttribute('aria-expanded',String(!codePanel.hidden));
-  if(!codePanel.hidden)el('china-code-input')?.focus();
+  el('map-shell').classList.toggle('is-code-open',!codePanel.hidden);
+  if(!codePanel.hidden){
+   const legend=el('railway-legend');if(legend)legend.open=false;
+   el('china-code-input')?.focus();
+  }
  });
- el('china-code-close')?.addEventListener('click',()=>{codePanel.hidden=true;codeTrigger.setAttribute('aria-expanded','false');codeTrigger.focus();});
+ el('china-code-close')?.addEventListener('click',()=>{
+  codePanel.hidden=true;el('map-shell').classList.remove('is-code-open');
+  codeTrigger.setAttribute('aria-expanded','false');codeTrigger.focus();
+ });
  el('china-code-form')?.addEventListener('submit',e=>{e.preventDefault();showChinaRailCode(el('china-code-input').value);});
  document.querySelectorAll('[data-china-code]').forEach(b=>b.addEventListener('click',()=>{const code=b.dataset.chinaCode;el('china-code-input').value=code;showChinaRailCode(code);}));
  const mapLegend=el('railway-legend');
- if(mapLegend)mapLegend.addEventListener('toggle',()=>{if(mapLegend.open&&!railDetails){
+ if(mapLegend)mapLegend.addEventListener('toggle',()=>{
+  if(mapLegend.open && codePanel && !codePanel.hidden){
+   codePanel.hidden=true;el('map-shell').classList.remove('is-code-open');
+   codeTrigger?.setAttribute('aria-expanded','false');
+  }
+  if(mapLegend.open&&!railDetails){
   const note=el('railway-legend-note');if(note)note.textContent=railLegendI18n[lang].note;
  }});
  el('theme-btn').addEventListener('click',()=>{
