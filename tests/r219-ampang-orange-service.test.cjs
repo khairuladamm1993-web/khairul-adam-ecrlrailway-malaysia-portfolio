@@ -117,7 +117,7 @@ test('R2.19 Safari UX: same-page MapLibre map and one numbered orange service ti
  assert(registry&&mapPanel);
  assert(mapPanel.compareDocumentPosition(registry)&d.defaultView.Node.DOCUMENT_POSITION_FOLLOWING);
  assert.equal(d.querySelectorAll('iframe').length,0);
- assert.match(d.getElementById('r219-map-note').textContent,/Lokasi Ampang belum disahkan/);
+ assert.match(d.getElementById('r219-map-note').textContent,/Geometri fizikal belum disahkan/);
  assert(d.getElementById('r219-expand'));
  assert(d.getElementById('r219-region'));
  assert.equal(d.querySelectorAll('#station-list li').length,18);
@@ -208,7 +208,7 @@ test('R2.19: native GIS overlay preserves MapLibre tap, responsive popup and cou
  assert.match(mapBridge,/MRS10AmpangGISOverlay\?\.attach\?\./);
  assert.match(mapBridge,/MRS10AmpangGISOverlay\?\.toggle\?\./);
  assert.match(geoOverlay,/map\.on\('style\.load'/);
- assert.match(geoOverlay,/source:'r219-ampang-gis-source'/);
+ assert.match(geoOverlay,/source:sourceId/);
  assert.match(geoOverlay,/map\.fitBounds\(/);
  assert.match(geoOverlay,/source location: public GIS|Sumber titik: GIS awam/);
  assert.match(geoOverlay,/if\(!result\)/);
