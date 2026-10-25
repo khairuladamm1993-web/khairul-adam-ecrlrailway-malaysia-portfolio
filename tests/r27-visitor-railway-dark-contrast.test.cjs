@@ -55,10 +55,14 @@ test('rail layer toggle label and state follow Chinese and Thai with intact view
 test('dark mode shows readable explicit named button and accepts persisted setting',()=>{
  const {w,map}=initialize();
  const theme=w.document.getElementById('theme-btn');
- assert.equal(theme.textContent,'Switch to Dark Mode');
+ assert.equal(theme.getAttribute('aria-label'),'Switch to Dark Mode');
+ assert.equal(theme.getAttribute('title'),'Switch to Dark Mode');
+ assert.equal(theme.querySelectorAll('.theme-contrast-icon').length,1);
  theme.click();
  assert.equal(w.document.documentElement.dataset.theme,'dark');
- assert.equal(theme.textContent,'Switch to Light Mode');
+ assert.equal(theme.getAttribute('aria-label'),'Switch to Light Mode');
+ assert.equal(theme.getAttribute('aria-pressed'),'true');
+ assert.equal(theme.textContent,'');
  assert.equal(w.localStorage.getItem('railway-theme'),'dark');
  assert(map.currentStyle.endsWith('/dark'));
  assert.equal(map.getLayer('mrl-railway').layout.visibility,'none');
