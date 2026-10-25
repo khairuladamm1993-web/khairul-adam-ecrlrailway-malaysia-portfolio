@@ -435,7 +435,7 @@ function renderKLRegistry(){
  const box=el('kl-registry'),api=window.MRS10KLRegistry;
  if(!box)return;
  box.hidden=!pilotMode||activeRegion!=='malaysia'||!api?.validateRegistry?.();
- if(box.hidden)return;
+ if(box.hidden){syncKajangPoiHighlights();return;}
  const local=klRegistryLocales[lang]||klRegistryLocales.en,registry=api.catalog;
  el('kl-registry-title').textContent=local.summary;
  el('kl-registry-warning').textContent=local.warning;
