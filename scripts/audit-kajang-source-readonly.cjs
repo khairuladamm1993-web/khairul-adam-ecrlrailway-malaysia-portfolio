@@ -7,6 +7,7 @@
 const baseOSM='https://api.openstreetmap.org/api/0.6';
 const dbkl='https://cps.dbkl.gov.my/server/rest/services/CPS_Public/CPS_Public/FeatureServer/13/query';
 const selangor='https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer/15/query';
+const overpass='https://overpass.private.coffee/api/interpreter';
 const withQuery=(base,query)=>base+'?'+new URLSearchParams(query).toString();
 const endpoints=Object.freeze([
  Object.freeze({id:'osm_relation_8000326',kind:'osm-relation',url:baseOSM+'/relation/8000326'}),
@@ -14,6 +15,8 @@ const endpoints=Object.freeze([
  Object.freeze({id:'dbkl_mrt1_segments',kind:'arcgis',url:withQuery(dbkl,{
   where:'1=1',outFields:'OBJECTID_1,dari_stese,hingga_ste,jenis_trek,Operator,sistem',
   returnGeometry:'true',outSR:'4326',resultRecordCount:'75',f:'json'})}),
+ Object.freeze({id:'overpass_osm_candidates',kind:'overpass',url:withQuery(overpass,{
+  data:'[out:json][timeout:8];(relation(8000326);way(778403716););out body;'})}),
  Object.freeze({id:'selangor_mrt_kajang',kind:'arcgis',url:withQuery(selangor,{
   where:'1=1',outFields:'*',returnGeometry:'true',outSR:'4326',resultRecordCount:'75',f:'json'})})
 ]);
@@ -41,6 +44,27 @@ function osmSummary(xml,kind,id){
   returnedNodes:nodeSet.size,allReferencedNodesPresent:refs.length>1&&refs.every(x=>nodeSet.has(x[1])),
   candidateOnly:true,geometryVerified:false,relationMembershipVerified:false};
 }
+function haversineKm(a,b){
+ const rad=Math.PI/180,R=6371.0088;
+ const dLat=(b[1]-a[1])*rad,dLon=(b[0]-a[0])*rad,latA=a[1]*rad,latB=b[1]*rad;
+ const q=Math.sin(dLat/2)**2+Math.cos(latA)*Math.cos(latB)*Math.sin(dLon/2)**2;
+ return 2*R*Math.asin(Math.min(1,Math.sqrt(q)));
+}
+function overpassSummary(payload,id){
+ if(payload?.remark&&/runtime error|too many requests|rate limit/i.test(payload.remark))
+  return {id,status:'OVERPASS_UNAVAILABLE',reason:String(payload.remark).slice(0,110),candidateOnly:true,geometryVerified:false};
+ const els=payload?.elements;
+ if(!Array.isArray(els))return {id,status:'OVERPASS_NO_ELEMENTS',candidateOnly:true,geometryVerified:false};
+ const relation=els.find(e=>e.type==='relation'&&e.id===8000326);
+ const way=els.find(e=>e.type==='way'&&e.id===778403716);
+ const membership=Array.isArray(relation?.members)&&relation.members.some(m=>m.type==='way'&&m.ref===778403716);
+ return {id,status:'OVERPASS_RESPONSE_READ',foundRelation:!!relation,relationVersion:relation?.version??null,
+  relationTags:relation?.tags?Object.fromEntries(Object.entries(relation.tags).filter(([k])=>['type','route','network','name','operator','ref'].includes(k))):null,
+  relationMemberCount:relation?.members?.length??null,relationWayCount:relation?.members?.filter(m=>m.type==='way').length??null,
+  foundWay:!!way,wayVersion:way?.version??null,
+  wayTags:way?.tags?Object.fromEntries(Object.entries(way.tags).filter(([k])=>['railway','name','operator','ref','usage'].includes(k))):null,
+  candidateWayInRelation:membership,candidateOnly:true,geometryVerified:false,continuityVerified:false};
+}
 function arcgisSummary(payload,id){
  if(!payload||typeof payload!=='object'||Array.isArray(payload))throw Error('NON_JSON_GIS');
  if(payload.error)return {status:'GIS_ERROR',id,errorCode:payload.error.code||null,message:String(payload.error.message||'').slice(0,120)};
@@ -50,10 +74,31 @@ function arcgisSummary(payload,id){
  const pointCounts=geometryFeatures.map(f=>f.geometry.paths.reduce((n,p)=>n+(Array.isArray(p)?p.length:0),0));
  const sample=features.slice(0,3).map(f=>({from:f.attributes?.dari_stese??null,to:f.attributes?.hingga_ste??null,
   operator:f.attributes?.Operator??null,system:f.attributes?.sistem??null,trackType:f.attributes?.jenis_trek??null}));
+ const keys=Object.keys(features[0]?.attributes||{}).sort();
+ const selected=keys.filter(k=>/name|route|operator|sistem|line|type|jenis|kajang|track|status|laluan|length|panjang|Shape/i.test(k)).slice(0,16);
+ const distinct={};for(const key of selected){
+  const values=[...new Set(features.map(f=>String(f.attributes?.[key]??'').trim()).filter(Boolean))];
+  distinct[key]=values.slice(0,8).map(x=>x.slice(0,60));
+ }
+ let lengthKm=0,vertices=0,minLon=Infinity,minLat=Infinity,maxLon=-Infinity,maxLat=-Infinity;
+ for(const f of geometryFeatures){for(const p of f.geometry.paths){
+  if(!Array.isArray(p))continue;
+  for(let i=0;i<p.length;i++){
+   const c=p[i];if(!Array.isArray(c)||c.length<2||!Number.isFinite(c[0])||!Number.isFinite(c[1])||
+    c[0]<99||c[0]>120||c[1]<0||c[1]>8)continue;
+   minLon=Math.min(minLon,c[0]);minLat=Math.min(minLat,c[1]);
+   maxLon=Math.max(maxLon,c[0]);maxLat=Math.max(maxLat,c[1]);vertices++;
+   if(i>0&&Array.isArray(p[i-1])&&Number.isFinite(p[i-1][0])&&Number.isFinite(p[i-1][1]))
+    lengthKm+=haversineKm(p[i-1],c);
+  }
+ }}
  return {status:'LIVE_FEATURE_COLLECTION_READ',id,featureCount:features.length,geometryFeatureCount:geometryFeatures.length,
-  pointCountTotal:pointCounts.reduce((a,b)=>a+b,0),exceededTransferLimit:!!payload.exceededTransferLimit,
-  sample,candidateOnly:true,geometryVerified:false,sourceLicenseVerified:false,
-  fullCorridorCovered:false};
+  pointCountTotal:pointCounts.reduce((a,b)=>a+b,0),validatedVertices:vertices,
+  bounds:vertices?[minLon,minLat,maxLon,maxLat].map(n=>Number(n.toFixed(5))):null,
+  undeduplicatedFeatureLengthKm:Number(lengthKm.toFixed(2)),
+  lengthCaveat:'Sum of all GIS feature paths, NOT operator service length or verified physical single-track kilometres',
+  attrKeys:keys.slice(0,25),distinctRelevantAttributes:distinct,exceededTransferLimit:!!payload.exceededTransferLimit,
+  sample,candidateOnly:true,geometryVerified:false,sourceLicenseVerified:false,fullCorridorCovered:false};
 }
 async function fetchBounded(url){
  const r=await fetch(url,{method:'GET',redirect:'error',signal:AbortSignal.timeout(9000),
@@ -71,6 +116,7 @@ async function probe(e,fetcher=fetchBounded){
  try{
   const body=await fetcher(e.url);
   const result=e.kind==='arcgis'?arcgisSummary(JSON.parse(body),e.id):
+   e.kind==='overpass'?overpassSummary(JSON.parse(body),e.id):
    osmSummary(body,e.kind,e.id.replace('osm_relation_','').replace('osm_way_',''));
   return {...result,source:e.url};
  }catch(err){return {id:e.id,status:'SOURCE_UNAVAILABLE',reason:String(err?.message||err).slice(0,90),source:e.url,
@@ -86,4 +132,4 @@ async function main(){
  }));
 }
 if(require.main===module)main().catch(e=>{console.error('KAJANG_AUDIT_INTERNAL_ERROR',e.message);process.exitCode=1});
-module.exports={endpoints,tags,osmSummary,arcgisSummary,probe};
+module.exports={endpoints,tags,osmSummary,arcgisSummary,overpassSummary,probe};
