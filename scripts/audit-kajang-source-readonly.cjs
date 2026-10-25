@@ -76,6 +76,34 @@ function arcgisSummary(payload,id){
   operator:f.attributes?.Operator??null,system:f.attributes?.sistem??null,trackType:f.attributes?.jenis_trek??null}));
  const keys=Object.keys(features[0]?.attributes||{}).sort();
  const selected=keys.filter(k=>/name|route|operator|sistem|line|type|jenis|kajang|track|status|laluan|length|panjang|Shape/i.test(k)).slice(0,16);
+ // The GIS layer index 15 is a MULTI-ROUTE collection despite its advertised
+ // name. Never infer that its entire collection belongs to MRT Kajang.
+ const kajangNames=new Set([
+  'Laluan Kajang (Kwasa Damansara → Kajang)',
+  'Laluan Kajang (Kajang → Kwasa Damansara)'
+ ]);
+ const directedKajang=features.filter(f=>kajangNames.has(String(f.attributes?.name||'').trim()));
+ const nonKajangRouteExamples=[...new Set(features.map(f=>String(f.attributes?.name||'').trim())
+  .filter(n=>n&&!kajangNames.has(n)))].slice(0,6);
+ let kajangLengthKm=0,kajangVertices=0,minKLon=Infinity,minKLat=Infinity,maxKLon=-Infinity,maxKLat=-Infinity;
+ for(const f of directedKajang){
+  for(const p of f.geometry?.paths||[]){
+   if(!Array.isArray(p))continue;
+   for(let i=0;i<p.length;i++){
+    const c=p[i];if(!Array.isArray(c)||c.length<2||!Number.isFinite(c[0])||!Number.isFinite(c[1]))continue;
+    minKLon=Math.min(minKLon,c[0]);minKLat=Math.min(minKLat,c[1]);
+    maxKLon=Math.max(maxKLon,c[0]);maxKLat=Math.max(maxKLat,c[1]);kajangVertices++;
+    if(i>0&&Array.isArray(p[i-1])&&Number.isFinite(p[i-1][0])&&Number.isFinite(p[i-1][1]))
+     kajangLengthKm+=haversineKm(p[i-1],c);
+   }
+  }
+ }
+ const kajangDirectedCandidates=directedKajang.slice(0,10).map(f=>({
+  name:String(f.attributes?.name||'').slice(0,110),osmType:String(f.attributes?.osm_type||'').slice(0,20),
+  osmId:String(f.attributes?.osm_id??'').slice(0,28),fullId:String(f.attributes?.full_id??'').slice(0,40),
+  paths:f.geometry?.paths?.length??0,
+  vertices:f.geometry?.paths?.reduce((n,p)=>n+(Array.isArray(p)?p.length:0),0)??0
+ }));
  const distinct={};for(const key of selected){
   const values=[...new Set(features.map(f=>String(f.attributes?.[key]??'').trim()).filter(Boolean))];
   distinct[key]=values.slice(0,8).map(x=>x.slice(0,60));
@@ -97,7 +125,16 @@ function arcgisSummary(payload,id){
   bounds:vertices?[minLon,minLat,maxLon,maxLat].map(n=>Number(n.toFixed(5))):null,
   undeduplicatedFeatureLengthKm:Number(lengthKm.toFixed(2)),
   lengthCaveat:'Sum of all GIS feature paths, NOT operator service length or verified physical single-track kilometres',
-  attrKeys:keys.slice(0,25),distinctRelevantAttributes:distinct,exceededTransferLimit:!!payload.exceededTransferLimit,
+  attrKeys:keys.slice(0,25),distinctRelevantAttributes:distinct,
+  containsOtherRoutes:nonKajangRouteExamples.length>0,
+  nonKajangRouteExamples,
+  kajangDirectedCandidateCount:directedKajang.length,
+  kajangDirectedCandidates,
+  kajangDirectedUndeduplicatedLengthKm:Number(kajangLengthKm.toFixed(2)),
+  kajangDirectedVertices:kajangVertices,
+  kajangDirectedBounds:kajangVertices?[minKLon,minKLat,maxKLon,maxKLat].map(n=>Number(n.toFixed(5))):null,
+  gisKajangCaveat:'Direction-specific service route geometry, NOT distinct survey tracks; cannot draw physical Kajang alignment without source/rights/topology review',
+  exceededTransferLimit:!!payload.exceededTransferLimit,
   sample,candidateOnly:true,geometryVerified:false,sourceLicenseVerified:false,fullCorridorCovered:false};
 }
 async function fetchBounded(url){
