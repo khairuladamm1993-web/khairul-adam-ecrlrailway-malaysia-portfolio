@@ -129,7 +129,47 @@
   return data.physicalSegments.length===0;
  }
  function findRoute(id){return catalog.routes.find(r=>r.id===id)||null}
- const api=Object.freeze({catalog,validateRegistry,findRoute});
+ // The two exact source strings below were observed in Owner Safari POI
+ // screenshots and cross-checked against the operator-ordered 29-stop list.
+ // They are NOT OSM way IDs, operator equipment codes, or precise station
+ // coordinates. Do not match a generic "Kajang" / "Pasar Seni" POI alone:
+ // interchange names are ambiguous and transport-mode tags are imperfect.
+ const observedPoiLabels=Object.freeze([
+  Object.freeze({raw:'KG16 Pasar Seni',officialName:'Pasar Seni',stationId:'mrt-pasar-seni',
+   evidence:'OWNER_SAFARI_R216_PASAR_SENI_POI'}),
+  Object.freeze({raw:'KG35 Kajang',officialName:'Kajang',stationId:'mrt-kajang',
+   evidence:'OWNER_SAFARI_R216_KAJANG_POI'})
+ ]);
+ function matchSourcedKajangPoi(props){
+  if(!props||props.class!=='railway'||props.subclass!=='station')return null;
+  const sourceName=typeof props.name==='string'?props.name.trim():'';
+  const recognized=observedPoiLabels.find(x=>x.raw===sourceName);
+  if(!recognized)return null;
+  // Optional Latin/English name must not contradict the exact raw source.
+  const en=String(props['name:en']||props.name_en||'').trim();
+  if(en && en.toLowerCase()!==recognized.officialName.toLowerCase() &&
+      en.toLowerCase()!==recognized.raw.toLowerCase())return null;
+  const service=findRoute('mrt-kajang'),order=service?.stationSequence?.indexOf(recognized.stationId);
+  const entry=catalog.stations.find(x=>x.id===recognized.stationId);
+  if(!entry||order<0||entry.name!==recognized.officialName)return null;
+  return Object.freeze({
+   routeId:service.id,routeName:service.name,stationId:entry.id,
+   stationName:entry.name,stopPosition:order+1,stopCount:service.stationSequence.length,
+   status:'CANDIDATE_EXACT_CARTOGRAPHIC_LABEL_MATCH',
+   evidence:recognized.evidence,physicalTrackId:null,geometry:null,
+   // Rendering a match does not establish an OSM route relation or way.
+   relationId:null,routeGeometryStatus:'UNVERIFIED'
+  });
+ }
+ const osmRelationAudit=Object.freeze({
+  relationCandidateIds:Object.freeze([]),acceptedRelationIds:Object.freeze([]),
+  acceptedWayIds:Object.freeze([]),verifiedPhysicalTracks:0,
+  routeRelationsNote:'OSM PTv2 route/route_master can describe variants/directions, stop/platform relations and member ways; source relation membership and way continuity require separate verification before using geometry.',
+  guidanceUrls:Object.freeze(['https://wiki.openstreetmap.org/wiki/Public_transport',
+   'https://wiki.openstreetmap.org/wiki/Relation:route']),
+  currentStatus:'NO_OSM_RELATION_OR_TRACK_WAY_MATCH_VERIFIED'
+ });
+ const api=Object.freeze({catalog,validateRegistry,findRoute,matchSourcedKajangPoi,osmRelationAudit});
  if(typeof module==='object'&&module.exports)module.exports=api;
  if(root)root.MRS10KLRegistry=api;
 })(typeof window!=='undefined'?window:null);
