@@ -17,7 +17,7 @@ const uiText={
 };
 
 const railLegendI18n={
- ms:{title:'Petunjuk warna railway',note:'Warna lapisan standard OpenRailwayMap sahaja. Garisan pada peta asas mungkin bukan railway; warna bukan pengesahan elektrifikasi atau kelajuan sebenar.',items:['Laluan utama','Rel laju (tag highspeed)','Laluan cabang','Metro / subway','Industri / spur','Rel lain / yard']},
+ ms:{title:'Jenis dan warna landasan',note:'Kategori umum lapisan standard OpenRailwayMap untuk Malaysia, Thailand dan China. Bukan nama laluan individu. Warna peta asas mungkin bukan rel; tidak membuktikan elektrifikasi atau kelajuan.',items:['Main line · Laluan utama','High-speed line · Rel laju bertag','Branch line · Laluan cabang','Metro / subway','Industrial / spur · Rel industri','Other rail / yard · Rel lain']},
  en:{title:'Railway colour legend',note:'OpenRailwayMap standard layer only. Basemap lines may not be railway; these colours do not prove electrification or actual operating speeds.',items:['Main line','High-speed tagged rail','Branch line','Metro / subway','Industrial / spur','Other rail / yard']},
  zh:{title:'铁路颜色图例',note:'仅适用于 OpenRailwayMap 标准图层。底图线条可能不是铁路；颜色不能证明电气化或实际运行速度。',items:['铁路干线','高速铁路标记','铁路支线','地铁','工业线 / 专用线','其他轨道 / 车场']},
  th:{title:'คำอธิบายสีทางรถไฟ',note:'ใช้กับชั้นมาตรฐาน OpenRailwayMap เท่านั้น เส้นบนแผนที่พื้นฐานอาจไม่ใช่ทางรถไฟ และสีไม่ได้ยืนยันระบบไฟฟ้าหรือความเร็วจริง',items:['ทางรถไฟสายหลัก','รางที่ระบุว่าเป็นความเร็วสูง','ทางรถไฟสายรอง','รถไฟฟ้าใต้ดิน','รางอุตสาหกรรม / รางแยก','รางอื่น / ลานจอด']}
@@ -47,6 +47,12 @@ const campusText={
  th:{button:'🎓 LRVTC · วิทยาเขตกวนถัง',title:'LRVTC · วิทยาเขตกวนถัง',
   note:'หมุดอ้างอิงบริเวณวิทยาเขต ไม่ใช่ทางเข้าหรืออาคารที่พักที่ยืนยันตำแหน่งแล้ว'}
 };
+const legendExplanations={
+ ms:['Laluan utama. Nama sebenar hanya ditunjukkan apabila sumber mengenal pastinya.','Rel yang ditanda high-speed dalam data peta, bukan pengesahan kelajuan operasi.','Laluan cabang atau sambungan kepada laluan utama.','Kategori metro; jangan anggap setiap garisan biru/ungu pada peta asas ialah metro.','Rel industri atau spur.','Rel lain, kawasan yard atau rel tanpa kategori khusus.'],
+ en:['Main railway corridor; exact route name needs source evidence.','Tagged high-speed infrastructure; not a verified operational speed.','Branch off a main corridor.','Metro category; not every purple/blue basemap line is metro.','Industrial or spur infrastructure.','Other rail, yard or otherwise unclassified track.'],
+ zh:['铁路干线；具体线路名称需要来源支持。','数据中标记为高速的铁路，不代表已核实运营速度。','连接主线的支线。','地铁类别；底图紫色线不一定是地铁。','工业铁路或专用线。','其他轨道或车场。'],
+ th:['ทางรถไฟสายหลัก ชื่อเส้นทางต้องมีข้อมูลรองรับ','ข้อมูลระบุว่าเป็นรางความเร็วสูง ไม่ใช่การยืนยันความเร็วใช้งานจริง','ทางรถไฟสายรอง','ประเภทเมโทร สีม่วงบนแผนที่พื้นฐานไม่จำเป็นต้องเป็นเมโทร','ทางรถไฟอุตสาหกรรม / รางแยก','รางอื่นหรือลานจอด']
+};
 const el=id=>document.getElementById(id);
 let lang='ms',map=null,ready=false,railDetails=false,activeRegion='malaysia',campusMarker=null;
 const railVisibility=on=>on?'visible':'none';
@@ -59,10 +65,7 @@ function makeCampusPopup(){
  return root;
 }
 function syncCampusPin(){
- const box=el('campus-location'),button=el('campus-focus');
  const china=activeRegion==='china';
- if(box)box.hidden=!china;
- if(button)button.textContent=campusText[lang].button;
  if(!china){
   if(campusMarker){campusMarker.remove();campusMarker=null;}
   return;
@@ -89,7 +92,7 @@ function setRailVisibility(){
  const note=el('railway-note');if(note)note.textContent=railDetails?readableRailLanguage[lang].technical:uiText[lang].railNote;
  const quick=el('rail-mode-status');
  if(quick)quick.textContent=railDetails?readableRailLanguage[lang].technical:readableRailLanguage[lang].railLines;
- const legend=el('railway-legend');if(legend)legend.hidden=!railDetails;
+ const legend=el('railway-legend');if(legend && !railDetails)legend.open=false;
 
 }
 try{const v=localStorage.getItem('railway-language');if(locales.includes(v))lang=v;}catch{}
@@ -118,7 +121,9 @@ function render(){
  const legendCopy=railLegendI18n[lang];
  const legendTitle=el('railway-legend-title');if(legendTitle)legendTitle.textContent=legendCopy.title;
  const legendNote=el('railway-legend-note');if(legendNote)legendNote.textContent=legendCopy.note;
+ const legendSummary=el('railway-legend-trigger');if(legendSummary){legendSummary.setAttribute('aria-label',legendCopy.title);legendSummary.title=legendCopy.title;}
  document.querySelectorAll('[data-rail-legend]').forEach(node=>{const i=Number(node.dataset.railLegend);if(Number.isInteger(i)&&i>=0&&i<legendCopy.items.length)node.textContent=legendCopy.items[i];});
+ renderLegendDetail();
  const guideTitle=el('liuzhou-title');if(guideTitle)guideTitle.textContent=readableRailLanguage[lang].guide;
  const guideHint=el('liuzhou-hint');if(guideHint)guideHint.textContent=readableRailLanguage[lang].guideHint;
  syncCampusPin();
@@ -132,6 +137,13 @@ function render(){
   const flag=['🇲🇾','🇹🇭','🇨🇳'][i];
   if(countryNames[lang][i])b.textContent=flag+' '+countryNames[lang][i];
  });
+}
+let selectedRailLegend=0;
+function renderLegendDetail(){
+ const heading=el('rail-legend-selected-name'),description=el('rail-legend-selected-note');
+ if(heading)heading.textContent=railLegendI18n[lang].items[selectedRailLegend];
+ if(description)description.textContent=legendExplanations[lang][selectedRailLegend];
+ document.querySelectorAll('[data-rail-legend]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.railLegend)===selectedRailLegend)));
 }
 function setLanguage(v){
  if(!locales.includes(v))return;lang=v;
@@ -250,12 +262,15 @@ function init(){
   el('liuzhou-guide').hidden=activeRegion!=='china';
   syncCampusPin();
  }));
- el('campus-focus').addEventListener('click',()=>{
-  activeRegion='china';syncCampusPin();
-  if(map)map.flyTo({center:LRVTC_CAMPUS.lngLat,zoom:13,duration:700});
-  if(campusMarker&&campusMarker.getPopup?.()&&!campusMarker.getPopup().isOpen?.())
-   campusMarker.togglePopup();
- });
+ // Marker click is handled by MapLibre Marker.setPopup(), without an external campus button.
+ document.querySelectorAll('[data-rail-legend]').forEach(b=>b.addEventListener('click',()=>{
+  const i=Number(b.dataset.railLegend);
+  if(Number.isInteger(i)&&i>=0&&i<6){selectedRailLegend=i;renderLegendDetail();}
+ }));
+ const mapLegend=el('railway-legend');
+ if(mapLegend)mapLegend.addEventListener('toggle',()=>{if(mapLegend.open&&!railDetails){
+  const note=el('railway-legend-note');if(note)note.textContent=railLegendI18n[lang].note;
+ }});
  el('theme-btn').addEventListener('click',()=>{
   const next=theme()==='dark'?'light':'dark';
   try{localStorage.setItem('railway-theme',next)}catch{}
