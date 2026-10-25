@@ -55,7 +55,7 @@ test('R2.15.1 genuine map tap reports no source-backed feature and never fabrica
  assert.equal(typeof map.handlers.click,'function');
  map.handlers.click({point:{x:120,y:200},lngLat:{lng:101.7,lat:3.15}});
  const status=doc.getElementById('railway-pilot-status').textContent;
- assert.match(status,/No selectable vector rail or station/);
+ assert.match(status,/Tiada ciri rel atau stesen vektor/);
  assert(!/KTM|MRT|LRT|Rapid KL/.test(status));
  w.close();
 });
