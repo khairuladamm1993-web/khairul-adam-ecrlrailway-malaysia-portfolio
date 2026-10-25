@@ -170,13 +170,61 @@
    relationId:null,routeGeometryStatus:'UNVERIFIED'
   });
  }
+ // R2.17.1: discovery references only. Neither a Wikidata P402 reference
+ // nor a third-party OSM mirror is an authoritative way-membership proof.
+ // A route relation can model passenger service without modelling physical tracks.
+ // Do not render or import these candidate IDs as physical geometry.
  const osmRelationAudit=Object.freeze({
-  relationCandidateIds:Object.freeze([]),acceptedRelationIds:Object.freeze([]),
-  acceptedWayIds:Object.freeze([]),verifiedPhysicalTracks:0,
-  routeRelationsNote:'OSM PTv2 route/route_master can describe variants/directions, stop/platform relations and member ways; source relation membership and way continuity require separate verification before using geometry.',
+  relationCandidateIds:Object.freeze(['8000326']),
+  wayCandidateIds:Object.freeze(['778403716']),
+  candidates:Object.freeze([
+   Object.freeze({
+    type:'relation',id:'8000326',status:'DISCOVERED_UNVERIFIED',
+    source:'WIKIDATA_P402_UNREFERENCED',
+    sourceUrl:'https://www.wikidata.org/wiki/Q6717618',
+    osmUrl:'https://www.openstreetmap.org/relation/8000326',
+    geometry:null,memberWayIds:Object.freeze([]),topologyVerified:false,
+    caveat:'Wikidata identifier has no cited claim reference; direct current OSM relation members and type were not retrieved.'
+   }),
+   Object.freeze({
+    type:'way',id:'778403716',status:'THIRD_PARTY_OSM_SNAPSHOT_UNVERIFIED',
+    source:'GEOVIEW_OSM_DERIVED_SNAPSHOT',
+    sourceUrl:'https://my.geoview.info/laluan_kajang%2C10778403716w',
+    osmUrl:'https://www.openstreetmap.org/way/778403716',
+    snapshotDate:'2025-07-14',geometry:null,memberWayIds:Object.freeze([]),
+    topologyVerified:false,
+    caveat:'Third-party snapshot labels a 4.193km subway way; live OSM way geometry, relation membership, neighbouring way continuity and KTM separation not confirmed.'
+   })
+  ]),
+  externalGeometryLayerCandidates:Object.freeze([
+   Object.freeze({
+    source:'SELANGOR_RAILWAY_MAP_ARCGIS',
+    serviceUrl:'https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer',
+    layerIndex:15,label:'MRT KAJANG LINE',status:'DISCOVERED_SCHEMA_ONLY',
+    geometry:null,licenseVerified:false,topologyVerified:false,
+    caveat:'Directory advertises route-themed layer; dataset features, currency, license and physical precision were not fetched or validated.'
+   })
+  ]),
+  operatorAlignmentContext:Object.freeze({
+   sourceUrl:'https://www.mymrt.com.my/projects/kajang-line/',
+   publishedServiceLengthKm:46,undergroundKm:9.5,
+   stations:29,geometry:null,status:'OPERATOR_AGGREGATE_ONLY',
+   caveat:'Operator summary does not supply OSM way geometry, junction locations or track topology.'
+  }),
+  acceptedRelationIds:Object.freeze([]),acceptedWayIds:Object.freeze([]),
+  verifiedPhysicalTracks:0,acceptedGeometry:null,
+  evidenceGates:Object.freeze([
+   'FETCH_LIVE_OSM_RELATION_AND_WAY_ATTRIBUTES',
+   'VERIFY_RELATION_TYPE_SERVICE_DIRECTION_AND_MEMBERS',
+   'VERIFY_WAY_GEOMETRY_AND_TOPOLOGICAL_CONTINUITY',
+   'SEPARATE_KTM_AND_NON_KAJANG_RAIL_INFRASTRUCTURE',
+   'VERIFY_CURRENT_ALIGNMENT_AND_SOURCE_LICENSE',
+   'QA_PREVIEW_THEN_OWNER_SAFARI_UAT'
+  ]),
+  routeRelationsNote:'OSM route/route_master may describe passenger service or directions, not surveyed physical tracks. Candidates cannot colour full physical alignment without member-way and way-geometry verification.',
   guidanceUrls:Object.freeze(['https://wiki.openstreetmap.org/wiki/Public_transport',
    'https://wiki.openstreetmap.org/wiki/Relation:route']),
-  currentStatus:'NO_OSM_RELATION_OR_TRACK_WAY_MATCH_VERIFIED'
+  currentStatus:'OSM_CANDIDATES_FOUND_GEOMETRY_AND_MEMBERSHIP_UNVERIFIED'
  });
  const api=Object.freeze({catalog,validateRegistry,findRoute,matchSourcedKajangPoi,osmRelationAudit});
  if(typeof module==='object'&&module.exports)module.exports=api;
