@@ -3352,5 +3352,178 @@
     },
     "decision": "NO-GO Preview UAT/Production/merge. Source current 330/330 PASS; first deployment was unexpectedly production-target and project was paused; recover a strictly non-production Preview with approval and safeguards.",
     "nextAction": "Preserve source QA and pause. Resolve Vercel first-deployment target mismatch and secure a genuinely isolated non-production Preview before Owner Safari. Do not unpause, redeploy, merge, modify main, auth/RLS, R2.17/18/19 or simulators without appropriate approval."
+  },
+  "integrationR2173": {
+    "project": "P01",
+    "issueId": "r2173-kajang-real-physical-alignment-source-audit",
+    "title": "R2.17.3 — Live MRT Kajang direction-geometry source audit, preserve source-backed green 29-stop station functions",
+    "checkedOn": "2026-10-26",
+    "state": "SOURCE_GEOMETRY_LIVE_READ_QA_PASS_PHYSICAL_TRACK_UNVERIFIED",
+    "ownerIntent": "Audit actual Kajang line geometry with KTM/LRT isolation while preserving approved green 29-station service Registry and sourced station marker functions. No production/merge approval.",
+    "parent": {
+      "issueId": "r2172-kajang-29-source-poi-green",
+      "sourceCommit": "b6fc699c9c69e9f62613c82e6ce07be7cc0901da",
+      "ownerSafari": "Owner screenshot 2026-10-26 05:41 MYT confirms green KG13 station marker and Kajang 9/29 popup in light mode; retain partial PASS."
+    },
+    "sourceObservations": {
+      "operator": {
+        "source": "https://www.mymrt.com.my/projects/kajang-line/",
+        "stations": 29,
+        "publishedCorridorKm": 46,
+        "undergroundKm": 9.5,
+        "status": "OFFICIAL_AGGREGATE_CONFIRMED_NOT_SURVEYED_TRACK"
+      },
+      "selangorGis": {
+        "source": "https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer/15",
+        "status": "LIVE_GIS_FEATURES_READ_MIXED_SERVICE_ROUTES",
+        "fullLayerFeatures": 62,
+        "fullLayerVertices": 23805,
+        "containsOtherRoutes": true,
+        "otherRoutesExamples": [
+          "Kelana Jaya",
+          "Ampang",
+          "Sri Petaling",
+          "KTM Port Klang",
+          "KLIA Transit"
+        ],
+        "selectedBy": "Exact source-record name, not map proximity or layer title",
+        "kajangDirectionCandidates": [
+          {
+            "name": "Laluan Kajang (Kwasa Damansara → Kajang)",
+            "osmType": "relation",
+            "osmId": "5690837",
+            "paths": 12,
+            "vertices": 778,
+            "status": "GIS_SOURCED_DIRECTION_CANDIDATE_ONLY"
+          },
+          {
+            "name": "Laluan Kajang (Kajang → Kwasa Damansara)",
+            "osmType": "relation",
+            "osmId": "8000325",
+            "paths": 11,
+            "vertices": 789,
+            "status": "GIS_SOURCED_DIRECTION_CANDIDATE_ONLY"
+          }
+        ],
+        "selectedCandidateVertices": 1567,
+        "twoDirectionPathSumKm": 93.52,
+        "twoDirectionLengthCaveat": "Sum of service-direction geometry paths, NOT physical track length or a single 93.52km railway; bidirectional features double count.",
+        "selectedBoundsWgs84": [
+          101.56374,
+          2.98245,
+          101.79046,
+          3.17652
+        ],
+        "physicalWayMembership": "UNVERIFIED",
+        "relationVersion": "UNVERIFIED",
+        "copyUseLicense": "UNVERIFIED"
+      },
+      "dbklGis": {
+        "source": "https://cps.dbkl.gov.my/server/rest/services/CPS_Public/CPS_Public/FeatureServer/13",
+        "status": "LIVE_GIS_PARTIAL_CORRIDOR_READ",
+        "features": 1,
+        "vertices": 189,
+        "boundsWgs84": [
+          101.61478,
+          3.07891,
+          101.74853,
+          3.15348
+        ],
+        "undeduplicatedFeatureLengthKm": 24.9,
+        "operatorField": "Prasaran",
+        "systemField": "MRT",
+        "fromToStationFields": "BLANK",
+        "fullCorridor": "NOT_COVERED",
+        "physicalPrecision": "UNVERIFIED"
+      },
+      "osmDirect": {
+        "relationOlderCandidate": "8000326",
+        "wayOlderCandidate": "778403716",
+        "apiStatus": "HTTP_429_BOTH",
+        "alternativeOverpassStatus": "TIMEOUT",
+        "liveMembershipVerified": false,
+        "acceptedRelationIds": [],
+        "acceptedPhysicalWayIds": []
+      },
+      "decision": {
+        "acceptedPhysicalWayIds": [],
+        "acceptedFullLineGeometry": null,
+        "verifiedPhysicalTracks": 0,
+        "fullGreenPhysicalTrackAllowed": false,
+        "reason": "Mixed GIS collection; two Kajang source features are service-direction relations, not verified individual railway physical way segments. Current OSM way members, topology, KTM separation and reuse rights remain unverified."
+      }
+    },
+    "development": {
+      "branch": "feature/mrs10-r2173-kajang-physical-line-source-audit",
+      "parentSourceCommit": "b6fc699c9c69e9f62613c82e6ce07be7cc0901da",
+      "sourceCommit": "eacf87062dacca0d85c1b7b96c99bbdedfefaf66",
+      "changedFiles": [
+        "scripts/audit-kajang-source-readonly.cjs",
+        "tests/r2173-kajang-physical-source-audit.test.cjs",
+        "package.json",
+        "docs/r2173-kajang-physical-line-source-audit.md"
+      ],
+      "unchangedProtected": [
+        "assets/map-language-lab.js",
+        "assets/railway-track-registry-kl.js",
+        "map-language-lab.html",
+        "GitHub main",
+        "Production",
+        "Supabase Auth/RLS",
+        "R2.18",
+        "R2.19",
+        "R2.20",
+        "P02",
+        "P03"
+      ],
+      "operation": "Source-only bounded HTTPS read-only diagnostic, never auto-adds railway map physical line or claims approved way IDs"
+    },
+    "qa": {
+      "fullRegression": "337/337 Node PASS, 0 FAIL, 0 SKIP",
+      "catalogue": "14/14 PASS, 0 FAIL, 0 SKIP",
+      "staging": "READY; target staging; exact source SHA verified",
+      "artifacts": "HTTP 200 map-language-lab.html, map-language-lab.js, railway-track-registry-kl.js; HTTP 404 restricted Member/quiz script artifacts",
+      "liveEvidence": "Vercel isolated staging build dpl_DtgfxVoMLvgDaLcQNpYkCbmDwmVQ performed bounded live Selangor GIS and DBKL source reads at commit 294c0b2c472978d89f10afbbfaa9411c1a4e7a22; OSM HTTP 429, Overpass timeout; results summarized in report",
+      "tests": "Mixed-source exclusion, exact Kajang direction labels, source bounds, no geometry auto-approval, KG13 9/29 preservation and negative rejection",
+      "ownerSafari": "NO NEW SAFARI UAT — no visible map code or Registry station style changes; R2.17.2 owner 05:41 partial PASS retained"
+    },
+    "finalStaging": {
+      "project": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_6dZAjA2USzCQ2YVsnEfd5we3699d",
+      "target": "staging",
+      "state": "READY",
+      "sourceSha": "eacf87062dacca0d85c1b7b96c99bbdedfefaf66",
+      "url": "https://mrs10-r211-mobile-map-lq20gkh5a-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "sourceOnly": "YES — no physical alignment recolour"
+    },
+    "evidence": {
+      "technicalReport": "docs/r2173-kajang-physical-line-source-audit.md",
+      "script": "scripts/audit-kajang-source-readonly.cjs",
+      "test": "tests/r2173-kajang-physical-source-audit.test.cjs",
+      "official": "https://www.mymrt.com.my/projects/kajang-line/",
+      "mapSchematic": "https://www.mymrt.com.my/wp-content/uploads/2025/05/MRT-Kajang-Line-Alignment-Map-MAY-2025-scaled.jpg",
+      "selangorGis": "https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer/15",
+      "dbklGis": "https://cps.dbkl.gov.my/server/rest/services/CPS_Public/CPS_Public/FeatureServer/13"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO FULL GREEN PHYSICAL ALIGNMENT / NO-GO PRODUCTION OR MERGE. Real GIS route-direction candidates sourced and code QA PASS; physical way IDs, individual connected tracks, KTM exclusion and license conditions still not proven.",
+    "nextAction": "Verify live OSM relation memberships for 5690837 and 8000325 and older 8000326; collect dated individual railway way IDs and confirm connected geometry, KTM/Putrajaya separation, ODbL/third-party reuse rights. Only after these gates consider source-backed GREEN service-line overlay (distinct from physical/surveyed tracks), separate QA and Owner Safari approval. Preserve R2.17.2 source-backed green station function.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "r2172": "PRESERVED",
+      "r218": "UNTOUCHED",
+      "r219": "UNTOUCHED",
+      "r220": "UNTOUCHED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT DONE"
+    }
   }
 }
