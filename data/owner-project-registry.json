@@ -2504,5 +2504,82 @@
         "No dated public HTTPS UAT PASS/CONFIRMED artifact supplied; formal resolution gating remains OPEN"
       ]
     }
+  },
+  "integrationR2162": {
+    "project": "P01",
+    "issueId": "r2162-kl-physical-rail-evidence-gates",
+    "title": "R2.16.2 Kuala Lumpur rail infrastructure source taxonomy and evidence requirements",
+    "checkedOn": "2026-10-26",
+    "state": "STAGING_SOURCE_AUDIT_READY_PHYSICAL_GEOMETRY_OPEN",
+    "scope": "Source audit only; physically mapped railway infrastructure remains unverified; no UI feature or exact track geometry added.",
+    "previousUat": "Owner explicitly confirmed R2.16.1 first/last of 29 displayed Kajang stops. Registry prior checkpoint already contains Owner confirmation; no duplicate UAT entry created.",
+    "development": {
+      "branch": "feature/mrs10-r2162-kl-physical-track-evidence-gates",
+      "baseCommit": "64713ca3874c5eda65d8de070081345732d6109e",
+      "sourceCommit": "9ce7dfcf86a6a80a1e2117f48b9deb6e5fdbe883",
+      "files": [
+        "assets/railway-track-physical-audit-kl.js",
+        "tests/r2162-physical-track-evidence-gates.test.cjs",
+        "package.json"
+      ],
+      "completed": [
+        "Document operator MRT Corp facts: 29 stops, 46km line, 7 underground stations, 22 elevated",
+        "Distinguish passenger service adjacency, train route relation, railway route relation and physical railway way",
+        "Explicitly require original source IDs/tags, geometry, lifecycle, topology checks and dated reviewer evidence before any physical segment can be marked verified",
+        "Reject all unsourced track candidates while the audit dataset has no verified OSM ways; no turnout/platform IDs, alignment, chainage or way IDs invented",
+        "Add negative tests proving synthetic track IDs and unmatched relations fail current pre-data audit validation"
+      ],
+      "officialReferences": [
+        "https://www.mymrt.com.my/projects/kajang-line/",
+        "https://www.mymrt.com.my/ms/ruang-acara/kajang/"
+      ],
+      "osmReferences": [
+        "https://wiki.openstreetmap.org/wiki/Open_Rail_Map",
+        "https://wiki.openstreetmap.org/wiki/OpenRailwayMap/Tagging"
+      ]
+    },
+    "coverage": {
+      "operatorNamedStations": 29,
+      "orderedPassengerServiceStopPairs": 28,
+      "verifiedInfrastructureWays": 0,
+      "verifiedMappedPhysicalTrackSegments": 0,
+      "matchedOSMTrainRouteRelations": 0,
+      "verifiedStationToPhysicalWayConnections": 0,
+      "warning": "Service station adjacencies are not identical to railway track segments; rendered teal lines do not validate physical track IDs."
+    },
+    "qa": {
+      "node": "310/310 PASS 0 FAIL/SKIP",
+      "catalogue": "14/14 PASS 0 FAIL/SKIP",
+      "deployment": "READY, isolated Vercel target staging, exact source SHA",
+      "safari": "No new UI or station gesture change in R2.16.2; prior Owner R2.16.1 endpoint UAT preserved, no new Safari UAT claimed",
+      "physicalAudit": "NOT YET PROVEN — no raw OSM infrastructure extracts or independent geometry verification",
+      "release": "NO-GO Production/merge, existing auth and private content exclusion retained"
+    },
+    "staging": {
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_9Gk15ANDQoPYfqgt7458DvrUfEmC",
+      "target": "staging",
+      "state": "READY",
+      "sourceSha": "9ce7dfcf86a6a80a1e2117f48b9deb6e5fdbe883",
+      "url": "https://mrs10-r211-mobile-map-4chy6ele6-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "note": "Audit is source-only and does not alter visible map or add physical track markers."
+    },
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO; no verified physical track geometry, provenance-linked way IDs, station-to-way topology, independent source audit, integration UAT or release approval.",
+    "nextAction": "Read trusted OSM railway way/relation data for a tightly scoped MRT Kajang test segment, record exact upstream element IDs and source snapshots, compare source tags/lifecycle and station-service alignment. Only after independently verified geometry and provenance create physical track candidate entries. Avoid publishing unverified details as official operations data.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT PERFORMED",
+      "ownerPersonalImages": "NOT PUBLISHED"
+    }
   }
 }
