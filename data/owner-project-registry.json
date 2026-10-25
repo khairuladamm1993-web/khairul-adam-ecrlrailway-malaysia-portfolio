@@ -2676,5 +2676,82 @@
       "causeConfirmedInSource": "Registry matchSourcedKajangPoi required subclass === station, while MapLibre pilotEligibleStation accepts ['station','halt','subway','tram_stop'] and Safari source showed subway.",
       "fixApproach": "Accept only railway class with subclass station or subway AND existing exact KG16/KG35 source name, reject generic names, mismatched source names, unsupported classes/modes; no physical track inference."
     }
+  },
+  "integrationR217": {
+    "project": "P01",
+    "issueId": "r217-kajang-green-identity-29-stations",
+    "title": "R2.17 MRT Kajang 29-stop green service identity and source-backed POI accent",
+    "checkedOn": "2026-10-26",
+    "state": "STAGING_READY_SAFARI_VISUAL_UAT_PENDING",
+    "ownerApproval": "Owner approved applying MRT Kajang official green identity to all 29 station records, with MRT/KTM visibly distinguishable. This is not consent to Production merge or fabricated physical geometry.",
+    "evidenceSources": [
+      "https://www.mymrt.com.my/projects/kajang-line/",
+      "https://www.mymrt.com.my/ms/awam/laluan-kajang/",
+      "https://www.mymrt.com.my/wp-content/uploads/2022/10/Annual-Progress-Report-2021_English.pdf"
+    ],
+    "development": {
+      "branch": "feature/mrs10-r217-kajang-green-identity",
+      "parentCommit": "3074361739099693965b22115a8b9c0a29323718",
+      "sourceCommit": "5b507cf18e4c308ee1cb891ebe6a279b9f3d1671",
+      "files": [
+        "assets/railway-track-registry-kl.js",
+        "assets/map-language-lab.js",
+        "map-language-lab.html",
+        "tests/r217-kajang-green-identity.test.cjs",
+        "package.json"
+      ],
+      "behavior": [
+        "All 29 operator-ordered MRT Kajang stops display 1-29 numbered green circles in the route-specific scrollable Registry; other routes retain existing neutral presentation",
+        "Light green identity #087D43, high-contrast dark-mode identity text #50E2A0; MRT Kajang matches receive popup green accent",
+        "When MRT Kajang is selected on Malaysia pilot, only OpenMapTiles source POIs with exact observed names KG16 Pasar Seni / KG35 Kajang get a subtle green layer; existing underlying station hit layer remains unchanged",
+        "Switch to another route or country hides the green highlight; no extra full-screen controls or map legend buttons",
+        "No artificial marker for the other 27 stations and no recolouring of unknown vector rail segments; KTM Kajang remains visually separate and not relabelled",
+        "No coordinate, physical railway way ID, service-route geometry, platform, turnout or chainage invented"
+      ]
+    },
+    "coverage": {
+      "operatorVerifiedServiceStops": 29,
+      "confirmedPassengerServiceAdjacencies": 28,
+      "sourceBackedExactPOIStylingCandidates": 2,
+      "otherPOIGeometryUnverified": 27,
+      "verifiedPhysicalTracks": 0,
+      "note": "All 29 green stations refer to the ordered service Registry, NOT 29 verified geolocated map POI markers. Only two source-backed observed POI labels currently receive on-map green accents."
+    },
+    "qa": {
+      "node": "318/318 PASS, 0 FAIL 0 SKIP at exact staging SHA",
+      "catalogue": "14/14 PASS, 0 FAIL 0 SKIP",
+      "deployment": "READY, isolated target staging",
+      "artifact": "HTML and registry/map JS HTTP 200; excluded Member/quiz JS HTTP 404",
+      "tests": "Color identity and dark contrast, 29 numbered list, exact green source POI filter, selection behaviour, country switch, no fabricated geometry",
+      "safari": "PENDING — Owner verify green 29-station Registry on iPhone, selection toggling and source-backed Kajang popup",
+      "notes": "Three earlier staging test runs failed newly authored harness/assertion (missing mock isStyleLoaded and cross-realm array comparison) and then caught a genuine country-switch highlight persistence bug; all fixed and final staging suite PASS."
+    },
+    "staging": {
+      "project": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_J3vMjZEpZG6BiN4Hc7YgyBmhq4v3",
+      "target": "staging",
+      "state": "READY",
+      "sourceSha": "5b507cf18e4c308ee1cb891ebe6a279b9f3d1671",
+      "url": "https://mrs10-r211-mobile-map-ad5q1z4wr-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "protection": "Existing isolated Vercel authentication and production separation preserved"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO for Production, integration and merge: staging source tests PASS but Owner Safari visual UAT not yet done; physical track alignment and station geolocation beyond exact sourced POIs remain unverified.",
+    "nextAction": "Owner opens R2.17 isolated staging on Safari iPhone, chooses Malaysia, expands Registry, selects MRT Kajang Line; verify green numbered 1 Kwasa Damansara through 29 Kajang and high-contrast dark mode. Optionally zoom near Kajang and tap exact KG35 station marker for green source identity candidate popup. Switch Thailand to ensure green highlight disappears. Do not assume all 29 map marker coordinates or physical track geometries are verified.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT DONE",
+      "ownerScreenshots": "NOT PUBLISHED"
+    }
   }
 }
