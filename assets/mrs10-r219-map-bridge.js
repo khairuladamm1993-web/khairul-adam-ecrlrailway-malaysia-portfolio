@@ -68,6 +68,7 @@ function featureAt(e){
  try{return(map.queryRenderedFeatures(b,{layers:['r219-base-stations']})||[])[0]||null}catch{return null}
 }
 function stationPopup(e){
+ if(window.MRS10AmpangGISOverlay?.at?.(e))return;
  const feature=featureAt(e);
  if(!feature||region!=='malaysia')return;
  const props=feature.properties||{},candidate=api.candidatePoi(props),verified=api.verifiedPoi(props);
@@ -93,10 +94,12 @@ map.addControl(new maplibre.NavigationControl({showCompass:false}),'top-left');
 map.on('style.load',installLayers);
 map.on('idle',applyLabels);
 map.on('click',stationPopup);
+window.MRS10AmpangGISOverlay?.attach?.({map,service:api,lib:maplibre,locale,region:()=>region});
 document.addEventListener('mrs10-r219-theme',()=>{theme=document.documentElement.dataset.theme==='dark'?'dark':'light';map.setStyle(mapStyle())});
 locale?.addEventListener('change',()=>{lastAppliedLang=null;status();applyLabels()});
 select?.addEventListener('change',()=>{
  const next=select.value;if(!centers[next])return;region=next;
+ window.MRS10AmpangGISOverlay?.toggle?.(next);
  if(activePopup){activePopup.remove();activePopup=null}
  map.flyTo({...centers[next],essential:true});status();
 });
