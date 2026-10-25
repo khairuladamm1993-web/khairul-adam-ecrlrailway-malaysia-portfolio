@@ -10,7 +10,7 @@ if(!host||!api?.validate?.())return;
 const note=document.getElementById('r219-map-note');
 const select=document.getElementById('r219-region');
 const locale=document.getElementById('lang');
-let map,theme='light',region='malaysia',activePopup=null;
+let map,theme='light',region='malaysia',activePopup=null,lastAppliedLang=null;
 const centers={malaysia:{center:[101.68653,3.14120],zoom:11.7},thailand:{center:[100.50144,13.75398],zoom:11},china:{center:[109.424,24.3285],zoom:11}};
 const help={
  ms:'Peta vektor interaktif · Titik biru ialah POI umum; marker Ampang oren masih menunggu pengesahan sumber.',
@@ -34,14 +34,17 @@ function status(){if(note)note.textContent=help[locale?.value]||help.en}
 function applyLabels(){
  if(!map?.isStyleLoaded?.())return;
  const language=locale?.value||'ms';
+ if(lastAppliedLang===language)return;
  const tags=language==='ms'?['name:ms','name:en','name:latin','name']:
  language==='en'?['name:en','name:latin','name']:['name:'+language,'name:en','name:latin','name'];
  for(const layer of map.getStyle().layers||[]){
   if(layer.type!=='symbol'||layer.layout?.['text-field']==null||!(/label_|place_|water_name|highway_name_other|highway-name-/).test(layer.id))continue;
   try{map.setLayoutProperty(layer.id,'text-field',['coalesce',...tags.map(k=>['get',k])]);}catch{}
  }
+ lastAppliedLang=language;
 }
 function installLayers(){
+ lastAppliedLang=null;
  if(!map?.getStyle?.()?.sources)return;
  const style=map.getStyle();
  const station=style.layers?.find(l=>l['source-layer']==='poi'&&style.sources[l.source]?.type==='vector')?.source;
@@ -91,7 +94,7 @@ map.on('style.load',installLayers);
 map.on('idle',applyLabels);
 map.on('click',stationPopup);
 document.addEventListener('mrs10-r219-theme',()=>{theme=document.documentElement.dataset.theme==='dark'?'dark':'light';map.setStyle(mapStyle())});
-locale?.addEventListener('change',()=>{status();applyLabels()});
+locale?.addEventListener('change',()=>{lastAppliedLang=null;status();applyLabels()});
 select?.addEventListener('change',()=>{
  const next=select.value;if(!centers[next])return;region=next;
  if(activePopup){activePopup.remove();activePopup=null}
