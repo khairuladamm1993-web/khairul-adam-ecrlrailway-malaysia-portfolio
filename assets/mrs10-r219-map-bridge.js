@@ -13,10 +13,10 @@ const locale=document.getElementById('lang');
 let map,theme='light',region='malaysia',activePopup=null,lastAppliedLang=null;
 const centers={malaysia:{center:[101.68653,3.14120],zoom:11.7},thailand:{center:[100.50144,13.75398],zoom:11},china:{center:[109.424,24.3285],zoom:11}};
 const help={
- ms:'Peta vektor interaktif · Titik biru ialah POI umum; marker Ampang oren masih menunggu pengesahan sumber.',
- en:'Interactive vector map · Blue dots are generic POIs; orange Ampang map markers await source validation.',
- zh:'交互式矢量地图 · 蓝点为普通位置标记；安邦线橙色车站标记仍待来源核实。',
- th:'แผนที่เวกเตอร์แบบโต้ตอบ · จุดสีน้ำเงินเป็นจุดทั่วไป ยังไม่ยืนยันหมุดสีส้มสาย Ampang'
+ ms:'Peta vektor interaktif · Titik biru ialah POI umum; titik oren hanya daripada sumber GIS yang berjaya dipadankan, bukan data operasi.',
+ en:'Interactive vector map · Blue dots are generic POIs; orange Ampang markers use source-matched GIS references, not operational coordinates.',
+ zh:'交互式矢量地图 · 蓝点为普通兴趣点；橙点仅对应公共 GIS 来源记录，并非运营坐标。',
+ th:'แผนที่เวกเตอร์ · จุดสีน้ำเงินคือ POI ทั่วไป; จุดสีส้มมาจากข้อมูล GIS ที่จับคู่แหล่งได้ ไม่ใช่พิกัดปฏิบัติการ'
 };
 const msg={
  ms:['Stesen peta','Padanan AG (calon, belum disahkan lokasi)','Rujukan peta, bukan identiti laluan yang disahkan','Trek fizikal belum disahkan'],
