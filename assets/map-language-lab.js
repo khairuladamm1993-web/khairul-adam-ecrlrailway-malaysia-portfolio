@@ -15,6 +15,12 @@ const uiText={
  zh:{railOn:'铁路详情：开启',railOff:'铁路详情：关闭',railNote:'游客模式隐藏 OpenRailwayMap 技术图层。开启铁路详情可查看线路和参考编号。',themeLight:'切换至浅色模式',themeDark:'切换至深色模式',labelLayers:'支持语言切换的标签图层'},
  th:{railOn:'รายละเอียดรถไฟ: เปิด',railOff:'รายละเอียดรถไฟ: ปิด',railNote:'โหมดนักท่องเที่ยวซ่อนชั้นข้อมูลทางเทคนิคของ OpenRailwayMap เปิดรายละเอียดรถไฟเพื่อดูเส้นทางและรหัสอ้างอิง',themeLight:'เปลี่ยนเป็นโหมดสว่าง',themeDark:'เปลี่ยนเป็นโหมดมืด',labelLayers:'ชั้นป้ายชื่อที่รองรับภาษา'}
 };
+const readableRailLanguage={
+ ms:{guide:'Liuzhou · nama railway dwibahasa',guideHint:'Rujukan nama daripada tangkap layar Owner; bukan pin lokasi stesen yang disahkan.',railLines:'Mod pelawat: garisan railway vektor tanpa nombor trek',railMissing:'Garisan railway vektor tidak tersedia dalam gaya peta ini.',technical:'Butiran teknikal ON: nombor trek dan nama pada imej OpenRailwayMap kekal dalam bahasa asal.'},
+ en:{guide:'Liuzhou · bilingual railway names',guideHint:'Names identified from the Owner screenshot; not verified station coordinates.',railLines:'Visitor mode: vector railway lines without track numbers',railMissing:'Vector railway lines are unavailable in this map style.',technical:'Technical railway mode ON: track numbers and names on the OpenRailwayMap image remain in their original language.'},
+ zh:{guide:'柳州 · 铁路地名对照',guideHint:'名称来自用户提供的截图，不代表经过核实的站点坐标。',railLines:'游客模式：铁路矢量线条，不显示股道编号',railMissing:'此地图样式不支持铁路矢量线条。',technical:'铁路详情开启：OpenRailwayMap 影像上的股道编号与地名仍使用原始语言。'},
+ th:{guide:'หลิ่วโจว · ชื่อสถานที่รถไฟสองภาษา',guideHint:'ชื่อจากภาพหน้าจอของเจ้าของ ไม่ใช่พิกัดสถานีที่ผ่านการยืนยัน',railLines:'โหมดนักท่องเที่ยว: เส้นทางรถไฟแบบเวกเตอร์ ไม่มีหมายเลขราง',railMissing:'แผนที่นี้ไม่มีข้อมูลเส้นทางรถไฟแบบเวกเตอร์',technical:'เปิดรายละเอียดรถไฟ: หมายเลขรางและชื่อบนภาพ OpenRailwayMap ยังคงเป็นภาษาต้นฉบับ'}
+};
 const el=id=>document.getElementById(id);
 let lang='ms',map=null,ready=false,railDetails=false;
 const railVisibility=on=>on?'visible':'none';
@@ -22,7 +28,10 @@ function setRailVisibility(){
  if(map?.getLayer?.('mrl-railway'))map.setLayoutProperty('mrl-railway','visibility',railVisibility(railDetails));
  const button=el('railway-btn');
  if(button){button.setAttribute('aria-pressed',String(railDetails));button.textContent=railDetails?uiText[lang].railOn:uiText[lang].railOff;}
- const note=el('railway-note');if(note)note.textContent=uiText[lang].railNote;
+ const note=el('railway-note');if(note)note.textContent=railDetails?readableRailLanguage[lang].technical:uiText[lang].railNote;
+ const quick=el('rail-mode-status');
+ if(quick)quick.textContent=railDetails?readableRailLanguage[lang].technical:readableRailLanguage[lang].railLines;
+
 }
 try{const v=localStorage.getItem('railway-language');if(locales.includes(v))lang=v;}catch{}
 function nameExpression(locale){
@@ -47,6 +56,8 @@ function render(){
  el('place-status').textContent=copy[lang][3];
  el('label-status').textContent=copy[lang][2];
  document.querySelectorAll('[data-locale]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.locale===lang)));
+ const guideTitle=el('liuzhou-title');if(guideTitle)guideTitle.textContent=readableRailLanguage[lang].guide;
+ const guideHint=el('liuzhou-hint');if(guideHint)guideHint.textContent=readableRailLanguage[lang].guideHint;
  setRailVisibility();
  const countryNames={
   ms:['Malaysia','Thailand','China'],en:['Malaysia','Thailand','China'],
@@ -61,6 +72,8 @@ function setLanguage(v){
  if(!locales.includes(v))return;lang=v;
  try{localStorage.setItem('railway-language',lang)}catch{}
  render();applyLabels();
+ const status=el('rail-vector-note');if(status&&map?.isStyleLoaded())status.textContent=
+  map.getLayer('mrl-readable-rail-lines')?readableRailLanguage[lang].railLines:readableRailLanguage[lang].railMissing;
 }
 function theme(){
  try{return localStorage.getItem('railway-theme')==='dark'?'dark':'light'}catch{return 'light'}
@@ -71,6 +84,28 @@ function updateTheme(){
  el('theme-btn').textContent=dark?'☀':'☾';
  el('theme-btn').setAttribute('aria-label',dark?uiText[lang].themeLight:uiText[lang].themeDark);
  el('theme-btn').textContent=dark?uiText[lang].themeLight:uiText[lang].themeDark;
+}
+function transportationSource(style){
+ // Source ID is derived from real OpenFreeMap style; no invented track geometry.
+ if(!style?.layers||!style?.sources)return null;
+ const layer=style.layers.find(l=>l['source-layer']==='transportation' &&
+   style.sources[l.source]?.type==='vector');
+ return layer?.source||null;
+}
+function railVectorLayer(source,dark){
+ return {id:'mrl-readable-rail-lines',type:'line',source,'source-layer':'transportation',
+  minzoom:8,filter:['==',['get','class'],'rail'],
+  layout:{'line-cap':'round','line-join':'round'},
+  paint:{'line-color':dark?'#87d8e8':'#247a97','line-opacity':0.87,
+    'line-width':['interpolate',['linear'],['zoom'],8,0.8,14,1.9,18,3]}};
+}
+function readableRails(){
+ const style=map.getStyle(),source=transportationSource(style);
+ if(!source)return false;
+ if(map.getLayer('mrl-readable-rail-lines'))return true;
+ const first=style.layers.find(x=>x.type==='symbol');
+ map.addLayer(railVectorLayer(source,theme()==='dark'),first?.id);
+ return true;
 }
 function overlay(){
  if(map.getSource('mrl-railway'))return;
@@ -88,7 +123,12 @@ function init(){
  });
  map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-left');
  map.on('style.load',()=>{
-  try{overlay();applyLabels();ready=true;el('label-status').dataset.ready='true'}
+  try{
+   const rails=readableRails();
+   overlay();applyLabels();setRailVisibility();ready=true;
+   el('label-status').dataset.ready='true';
+   el('rail-vector-note').textContent=rails?readableRailLanguage[lang].railLines:readableRailLanguage[lang].railMissing;
+  }
   catch(e){el('label-status').textContent='Map style unavailable';}
  });
  map.on('error',()=>{if(!ready)el('label-status').textContent='Vector map unavailable';});
@@ -97,6 +137,7 @@ function init(){
  document.querySelectorAll('[data-region]').forEach(b=>b.addEventListener('click',()=>{
   const target=centers[b.dataset.region];
   if(target)map.flyTo({center:target[0],zoom:target[1],duration:600});
+  el('liuzhou-guide').hidden=b.dataset.region!=='china';
  }));
  el('theme-btn').addEventListener('click',()=>{
   const next=theme()==='dark'?'light':'dark';
@@ -108,7 +149,7 @@ function init(){
   if(e.key==='railway-language'&&locales.includes(e.newValue))setLanguage(e.newValue);
  });
 }
-if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText};
+if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText,transportationSource,railVectorLayer};
 if(typeof document!=='undefined'){
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
  else init();
