@@ -1954,7 +1954,7 @@
     "issueId": "r2154-station-poi-source-recovery",
     "checkedOn": "2026-10-26",
     "title": "R2.15.4 Pilot station POI source selection fallback",
-    "state": "STAGING_READY_STATION_SAFARI_UAT_PENDING",
+    "state": "PARTIAL_SAFARI_RAIL_REGRESSION_PASS_STATION_LAYER_READY_TAP_PENDING",
     "reason": "Owner screenshot R2.15.3 confirmed rail READY and a valid light_rail popup, but station MISSING. Code previously picked POI source only from styled source-layer=poi references; if no POI style layer is present, existing vector tileset was not considered.",
     "development": {
       "branch": "feature/mrs10-r2154-station-poi-source-recovery",
@@ -1982,8 +1982,8 @@
       "catalogue": "14/14 PASS",
       "deployment": "READY target staging, exact source SHA",
       "artifact": "HTML and JS HTTP 200; excluded Member/quiz HTTP 404",
-      "safari": "PENDING — station symbol and source-backed popup not yet tested on owner iPhone",
-      "previouslyPassed": "R2.15.3 source-backed light_rail rail tap PASS on real Safari screenshot",
+      "safari": "PARTIAL PASS — Owner 2026-10-26 01:19 screenshots show visible turquoise station POI markers, and debug rail READY / station READY; source-backed light_rail rail popup still works. Station marker tap popup NOT YET DEMONSTRATED.",
+      "previouslyPassed": "R2.15.3 and R2.15.4 Owner Safari rail segment source-backed popup PASS; station layer now READY but station selection UAT pending",
       "sourceIntegrity": "Source fallback uses existing vector ID, no invented geometries"
     },
     "staging": {
@@ -2001,8 +2001,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "HOLD / NO-GO for Production and integration; station content on real Safari remains unverified and KL full topology incomplete",
-    "nextAction": "On iPhone Safari R2.15.4 staging Malaysia railPilot=1&railDebug=1, zoom near central Kuala Lumpur and check debug station READY/MISSING after one tap. If READY, zoom to a real sourced railway station icon and confirm station popup; station layer READY alone is not a source-data PASS. Also continue separate KL track alignment coverage audit with authoritative references before Track Registry.",
+    "releaseDecision": "HOLD / NO-GO for Production/merge — rail click and station layer recovery supported by Owner screenshots, station feature popup and KL route/physical track completeness remain unverified",
+    "nextAction": "On the same isolated R2.15.4 Safari Preview, choose an isolated blue station circle and tap once without dragging. Capture whether a station popup appears and its source-backed fields; do not count rail segment popup as station PASS. If station click fails, inspect POI hit priority / feature properties. Audit KL network separately before mapping each physical track.",
     "boundaries": {
       "main": "UNCHANGED",
       "production": "UNCHANGED",
@@ -2011,6 +2011,32 @@
       "p03": "UNTOUCHED",
       "merge": "NOT DONE",
       "ownerScreenshots": "NOT PUBLISHED"
+    },
+    "ownerSafariEvidence": {
+      "observedAt": "2026-10-26T01:19:00+08:00",
+      "evidenceType": "Two Owner-submitted iPhone Safari screenshots in ChatGPT conversation; not published to GitHub",
+      "locale": "EN",
+      "mode": "Malaysia railPilot=1&railDebug=1, expanded map, Railway details OFF",
+      "evidence": [
+        {
+          "frame": "first",
+          "actual": "Multiple blue/turquoise circular station POI markers visible around central Kuala Lumpur; diagnostic TOUCH 16 / MAP CLICK 0, canvas pointer received; map click pending.",
+          "outcome": "STATION_SYMBOLS_VISUALLY_PRESENT; NO STATION_TAP EVIDENCE"
+        },
+        {
+          "frame": "second",
+          "actual": "Rail segment popup displays English name unavailable, Category light_rail, OpenMapTiles/OpenFreeMap; diagnostic TOUCH 21 / MAP CLICK 1, source features 1 / visible 1 / raw rail 2, rail READY / station READY.",
+          "outcome": "RAIL_POPUP_REGRESSION_PASS; STATION_LAYER_READY"
+        }
+      ],
+      "scopeNotes": [
+        "rail READY/station READY confirms vector style layers exist, not that a particular station name or point was clicked",
+        "The multiple visible circular symbols reflect source-backed railway POIs but do not prove all are operational passenger stations",
+        "TOUCH total and MAP CLICK total reflect different event types; zero MAP CLICK on first screenshot does not itself establish tap defect",
+        "raw rail 2 is rendered feature count, not physical track count",
+        "Do not infer exact station/route identity from map label, circle position or rail colour"
+      ],
+      "nextStationTest": "Tap one isolated turquoise station circle (not its adjacent line) in expanded Malaysia staging map; inspect whether popup states Station and a source-backed name or honest fallback, and note 'source features' diagnostic."
     }
   }
 }
