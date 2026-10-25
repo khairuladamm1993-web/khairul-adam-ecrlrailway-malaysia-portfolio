@@ -86,7 +86,7 @@ function pilotFeatureInfo(props,kind,locale){
  const pinyin=String(p['name:zh-Latn-pinyin']||p['name:zh-Latn']||'').trim();
  return {title,category:kind==='station'?l.station:l.rail,original:original&&original!==title?original:'',pinyin,subclass:String(p.subclass||'').trim(),source:l.source,localization:l, hasVerifiedEnglish:!!(english||latinOriginal)};
 }
-let pilotMode=false,pilotEventHandlersBound=false,pilotInfoPopup=null;
+let pilotMode=false,pilotStationBound=false,pilotRailBound=false,pilotInfoPopup=null;
 function pilotSourceForLayer(style,sourceLayer){
  const entry=style?.layers?.find(layer=>layer['source-layer']===sourceLayer && style.sources?.[layer.source]?.type==='vector');
  return entry?.source||null;
@@ -128,18 +128,19 @@ function installPilotVectorLayers(){
    rails=true;
   }catch(e){rails=false;}
  }else rails=!!map.getLayer('mrl-pilot-rail-hits');
- if(stations&&!pilotEventHandlersBound){
+ if(stations&&!pilotStationBound){
   map.on('click','mrl-pilot-stations',e=>{
    const f=e.features?.find(x=>pilotEligibleStation(x.properties));if(f)popupFromPilotFeature(f,'station',e.lngLat);
   });
  }
- if(rails&&!pilotEventHandlersBound){
+ if(rails&&!pilotRailBound){
   map.on('click','mrl-pilot-rail-hits',e=>{
    if(stations&&map.queryRenderedFeatures?.(e.point,{layers:['mrl-pilot-stations']})?.some(f=>pilotEligibleStation(f.properties)))return;
    const f=e.features?.find(x=>pilotEligibleRail(x.properties));if(f)popupFromPilotFeature(f,'rail',e.lngLat);
   });
  }
- if(stations||rails)pilotEventHandlersBound=true;
+ if(stations)pilotStationBound=true;
+ if(rails)pilotRailBound=true;
  if(status)status.textContent=pilotLocalized[lang].title+' · '+pilotLocalized[lang].tap+
   (!stations?' [station POI layer unavailable]':'')+(!rails?' [rail layer unavailable]':'');
  return stations||rails;
