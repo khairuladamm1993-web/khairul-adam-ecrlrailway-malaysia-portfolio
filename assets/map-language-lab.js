@@ -240,20 +240,23 @@ function installPilotVectorLayers(){
    if(pilotDebug)writeRailTapDiagnostic('Station layer setup error',String(e?.message||e).slice(0,120));
  }
  }else stations=!!map.getLayer('mrl-pilot-stations');
- // Highlight ONLY exact code+name POIs actually present in source tiles.
- // The other 27 of 29 stations are green in the verified *ordered registry*,
- // not fabricated as map coordinates or physical railway tracks.
+ // R2.17.2: draw Kajang green over *actual source POIs* ONLY when the
+ // live tile emits an exact KG code+official name crosswalk candidate.
+ // Station order and candidate code tables do NOT create map geometries or
+ // certify physical railway ways. Nearby KTM/other systems stay unchanged.
  if(poiSource&&!map.getLayer('mrl-kajang-known-poi')){
   try{
-   const identity=window.MRS10KLRegistry?.findRoute?.('mrt-kajang')?.visualIdentity;
-   if(identity){
+   const api=window.MRS10KLRegistry;
+   const identity=api?.findRoute?.('mrt-kajang')?.visualIdentity;
+   const candidates=api?.kajangPoiSourceNames;
+   if(identity&&Array.isArray(candidates)&&candidates.length>=29){
     map.addLayer({
      id:'mrl-kajang-known-poi',type:'circle',source:poiSource,'source-layer':'poi',minzoom:10,
      filter:['all',['==',['get','class'],'railway'],
       ['in',['get','subclass'],['literal',['station','subway']]],
-      ['in',['get','name'],['literal',['KG16 Pasar Seni','KG35 Kajang']]]],
+      ['in',['get','name'],['literal',candidates]]],
      layout:{visibility:'none'},
-     paint:{'circle-radius':5.5,'circle-color':identity.light,
+     paint:{'circle-radius':6.3,'circle-color':identity.light,
       'circle-stroke-color':'#FFFFFF','circle-stroke-width':2}
     });
    }
