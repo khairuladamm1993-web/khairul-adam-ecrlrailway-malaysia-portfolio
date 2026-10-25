@@ -10,12 +10,13 @@ test('readable rails use an actual transportation vector source, never guessed g
  assert.equal(maps.transportationSource({sources:{},layers:[]}),null);
  assert.equal(maps.transportationSource({sources:{notrail:{type:'raster'}},layers:[{source:'notrail','source-layer':'transportation'}]}),null);
 });
-test('rail geometry filters exclusively supported OpenMapTiles rail class',()=>{
+test('rail geometry filters both supported OpenMapTiles railway classes rail and transit',()=>{
  const layer=maps.railVectorLayer('osm',false);
  assert.equal(layer.type,'line');
  assert.equal(layer.source,'osm');
  assert.equal(layer['source-layer'],'transportation');
- assert.deepEqual(layer.filter,['==',['get','class'],'rail']);
+ assert.deepEqual(layer.filter,maps.railVectorFilter);
+ assert.deepEqual(layer.filter[1][2][1],['rail','transit']);
  assert.equal(layer.minzoom,8);
  assert(!('features' in layer));
  assert.equal(maps.railVectorLayer('osm',true).paint['line-color']!==layer.paint['line-color'],true);
