@@ -17,10 +17,16 @@ const uiText={
 };
 
 const railLegendI18n={
- ms:{title:'Jenis dan warna landasan',note:'Kategori umum lapisan standard OpenRailwayMap untuk Malaysia, Thailand dan China. Bukan nama laluan individu. Warna peta asas mungkin bukan rel; tidak membuktikan elektrifikasi atau kelajuan.',items:['Main line · Laluan utama','High-speed line · Rel laju bertag','Branch line · Laluan cabang','Metro / subway','Industrial / spur · Rel industri','Other rail / yard · Rel lain']},
- en:{title:'Railway colour legend',note:'OpenRailwayMap standard layer only. Basemap lines may not be railway; these colours do not prove electrification or actual operating speeds.',items:['Main line','High-speed tagged rail','Branch line','Metro / subway','Industrial / spur','Other rail / yard']},
- zh:{title:'铁路颜色图例',note:'仅适用于 OpenRailwayMap 标准图层。底图线条可能不是铁路；颜色不能证明电气化或实际运行速度。',items:['铁路干线','高速铁路标记','铁路支线','地铁','工业线 / 专用线','其他轨道 / 车场']},
- th:{title:'คำอธิบายสีทางรถไฟ',note:'ใช้กับชั้นมาตรฐาน OpenRailwayMap เท่านั้น เส้นบนแผนที่พื้นฐานอาจไม่ใช่ทางรถไฟ และสีไม่ได้ยืนยันระบบไฟฟ้าหรือความเร็วจริง',items:['ทางรถไฟสายหลัก','รางที่ระบุว่าเป็นความเร็วสูง','ทางรถไฟสายรอง','รถไฟฟ้าใต้ดิน','รางอุตสาหกรรม / รางแยก','รางอื่น / ลานจอด']}
+ms:{title:'Jenis dan warna landasan',note:'8 warna asal OpenRailwayMap. Lapisan rel dipaparkan 60% lutsinar: warna boleh bercampur dengan peta asas. Warna sahaja tidak membuktikan nama, kelajuan atau elektrifikasi.',items:['Main line · Laluan utama','High-speed line · Rel laju bertag','Branch line · Laluan cabang','Metro / subway','Light rail / LRT','Tram','Industrial / spur · Rel industri','Other rail / yard · Rel lain']},
+en:{title:'Railway colour legend',note:'8 original OpenRailwayMap colours. The rail overlay is 60% opaque, so colours blend with the basemap. Colours alone do not verify route names, operating speed or electrification.',items:['Main line','High-speed tagged rail','Branch line','Metro / subway','Light rail / LRT','Tram','Industrial / spur','Other rail / yard']},
+zh:{title:'铁路颜色图例',note:'OpenRailwayMap 原始八种颜色；叠加层不透明度为 60%，颜色与底图混合。颜色不代表已核实的线路名称、运营速度或电气化。',items:['铁路干线','高速铁路标记','铁路支线','地铁','轻轨','有轨电车','工业线 / 专用线','其他轨道 / 车场']},
+th:{title:'คำอธิบายสีทางรถไฟ',note:'สีต้นฉบับ 8 แบบของ OpenRailwayMap ชั้นทางรถไฟทึบ 60% จึงผสมกับสีพื้นแผนที่ สีไม่ได้ยืนยันชื่อเส้นทาง ความเร็ว หรือระบบไฟฟ้า',items:['ทางรถไฟสายหลัก','รางที่ระบุว่าเป็นความเร็วสูง','ทางรถไฟสายรอง','รถไฟฟ้าใต้ดิน','รถไฟฟ้ารางเบา','รถราง','รางอุตสาหกรรม / รางแยก','รางอื่น / ลานจอด']}
+};
+const railLegendCities={
+ms:{malaysia:'Malaysia',thailand:'Thailand',china:'China',pilot:{malaysia:'Kuala Lumpur',thailand:'Bangkok',china:'Liuzhou'}},
+en:{malaysia:'Malaysia',thailand:'Thailand',china:'China',pilot:{malaysia:'Kuala Lumpur',thailand:'Bangkok',china:'Liuzhou'}},
+zh:{malaysia:'马来西亚',thailand:'泰国',china:'中国',pilot:{malaysia:'吉隆坡',thailand:'曼谷',china:'柳州'}},
+th:{malaysia:'มาเลเซีย',thailand:'ไทย',china:'จีน',pilot:{malaysia:'กัวลาลัมเปอร์',thailand:'กรุงเทพฯ',china:'หลิ่วโจว'}}
 };
 const readableRailLanguage={
  ms:{guide:'Liuzhou · nama railway dwibahasa',guideHint:'Rujukan nama daripada tangkap layar Owner; bukan pin lokasi stesen yang disahkan.',railLines:'Mod pelawat: garisan railway vektor tanpa nombor trek',railMissing:'Garisan railway vektor tidak tersedia dalam gaya peta ini.',technical:'Butiran teknikal ON: nombor trek dan nama pada imej OpenRailwayMap kekal dalam bahasa asal.'},
@@ -48,10 +54,10 @@ const campusText={
   note:'หมุดอ้างอิงบริเวณวิทยาเขต ไม่ใช่ทางเข้าหรืออาคารที่พักที่ยืนยันตำแหน่งแล้ว'}
 };
 const legendExplanations={
- ms:['Laluan utama. Nama sebenar hanya ditunjukkan apabila sumber mengenal pastinya.','Rel yang ditanda high-speed dalam data peta, bukan pengesahan kelajuan operasi.','Laluan cabang atau sambungan kepada laluan utama.','Kategori metro; jangan anggap setiap garisan biru/ungu pada peta asas ialah metro.','Rel industri atau spur.','Rel lain, kawasan yard atau rel tanpa kategori khusus.'],
- en:['Main railway corridor; exact route name needs source evidence.','Tagged high-speed infrastructure; not a verified operational speed.','Branch off a main corridor.','Metro category; not every purple/blue basemap line is metro.','Industrial or spur infrastructure.','Other rail, yard or otherwise unclassified track.'],
- zh:['铁路干线；具体线路名称需要来源支持。','数据中标记为高速的铁路，不代表已核实运营速度。','连接主线的支线。','地铁类别；底图紫色线不一定是地铁。','工业铁路或专用线。','其他轨道或车场。'],
- th:['ทางรถไฟสายหลัก ชื่อเส้นทางต้องมีข้อมูลรองรับ','ข้อมูลระบุว่าเป็นรางความเร็วสูง ไม่ใช่การยืนยันความเร็วใช้งานจริง','ทางรถไฟสายรอง','ประเภทเมโทร สีม่วงบนแผนที่พื้นฐานไม่จำเป็นต้องเป็นเมโทร','ทางรถไฟอุตสาหกรรม / รางแยก','รางอื่นหรือลานจอด']
+ms:['Laluan utama (usage=main); nama sebenar memerlukan bukti sumber.','Rel utama bertag highspeed=yes; bukan bukti kelajuan operasi.','Rel cabang bertag usage=branch.','Subway / metro (railway=subway). Warna biru mungkin kelihatan ungu selepas bercampur dengan peta asas.','Light rail / LRT (railway=light_rail), warna asal hijau.','Tram (railway=tram), warna asal merah jambu.','Rel industri atau spur berdasarkan atribut usage/service.','Rel lain, yard atau data belum dikategorikan.'],
+en:['Main railway (usage=main); exact name needs source evidence.','Main track tagged highspeed=yes; not verified operating speed.','Branch use (usage=branch).','Metro / subway; blue may appear purple over the basemap.','Light rail (railway=light_rail), original green.','Tram (railway=tram), original pink.','Industrial usage or spur service based on source tags.','Other, yard or uncategorized rail.'],
+zh:['usage=main 主线；具体线路名需要来源。','highspeed=yes 标记，不代表实际运营速度。','usage=branch 铁路支线。','railway=subway 蓝色叠加底图后可能偏紫。','railway=light_rail 绿色轻轨。','railway=tram 粉色有轨电车。','工业或专用线属性。','其他、车场或未分类轨道。'],
+th:['สายหลัก usage=main ชื่อจริงต้องมีแหล่งข้อมูล','ติดแท็ก highspeed=yes ไม่ยืนยันความเร็วจริง','ทางแยก usage=branch','รถไฟใต้ดิน สีฟ้าอาจดูม่วงเมื่อซ้อนบนพื้นแผนที่','รถไฟฟ้ารางเบา railway=light_rail สีเขียว','รถราง railway=tram สีชมพู','รางอุตสาหกรรมหรือรางแยกตามแท็ก','รางอื่น ลานจอด หรือไม่ได้จัดประเภท']
 };
 // R2.13 opt-in pilot uses verified CITY-AREA centers, never guessed station coordinates.
 // Kuala Lumpur: https://digital.library.unt.edu/explore/locations/p09469/
@@ -215,7 +221,7 @@ function render(){
  const legendNote=el('railway-legend-note');if(legendNote)legendNote.textContent=legendCopy.note;
  const legendSummary=el('railway-legend-trigger');if(legendSummary){legendSummary.setAttribute('aria-label',legendCopy.title);legendSummary.title=legendCopy.title;}
  document.querySelectorAll('[data-rail-legend]').forEach(node=>{const i=Number(node.dataset.railLegend);if(Number.isInteger(i)&&i>=0&&i<legendCopy.items.length)node.lastElementChild.textContent=legendCopy.items[i];});
- renderLegendDetail();
+ renderLegendDetail();renderLegendRegion();
  const pilotStatus=el('railway-pilot-status');
  if(pilotStatus && pilotMode){
   pilotStatus.hidden=false;
@@ -236,6 +242,11 @@ function render(){
  });
 }
 let selectedRailLegend=0;
+function renderLegendRegion(){
+ const node=el('railway-legend-region');if(!node)return;
+ const places=railLegendCities[lang]||railLegendCities.en;
+ node.textContent=pilotMode?places.pilot[activeRegion]:places[activeRegion];
+}
 function renderLegendDetail(){
  const heading=el('rail-legend-selected-name'),description=el('rail-legend-selected-note');
  if(heading)heading.textContent=railLegendI18n[lang].items[selectedRailLegend];
@@ -359,13 +370,14 @@ function init(){
   if(destination)map.flyTo({center:destination[0],zoom:destination[1],duration:600});
   if(pilotMode&&pilotInfoPopup){pilotInfoPopup.remove();pilotInfoPopup=null;}
   activeRegion=b.dataset.region;
+  renderLegendRegion();
   el('liuzhou-guide').hidden=activeRegion!=='china';
   syncCampusPin();
  }));
  // Marker click is handled by MapLibre Marker.setPopup(), without an external campus button.
  document.querySelectorAll('[data-rail-legend]').forEach(b=>b.addEventListener('click',()=>{
   const i=Number(b.dataset.railLegend);
-  if(Number.isInteger(i)&&i>=0&&i<6){selectedRailLegend=i;renderLegendDetail();}
+  if(Number.isInteger(i)&&i>=0&&i<railLegendI18n[lang].items.length){selectedRailLegend=i;renderLegendDetail();}
  }));
  const mapLegend=el('railway-legend');
  if(mapLegend)mapLegend.addEventListener('toggle',()=>{if(mapLegend.open&&!railDetails){
