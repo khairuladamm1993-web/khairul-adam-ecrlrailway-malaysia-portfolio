@@ -53,9 +53,17 @@
       "category": "website",
       "phase": "R2.5 + R2.6 integrated in MR-S10 single-domain isolated Unified Preview; Owner session/browser UAT pending",
       "overall": "IN_PROGRESS",
-      "nextDecision": "Owner Safari R2.9 UAT: open isolated MR-S10 Visitor Map, select China then the LRVTC Guantang Campus button. Verify one school pin and four-language popup at campus area, absent in Malaysia/Thailand, railway map unchanged. Remain NO-GO for Production merge. R2.8 English/Pinyin and map technical labels remain separate pending issues.",
+      "nextDecision": "Investigate target mismatch read-only and verify a supported staging-only creation path before any separately approved replacement deployment. Preserve protected existing deployment; no auto-retry.",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
+        {
+          "type": "test",
+          "label": "R2.11 mobile map source QA and deployment gate",
+          "value": "256/256 Node PASS · 14/14 Catalogue PASS · Public build PASS · staging target FAIL · Safari PENDING",
+          "verifiedOn": "2026-10-25",
+          "confidence": "local automated source QA; Vercel target mismatch confirmed",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/1011a336809127a7e9b75a31aa67a2c71a18c705"
+        },
         {
           "type": "test",
           "label": "R2.9 Owner-approved Guantang Campus education pin (isolated preview)",
@@ -295,6 +303,28 @@
             "tests": "NOT_PASS",
             "verifiedAt": null,
             "evidence": [],
+            "releaseGates": {
+              "ci": "NOT_PASS",
+              "safariUat": "NOT_PASS",
+              "security": "NOT_PASS",
+              "deployment": "NOT_PASS",
+              "ownerApproval": "NOT_APPROVED"
+            }
+          }
+        },
+        {
+          "id": "r211-staging-target",
+          "kind": "BLOCKED",
+          "label": "R2.11 staging target mismatch",
+          "detail": "Explicit staging request returned target production on new isolated project; protected/all, no project domains; cancellation and pause rejected. No second deployment.",
+          "basis": "integrationR211",
+          "resolution": {
+            "state": "OPEN",
+            "tests": "PASS",
+            "verifiedAt": "2026-10-25",
+            "evidence": [
+              "https://mrs10-r211-mobile-map-lajy604su-1993khairuladam-3016.vercel.app/map-language-lab.html"
+            ],
             "releaseGates": {
               "ci": "NOT_PASS",
               "safariUat": "NOT_PASS",
@@ -908,5 +938,68 @@
     "releaseDecision": "STAGING_READY_FOR_OWNER_SAFARI_UAT_ONLY; NOT_APPROVED_FOR_PRODUCTION_RELEASE",
     "ownerApproval": "LRVTC reference campus location only; no deploy, merge or production release approval",
     "nextAction": "Owner opens isolated protected staging map URL, runs Safari iPhone/iPad checks for country China, pin and compact scrolling popup, language BM EN 中文 ไทย, railway details ON/OFF and collapsed legend, Dark Mode contrast. Request screenshots/observations to close Safari gate; no changes to existing Production, Supabase or P02/P03."
+  },
+  "integrationR211": {
+    "checkedOn": "2026-10-25",
+    "project": "P01",
+    "title": "R2.11 mobile visitor map UX refinement",
+    "sourceBaseline": "79c7f86128134737576c05e7646fc9a9b12594b9",
+    "sourceBranch": "feature/mrs10-r211-mobile-map-ux",
+    "sourceCommit": "1011a336809127a7e9b75a31aa67a2c71a18c705",
+    "filesChanged": [
+      "assets/map-language-lab.js",
+      "map-language-lab.html",
+      "package.json",
+      "tests/r211-mobile-map-ux.test.cjs"
+    ],
+    "rootCause": "Global dark-theme paragraph colour overrode popup text while MapLibre retained a white popup background; generic button sizing affected map controls. Popup/mobile map lacked viewport-specific expanded layout.",
+    "fixes": [
+      "Explicit light/dark popup background, foreground and muted tokens; scoped paragraph/close-button/tip styles; WCAG AA colour-pair assertions",
+      "Popup width min(82vw,255px), total content height limited to min(34dvh,170px), keyboard-focusable internal scrolling, retained address/pinyin/confidence disclaimer",
+      "Mobile map clamp(460px,72dvh,800px); 32px visible navigation controls inside 44px targets",
+      "One in-page expand/exit control, safe-area/dvh layout, background inert and scroll restoration, Escape, same MapLibre instance resize, cleanup on removal, four-language labels"
+    ],
+    "qa": {
+      "node": "256/256 PASS; exit 0; Node v24.19.0; local regression including 5 new R2.11 tests",
+      "catalogue": "14/14 PASS; exit 0",
+      "publicBuild": "PASS; exit 0; 39 files; map HTML/JS byte-identical to tested source",
+      "publishedSourceIntegrity": "4/4 changed files byte-equal to GitHub commit; parent baseline verified",
+      "privacy": "Local protected asset exclusions PASS; remote questions.js and member-gateway.js HTTP 404; access.js public-only stub; analytics disabled",
+      "http": "Authenticated map HTML 200 and expected JS 200; anonymous map HTTP 302",
+      "chromium": "NOT EXECUTED — no local Chromium",
+      "safari": "PENDING — no R2.11 real Safari evidence",
+      "githubActions": "NOT EXECUTED"
+    },
+    "deployment": {
+      "project": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "id": "dpl_Cfw9ijKoKsHxBodGejjwwSme7C3T",
+      "url": "https://mrs10-r211-mobile-map-lajy604su-1993khairuladam-3016.vercel.app/map-language-lab.html",
+      "requestedTarget": "staging",
+      "reportedTarget": "production",
+      "buildState": "READY",
+      "stageGate": "FAIL — target mismatch; NOT a verified staging UAT deployment",
+      "sourceSha": "1011a336809127a7e9b75a31aa67a2c71a18c705",
+      "ssoProtection": "all",
+      "projectDomains": [],
+      "autoAssignCustomDomainsRequested": false,
+      "cancelAttempt": "400 deployment_not_canceled; deployment already READY",
+      "pauseAttempt": "400 invalid_deployment: Active production deployment does not exist",
+      "attempts": 1,
+      "secondAttempt": "NOT PERFORMED",
+      "rootCause": "UNKNOWN why explicit staging request was reported as production; do not infer from live:false"
+    },
+    "releaseDecision": "HOLD — source QA PASS, staging target gate FAIL; not ready for Owner Safari UAT or Production release",
+    "nextAction": "Investigate target mismatch read-only and verify a supported staging-only creation path before any separately approved replacement deployment. Preserve protected existing deployment; no auto-retry.",
+    "preserved": {
+      "R210": "unchanged",
+      "main": "3a2f3b958d6090acdbc5e080b61e46aa8b5415f3; unchanged",
+      "canonicalPreview": "no writes",
+      "supabaseAuthRls": "no changes",
+      "P02": "untouched",
+      "P03": "untouched",
+      "campusCoordinates": "unchanged",
+      "railwayLegend": "unchanged"
+    }
   }
 }
