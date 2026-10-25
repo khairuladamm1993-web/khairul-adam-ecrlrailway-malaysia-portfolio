@@ -3263,7 +3263,7 @@
     "issueId": "r220-mrt-putrajaya-yellow-service-registry",
     "title": "MR-S10 R2.20 — MRT Putrajaya Line 36 operational stops and five provisional",
     "checkedOn": "2026-10-26",
-    "state": "DEV_SOURCE_QA_PASS_OWNER_SAFARI_PENDING_PREVIEW_BLOCKED_PAUSED",
+    "state": "DEV_QA_PASS_SAFE_PREVIEW_READY_SAFARI_UAT_PENDING",
     "ownerApproval": "NOT_APPROVED_FOR_PRODUCTION",
     "development": {
       "repository": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
@@ -3327,9 +3327,31 @@
       "protection": "VERCEL_AUTHENTICATION_ALL",
       "mitigation": "pause_project CALLED after unexpected Production target; project live:false; no further deployment/production operations",
       "pausedProjectPolicy": "DO_NOT_UNPAUSE_WITHOUT_EXPLICIT_OWNER_AUTHORIZATION",
-      "ownerPreview": "BLOCKED_NOT_A_CONFIRMED_STAGING_PREVIEW",
+      "ownerPreview": "READY_SAFE_UNALIASED_PREVIEW_IN_EXISTING_UAT_PROJECT",
       "HTTP": "UNVERIFIED",
-      "production": "NO_GO"
+      "production": "NO_GO",
+      "separatePreview": {
+        "project": "mrs10-r211-mobile-map-uat",
+        "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+        "deploymentId": "dpl_F4bbF7EmMRBXHUZRbeRzUvz476Uj",
+        "url": "https://mrs10-r211-mobile-map-7n0m0gpab-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+        "target": null,
+        "targetExplanation": "No production target: Vercel preview, immutable URL, no staging alias target",
+        "status": "READY",
+        "sourceSha": "2e58c6ccda65a364f30929b5cc983911ecd66d25",
+        "protection": "VERCEL_AUTH_ALL; project live:false, custom domains []",
+        "ownerSafari": "PENDING",
+        "httpSmoke": "UNVERIFIED"
+      },
+      "additionalProjectContainment": {
+        "project": "mrs10-r220-putrajaya-isolated-uat",
+        "projectId": "prj_vYKx7YiD3vJAIf2BXJimBxA3WkAH",
+        "initialDeploymentId": "dpl_kNZ5bBZjH5TkUi6LvZxBUpATYmpn",
+        "firstDeploymentUnexpectedTarget": "production",
+        "mitigation": "pause_project CALLED; project live:false and Vercel Auth all",
+        "followOnPreviewAttempt": "BLOCKED_BECAUSE_PROJECT_PAUSED",
+        "doNotUnpause": true
+      }
     },
     "integration": {
       "state": "OPEN",
@@ -3343,15 +3365,15 @@
       "sourceQA": "PASS",
       "catalogue": "PASS",
       "sourcePublicBuild": "PASS",
-      "separatePreview": "BLOCKED",
+      "separatePreview": "PASS_PREVIEW_METADATA_ONLY",
       "ownerSafari": "PENDING",
       "HTTP": "UNVERIFIED",
-      "securityOfGitDeployment": "UNVERIFIED",
+      "securityOfGitDeployment": "PARTIAL_METADATA_ONLY",
       "integratedBranches": "NOT_TESTED",
       "ownerProductionApproval": "NOT_APPROVED"
     },
-    "decision": "NO-GO Preview UAT/Production/merge. Source current 330/330 PASS; first deployment was unexpectedly production-target and project was paused; recover a strictly non-production Preview with approval and safeguards.",
-    "nextAction": "Preserve source QA and pause. Resolve Vercel first-deployment target mismatch and secure a genuinely isolated non-production Preview before Owner Safari. Do not unpause, redeploy, merge, modify main, auth/RLS, R2.17/18/19 or simulators without appropriate approval."
+    "decision": "NO-GO Production/merge. R2.20 source QA 330/330 PASS, catalogue 14/14 PASS, a non-production Preview is READY (protected, immutable URL). Owner Safari and HTTP/security audit remain pending. Unexpected production-target first deployments in standalone projects remain paused/blocked and MUST NOT be used for UAT.",
+    "nextAction": "Owner Safari: open the unique non-production Preview URL (R2.20; Malaysia > MRT Putrajaya), verify 36 operational yellow stations, five provisional excluded, dark/light contrast, 4 languages, route isolation. Do not unpause dedicated projects, merge, or promote without explicit approval."
   },
   "integrationR2173": {
     "project": "P01",
