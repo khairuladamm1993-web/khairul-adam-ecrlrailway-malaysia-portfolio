@@ -75,6 +75,15 @@ class Gate(unittest.TestCase):
     def test_invalid_archive_is_unavailable_not_approved(self):
         with self.assertRaises(zipfile.BadZipFile):
             mod.analyze(b"not a ZIP")
+    def test_http_unavailable_reports_status_without_fabricating_geometry(self):
+        import urllib.error
+        def unavailable(_request, timeout):
+            raise urllib.error.HTTPError(mod.URL,429,"Too Many Requests",{},None)
+        result=mod.probe(opener=unavailable)
+        self.assertEqual(result["status"],"HTTP_SOURCE_UNAVAILABLE")
+        self.assertEqual(result["httpStatus"],429)
+        self.assertFalse(result["serviceGeometryCandidate"])
+        self.assertFalse(result["physicalTrackVerified"])
     def test_source_is_bounded_and_public(self):
         self.assertEqual(mod.URL,"https://api.data.gov.my/gtfs-static/prasarana?category=rapid-rail-kl")
         self.assertLessEqual(mod.MAX_ZIP_BYTES,16_000_000)
