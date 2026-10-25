@@ -336,10 +336,10 @@
         },
         {
           "id": "r219-ampang-orange-service-registry",
-          "kind": "BLOCKED",
+          "kind": "IN_PROGRESS",
           "label": "P01 R2.19 — LRT Ampang Line 18-station source-backed service registry",
-          "detail": "R2.19 source/CI validated on isolated GitHub branch: 18 stations/11 shared; six new Node tests + 318 existing tests PASS; protected staging artifact build PASS. Isolated Vercel project deployment unexpectedly target=production (READY, SSO all); NOT ACCEPTED AS STAGING; no corrective deployment attempted.",
-          "basis": "Prasarana operator history + MyRapid schematic + Eastern Asia transport research 2023; connected GitHub source read-back, structural module checks",
+          "detail": "R2.19 isolated source and CI PASS (6/6 R2.19; 318/318 full regression; staging static artifact build PASS). Vercel first deployment bootstrapped as production by default; approved corrective deployment uses explicit target=staging and is READY in the R2.19 project. Browser HTTP content check not yet independently verified; Safari UAT pending.",
+          "basis": "Prasarana/official transit sources; GitHub Actions 40233275721; Vercel live GET deployment metadata and build events; owner approval limited to isolated R2.19 target correction",
           "sourceUrls": [
             "https://www.prasarana.com.my/mobiliti/the-nations-first-lrt-line/",
             "https://myrapid.com.my/wp-content/uploads/2021/07/28102018_Transit-Map.pdf",
@@ -366,27 +366,28 @@
             "safari": "UNVERIFIED",
             "mapPoi": "UNVERIFIED — zero source-verified AG cartographic POI crosswalks",
             "physicalAlignment": "UNVERIFIED — zero OSM route/way/track geometry",
-            "staging": "BLOCKED_TARGET_MISMATCH — Vercel deployment dpl_9n4uMjspt35i9whLo7MWY5p3uZHL, project prj_xlweXyowjdvfr87gsAIEuIWsRkde, readyState READY but target=production, not accepted Preview",
+            "staging": "STAGING TARGET VERIFIED / READY — isolated deployment dpl_BqbRcxxuHrggWHeFoBkkUhHTM5du on project prj_xlweXyowjdvfr87gsAIEuIWsRkde, source SHA 0d4bd52188fd48da27366a80d8933531d97b3144. Direct public HTTP asset availability UNVERIFIED (SSO protection, remote access blocked).",
             "staticArtifact": "PASS — separate CI safe artifact build, protected legacy assets excluded",
-            "security": "SOURCE/ARTIFACT PASS — Vercel deploy access protection ALL (read-only metadata); full browser/security UAT pending"
+            "security": "Source artifact scan and Vercel Authentication ALL metadata PASS; browser access and endpoint-by-endpoint UAT UNVERIFIED."
           },
           "resolution": {
             "state": "OPEN",
-            "tests": "AUTOMATED_PASS_RELEASE_BLOCKED",
+            "tests": "AUTOMATED_PASS_STAGING_METADATA_PASS_SAFARI_UNVERIFIED",
             "verifiedAt": null,
             "evidence": [
               "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40233275721",
-              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/0d4bd52188fd48da27366a80d8933531d97b3144"
+              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/0d4bd52188fd48da27366a80d8933531d97b3144",
+              "https://vercel.com/1993khairuladam-3016/mrs10-r219-ampang-orange-preview/BqbRcxxuHrggWHeFoBkkUhHTM5du"
             ],
             "releaseGates": {
               "ci": "PASS",
               "safariUat": "NOT_PASS",
-              "security": "NOT_PASS",
-              "deployment": "FAIL_TARGET_MISMATCH",
-              "ownerApproval": "NOT_APPROVED"
+              "security": "PARTIAL_SOURCE_ARTIFACT_AND_SSO_ONLY",
+              "deployment": "STAGING_READY_HTTP_UNVERIFIED",
+              "ownerApproval": "STAGING_CORRECTION_ONLY_APPROVED_NO_PRODUCTION_RELEASE"
             }
           },
-          "nextAction": "NO-GO: stop staging; Owner approval required before any corrective Vercel deployment/cancel/retarget. Investigate why first isolated git-sourced deployment was labelled production. Keep existing MR-S10 Production and R2.18 unchanged. Only after properly isolated Preview approval: Safari iPhone/iPad UAT then source-backed POI/route relation audit and reconciled integration.",
+          "nextAction": "Owner Safari iPhone/iPad: authenticate Vercel to inspect isolated R2.19 staging HTML and JS 200, ensure 18 AG station entries, popup AG7, 4-language fallback and dark contrast; verify original MapLibre unaffected. Remain OPEN and NO-GO Production. Conduct separate OSM POI/geometry audit and reconcile R2.18 integration only later; no automatic merge.",
           "deploymentAudit": {
             "projectId": "prj_xlweXyowjdvfr87gsAIEuIWsRkde",
             "projectName": "mrs10-r219-ampang-orange-preview",
@@ -396,7 +397,22 @@
             "observedTarget": "production",
             "observedReadyState": "READY",
             "accessProtection": "Vercel Authentication ALL enabled",
-            "gate": "REJECT_AS_STAGING; no further deployment or corrective mutation"
+            "gate": "REJECT_AS_STAGING; no further deployment or corrective mutation",
+            "correctiveDeployment": {
+              "projectId": "prj_xlweXyowjdvfr87gsAIEuIWsRkde",
+              "deploymentId": "dpl_BqbRcxxuHrggWHeFoBkkUhHTM5du",
+              "sourceSha": "0d4bd52188fd48da27366a80d8933531d97b3144",
+              "branch": "feature/mrs10-r219-ampang-orange-service-registry",
+              "target": "staging",
+              "state": "READY",
+              "accessProtection": "Vercel Authentication ALL enabled",
+              "url": "https://mrs10-r219-ampang-orange-preview-fy36r6tcg-1993khairuladam-3016.vercel.app/ampang-line-r219.html",
+              "buildLog": "Build Completed; Production artifact built safely; excluded gateway.js, questions.js, quiz-core.js",
+              "httpAssetVerification": "UNVERIFIED — anonymous access not feasible in this session; underlying Git source and CI artifact validated",
+              "releaseStatus": "ISOLATED_STAGING_ONLY; NOT_PRODUCTION_APPROVAL"
+            },
+            "rootCause": "Vercel first deployment of a newly created project is classified production by default; on same isolated R2.19 project subsequent explicit staging target accepted and READY.",
+            "noProtectedProjectChanges": "Production MR-S10 original, GitHub main, Supabase Auth/RLS, R2.18, P02, P03 not targeted by any corrective write"
           }
         }
       ]
