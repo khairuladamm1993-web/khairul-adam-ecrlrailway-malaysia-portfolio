@@ -336,9 +336,9 @@
         },
         {
           "id": "r219-ampang-orange-service-registry",
-          "kind": "IN_PROGRESS",
+          "kind": "BLOCKED",
           "label": "P01 R2.19 — LRT Ampang Line 18-station source-backed service registry",
-          "detail": "Isolated module and mobile reference viewer committed on R2.17 baseline; 18 AG-labelled service stops Sentul Timur–Ampang, 11 shared stops with Sri Petaling. Orange service-colour family confirmed; exact operator hex and track/POI geometry UNVERIFIED. No shared MapLibre/Registry source edits or deployment.",
+          "detail": "R2.19 source/CI validated on isolated GitHub branch: 18 stations/11 shared; six new Node tests + 318 existing tests PASS; protected staging artifact build PASS. Isolated Vercel project deployment unexpectedly target=production (READY, SSO all); NOT ACCEPTED AS STAGING; no corrective deployment attempted.",
           "basis": "Prasarana operator history + MyRapid schematic + Eastern Asia transport research 2023; connected GitHub source read-back, structural module checks",
           "sourceUrls": [
             "https://www.prasarana.com.my/mobiliti/the-nations-first-lrt-line/",
@@ -349,7 +349,7 @@
           "development": {
             "branch": "feature/mrs10-r219-ampang-orange-service-registry",
             "parentCommit": "5b507cf18e4c308ee1cb891ebe6a279b9f3d1671",
-            "lastVerifiedCommit": "0c9e0219cc916239129f4324ddfb1a8c4b1c24aa",
+            "lastVerifiedCommit": "0d4bd52188fd48da27366a80d8933531d97b3144",
             "files": [
               "assets/mrs10-r219-ampang-service.js",
               "ampang-line-r219.html",
@@ -362,28 +362,42 @@
           "evidence": {
             "source": "PASS",
             "structuredModuleChecks": "10/10 PASS using authenticated GitHub fetch and in-memory JS verification; NOT full Node CI",
-            "nodeTests": "UNVERIFIED — six Node tests committed but no complete CI result available",
+            "nodeTests": "PASS — 6/6 R2.19; 318/318 existing Node regression; GitHub Actions run 40233275721",
             "safari": "UNVERIFIED",
             "mapPoi": "UNVERIFIED — zero source-verified AG cartographic POI crosswalks",
             "physicalAlignment": "UNVERIFIED — zero OSM route/way/track geometry",
-            "staging": "NOT_DEPLOYED"
+            "staging": "BLOCKED_TARGET_MISMATCH — Vercel deployment dpl_9n4uMjspt35i9whLo7MWY5p3uZHL, project prj_xlweXyowjdvfr87gsAIEuIWsRkde, readyState READY but target=production, not accepted Preview",
+            "staticArtifact": "PASS — separate CI safe artifact build, protected legacy assets excluded",
+            "security": "SOURCE/ARTIFACT PASS — Vercel deploy access protection ALL (read-only metadata); full browser/security UAT pending"
           },
           "resolution": {
             "state": "OPEN",
-            "tests": "SOURCE_CONSISTENCY_PASS_CI_UNVERIFIED",
+            "tests": "AUTOMATED_PASS_RELEASE_BLOCKED",
             "verifiedAt": null,
             "evidence": [
-              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/0c9e0219cc916239129f4324ddfb1a8c4b1c24aa"
+              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40233275721",
+              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/0d4bd52188fd48da27366a80d8933531d97b3144"
             ],
             "releaseGates": {
-              "ci": "NOT_PASS",
+              "ci": "PASS",
               "safariUat": "NOT_PASS",
               "security": "NOT_PASS",
-              "deployment": "NOT_PASS",
+              "deployment": "FAIL_TARGET_MISMATCH",
               "ownerApproval": "NOT_APPROVED"
             }
           },
-          "nextAction": "Verify isolated GitHub Actions Node regression; run build and security gate; audit OSM POI/route relations; create approved isolated staging Preview only after successful source/build QA; Owner Safari UAT 18-stop list, English fallback, orange accents, shared identities and theme; integrate only through R2.18/R2.19 reconciled integration tests. Production NO-GO."
+          "nextAction": "NO-GO: stop staging; Owner approval required before any corrective Vercel deployment/cancel/retarget. Investigate why first isolated git-sourced deployment was labelled production. Keep existing MR-S10 Production and R2.18 unchanged. Only after properly isolated Preview approval: Safari iPhone/iPad UAT then source-backed POI/route relation audit and reconciled integration.",
+          "deploymentAudit": {
+            "projectId": "prj_xlweXyowjdvfr87gsAIEuIWsRkde",
+            "projectName": "mrs10-r219-ampang-orange-preview",
+            "deploymentId": "dpl_9n4uMjspt35i9whLo7MWY5p3uZHL",
+            "url": "https://mrs10-r219-ampang-orange-preview-6j7yci03n-1993khairuladam-3016.vercel.app",
+            "sourceSha": "0d4bd52188fd48da27366a80d8933531d97b3144",
+            "observedTarget": "production",
+            "observedReadyState": "READY",
+            "accessProtection": "Vercel Authentication ALL enabled",
+            "gate": "REJECT_AS_STAGING; no further deployment or corrective mutation"
+          }
         }
       ]
     },
