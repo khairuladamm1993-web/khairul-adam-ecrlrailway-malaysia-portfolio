@@ -141,7 +141,9 @@
    evidence:'OWNER_SAFARI_R216_KAJANG_POI'})
  ]);
  function matchSourcedKajangPoi(props){
-  if(!props||props.class!=='railway'||props.subclass!=='station')return null;
+  // OpenMapTiles POI railway station class may be tagged station OR subway.
+  // Accept subway only with an exact Owner-observed code+name; never infer from category alone.
+  if(!props||props.class!=='railway'||!['station','subway'].includes(props.subclass))return null;
   const sourceName=typeof props.name==='string'?props.name.trim():'';
   const recognized=observedPoiLabels.find(x=>x.raw===sourceName);
   if(!recognized)return null;
