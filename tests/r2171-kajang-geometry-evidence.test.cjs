@@ -51,12 +51,14 @@ test('R2.17.1: third-party GIS route layer and official route length cannot cert
  assert.equal(o.status,'OPERATOR_AGGREGATE_ONLY');
  assert(a.evidenceGates.includes('SEPARATE_KTM_AND_NON_KAJANG_RAIL_INFRASTRUCTURE'));
 });
-test('R2.17.1: the 29 green registry stations and two source-backed POI accents remain; do not paint physical track',()=>{
+test('R2.17.1/2: the 29 green registry stations and source-backed POI candidates remain; do not paint physical track',()=>{
  assert.equal(api.findRoute('mrt-kajang').visualIdentity.light,'#087D43');
  assert.equal(api.findRoute('mrt-kajang').visualIdentity.physicalAlignmentStatus,'UNVERIFIED');
  assert.match(source,/mrl-kajang-known-poi/);
- assert.match(source,/KG16 Pasar Seni/);
- assert.match(source,/KG35 Kajang/);
+ assert.match(source,/kajangPoiSourceNames/);
+ assert(api.kajangPoiSourceNames.includes('KG13 Pusat Bandar Damansara'));
+ assert(api.kajangPoiSourceNames.includes('KG16 Pasar Seni'));
+ assert(api.kajangPoiSourceNames.includes('KG35 Kajang'));
  assert.doesNotMatch(source,/mrl-kajang-alignment/);
  assert.doesNotMatch(source,/mrl-kajang-physical-line/);
  assert.match(source,/syncKajangPoiHighlights/);
