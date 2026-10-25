@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="robots" content="noindex,nofollow"><title>MR-S10 R2.19 · LRT Ampang Line | Isolated Registry</title>
+<meta name="robots" content="noindex,nofollow"><link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.css"><title>MR-S10 R2.19 · LRT Ampang Line | Isolated Registry</title>
 <style>
 :root{color-scheme:light;--bg:#f5f8fa;--card:#fff;--text:#162d3a;--muted:#415965;--line:#a9bac2;--orange:#A65100;--orange-bg:#fff1e2;--focus:#076a91;font-family:system-ui,-apple-system,Arial,sans-serif}
 :root[data-theme=dark]{color-scheme:dark;--bg:#101f2b;--card:#142e3e;--text:#f3faff;--muted:#d0e1ee;--line:#667d8b;--orange:#FFBB7B;--orange-bg:#392917;--focus:#8edbff}
@@ -30,15 +30,39 @@ dialog p{margin:7px 0}.close-row{display:flex;justify-content:flex-end;margin-to
 a{color:var(--orange);text-underline-offset:2px;overflow-wrap:anywhere}
 .notice{font-size:.84rem}.map-reference{margin-top:12px}.map-reference summary{color:var(--text)}.map-reference .map{height:clamp(320px,53dvh,640px);margin-top:8px}.shared-tag{font-size:.72rem;border:1px solid var(--line);border-radius:5px;padding:2px 4px;color:var(--muted);white-space:nowrap}.legend-line{height:3px;width:40px;background:var(--orange);display:inline-block;vertical-align:middle;margin:0 8px}
 @media(max-width:480px){main{padding:9px 10px 20px}.map{height:62dvh}ol{grid-template-columns:1fr}}
+/* Unified MapLibre map + one timeline, like R2.18; source-independent AG station position remains UNVERIFIED. */
+#r219-map-shell{position:relative;margin:10px 0}
+#r219-map{height:clamp(430px,67dvh,780px);border:1px solid var(--line);border-radius:12px}
+#r219-expand{position:absolute;top:12px;right:12px;z-index:2;min-width:44px;background:#eaf4f8;color:#183240;font-size:22px}
+#r219-map-shell.expanded{position:fixed;inset:0;z-index:900;isolation:isolate;margin:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);background:var(--bg)}
+#r219-map-shell.expanded #r219-map{height:100%;border:0;border-radius:0}
+#r219-map-shell.expanded #r219-expand{top:calc(12px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right))}
+#r219-map .maplibregl-popup-content{background:var(--card);color:var(--text);border-radius:9px;max-width:255px}
+#r219-map .maplibregl-popup-close-button{color:var(--text);font-size:23px;min-width:44px;min-height:44px}
+#r219-map .r219-popup{padding:23px 3px 5px;font-size:.86rem;overflow-wrap:anywhere;max-height:35dvh;overflow-y:auto}
+#r219-map .r219-popup strong{font-size:.98rem;color:var(--orange)}#r219-map .r219-popup p{margin:6px 0;color:var(--text)}
+#region-label{color:var(--text);font-size:.9rem;font-weight:700}
+#r219-map-note{font-size:.8rem;margin:8px 0 2px}
+#station-list{list-style:none;display:block;counter-reset:ampang-stop;max-height:min(43dvh,340px);overflow-y:auto;margin:12px 0;padding:0 5px 0 4px;background:linear-gradient(#A65100,#A65100) 19px 0/2px 100% no-repeat}
+#station-list li{margin:0;min-height:39px}
+#station-list li button{border:0;border-radius:0;background:transparent;min-height:42px;display:flex;align-items:center;padding:4px 2px;gap:11px;font-weight:570}
+#station-list li button:focus-visible{outline:3px solid var(--focus)}
+#station-list .num{flex:0 0 30px;max-width:30px;height:30px;background:#A65100;color:#fff;box-shadow:0 0 0 2px var(--card)}
+#station-list li:first-child button,#station-list li:last-child button{font-weight:800}
+:root[data-theme=dark] #r219-map .maplibregl-popup-content{background:#142e3e;color:#f3faff}
+:root[data-theme=dark] #r219-map .maplibregl-popup-close-button{color:#f3faff}
 </style><script src="./assets/mrs10-r219-ampang-service.js"></script></head>
 <body><main>
 <header><div><div class="eyebrow">P01 / R2.19 · ISOLATED DEVELOPMENT</div><h1 id="heading">LRT Ampang Line · Perkhidmatan 3</h1></div>
 <div class="toolbar"><label for="lang">Language</label><select id="lang" aria-label="Language"><option value="ms">BM</option><option value="en">EN</option><option value="zh">中文</option><option value="th">ไทย</option></select><button id="theme" type="button">Dark Mode</button></div></header>
+<div class="toolbar"><label id="region-label" for="r219-region">Kawasan peta</label><select id="r219-region" aria-label="Map region"><option value="malaysia">Malaysia</option><option value="thailand">Thailand</option><option value="china">China</option></select></div>
+<div id="r219-map-shell"><div id="r219-map" role="region" aria-label="Interactive Railway-First map"></div>
+<button type="button" id="r219-expand" aria-label="Expand map" aria-expanded="false">⛶</button></div>
+<p id="r219-map-note" role="status" aria-live="polite">Peta vektor interaktif. Lokasi Ampang belum disahkan.</p>
 <section><details open id="registry"><summary id="registry-title">LRT Ampang · 18 stesen</summary>
 <p id="summary" class="stats"></p><ol id="station-list" aria-label="Ampang Line station sequence"></ol>
 <p id="disclaimer" class="notice"></p><p class="notice"><span class="legend-line"></span><span id="legend-note"></span></p>
 </details></section>
-<details class="map-reference" id="map-reference"><summary id="map-ref-title">Peta asas MR-S10 (bukan peta khas Ampang)</summary><p id="map-ref-note" class="notice">Titik biru ialah POI peta asal, bukan padanan stesen Ampang yang disahkan. Tetapan bahasa/tema peta dikawal secara berasingan.</p><div class="map"><iframe title="Existing MR-S10 Railway-First Map, unchanged; not verified Ampang positions" src="./map-language-lab.html?railPilot=1" loading="lazy"></iframe></div></details>
 <dialog id="details"><h2 id="station-title"></h2><p id="station-code"></p><p id="station-shared"></p><p id="station-interchange"></p><p id="station-geometry"></p>
 <p><a id="station-source" target="_blank" rel="noopener noreferrer">Source / Sumber</a></p>
 <div class="close-row"><button type="button" id="close">Close / Tutup</button></div></dialog>
@@ -57,7 +81,7 @@ let lang='ms';let active=null;let theme='light';
 const set=(id,s)=>{el(id).textContent=s};
 function render(){
  const l=i18n[lang];document.documentElement.lang=lang;set('heading',l.heading);set('registry-title',l.registry);set('summary',l.summary);set('disclaimer',l.note);set('legend-note',l.orange);
- set('theme',theme==='dark'?l.light:l.dark);set('map-ref-title',l.mapTitle);set('map-ref-note',l.mapNote);const list=el('station-list');list.replaceChildren();
+ set('theme',theme==='dark'?l.light:l.dark);const list=el('station-list');list.replaceChildren();
  for(const s of api.stations){
   const li=document.createElement('li'),btn=document.createElement('button'),num=document.createElement('span'),name=document.createElement('span'),code=document.createElement('span');
   btn.type='button';num.className='num';num.textContent=String(s.order);name.className='name';name.textContent=s.name;code.className='code';code.textContent=s.serviceCode;
@@ -74,8 +98,8 @@ function populate(s){
 }
 function showStation(s){active=s;populate(s);const d=el('details');if(!d.open)d.showModal()}
 el('lang').addEventListener('change',e=>{if(i18n[e.target.value]){lang=e.target.value;render()}});
-el('theme').addEventListener('click',()=>{theme=theme==='dark'?'light':'dark';document.documentElement.dataset.theme=theme;render()});
+el('theme').addEventListener('click',()=>{theme=theme==='dark'?'light':'dark';document.documentElement.dataset.theme=theme;render();document.dispatchEvent(new Event('mrs10-r219-theme'))});
 el('close').addEventListener('click',()=>el('details').close());
 render();
 })();
-</script></body></html>
+</script><script src="./assets/mrs10-r219-map-bridge.js" defer></script></body></html>
