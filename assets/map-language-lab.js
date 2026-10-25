@@ -53,6 +53,97 @@ const legendExplanations={
  zh:['铁路干线；具体线路名称需要来源支持。','数据中标记为高速的铁路，不代表已核实运营速度。','连接主线的支线。','地铁类别；底图紫色线不一定是地铁。','工业铁路或专用线。','其他轨道或车场。'],
  th:['ทางรถไฟสายหลัก ชื่อเส้นทางต้องมีข้อมูลรองรับ','ข้อมูลระบุว่าเป็นรางความเร็วสูง ไม่ใช่การยืนยันความเร็วใช้งานจริง','ทางรถไฟสายรอง','ประเภทเมโทร สีม่วงบนแผนที่พื้นฐานไม่จำเป็นต้องเป็นเมโทร','ทางรถไฟอุตสาหกรรม / รางแยก','รางอื่นหรือลานจอด']
 };
+// R2.13 opt-in pilot uses verified CITY-AREA centers, never guessed station coordinates.
+// Kuala Lumpur: https://digital.library.unt.edu/explore/locations/p09469/
+// Bangkok: https://digital.library.unt.edu/explore/locations/p01401/
+// Liuzhou: https://mapcarta.com/Liuzhou
+// POI/transportation vector schemas: https://openmaptiles.org/docs/schema/
+const pilotCenters=Object.freeze({
+ malaysia:{label:'Kuala Lumpur',center:[101.68653,3.14120],zoom:12.5},
+ thailand:{label:'Bangkok',center:[100.50144,13.75398],zoom:12.5},
+ china:{label:'Liuzhou',center:[109.424,24.3285],zoom:12.5}
+});
+const pilotLocalized={
+ ms:{title:'Ujian rel & stesen',tap:'Tekan simbol stesen atau rel vektor. Nama khusus mungkin tiada.',station:'Stesen railway',rail:'Segmen landasan',unnamed:'Nama English tidak tersedia',original:'Nama asal',pinyin:'Pinyin (jika disahkan)',kind:'Kategori',source:'Data: OpenMapTiles / OpenFreeMap; bukan sistem operasi'},
+ en:{title:'Rail and station pilot',tap:'Tap a station symbol or vector rail. Specific names may be unavailable.',station:'Railway station',rail:'Rail segment',unnamed:'English name unavailable',original:'Original name',pinyin:'Verified pinyin',kind:'Category',source:'OpenMapTiles / OpenFreeMap data; not operational'},
+ zh:{title:'铁路与车站测试',tap:'点击车站符号或矢量轨道，名称数据可能缺失。',station:'铁路车站',rail:'轨道区段',unnamed:'名称不可用',original:'原名',pinyin:'来源拼音',kind:'类别',source:'OpenMapTiles / OpenFreeMap 数据，非运营用途'},
+ th:{title:'ทดสอบทางรถไฟและสถานี',tap:'แตะสัญลักษณ์สถานีหรือรางเวกเตอร์ ชื่อบางแห่งอาจไม่มีข้อมูล',station:'สถานีรถไฟ',rail:'ช่วงทางรถไฟ',unnamed:'ไม่มีชื่อภาษาอังกฤษ',original:'ชื่อเดิม',pinyin:'พินอินที่มีข้อมูลยืนยัน',kind:'ประเภท',source:'ข้อมูล OpenMapTiles / OpenFreeMap ไม่ใช่การเดินรถ'}
+};
+const pilotStationSubclasses=Object.freeze(['station','halt','subway','tram_stop']);
+function pilotEligibleStation(props){
+ return !!props && props.class==='railway' && pilotStationSubclasses.includes(props.subclass);
+}
+function pilotEligibleRail(props){
+ return !!props && props.class==='rail';
+}
+function pilotFeatureInfo(props,kind,locale){
+ const p=props||{},l=pilotLocalized[locale]||pilotLocalized.en;
+ const original=String(p.name||'').trim();
+ const english=String(p['name:en']||p.name_en||p['name:latin']||'').trim();
+ const local=locale==='zh'?String(p['name:zh']||'').trim():locale==='th'?String(p['name:th']||'').trim():'';
+ const latinOriginal=original && !/[\u3400-\u9fff\u0e00-\u0e7f]/.test(original)?original:'';
+ const title=(locale==='ms'||locale==='en' ? (english||latinOriginal) : (local||english||original))||l.unnamed;
+ const pinyin=String(p['name:zh-Latn-pinyin']||p['name:zh-Latn']||'').trim();
+ return {title,category:kind==='station'?l.station:l.rail,original:original&&original!==title?original:'',pinyin,subclass:String(p.subclass||'').trim(),source:l.source,localization:l, hasVerifiedEnglish:!!(english||latinOriginal)};
+}
+let pilotMode=false,pilotEventHandlersBound=false,pilotInfoPopup=null;
+function pilotSourceForLayer(style,sourceLayer){
+ const entry=style?.layers?.find(layer=>layer['source-layer']===sourceLayer && style.sources?.[layer.source]?.type==='vector');
+ return entry?.source||null;
+}
+function popupFromPilotFeature(feature,kind,lngLat){
+ if(!feature||!(kind==='station'?pilotEligibleStation(feature.properties):pilotEligibleRail(feature.properties)))return;
+ const info=pilotFeatureInfo(feature.properties,kind,lang);
+ const root=document.createElement('div');
+ root.className='campus-popup';root.tabIndex=0;root.setAttribute('role','region');root.setAttribute('aria-label',info.category);
+ const title=document.createElement('strong');title.textContent=info.title;root.appendChild(title);
+ for(const line of [info.category,info.subclass?info.localization.kind+': '+info.subclass:'',
+  info.original?info.localization.original+': '+info.original:'',
+  info.pinyin?info.localization.pinyin+': '+info.pinyin:'',info.source]){
+  if(!line)continue;const node=document.createElement('p');node.textContent=line;root.appendChild(node);
+ }
+ if(pilotInfoPopup)pilotInfoPopup.remove();
+ pilotInfoPopup=new maplibregl.Popup({offset:12,maxWidth:'255px',className:'mrl-campus-popup'})
+  .setLngLat(lngLat).setDOMContent(root).addTo(map);
+}
+function installPilotVectorLayers(){
+ if(!pilotMode||!map?.isStyleLoaded())return false;
+ const style=map.getStyle(),railSource=transportationSource(style),poiSource=pilotSourceForLayer(style,'poi');
+ const status=el('railway-pilot-status');
+ let stations=false,rails=false;
+ // A vector feature must exist before any popup can open: no synthetic station markers.
+ if(poiSource&&!map.getLayer('mrl-pilot-stations')){
+  try{
+   map.addLayer({id:'mrl-pilot-stations',type:'circle',source:poiSource,'source-layer':'poi',minzoom:10,
+    filter:['all',['==',['get','class'],'railway'],['in',['get','subclass'],['literal',pilotStationSubclasses]]],
+    paint:{'circle-radius':6,'circle-color':'#1F849E','circle-stroke-color':'#FFFFFF','circle-stroke-width':1.5}});
+   stations=true;
+  }catch(e){stations=false;}
+ }else stations=!!map.getLayer('mrl-pilot-stations');
+ if(railSource&&!map.getLayer('mrl-pilot-rail-hits')){
+  try{
+   map.addLayer({id:'mrl-pilot-rail-hits',type:'line',source:railSource,'source-layer':'transportation',minzoom:10,
+    filter:['==',['get','class'],'rail'],layout:{'line-cap':'round','line-join':'round'},
+    paint:{'line-color':'#000000','line-opacity':0.01,'line-width':12}});
+   rails=true;
+  }catch(e){rails=false;}
+ }else rails=!!map.getLayer('mrl-pilot-rail-hits');
+ if(stations&&!pilotEventHandlersBound){
+  map.on('click','mrl-pilot-stations',e=>{
+   const f=e.features?.find(x=>pilotEligibleStation(x.properties));if(f)popupFromPilotFeature(f,'station',e.lngLat);
+  });
+ }
+ if(rails&&!pilotEventHandlersBound){
+  map.on('click','mrl-pilot-rail-hits',e=>{
+   if(stations&&map.queryRenderedFeatures?.(e.point,{layers:['mrl-pilot-stations']})?.some(f=>pilotEligibleStation(f.properties)))return;
+   const f=e.features?.find(x=>pilotEligibleRail(x.properties));if(f)popupFromPilotFeature(f,'rail',e.lngLat);
+  });
+ }
+ if(stations||rails)pilotEventHandlersBound=true;
+ if(status)status.textContent=pilotLocalized[lang].title+' · '+pilotLocalized[lang].tap+
+  (!stations?' [station POI layer unavailable]':'')+(!rails?' [rail layer unavailable]':'');
+ return stations||rails;
+}
 const el=id=>document.getElementById(id);
 let lang='ms',map=null,ready=false,railDetails=false,activeRegion='malaysia',campusMarker=null;
 const railVisibility=on=>on?'visible':'none';
@@ -124,6 +215,11 @@ function render(){
  const legendSummary=el('railway-legend-trigger');if(legendSummary){legendSummary.setAttribute('aria-label',legendCopy.title);legendSummary.title=legendCopy.title;}
  document.querySelectorAll('[data-rail-legend]').forEach(node=>{const i=Number(node.dataset.railLegend);if(Number.isInteger(i)&&i>=0&&i<legendCopy.items.length)node.lastElementChild.textContent=legendCopy.items[i];});
  renderLegendDetail();
+ const pilotStatus=el('railway-pilot-status');
+ if(pilotStatus && pilotMode){
+  pilotStatus.hidden=false;
+  pilotStatus.textContent=pilotLocalized[lang].title+' · '+pilotLocalized[lang].tap;
+ }
  const guideTitle=el('liuzhou-title');if(guideTitle)guideTitle.textContent=readableRailLanguage[lang].guide;
  const guideHint=el('liuzhou-hint');if(guideHint)guideHint.textContent=readableRailLanguage[lang].guideHint;
  syncCampusPin();
@@ -221,7 +317,7 @@ function setExpanded(value){
 function onMapKey(event){if(event.key==='Escape'&&expanded){event.preventDefault();setExpanded(false);}}
 function onViewportResize(){if(expanded)map?.resize?.();}
 function init(){
-
+ try{pilotMode=new URLSearchParams(window.location.search).get('railPilot')==='1'}catch{pilotMode=false}
  render();updateTheme();
  if(!window.maplibregl?.Map){el('label-status').textContent='Vector map engine unavailable';return;}
  map=new maplibregl.Map({
@@ -247,6 +343,7 @@ function init(){
   try{
    const rails=readableRails();
    overlay();applyLabels();setRailVisibility();ready=true;
+   if(pilotMode)installPilotVectorLayers();
    el('label-status').dataset.ready='true';
    el('rail-vector-note').textContent=rails?readableRailLanguage[lang].railLines:readableRailLanguage[lang].railMissing;
   }
@@ -256,8 +353,10 @@ function init(){
  document.querySelectorAll('[data-locale]').forEach(b=>b.addEventListener('click',()=>{setLanguage(b.dataset.locale);updateTheme();}));
  el('railway-btn').addEventListener('click',()=>{railDetails=!railDetails;setRailVisibility();});
  document.querySelectorAll('[data-region]').forEach(b=>b.addEventListener('click',()=>{
-  const target=centers[b.dataset.region];
-  if(target)map.flyTo({center:target[0],zoom:target[1],duration:600});
+  const target=pilotMode?pilotCenters[b.dataset.region]:null;
+  const destination=target?[target.center,target.zoom]:centers[b.dataset.region];
+  if(destination)map.flyTo({center:destination[0],zoom:destination[1],duration:600});
+  if(pilotMode&&pilotInfoPopup){pilotInfoPopup.remove();pilotInfoPopup=null;}
   activeRegion=b.dataset.region;
   el('liuzhou-guide').hidden=activeRegion!=='china';
   syncCampusPin();
@@ -281,7 +380,7 @@ function init(){
   if(e.key==='railway-language'&&locales.includes(e.newValue))setLanguage(e.newValue);
  });
 }
-if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText,transportationSource,railVectorLayer,LRVTC_CAMPUS,campusText};
+if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText,transportationSource,railVectorLayer,LRVTC_CAMPUS,campusText,pilotCenters,pilotEligibleStation,pilotEligibleRail,pilotFeatureInfo,pilotSourceForLayer};
 if(typeof document!=='undefined'){
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
  else init();
