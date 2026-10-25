@@ -28,6 +28,15 @@ h1{font-size:clamp(1.35rem,4vw,2.1rem);line-height:1.2}p{max-width:85ch}#label-s
 #railway-btn{width:auto;padding:9px 16px;font-weight:750}
 #visitor-map{outline:1px solid var(--line)}
 button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #efa93e;outline-offset:3px}
+#campus-location[hidden]{display:none}
+.campus-location{margin:4px 0 12px}
+#campus-focus{border-color:#357f93;font-weight:700;background:var(--card);color:var(--fg)}
+.lrvtc-pin{display:block;width:40px;height:40px;border-radius:50% 50% 50% 7px;transform:rotate(-45deg);background:#eaf8f2;color:#093c3d;border:2px solid #317a78;font-size:19px;box-shadow:0 2px 5px #0003;cursor:pointer}
+.lrvtc-pin:focus-visible{outline:3px solid #f5ad37}
+.campus-popup{color:#17313f;line-height:1.45;font-size:14px}
+.campus-popup p{margin:6px 0}.campus-popup small{color:#354d5a}
+:root[data-theme="dark"] #campus-focus{color:#f3faff;background:#183746;border-color:#9bd8e7}
+:root[data-theme="dark"] .campus-popup{color:#142e3c}
 .rail-note,.liuzhou-guide{margin:12px 0;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--fg)}
 .liuzhou-guide summary{cursor:pointer;font-weight:750;min-height:35px}
 .bilingual{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -54,6 +63,9 @@ await import('./assets/map-language-lab.js');
 <button type="button" data-region="malaysia">🇲🇾 Malaysia</button>
 <button type="button" data-region="thailand">🇹🇭 Thailand</button>
 <button type="button" data-region="china">🇨🇳 China</button></div>
+<div id="campus-location" class="campus-location" hidden>
+<button type="button" id="campus-focus" aria-controls="visitor-map">🎓 LRVTC · Kampus Guantang</button>
+</div>
 <div id="visitor-map" role="region" aria-label="Multilingual visitor map"></div>
 <p class="rail-note" id="rail-vector-note" role="status" aria-live="polite">Visitor mode: railway lines without technical labels</p>
 <details id="liuzhou-guide" class="liuzhou-guide" hidden>
