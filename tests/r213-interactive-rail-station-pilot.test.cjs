@@ -93,7 +93,7 @@ test('R2.13 station and rail clicks show SOURCE attributes without inventing rai
  assert.match(map.lastPopup.node.textContent,/Liuzhou Railway Station/);
  assert.match(map.lastPopup.node.textContent,/柳州站/);
  railClick({features:[{properties:{class:'rail',subclass:'rail'}}],lngLat:{lng:109.4,lat:24.3},point:{x:1,y:2}});
- assert.match(map.lastPopup.node.textContent,/English name unavailable/);
+ assert.match(map.lastPopup.node.textContent,/Nama English tidak tersedia/);
  assert.doesNotMatch(map.lastPopup.node.textContent,/High-speed railway/);
  w.close();
 });
