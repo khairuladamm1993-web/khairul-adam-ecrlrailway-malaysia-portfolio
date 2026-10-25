@@ -333,6 +333,57 @@
               "ownerApproval": "NOT_APPROVED"
             }
           }
+        },
+        {
+          "id": "r219-ampang-orange-service-registry",
+          "kind": "IN_PROGRESS",
+          "label": "P01 R2.19 — LRT Ampang Line 18-station source-backed service registry",
+          "detail": "Isolated module and mobile reference viewer committed on R2.17 baseline; 18 AG-labelled service stops Sentul Timur–Ampang, 11 shared stops with Sri Petaling. Orange service-colour family confirmed; exact operator hex and track/POI geometry UNVERIFIED. No shared MapLibre/Registry source edits or deployment.",
+          "basis": "Prasarana operator history + MyRapid schematic + Eastern Asia transport research 2023; connected GitHub source read-back, structural module checks",
+          "sourceUrls": [
+            "https://www.prasarana.com.my/mobiliti/the-nations-first-lrt-line/",
+            "https://myrapid.com.my/wp-content/uploads/2021/07/28102018_Transit-Map.pdf",
+            "https://easts.info/on-line/proceedings/vol.14/pdf/PP3803.pdf",
+            "https://mrt.com.my/lrt_ampang/index.htm"
+          ],
+          "development": {
+            "branch": "feature/mrs10-r219-ampang-orange-service-registry",
+            "parentCommit": "5b507cf18e4c308ee1cb891ebe6a279b9f3d1671",
+            "lastVerifiedCommit": "0c9e0219cc916239129f4324ddfb1a8c4b1c24aa",
+            "files": [
+              "assets/mrs10-r219-ampang-service.js",
+              "ampang-line-r219.html",
+              "tests/r219-ampang-orange-service.test.cjs",
+              ".github/workflows/r219-ampang-ci.yml"
+            ],
+            "r218Isolation": "PASS — no shared R2.18 files edited",
+            "productionAndOtherProjects": "UNTOUCHED"
+          },
+          "evidence": {
+            "source": "PASS",
+            "structuredModuleChecks": "10/10 PASS using authenticated GitHub fetch and in-memory JS verification; NOT full Node CI",
+            "nodeTests": "UNVERIFIED — six Node tests committed but no complete CI result available",
+            "safari": "UNVERIFIED",
+            "mapPoi": "UNVERIFIED — zero source-verified AG cartographic POI crosswalks",
+            "physicalAlignment": "UNVERIFIED — zero OSM route/way/track geometry",
+            "staging": "NOT_DEPLOYED"
+          },
+          "resolution": {
+            "state": "OPEN",
+            "tests": "SOURCE_CONSISTENCY_PASS_CI_UNVERIFIED",
+            "verifiedAt": null,
+            "evidence": [
+              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/0c9e0219cc916239129f4324ddfb1a8c4b1c24aa"
+            ],
+            "releaseGates": {
+              "ci": "NOT_PASS",
+              "safariUat": "NOT_PASS",
+              "security": "NOT_PASS",
+              "deployment": "NOT_PASS",
+              "ownerApproval": "NOT_APPROVED"
+            }
+          },
+          "nextAction": "Verify isolated GitHub Actions Node regression; run build and security gate; audit OSM POI/route relations; create approved isolated staging Preview only after successful source/build QA; Owner Safari UAT 18-stop list, English fallback, orange accents, shared identities and theme; integrate only through R2.18/R2.19 reconciled integration tests. Production NO-GO."
         }
       ]
     },
