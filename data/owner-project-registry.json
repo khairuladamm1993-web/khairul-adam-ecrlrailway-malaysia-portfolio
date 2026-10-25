@@ -1151,5 +1151,57 @@
     },
     "releaseDecision": "EXPERIMENT_ONLY; no R2.12 merge or Production release; requires real Safari source coverage verification",
     "nextAction": "Owner choose each country and tap a station marker and vector rail segment; collect screenshot/missing labels/which POIs render. Verify source-backed attributes before expanding to more regions."
+  },
+  "integrationR213b": {
+    "project": "P01",
+    "issue": "legend-colours-across-three-pilot-cities",
+    "checkedOn": "2026-10-25",
+    "state": "STAGING_READY_SAFARI_UAT_PENDING",
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "ownerObservation": "25 Oct 2026 Safari screenshots: Kuala Lumpur green/purple, Bangkok purple, Liuzhou red/orange line colours do not visually correspond to prior 6-colour legend.",
+    "diagnosis": "Official OpenRailwayMap standard.mapcss supports eight relevant base categories including previously omitted light rail green #00BD14 and tram pink #D877B8. App combines standard OpenRailwayMap raster at 0.60 opacity with OpenFreeMap basemap, so displayed colours can blend and base-map lines need not be railway. No claim that any single photographed track type is proven from colour alone.",
+    "sourceEvidence": "https://github.com/OpenRailwayMap/OpenRailwayMap/blob/master/styles/standard.mapcss",
+    "branch": "feature/mrs10-r213b-rail-colour-legend-alignment",
+    "sourceCommit": "3dd28e8eb95bfb37e0fb63145add54c867aa256b",
+    "parentCommit": "ca53c00435caf44d83353bae8bd6ed5c308203f3",
+    "modifications": [
+      "Eight source-style rail categories: main #FF8100, highspeed #FF0C00, branch #DACA00, subway #0300C3, light rail #00BD14, tram #D877B8, industrial/spur #87491D, other/yard #000000",
+      "Map-only compact legend now has two additional categories and localized four-language explanations",
+      "Region label responds to the selected China/Malaysia/Thailand country and the Kuala Lumpur/Bangkok/Liuzhou pilot",
+      "Disclaimer explains semi-transparent OpenRailwayMap raster, basemap colour mixing, and absence of definitive per-line interpretation",
+      "Campus approved coordinates, expand map, source-backed pilot station names and opt-in mode untouched"
+    ],
+    "qa": {
+      "node": "271/271 PASS, 0 FAIL 0 SKIP — final Vercel staging deployment build logs",
+      "catalogue": "14/14 PASS, 0 FAIL 0 SKIP",
+      "previewBuild": "PASS; public-only analytics and member excluded",
+      "http": "200 map page and JS, 404 quiz and Member JS",
+      "uiStructure": "Eight swatches, green/pink and city label verified present in published HTML",
+      "ownerSafari": "PENDING — visual and clickable colour legend still requires Owner Safari confirmation",
+      "actualRailwayFeatureAttribution": "UNVERIFIED — raster tile is not selectable railway geometry; vector layer may lack route names",
+      "earlierFailedCandidate": "dpl_EYp47jFd7oYNfjW8jtHVVNDV9ykS and dpl_2za36gHJsENjWQVTGTWMziwgqW86 encountered outdated language test assertions; corrected without altering Production"
+    },
+    "staging": {
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_8vgMHfuB5MZsv7Bf9tF4ZdHji19N",
+      "target": "staging",
+      "state": "READY",
+      "url": "https://mrs10-r211-mobile-map-pxh3fjhxk-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "sso": "Vercel Authentication all unchanged"
+    },
+    "releaseDecision": "HOLD: source fix PASS; Owner Safari and real vector station/rail data checks pending. No Production release.",
+    "nextAction": "Owner selects Malaysia/Bangkok/China pilot regions with railway details ON, opens in-map colour legend and checks green Light rail and pink Tram plus other six entries. Capture screenshot before/after and report perceived mismatch; record missing layer names separately. Do not infer exact route identities solely from blended tile colours.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "supabase": "UNCHANGED"
+    }
   }
 }
