@@ -215,3 +215,47 @@ test('R2.19: native GIS overlay preserves MapLibre tap, responsive popup and cou
  assert.doesNotMatch(geoOverlay,/openrailwaymap\.org\/standard/);
  assert.equal(ampangGIS.decode([],api).missing,18);
 });
+
+test('R2.19 AG3 source provenance: exact ArcGIS FID16 TITWANGSA AG03 maps to official Titiwangsa',()=>{
+ const src=ampangGIS.sourceCorrection;
+ assert.equal(src.fid,16);
+ assert.equal(src.rawName,'TITWANGSA');
+ assert.equal(src.rawCode,'AG03');
+ assert.match(src.audit,/40238891427/);
+ // Test coordinates are synthetic, in bounding box, NOT registry location data.
+ const observed={attributes:{FID:16,STN_NAME:'TITWANGSA',STN_CODE:'AG03'},
+  geometry:{x:101.715,y:3.170}};
+ const r=ampangGIS.decode([observed],api);
+ assert.equal(r.ok,true);
+ assert.equal(r.matched,1);
+ assert.equal(r.missing,17);
+ assert.equal(r.data[0].code,'AG3');
+ assert.equal(r.data[0].name,'Titiwangsa');
+ assert.equal(r.data[0].sourceRawName,'TITWANGSA');
+ assert.equal(r.data[0].sourceRawCode,'AG03');
+ assert.equal(r.data[0].matchMethod,'OBSERVED_GIS_TYPO_AND_PADDED_CODE_FID16');
+ assert.equal(r.data[0].correctionEvidence,src.audit);
+ assert.equal(r.data[0].physicalTrackStatus,'UNVERIFIED');
+ assert.equal(api.stationByCode('AG3').geometry,null);
+});
+test('R2.19 AG3 correction rejects wrong FID, name, padded code and out-of-bounds',()=>{
+ const source={FID:16,STN_NAME:'TITWANGSA',STN_CODE:'AG03'};
+ const example={x:101.715,y:3.170};
+ for(const obj of [
+  {attrs:{...source,FID:15},geom:example},
+  {attrs:{...source,STN_CODE:'AG04'},geom:example},
+  {attrs:{...source,STN_NAME:'OTHER STATION'},geom:example},
+  {attrs:source,geom:{x:104.5,y:3.170}},
+  {attrs:source,geom:{x:101.715,y:null}}
+ ]){
+  const d=ampangGIS.decode([{attributes:obj.attrs,geometry:obj.geom}],api);
+  assert.equal(d.matched,0);
+  assert.equal(d.missing,18);
+ }
+ const duplicate=ampangGIS.decode([
+  {attributes:source,geometry:example},
+  {attributes:source,geometry:{x:101.716,y:3.171}}
+ ],api);
+ assert.equal(duplicate.matched,0);
+ assert.equal(duplicate.missing,18);
+});
