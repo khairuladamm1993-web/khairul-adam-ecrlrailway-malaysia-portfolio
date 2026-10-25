@@ -71,14 +71,18 @@ test('R2.17: all 29 list items become green only when MRT Kajang selected, and o
  assert.equal(doc.getElementById('kl-registry-station-order').hidden,true);
  w.close();
 });
-test('R2.17: only exact source-backed KG16/KG35 map POIs turn green; no whole alignment recolouring',()=>{
+test('R2.17/2: only allowlisted KG code/name source POIs turn green; no whole alignment recolouring',()=>{
  const {w,map,doc}=start();
  const layer=map.getLayer('mrl-kajang-known-poi');
  assert(layer,'source-backed highlight must be installed');
  assert.equal(layer.type,'circle');
  assert.equal(layer.source,'osm');
  assert.equal(layer['source-layer'],'poi');
- assert.deepEqual(Array.from(layer.filter[3][2][1]),['KG16 Pasar Seni','KG35 Kajang']);
+ const sourceNames=Array.from(layer.filter[3][2][1]);
+ assert(sourceNames.length>=29);
+ for(const name of ['KG13 Pusat Bandar Damansara','KG16 Pasar Seni','KG35 Kajang'])assert(sourceNames.includes(name));
+ assert(!sourceNames.includes('Kajang'),'generic POIs cannot be green');
+ assert(!sourceNames.includes('MR3 Maharajalela'),'monorail stays separate');
  assert.equal(layer.paint['circle-color'],'#087D43');
  assert.equal(layer.layout.visibility,'none');
  const selector=doc.getElementById('kl-registry-route');
