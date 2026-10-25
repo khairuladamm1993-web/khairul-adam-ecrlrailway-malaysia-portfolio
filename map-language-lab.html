@@ -167,6 +167,32 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ef
 #visitor-map .campus-popup.kelana-match .kelana-match-notice{
  border-left:3px solid var(--kj-ruby);padding-left:8px
 }
+
+/* R2.20: MRT Putrajaya official yellow hue, accessible UI-approximation HEX.
+   No styling for unverified railway physical alignments. */
+:root{--py-yellow:#E5B800;--py-text:#795B00;--py-on-yellow:#182A36}
+:root[data-theme="dark"]{--py-yellow:#E5B800;--py-text:#FFE36C}
+.kl-registry[data-route="mrt-putrajaya"] #kl-registry-route-name{color:var(--py-text)}
+.kl-registry[data-route="mrt-putrajaya"] #kl-registry-route-status{border-left:3px solid var(--py-yellow);padding-left:10px}
+.kl-registry[data-route="mrt-putrajaya"] .kl-registry-stations{
+ list-style:none;counter-reset:py-stop;margin-left:0;padding:4px 8px 4px 4px;
+ background:linear-gradient(var(--py-yellow),var(--py-yellow)) 19px 0/2px 100% no-repeat
+}
+.kl-registry[data-route="mrt-putrajaya"] .kl-registry-stations li{
+ list-style:none;counter-increment:py-stop;display:flex;align-items:center;
+ min-height:39px;gap:10px;margin:0;font-weight:570;line-height:1.4
+}
+.kl-registry[data-route="mrt-putrajaya"] .kl-registry-stations li::before{
+ content:counter(py-stop);display:grid;place-items:center;flex:0 0 30px;
+ width:30px;height:30px;border-radius:50%;background:var(--py-yellow);
+ color:var(--py-on-yellow);font-size:12px;font-weight:800;box-shadow:0 0 0 2px var(--card)
+}
+.kl-registry[data-route="mrt-putrajaya"] .kl-registry-stations li:first-child,
+.kl-registry[data-route="mrt-putrajaya"] .kl-registry-stations li:last-child{font-weight:800}
+#visitor-map .campus-popup.putrajaya-match>strong{color:var(--py-text)}
+#visitor-map .campus-popup.putrajaya-match .putrajaya-match-notice{
+ border-left:3px solid var(--py-yellow);padding-left:8px
+}
 </style>
 <script type="module">
 import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.mjs';
