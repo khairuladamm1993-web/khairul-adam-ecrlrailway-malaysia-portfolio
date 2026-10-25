@@ -29,7 +29,7 @@
  const mountMap=()=>ensureMap().then(m=>m.mount(document.querySelector('#railway-map-mount'))).catch(error=>{const host=document.querySelector('#railway-map-mount');if(host)host.innerHTML='<article class="learning-card"><h2>MAP</h2><p>'+R.escape(error.message||error)+'</p></article>';});
  function renderDetail(){
   const body=document.querySelector('#detail-content');
-  const controls=`<div class="quiz-languages">${['ms','en','zh'].map(l=>`<button data-detail-lang="${l}" aria-pressed="${R.language===l}">${({ms:'BM',en:'EN',zh:'中文'})[l]}</button>`).join('')}${R.language==='zh'?`<button data-detail-pinyin aria-pressed="${R.pinyin}">Pinyin ${R.pinyin?'ON':'OFF'}</button>`:''}<button data-detail-theme>${h(window.RailwayTheme.value==='light'?'Dark Mode':'Light Mode')}</button></div>`;
+  const controls=`<div class="quiz-languages">${['ms','en','zh','th'].map(l=>`<button data-detail-lang="${l}" aria-pressed="${R.language===l}">${({ms:'BM',en:'EN',zh:'中文',th:'ไทย'})[l]}</button>`).join('')}${R.language==='zh'?`<button data-detail-pinyin aria-pressed="${R.pinyin}">Pinyin ${R.pinyin?'ON':'OFF'}</button>`:''}<button data-detail-theme>${h(window.RailwayTheme.value==='light'?'Dark Mode':'Light Mode')}</button></div>`;
   if(currentDetail==='member')body.innerHTML=`<h2 id="detail-title">${h('Verified Member')}</h2><p class="access-label">${h('Secure email Magic Link')}</p><p>${h('Enter your email to receive a one-time secure sign-in link. Member access remains locked until a verified Supabase session is confirmed.')}</p><p>${h('No IC or passport is required. Public portfolio access remains available without login.')}</p><a class="primary" href="portfolio.html#home">${h('Browse the public portfolio')}</a>`;
   else {const item=window.RailwayInsights[currentDetail];if(!item)return;body.innerHTML=`<p class="access-label">${h('Public overview')}</p><h2 id="detail-title">${h(item.title)}</h2><p>${h(item.summary)}</p><div class="detail-member"><h3>${h('Detailed Insights — Member Access')}</h3>${accessButton()}</div>`;}
   body.insertAdjacentHTML('afterbegin',controls);
@@ -45,7 +45,7 @@
   document.querySelector('#start-quiz').hidden=true;
   if(category==='practical')box.innerHTML=`<div class="content-heading"><div><h2>${h('Module previews')}</h2><p>${h('Full quiz — Member Access')}</p></div></div><div class="module-grid">${window.RailwayModulePreviews.map(m=>`<button class="module" data-preview-module="${m.id}" data-member><span class="module-index">${String(m.index).padStart(2,'0')}</span><span><span class="module-title">${h(m.title)}</span><span class="module-meta">${h('16-question bank')} · ${h('Verified Member access')}</span></span><span aria-hidden="true">↗</span></button>`).join('')}</div><section class="content-row"><h2>${h('Rolling Stock Library')}</h2><article class="learning-card"><h3>CR200J</h3><p>${h('ECRL passenger rolling stock')}</p><p>${h('Full rolling-stock specification — Member Access')}</p>${accessButton()}</article></section>`;
   else if(category==='ebook'){
-   const language=['ms','en','zh'].includes(R.language)?R.language:'ms';
+   const language=['ms','en','zh','th'].includes(R.language)?R.language:'ms';
    const labels={
     ms:{status:'AWAM · DRAF EDITORIAL',title:'Asas Kereta Api — Bab 01',
       description:'Pengenalan sistem kereta api: infrastruktur, rolling stock, signalling, operasi dan glosari BM / EN / 中文.',
@@ -55,7 +55,10 @@
       action:'READ CHAPTER 01'},
     zh:{status:'公开 · 编辑草稿',title:'铁路基础知识 — 第01章',
       description:'铁路系统简介：基础设施、轨道车辆、信号、运营及三语术语表。',
-      action:'阅读第01章'}
+      action:'阅读第01章'},
+    th:{status:'สาธารณะ · ฉบับร่าง',title:'พื้นฐานระบบรถไฟ — บทที่ 01',
+      description:'บทนำเกี่ยวกับระบบรถไฟ โครงสร้างพื้นฐาน รถไฟและหัวรถจักร ระบบอาณัติสัญญาณ การเดินรถ และอภิธานศัพท์สามภาษา',
+      action:'อ่านบทที่ 01'}
    };
    const copy=labels[language];
    box.innerHTML=`<section class="content-row"><h2>${h('E-BOOK TRAIN OPERATION')}</h2><article class="learning-card"><span class="access-label">${R.escape(copy.status)}</span><h3>${R.escape(copy.title)}</h3><p>${R.escape(copy.description)}</p><a class="primary" href="reading/railway-fundamentals-01.html?lang=${language}">${R.escape(copy.action)} ↗</a></article></section>`;
