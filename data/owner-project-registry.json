@@ -2410,7 +2410,7 @@
     "issueId": "r2161-mrt-kajang-official-station-sequence",
     "title": "R2.16.1 MRT Kajang operator station-order audit and safe consecutive service adjacencies",
     "checkedOn": "2026-10-26",
-    "state": "STAGING_READY_SAFARI_STATION_ORDER_UAT_PENDING",
+    "state": "OWNER_SAFARI_KAJANG_1_TO_29_ENDPOINTS_CONFIRMED_OTHER_GATES_OPEN",
     "scope": "Kuala Lumpur/Klang Valley MR-S10 P01 railway catalogue; service order only, not physical track geometries",
     "reason": "R2.16 Phase 1 had MRT Kajang order NOT_YET_VERIFIED; Owner approved starting source-backed Kajang ordering and segment audit. MRT Corp overview declares 29 stations Kwasa Damansara to Kajang; another operator-page selector lists 29 in order; the project stations sidebar omits Kwasa Damansara (28).",
     "sourceAudit": {
@@ -2455,7 +2455,7 @@
       "catalogue": "14/14 PASS, 0 FAIL/SKIP",
       "build": "PASS — target staging, no Production",
       "publicArtifacts": "HTTP 200 map HTML, registry JS, map JS; HTTP 404 excluded Member/quiz JS",
-      "safari": "PENDING — show 29 named Kajang stops, endpoints, and 0 physical track claims; check ERL and popup no regression on same build",
+      "safari": "PARTIAL PASS — Owner confirms R2.16.1 MRT Kajang numbered list starts 1. Kwasa Damansara and ends 29. Kajang. Device screenshot of entire list not independently provided in this turn; intermediate 27 names and scroll usability await specific Owner evidence. Physical-track and full network QA remain OPEN.",
       "physicalGeometry": "NOT CLAIMED — no verified physical route, track way IDs, turnout or platform lane numbers"
     },
     "staging": {
@@ -2474,8 +2474,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "NO-GO Production/merge; source-backed 29 stop sequence and build PASS, iPhone Safari UAT pending, OSM/track-geometry correspondence and full KL network remain unverified",
-    "nextAction": "Owner opens R2.16.1 isolated staging, selects Malaysia and MRT Kajang; verify 29 stops starting Kwasa Damansara ending Kajang, scrollable panel and official links; confirm 0 physical tracks verified. Do not treat 28 consecutive service stop pairs as physical lane geometries. Follow with separate OSM relations/ways and operator track topology audit before geometry assignment.",
+    "releaseDecision": "NO-GO Production/merge — owner-confirmed station-list endpoints and source/build QA PASS, but physical railway geometry, entire-network coverage, formal UAT evidence and release approval remain outstanding.",
+    "nextAction": "Keep the Owner-confirmed 1-to-29 endpoints PASS without repeating them. Check the list scroll and a mid-route name only if needed for R2.16.1 display coverage; then proceed with authoritative OSM way/relation and operator topology audit, differentiating passenger stop adjacency from individual track geometry. Do not merge or deploy Production.",
     "boundaries": {
       "main": "UNCHANGED",
       "production": "UNCHANGED",
@@ -2484,6 +2484,25 @@
       "p03": "UNTOUCHED",
       "merge": "NOT PERFORMED",
       "privateImages": "NOT PUBLISHED"
+    },
+    "ownerSafariKajangSequenceUat": {
+      "confirmedOn": "2026-10-26",
+      "evidenceType": "Explicit Owner confirmation in ChatGPT conversation after viewing R2.16.1 Safari Preview; no new screenshot or publicly hosted UAT record provided",
+      "previewDeploymentId": "dpl_83LmexMzz3xMoxwi6oN4DeZ8jN8L",
+      "deploymentStateAtRecheck": "READY",
+      "buildSourceSha": "64713ca3874c5eda65d8de070081345732d6109e",
+      "scope": "MRT Kajang Line Registry numbered list endpoints only",
+      "ownerStatement": "Yes tepat, 1.kwangsa damansara to 29.kajang",
+      "normalizedFirstStop": "1. Kwasa Damansara",
+      "normalizedLastStop": "29. Kajang",
+      "result": "OWNER_CONFIRMED_FIRST_AND_LAST_STOP_DISPLAYED_CORRECTLY",
+      "limits": [
+        "Owner confirmation establishes visible first/last stop and numbering 1–29, not a line-by-line independent sign-off for all 29 middle names",
+        "No separate Owner evidence of full scroll interaction, all source links, theme/localization or map station popup regression on R2.16.1",
+        "28 CONSECUTIVE_SERVICE_STOPS edges are not validated physical track or platform lane segments",
+        "Full KL rail coverage, railway physical geometry, turnout, chainage and survey accuracy are not verified",
+        "No dated public HTTPS UAT PASS/CONFIRMED artifact supplied; formal resolution gating remains OPEN"
+      ]
     }
   }
 }
