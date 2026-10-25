@@ -1700,5 +1700,75 @@
       "merge": "NOT DONE",
       "ownerPhotos": "NOT PUBLISHED"
     }
+  },
+  "integrationR2151": {
+    "project": "P01",
+    "issueId": "r2151-legend-tap-gate-diagnostic",
+    "checkedOn": "2026-10-26",
+    "title": "R2.15.1 Visitor-Mode Raster Legend Gate and Vector Tap Feedback",
+    "state": "STAGING_READY_SAFARI_UAT_PENDING",
+    "ownerObservation": "Owner 00:20 MYT iPhone Safari: Railway details OFF, eight-colour legend expanded covering most of map; no reaction after attempted line taps; many urban railway segments reported missing in Kuala Lumpur.",
+    "verifiedDiagnosis": {
+      "legend": "CONTRIBUTING UI BLOCKER CONFIRMED — expanded HTML legend intercepts touch within its area even when raster OpenRailwayMap overlay is OFF; raster colour swatches are informational, not vector line selectors.",
+      "tap": "STILL UNVERIFIED ON DEVICE — underlying MapLibre vector hit test exists, but owner did not observe popup; overlay covering map explains some, not necessarily all clicks.",
+      "coverage": "NOT COMPLETE — OpenFreeMap/OpenMapTiles transportation vectors filtered by existing rail/transit classes can omit corridors depending on source data, generalization, zoom and tiles. No authoritative all-KL-route coverage proof. Never conflate source geometry with OpenRailwayMap raster labels.",
+      "documentation": [
+        "https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/",
+        "https://openmaptiles.org/docs/schema/"
+      ]
+    },
+    "development": {
+      "branch": "feature/mrs10-r2151-legend-tap-gate-diagnostic",
+      "baseCommit": "1e79fae7c096cc76bdd8c36229caacdf468778d0",
+      "sourceCommit": "b4ddf5d094c81a7b55db858868675950aa73a8b1",
+      "files": [
+        "assets/map-language-lab.js",
+        "map-language-lab.html",
+        "tests/r2151-legend-tap-gate.test.cjs",
+        "package.json"
+      ],
+      "changes": [
+        "Hide the raster-only Railway colour legend completely when Railway details OFF; restore on ON, preserve all eight canonical category swatches.",
+        "Limit expanded palette to max 42dvh / 320px and allow scrolling, rather than covering most of the map.",
+        "Bind source-backed map touch feedback even if no pilot layers have loaded; report a missing selectable feature rather than guessing a line name.",
+        "Retain original source-backed rail/transit filtering, China code lookup, mobile theme, ECRL legacy map and all four languages."
+      ]
+    },
+    "qa": {
+      "node": "290/290 PASS, 0 FAIL, 0 SKIPPED on exact Vercel staging source SHA",
+      "catalogue": "14/14 PASS, 0 FAIL, 0 SKIPPED",
+      "staging": "READY; target staging; not production",
+      "publishedArtifacts": "Map HTML and JS HTTP 200; excluded Member/quiz paths 404",
+      "safari": "PENDING — Owner must re-test actual railway vector hit and visibility with palette hidden",
+      "urbanRailCompleteness": "NOT VERIFIED / NOT CLAIMED",
+      "buildNotes": "First staging build failed a new test expectation in English while site default was Malay; corrected test to observed BM string; second staging build 290/290 PASS."
+    },
+    "staging": {
+      "project": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_9C88icMiTg4ke6UfRiq8Y4zTstkL",
+      "target": "staging",
+      "state": "READY",
+      "sourceSha": "b4ddf5d094c81a7b55db858868675950aa73a8b1",
+      "url": "https://mrs10-r211-mobile-map-7lxj3zjft-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "authProtection": "Existing Vercel Authentication retained"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "HOLD / NO-GO — source/staging passes; real Safari vector click and railway network coverage remain unverified. No merge, promotion or Production approval.",
+    "nextAction": "Owner opens isolated R2.15.1 staging, selects Malaysia with Railway details OFF, verifies 🎨 icon is not visible, zooms to railway around Kuala Lumpur and taps line; report popup or changed pilot status 'No selectable vector...' with screenshot. If tap still fails, inspect loaded style tiles and the exact tapped feature; perform a separate source-by-source urban-rail coverage audit, not fabricated full-line rendering.",
+    "boundaries": {
+      "gitHubMain": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabase": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT PERFORMED",
+      "ownerImages": "NOT PUBLISHED"
+    }
   }
 }
