@@ -3841,5 +3841,108 @@
       "p03": "UNTOUCHED",
       "otherR217Branches": "UNTOUCHED"
     }
+  },
+  "integrationR221": {
+    "project": "P01",
+    "issueId": "p01-r221-four-line-combined-integration-candidate",
+    "title": "MR-S10 P01 R2.21 — Combined Kajang/Kelana Jaya/Ampang/Putrajaya isolated development integration",
+    "checkedOn": "2026-10-26",
+    "state": "DEVELOPMENT_INTEGRATED_QA_PASS_PROTECTED_PREVIEW_READY_OWNER_SAFARI_PENDING",
+    "ownerRequest": "Owner reviewed R2.20.1 Safari and reports all checked items OK, requests integration; language quality raised as ongoing concern, not an authorization to assert universal translations.",
+    "branch": "feature/mrs10-p01-r2175-r220-integration-qa",
+    "repository": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
+    "provenance": {
+      "kajangR2175": {
+        "sourceBranch": "feature/mrs10-r2175-kajang-popup-identity-clarity",
+        "sha": "a23a17d0a51dbf94d944cab0015a99539aa7a084",
+        "stops": 29,
+        "scope": "source-backed POI candidates, sticky accessible popup and unverified GIS audit"
+      },
+      "kelanaR2182": {
+        "sourceBranch": "feature/mrs10-r218-kelana-jaya-ruby-identity",
+        "sha": "f7084ffb124fc8d0d2e58bace98f86bd376109c1",
+        "stops": 37,
+        "scope": "ruby service identity, 4-language map and Thai source-backed fallbacks"
+      },
+      "ampangR219": {
+        "sourceBranch": "feature/mrs10-r219-ampang-orange-service-registry",
+        "sha": "91ec4914b75cd2c1da3efcf9e48123a08adebdcb",
+        "stops": 18,
+        "scope": "isolated Ampang service/GIS page, linked from central map Registry"
+      },
+      "putrajayaR2201": {
+        "sourceBranch": "feature/mrs10-r220-putrajaya-yellow-service-registry",
+        "sha": "1e7440e9f4cdf9c47c45648ecc06e4da264f9005",
+        "stops": 36,
+        "scope": "yellow source POI and shared KG04/PY01 reference locator; 5 provisional not operating"
+      }
+    },
+    "currentCommit": "6ee8a4a14ffbe5567c54ec575cbb812bde6d8e4c",
+    "developmentHistory": [
+      "2f60451b894456c0e54d0d81df74fef5159b7945",
+      "6690860fff053d38445f5f7d83235b92c14f2ee5",
+      "428cb8aef4d2c61070ac7ae11fbebb168b87cf39",
+      "6ee8a4a14ffbe5567c54ec575cbb812bde6d8e4c"
+    ],
+    "implementation": {
+      "combinedServiceCounts": {
+        "mrtKajang": 29,
+        "lrtKelanaJaya": 37,
+        "lrtAmpang": 18,
+        "mrtPutrajaya": 36
+      },
+      "ampangLaunch": "Central Registry → LRT Ampang → source-backed 18-station standalone GIS page",
+      "kajangMerge": "R2.17.5 source POI catalogue + mobile popup reconciled against R2.18/R2.20 base",
+      "routeIdentity": "Single-source registry route selector for KG/KJ/PY; isolated R2.19 Ampang source module linked, not retyped",
+      "multilingual": "BM/EN/中文/ไทย UI selectors and Ampang navigation labels; tile translations vary by feature; comprehensive station/place translations NOT_CERTIFIED",
+      "sharedStation": "KG04/PY01 Kwasa source POI supported without reclassifying physical ways",
+      "unknownPhysicalGeometry": "UNVERIFIED; no approved physical track geometry added",
+      "provisionalStations": "Five Putrajaya provisional excluded from 36 operating stops"
+    },
+    "qa": {
+      "githubActionsRun": 40243550876,
+      "url": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40243550876",
+      "node": "367/367 PASS",
+      "catalogue": "14/14 PASS",
+      "artifactId": 12617303389,
+      "artifact": "PUBLIC_ONLY_ISOLATED_QA_NOT_PRODUCTION",
+      "previewArtifactSecurity": "PASS build omitted Member/Admin/quiz, robots disallow, connect-src none (QA artifact only)",
+      "previousFailingRun": "40243428431 failed 12 assertions due to Ampang HTML excluded from production builder",
+      "resolvedBy": "Added Ampang HTML to production builder allowlist on dev integration branch only, and 4-service combined regression check"
+    },
+    "deployment": {
+      "teamId": "team_0JRmhxIIyLuWMPHsxwWxJfTv",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_8AMF4FFGP8C9YSftzxxAgZvoniwr",
+      "target": null,
+      "state": "READY",
+      "sourceSha": "6ee8a4a14ffbe5567c54ec575cbb812bde6d8e4c",
+      "url": "https://mrs10-r211-mobile-map-j3q04xcac-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "ampangUrl": "https://mrs10-r211-mobile-map-j3q04xcac-1993khairuladam-3016.vercel.app/ampang-line-r219.html",
+      "protection": "VERCEL_AUTH_ALL; ISOLATED UAT PROJECT live:false domains:[]",
+      "browserHttpSmoke": "UNVERIFIED",
+      "safariOwnerCombined": "PENDING"
+    },
+    "releaseGates": {
+      "combinedSourceQA": "PASS",
+      "combinedCatalogue": "PASS",
+      "staticPublicArtifact": "PASS_BUILD",
+      "previewDeployment": "READY_METADATA_CONFIRMED_NOT_PRODUCTION",
+      "languageCoverage": "4_UI_LOCALES_PRESENT_TRANSLATION_COMPLETENESS_NOT_VERIFIED",
+      "combinedSafariUat": "PENDING",
+      "deploymentHttpSecurity": "UNVERIFIED",
+      "productionApproval": "NOT_APPROVED",
+      "mergeIntoMain": "NOT_AUTHORIZED"
+    },
+    "releaseDecision": "DEV INTEGRATION PASS; NO-GO for Production. Request explicit combined Safari verification and security HTTP checks before further promotion.",
+    "safety": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "p02Simulator": "UNCHANGED",
+      "p03SwiftSimulator": "UNCHANGED",
+      "sourceBranches": "UNCHANGED"
+    },
+    "nextAction": "Owner test combined Preview: select Kajang, Kelana Jaya, Putrajaya and Ampang link; verify four language controls and Dark/Light. The user earlier reported all R2.20 checks OK; do not mistake that for integrated Preview PASS. Preserve Production NO-GO."
   }
 }
