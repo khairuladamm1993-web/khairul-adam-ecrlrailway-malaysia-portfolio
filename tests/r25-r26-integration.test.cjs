@@ -50,6 +50,6 @@ test('Integrated artifact builders include multi-language files and Owner Dashbo
  const prev=read('scripts/build-preview.py');
  for(const file of ['translations-th.js','map-locale.js','owner-two-way-workflow.js']){
   assert(prod.includes(file),file+' in production builder');
-  if(file!=='owner-two-way-workflow.js')assert(prev.includes(file) || prev.includes("copytree"),file+' in public builder');
+  if(file!=='owner-two-way-workflow.js')assert(prev.includes("for p in (root/'assets').iterdir()") && prev.includes('p.name not in excluded'),file+' included by public builder allowlist');
  }
 });
