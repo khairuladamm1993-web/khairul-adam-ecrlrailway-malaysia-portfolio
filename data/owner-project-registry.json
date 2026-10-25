@@ -3734,7 +3734,7 @@
     "issueId": "r2175-kajang-popup-official-station-title-clarity",
     "title": "R2.17.5 MRT Kajang source-matched popup official station title visibility",
     "checkedOn": "2026-10-26",
-    "state": "ISOLATED_STAGING_SOURCE_QA_PASS_OWNER_SAFARI_UAT_PENDING",
+    "state": "OWNER_SAFARI_FULL_TITLE_LIGHT_MODE_SCOPED_PASS_REMAINING_GATES_OPEN",
     "context": "Owner screenshot 2026-10-26 05:41 MYT from previous R2.17.2 staging shows green MRT Kajang source-matched 9/29 marker, but scrolled popup displays only terminal word Damansara of official station heading; source match still requires exact code+full source label and is not a physical-track proof.",
     "scope": "Preserve green official service-stop identity, improve popup station header visibility and distinguish full official name from vector tile display alias without changing route geometry or nearby KTM features.",
     "development": {
@@ -3761,7 +3761,7 @@
       "sourceChecks": "5 new R2.17.5 targeted tests PASS: KG13 exact official title, code-first canonical other stations, ambiguous KTM mismatch rejection, Chinese/Thai preserved, matched-only CSS.",
       "staging": "READY; target staging; exact source SHA matched.",
       "staticArtifacts": "map-language-lab.html and map-language-lab.js and railway-track-registry-kl.js HTTP 200; excluded member-gateway.js, questions.js HTTP 404.",
-      "safari": "PENDING; Owner to verify full station title remains legible in light/dark mode and when scrolling popup; keep earlier R2.17.2 9/29 UAT evidence independent."
+      "safari": "Owner Safari screenshot 2026-10-26 06:39 MYT: full official KG13 Pusat Bandar Damansara popup title, green marker, source label and 9/29 caveat PASS in Light Mode. Dark Mode, scrolling and exact deployment provenance still pending."
     },
     "staging": {
       "project": "mrs10-r211-mobile-map-uat",
@@ -3783,15 +3783,36 @@
     },
     "ownerUat": {
       "required": "Use Safari iPhone Malaysia pilot, select MRT Kajang, tap source-backed KG13, scroll popup; verify Pusat Bandar Damansara heading stays visible with KG13 and 9/29 notice; try Light/Dark mode. Negative tap KTM/other generic station to verify no false MRT identity.",
-      "state": "PENDING"
+      "state": "LIGHT_MODE_TITLE_SCOPED_PASS_DARK_SCROLL_SHA_PENDING",
+      "safariScreenshot0639": {
+        "observedAt": "2026-10-26T06:39:00+08:00",
+        "provenance": "Owner iPhone Safari screenshot supplied in chat; not stored in public repository",
+        "station": "Pusat Bandar Damansara",
+        "sourceLabel": "KG13 Pusat Bandar Damansara",
+        "lineMatch": "MRT · Kajang Line · 9/29",
+        "findings": [
+          "Full official Pusat Bandar Damansara header clearly visible and green in light-mode popup",
+          "Green map POI marker visible",
+          "KG13 original source label visible",
+          "9/29 candidate match and physical-track unverified qualification visible",
+          "Popup text remains readable"
+        ],
+        "verdict": "SCOPED_LIGHT_MODE_VISUAL_PASS",
+        "limitations": [
+          "Safari screenshot hostname truncated: exact deployed source commit unproven",
+          "Dark Mode and active popup scroll sticky-title behaviour not shown",
+          "No current evidence proving all 29 geographical POI locations or complete physical alignment",
+          "KTM/other-source false-match rejection not tested in this screenshot"
+        ]
+      }
     },
     "resolution": {
       "state": "OPEN",
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "NO-GO main/Production/merge: source+build PASS, Owner Safari visual pending, full physical Kajang green alignment still blocked",
-    "nextAction": "Owner Safari full-title visibility UAT for KG13. Separately continue R2.17.4 geometry source access and licensing verification, no speculative green line.",
+    "releaseDecision": "NO-GO Production/merge — Light Mode title scoped PASS only; exact deployed SHA, scroll, Dark Mode and physical geometry remain open.",
+    "nextAction": "Owner Safari confirm full KG13 popup title stays visible while scrolling, and in Dark Mode. Source SHA is not proven by truncated Safari hostname. Do not conflate source-backed POI highlight with full physical alignment. Preserve other branches.",
     "boundaries": {
       "main": "UNCHANGED",
       "production": "UNCHANGED",
