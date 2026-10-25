@@ -3699,5 +3699,77 @@
       "p03": "UNTOUCHED",
       "merge": "NOT DONE"
     }
+  },
+  "integrationR2175": {
+    "project": "P01",
+    "issueId": "r2175-kajang-popup-official-station-title-clarity",
+    "title": "R2.17.5 MRT Kajang source-matched popup official station title visibility",
+    "checkedOn": "2026-10-26",
+    "state": "ISOLATED_STAGING_SOURCE_QA_PASS_OWNER_SAFARI_UAT_PENDING",
+    "context": "Owner screenshot 2026-10-26 05:41 MYT from previous R2.17.2 staging shows green MRT Kajang source-matched 9/29 marker, but scrolled popup displays only terminal word Damansara of official station heading; source match still requires exact code+full source label and is not a physical-track proof.",
+    "scope": "Preserve green official service-stop identity, improve popup station header visibility and distinguish full official name from vector tile display alias without changing route geometry or nearby KTM features.",
+    "development": {
+      "branch": "feature/mrs10-r2175-kajang-popup-identity-clarity",
+      "parentCommit": "b6fc699c9c69e9f62613c82e6ce07be7cc0901da",
+      "sourceCommit": "a23a17d0a51dbf94d944cab0015a99539aa7a084",
+      "files": [
+        "assets/map-language-lab.js",
+        "map-language-lab.html",
+        "tests/r2175-kajang-popup-identity-clarity.test.cjs",
+        "package.json"
+      ],
+      "changes": [
+        "Source-backed KG code+official station name candidates display canonical official name in popup header; code stays available in Original name/source metadata; candidate 9/29 and physical track caveat preserved.",
+        "Keep provided Chinese/Thai source translations; use full official name as fallback when no translation exists.",
+        "Official matched station title position sticky inside popup scrolling viewport, with matched-only max-height 250px/44dvh; other country/route popups retain their original dimensions.",
+        "Potentially ambiguous vector POIs that do not pass exact source code+name and English-check remain generic blue with no Kajang candidate claim.",
+        "Existing 29-stop green Registry, station service IDs, physical railway sources, OSM relation and way audit untouched."
+      ]
+    },
+    "qa": {
+      "fullRegression": "333/333 Node PASS; 0 FAIL, 0 SKIP",
+      "catalogue": "14/14 PASS; 0 FAIL, 0 SKIP",
+      "sourceChecks": "5 new R2.17.5 targeted tests PASS: KG13 exact official title, code-first canonical other stations, ambiguous KTM mismatch rejection, Chinese/Thai preserved, matched-only CSS.",
+      "staging": "READY; target staging; exact source SHA matched.",
+      "staticArtifacts": "map-language-lab.html and map-language-lab.js and railway-track-registry-kl.js HTTP 200; excluded member-gateway.js, questions.js HTTP 404.",
+      "safari": "PENDING; Owner to verify full station title remains legible in light/dark mode and when scrolling popup; keep earlier R2.17.2 9/29 UAT evidence independent."
+    },
+    "staging": {
+      "project": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_DBJBgEkN63DMHK1RsWpxWWF9toW8",
+      "sourceSha": "a23a17d0a51dbf94d944cab0015a99539aa7a084",
+      "target": "staging",
+      "state": "READY",
+      "url": "https://mrs10-r211-mobile-map-bty64r8ax-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "security": "Preview only; Production, main, auth/RLS, P02/P03 untouched."
+    },
+    "geometryDependency": {
+      "status": "BLOCKED_NO_ACCEPTED_PHYSICAL_GEOMETRY",
+      "referenceCheckpoints": [
+        "integrationR2173",
+        "integrationR2174"
+      ],
+      "instruction": "Do not green-paint the full physical MRT Kajang track until service relation and way membership, topology, provenance, rights and KTM separation have been validated. Official Prasarana GTFS read in R2.17.4 returned HTTP 406; keep distinct SERVICE_REFERENCE and PHYSICAL_TRACK layers if a licensed service shape is later accepted."
+    },
+    "ownerUat": {
+      "required": "Use Safari iPhone Malaysia pilot, select MRT Kajang, tap source-backed KG13, scroll popup; verify Pusat Bandar Damansara heading stays visible with KG13 and 9/29 notice; try Light/Dark mode. Negative tap KTM/other generic station to verify no false MRT identity.",
+      "state": "PENDING"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO main/Production/merge: source+build PASS, Owner Safari visual pending, full physical Kajang green alignment still blocked",
+    "nextAction": "Owner Safari full-title visibility UAT for KG13. Separately continue R2.17.4 geometry source access and licensing verification, no speculative green line.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "otherR217Branches": "UNTOUCHED"
+    }
   }
 }
