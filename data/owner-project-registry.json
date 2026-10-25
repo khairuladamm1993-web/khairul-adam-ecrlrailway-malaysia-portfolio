@@ -1272,7 +1272,7 @@
     "project": "P01",
     "checkedOn": "2026-10-25",
     "title": "R2.14 China Railway Code Explorer (source-backed opt-in pilot)",
-    "state": "PARTIAL_APP_SAFARI_UAT_PASS_RELEASE_HOLD",
+    "state": "PARTIAL_SAFARI_UAT_BM_LIGHT_DARK_PASS_UX_OPEN",
     "approvalScope": "Owner endorsed in-map China railway code explanations; staging pilot only, not production deployment or raster digit interaction",
     "sourceBaseline": "3dd28e8eb95bfb37e0fb63145add54c867aa256b",
     "branch": "feature/mrs10-r214-china-rail-code-lookup-pilot",
@@ -1339,7 +1339,7 @@
       "catalogue": "14/14 PASS; 0 FAIL 0 SKIP",
       "publicBuild": "PASS: user-facing preview only; analytics/member auth excluded",
       "privacy": "HTTP 200 for map HTML/JS, 404 for protected quiz and member gateway assets",
-      "browser": "PARTIAL SAFARI UAT PASS — actual MR-S10 China code lookup 44930, 0073 and 44915 tested by Owner in 3 iPhone Safari screenshots (2026-10-25, 22:57-22:58 MYT). Other languages, Dark Mode, responsive panel, railway/station vector tapping remain PENDING.",
+      "browser": "PARTIAL SAFARI PASS — 44930, 0073, 44915 interactions previously PASS in EN; new 2026-10-25 23:02 Owner screenshots confirm BM Light/Dark readable for 44930. 中文/ไทย, full responsive/overlap, and actual vector rail/station tap remain PENDING.",
       "featureTap": "Direct tap on pre-rendered raster digits UNSUPPORTED; do not claim full code popup",
       "production": "UNCHANGED",
       "referenceNameMatches": "5/5 OWNER CONFIRMED for code/name reference matches (two Chinese Wikipedia screenshots, remaining three Owner-reported)."
@@ -1360,8 +1360,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "HOLD / NO-GO FOR PRODUCTION: 3/3 tested lookup interactions PASS, source regression/cat PASS; full language/theme/UX and railway feature UAT outstanding, no merge authorized.",
-    "nextAction": "Test BM, 中文, ไทย and Dark Mode with China 44930/0073 once, then improve overlapping notification / oversized code panel in separate isolated development branch. Preserve source references, no raster digit clicking claim. ECRL Leaflet / MapLibre integration should be staged separately only after Owner QA and explicit merge approval.",
+    "releaseDecision": "HOLD / NO-GO — targeted code lookup and BM Light/Dark partial Safari PASS, but layout defects and two language UATs open. No production or ECRL integration approval.",
+    "nextAction": "Preserve source R2.14; in isolated development branch fix overlapping pilot information banner and oversized/occluded China code lookup for iPhone expanded map, then run regression and isolated staging UAT. Check 中文 and ไทย on 44930 as distinct remaining language UAT. Do not infer raster digit click or initiate ECRL merge.",
     "protectedProjects": {
       "main": "UNTOUCHED",
       "production": "UNCHANGED",
@@ -1452,6 +1452,47 @@
         "Unified ECRL Map integration"
       ],
       "conclusion": "PARTIAL_APP_SAFARI_UAT_PASS: 3/3 targeted China code lookup cases PASS; broad Safari acceptance remains PENDING"
+    },
+    "ownerSafariBmThemeUat": {
+      "checkedOn": "2026-10-25",
+      "screenshots": [
+        {
+          "timeMYT": "23:02",
+          "locale": "BM",
+          "theme": "Light",
+          "result": "PASS: BM controls ('Butiran railway: AKTIF','Cari','Kod stesen (TMIS)','Sumber rujukan') readable; 44930 displayed with Rong'an Railway Station, 融安站, Róng'ān Zhàn."
+        },
+        {
+          "timeMYT": "23:02",
+          "locale": "BM",
+          "theme": "Dark",
+          "result": "PASS: BM controls and 44930 station name, Hanzi, pinyin remain legible on navy code panel."
+        }
+      ],
+      "defects": [
+        {
+          "issue": "code-lookup-panel-overlaps-pilot-status",
+          "severity": "UX",
+          "status": "OPEN",
+          "observation": "Rail-and-station pilot status/banner visibly overlaps open code lookup panel on iPhone."
+        },
+        {
+          "issue": "code-lookup-panel-overlarge",
+          "severity": "UX",
+          "status": "OPEN",
+          "observation": "Open panel obscures a large portion of map and top panel heading can be obscured/cropped in screenshots."
+        }
+      ],
+      "notVerified": [
+        "Chinese locale 中文",
+        "Thai locale ไทย",
+        "Dark contrast across all interactive controls and zoom states",
+        "Actual station / rail vector tap in all three countries",
+        "Tablet breakpoints and keyboard scrolling",
+        "Release integration into ECRL Corridor Map"
+      ],
+      "evidenceType": "Owner-uploaded Safari iPhone screenshots in ChatGPT conversation; not copied to public GitHub repository",
+      "conclusion": "PARTIAL SAFARI PASS: BM Light and Dark text contrast for 44930 lookup; responsive overlap still OPEN"
     }
   }
 }
