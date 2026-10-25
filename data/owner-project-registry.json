@@ -2119,5 +2119,71 @@
       ]
     },
     "ownerDebugGestureNote": "Owner reports scrolling/panning increases raw TOUCH count. Code uses pointerdown on map canvas; this includes gesture starts and is not a count of real map clicks. Distinguish MAP CLICK count. Improve diagnostics in separate isolated R2.15.5 source branch."
+  },
+  "integrationR2155": {
+    "project": "P01",
+    "issueId": "r2155-map-tap-versus-pan-diagnostic",
+    "checkedOn": "2026-10-26",
+    "title": "R2.15.5 Gesture-aware map tap diagnostics",
+    "state": "STAGING_READY_SAFARI_UAT_PENDING",
+    "reason": "Owner noticed diagnostic TOUCH increased while dragging/scrolling map. Prior implementation incremented on pointerdown, which is a gesture start (not proof of map click). Last Owner Liuzhou screenshot TOUCH 91 / MAP CLICK 1, LUORONG / 雒容 station popup confirmed.",
+    "alreadyVerifiedSafari": {
+      "Malaysia": "Maharajalela railway station, source-backed popup PASS; prior light_rail segment source-backed popup PASS",
+      "Thailand": "Bangkok Sam Yot railway station, source-backed popup PASS",
+      "China": "Liuzhou area LUORONG / 雒容 railway station, source-backed popup PASS at 2026-10-26 01:30 MYT",
+      "scopeLimit": "One station sample per country; does not verify every station, real individual physical track ID or rail network completeness"
+    },
+    "development": {
+      "branch": "feature/mrs10-r2155-map-tap-vs-pan-diagnostic",
+      "baseCommit": "5e25581c6709a3899e7e3c394d3d32f78c329c62",
+      "sourceCommit": "85829c7eede472115e99b0441d0dabb18d9d6140",
+      "files": [
+        "assets/map-language-lab.js",
+        "tests/r2152-touch-source-diagnostic.test.cjs",
+        "tests/r2153-style-load-layer-recovery.test.cjs"
+      ],
+      "changes": [
+        "Remove misleading raw TOUCH (pointerdown) diagnostic counter, which increases on map pan/drag gestures",
+        "MAP TAPS increments only on MapLibre map click event; MAP PANS increments on MapLibre dragstart; a drag without click does not increment taps",
+        "Existing railTapProbe details/source feature counts and rail/station READY states remain; no tracking of coordinates stored",
+        "Station popup, station source fallback, China codes, color legend, language and theme behavior unchanged"
+      ]
+    },
+    "qa": {
+      "node": "301/301 PASS; 0 FAIL/SKIP on exact staging SHA",
+      "catalogue": "14/14 PASS; 0 FAIL/SKIP",
+      "artifact": "Map HTML and JS HTTP 200; Member/quiz excluded HTTP 404",
+      "built": "READY target staging; exact SHA validated",
+      "safari": "PENDING — Owner confirm map pan changes PANS, not MAP TAPS, and real station click increments MAP TAPS",
+      "provenance": "Only MapLibre click/drag events, no station names fabricated and no raster click claim",
+      "operations": "No Production, Supabase Auth/RLS, ECRL P02, Swift P03 or main change"
+    },
+    "staging": {
+      "project": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "target": "staging",
+      "state": "READY",
+      "deploymentId": "dpl_GEAVCu5JnJJPRvzGTins42taNxhK",
+      "sourceSha": "85829c7eede472115e99b0441d0dabb18d9d6140",
+      "url": "https://mrs10-r211-mobile-map-p2bbxt431-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1&railDebug=1",
+      "protection": "Existing Vercel project settings unchanged"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO — source and staging QA PASS, live Safari gesture verification pending; network coverage, track topology and integration remain OPEN. No merge or Production deployment authorized.",
+    "nextAction": "Owner opens new R2.15.5 isolated Safari staging, pans map once: PANS increases, MAP TAPS unchanged. Tap one already tested station symbol: MAP TAPS increases and source-backed popup appears. Then proceed to other regions only if meaningful; previously passed multilingual/rail station tests retained.",
+    "boundaries": {
+      "production": "UNCHANGED",
+      "main": "UNCHANGED",
+      "supabase": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT DONE",
+      "screenshots": "NOT PUBLISHED"
+    }
   }
 }
