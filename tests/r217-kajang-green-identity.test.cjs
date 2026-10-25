@@ -78,11 +78,19 @@ test('R2.17/2: only allowlisted KG code/name source POIs turn green; no whole al
  assert.equal(layer.type,'circle');
  assert.equal(layer.source,'osm');
  assert.equal(layer['source-layer'],'poi');
- const sourceNames=Array.from(layer.filter[3][2][1]);
- assert(sourceNames.length>=29);
- for(const name of ['KG13 Pusat Bandar Damansara','KG16 Pasar Seni','KG35 Kajang'])assert(sourceNames.includes(name));
- assert(!sourceNames.includes('Kajang'),'generic POIs cannot be green');
- assert(!sourceNames.includes('MR3 Maharajalela'),'monorail stays separate');
+ // R2.17.6: assert actual filter behaviour, not the former filter array shape.
+ const passes=require('./helpers/kajang-filter-evaluator.cjs');
+ assert(api.kajangPoiSourceNames.length>=29);
+ for(const name of ['KG13 Pusat Bandar Damansara','KG16 Pasar Seni','KG35 Kajang']){
+  const matched=api.matchSourcedKajangPoi({class:'railway',subclass:'subway',name});
+  assert(matched,'a Registry crosswalk must exist');
+  assert(passes(layer.filter,{class:'railway',subclass:'subway',name,'name:en':matched.stationName}));
+ }
+ for(const name of ['Kajang','MR3 Maharajalela','KTM Kajang']){
+  assert(!passes(layer.filter,{class:'railway',subclass:'subway',name}),'unrelated rail POIs stay neutral');
+ }
+ assert(!passes(layer.filter,{class:'railway',subclass:'subway',
+  name:'KG13 Pusat Bandar Damansara','name:en':'KTM Kajang'}),'contradictory English source must stay neutral');
  assert.equal(layer.paint['circle-color'],'#087D43');
  assert.equal(layer.layout.visibility,'none');
  const selector=doc.getElementById('kl-registry-route');
