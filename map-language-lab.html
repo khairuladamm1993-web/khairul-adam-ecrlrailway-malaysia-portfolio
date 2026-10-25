@@ -1,0 +1,30 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><title>MR-S10 Multilingual Map BETA</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.css">
+<style>
+:root{color-scheme:light;--bg:#f4f8fa;--fg:#19313e;--card:#fff;--line:#bdcbd1}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#09131b;--fg:#e3f1f7;--card:#142a36;--line:#42616f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif}
+main{max-width:1100px;margin:auto;padding:12px 14px 40px}a{color:inherit;font-weight:650}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 18px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+button{font:600 15px system-ui;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:10px;min-height:44px;padding:8px 13px;touch-action:manipulation}
+button[aria-pressed="true"]{border-color:#177b9a;background:#ceeaf3;color:#163f51}
+:root[data-theme="dark"] button[aria-pressed="true"]{background:#284e5e;color:#e2f4fc}
+#visitor-map{height:clamp(390px,65vh,680px);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.notice{margin:14px 0;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:9px}
+h1{font-size:clamp(1.35rem,4vw,2.1rem);line-height:1.2}p{max-width:85ch}#label-status{font-size:.88rem}
+</style>
+<script defer src="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.js"></script>
+<script defer src="assets/map-language-lab.js"></script></head>
+<body><main><header><a href="gateway.html">← MR-S10 Gateway</a><button id="theme-btn" type="button" aria-label="Dark Mode">☾</button></header>
+<h1 id="lab-title">Multilingual visitor map · BETA</h1><p id="lab-info">Switch map place names where translations exist.</p>
+<div class="controls" aria-label="Language selector">
+<button data-locale="ms" aria-pressed="true">BM</button><button data-locale="en" aria-pressed="false">EN</button><button data-locale="zh" aria-pressed="false">中文</button><button data-locale="th" aria-pressed="false">ไทย</button></div>
+<div class="controls" aria-label="Countries">
+<button type="button" data-region="malaysia">🇲🇾 Malaysia</button>
+<button type="button" data-region="thailand">🇹🇭 Thailand</button>
+<button type="button" data-region="china">🇨🇳 China</button></div>
+<div id="visitor-map" role="region" aria-label="Multilingual visitor map"></div>
+<div class="notice"><strong id="label-status" role="status" aria-live="polite">Loading map…</strong><p id="place-status">Visitor reference only, not an ECRL operational map.</p>
+<p>© OpenMapTiles, © OpenStreetMap contributors; railway layer © OpenRailwayMap contributors. Language coverage depends on source place names; no railway coordinates are invented.</p></div></main></body></html>
