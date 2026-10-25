@@ -367,6 +367,63 @@ function applyLabels(){
  el('label-status').textContent=(n?n+' '+uiText[lang].labelLayers+' · ':'')+copy[lang][2];
  return n;
 }
+// R2.16: service and station source catalogue is independent from rendered physical geometry.
+// A source-backed station popup does not prove that the station belongs to any selected route.
+const klRegistryLocales={
+ ms:{summary:'Kuala Lumpur · Daftar laluan & stesen (Fasa 1)',warning:'Rujukan perkhidmatan sahaja. Jajaran fizikal, nombor trek dan susunan stesen perlu bukti berasingan.',
+  count:(r,n)=>r+' laluan rujukan · '+n+' stesen ERL disahkan mengikut turutan · 0 trek fizikal disahkan',
+  label:'Pilih laluan',notVerified:'Turutan semua stesen belum disahkan daripada sumber.',
+  verified:'Turutan perhentian disahkan oleh operator. Ini bukan geometri landasan.',sources:'Sumber operator'},
+ en:{summary:'Kuala Lumpur · Rail & Station Registry (Phase 1)',warning:'Service references only. Physical track geometry, IDs and most station orders remain unverified.',
+  count:(r,n)=>r+' referenced routes · '+n+' ERL stops in verified order · 0 physical tracks verified',
+  label:'Choose a route',notVerified:'Full station order is not yet verified from source.',
+  verified:'Operator-confirmed stop order; not physical track geometry.',sources:'Operator sources'},
+ zh:{summary:'吉隆坡 · 铁路线路与车站目录（第一阶段）',warning:'仅为线路资料。尚未核实实体轨道、轨道编号与大部分车站顺序。',
+  count:(r,n)=>r+' 条参考线路 · 已核实 '+n+' 个 ERL 车站的顺序 · 0 条实体轨道已核实',
+  label:'选择线路',notVerified:'尚未从来源核实完整车站顺序。',verified:'运营方确认车站顺序；并非实体轨道图。',sources:'运营方来源'},
+ th:{summary:'กัวลาลัมเปอร์ · ทะเบียนสายรถไฟและสถานี (ระยะที่ 1)',warning:'ข้อมูลอ้างอิงการให้บริการเท่านั้น ยังไม่ยืนยันแนวรางจริง หมายเลขราง และลำดับสถานีส่วนใหญ่',
+  count:(r,n)=>r+' สายอ้างอิง · ยืนยันลำดับ '+n+' สถานี ERL · ยังไม่ยืนยันรางจริง',
+  label:'เลือกสาย',notVerified:'ยังไม่ยืนยันลำดับสถานีทั้งหมดจากแหล่งข้อมูล',
+  verified:'ผู้ให้บริการยืนยันลำดับจุดจอด ไม่ใช่แนวรางจริง',sources:'แหล่งข้อมูลผู้ให้บริการ'}
+};
+function renderKLRegistry(){
+ const box=el('kl-registry'),api=window.MRS10KLRegistry;
+ if(!box)return;
+ box.hidden=!pilotMode||activeRegion!=='malaysia'||!api?.validateRegistry?.();
+ if(box.hidden)return;
+ const local=klRegistryLocales[lang]||klRegistryLocales.en,registry=api.catalog;
+ el('kl-registry-title').textContent=local.summary;
+ el('kl-registry-warning').textContent=local.warning;
+ const verifiedRoute=registry.routes.find(r=>r.stationSequenceStatus==='SOURCE_CONFIRMED');
+ el('kl-registry-counts').textContent=local.count(registry.routes.length,verifiedRoute?.stationSequence.length||0);
+ el('kl-registry-route-label').textContent=local.label;
+ const selector=el('kl-registry-route'),previous=selector.value;
+ if(selector.options.length!==registry.routes.length){
+  selector.replaceChildren();
+  registry.routes.forEach(r=>{const opt=document.createElement('option');opt.value=r.id;opt.textContent=r.name;selector.appendChild(opt);});
+ }
+ if(previous && api.findRoute(previous))selector.value=previous;
+ const route=api.findRoute(selector.value)||registry.routes[0];
+ if(!route)return;
+ el('kl-registry-route-name').textContent=route.name;
+ el('kl-registry-route-status').textContent=route.stationSequenceStatus==='SOURCE_CONFIRMED'?local.verified:local.notVerified;
+ const list=el('kl-registry-station-order');
+ list.replaceChildren();
+ if(route.stationSequenceStatus==='SOURCE_CONFIRMED'){
+  const byId=new Map(registry.stations.map(st=>[st.id,st]));
+  route.stationSequence.forEach(id=>{const li=document.createElement('li');li.textContent=byId.get(id)?.name||'Unverified';list.appendChild(li);});
+ }
+ list.hidden=!route.stationSequence.length;
+ const sources=el('kl-registry-sources');sources.replaceChildren();
+ sources.appendChild(document.createTextNode(local.sources+': '));
+ route.sourceUrls.forEach((url,i)=>{
+  if(typeof url!=='string'||!url.startsWith('https://'))return;
+  const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';
+  a.textContent='Source '+(i+1);
+  if(i)sources.appendChild(document.createTextNode(' · '));
+  sources.appendChild(a);
+ });
+}
 function render(){
  document.documentElement.lang=lang==='zh'?'zh-Hans':lang;
  el('lab-title').textContent=copy[lang][0];
@@ -379,7 +436,7 @@ function render(){
  const legendNote=el('railway-legend-note');if(legendNote)legendNote.textContent=legendCopy.note;
  const legendSummary=el('railway-legend-trigger');if(legendSummary){legendSummary.setAttribute('aria-label',legendCopy.title);legendSummary.title=legendCopy.title;}
  document.querySelectorAll('[data-rail-legend]').forEach(node=>{const i=Number(node.dataset.railLegend);if(Number.isInteger(i)&&i>=0&&i<legendCopy.items.length)node.lastElementChild.textContent=legendCopy.items[i];});
- renderLegendDetail();renderLegendRegion();syncChinaCodeWidget();
+ renderLegendDetail();renderLegendRegion();syncChinaCodeWidget();renderKLRegistry();
  const pilotStatus=el('railway-pilot-status');
  if(pilotStatus && pilotMode){
   pilotStatus.hidden=false;
@@ -534,13 +591,14 @@ function init(){
  map.on('error',()=>{if(!ready)el('label-status').textContent='Vector map unavailable';});
  document.querySelectorAll('[data-locale]').forEach(b=>b.addEventListener('click',()=>{setLanguage(b.dataset.locale);updateTheme();}));
  el('railway-btn').addEventListener('click',()=>{railDetails=!railDetails;setRailVisibility();});
+ el('kl-registry-route')?.addEventListener('change',renderKLRegistry);
  document.querySelectorAll('[data-region]').forEach(b=>b.addEventListener('click',()=>{
   const target=pilotMode?pilotCenters[b.dataset.region]:null;
   const destination=target?[target.center,target.zoom]:centers[b.dataset.region];
   if(destination)map.flyTo({center:destination[0],zoom:destination[1],duration:600});
   if(pilotMode&&pilotInfoPopup){pilotInfoPopup.remove();pilotInfoPopup=null;}
   activeRegion=b.dataset.region;
-  renderLegendRegion();syncChinaCodeWidget();
+  renderLegendRegion();syncChinaCodeWidget();renderKLRegistry();
   el('liuzhou-guide').hidden=activeRegion!=='china';
   syncCampusPin();
  }));
