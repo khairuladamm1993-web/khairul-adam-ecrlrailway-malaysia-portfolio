@@ -1499,7 +1499,7 @@
     "project": "P01",
     "checkedOn": "2026-10-25",
     "title": "R2.14.1 Compact Mobile Controls & Half-Contrast Theme Icon",
-    "state": "PARTIAL_SAFARI_VISUAL_PASS_BOTTOM_POPUP_PASS",
+    "state": "FOUR_LANGUAGE_OWNER_UAT_PASS_VECTOR_UAT_PENDING",
     "issueId": "r2141-compact-mobile-controls",
     "ownerDesignReference": "Owner-provided iPhone Control Center screenshot with half-light/half-dark appearance glyph, confirmed acceptable. Image not published to GitHub.",
     "branch": "feature/mrs10-r2141-compact-controls-contrast-icon",
@@ -1526,9 +1526,9 @@
       "html": "HTTP 200; compact theme icon and panel CSS present in staging output",
       "js": "HTTP 200; theme text overwrite removed; code panel overlap class present",
       "restrictedFiles": "404 for excluded questions.js and member-gateway.js",
-      "realSafari": "PARTIAL SAFARI VISUAL PASS — 23:36 EN Dark Mode compact controls/popup readable, 23:41 EN Light Mode result 44930 including Hanzi, pinyin and reference link fully visible above Safari bottom bar. Lower result visibility subissue PASS. 中文/ไทย, complete theme interaction/accessibility and vector tap UAT pending.",
+      "realSafari": "PARTIAL SAFARI PASS — earlier EN/BM Light/Dark screenshots confirm readable compact code lookup and reference link fully visible. 中文 and ไทย now Owner-reported PASS. Vector station/rail click and expanded/alternate screen UAT pending.",
       "rasterClick": "UNSUPPORTED — no change to OpenRailwayMap raster behavior",
-      "chineseThaiLanguage": "PENDING — 中文 and ไทย R2.14 UAT not covered by previous screenshots"
+      "chineseThaiLanguage": "OWNER-REPORTED PASS — 2026-10-25 Owner confirmed both 中文 and ไทย in good condition during Safari UAT; no new screenshots. Treat separately from feature-level and release QA."
     },
     "staging": {
       "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
@@ -1546,8 +1546,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "NO-GO FOR PRODUCTION — narrow popup lower-visibility defect passed in Owner 23:41 Light Mode screenshot; full Safari UAT and 中文/ไทย still pending; no merge authorised.",
-    "nextAction": "Continue on same R2.14.1 staging: verify 中文 then ไทย code 44930 locale text and pinyin; check other small-screen/expanded layout and real railway/station vector taps separately before considering integration. Preserve passed EN Light/Dark and source tests.",
+    "releaseDecision": "NO-GO FOR PRODUCTION — four-language UI owner UAT PASS, source/staging tests PASS; independent feature-level railway/station tap and expanded-device acceptance are still pending; no merge approval.",
+    "nextAction": "Preserve four-language UI passes. Next perform one direct tap on actual vector rail or station in R2.14.1 pilot with ?railPilot=1 and report if popup with source-backed attributes appears; do not equate raster line labels with vector interactions. Then extend to other pilot regions if verified. Production/ECRL integration remain untouched.",
     "boundaries": {
       "production": "UNCHANGED",
       "gitHubMain": "UNCHANGED",
@@ -1573,7 +1573,7 @@
       "gaps": [
         "RESOLVED in 23:41 Light Mode screenshot: pinyin and Reference source visible above bottom toolbar. Exact internal scroll mechanics were not independently observed.",
         "A still screenshot does not verify theme toggle interaction or 44px physical target hit testing",
-        "中文 and ไทย display UAT still pending",
+        "中文 and ไทย display reported PASS by Owner 2026-10-25 (no new screenshots)",
         "Expanded-map/portrait-small-screen and lower popup safe-area behavior not fully confirmed",
         "No direct vector station or railway click evidence in this screenshot"
       ],
@@ -1598,6 +1598,38 @@
         "scrollMechanics": "NOT_INDEPENDENTLY_VERIFIED_IN_STILL_IMAGE"
       },
       "limits": "Chinese/Thai locale UAT, full-device responsiveness, and direct station/rail vector click behavior remain unverified"
+    },
+    "ownerFourLanguageUat": {
+      "checkedOn": "2026-10-25",
+      "evidenceKind": "Owner direct Safari result report in ChatGPT; no new locale screenshots attached",
+      "checks": [
+        {
+          "locale": "EN",
+          "result": "PASS_FROM_OWNER_SCREENSHOTS",
+          "evidence": "Earlier 44930, 0073, 44915 and Light/Dark owner screenshots"
+        },
+        {
+          "locale": "BM",
+          "result": "PASS_FROM_OWNER_SCREENSHOTS",
+          "evidence": "Earlier BM 44930 Light/Dark owner screenshots"
+        },
+        {
+          "locale": "中文",
+          "result": "PASS_OWNER_REPORTED",
+          "evidence": "Owner states Chinese was in good condition; no screenshot in latest message"
+        },
+        {
+          "locale": "ไทย",
+          "result": "PASS_OWNER_REPORTED",
+          "evidence": "Owner states Thai was in good condition; no screenshot in latest message"
+        }
+      ],
+      "scope": "Four-language owner review for R2.14.1 pilot controls and code lookup. Does NOT establish data coverage for all station names or raster translation.",
+      "remaining": [
+        "Direct tap station and rail vector feature needs real Safari evidence",
+        "Expanded map / other screen widths not verified",
+        "Production release and ECRL integration still unauthorized"
+      ]
     }
   }
 }
