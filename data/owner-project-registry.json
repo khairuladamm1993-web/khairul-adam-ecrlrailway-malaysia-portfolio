@@ -2404,5 +2404,86 @@
         "This screenshot is not a publicly hosted dated HTTPS PASS/CONFIRMED evidence artefact for formal SOLVED gating"
       ]
     }
+  },
+  "integrationR2161": {
+    "project": "P01",
+    "issueId": "r2161-mrt-kajang-official-station-sequence",
+    "title": "R2.16.1 MRT Kajang operator station-order audit and safe consecutive service adjacencies",
+    "checkedOn": "2026-10-26",
+    "state": "STAGING_READY_SAFARI_STATION_ORDER_UAT_PENDING",
+    "scope": "Kuala Lumpur/Klang Valley MR-S10 P01 railway catalogue; service order only, not physical track geometries",
+    "reason": "R2.16 Phase 1 had MRT Kajang order NOT_YET_VERIFIED; Owner approved starting source-backed Kajang ordering and segment audit. MRT Corp overview declares 29 stations Kwasa Damansara to Kajang; another operator-page selector lists 29 in order; the project stations sidebar omits Kwasa Damansara (28).",
+    "sourceAudit": {
+      "source1": "https://www.mymrt.com.my/ms/ruang-acara/kajang/",
+      "source2": "https://www.mymrt.com.my/projects/kajang-line/",
+      "disagreement": "https://www.mymrt.com.my/projects/kajang-line/stations/",
+      "verifiedFromOperator": "29 sequential service stops from Kwasa Damansara to Kajang as displayed in official MRT Corp event-space selector, reconciled against current line overview stating 29 stations",
+      "exclusions": "Kampung Selamat and Sungai Buloh are Putrajaya Line, not current Kajang service stop list",
+      "note": "MRT Corp project-stations sidebar lists 28 names because Kwasa Damansara is absent; do not treat stale sidebar as comprehensive source",
+      "trackGeometry": "UNVERIFIED",
+      "OSMWayRelationIDs": "NOT MATCHED OR VALIDATED",
+      "railwayPhysicalLaneCount": "UNVERIFIED"
+    },
+    "development": {
+      "branch": "feature/mrs10-r2161-kajang-station-sequence-audit",
+      "baseCommit": "a7372247e7822f266438994b3499c7fbea88c03d",
+      "sourceCommit": "64713ca3874c5eda65d8de070081345732d6109e",
+      "changedFiles": [
+        "assets/railway-track-registry-kl.js",
+        "assets/map-language-lab.js",
+        "map-language-lab.html",
+        "tests/r216-kl-rail-registry.test.cjs"
+      ],
+      "counts": {
+        "routes": 10,
+        "verifiedOrderedServiceRoutes": 2,
+        "mrtKajangStops": 29,
+        "mrtKajangConsecutiveServiceAdjacencies": 28,
+        "physicalSegments": 0
+      },
+      "implementation": [
+        "Store 29 MRT Corp sourced stations, each with stable software catalogue ID, no geometry",
+        "Store 28 consecutive passenger-service stop pairs as CONSECUTIVE_SERVICE_STOPS, NOT surveyed physical tracks",
+        "Explicit validator rejects fabricated route geometries, physical IDs and invalid service adjacency records",
+        "Retain ERL six-stop verified order and all existing R2.16 samples; most other route station orders remain NOT_YET_VERIFIED",
+        "Display verified route order count dynamically in four UI languages, and cap long list scrolling for Safari iPhone",
+        "Operator-source links for Kajang include official MRT Corp station selector and line overview before general MyRapid context"
+      ]
+    },
+    "qa": {
+      "node": "307/307 PASS, 0 FAIL/SKIP on exact staging source SHA",
+      "catalogue": "14/14 PASS, 0 FAIL/SKIP",
+      "build": "PASS — target staging, no Production",
+      "publicArtifacts": "HTTP 200 map HTML, registry JS, map JS; HTTP 404 excluded Member/quiz JS",
+      "safari": "PENDING — show 29 named Kajang stops, endpoints, and 0 physical track claims; check ERL and popup no regression on same build",
+      "physicalGeometry": "NOT CLAIMED — no verified physical route, track way IDs, turnout or platform lane numbers"
+    },
+    "staging": {
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "project": "mrs10-r211-mobile-map-uat",
+      "deploymentId": "dpl_83LmexMzz3xMoxwi6oN4DeZ8jN8L",
+      "target": "staging",
+      "state": "READY",
+      "sourceSha": "64713ca3874c5eda65d8de070081345732d6109e",
+      "url": "https://mrs10-r211-mobile-map-4r35lzgt9-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "protection": "Existing Vercel isolation and authentication unchanged"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO Production/merge; source-backed 29 stop sequence and build PASS, iPhone Safari UAT pending, OSM/track-geometry correspondence and full KL network remain unverified",
+    "nextAction": "Owner opens R2.16.1 isolated staging, selects Malaysia and MRT Kajang; verify 29 stops starting Kwasa Damansara ending Kajang, scrollable panel and official links; confirm 0 physical tracks verified. Do not treat 28 consecutive service stop pairs as physical lane geometries. Follow with separate OSM relations/ways and operator track topology audit before geometry assignment.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT PERFORMED",
+      "privateImages": "NOT PUBLISHED"
+    }
   }
 }
