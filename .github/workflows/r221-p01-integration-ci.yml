@@ -1,0 +1,42 @@
+name: MR-S10 P01 four-service isolated integration QA
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-r2175-r220-integration-qa
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Combined Node tests
+        run: npm test
+      - name: Catalogue tests
+        run: node --test tests/reading-library-framework.test.cjs
+      - name: Secure public QA artifact (not deployed)
+        run: |
+          node --check assets/railway-track-registry-kl.js
+          node --check assets/map-language-lab.js
+          node --check assets/mrs10-r219-ampang-service.js
+          node --check assets/mrs10-r219-map-bridge.js
+          python3 scripts/build-preview.py dist-p01-qa
+          test -f dist-p01-qa/ampang-line-r219.html
+          test -f dist-p01-qa/assets/mrs10-r219-ampang-service.js
+          test ! -f dist-p01-qa/assets/member-gateway.js
+          test ! -f dist-p01-qa/assets/questions.js
+          grep -Fq "connect-src 'none'" dist-p01-qa/_headers
+          grep -Fq "Disallow: /" dist-p01-qa/robots.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mrs10-p01-integration-qa-${{ github.sha }}
+          path: dist-p01-qa/
+          retention-days: 3

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.css"><title>MR-S10 R2.19 · LRT Ampang Line | Isolated Registry</title>
+<style>
+:root{color-scheme:light;--bg:#f5f8fa;--card:#fff;--text:#162d3a;--muted:#415965;--line:#a9bac2;--orange:#A65100;--orange-bg:#fff1e2;--focus:#076a91;font-family:system-ui,-apple-system,Arial,sans-serif}
+:root[data-theme=dark]{color-scheme:dark;--bg:#101f2b;--card:#142e3e;--text:#f3faff;--muted:#d0e1ee;--line:#667d8b;--orange:#FFBB7B;--orange-bg:#392917;--focus:#8edbff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-size:15px}
+main{max-width:1040px;margin:auto;padding:12px max(12px,env(safe-area-inset-right)) 24px}
+header,.toolbar{display:flex;align-items:center;gap:9px;justify-content:space-between;flex-wrap:wrap}
+h1{font-size:1.15rem;line-height:1.3;margin:4px 0;color:var(--orange)}
+p{line-height:1.48;margin:8px 0;color:var(--muted)}
+button,select{font:inherit;min-height:44px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--text);padding:7px 10px}
+button:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+fieldset{border:0;padding:0;margin:0;display:flex;gap:6px;align-items:center}
+label{font-weight:650}.eyebrow{font-size:.8rem;color:var(--muted)}
+.map{height:clamp(380px,65dvh,750px);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:12px;background:var(--card)}
+iframe{width:100%;height:100%;border:0;display:block}
+section{margin:12px 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+summary{cursor:pointer;font-weight:750;min-height:44px;color:var(--orange);padding:8px 0}
+.stats{font-size:.9rem;font-weight:700;color:var(--orange);border-left:4px solid var(--orange);padding-left:10px}
+ol{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:7px;max-height:43dvh;overflow-y:auto;overscroll-behavior:contain}
+li button{width:100%;display:flex;gap:10px;align-items:center;min-height:48px;text-align:left}
+.num{display:grid;place-items:center;border-radius:50%;flex:0 0 31px;width:31px;height:31px;background:#A65100;color:#fff;font-size:.8rem;font-weight:800}
+.name{flex:1;overflow-wrap:anywhere}.code{font-size:.77rem;color:var(--muted)}
+li button:hover{background:var(--orange-bg)}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);max-width:min(92vw,430px);width:100%;padding:16px}
+dialog::backdrop{background:#091820b9}
+dialog h2{font-size:1.1rem;color:var(--orange);margin:0 0 8px}
+dialog p{margin:7px 0}.close-row{display:flex;justify-content:flex-end;margin-top:15px}
+a{color:var(--orange);text-underline-offset:2px;overflow-wrap:anywhere}
+.notice{font-size:.84rem}.map-reference{margin-top:12px}.map-reference summary{color:var(--text)}.map-reference .map{height:clamp(320px,53dvh,640px);margin-top:8px}.shared-tag{font-size:.72rem;border:1px solid var(--line);border-radius:5px;padding:2px 4px;color:var(--muted);white-space:nowrap}.legend-line{height:3px;width:40px;background:var(--orange);display:inline-block;vertical-align:middle;margin:0 8px}
+@media(max-width:480px){main{padding:9px 10px 20px}.map{height:62dvh}ol{grid-template-columns:1fr}}
+/* Unified MapLibre map + one timeline, like R2.18; source-independent AG station position remains UNVERIFIED. */
+#r219-map-shell{position:relative;margin:10px 0}
+#r219-map{height:clamp(430px,67dvh,780px);border:1px solid var(--line);border-radius:12px}
+#r219-expand{position:absolute;top:12px;right:12px;z-index:2;min-width:44px;background:#eaf4f8;color:#183240;font-size:22px}
+#r219-map-shell.expanded{position:fixed;inset:0;z-index:900;isolation:isolate;margin:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);background:var(--bg)}
+#r219-map-shell.expanded #r219-map{height:100%;border:0;border-radius:0}
+#r219-map-shell.expanded #r219-expand{top:calc(12px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right))}
+#r219-map .maplibregl-popup-content{background:var(--card);color:var(--text);border-radius:9px;max-width:255px}
+#r219-map .maplibregl-popup-close-button{color:var(--text);font-size:23px;min-width:44px;min-height:44px}
+#r219-map .r219-popup{padding:23px 3px 5px;font-size:.86rem;overflow-wrap:anywhere;max-height:35dvh;overflow-y:auto}
+#r219-map .r219-popup strong{font-size:.98rem;color:var(--orange)}#r219-map .r219-popup p{margin:6px 0;color:var(--text)}
+#region-label{color:var(--text);font-size:.9rem;font-weight:700}
+#r219-map-note{font-size:.8rem;margin:8px 0 2px}
+#station-list{list-style:none;display:block;counter-reset:ampang-stop;max-height:min(43dvh,340px);overflow-y:auto;margin:12px 0;padding:0 5px 0 4px;background:linear-gradient(#A65100,#A65100) 19px 0/2px 100% no-repeat}
+#station-list li{margin:0;min-height:39px}
+#station-list li button{border:0;border-radius:0;background:transparent;min-height:42px;display:flex;align-items:center;padding:4px 2px;gap:11px;font-weight:570}
+#station-list li button:focus-visible{outline:3px solid var(--focus)}
+#station-list .num{flex:0 0 30px;max-width:30px;height:30px;background:#A65100;color:#fff;box-shadow:0 0 0 2px var(--card)}
+#station-list li:first-child button,#station-list li:last-child button{font-weight:800}
+:root[data-theme=dark] #r219-map .maplibregl-popup-content{background:#142e3e;color:#f3faff}
+:root[data-theme=dark] #r219-map .maplibregl-popup-close-button{color:#f3faff}
+
+/* R2.19 UI parity with MR-S10 visitor map — presentation only, native GIS is unchanged. */
+:root{--control-selected:#d5eaf2;--control-selected-border:#2e7a9a}
+:root[data-theme=dark]{--control-selected:#20465b;--control-selected-border:#84cbeb}
+main{padding:14px max(12px,env(safe-area-inset-right)) 24px max(12px,env(safe-area-inset-left))}
+.mrs19-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
+.gateway-back{font-weight:700;color:var(--text);text-decoration:underline;text-underline-offset:3px;line-height:1.3}
+.mrs19-topbar #theme{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:8px;width:48px;height:46px;padding:6px;border-radius:13px}
+#theme .theme-icon{display:block;font-size:27px;line-height:1}
+#theme .theme-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.mrs19-intro{padding:2px 0 8px}.mrs19-intro h1{font-size:clamp(1.4rem,5vw,1.9rem);line-height:1.24;margin:7px 0;color:var(--orange)}
+.mrs19-intro .subtitle{max-width:42rem;margin:3px 0 6px}
+.mrs19-choice{margin:5px 0 12px}
+.choice-label{font-size:.78rem;color:var(--muted);font-weight:700;margin-bottom:6px}
+.choice-tabs{display:flex;flex-wrap:nowrap;gap:7px}
+.choice-tabs button{min-height:44px;flex:1;min-width:0;padding:7px 5px;border-radius:12px;font-weight:680;border:1px solid var(--line);background:var(--card);color:var(--text)}
+.choice-tabs button[aria-pressed=true]{background:var(--control-selected);border:2px solid var(--control-selected-border);padding:6px 4px}
+.choice-tabs button:active{transform:scale(.99)}
+.region-tabs button{display:flex;justify-content:center;align-items:center;gap:5px;font-size:.91rem}
+.region-tabs button .flag{font-size:1rem}
+.control-proxy{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+#r219-map-shell{margin:6px 0 0}
+#r219-map{height:clamp(395px,59dvh,690px);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+#r219-expand{top:10px;right:10px;border-radius:12px}
+.mrs19-evidence{display:flex;align-items:center;gap:11px;margin:10px 0 12px;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 12px}
+.mrs19-evidence .evidence-dot{width:9px;height:9px;border-radius:50%;background:var(--orange);flex:0 0 auto}
+#r219-gis-status{font-size:.85rem;line-height:1.44;font-weight:650;color:var(--text);margin:0}
+.source-explanation{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:2px 12px;margin-bottom:12px}
+.source-explanation summary{color:var(--muted);font-weight:650;font-size:.85rem;min-height:38px;display:flex;align-items:center}
+.source-explanation a{color:var(--orange)}
+.source-explanation #r219-map-note{color:var(--muted)}
+section{border-radius:14px;padding:12px}
+section #registry-title{font-size:1.05rem}
+#station-list{max-height:min(50dvh,430px)}
+#station-list li button:hover{background:var(--orange-bg)}
+#station-list li .code{font-weight:650}
+@media(max-width:390px){.choice-tabs{gap:5px}.choice-tabs button{font-size:.88rem}.region-tabs button{font-size:.84rem}.region-tabs button .flag{font-size:.93rem}}
+@media(max-width:350px){.region-tabs button{gap:2px;font-size:.76rem}}
+@media(prefers-reduced-motion:reduce){.choice-tabs button:active{transform:none}}
+</style><script src="./assets/mrs10-r219-ampang-service.js"></script></head>
+<body><main>
+<header class="mrs19-topbar">
+<a class="gateway-back" href="./gateway.html">← MR-S10 Gateway</a>
+<button id="theme" type="button" aria-label="Mod Gelap" title="Mod Gelap" aria-pressed="false"><span class="theme-icon" aria-hidden="true">◐</span><span class="theme-label" id="theme-label">Mod Gelap</span></button>
+</header>
+<div class="mrs19-intro">
+<div class="eyebrow">P01 / R2.19 · ISOLATED DEVELOPMENT</div>
+<h1 id="heading">LRT Ampang Line · Perkhidmatan 3</h1>
+<p id="r219-intro" class="subtitle">Peta pelawat dan 18 stesen daripada rujukan GIS awam.</p>
+</div>
+<div class="mrs19-choice" aria-label="Language selector">
+<div class="choice-label" id="lang-label">Bahasa peta</div>
+<div class="choice-tabs" role="group" aria-labelledby="lang-label">
+<button type="button" data-r219-locale="ms" aria-pressed="true">BM</button>
+<button type="button" data-r219-locale="en" aria-pressed="false">EN</button>
+<button type="button" data-r219-locale="zh" aria-pressed="false">中文</button>
+<button type="button" data-r219-locale="th" aria-pressed="false">ไทย</button>
+</div>
+<select id="lang" class="control-proxy" aria-hidden="true" tabindex="-1" aria-label="Language"><option value="ms">BM</option><option value="en">EN</option><option value="zh">中文</option><option value="th">ไทย</option></select>
+</div>
+<div class="mrs19-choice" aria-label="Map region selector">
+<div class="choice-label" id="region-label">Kawasan peta</div>
+<div class="choice-tabs region-tabs" role="group" aria-labelledby="region-label">
+<button type="button" data-r219-region="malaysia" aria-pressed="true"><span class="flag" aria-hidden="true">🇲🇾</span>Malaysia</button>
+<button type="button" data-r219-region="thailand" aria-pressed="false"><span class="flag" aria-hidden="true">🇹🇭</span>Thailand</button>
+<button type="button" data-r219-region="china" aria-pressed="false"><span class="flag" aria-hidden="true">🇨🇳</span>China</button>
+</div>
+<select id="r219-region" class="control-proxy" tabindex="-1" aria-hidden="true" aria-label="Map region"><option value="malaysia">Malaysia</option><option value="thailand">Thailand</option><option value="china">China</option></select>
+</div>
+<div id="r219-map-shell"><div id="r219-map" role="region" aria-label="Interactive Railway-First map"></div>
+<button type="button" id="r219-expand" aria-label="Expand map" aria-expanded="false">⛶</button></div>
+<div class="mrs19-evidence"><span class="evidence-dot" aria-hidden="true"></span><p id="r219-gis-status" class="notice" role="status" aria-live="polite">GIS: Menunggu padanan koordinat sumber; tiada titik rekaan.</p></div>
+<details class="source-explanation"><summary id="r219-evidence-title">Butiran sumber GIS</summary>
+<p id="r219-map-note" role="status" aria-live="polite">Peta vektor interaktif. Geometri fizikal belum disahkan.</p>
+<p class="notice"><a href="https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer/1" target="_blank" rel="noopener noreferrer">ArcGIS · LRT Ampang Station layer</a></p>
+</details>
+<section><details open id="registry"><summary id="registry-title">LRT Ampang · 18 stesen</summary>
+<p id="summary" class="stats"></p><ol id="station-list" aria-label="Ampang Line station sequence"></ol>
+<details class="source-explanation" id="registry-technical"><summary id="registry-technical-summary">Nota teknikal</summary><p id="disclaimer" class="notice"></p><p class="notice"><span class="legend-line"></span><span id="legend-note"></span></p></details>
+</details></section>
+<dialog id="details"><h2 id="station-title"></h2><p id="station-code"></p><p id="station-shared"></p><p id="station-interchange"></p><p id="station-geometry"></p>
+<p><a id="station-source" target="_blank" rel="noopener noreferrer">Source / Sumber</a></p>
+<div class="close-row"><button type="button" id="close">Close / Tutup</button></div></dialog>
+</main>
+<script>
+(function(){
+'use strict';
+const i18n={
+ ms:{intro:'Peta pelawat dan 18 stesen daripada rujukan GIS awam.',languageLabel:'Bahasa peta',regionLabel:'Kawasan peta',evidenceTitle:'Butiran sumber GIS',techTitle:'Nota teknikal',mapTitle:'Peta asas MR-S10 · rujukan umum',mapNote:'Titik biru ialah POI umum pada peta asal, bukan 18 stesen Ampang yang telah disahkan lokasinya. Peta dan Registry kini menggunakan kawalan bahasa/tema yang sama; hanya geometri landasan fizikal belum disahkan.',heading:'LRT Ampang Line · Perkhidmatan 3',registry:'LRT Ampang · 18 stesen',summary:'Sentul Timur → Ampang · 11 stesen bersama Sri Petaling',note:'Senarai 18 stesen disahkan. Titik oren pada peta, jika dipaparkan, berasal daripada padanan nama + koordinat sumber GIS awam dan bukan pengukuran operasi. Geometri trek fizikal masih BELUM DISAHKAN.',orange:'Oren ialah kategori warna operator; kod heks tepat belum disahkan.',shared:'Perkhidmatan bersama: LRT Sri Petaling',branch:'Cabang Ampang selepas Chan Sow Lin',geometry:'Geometri fizikal: BELUM DISAHKAN',interchange:'Sambungan penumpang disokong sumber',other:'Tiada pengesahan pertukaran tambahan untuk rekod ini',source:'Buka bukti sumber',light:'Mod Cerah',dark:'Mod Gelap'},
+ en:{intro:'Visitor map with 18 stations from public GIS references.',languageLabel:'Map language',regionLabel:'Map area',evidenceTitle:'GIS source details',techTitle:'Technical notes',mapTitle:'MR-S10 base map · general reference',mapNote:'Blue dots are generic POIs from the original map, not 18 geolocated Ampang stations. The map and registry now share page language/theme controls; Ampang physical alignment remains unverified.',heading:'LRT Ampang Line · Service 3',registry:'LRT Ampang · 18 stations',summary:'Sentul Timur → Ampang · 11 stations shared with Sri Petaling',note:'The 18-stop passenger service is verified. Any orange map points are matched to public GIS station positions, not surveyed operational coordinates. Physical rail alignment remains UNVERIFIED.',orange:'Operator colour family is orange; an exact official hex is unverified.',shared:'Shared service: LRT Sri Petaling',branch:'Ampang branch beyond Chan Sow Lin',geometry:'Physical track geometry: UNVERIFIED',interchange:'Source-backed passenger connection',other:'No additional interchange evidence recorded',source:'Open source evidence',light:'Light Mode',dark:'Dark Mode'},
+ zh:{intro:'基于公共 GIS 资料的安邦线18站访客地图。',languageLabel:'地图语言',regionLabel:'地图区域',evidenceTitle:'GIS 来源信息',techTitle:'技术说明',mapTitle:'MR-S10 基础地图 · 普通参考',mapNote:'蓝色标记是原地图的普通兴趣点，并非已核实位置的安邦线18站。地图与车站目录共用语言及主题设置；实体轨道仍未核实。',heading:'安邦轻轨线 · 3号线',registry:'安邦线 · 18个车站',summary:'Sentul Timur → Ampang · 与 Sri Petaling 共用11站',note:'18站的服务顺序已核实。地图橙色站点来自公共 GIS 资料匹配，非运营测绘坐标；实体轨道仍未核实，站名保留已核实的英文写法。',orange:'运营商使用橙色；官方十六进制颜色尚未核实。',shared:'共用客运服务：Sri Petaling',branch:'Chan Sow Lin 后为 Ampang 支线',geometry:'实体轨道：未核实',interchange:'有来源支持的换乘',other:'暂无其他已验证换乘',source:'打开来源',light:'浅色模式',dark:'深色模式'},
+ th:{intro:'แผนที่ผู้เยี่ยมชม 18 สถานี จากแหล่ง GIS สาธารณะ',languageLabel:'ภาษาแผนที่',regionLabel:'พื้นที่แผนที่',evidenceTitle:'รายละเอียดแหล่ง GIS',techTitle:'หมายเหตุทางเทคนิค',mapTitle:'แผนที่พื้นฐาน MR-S10 · อ้างอิงทั่วไป',mapNote:'จุดสีน้ำเงินคือข้อมูลจุดสนใจทั่วไป ไม่ใช่ตำแหน่งสถานี Ampang ทั้ง 18 แห่งที่ยืนยันแล้ว แผนที่และทะเบียนสถานีใช้การตั้งค่าภาษาและธีมร่วมกัน ส่วนแนวรางจริงยังไม่ยืนยัน',heading:'รถไฟฟ้าสาย Ampang · สาย 3',registry:'สาย Ampang · 18 สถานี',summary:'Sentul Timur → Ampang · ใช้ร่วมกับ Sri Petaling 11 สถานี',note:'ลำดับ 18 สถานีได้รับการตรวจสอบ จุดสีส้มมาจากข้อมูล GIS สาธารณะที่จับคู่แล้ว ไม่ใช่พิกัดสำรวจเพื่อปฏิบัติการ แนวรางจริงยังไม่ยืนยัน และชื่อสถานีคงรูปภาษาอังกฤษที่ตรวจสอบได้',orange:'ยืนยันเฉดสีส้ม แต่ยังไม่ยืนยันรหัสสีทางการ',shared:'บริการร่วมกับ Sri Petaling',branch:'แยกบริการไป Ampang หลัง Chan Sow Lin',geometry:'แนวรางจริง: ยังไม่ยืนยัน',interchange:'การเชื่อมต่อผู้โดยสารที่มีแหล่งอ้างอิง',other:'ไม่มีการยืนยันการเปลี่ยนสายเพิ่มเติม',source:'เปิดแหล่งอ้างอิง',light:'โหมดสว่าง',dark:'โหมดมืด'}
+};
+const api=window.MRS10AmpangR219;const el=id=>document.getElementById(id);if(!api||!api.validate()){el('summary').textContent='SOURCE REGISTRY ERROR';return}
+let lang='ms';let active=null;let theme='light';
+const set=(id,s)=>{el(id).textContent=s};
+function render(){
+ const l=i18n[lang];document.documentElement.lang=lang;set('heading',l.heading);set('registry-title',l.registry);set('summary',l.summary);set('disclaimer',l.note);set('legend-note',l.orange);
+ const mode=theme==='dark'?l.light:l.dark;
+ set('theme-label',mode);el('theme').setAttribute('aria-label',mode);el('theme').title=mode;el('theme').setAttribute('aria-pressed',String(theme==='dark'));
+ set('r219-intro',l.intro);set('lang-label',l.languageLabel);set('region-label',l.regionLabel);
+ set('r219-evidence-title',l.evidenceTitle);set('registry-technical-summary',l.techTitle);
+ document.querySelectorAll('[data-r219-locale]').forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.r219Locale===lang)));
+ const list=el('station-list');list.replaceChildren();
+ for(const s of api.stations){
+  const li=document.createElement('li'),btn=document.createElement('button'),num=document.createElement('span'),name=document.createElement('span'),code=document.createElement('span');
+  btn.type='button';num.className='num';num.textContent=String(s.order);name.className='name';name.textContent=s.name;code.className='code';code.textContent=s.serviceCode;
+  btn.setAttribute('aria-label',s.serviceCode+' '+s.name+(s.sharedPassengerService?' · shared with Sri Petaling':''));btn.append(num,name,code);if(s.sharedPassengerService){const shared=document.createElement('span');shared.className='shared-tag';shared.textContent='SP';shared.title='Shared passenger service · Sri Petaling';shared.setAttribute('aria-label','Shared with Sri Petaling');btn.append(shared)}btn.addEventListener('click',()=>showStation(s));
+  li.append(btn);list.append(li);
+ }
+ if(active&&el('details').open)populate(active);
+}
+function populate(s){
+ const l=i18n[lang];set('station-title',s.order+'/18 · '+s.name);set('station-code',s.serviceCode);
+ set('station-shared',s.sharedPassengerService?l.shared:l.branch);set('station-interchange',s.interchangeEvidence?l.interchange+': '+s.interchangeEvidence.with.join(', '):l.other);
+ set('station-geometry',l.geometry);
+ const link=el('station-source');link.href=s.interchangeEvidence?.sourceUrl||api.sourceUrls.researchMap;link.textContent=l.source;
+}
+function showStation(s){active=s;populate(s);const d=el('details');if(!d.open)d.showModal()}
+el('lang').addEventListener('change',e=>{if(i18n[e.target.value]){lang=e.target.value;render()}});
+document.querySelectorAll('[data-r219-locale]').forEach(btn=>btn.addEventListener('click',()=>{
+ const sel=el('lang');if(!i18n[btn.dataset.r219Locale])return;
+ sel.value=btn.dataset.r219Locale;sel.dispatchEvent(new Event('change',{bubbles:true}));
+}));
+function renderRegions(){const selected=el('r219-region').value;document.querySelectorAll('[data-r219-region]').forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.r219Region===selected)))}
+document.querySelectorAll('[data-r219-region]').forEach(btn=>btn.addEventListener('click',()=>{
+ const sel=el('r219-region');sel.value=btn.dataset.r219Region;sel.dispatchEvent(new Event('change',{bubbles:true}));
+}));
+el('r219-region').addEventListener('change',renderRegions);renderRegions();
+el('theme').addEventListener('click',()=>{theme=theme==='dark'?'light':'dark';document.documentElement.dataset.theme=theme;render();document.dispatchEvent(new Event('mrs10-r219-theme'))});
+el('close').addEventListener('click',()=>el('details').close());
+render();
+})();
+</script><script src="./assets/mrs10-r219-ampang-gis.js"></script>
+<script src="./assets/mrs10-r219-ampang-gis-overlay.js"></script>
+<script src="./assets/mrs10-r219-map-bridge.js" defer></script></body></html>

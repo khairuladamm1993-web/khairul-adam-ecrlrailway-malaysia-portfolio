@@ -536,6 +536,17 @@ function renderKLRegistry(){
  const route=api.findRoute(selector.value)||registry.routes[0];
  if(!route)return;
  box.dataset.route=route.id;
+  // R2.19 Ampang: isolated service/GIS page, attached via source-safe navigation.
+  const ampangLink=el('r219-ampang-integrated-link');
+  if(ampangLink){
+   ampangLink.hidden=route.id!=='lrt-ampang';
+   ampangLink.textContent={
+    ms:'Buka LRT Ampang — 18 stesen & peta GIS bersumber',
+    en:'Open LRT Ampang — 18 stations & source-backed GIS map',
+    zh:'打开安邦轻轨线 — 18站与来源 GIS 地图',
+    th:'เปิด LRT Ampang — 18 สถานีและแผนที่ GIS ที่มีแหล่งอ้างอิง'
+   }[lang]||'Open Ampang map';
+  }
   const kwasaButton=el('putrajaya-kwasa-focus');
   if(kwasaButton){kwasaButton.hidden=route.id!=='mrt-putrajaya';
    kwasaButton.textContent={ms:'Cari PY01 Kwasa Damansara di peta',en:'Find PY01 Kwasa Damansara on map',

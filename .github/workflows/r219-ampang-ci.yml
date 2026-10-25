@@ -1,0 +1,57 @@
+name: R2.19 Isolated Ampang Source and Regression
+on:
+  push:
+    branches:
+      - feature/mrs10-r219-ampang-orange-service-registry
+    paths:
+      - 'assets/mrs10-r219-ampang-service.js'
+      - 'ampang-line-r219.html'
+      - 'assets/mrs10-r219-map-bridge.js'
+      - 'assets/mrs10-r219-ampang-gis.js'
+      - 'assets/mrs10-r219-ampang-gis-overlay.js'
+      - 'tests/r219-ampang-orange-service.test.cjs'
+      - 'scripts/r219-gis-source-audit.cjs'
+      - '.github/workflows/r219-ampang-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-and-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts
+      - name: Read-only live GIS source evidence audit
+        run: node scripts/r219-gis-source-audit.cjs
+      - name: R2.19 source, service and safe UI QA
+        run: node --test tests/r219-ampang-orange-service.test.cjs
+      - name: Entire existing MR-S10 regression suite
+        run: npm test
+      - name: Build isolated static staging artifact (no deployment)
+        shell: bash
+        run: |
+          python3 scripts/build-production.py "$RUNNER_TEMP/mrs10-r219-stage"
+          cp ampang-line-r219.html "$RUNNER_TEMP/mrs10-r219-stage/ampang-line-r219.html"
+          test -f "$RUNNER_TEMP/mrs10-r219-stage/ampang-line-r219.html"
+          test -f "$RUNNER_TEMP/mrs10-r219-stage/assets/mrs10-r219-ampang-service.js"
+          test -f "$RUNNER_TEMP/mrs10-r219-stage/assets/mrs10-r219-map-bridge.js"
+          test -f "$RUNNER_TEMP/mrs10-r219-stage/assets/mrs10-r219-ampang-gis.js"
+          test -f "$RUNNER_TEMP/mrs10-r219-stage/assets/mrs10-r219-ampang-gis-overlay.js"
+          ! grep -q -i "<iframe" "$RUNNER_TEMP/mrs10-r219-stage/ampang-line-r219.html"
+          grep -q "r219-map" "$RUNNER_TEMP/mrs10-r219-stage/ampang-line-r219.html"
+          test -f "$RUNNER_TEMP/mrs10-r219-stage/map-language-lab.html"
+          test ! -f "$RUNNER_TEMP/mrs10-r219-stage/assets/questions.js"
+          test ! -f "$RUNNER_TEMP/mrs10-r219-stage/assets/quiz-core.js"
+          test ! -f "$RUNNER_TEMP/mrs10-r219-stage/assets/gateway.js"
+      - name: Source restrictions
+        shell: bash
+        run: |
+          test ! -f .env
+          ! grep -Eq '(GITHUB_TOKEN|SUPABASE_SERVICE_ROLE|VERCEL_TOKEN)' assets/mrs10-r219-ampang-service.js assets/mrs10-r219-map-bridge.js assets/mrs10-r219-ampang-gis.js assets/mrs10-r219-ampang-gis-overlay.js ampang-line-r219.html
+          test -f map-language-lab.html

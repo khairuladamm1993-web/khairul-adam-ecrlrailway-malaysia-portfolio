@@ -198,6 +198,10 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ef
 #putrajaya-kwasa-focus[hidden]{display:none}
 .py01-sourced-marker{min-width:44px;height:44px;background:var(--py-yellow);color:#203040;
  border:2px solid #203040;border-radius:12px 12px 12px 3px;font-weight:850}
+#r219-ampang-integrated-link{display:block;width:fit-content;max-width:100%;padding:11px 12px;
+ min-height:44px;margin:8px 0 12px;border:2px solid #A65100;border-radius:9px;
+ background:var(--card);color:var(--fg);font-weight:700}
+#r219-ampang-integrated-link[hidden]{display:none}
 </style>
 <script type="module">
 import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.mjs';
@@ -255,6 +259,7 @@ await import('./assets/map-language-lab.js');
  <section id="kl-registry-result" aria-live="polite">
   <strong id="kl-registry-route-name"></strong>
   <p id="kl-registry-route-status"></p>
+  <a id="r219-ampang-integrated-link" href="./ampang-line-r219.html" rel="noopener" hidden>Open Ampang Line source GIS viewer</a>
    <button type="button" id="putrajaya-kwasa-focus" aria-controls="visitor-map" hidden>Find PY01 on map</button>
   <ol class="kl-registry-stations" id="kl-registry-station-order" hidden></ol>
   <p class="kl-registry-sources" id="kl-registry-sources"></p>
