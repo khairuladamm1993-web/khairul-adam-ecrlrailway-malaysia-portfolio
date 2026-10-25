@@ -195,6 +195,23 @@ function popupFromPilotFeature(feature,kind,lngLat){
   info.pinyin?info.localization.pinyin+': '+info.pinyin:'',info.source]){
   if(!line)continue;const node=document.createElement('p');node.textContent=line;root.appendChild(node);
  }
+ // R2.16.2: exact source-string crosswalk, not physical track assignment.
+ // No route is inferred from rail colour, geometry proximity or generic place names.
+ if(kind==='station'&&activeRegion==='malaysia'&&pilotMode){
+  const candidate=window.MRS10KLRegistry?.matchSourcedKajangPoi?.(feature.properties);
+  if(candidate){
+   const label=lang==='ms'?'Padanan nama peta (calon)':
+    lang==='zh'?'地图名称对应（候选）':
+    lang==='th'?'จับคู่ชื่อบนแผนที่ (เบื้องต้น)':'Map name match (candidate)';
+   const notice=document.createElement('p');
+   notice.textContent=label+': '+candidate.routeName+' · '+
+    candidate.stopPosition+'/'+candidate.stopCount+' · '+
+    (lang==='ms'?'Trek fizikal belum disahkan':
+      lang==='zh'?'实体轨道未核实':
+      lang==='th'?'ยังไม่ยืนยันรางจริง':'Physical track unverified');
+   root.appendChild(notice);
+  }
+ }
  if(pilotInfoPopup)pilotInfoPopup.remove();
  pilotInfoPopup=new maplibregl.Popup({offset:12,maxWidth:'255px',className:'mrl-campus-popup'})
   .setLngLat(lngLat).setDOMContent(root).addTo(map);
