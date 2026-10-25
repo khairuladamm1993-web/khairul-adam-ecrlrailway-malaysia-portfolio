@@ -141,33 +141,79 @@
  // They are NOT OSM way IDs, operator equipment codes, or precise station
  // coordinates. Do not match a generic "Kajang" / "Pasar Seni" POI alone:
  // interchange names are ambiguous and transport-mode tags are imperfect.
+ // R2.17.2: operator-confirmed 29 station names + independently sourced KG
+ // codes are candidate visual identities ONLY, not physical-track or POI-location
+ // certifications. Three raw strings are evidenced by Owner Safari screenshots.
+ // All other candidate labels must still be emitted by the live POI source to
+ // appear on the map. No station coordinates are derived or fabricated.
+ const kajangPoiStationCodes=Object.freeze([
+  ['KG04','mrt-kwasa-damansara'],['KG05','mrt-kwasa-sentral'],
+  ['KG06','mrt-kota-damansara'],['KG07','mrt-surian'],
+  ['KG08','mrt-mutiara-damansara'],['KG09','mrt-bandar-utama'],
+  ['KG10','mrt-taman-tun-dr-ismail'],['KG12','mrt-phileo-damansara'],
+  ['KG13','mrt-pusat-bandar-damansara'],['KG14','mrt-semantan'],
+  ['KG15','mrt-muzium-negara'],['KG16','mrt-pasar-seni'],
+  ['KG17','mrt-merdeka'],['KG18A','mrt-bukit-bintang'],
+  ['KG20','mrt-tun-razak-exchange'],['KG21','mrt-cochrane'],
+  ['KG22','mrt-maluri'],['KG23','mrt-taman-pertama'],
+  ['KG24','mrt-taman-midah'],['KG25','mrt-taman-mutiara'],
+  ['KG26','mrt-taman-connaught'],['KG27','mrt-taman-suntex'],
+  ['KG28','mrt-sri-raya'],['KG29','mrt-bandar-tun-hussein-onn'],
+  ['KG30','mrt-batu-sebelas-cheras'],['KG31','mrt-bukit-dukung'],
+  ['KG33','mrt-sungai-jernih'],['KG34','mrt-stadium-kajang'],
+  ['KG35','mrt-kajang']
+ ].map(([code,stationId])=>Object.freeze({code,stationId})));
  const observedPoiLabels=Object.freeze([
-  Object.freeze({raw:'KG16 Pasar Seni',officialName:'Pasar Seni',stationId:'mrt-pasar-seni',
-   evidence:'OWNER_SAFARI_R216_PASAR_SENI_POI'}),
-  Object.freeze({raw:'KG35 Kajang',officialName:'Kajang',stationId:'mrt-kajang',
-   evidence:'OWNER_SAFARI_R216_KAJANG_POI'})
+  Object.freeze({raw:'KG13 Pusat Bandar Damansara',officialName:'Pusat Bandar Damansara',
+    stationId:'mrt-pusat-bandar-damansara',evidence:'OWNER_SAFARI_R2171_KG13_SOURCE_POI'}),
+  Object.freeze({raw:'KG16 Pasar Seni',officialName:'Pasar Seni',
+    stationId:'mrt-pasar-seni',evidence:'OWNER_SAFARI_R216_PASAR_SENI_POI'}),
+  Object.freeze({raw:'KG35 Kajang',officialName:'Kajang',
+    stationId:'mrt-kajang',evidence:'OWNER_SAFARI_R216_KAJANG_POI'})
  ]);
+ // Alias strings are conservative cartographic label variants, not a claim
+ // that a particular label or coordinate actually occurs in a current tile.
+ const nameAlternates=Object.freeze({
+  'mrt-tun-razak-exchange':Object.freeze(['Tun Razak Exchange']),
+  'mrt-batu-sebelas-cheras':Object.freeze(['Batu 11 Cheras'])
+ });
+ const kajangServicePoiCandidates=Object.freeze(kajangPoiStationCodes.flatMap(({code,stationId})=>{
+  const entry=catalog.stations.find(s=>s.id===stationId);
+  if(!entry)throw new Error('Kajang POI candidate missing station '+stationId);
+  const variants=[entry.name,...(nameAlternates[stationId]||[])];
+  return variants.map(name=>{
+   const raw=code+' '+name;
+   const owner=observedPoiLabels.find(p=>p.raw===raw&&p.stationId===stationId);
+   return Object.freeze({
+    raw,stationId,officialName:entry.name,code,
+    confidence:owner?'OWNER_SAFARI_SOURCE_LABEL_OBSERVED':'SOURCE_LABEL_CANDIDATE_NOT_OBSERVED',
+    evidence:owner?.evidence||'SECONDARY_KG_CODE_OPERATOR_STATION_NAME_CROSSCHECK'
+   });
+  });
+ }));
+ const kajangPoiSourceNames=Object.freeze(kajangServicePoiCandidates.map(x=>x.raw));
  function matchSourcedKajangPoi(props){
-  // OpenMapTiles POI railway station class may be tagged station OR subway.
-  // Accept subway only with an exact Owner-observed code+name; never infer from category alone.
+  // Only an exact observed/candidate KG code+name in an actual rendered source
+  // feature may trigger a service overlay. Reject generic nearby KTM/LRT POIs.
   if(!props||props.class!=='railway'||!['station','subway'].includes(props.subclass))return null;
   const sourceName=typeof props.name==='string'?props.name.trim():'';
-  const recognized=observedPoiLabels.find(x=>x.raw===sourceName);
+  const recognized=kajangServicePoiCandidates.find(x=>x.raw===sourceName);
   if(!recognized)return null;
-  // Optional Latin/English name must not contradict the exact raw source.
-  const en=String(props['name:en']||props.name_en||'').trim();
-  if(en && en.toLowerCase()!==recognized.officialName.toLowerCase() &&
-      en.toLowerCase()!==recognized.raw.toLowerCase())return null;
+  const english=String(props['name:en']||props.name_en||'').trim();
+  const allowedEnglish=[recognized.officialName,recognized.raw,sourceName,
+    ...kajangServicePoiCandidates.filter(x=>x.stationId===recognized.stationId).map(x=>x.raw.slice(x.code.length+1))];
+  if(english&&!allowedEnglish.some(v=>v.toLowerCase()===english.toLowerCase()))return null;
   const service=findRoute('mrt-kajang'),order=service?.stationSequence?.indexOf(recognized.stationId);
   const entry=catalog.stations.find(x=>x.id===recognized.stationId);
   if(!entry||order<0||entry.name!==recognized.officialName)return null;
   return Object.freeze({
    routeId:service.id,routeName:service.name,stationId:entry.id,
-   stationName:entry.name,stopPosition:order+1,stopCount:service.stationSequence.length,
-   status:'CANDIDATE_EXACT_CARTOGRAPHIC_LABEL_MATCH',
-   evidence:recognized.evidence,physicalTrackId:null,geometry:null,
-   // Rendering a match does not establish an OSM route relation or way.
-   relationId:null,routeGeometryStatus:'UNVERIFIED'
+   stationName:entry.name,stationCode:recognized.code,
+   stopPosition:order+1,stopCount:service.stationSequence.length,
+   status:recognized.confidence==='OWNER_SAFARI_SOURCE_LABEL_OBSERVED'?
+    'CANDIDATE_EXACT_CARTOGRAPHIC_LABEL_MATCH':'CANDIDATE_UNOBSERVED_SOURCE_CODE_NAME_MATCH',
+   confidence:recognized.confidence,evidence:recognized.evidence,
+   physicalTrackId:null,geometry:null,relationId:null,routeGeometryStatus:'UNVERIFIED'
   });
  }
  // R2.17.1: discovery references only. Neither a Wikidata P402 reference
@@ -226,7 +272,7 @@
    'https://wiki.openstreetmap.org/wiki/Relation:route']),
   currentStatus:'OSM_CANDIDATES_FOUND_GEOMETRY_AND_MEMBERSHIP_UNVERIFIED'
  });
- const api=Object.freeze({catalog,validateRegistry,findRoute,matchSourcedKajangPoi,osmRelationAudit});
+ const api=Object.freeze({catalog,validateRegistry,findRoute,matchSourcedKajangPoi,kajangPoiSourceNames,kajangServicePoiCandidates,osmRelationAudit});
  if(typeof module==='object'&&module.exports)module.exports=api;
  if(root)root.MRS10KLRegistry=api;
 })(typeof window!=='undefined'?window:null);
