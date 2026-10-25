@@ -6,7 +6,8 @@ const api=require('../assets/railway-track-registry-kl.js');
 test('R2.16.3: only two exact source-observed KG code station labels become conservative catalogue candidates',()=>{
  const examples=[['KG16 Pasar Seni','Pasar Seni',12],['KG35 Kajang','Kajang',29]];
  for(const [name,officialName,pos] of examples){
-  const x=api.matchSourcedKajangPoi({class:'railway',subclass:'station',name,'name:en':officialName});
+  for(const subclass of ['station','subway']){
+  const x=api.matchSourcedKajangPoi({class:'railway',subclass,name,'name:en':officialName});
   assert.equal(x.stationName,officialName);
   assert.equal(x.stopPosition,pos);
   assert.equal(x.stopCount,29);
@@ -16,6 +17,7 @@ test('R2.16.3: only two exact source-observed KG code station labels become cons
   assert.equal(x.geometry,null);
   assert.equal(x.relationId,null);
   assert.equal(x.routeGeometryStatus,'UNVERIFIED');
+  }
  }
  assert.equal(api.catalog.physicalSegments.length,0);
  assert.equal(api.osmRelationAudit.verifiedPhysicalTracks,0);
@@ -27,13 +29,24 @@ test('R2.16.3: refuse unsupported generic names, similarly named LRT, nearby rai
   null,{}, {class:'railway',subclass:'station',name:'Kajang'},
   {class:'railway',subclass:'station',name:'Pasar Seni'},
   {class:'railway',subclass:'station',name:'KG35 Kajang ',name_en:'Unknown station'},
+  {class:'railway',subclass:'subway',name:'Kajang'},
+  {class:'railway',subclass:'subway',name:'KG35 Kajang','name:en':'Not Kajang'},
   {class:'railway',subclass:'halt',name:'KG35 Kajang'},
+  {class:'railway',subclass:'tram_stop',name:'KG35 Kajang'},
   {class:'transit',subclass:'subway',name:'KG35 Kajang'},
   {class:'railway',subclass:'station',name:'MR3 Maharajalela'},
   {class:'railway',subclass:'station',name:'KG35 Sungai Buloh'},
   {class:'railway',subclass:'station',name:'KG29 Kajang'},
   {class:'railway',subclass:'station',name:'KG16 Pasar Seni LRT'}
  ])assert.equal(api.matchSourcedKajangPoi(p),null,JSON.stringify(p));
+});
+test('R2.16.3: Safari visual regression — subway POI may match exact KG35 but generic names cannot',()=>{
+ const ok=api.matchSourcedKajangPoi({class:'railway',subclass:'subway',name:'KG35 Kajang','name:en':'Kajang'});
+ assert.equal(ok?.stopPosition,29);
+ assert.equal(ok?.stationName,'Kajang');
+ assert.equal(api.matchSourcedKajangPoi({class:'railway',subclass:'subway',name:'Kajang'}),null);
+ assert.equal(api.matchSourcedKajangPoi({class:'railway',subclass:'subway',name:'KG35 Kajang','name:en':'Kajang LRT'}),null);
+ assert.equal(api.catalog.physicalSegments.length,0);
 });
 function boot(featureProps){
  const w=new JSDOM(read('map-language-lab.html'),{url:'https://qa.example/map-language-lab.html?railPilot=1',runScripts:'outside-only'}).window;
@@ -74,7 +87,7 @@ function boot(featureProps){
  return{w,map,doc:w.document};
 }
 test('R2.16.3: a source-backed Kajang POI popup displays a candidate 29/29 with no physical track claim',()=>{
- const{w,map,doc}=boot({class:'railway',subclass:'station',name:'KG35 Kajang','name:en':'Kajang'});
+ const{w,map,doc}=boot({class:'railway',subclass:'subway',name:'KG35 Kajang','name:en':'Kajang'});
  doc.querySelector('[data-locale="en"]').click();
  map.fire('click',{point:{x:120,y:150},lngLat:{lng:101.79,lat:2.99}});
  const text=map.popup?.node?.textContent||'';
