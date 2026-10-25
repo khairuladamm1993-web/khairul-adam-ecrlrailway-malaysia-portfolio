@@ -1038,5 +1038,118 @@
       ],
       "targetMismatchRootCause": "UNCONFIRMED: previous first deployment mismatch; successful later staging deployment with existing project and branch ref does not prove original internal Vercel mechanism"
     }
+  },
+  "integrationR212": {
+    "project": "P01",
+    "checkedOn": "2026-10-25",
+    "status": "STAGING_READY_SAFARI_UAT_PENDING",
+    "title": "R2.12 Map-first compact legend and LRVTC",
+    "parentSha": "1011a336809127a7e9b75a31aa67a2c71a18c705",
+    "branch": "feature/mrs10-r212-map-first-compact-ui",
+    "sourceCommit": "e5599a77021ee4ab0fe2e188fbf378a5766079be",
+    "filesChanged": [
+      "assets/map-language-lab.js",
+      "map-language-lab.html",
+      "package.json",
+      "tests/r29-lrvtc-campus-pin.test.cjs",
+      "tests/r211-mobile-map-ux.test.cjs",
+      "tests/r212-map-first-ux.test.cjs"
+    ],
+    "changes": [
+      "Remove external LRVTC button; retain geographic marker only while China is selected, with campus-reference caveat",
+      "Move standard OpenRailwayMap six-category legend into a small map 🎨 control, with clickable category explanations and four languages",
+      "BM/EN readable generic English track-type names, without claiming actual named routes or raster feature picking",
+      "Preserve R2.11 expand map and zoom controls; no geospatial coordinate changes"
+    ],
+    "qa": {
+      "node": "261/261 PASS; 0 failed or skipped; Vercel staging build log",
+      "catalogue": "14/14 PASS; 0 fail",
+      "build": "PASS; public preview, member/analytics disabled",
+      "http": "Map HTML 200, map JS 200, protected quiz.js 404, member-gateway.js 404",
+      "safari": "PENDING; Owner to test China marker, in-map legend, Dark Mode, map controls"
+    },
+    "staging": {
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "projectName": "mrs10-r211-mobile-map-uat",
+      "deploymentId": "dpl_5TKQiqRvafTA2jbmitp1SQSwPzVB",
+      "target": "staging",
+      "state": "READY",
+      "url": "https://mrs10-r211-mobile-map-78p9grbp3-1993khairuladam-3016.vercel.app/map-language-lab.html",
+      "sso": "all; unchanged"
+    },
+    "releaseDecision": "HOLD_FOR_OWNER_SAFARI_UAT; no Production promotion",
+    "nextAction": "Owner check map-only LRVTC when China is selected, compact popup, in-map colour swatches for all 3 country selections, Dark/Light contrast, zoom and expand."
+  },
+  "integrationR213": {
+    "project": "P01",
+    "checkedOn": "2026-10-25",
+    "status": "EXPERIMENTAL_STAGING_READY_DATA_UAT_PENDING",
+    "title": "R2.13 Interactive Railway & Station Pilot",
+    "parentSha": "e5599a77021ee4ab0fe2e188fbf378a5766079be",
+    "branch": "feature/mrs10-r213-interactive-rail-station-pilot",
+    "sourceCommit": "ca53c00435caf44d83353bae8bd6ed5c308203f3",
+    "mode": "Opt-in query railPilot=1 ONLY; ordinary R2.12 presentation remains unchanged within R2.13 source",
+    "areas": [
+      {
+        "country": "Malaysia",
+        "city": "Kuala Lumpur",
+        "cityCenter": [
+          101.68653,
+          3.1412
+        ],
+        "coordinateMeaning": "verified city-area center, NOT station point",
+        "evidence": "https://digital.library.unt.edu/explore/locations/p09469/"
+      },
+      {
+        "country": "Thailand",
+        "city": "Bangkok",
+        "cityCenter": [
+          100.50144,
+          13.75398
+        ],
+        "coordinateMeaning": "verified city-area center, NOT station point",
+        "evidence": "https://digital.library.unt.edu/explore/locations/p01401/"
+      },
+      {
+        "country": "China",
+        "city": "Liuzhou",
+        "cityCenter": [
+          109.424,
+          24.3285
+        ],
+        "coordinateMeaning": "approximate sourced city-area center, NOT station point",
+        "evidence": "https://mapcarta.com/Liuzhou"
+      }
+    ],
+    "capabilities": [
+      "Data-driven station points from OpenMapTiles vector POI class railway, subclass station/halt/subway/tram_stop",
+      "Vector rail segments from transportation class rail, no guessed track geometry",
+      "MapLibre click popup uses data attribute name:en/name_en etc if supplied; original name shown, verified pinyin only when source field exists",
+      "Missing English name shown explicitly; no forced transliteration or invented line/station identity",
+      "Graceful absence if vector layer unavailable, no guaranteed coverage until Safari verification"
+    ],
+    "schemaEvidence": [
+      "https://openmaptiles.org/docs/schema/",
+      "https://github.com/openmaptiles/openmaptiles/blob/master/layers/poi/poi.yaml"
+    ],
+    "qa": {
+      "node": "268/268 PASS; 0 fail/skip; Vercel staging build log",
+      "catalogue": "14/14 PASS; 0 fail/skip",
+      "build": "PASS: public-only preview, no privileged bundles",
+      "http": "Pilot HTML 200, JS 200, protected quiz and Member JS 404",
+      "safari": "PENDING: actual vector POI/station availability and hit testing at each of 3 city areas NOT VERIFIED",
+      "initialFailedCandidate": "dpl_CXnwQSSWDWsxTPmeFkSKh8mpAZBC ERROR; test assertion wrong BM string; corrected and rerun"
+    },
+    "staging": {
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "projectName": "mrs10-r211-mobile-map-uat",
+      "deploymentId": "dpl_75DoxdFoMK2xjVRKE9LHHN99NEp4",
+      "target": "staging",
+      "state": "READY",
+      "url": "https://mrs10-r211-mobile-map-c7cmym2in-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "sso": "all; unchanged"
+    },
+    "releaseDecision": "EXPERIMENT_ONLY; no R2.12 merge or Production release; requires real Safari source coverage verification",
+    "nextAction": "Owner choose each country and tap a station marker and vector rail segment; collect screenshot/missing labels/which POIs render. Verify source-backed attributes before expanding to more regions."
   }
 }
