@@ -1156,7 +1156,7 @@
     "project": "P01",
     "issue": "legend-colours-across-three-pilot-cities",
     "checkedOn": "2026-10-25",
-    "state": "STAGING_READY_SAFARI_UAT_PENDING",
+    "state": "PARTIAL_SAFARI_UI_PASS_RELEASE_HOLD",
     "resolution": {
       "state": "OPEN",
       "tests": "PASS_SOURCE_ONLY",
@@ -1182,8 +1182,8 @@
       "previewBuild": "PASS; public-only analytics and member excluded",
       "http": "200 map page and JS, 404 quiz and Member JS",
       "uiStructure": "Eight swatches, green/pink and city label verified present in published HTML",
-      "ownerSafari": "PENDING — visual and clickable colour legend still requires Owner Safari confirmation",
-      "actualRailwayFeatureAttribution": "UNVERIFIED — raster tile is not selectable railway geometry; vector layer may lack route names",
+      "ownerSafari": "PARTIAL PASS — three Owner Safari screenshots show eight colour swatches and manual category explanation in Kuala Lumpur/Bangkok/Liuzhou. No proof of per-line classification, station click, dark mode or full Safari UAT. Legend panel consumes substantial map space.",
+      "actualRailwayFeatureAttribution": "UNVERIFIED — selecting a legend swatch does not identify a railway segment; no direct feature tap evidence supplied.",
       "earlierFailedCandidate": "dpl_EYp47jFd7oYNfjW8jtHVVNDV9ykS and dpl_2za36gHJsENjWQVTGTWMziwgqW86 encountered outdated language test assertions; corrected without altering Production"
     },
     "staging": {
@@ -1194,14 +1194,44 @@
       "url": "https://mrs10-r211-mobile-map-pxh3fjhxk-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
       "sso": "Vercel Authentication all unchanged"
     },
-    "releaseDecision": "HOLD: source fix PASS; Owner Safari and real vector station/rail data checks pending. No Production release.",
-    "nextAction": "Owner selects Malaysia/Bangkok/China pilot regions with railway details ON, opens in-map colour legend and checks green Light rail and pink Tram plus other six entries. Capture screenshot before/after and report perceived mismatch; record missing layer names separately. Do not infer exact route identities solely from blended tile colours.",
+    "releaseDecision": "HOLD — UI legend manually interactive, source build PASS; direct map railway/station selection and compact layout need further Safari tests. No merge or Production release.",
+    "nextAction": "Pilot next test: tap an actual rail line or station symbol separately in each city and capture resulting source-backed popup or report no response. Improve expanded-map legend footprint only in a new isolated development branch after UI acceptance. Preserve eight canonical source colours; do not infer per-track class from manual swatch selection.",
     "boundaries": {
       "main": "UNCHANGED",
       "production": "UNCHANGED",
       "p02": "UNTOUCHED",
       "p03": "UNTOUCHED",
       "supabase": "UNCHANGED"
+    },
+    "ownerSafariEvidence": {
+      "checkedOn": "2026-10-25",
+      "evidenceType": "Owner-provided Safari iPhone screenshots within ChatGPT conversation; image attachments NOT published to public GitHub",
+      "screenshotsDescription": [
+        "16:39 Malaysia/Kuala Lumpur — in-map eight-colour legend expanded; Light rail / LRT green category manually selected; explanation visible",
+        "16:41 Thailand/Bangkok — in-map eight-colour legend expanded; Metro / subway blue category manually selected; explanation visible",
+        "16:41 China/Liuzhou — in-map eight-colour legend expanded; Branch line yellow category manually selected; explanation visible"
+      ],
+      "staticVisualChecks": {
+        "eightSwatches": "PASS_SAFARI_SCREENSHOTS",
+        "localizedRegionLabels": "PASS_SAFARI_SCREENSHOTS_EN",
+        "swatchSelectedState": "PASS_SAFARI_SCREENSHOTS",
+        "categoryExplanation": "PASS_SAFARI_SCREENSHOTS",
+        "readability": "PASS_FOR_CAPTURED_LIGHT_MODE",
+        "compactMapOccupancy": "NEEDS_IMPROVEMENT: open legend covers substantial map viewport",
+        "darkMode": "NOT_CHECKED_IN_THIS_EVIDENCE",
+        "directTrackTap": "NOT_TESTED_IN_THIS_EVIDENCE",
+        "stationMarkerAndPopup": "NOT_TESTED_IN_THIS_EVIDENCE",
+        "attributeToColourMatch": "UNVERIFIED: category swatches are user-selected and are not matched to tapped track",
+        "screenshotPublication": "NOT_AUTHORIZED"
+      },
+      "verifiedDeployment": {
+        "id": "dpl_8vgMHfuB5MZsv7Bf9tF4ZdHji19N",
+        "state": "READY",
+        "target": "staging",
+        "sha": "3dd28e8eb95bfb37e0fb63145add54c867aa256b",
+        "checkedOn": "2026-10-25"
+      },
+      "releaseDecision": "PARTIAL_SAFARI_UI_PASS_ONLY; actual railway feature/station interactivity and full UAT remain PENDING"
     }
   }
 }
