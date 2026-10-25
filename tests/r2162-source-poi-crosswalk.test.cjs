@@ -3,7 +3,7 @@ const fs=require('node:fs'),path=require('node:path'),{JSDOM}=require('jsdom');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 const api=require('../assets/railway-track-registry-kl.js');
 
-test('R2.16.2: only two exact source-observed KG code station labels become conservative catalogue candidates',()=>{
+test('R2.16.3: only two exact source-observed KG code station labels become conservative catalogue candidates',()=>{
  const examples=[['KG16 Pasar Seni','Pasar Seni',12],['KG35 Kajang','Kajang',29]];
  for(const [name,officialName,pos] of examples){
   const x=api.matchSourcedKajangPoi({class:'railway',subclass:'station',name,'name:en':officialName});
@@ -22,7 +22,7 @@ test('R2.16.2: only two exact source-observed KG code station labels become cons
  assert.deepEqual(api.osmRelationAudit.acceptedWayIds,[]);
  assert.deepEqual(api.osmRelationAudit.acceptedRelationIds,[]);
 });
-test('R2.16.2: refuse unsupported generic names, similarly named LRT, nearby rails and contradictory attributes',()=>{
+test('R2.16.3: refuse unsupported generic names, similarly named LRT, nearby rails and contradictory attributes',()=>{
  for(const p of [
   null,{}, {class:'railway',subclass:'station',name:'Kajang'},
   {class:'railway',subclass:'station',name:'Pasar Seni'},
@@ -73,7 +73,7 @@ function boot(featureProps){
  map.fire('style.load');
  return{w,map,doc:w.document};
 }
-test('R2.16.2: a source-backed Kajang POI popup displays a candidate 29/29 with no physical track claim',()=>{
+test('R2.16.3: a source-backed Kajang POI popup displays a candidate 29/29 with no physical track claim',()=>{
  const{w,map,doc}=boot({class:'railway',subclass:'station',name:'KG35 Kajang','name:en':'Kajang'});
  doc.querySelector('[data-locale="en"]').click();
  map.fire('click',{point:{x:120,y:150},lngLat:{lng:101.79,lat:2.99}});
@@ -84,14 +84,14 @@ test('R2.16.2: a source-backed Kajang POI popup displays a candidate 29/29 with 
  assert.match(text,/OpenMapTiles/);
  w.close();
 });
-test('R2.16.2: ambiguous station POI cannot falsely join the MRT Kajang service route',()=>{
+test('R2.16.3: ambiguous station POI cannot falsely join the MRT Kajang service route',()=>{
  const{w,map}=boot({class:'railway',subclass:'station',name:'Kajang'});
  map.fire('click',{point:{x:120,y:150},lngLat:{lng:101.79,lat:2.99}});
  assert(map.popup?.node);
  assert.doesNotMatch(map.popup.node.textContent,/29\/29|name match \(candidate\)/i);
  w.close();
 });
-test('R2.16.2: crosswalk is Malaysia-only; China and Thailand preserve source-backed station popups',()=>{
+test('R2.16.3: crosswalk is Malaysia-only; China and Thailand preserve source-backed station popups',()=>{
  const{w,map,doc}=boot({class:'railway',subclass:'station',name:'KG16 Pasar Seni','name:en':'Pasar Seni'});
  for(const country of ['thailand','china']){
   doc.querySelector('[data-region="'+country+'"]').click();
