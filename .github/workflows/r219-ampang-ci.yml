@@ -10,6 +10,7 @@ on:
       - 'assets/mrs10-r219-ampang-gis.js'
       - 'assets/mrs10-r219-ampang-gis-overlay.js'
       - 'tests/r219-ampang-orange-service.test.cjs'
+      - 'scripts/r219-gis-source-audit.cjs'
       - '.github/workflows/r219-ampang-ci.yml'
   workflow_dispatch:
 permissions:
@@ -26,6 +27,8 @@ jobs:
           cache: npm
       - name: Install dependencies without lifecycle scripts
         run: npm ci --ignore-scripts
+      - name: Read-only live GIS source evidence audit
+        run: node scripts/r219-gis-source-audit.cjs
       - name: R2.19 source, service and safe UI QA
         run: node --test tests/r219-ampang-orange-service.test.cjs
       - name: Entire existing MR-S10 regression suite
