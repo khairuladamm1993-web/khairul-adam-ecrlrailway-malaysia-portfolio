@@ -4,7 +4,7 @@
  const read=(key,fallback)=>{try{return localStorage.getItem(key)||fallback;}catch{return fallback;}};
  const write=(key,value)=>{try{localStorage.setItem(key,value);}catch{}};
  let language=read('railway-language','ms'),pinyin=read('railway-pinyin','off')==='on';
- if(!['ms','en','zh'].includes(language))language='ms';
+ if(!['ms','en','zh','th'].includes(language))language='ms';
  const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const obj=value=>typeof value==='string'?{en:value,...dict[value]}:value;
  const text=value=>{const o=obj(value);return o[language]||o.en||'';};
