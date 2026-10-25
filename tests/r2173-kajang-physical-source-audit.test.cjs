@@ -3,11 +3,11 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const a=require('../scripts/audit-kajang-source-readonly.cjs');
 const registry=require('../assets/railway-track-registry-kl.js');
 test('R2.17.3 source probe enforces four explicit public read-only endpoints and no credentials',()=>{
- assert.equal(a.endpoints.length,4);
+ assert.equal(a.endpoints.length,5);
  for(const e of a.endpoints){
   const url=new URL(e.url);
   assert.equal(url.protocol,'https:');
-  assert(['api.openstreetmap.org','cps.dbkl.gov.my','services5.arcgis.com'].includes(url.hostname));
+  assert(['api.openstreetmap.org','cps.dbkl.gov.my','services5.arcgis.com','overpass.private.coffee'].includes(url.hostname));
   assert(!url.username&&!url.password);
   if(e.kind==='arcgis'){
    assert.equal(url.searchParams.get('where'),'1=1');
@@ -44,6 +44,27 @@ test('R2.17.3 public DBKL polyline has route data but is never treated as a surv
  assert.equal(x.geometryVerified,false);assert.equal(x.fullCorridorCovered,false);
  assert.equal(x.sourceLicenseVerified,false);
  assert.equal(a.arcgisSummary({error:{code:403,message:'restricted'}},'test').status,'GIS_ERROR');
+});
+test('R2.17.3 candidate GIS line geometry bounds and length are diagnostic only',()=>{
+ const f={features:[{attributes:{sistem:'MRT 1',Operator:'Prasarana'},geometry:{paths:[[[101.65,3.1],[101.66,3.1],[101.67,3.11]]]}}]};
+ const x=a.arcgisSummary(f,'dbkl_mrt1_segments');
+ assert.equal(x.featureCount,1);
+ assert.equal(x.validatedVertices,3);
+ assert.deepEqual(x.bounds,[101.65,3.1,101.67,3.11]);
+ assert(x.undeduplicatedFeatureLengthKm>1);
+ assert.equal(x.distinctRelevantAttributes.Operator[0],'Prasarana');
+ assert.equal(x.geometryVerified,false);
+ assert.match(x.lengthCaveat,/NOT operator service length/);
+});
+test('R2.17.3 public Overpass relation membership alone never verifies track topology',()=>{
+ const x=a.overpassSummary({elements:[
+  {type:'relation',id:8000326,version:5,tags:{name:'Kajang Line',route:'subway'},members:[{type:'way',ref:778403716,role:''}]},
+  {type:'way',id:778403716,version:3,tags:{railway:'subway',name:'Laluan Kajang'}}
+ ]},'overpass_osm_candidates');
+ assert.equal(x.foundRelation,true);assert.equal(x.foundWay,true);
+ assert.equal(x.candidateWayInRelation,true);
+ assert.equal(x.candidateOnly,true);assert.equal(x.geometryVerified,false);
+ assert.equal(x.continuityVerified,false);
 });
 test('R2.17.3 remote endpoint failures are classified, not fabricated or silently accepted',async()=>{
  const x=await a.probe(a.endpoints[0],async()=>{throw Error('network unavailable')});
