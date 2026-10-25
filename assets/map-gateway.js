@@ -135,8 +135,10 @@
   const controller=new AbortController(),signal=controller.signal;
   const state={host,controller,map:null,leaflet:null,markers:new Map(),chainageMarker:null,selected:null,filter:'All',query:'',chainageMode:false,ownerLoaded:false,layers:{...MAP_LAYERS}};
   instance=state;
+  const localizer=window.RailwayMapLocale;
   host.innerHTML='<section class="map-module" aria-label="ECRL reference map">'+
    '<div class="map-identity-row"><span class="map-malaysia-badge" aria-label="Malaysia map context">🇲🇾 <span>Malaysia</span></span></div>'+
+   '<p class="map-localization-note" data-map-localization-note><strong>MAP BASE LABELS</strong> · Basemap labels remain in source language; website controls follow your selected language.</p>'+
    '<div class="map-toolbar"><label class="map-search"><span>Search</span><input type="search" data-map-search placeholder="Station name; Member code / chainage when available" autocomplete="off"></label>'+
    '<div class="map-filters" role="group" aria-label="Map filters">'+['All','STN','PL','Depot'].map(x=>'<button type="button" data-map-filter="'+x+'" aria-pressed="'+(x==='All')+'">'+x+'</button>').join('')+'</div>'+
    '<div class="map-actions"><button type="button" data-map-fit>FIT FULL ROUTE</button><button type="button" data-map-focus disabled>FOCUS SELECTED</button></div></div>'+
@@ -145,6 +147,17 @@
    '<p class="study-boundary">No route line / no polyline. Manual pan or zoom never recalculates stored marker coordinates.</p>'+
    '</section>';
 
+  const applyLocale=()=>localizer?.apply(host,R?.language||'ms');
+  state.localeObservers=[];
+  for(const selector of ['[data-map-detail]','[data-map-results]']){
+   const target=host.querySelector(selector);
+   if(target&&typeof MutationObserver!=='undefined'){
+    const observer=new MutationObserver(()=>applyLocale());
+    observer.observe(target,{childList:true,characterData:true,subtree:true});
+    state.localeObservers.push(observer);
+   }
+  }
+  applyLocale();
   const resultHost=host.querySelector('[data-map-results]'),detailHost=host.querySelector('[data-map-detail]');
   const input=host.querySelector('[data-map-search]'),focusBtn=host.querySelector('[data-map-focus]');
   const corridorBase=()=>points().filter(p=>p.phase==='current');
@@ -410,7 +423,8 @@
  }
  function unmount(){
   if(!instance)return;
-  const old=instance;instance=null;window.RailwayOwnerMap?.unmount();old.controller.abort();try{old.chainageMarker?.remove();}catch{}try{old.map?.remove();}catch{}old.markers.clear();
+  const old=instance;instance=null;window.RailwayOwnerMap?.unmount();old.controller.abort();for(const observer of old.localeObservers||[])observer.disconnect();try{old.chainageMarker?.remove();}catch{}try{old.map?.remove();}catch{}old.markers.clear();
  }
+ R?.onLanguage?.(()=>{if(instance?.host)window.RailwayMapLocale?.apply(instance.host,R.language);});
  window.RailwayMap=Object.freeze({mount,unmount,get mounted(){return Boolean(instance);},referenceCount(){return points().length}});
 })();
