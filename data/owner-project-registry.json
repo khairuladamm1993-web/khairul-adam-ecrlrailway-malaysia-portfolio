@@ -2994,5 +2994,102 @@
         "translatedDataLimit": "Actual Chinese/Thai place names are only available where the vector source contains them."
       }
     }
+  },
+  "integrationR2171": {
+    "project": "P01",
+    "issueId": "r2171-kajang-physical-alignment-evidence-candidates",
+    "title": "R2.17.1 Kajang physical alignment candidate discovery; full green physical line BLOCKED on geometry gates",
+    "checkedOn": "2026-10-26",
+    "state": "AUDIT_CANDIDATES_RECORDED_STAGING_READY_GEOMETRY_UNVERIFIED",
+    "parent": {
+      "issueId": "r217-kajang-green-identity-29-stations",
+      "sourceCommit": "5b507cf18e4c308ee1cb891ebe6a279b9f3d1671",
+      "safariState": "R2.17 Owner partial PASS for KG35 Kajang green POI/dark popup. 29-list Safari UAT not fully established."
+    },
+    "ownerIntent": "Continue toward green MRT Kajang alignment, separating real physical railway from KTM Kajang and adjacent services. No permission to infer geometry or alter production.",
+    "findings": {
+      "operatorReference": "https://www.mymrt.com.my/projects/kajang-line/",
+      "officialAggregate": "Current MRT Corp overview states 29 stations, Kwasa Damansara to Kajang, 46km alignment, 9.5km underground; no GIS track geometry supplied",
+      "osmRelationCandidate": {
+        "id": "8000326",
+        "sourceUrl": "https://www.wikidata.org/wiki/Q6717618",
+        "status": "UNVERIFIED",
+        "reason": "Unreferenced Wikidata P402 relation. OSM current relation type, members and way geometry could not be accessed."
+      },
+      "osmWayCandidate": {
+        "id": "778403716",
+        "sourceUrl": "https://my.geoview.info/laluan_kajang%2C10778403716w",
+        "snapshotDate": "2025-07-14",
+        "snapshotLengthMeters": 4193,
+        "status": "UNVERIFIED",
+        "reason": "Third-party cached OSM way label only. Current geometry, membership and continuity not retrieved."
+      },
+      "arcgisCandidate": {
+        "sourceUrl": "https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer",
+        "layerIndex": 15,
+        "label": "MRT KAJANG LINE",
+        "status": "DISCOVERED_DIRECTORY_ONLY",
+        "reason": "Layer listing known; source quality, license, features and exact geometry not checked."
+      },
+      "acceptedOsmRelationIds": [],
+      "acceptedOsmPhysicalWayIds": [],
+      "verifiedPhysicalTracks": 0,
+      "acceptedGeometry": null,
+      "fullLineColorStatus": "NOT_AUTHORIZED_WITHOUT_PHYSICAL_EVIDENCE",
+      "status": "CANDIDATES_DISCOVERED_DIRECT_OSM_GEOMETRY_BLOCKED"
+    },
+    "development": {
+      "branch": "feature/mrs10-r2171-kajang-geometry-evidence-audit",
+      "parentCommit": "5b507cf18e4c308ee1cb891ebe6a279b9f3d1671",
+      "sourceCommit": "1bc7e276e09b387d3f30527cb743d23764bf51b9",
+      "changedFiles": [
+        "assets/railway-track-registry-kl.js",
+        "tests/r2171-kajang-geometry-evidence.test.cjs",
+        "package.json",
+        "docs/r2171-kajang-geometry-audit.md"
+      ],
+      "preserved": "R2.17 29-station green service Registry; source-backed KG16 and KG35 POI accents; all map layers visually unchanged. No physical ways are painted green."
+    },
+    "staging": {
+      "project": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_DtRAbrxpuaShB9MMDrCiUuTUsh4h",
+      "target": "staging",
+      "state": "READY",
+      "sourceSha": "1bc7e276e09b387d3f30527cb743d23764bf51b9",
+      "url": "https://mrs10-r211-mobile-map-81bdtk6sz-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1"
+    },
+    "qa": {
+      "node": "323/323 PASS 0 FAIL 0 SKIP",
+      "catalogue": "14/14 PASS 0 FAIL 0 SKIP",
+      "artifact": "HTTP 200 HTML, registry JS and map JS; excluded Member/quiz JS HTTP 404",
+      "checks": "5 new regression tests validate candidate references, direct geometry gate, no accepted way IDs, operator/GIS distinction, and continued absence of physical-line repaint",
+      "safari": "Not retested for R2.17.1; no user-visible map repaint in audit-only branch. R2.17 Owner green Kajang popup partial PASS retained.",
+      "directOsmApi": "Blocked/unreachable from the available research environment. No source-current relation XML or way geometry obtained."
+    },
+    "evidence": {
+      "report": "docs/r2171-kajang-geometry-audit.md",
+      "official": "https://www.mymrt.com.my/projects/kajang-line/",
+      "osmRef": "https://www.wikidata.org/wiki/Q6717618",
+      "osmMirror": "https://my.geoview.info/laluan_kajang%2C10778403716w",
+      "thirdPartyArcgis": "https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO: source audit and isolated staging QA PASS, but direct physical alignment geometry and all topology gates remain UNVERIFIED. Production/merge remain blocked.",
+    "nextAction": "Retrieve live OSM relation 8000326 and way 778403716, verify their tags, way members/geometry/continuity; reconcile MRT Kajang vs KTM Kajang, Putrajaya interchange, underground/viaduct segments, source licensing. Only style verified matched railway way IDs, then run combined integration QA and Owner Safari UAT.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "r218": "UNTOUCHED",
+      "r219": "UNTOUCHED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT DONE"
+    }
   }
 }
