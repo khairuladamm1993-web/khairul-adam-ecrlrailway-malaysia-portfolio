@@ -14,6 +14,30 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;border-bottom:1p
 .table-wrap{overflow-x:auto}.diagram{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:20px 0}.diagram div{background:#152936;border:1px solid #496174;border-radius:10px;padding:12px}
 summary{cursor:pointer;font-weight:600}footer{border-top:1px solid #34424f;font-size:.9rem}
 @media(prefers-color-scheme:light){body{background:#f7f9fc;color:#17242f}a{color:#165a98}.note,details{background:#e9f0f6}.diagram div{background:#e9f0f6}}
+
+/* R2.7: Explicit user-selected theme must win over OS prefers-color-scheme. */
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+:root[data-theme="light"] body{background:#f7f9fc;color:#172b36}
+:root[data-theme="light"] a{color:#125986}
+:root[data-theme="light"] .muted,:root[data-theme="light"] small{color:#405564}
+:root[data-theme="light"] .note,:root[data-theme="light"] details,:root[data-theme="light"] .diagram div{background:#eaf1f6;color:#172b36;border-color:#9fb5c4}
+:root[data-theme="light"] .tag{border-color:#728897;color:#1c3645;background:#ecf3f7}
+:root[data-theme="light"] header,:root[data-theme="light"] footer,:root[data-theme="light"] th,:root[data-theme="light"] td{border-color:#9fb4c2}
+:root[data-theme="dark"] body{background:#09131b;color:#e8eef4}
+:root[data-theme="dark"] a{color:#a4dbfa}
+:root[data-theme="dark"] .muted,:root[data-theme="dark"] small{color:#bfcfd9}
+:root[data-theme="dark"] .note,:root[data-theme="dark"] details{background:#15222d;color:#e8eef4;border-color:#526477}
+:root[data-theme="dark"] .diagram div{background:#152936;color:#e8eef4;border-color:#496174}
+:root[data-theme="dark"] header,:root[data-theme="dark"] footer,:root[data-theme="dark"] th,:root[data-theme="dark"] td{border-color:#526477}
+.chapter-header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.chapter-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chapter-controls label{font:600 .88rem/1.5 system-ui,sans-serif}
+.chapter-controls select,.chapter-controls button{font:600 .9rem/1.5 system-ui,sans-serif;min-height:44px;padding:8px 12px;border:1px solid #758c9c;border-radius:9px;background:#fff;color:#173241}
+:root[data-theme="dark"] .chapter-controls select,:root[data-theme="dark"] .chapter-controls button{color:#e8f5fa;background:#1b313e;border-color:#8aa7b8}
+.chapter-controls option{color:#173241;background:#fff}
+.chapter-controls button:focus-visible,.chapter-controls select:focus-visible{outline:3px solid #e6bd6e;outline-offset:2px}
+@media(max-width:650px){header,main,footer{padding:16px}.chapter-controls{width:100%}.chapter-controls label{width:100%}.chapter-controls select,.chapter-controls button{flex:1}}
 </style></head>
 <body><header class="chapter-header">
 <a href="../gateway.html">← MR-S10 Railway Learning Gateway</a>
