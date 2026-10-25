@@ -1267,5 +1267,107 @@
       "recommendedNextChange": "Isolated source-data-backed station/line label readability pilot: prioritize verified English/Latin name when BM/EN, original+verified romanization/pinyin in compact source-based popup when available, no invented station names, no assumption raster labels are translatable, reduce verbose status banner when expanded. Verify POI and rail data with real Safari taps.",
       "uatDecision": "PARTIAL_VISUAL_PASS; multilingual readability improvement required; tap interaction UAT PENDING"
     }
+  },
+  "integrationR214": {
+    "project": "P01",
+    "checkedOn": "2026-10-25",
+    "title": "R2.14 China Railway Code Explorer (source-backed opt-in pilot)",
+    "state": "STAGING_READY_SAFARI_UAT_PENDING",
+    "approvalScope": "Owner endorsed in-map China railway code explanations; staging pilot only, not production deployment or raster digit interaction",
+    "sourceBaseline": "3dd28e8eb95bfb37e0fb63145add54c867aa256b",
+    "branch": "feature/mrs10-r214-china-rail-code-lookup-pilot",
+    "sourceCommit": "7e6f8285b0cdc9e2cdf9ed6ea23673f6a49f275f",
+    "sourceFiles": [
+      "assets/map-language-lab.js",
+      "map-language-lab.html",
+      "package.json",
+      "tests/r214-china-rail-code-lookup.test.cjs"
+    ],
+    "codeCatalogue": [
+      {
+        "code": "44906",
+        "kind": "station",
+        "hanzi": "程村站",
+        "latin": "Chengcun Railway Station",
+        "pinyin": "Chéngcūn Zhàn",
+        "source": "https://zh.wikipedia.org/wiki/程村站"
+      },
+      {
+        "code": "44930",
+        "kind": "station",
+        "hanzi": "融安站",
+        "latin": "Rong'an Railway Station",
+        "pinyin": "Róng'ān Zhàn",
+        "source": "https://zh.wikipedia.org/wiki/融安站"
+      },
+      {
+        "code": "44957",
+        "kind": "station",
+        "hanzi": "融水站",
+        "latin": "Rongshui Railway Station",
+        "pinyin": "Róngshuǐ Zhàn",
+        "source": "https://zh.wikipedia.org/wiki/融水站"
+      },
+      {
+        "code": "0073",
+        "kind": "line",
+        "hanzi": "衡柳铁路",
+        "latin": "Hengyang–Liuzhou Railway",
+        "pinyin": "Héngliǔ Tiělù",
+        "source": "https://wiki.openstreetmap.org/wiki/Zh-hans:OpenRailwayMap/China_Railway_Line_Number"
+      },
+      {
+        "code": "0081",
+        "kind": "line",
+        "hanzi": "黔桂铁路",
+        "latin": "Guizhou–Guangxi Railway",
+        "pinyin": "Qiánguì Tiělù",
+        "source": "https://wiki.openstreetmap.org/wiki/Zh-hans:OpenRailwayMap/China_Railway_Line_Number"
+      }
+    ],
+    "UX": {
+      "button": "One 44px 🔢 button inside map, shown ONLY when pilotMode=true and activeRegion=china",
+      "output": "Compact, scrollable card with code, verified English name, Hanzi, pinyin, source link",
+      "methods": "Two example buttons and 4/5-digit lookup; zero-leading line codes preserved as strings",
+      "unsupported": "No direct text recognition or click detection on pre-rendered OpenRailwayMap raster numerals; map geographic station marker matching NOT IMPLEMENTED",
+      "gracefulFallback": "Unknown code returns explicit unverified message. No guessed station identities or coordinates",
+      "languages": "Chinese code UI localized to BM, EN, Chinese and Thai; names remain source-verified"
+    },
+    "QA": {
+      "sourceCommit": "VERIFIED by GitHub fetch; isolated branch and four modified files",
+      "node": "276/276 PASS; 0 FAIL 0 SKIP on exact staging SHA",
+      "catalogue": "14/14 PASS; 0 FAIL 0 SKIP",
+      "publicBuild": "PASS: user-facing preview only; analytics/member auth excluded",
+      "privacy": "HTTP 200 for map HTML/JS, 404 for protected quiz and member gateway assets",
+      "browser": "Safari iPhone UAT PENDING; actual on-device code lookup not confirmed",
+      "featureTap": "Direct tap on pre-rendered raster digits UNSUPPORTED; do not claim full code popup",
+      "production": "UNCHANGED"
+    },
+    "staging": {
+      "projectName": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_DnCB938zXPnRgYKuBb9RBbMHeAH9",
+      "target": "staging",
+      "state": "READY",
+      "url": "https://mrs10-r211-mobile-map-lpbkavjh1-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "sourceSha": "7e6f8285b0cdc9e2cdf9ed6ea23673f6a49f275f",
+      "authenticated": "Vercel project existing protection retained"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO FOR PRODUCTION; pilot staging only; Safari UAT still pending",
+    "nextAction": "Owner selects China in R2.14 pilot, presses map 🔢 icon and verifies sample 44930 and leading-zero 0073 plus an unknown code. Check BM/EN and Dark Mode contrast, then screenshot. No raster digit click expected; separate future vector data investigation required.",
+    "protectedProjects": {
+      "main": "UNTOUCHED",
+      "production": "UNCHANGED",
+      "supabase": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED"
+    },
+    "ownerImages": "No personal photos published"
   }
 }
