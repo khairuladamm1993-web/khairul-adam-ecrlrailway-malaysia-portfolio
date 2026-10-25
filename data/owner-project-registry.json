@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "R2.4 theme accessibility + Chapter 01 BM/EN/Chinese staging published; automatic QA PASS, Safari visual UAT pending",
+  "register": "MRL'S10 R2.5 two-way workflow Node regression 217/217 and Catalogue 14/14 PASS; staging READY but Vercel SSO protected; Owner cross-chat UAT pending",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -51,11 +51,19 @@
       "code": "P01",
       "name": "MR-S10 Portfolio Website",
       "category": "website",
-      "phase": "R2.4 integrated MR-S10 Owner Gateway plus Light/Dark contrast and trilingual Chapter 01 QA",
+      "phase": "R2.5 two-way ChatGPT ↔ GitHub Registry ↔ Owner Dashboard workflow; staged for Owner UAT",
       "overall": "IN_PROGRESS",
-      "nextDecision": "Safari iPhone UAT: verify Light/Dark control contrast (Map toolbar and Read Chapter 01) and complete Chapter 01 text in BM, EN and 中文. Only then consider visual defect SOLVED. Owner/Admin login, Vercel live bridge and Swift checkpoint publisher remain separate.",
+      "nextDecision": "Confirm authenticated Owner Safari handoff from MR-S10 to a separately connected ChatGPT chat, verified GitHub Registry checkpoint write, and return Refresh showing that exact update. Staging Vercel SSO protection remains enabled; no production release or changes to Supabase Auth/RLS.",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
+        {
+          "type": "test",
+          "label": "R2.5 Cross-Chat Verified Two-Way Workflow — development Node QA",
+          "value": "217/217 PASS · 14/14 Catalogue PASS · same-site build PASS",
+          "verifiedOn": "2026-10-25",
+          "confidence": "automated-tests-only; Safari Owner cross-chat UAT pending",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/feature/mrs10-r25-two-way-verified-workflow"
+        },
         {
           "type": "test",
           "label": "R2.4 Safari contrast and Chapter 01 multilingual build",
@@ -612,5 +620,23 @@
       "outstanding": "Confirm contrast and language on actual Safari; authentication callback not enabled on isolated staging.",
       "scope": "R2.4 dev/staging only; no main merge, no MR-S10 Production or Supabase Auth changes"
     }
+  },
+  "integrationR25": {
+    "scope": "Two-way issue-level workflow via authorized GitHub connector and public-safe Verified Registry, not direct private chat transcript integration",
+    "developmentBranch": "feature/mrs10-r25-two-way-verified-workflow",
+    "latestTestedCommit": "ffcefa3d47b48272679defbb67f8ce5d8a8c492b",
+    "githubRegistryBranch": "feature/owner-r23-verified-checkpoint-sync",
+    "fullNode": "217/217 PASS",
+    "catalogue": "14/14 PASS",
+    "build": "Integrated and public build PASS",
+    "isolatedDeployment": "dpl_87S417avMzJffjwpCMCx2HcibYYp",
+    "isolatedPreviewDomain": "mrs10-r25-two-way-preview.vercel.app",
+    "isolatedDeploymentState": "READY",
+    "isolatedBrowserAccess": "BLOCKED_BY_ENABLED_VERCEL_AUTHENTICATION; not a Safari UAT PASS",
+    "realOwnerCrossChatWriteUat": "PENDING",
+    "noPrivateTranscriptFeed": true,
+    "automaticSyncScope": "Dashboard reads GitHub registry on Refresh and scheduled browser checks while open. New cross-chat records require explicitly authorized GitHub write from that chat.",
+    "sourceSafety": "Developer preview only. No MR-S10 Production merge, no Supabase Auth/RLS updates, no provider protection changes.",
+    "targetProducts": 2
   }
 }
