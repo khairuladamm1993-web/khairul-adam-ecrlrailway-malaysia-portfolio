@@ -197,11 +197,26 @@ function popupFromPilotFeature(feature,kind,lngLat){
  }
  // R2.16.3: exact source-string crosswalk, not physical track assignment.
  // No route is inferred from rail colour, geometry proximity or generic place names.
+ let isKajangMatch=false;
  if(kind==='station'&&activeRegion==='malaysia'&&pilotMode){
-  const candidate=window.MRS10KLRegistry?.matchSourcedKajangPoi?.(feature.properties)||
-   window.MRS10KLRegistry?.matchSourcedKelanaPoi?.(feature.properties)||
-    window.MRS10KLRegistry?.matchSourcedPutrajayaPoi?.(feature.properties);
+  const routeApi=window.MRS10KLRegistry;
+  const selected=el('kl-registry-route')?.value;
+  const candidates=[
+   routeApi?.matchSourcedKajangPoi?.(feature.properties),
+   routeApi?.matchSourcedKelanaPoi?.(feature.properties),
+   routeApi?.matchSourcedPutrajayaPoi?.(feature.properties)
+  ].filter(Boolean);
+  // Shared interchange: chosen service takes precedence over feature proximity.
+  const candidate=candidates.find(x=>x.routeId===selected)||candidates[0]||null;
   if(candidate){
+   if(candidate.routeId==='mrt-kajang'){
+    isKajangMatch=true;
+    // R2.17.5 retains sourced Chinese/Thai station names, never invents one.
+    const translated=lang==='zh'?feature.properties['name:zh']:
+     lang==='th'?feature.properties['name:th']:null;
+    title.textContent=translated?info.title:candidate.stationName;
+    root.setAttribute('aria-label',candidate.stationName+' · '+candidate.routeName);
+   }
    const label=lang==='ms'?'Padanan nama peta (calon)':
     lang==='zh'?'地图名称对应（候选）':
     lang==='th'?'จับคู่ชื่อบนแผนที่ (เบื้องต้น)':'Map name match (candidate)';
@@ -219,7 +234,8 @@ function popupFromPilotFeature(feature,kind,lngLat){
   }
  }
  if(pilotInfoPopup)pilotInfoPopup.remove();
- pilotInfoPopup=new maplibregl.Popup({offset:12,maxWidth:'255px',className:'mrl-campus-popup'})
+ pilotInfoPopup=new maplibregl.Popup({offset:12,maxWidth:'255px',
+  className:'mrl-campus-popup'+(isKajangMatch?' mrl-kajang-matched-popup':'')})
   .setLngLat(lngLat).setDOMContent(root).addTo(map);
 }
 function installPilotVectorLayers(){
@@ -249,15 +265,17 @@ function installPilotVectorLayers(){
  // not fabricated as map coordinates or physical railway tracks.
  if(poiSource&&!map.getLayer('mrl-kajang-known-poi')){
   try{
-   const identity=window.MRS10KLRegistry?.findRoute?.('mrt-kajang')?.visualIdentity;
-   if(identity){
+   const sourceApi=window.MRS10KLRegistry;
+   const identity=sourceApi?.findRoute?.('mrt-kajang')?.visualIdentity;
+   const sourceNames=sourceApi?.kajangPoiSourceNames;
+   if(identity&&Array.isArray(sourceNames)&&sourceNames.length>=29){
     map.addLayer({
      id:'mrl-kajang-known-poi',type:'circle',source:poiSource,'source-layer':'poi',minzoom:10,
      filter:['all',['==',['get','class'],'railway'],
       ['in',['get','subclass'],['literal',['station','subway']]],
-      ['in',['get','name'],['literal',['KG16 Pasar Seni','KG35 Kajang']]]],
+      ['in',['get','name'],['literal',sourceNames]]],
      layout:{visibility:'none'},
-     paint:{'circle-radius':5.5,'circle-color':identity.light,
+     paint:{'circle-radius':6.3,'circle-color':identity.light,
       'circle-stroke-color':'#FFFFFF','circle-stroke-width':2}
     });
    }
