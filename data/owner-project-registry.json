@@ -338,7 +338,7 @@
           "id": "r219-ampang-orange-service-registry",
           "kind": "IN_PROGRESS",
           "label": "P01 R2.19 — LRT Ampang Line 18-station source-backed service registry",
-          "detail": "Owner Safari screenshot of first R2.19 staging (05:14 MYT) showed 18-stop orange registry beginning AG1/AG2, but general MR-S10 map blue POI dots and generic vector tap warning; root cause confirmed as standalone iframe before registry (no integrated sourced Ampang POI highlights). On isolated branch UX corrected: 18-stop orange registry appears first, 11 shared-SP tags, general base map moved to labelled default-collapsed reference panel. New CI 7/7 R2.19 and 318/318 existing PASS, safe artifact PASS. New target=staging READY. Owner Safari UAT of corrected version pending.",
+          "detail": "R2.19 native MapLibre parity repair on isolated branch: no iframe; one-page native map, native zoom/fullscreen, Malaysia/Thailand/China city-area references, BM/EN/中文/ไทย controls, responsive 18-stop orange timeline, 11 SP shared-service tags; confirmed from source code, not yet Owner Safari verified. Strict candidate-only AG POI matching; no orange geographic POI without source crosswalk, no physical track geometry or colouring. 9/9 new tests + 318/318 existing Node PASS; safe staged build PASS.",
           "basis": "Prasarana/official transit sources; GitHub Actions 40233275721; Vercel live GET deployment metadata and build events; owner approval limited to isolated R2.19 target correction",
           "sourceUrls": [
             "https://www.prasarana.com.my/mobiliti/the-nations-first-lrt-line/",
@@ -349,12 +349,13 @@
           "development": {
             "branch": "feature/mrs10-r219-ampang-orange-service-registry",
             "parentCommit": "5b507cf18e4c308ee1cb891ebe6a279b9f3d1671",
-            "lastVerifiedCommit": "65fcf533d04ebcec2af8a87bb0d3afb07f319385",
+            "lastVerifiedCommit": "df0ae24114690886d4b137b9102c74ed75cfd94b",
             "files": [
               "assets/mrs10-r219-ampang-service.js",
               "ampang-line-r219.html",
               "tests/r219-ampang-orange-service.test.cjs",
-              ".github/workflows/r219-ampang-ci.yml"
+              ".github/workflows/r219-ampang-ci.yml",
+              "assets/mrs10-r219-map-bridge.js"
             ],
             "r218Isolation": "PASS — no shared R2.18 files edited",
             "productionAndOtherProjects": "UNTOUCHED"
@@ -362,34 +363,36 @@
           "evidence": {
             "source": "PASS",
             "structuredModuleChecks": "10/10 PASS using authenticated GitHub fetch and in-memory JS verification; NOT full Node CI",
-            "nodeTests": "PASS 7/7 R2.19 and 318/318 existing Node regression at SHA 65fcf533d04ebcec2af8a87bb0d3afb07f319385 (GitHub Actions run 40234785725)",
-            "safari": "PARTIAL PASS on earlier staging via Owner screenshot: HTML rendered, orange registry AG1/AG2 visible, blue POI base map and generic tap warning observed; R2.19 updated UX Safari UAT NOT YET VERIFIED",
+            "nodeTests": "PASS — 9/9 R2.19 new tests and 318/318 MR-S10 existing regressions; CI run 40236949332",
+            "safari": "Older staging partial evidence only; new native MapLibre staging UNVERIFIED on Safari",
             "mapPoi": "UNVERIFIED — zero source-verified AG cartographic POI crosswalks",
             "physicalAlignment": "UNVERIFIED — zero OSM route/way/track geometry",
-            "staging": "STAGING READY — Vercel project prj_xlweXyowjdvfr87gsAIEuIWsRkde; dpl_6x79Dje3a4o1rkiiqQ3sZod1YN9T; target staging; source SHA 65fcf533d04ebcec2af8a87bb0d3afb07f319385; Vercel Authentication ALL. HTTP body status and Safari updated UAT unverified.",
-            "staticArtifact": "PASS — isolated safe build of base artifact and R2.19 reference HTML in GitHub Actions and Vercel staging",
+            "staging": "STAGING READY — project prj_xlweXyowjdvfr87gsAIEuIWsRkde; deployment dpl_8QtLVvCDZ6nbRtZKg4uUE6JnWJji; target staging; commit df0ae24114690886d4b137b9102c74ed75cfd94b; Vercel Authentication ALL; Owner Safari HTML/map visual UAT pending",
+            "staticArtifact": "PASS — staging static artifact includes ampang-line-r219.html and assets/mrs10-r219-map-bridge.js; no iframe; protected questions.js, quiz-core.js and gateway.js absent",
             "security": "Source artifact scan and Vercel Authentication ALL metadata PASS; browser access and endpoint-by-endpoint UAT UNVERIFIED."
           },
           "resolution": {
             "state": "OPEN",
-            "tests": "AUTOMATED_PASS_SAFARI_UPDATED_UAT_PENDING",
+            "tests": "AUTOMATED_PASS_NATIVE_STAGING_READY_SAFARI_PENDING",
             "verifiedAt": null,
             "evidence": [
               "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40233275721",
               "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/0d4bd52188fd48da27366a80d8933531d97b3144",
               "https://vercel.com/1993khairuladam-3016/mrs10-r219-ampang-orange-preview/BqbRcxxuHrggWHeFoBkkUhHTM5du",
               "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40234785725",
-              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/65fcf533d04ebcec2af8a87bb0d3afb07f319385"
+              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/65fcf533d04ebcec2af8a87bb0d3afb07f319385",
+              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40236949332",
+              "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/df0ae24114690886d4b137b9102c74ed75cfd94b"
             ],
             "releaseGates": {
               "ci": "PASS",
-              "safariUat": "PARTIAL_OLD_STAGING_UPDATED_UNVERIFIED",
+              "safariUat": "NOT_PASS_NEW_NATIVE_MAP_PENDING",
               "security": "PARTIAL_SOURCE_ARTIFACT_AND_SSO_ONLY",
               "deployment": "STAGING_READY_HTTP_UNVERIFIED",
               "ownerApproval": "ISOLATED_STAGING_APPROVED_NO_PRODUCTION_RELEASE"
             }
           },
-          "nextAction": "Owner Safari UAT on corrected R2.19 staging: orange 18-stop list immediately visible, 11 SP tags AG1..AG11, tap AG7 popup, BM/EN/中文/ไทย, light/dark, optional collapsed generic blue reference map. Report pass/fail screenshot. Continue separate source-matched vector POI audit before integrating map layers with R2.18; no Production merge.",
+          "nextAction": "Owner Safari on isolated R2.19 staging: verify native map visible without iframe, fullscreen, zoom, pan/tap, four languages and themes, 18-station orange vertical timeline, AG7 popup, 11 SP shared tags; capture screenshot. Source verify AG POI crosswalk and OSM geometry later; no production merge and no overwriting R2.18.",
           "deploymentAudit": {
             "projectId": "prj_xlweXyowjdvfr87gsAIEuIWsRkde",
             "projectName": "mrs10-r219-ampang-orange-preview",
@@ -432,6 +435,18 @@
               "action": "Registry-first layout; old generic map separated behind collapsed reference details, labelled accurately; no invented GIS and no shared map/registry edit",
               "safari": "PENDING_UPDATED_STAGING",
               "production": "UNCHANGED"
+            },
+            "nativeMapIntegrated": {
+              "projectId": "prj_xlweXyowjdvfr87gsAIEuIWsRkde",
+              "deploymentId": "dpl_8QtLVvCDZ6nbRtZKg4uUE6JnWJji",
+              "url": "https://mrs10-r219-ampang-orange-preview-6kzpyhje9-1993khairuladam-3016.vercel.app/ampang-line-r219.html",
+              "sourceSha": "df0ae24114690886d4b137b9102c74ed75cfd94b",
+              "target": "staging",
+              "readyState": "READY",
+              "access": "Vercel Authentication ALL",
+              "verifiedSource": "Vercel live metadata, build events, GitHub CI logs",
+              "safari": "PENDING",
+              "architecture": "Same-page custom R2.19 MapLibre adapter; preserved R2.17 source branch, R2.18 no merge or write; 18 reference stations are not geolocated"
             }
           }
         }
