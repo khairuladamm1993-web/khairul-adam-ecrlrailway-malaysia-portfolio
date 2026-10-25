@@ -108,3 +108,47 @@ test('R2.17.5: expanded matched popup keeps station heading sticky and does not 
  assert.match(html,/\.mrl-campus-popup \.maplibregl-popup-content\{background:var\(--popup-bg\);color:var\(--popup-fg\);padding:44px 10px 9px;border-radius:10px;max-height:min\(34dvh,170px\)\}/);
  assert.equal(api.osmRelationAudit.verifiedPhysicalTracks,0);
 });
+
+function evalKajangStyleFilter(expr,props){
+ if(!Array.isArray(expr))return expr;
+ const [op,...args]=expr;
+ const read=x=>evalKajangStyleFilter(x,props);
+ switch(op){
+  case 'all':return args.every(read);
+  case 'any':return args.some(read);
+  case '!':return !read(args[0]);
+  case '==':return read(args[0])===read(args[1]);
+  case 'get':return props[args[0]];
+  case 'has':return Object.prototype.hasOwnProperty.call(props,args[0]);
+  case 'literal':return args[0];
+  case 'to-string':return String(read(args[0]));
+  case 'downcase':return read(args[0]).toLowerCase();
+  case 'in':return read(args[1]).includes(read(args[0]));
+  default:throw Error('Unexpected MapLibre filter expression '+op);
+ }
+}
+test('R2.17.6: green POI visual filter rejects contradictory English fields like the popup matcher',()=>{
+ const{w,map}=render(station('KG13 Pusat Bandar Damansara','Pusat Bandar Damansara'));
+ const layer=map.getLayer('mrl-kajang-known-poi');
+ assert(layer,'source-backed green candidate layer must exist');
+ const passes=p=>evalKajangStyleFilter(layer.filter,p);
+ const official=station('KG13 Pusat Bandar Damansara','Pusat Bandar Damansara');
+ assert(passes(official),'legitimate KG13 must remain green');
+ assert(passes(station('KG13 Pusat Bandar Damansara')),'missing optional English is allowed');
+ assert(passes(station('KG13 Pusat Bandar Damansara','Pusat Bandar Damansara',{'name:zh':'白沙罗市中心'})));
+ for(const props of [
+  station('KG13 Pusat Bandar Damansara','KTM Kajang'),
+  station('KG13 Pusat Bandar Damansara','Pusat Bandar Damansara',{name_en:'KTM Kajang'}),
+  station('KTM Kajang','KTM Kajang'),
+  station('Damansara','Damansara'),
+  {...official,class:'highway'}
+ ])assert(!passes(props),'contradictory or ambiguous source must not receive Kajang green: '+props.name);
+ for(const raw of api.kajangPoiSourceNames){
+  const match=api.matchSourcedKajangPoi(station(raw));
+  assert(match,'Registry candidate must be code+name verified: '+raw);
+  assert(passes(station(raw,match.stationName)),'do not regress allowed station: '+raw);
+ }
+ assert.equal(api.osmRelationAudit.verifiedPhysicalTracks,0);
+ assert.deepEqual(api.osmRelationAudit.acceptedWayIds,[]);
+ w.close();
+});
