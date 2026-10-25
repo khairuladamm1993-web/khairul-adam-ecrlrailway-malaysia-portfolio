@@ -1,5 +1,5 @@
 /* R2.6 Thai source-reviewed interface glossary. Unspecified source text retains its documented English fallback; not an automatic translation service. */
-Object.assign(window.railwayTranslations, {
+const thaiTerms = {
   "Language": {
     "th": "ภาษา"
   },
@@ -351,4 +351,5 @@ Object.assign(window.railwayTranslations, {
   "Basemap labels remain in source language; website controls follow your selected language.": {
     "th": "ป้ายชื่อบนภาพแผนที่พื้นฐานยังคงเป็นภาษาของแหล่งข้อมูล ส่วนเมนูและข้อมูลของเว็บไซต์ใช้ภาษาที่เลือก"
   }
-});
+};
+for(const [key,value] of Object.entries(thaiTerms)) window.railwayTranslations[key]={...(window.railwayTranslations[key]||{}),...value};
