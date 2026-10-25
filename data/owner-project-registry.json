@@ -3128,5 +3128,95 @@
       "p03": "UNTOUCHED",
       "merge": "NOT DONE"
     }
+  },
+  "integrationR2172": {
+    "project": "P01",
+    "issueId": "r2172-kajang-29-source-poi-green",
+    "title": "MRT Kajang POI green source-label expansion: KG13 Owner Safari and 29 reviewed code/name candidates",
+    "checkedOn": "2026-10-26",
+    "state": "ISOLATED_STAGING_READY_OWNER_SAFARI_KG13_RETEST_PENDING",
+    "ownerObservation": {
+      "observedAt": "2026-10-26T05:21:00+08:00",
+      "provenance": "Owner Safari screenshot supplied in current ChatGPT conversation; no screenshot uploaded to public repository",
+      "selection": "Malaysia / MRT · Kajang Line selected in Registry",
+      "observedFeature": {
+        "name": "Pusat Bandar Damansara",
+        "originalName": "KG13 Pusat Bandar Damansara",
+        "category": "subway"
+      },
+      "gap": "KG13 source-backed station marker remained blue and popup had no Kajang route 9/29 candidate notice in old R2.17.1",
+      "confirmedExisting": "Green 29-service-stop Registry list visible and legible in Safari at 05:22, including numbers 6-13",
+      "physicalLine": "Underlying map railway remained teal, as designed until way geometry is verified"
+    },
+    "rootCause": "R2.17.1 separate green POI overlay filter allowed only exact labels KG16 Pasar Seni and KG35 Kajang; KG13 was missing although Owner screenshot showed exact source code/name.",
+    "development": {
+      "branch": "feature/mrs10-r2172-kajang-29-source-poi-green",
+      "parentCommit": "1bc7e276e09b387d3f30527cb743d23764bf51b9",
+      "sourceCommit": "b6fc699c9c69e9f62613c82e6ce07be7cc0901da",
+      "files": [
+        "assets/railway-track-registry-kl.js",
+        "assets/map-language-lab.js",
+        "tests/r217-kajang-green-identity.test.cjs",
+        "tests/r2171-kajang-geometry-evidence.test.cjs",
+        "tests/r2172-kajang-29-source-poi-green.test.cjs",
+        "package.json",
+        "docs/r2172-kajang-source-poi-green-qa.md"
+      ],
+      "details": [
+        "Owner-observed KG13 Pusat Bandar Damansara source POI added to candidate matcher, now expected stop 9/29 and green marker when MRT Kajang selected",
+        "29 unique MRT Kajang station KG codes mapped to 29 operator-verified station names; exact source POI name and allowed station subtype required, not coordinates/proximity",
+        "Other unobserved KG station names remain source-label candidates, NOT 29 observed/map-located verified stations",
+        "Green filter derives allowlisted names from Railway Registry, not duplicated hard-coded strings in map JS; two narrowly declared label variants for TRX and Batu 11",
+        "Existing 29-stop green Registry list, source green KG16/KG35, country switching, dark mode and click interaction preserved",
+        "Railway vector/physical track not coloured green; KTM and other lines must remain separate; no physical geometry or source OSM relations accepted"
+      ]
+    },
+    "evidence": {
+      "operatorStations": [
+        "https://www.mymrt.com.my/ms/ruang-acara/kajang/",
+        "https://www.mymrt.com.my/projects/kajang-line/"
+      ],
+      "secondaryStationCodes": [
+        "https://www.klia2.info/rail/mrt-sbk/",
+        "https://mrtkl.com/mrt-kajang-line"
+      ],
+      "caveat": "Code-to-name references are secondary and exact station POI labels must be present in actual map source. Secondary code directory does not verify physical track or independently prove all 29 map features exist.",
+      "officialTrackMembersVerified": false,
+      "verifiedPhysicalTracks": 0
+    },
+    "qa": {
+      "stagingBuild": "READY",
+      "node": "328/328 PASS, 0 FAIL 0 SKIP",
+      "catalogue": "14/14 PASS, 0 FAIL 0 SKIP",
+      "actualStaticArtifacts": "map-language-lab.html and Registry/map JS HTTP 200; excluded member-gateway.js and questions.js HTTP 404",
+      "coverage": "KG13 source screenshot positive 9/29; 29 unique code candidates, aliases, malicious/ambiguous mismatches rejected; original green KG16/KG35, country-switch visibility and physical geometry safety gates preserved",
+      "safari": "PENDING NEW OWNER SAFARI visual test KG13 green circle and 9/29 popup on latest staging SHA; screenshot of OLD version only proves defect."
+    },
+    "staging": {
+      "project": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_DDPBFzajRhtS2ACLppvERJesqX7G",
+      "sourceSha": "b6fc699c9c69e9f62613c82e6ce07be7cc0901da",
+      "target": "staging",
+      "state": "READY",
+      "url": "https://mrs10-r211-mobile-map-19gquit9u-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "NO-GO Production/merge. Source tests and staging PASS; Safari KG13 retest not yet provided. R2.17.1 physical green line audit also remains OPEN.",
+    "nextAction": "Owner Safari: open exact R2.17.2 staging, choose Malaysia and MRT · Kajang Line, zoom Pusat Bandar Damansara; green KG13 marker and popup Map name match (candidate) 9/29 expected. Teal railway line is intentionally unchanged pending separately verified physical ways. Test KG16 and KG35 regression and dark/light mode if possible. Do not assert all 29 geographic POIs exist without source tiles.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabaseAuthRls": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "r218": "UNTOUCHED",
+      "r219": "UNTOUCHED",
+      "merge": "NOT DONE"
+    }
   }
 }
