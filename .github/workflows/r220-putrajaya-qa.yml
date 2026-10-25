@@ -1,0 +1,48 @@
+name: MR-S10 R2.20 Putrajaya isolated validation
+on:
+  push:
+    branches:
+      - feature/mrs10-r220-putrajaya-yellow-service-registry
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Locked dependencies
+        run: npm ci --ignore-scripts --no-audit
+      - name: Full Node QA
+        run: npm test
+      - name: Catalogue QA
+        run: node --test tests/reading-library-framework.test.cjs
+      - name: Syntax and public-only preview security check
+        run: |
+          node --check assets/railway-track-registry-kl.js
+          node --check assets/map-language-lab.js
+          python3 -m py_compile scripts/build-preview.py
+          python3 scripts/build-preview.py dist-r220-public
+          test -f dist-r220-public/assets/railway-track-registry-kl.js
+          test -f dist-r220-public/assets/map-language-lab.js
+          test ! -f dist-r220-public/assets/member-gateway.js
+          test ! -f dist-r220-public/assets/owner-issue-handoff.js
+          test ! -f dist-r220-public/assets/questions.js
+          grep -Fq "Disallow: /" dist-r220-public/robots.txt
+          grep -Fq "connect-src 'none'" dist-r220-public/_headers
+      - name: Upload isolated public QA artifact, not deployed
+        uses: actions/upload-artifact@v4
+        with:
+          name: mrs10-r220-public-qa-${{ github.sha }}
+          path: dist-r220-public/
+          if-no-files-found: error
+          retention-days: 3
