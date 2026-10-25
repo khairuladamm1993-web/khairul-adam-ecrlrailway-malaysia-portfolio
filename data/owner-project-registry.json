@@ -3328,7 +3328,7 @@
     "issueId": "r220-mrt-putrajaya-yellow-service-registry",
     "title": "MR-S10 R2.20 — MRT Putrajaya Line 36 operational stops and five provisional",
     "checkedOn": "2026-10-26",
-    "state": "R2201_KWASA_OSM_FINDER_DEV_QA_PASS_PREVIEW_READY_SAFARI_RETEST_PENDING",
+    "state": "R2201_PY01_OSM_MATCH_OWNER_SCREENSHOT_PASS_OTHER_SAFARI_GATES_PENDING",
     "ownerApproval": "NOT_APPROVED_FOR_PRODUCTION",
     "development": {
       "repository": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
@@ -3394,7 +3394,7 @@
       "publicBuild": "PASS_SOURCE_ONLY_WITH_AUTH_AND_ANALYTICS_DISABLED",
       "artifactId": 12616033413,
       "artifactDeployment": "NOT_DEPLOYED",
-      "ownerSafari": "R2.20.1_RETEST_PENDING"
+      "ownerSafari": "TARGETED_PY01_VECTOR_POI_POPUP_PASS_OWNER_SCREENSHOT; full UAT PENDING"
     },
     "deployment": {
       "dedicatedProject": "mrs10-r220-putrajaya-isolated-preview",
@@ -3421,7 +3421,7 @@
         "status": "READY",
         "sourceSha": "1e7440e9f4cdf9c47c45648ecc06e4da264f9005",
         "protection": "VERCEL_AUTH_ALL; project live:false, custom domains []",
-        "ownerSafari": "R2201_KWASA_FINDER_RETEST_PENDING",
+        "ownerSafari": "PY01_SOURCE_VECTOR_POI_MATCH_PASS_SCREENSHOT; focus button and full Safari UAT PENDING",
         "httpSmoke": "UNVERIFIED",
         "previousDeploymentId": "dpl_F4bbF7EmMRBXHUZRbeRzUvz476Uj"
       },
@@ -3448,21 +3448,28 @@
       "catalogue": "PASS_14_OF_14",
       "sourcePublicBuild": "PASS",
       "separatePreview": "READY_PROTECTED_UNALIASED_PREVIEW_METADATA",
-      "ownerSafari": "R2201_KWASA_FINDER_RETEST_PENDING",
+      "ownerSafari": "PARTIAL_PASS_PY01_MAP_MATCH_ONLY",
       "HTTP": "UNVERIFIED",
       "securityOfGitDeployment": "PARTIAL_METADATA_ONLY",
       "integratedBranches": "NOT_TESTED",
       "ownerProductionApproval": "NOT_APPROVED"
     },
-    "decision": "NO-GO merge/Production. Source QA 331/331 PASS and Catalogue 14/14 PASS, R2.20.1 source-backed KG04 PY01 on-demand locator Preview READY; Owner Safari retest and HTTP/security smoke pending. Other chat branches and Production untouched.",
-    "nextAction": "Owner open R2.20.1 isolated Preview (unique non-production URL), Malaysia > Registry > MRT Putrajaya > Cari PY01 Kwasa Damansara di peta; confirm a yellow PY01 sourced-reference marker appears at the Kwasa station, not Kampung Selamat. Verify changing to another route hides focus button. Do not claim full 36 vector POI points or physical alignment. No Production release.",
+    "decision": "NO-GO Production/merge. R2.20.1 QA 331/331 + 14/14 PASS, immutable protected preview READY, Owner Safari screenshot confirms PY01 Kwasa Damansara 'MRT Putrajaya Line 1/36' candidate popup. Remaining 35 markers, manual focus button, full language/theme and HTTP/security/integration gates not accepted.",
+    "nextAction": "Keep R2.20.1 screenshot-backed PY01 map match PASS. If proceeding with UAT, verify actual on-demand PY01 finder button and PY41 terminal, Malay/English/Chinese/Thai and Light/Dark; avoid asserting 36 located map POIs. Integrate independently only after shared-branch QA; Production approval separate.",
     "ownerSafariFeedback": {
       "observedOn": "2026-10-26",
       "screenshot": "Owner screenshot of Registry shows first PY01 Kwasa Damansara, second PY03 Kampung Selamat; Owner reports first station absent/not found on map.",
       "previousRegistry": "PASS_DISPLAY_FIRST_STOP",
-      "mapFirstStop": "FAIL_REPORTED_BY_OWNER_BEFORE_R2201_FIX",
-      "retest": "PENDING_NEW_PREVIEW",
-      "note": "Map viewport centred Kuala Lumpur; OSM feature labels use shared KG04 PY01; no claim that actual tile matching has been observed."
+      "mapFirstStop": "PASS_OWNER_SCREENSHOT_R2201",
+      "retest": "TARGETED_PY01_MATCH_PASS_WITH_SCREENSHOT",
+      "note": "Owner screenshot establishes specific PY01 first-stop vector source candidate popup on preview. Does not independently confirm all Putrajaya stations or on-demand map finder button.",
+      "evidence": {
+        "channel": "OWNER_UPLOADED_SAFARI_SCREENSHOT_IN_CHAT",
+        "sourceDeploymentSha": "1e7440e9f4cdf9c47c45648ecc06e4da264f9005",
+        "observed": "Malaysia vector map at Kwasa Damansara area with yellow station marker and open popup: 'Padanan nama peta (calon): MRT · Putrajaya Line · 1/36 · Trek fizikal belum disahkan'.",
+        "confirmed": "MRT Putrajaya first-stop code/name candidate resolves in actual map popup; source POI-based map match rendered, without physical alignment validation.",
+        "notConfirmed": "Other 35 physical map POIs, on-demand 'Cari PY01' button behavior, full four-language and theme UAT, physical track/OSM relation geometry or HTTP security smoke."
+      }
     }
   },
   "integrationR2173": {
