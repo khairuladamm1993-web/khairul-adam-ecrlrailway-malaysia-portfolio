@@ -11,7 +11,7 @@
   erl:'https://www.kliaekspres.com/products-fares/klia-transit/'
  });
  const route=(id,name,mode,operator,sourceKeys,stationSequence=[])=>Object.freeze({
-  id,name,mode,operator,sourceUrls:sourceKeys.map(k=>sourceCatalogue[k]),
+  id,name,mode,operator,sourceUrls:sourceKeys.map(k=>sourceCatalogue[k]||k),
   confidence:'OPERATOR_SERVICE_CONFIRMED',
   // These IDs are software registry IDs, NOT railway track or signal IDs.
   physicalTrackIds:[],vectorFeatureIds:[],geometry:null,
