@@ -1,0 +1,48 @@
+name: MR-S10 R2.18 Kelana Jaya isolated validation
+on:
+  push:
+    branches:
+      - feature/mrs10-r218-kelana-jaya-ruby-identity
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit
+      - name: Run full Node regression including R2.18
+        run: npm test
+      - name: Catalogue validation
+        run: node --test tests/reading-library-framework.test.cjs
+      - name: Validate syntax and public-only preview artifact
+        run: |
+          node --check assets/railway-track-registry-kl.js
+          node --check assets/map-language-lab.js
+          python3 -m py_compile scripts/build-preview.py
+          python3 scripts/build-preview.py dist-r218-public-preview
+          test -f dist-r218-public-preview/assets/railway-track-registry-kl.js
+          test -f dist-r218-public-preview/assets/map-language-lab.js
+          test ! -f dist-r218-public-preview/assets/member-gateway.js
+          test ! -f dist-r218-public-preview/assets/owner-issue-handoff.js
+          test ! -f dist-r218-public-preview/assets/questions.js
+          grep -Fq "Disallow: /" dist-r218-public-preview/robots.txt
+          grep -Fq "connect-src 'none'" dist-r218-public-preview/_headers
+      - name: Upload isolated QA artifact (not deployed)
+        uses: actions/upload-artifact@v4
+        with:
+          name: mrs10-r218-preview-qa-${{ github.sha }}
+          path: dist-r218-public-preview/
+          if-no-files-found: error
+          retention-days: 3
