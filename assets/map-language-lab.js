@@ -268,7 +268,7 @@ function installPilotVectorLayers(){
     id:'mrl-kelana-code-poi',type:'circle',source:poiSource,'source-layer':'poi',minzoom:10,
     filter:['all',['==',['get','class'],'railway'],
      ['in',['get','subclass'],['literal',['station','subway']]],
-     ['in',['get','name'],['literal',['KJ1 Gombak','KJ2 Taman Melati','KJ3 Wangsa Maju','KJ4 Sri Rampai','KJ5 Setiawangsa','KJ6 Jelatek','KJ7 Dato' Keramat','KJ8 Damai','KJ9 Ampang Park','KJ10 KLCC','KJ11 Kampung Baru','KJ12 Dang Wangi','KJ13 Masjid Jamek','KJ14 Pasar Seni','KJ15 KL Sentral','KJ16 Bangsar','KJ17 Abdullah Hukum','KJ18 Kerinchi','KJ19 Universiti','KJ20 Taman Jaya','KJ21 Asia Jaya','KJ22 Taman Paramount','KJ23 Taman Bahagia','KJ24 Kelana Jaya','KJ25 Lembah Subang','KJ26 Ara Damansara','KJ27 Glenmarie','KJ28 Subang Jaya','KJ29 SS15','KJ30 SS18','KJ31 USJ7','KJ32 Taipan','KJ33 Wawasan','KJ34 USJ21','KJ35 Alam Megah','KJ36 Subang Alam','KJ37 Putra Heights']]]],
+     ['in',['get','name'],['literal',['KJ1 Gombak','KJ2 Taman Melati','KJ3 Wangsa Maju','KJ4 Sri Rampai','KJ5 Setiawangsa','KJ6 Jelatek',"KJ7 Dato' Keramat",'KJ8 Damai','KJ9 Ampang Park','KJ10 KLCC','KJ11 Kampung Baru','KJ12 Dang Wangi','KJ13 Masjid Jamek','KJ14 Pasar Seni','KJ15 KL Sentral','KJ16 Bangsar','KJ17 Abdullah Hukum','KJ18 Kerinchi','KJ19 Universiti','KJ20 Taman Jaya','KJ21 Asia Jaya','KJ22 Taman Paramount','KJ23 Taman Bahagia','KJ24 Kelana Jaya','KJ25 Lembah Subang','KJ26 Ara Damansara','KJ27 Glenmarie','KJ28 Subang Jaya','KJ29 SS15','KJ30 SS18','KJ31 USJ7','KJ32 Taipan','KJ33 Wawasan','KJ34 USJ21','KJ35 Alam Megah','KJ36 Subang Alam','KJ37 Putra Heights']]]],
     layout:{visibility:'none'},
     paint:{'circle-radius':5.5,'circle-color':identity.light,
      'circle-stroke-color':'#FFFFFF','circle-stroke-width':2}
