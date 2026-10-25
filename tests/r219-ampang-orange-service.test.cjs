@@ -259,3 +259,76 @@ test('R2.19 AG3 correction rejects wrong FID, name, padded code and out-of-bound
  assert.equal(duplicate.matched,0);
  assert.equal(duplicate.missing,18);
 });
+
+test('R2.19 UI merge: visitor-map language tabs control existing MapLibre locale state',()=>{
+ const w=boot(),d=w.document;
+ const buttons=Array.from(d.querySelectorAll('[data-r219-locale]'));
+ assert.deepEqual(buttons.map(b=>b.dataset.r219Locale),['ms','en','zh','th']);
+ assert.equal(d.querySelectorAll('#lang').length,1);
+ assert.equal(d.getElementById('lang').getAttribute('aria-hidden'),'true');
+ assert.equal(buttons.filter(b=>b.getAttribute('aria-pressed')==='true').length,1);
+ for(const lang of ['en','zh','th','ms']){
+  buttons.find(b=>b.dataset.r219Locale===lang).click();
+  assert.equal(d.getElementById('lang').value,lang);
+  assert.equal(d.documentElement.lang,lang);
+  assert.equal(d.querySelectorAll('#station-list li').length,18);
+  assert.equal(buttons.filter(b=>b.getAttribute('aria-pressed')==='true').length,1);
+  assert.equal(buttons.find(b=>b.dataset.r219Locale===lang).getAttribute('aria-pressed'),'true');
+ }
+ w.close();
+});
+test('R2.19 UI merge: three country tabs dispatch one existing region-change signal',()=>{
+ const w=boot(),d=w.document,buttons=Array.from(d.querySelectorAll('[data-r219-region]'));
+ assert.deepEqual(buttons.map(b=>b.dataset.r219Region),['malaysia','thailand','china']);
+ assert.equal(d.getElementById('r219-region').getAttribute('aria-hidden'),'true');
+ let changed=0;
+ d.getElementById('r219-region').addEventListener('change',()=>changed++);
+ for(const region of ['thailand','china','malaysia']){
+  buttons.find(b=>b.dataset.r219Region===region).click();
+  assert.equal(d.getElementById('r219-region').value,region);
+  assert.equal(buttons.filter(b=>b.getAttribute('aria-pressed')==='true').length,1);
+  assert.equal(buttons.find(b=>b.dataset.r219Region===region).getAttribute('aria-pressed'),'true');
+ }
+ assert.equal(changed,3);
+ w.close();
+});
+test('R2.19 UI merge: preserved 18 orange GIS markers contract and compact source disclosure',()=>{
+ const w=boot(),d=w.document;
+ assert.equal(d.querySelectorAll('iframe').length,0);
+ assert.equal(d.querySelectorAll('#r219-map').length,1);
+ assert.equal(d.querySelectorAll('#r219-gis-status').length,1);
+ assert(d.querySelector('#r219-gis-status').closest('.mrs19-evidence'));
+ assert.equal(d.querySelector('details.source-explanation').open,false);
+ assert.equal(d.getElementById('registry-technical').open,false);
+ assert.match(viewer,/\.choice-tabs button\[aria-pressed=true\]/);
+ assert.match(viewer,/#r219-map\{height:clamp\(395px,59dvh,690px\)/);
+ for(const file of ['mrs10-r219-ampang-service.js','mrs10-r219-ampang-gis.js',
+   'mrs10-r219-ampang-gis-overlay.js','mrs10-r219-map-bridge.js'])
+  assert(viewer.includes(file));
+ assert.equal(d.querySelectorAll('#station-list li').length,18);
+ assert.equal(d.querySelectorAll('.shared-tag').length,11);
+ assert.equal(ampangGIS.sourceCorrection.fid,16);
+ w.close();
+});
+test('R2.19 UI merge: theme keeps map event and multilingual source descriptions',()=>{
+ const w=boot(),d=w.document;
+ let signal=0;
+ d.addEventListener('mrs10-r219-theme',()=>signal++);
+ d.getElementById('theme').click();
+ assert.equal(signal,1);
+ assert.equal(d.documentElement.dataset.theme,'dark');
+ assert.equal(d.getElementById('theme').getAttribute('aria-pressed'),'true');
+ assert.match(d.getElementById('theme').getAttribute('aria-label'),/Cerah/);
+ d.querySelector('[data-r219-locale="en"]').click();
+ assert.match(d.getElementById('r219-intro').textContent,/Visitor map/);
+ assert.match(d.getElementById('r219-evidence-title').textContent,/GIS source/);
+ d.querySelector('[data-r219-locale="zh"]').click();
+ assert.match(d.getElementById('r219-intro').textContent,/GIS/);
+ d.querySelector('[data-r219-locale="th"]').click();
+ assert.match(d.getElementById('r219-intro').textContent,/GIS/);
+ d.getElementById('theme').click();
+ assert.equal(d.documentElement.dataset.theme,'light');
+ assert.equal(signal,2);
+ assert.equal(d.getElementById('theme').getAttribute('aria-pressed'),'false');
+ w.close();
+});
