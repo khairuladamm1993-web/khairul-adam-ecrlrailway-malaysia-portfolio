@@ -63,6 +63,19 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ef
 .bilingual{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .bilingual>div{padding:9px;border-radius:9px;border:1px solid var(--line)}
 .bilingual dt{font-size:1.35rem;font-weight:750}.bilingual dd{margin:3px 0 0}
+.china-code-trigger[hidden],.china-code-panel[hidden]{display:none}
+.china-code-trigger{position:absolute;z-index:8;left:10px;bottom:66px;width:44px;height:44px;min-height:44px;padding:0;display:grid;place-items:center;background:#eef5f8;color:#17313f;border:1px solid #8aaabe;border-radius:8px;font-size:19px}
+.china-code-panel{position:absolute;z-index:10;left:10px;bottom:116px;width:min(285px,calc(100% - 20px));max-height:min(45dvh,330px);overflow:auto;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px;box-shadow:0 3px 12px #0004;font-size:13px}
+.china-code-heading{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.china-code-heading button{font-size:12px;min-height:36px;padding:5px 9px}
+.china-code-panel p{color:var(--fg);margin:6px 0;line-height:1.45}
+.china-code-form{display:grid;grid-template-columns:1fr auto;gap:6px}
+.china-code-label{grid-column:1/-1}
+.china-code-form input{min-width:0;padding:8px;border:1px solid var(--line);border-radius:6px;color:var(--fg);background:var(--card)}
+.china-code-form button,.china-code-samples button{min-height:40px;padding:6px 9px;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:6px}
+.china-code-samples{display:flex;gap:7px;margin:8px 0}
+.china-code-result{padding-top:7px;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.china-code-result a{display:inline-block;color:var(--fg);text-decoration:underline;margin-top:6px}
 .railway-legend{position:absolute;z-index:8;left:10px;bottom:12px;margin:0;width:44px;max-width:calc(100% - 20px);color:var(--fg)}
 .railway-legend[open]{width:min(310px,calc(100% - 20px))}
 .railway-legend summary{list-style:none;cursor:pointer;display:grid;place-items:center;width:44px;height:44px;min-height:44px;border-radius:8px;border:1px solid #8aaabe;background:#eef5f8;color:#17313f;font-weight:700}
@@ -98,7 +111,19 @@ await import('./assets/map-language-lab.js');
 <button type="button" data-region="malaysia">🇲🇾 Malaysia</button>
 <button type="button" data-region="thailand">🇹🇭 Thailand</button>
 <button type="button" data-region="china">🇨🇳 China</button></div>
-<div id="map-shell"><div id="visitor-map" role="region" aria-label="Multilingual visitor map"></div><div id="railway-pilot-status" class="railway-pilot-status" role="status" aria-live="polite" hidden></div><button id="map-expand" type="button" aria-label="Expand map" aria-expanded="false" aria-controls="visitor-map"><span aria-hidden="true">⛶</span></button><details id="railway-legend" class="railway-legend">
+<div id="map-shell"><div id="visitor-map" role="region" aria-label="Multilingual visitor map"></div><div id="railway-pilot-status" class="railway-pilot-status" role="status" aria-live="polite" hidden></div><button id="map-expand" type="button" aria-label="Expand map" aria-expanded="false" aria-controls="visitor-map"><span aria-hidden="true">⛶</span></button><button id="china-code-trigger" class="china-code-trigger" type="button" aria-label="China railway codes" aria-controls="china-code-panel" aria-expanded="false" hidden>🔢</button>
+<section id="china-code-panel" class="china-code-panel" aria-label="Verified China railway code lookup" hidden>
+ <div class="china-code-heading"><strong id="china-code-title">China railway codes · pilot</strong><button id="china-code-close" type="button">Close</button></div>
+ <p id="china-code-hint">Type a verified 4/5-digit code, or tap a sample below.</p>
+ <form id="china-code-form" class="china-code-form">
+  <label for="china-code-input" class="china-code-label">Code</label>
+  <input id="china-code-input" type="text" inputmode="numeric" pattern="[0-9]{4,5}" maxlength="5" autocomplete="off" placeholder="44930 / 0073" />
+  <button id="china-code-search" type="submit">Look up</button>
+ </form>
+ <div class="china-code-samples"><button type="button" data-china-code="44930">44930</button><button type="button" data-china-code="0073">0073</button></div>
+ <div id="china-code-result" class="china-code-result" role="status" aria-live="polite"></div>
+</section>
+<details id="railway-legend" class="railway-legend">
 <summary id="railway-legend-trigger" aria-label="Railway colour legend" title="Railway colour legend"><span aria-hidden="true">🎨</span></summary><div class="rail-legend-panel"><strong id="railway-legend-title">Railway colour legend</strong><div id="railway-legend-region" class="rail-legend-region">Malaysia</div>
 <div class="rail-legend-grid">
 <button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="0"><span class="rail-legend-swatch" aria-hidden="true" style="background:#FF8100"></span><span>Main line</span></button>
