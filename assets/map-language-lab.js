@@ -34,6 +34,14 @@ function render(){
  el('place-status').textContent=copy[lang][3];
  el('label-status').textContent=copy[lang][2];
  document.querySelectorAll('[data-locale]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.locale===lang)));
+ const countryNames={
+  ms:['Malaysia','Thailand','China'],en:['Malaysia','Thailand','China'],
+  zh:['马来西亚','泰国','中国'],th:['มาเลเซีย','ประเทศไทย','จีน']
+ };
+ document.querySelectorAll('[data-region]').forEach((b,i)=>{
+  const flag=['🇲🇾','🇹🇭','🇨🇳'][i];
+  if(countryNames[lang][i])b.textContent=flag+' '+countryNames[lang][i];
+ });
 }
 function setLanguage(v){
  if(!locales.includes(v))return;lang=v;
