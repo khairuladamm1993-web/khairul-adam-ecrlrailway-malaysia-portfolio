@@ -3134,7 +3134,7 @@
     "issueId": "r2172-kajang-29-source-poi-green",
     "title": "MRT Kajang POI green source-label expansion: KG13 Owner Safari and 29 reviewed code/name candidates",
     "checkedOn": "2026-10-26",
-    "state": "ISOLATED_STAGING_READY_OWNER_SAFARI_KG13_RETEST_PENDING",
+    "state": "OWNER_SAFARI_KG13_GREEN_9_29_PARTIAL_PASS_PHYSICAL_LINE_PENDING",
     "ownerObservation": {
       "observedAt": "2026-10-26T05:21:00+08:00",
       "provenance": "Owner Safari screenshot supplied in current ChatGPT conversation; no screenshot uploaded to public repository",
@@ -3190,7 +3190,7 @@
       "catalogue": "14/14 PASS, 0 FAIL 0 SKIP",
       "actualStaticArtifacts": "map-language-lab.html and Registry/map JS HTTP 200; excluded member-gateway.js and questions.js HTTP 404",
       "coverage": "KG13 source screenshot positive 9/29; 29 unique code candidates, aliases, malicious/ambiguous mismatches rejected; original green KG16/KG35, country-switch visibility and physical geometry safety gates preserved",
-      "safari": "PENDING NEW OWNER SAFARI visual test KG13 green circle and 9/29 popup on latest staging SHA; screenshot of OLD version only proves defect."
+      "safari": "PARTIAL PASS — Owner screenshot 2026-10-26 05:41 MYT from exact R2.17.2 staging hostname: green KG13 area marker, MRT Kajang candidate 9/29 popup, light-mode accent and physical-track disclaimer. All 29 geographic POIs, physical line and full header remain unverified."
     },
     "staging": {
       "project": "mrs10-r211-mobile-map-uat",
@@ -3206,8 +3206,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "NO-GO Production/merge. Source tests and staging PASS; Safari KG13 retest not yet provided. R2.17.1 physical green line audit also remains OPEN.",
-    "nextAction": "Owner Safari: open exact R2.17.2 staging, choose Malaysia and MRT · Kajang Line, zoom Pusat Bandar Damansara; green KG13 marker and popup Map name match (candidate) 9/29 expected. Teal railway line is intentionally unchanged pending separately verified physical ways. Test KG16 and KG35 regression and dark/light mode if possible. Do not assert all 29 geographic POIs exist without source tiles.",
+    "releaseDecision": "NO-GO Production/merge: scoped Owner Safari KG13 green POI PASS, but other 28 geographic source POIs/track physical geometry, accessibility and integrated R2.18/R2.19 QA not release-approved.",
+    "nextAction": "Preserve validated R2.17.2 KG13 green marker/9/29 popup; inspect full popup heading if clipping recurs. Continue GIS way/relation topology audit before any physical line green; do not infer KTM position from proximity. Optional Safari tests KG16/KG35 regression and dark/country switching; no Production/merge.",
     "boundaries": {
       "main": "UNCHANGED",
       "production": "UNCHANGED",
@@ -3217,6 +3217,30 @@
       "r218": "UNTOUCHED",
       "r219": "UNTOUCHED",
       "merge": "NOT DONE"
+    },
+    "ownerSafariRetest": {
+      "observedAt": "2026-10-26T05:41:00+08:00",
+      "provenance": "Owner-supplied iPhone Safari screenshot in ChatGPT conversation, screenshot itself not copied to GitHub",
+      "previewHostnameObserved": "mrs10-r211-mobile-map-19gquit9u-1993khairuladam-3016.vercel.app",
+      "verifiedDeployment": {
+        "id": "dpl_DDPBFzajRhtS2ACLppvERJesqX7G",
+        "state": "READY",
+        "target": "staging",
+        "sourceSha": "b6fc699c9c69e9f62613c82e6ce07be7cc0901da"
+      },
+      "accepted": [
+        "Green map station circle visible at selected sourced KG13/Pusat Bandar Damansara candidate area",
+        "Popup displays MRT · Kajang Line · 9/29",
+        "Green-accent popup is readable in light mode",
+        "Physical track unverified qualifier correctly retained"
+      ],
+      "limitations": [
+        "Visible popup heading shows only Damansara; full heading/scroll position not established from screenshot",
+        "No proof that 29 on-map POI features appear or all are green",
+        "Underlying physical railway line geometry remains teal and unverified",
+        "No evidence from screenshot of 4-language functionality, dark-mode retest on latest SHA, or KTM POI distinction"
+      ],
+      "verdict": "PARTIAL_PASS_KG13_GREEN_9_OF_29_LIGHT_MODE"
     }
   }
 }
