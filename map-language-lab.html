@@ -117,6 +117,31 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ef
 .kl-registry .kl-registry-stations{margin:8px 0 8px 18px;padding:0 8px 0 0;font-size:.9rem;max-height:min(43dvh,340px);overflow-y:auto;overscroll-behavior:contain}
 .kl-registry .kl-registry-stations li{margin:4px 0}
 .kl-registry .kl-registry-sources{font-size:.87rem;overflow-wrap:anywhere}
+/* R2.17 green is the Kajang *service* identity; do not paint unverified railway alignment. */
+:root{--kg-green:#087D43;--kg-text:#087D43;--kg-on-green:#fff}
+:root[data-theme="dark"]{--kg-green:#087D43;--kg-text:#50E2A0}
+.kl-registry[data-route="mrt-kajang"] #kl-registry-route-name{color:var(--kg-text)}
+.kl-registry[data-route="mrt-kajang"] #kl-registry-route-status{border-left:3px solid var(--kg-green);padding-left:10px}
+.kl-registry[data-route="mrt-kajang"] .kl-registry-stations{
+ list-style:none;counter-reset:kg-stop;margin-left:0;padding:4px 8px 4px 4px;
+ background:linear-gradient(var(--kg-green),var(--kg-green)) 19px 0/2px 100% no-repeat
+}
+.kl-registry[data-route="mrt-kajang"] .kl-registry-stations li{
+ list-style:none;counter-increment:kg-stop;display:flex;align-items:center;
+ min-height:39px;gap:10px;margin:0;font-weight:570;line-height:1.4
+}
+.kl-registry[data-route="mrt-kajang"] .kl-registry-stations li::before{
+ content:counter(kg-stop);display:grid;place-items:center;flex:0 0 30px;
+ width:30px;height:30px;border-radius:50%;background:var(--kg-green);
+ color:var(--kg-on-green);font-size:12px;font-weight:800;
+ box-shadow:0 0 0 2px var(--card)
+}
+.kl-registry[data-route="mrt-kajang"] .kl-registry-stations li:first-child,
+.kl-registry[data-route="mrt-kajang"] .kl-registry-stations li:last-child{font-weight:800}
+#visitor-map .campus-popup.kajang-match>strong{color:var(--kg-text)}
+#visitor-map .campus-popup.kajang-match .kajang-match-notice{
+ border-left:3px solid var(--kg-green);padding-left:8px
+}
 </style>
 <script type="module">
 import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.mjs';
