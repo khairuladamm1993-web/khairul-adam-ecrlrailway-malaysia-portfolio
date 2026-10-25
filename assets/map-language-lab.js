@@ -111,6 +111,58 @@ function pilotFeatureInfo(props,kind,locale){
  return {title,category:kind==='station'?l.station:l.rail,original:original&&original!==title?original:'',pinyin,subclass:String(p.subclass||'').trim(),source:l.source,localization:l, hasVerifiedEnglish:!!(english||latinOriginal)};
 }
 let pilotMode=false,pilotTapBound=false,pilotInfoPopup=null;
+// R2.15.2 opt-in diagnostic only. It records no device location or persistent tracking.
+// Pointer count distinguishes an iOS touch that reaches the map canvas from the MapLibre click event.
+// Query counts reflect rendered tile features, not authoritative station names or alignments.
+let pilotDebug=false,pilotPointerCount=0,pilotMapClickCount=0;
+function railTapProbe(mapInstance,point,radius=12){
+ const out={selectable:0,visible:0,rawRail:0,subclass:'',hitLayer:false,visibleLayer:false};
+ if(!Number.isFinite(point?.x)||!Number.isFinite(point?.y)||!mapInstance?.queryRenderedFeatures)return out;
+ const bbox=[[point.x-radius,point.y-radius],[point.x+radius,point.y+radius]];
+ const query=layers=>{
+  try{return mapInstance.queryRenderedFeatures(bbox,layers?{layers}:undefined)||[];}
+  catch{return[];}
+ };
+ const selectableIds=['mrl-pilot-stations','mrl-pilot-rail-hits'].filter(id=>!!mapInstance.getLayer?.(id));
+ out.hitLayer=selectableIds.length>0;
+ out.selectable=selectableIds.length?query(selectableIds).filter(f=>
+  (f.layer?.id==='mrl-pilot-stations'&&pilotEligibleStation(f.properties))||
+  (f.layer?.id==='mrl-pilot-rail-hits'&&pilotEligibleRail(f.properties))).length:0;
+ out.visibleLayer=!!mapInstance.getLayer?.('mrl-readable-rail-lines');
+ const visible=out.visibleLayer?query(['mrl-readable-rail-lines']):[];
+ out.visible=visible.length;
+ // Only class/subclass returned by current rendered geometry; never identify rail by colour.
+ const raw=query().filter(f=>pilotEligibleRail(f.properties));
+ out.rawRail=raw.length;
+ out.subclass=String((visible[0]||raw[0])?.properties?.subclass||'').slice(0,30);
+ return out;
+}
+function writeRailTapDiagnostic(stage,details){
+ if(!pilotDebug)return;
+ const node=el('rail-tap-diagnostic');if(!node)return;
+ const suffix=details?' · '+details:'';
+ node.textContent='TOUCH '+pilotPointerCount+' / MAP CLICK '+pilotMapClickCount+
+  ' · '+stage+suffix;
+ node.hidden=false;
+}
+function attachPilotTouchDiagnostic(){
+ if(!pilotMode||!pilotDebug||!map)return;
+ const host=map.getCanvasContainer?.()||map.getCanvas?.()?.parentElement;
+ if(host?.addEventListener){
+  const hit=()=>{pilotPointerCount++;writeRailTapDiagnostic('Canvas pointer received; map click pending');};
+  host.addEventListener('pointerdown',hit,{capture:true,passive:true});
+  if(typeof window.PointerEvent==='undefined')host.addEventListener('touchstart',hit,{capture:true,passive:true});
+ }
+ map.on('click',e=>{
+  pilotMapClickCount++;
+  const d=railTapProbe(map,e.point);
+  const info='source features '+d.selectable+' / visible '+d.visible+' / raw rail '+d.rawRail+
+   ' · '+(d.subclass||'unknown')+' · layers '+(d.hitLayer?'ready':'missing');
+  writeRailTapDiagnostic('Map click received',info);
+ });
+ writeRailTapDiagnostic('Diagnostic armed');
+}
+
 function pilotSourceForLayer(style,sourceLayer){
  const entry=style?.layers?.find(layer=>layer['source-layer']===sourceLayer && style.sources?.[layer.source]?.type==='vector');
  return entry?.source||null;
@@ -406,7 +458,11 @@ function setExpanded(value){
 function onMapKey(event){if(event.key==='Escape'&&expanded){event.preventDefault();setExpanded(false);}}
 function onViewportResize(){if(expanded)map?.resize?.();}
 function init(){
- try{pilotMode=new URLSearchParams(window.location.search).get('railPilot')==='1'}catch{pilotMode=false}
+ try{
+  const params=new URLSearchParams(window.location.search);
+  pilotMode=params.get('railPilot')==='1';
+  pilotDebug=pilotMode&&params.get('railDebug')==='1';
+ }catch{pilotMode=false;pilotDebug=false}
  render();updateTheme();
  if(!window.maplibregl?.Map){el('label-status').textContent='Vector map engine unavailable';return;}
  map=new maplibregl.Map({
@@ -415,6 +471,7 @@ function init(){
   pitchWithRotate:false,dragRotate:false,touchPitch:false
  });
  map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-left');
+ if(pilotDebug)attachPilotTouchDiagnostic();
  const expandButton=el('map-expand');
  const toggleExpanded=()=>setExpanded(!expanded);
  expandButton?.addEventListener('click',toggleExpanded);
@@ -494,7 +551,7 @@ function init(){
   if(e.key==='railway-language'&&locales.includes(e.newValue))setLanguage(e.newValue);
  });
 }
-if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText,transportationSource,railVectorLayer,LRVTC_CAMPUS,campusText,pilotCenters,pilotEligibleStation,pilotEligibleRail,pilotFeatureInfo,pilotSourceForLayer,railVectorFilter,queryPilotVectorFeature,chinaRailCodeRecords,lookupChinaRailCode};
+if(typeof module==='object'&&module.exports)module.exports={nameExpression,isNameLayer,centers,copy,railVisibility,uiText,transportationSource,railVectorLayer,LRVTC_CAMPUS,campusText,pilotCenters,pilotEligibleStation,pilotEligibleRail,pilotFeatureInfo,pilotSourceForLayer,railVectorFilter,queryPilotVectorFeature,railTapProbe,chinaRailCodeRecords,lookupChinaRailCode};
 if(typeof document!=='undefined'){
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
  else init();
