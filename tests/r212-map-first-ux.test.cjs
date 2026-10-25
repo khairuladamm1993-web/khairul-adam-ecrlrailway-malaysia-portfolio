@@ -83,7 +83,9 @@ test('R2.12 campus only appears after China selection; marker remains a real geo
 test('R2.12 legend is informational and does not claim raster pickability or fabricate individual railway names',()=>{
  assert.match(script,/legendExplanations/);
  assert.match(script,/exact name needs source evidence/);
- assert(!script.includes('queryRenderedFeatures('));
+ assert.match(script,/queryRenderedFeatures\(bounds,\{layers\}\)/);
+ assert(!script.includes("layers:['mrl-railway']"));
+ assert(!script.includes('raster tile is clickable'));
  assert(script.includes('tiles.openrailwaymap.org'));
  for(const c of ['#FF8100','#FF0C00','#DACA00','#0300C3','#00BD14','#D877B8','#87491D','#000000'])assert(html.includes(c),c);
 });
