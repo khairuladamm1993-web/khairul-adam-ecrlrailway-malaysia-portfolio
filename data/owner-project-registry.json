@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "register": "R2.5+R2.6 combined on existing isolated MR-S10 Unified Preview; 230/230 Node PASS, Catalogue 14/14 PASS, deployment READY, Vercel SSO limits Safari, production untouched",
+  "register": "R2.7 optional vector visitor map and explicit Chapter theme fix QA PASS 236/236, staging READY 48 assets; user Safari UAT pending. Unified R2.5+R2.6 alias not changed.",
   "capturedOn": "2026-10-25",
   "observationType": "2026-10-25 Vercel read-only recheck + separate owner ChatGPT diagnostic; all other sources retain prior verification date",
   "authority": "Evidence statuses need source + lastChecked; ChatGPT conversations are not a direct website API",
@@ -53,9 +53,17 @@
       "category": "website",
       "phase": "R2.5 + R2.6 integrated in MR-S10 single-domain isolated Unified Preview; Owner session/browser UAT pending",
       "overall": "IN_PROGRESS",
-      "nextDecision": "Owner Safari: open the existing MR-S10 Unified Preview and check BM/EN/中文/ไทย controls plus Chapter 01. Vercel Authentication is enabled; do not request Supabase Magic Link until callback approved. R2.5 full two-way UAT and map raster place labels remain pending. No Production merge.",
+      "nextDecision": "Verify on Safari R2.7 separate staging: Light/Dark Chapter 01 honors saved theme and changes visuals; MapLibre visitor map responds to BM/EN/中文/ไทย location labels with English fallback when available. Keep old ECRL map and canonical staging stable until Owner confirms UAT. OpenFreeMap/CDN/network and WebGL require live verification.",
       "updatePolicy": "Registry checkpoint; GitHub latest SHA live-on-open",
       "facts": [
+        {
+          "type": "test",
+          "label": "R2.7 Chapter reader theme and multilingual vector map beta",
+          "value": "236/236 Node PASS · 14/14 Catalogue PASS · isolated staging READY · Safari UAT pending",
+          "verifiedOn": "2026-10-25",
+          "confidence": "automated tests plus Vercel deployment metadata; not real Safari visual verification",
+          "evidence": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/tree/fix/mrs10-r27-chapter-theme-map-label-prototype"
+        },
         {
           "type": "test",
           "label": "R2.5 + R2.6 single MR-S10 Unified Preview integration",
@@ -701,5 +709,29 @@
     "ecrlSlice1": "UNCHANGED / BLOCKED / NO-GO",
     "releaseDecision": "NO-GO to MR-S10 Production; isolated staging merged only",
     "rollback": "Previous isolated staging alias deployment dpl_D5VGM9hWVrNgVicN7pQUfYHhkNAC"
+  },
+  "integrationR27": {
+    "checkedOn": "2026-10-25",
+    "scope": "Chapter 01 Light/Dark fix, localized reader controls, isolated multilingual MapLibre visitor map beta",
+    "sourceBranch": "fix/mrs10-r27-chapter-theme-map-label-prototype",
+    "sourceCommit": "9c8118f5afef61984210784a318341fc128023f9",
+    "nodeQa": "236/236 PASS",
+    "catalogueQa": "14/14 PASS",
+    "packageBuild": "full and public build PASS",
+    "deploymentId": "dpl_GBTxAamcwdTLtCXkER3cajzBdPDp",
+    "stagingAlias": "https://mrs10-r27-map-language-uat.vercel.app/gateway.html",
+    "stage": "READY",
+    "deployedArtifactCount": 48,
+    "browserUat": "PENDING — live Safari theme switching and vector-language labels not independently observed",
+    "protection": "Vercel Authentication enabled, retained",
+    "chapterThemeRootCause": "User data-theme changed but CSS only had OS prefers-color-scheme; explicit attribute selectors added",
+    "multilingualMap": "BETA: MapLibre OpenFreeMap vector map with language fallbacks MS→EN→LATIN→SOURCE, EN→LATIN→SOURCE, ZH/TH→EN→LATIN→SOURCE",
+    "existingEcrlMap": "UNCHANGED; railway raster provider labels may remain native",
+    "translationLimit": "Thai full-website interface coverage incomplete. Requires native speaker editorial review and real Safari UAT.",
+    "previousCanonicalStaging": "https://mrs10-r24-single-gateway-preview.vercel.app/gateway.html",
+    "canonicalStaging": "UNCHANGED — existing alias deployment dpl_DnL1Zk7EqBU2V4BPrJDPtCWWQQ8G",
+    "main": "UNCHANGED",
+    "authRls": "UNCHANGED",
+    "ecrlSlice1": "UNCHANGED"
   }
 }
