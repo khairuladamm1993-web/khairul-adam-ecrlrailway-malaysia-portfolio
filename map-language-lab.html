@@ -106,10 +106,22 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ef
 @media(max-width:500px){.bilingual{grid-template-columns:1fr}}
 
 @media(max-width:700px){main{padding-top:max(55px,env(safe-area-inset-top))}header{align-items:center}header a{max-width:calc(100% - 56px);line-height:1.5}#theme-btn{min-width:44px}}
+/* R2.16: read-only service registry lives below map, never obstructs tap targets. */
+.kl-registry{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin:12px 0;line-height:1.45}
+.kl-registry[hidden]{display:none}
+.kl-registry summary{font-weight:750;cursor:pointer;min-height:44px;display:flex;align-items:center}
+.kl-registry p{margin:7px 0;font-size:.88rem;color:var(--muted)}
+.kl-registry label{display:block;font-size:.88rem;font-weight:700;margin-top:10px}
+.kl-registry select{display:block;width:100%;max-width:600px;min-height:44px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card);color:var(--fg);font:inherit}
+.kl-registry-status{font-size:.87rem;font-weight:700}
+.kl-registry .kl-registry-stations{margin:8px 0 8px 18px;padding:0;font-size:.9rem}
+.kl-registry .kl-registry-stations li{margin:4px 0}
+.kl-registry .kl-registry-sources{font-size:.87rem;overflow-wrap:anywhere}
 </style>
 <script type="module">
 import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.mjs';
 window.maplibregl=maplibregl;
+await import('./assets/railway-track-registry-kl.js');
 await import('./assets/map-language-lab.js');
 </script></head>
 <body><main><header><a href="gateway.html">← MR-S10 Gateway</a><button id="theme-btn" type="button" aria-label="Switch to Dark Mode" title="Switch to Dark Mode" aria-pressed="false"><span class="theme-contrast-icon" aria-hidden="true"></span></button></header>
@@ -153,6 +165,19 @@ await import('./assets/map-language-lab.js');
 <p id="railway-legend-note">For the OpenRailwayMap standard layer only.</p></div>
 </details></div>
 <p class="rail-note" id="rail-vector-note" role="status" aria-live="polite">Visitor mode: railway lines without technical labels</p>
+<details id="kl-registry" class="kl-registry" hidden>
+ <summary id="kl-registry-title">Kuala Lumpur · Railway &amp; Station Registry (Phase 1)</summary>
+ <p id="kl-registry-warning">Verified service references only. Physical tracks, precise alignments and station order require separate evidence.</p>
+ <div id="kl-registry-counts" class="kl-registry-status"></div>
+ <label id="kl-registry-route-label" for="kl-registry-route">Service route</label>
+ <select id="kl-registry-route" aria-controls="kl-registry-result"></select>
+ <section id="kl-registry-result" aria-live="polite">
+  <strong id="kl-registry-route-name"></strong>
+  <p id="kl-registry-route-status"></p>
+  <ol class="kl-registry-stations" id="kl-registry-station-order" hidden></ol>
+  <p class="kl-registry-sources" id="kl-registry-sources"></p>
+ </section>
+</details>
 <details id="liuzhou-guide" class="liuzhou-guide" hidden>
  <summary id="liuzhou-title">Liuzhou · bilingual railway names</summary>
  <p id="liuzhou-hint">Names from Owner screenshot. Not validated geographic station coordinates.</p>
