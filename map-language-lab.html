@@ -47,6 +47,8 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ef
 #visitor-map .mrl-campus-popup.maplibregl-popup-anchor-right .maplibregl-popup-tip{border-left-color:var(--popup-bg)}
 :root[data-theme="dark"] #campus-focus{color:#f3faff;background:#183746;border-color:#9bd8e7}
 #map-shell{position:relative;isolation:isolate}
+.railway-pilot-status[hidden]{display:none}
+.railway-pilot-status{position:absolute;z-index:6;top:66px;left:10px;right:10px;max-width:360px;padding:6px 9px;border-radius:8px;background:var(--card);color:var(--fg);border:1px solid var(--line);font-size:12px;pointer-events:none;line-height:1.35}
 #map-expand{position:absolute;top:10px;right:10px;z-index:3;width:44px;height:44px;min-height:44px;padding:6px;border:0;background:transparent;color:#17313f;display:grid;place-items:center}
 #map-expand span{display:grid;place-items:center;width:32px;height:32px;background:#eef5f8;border:1px solid #8aaabe;border-radius:7px;font-size:22px;line-height:1}
 #visitor-map .maplibregl-ctrl-group{background:transparent;box-shadow:none}
@@ -95,7 +97,7 @@ await import('./assets/map-language-lab.js');
 <button type="button" data-region="malaysia">🇲🇾 Malaysia</button>
 <button type="button" data-region="thailand">🇹🇭 Thailand</button>
 <button type="button" data-region="china">🇨🇳 China</button></div>
-<div id="map-shell"><div id="visitor-map" role="region" aria-label="Multilingual visitor map"></div><button id="map-expand" type="button" aria-label="Expand map" aria-expanded="false" aria-controls="visitor-map"><span aria-hidden="true">⛶</span></button><details id="railway-legend" class="railway-legend">
+<div id="map-shell"><div id="visitor-map" role="region" aria-label="Multilingual visitor map"></div><div id="railway-pilot-status" class="railway-pilot-status" role="status" aria-live="polite" hidden></div><button id="map-expand" type="button" aria-label="Expand map" aria-expanded="false" aria-controls="visitor-map"><span aria-hidden="true">⛶</span></button><details id="railway-legend" class="railway-legend">
 <summary id="railway-legend-trigger" aria-label="Railway colour legend" title="Railway colour legend"><span aria-hidden="true">🎨</span></summary><div class="rail-legend-panel"><strong id="railway-legend-title">Railway colour legend</strong>
 <div class="rail-legend-grid">
 <button class="rail-legend-row" type="button" aria-pressed="false" data-rail-legend="0"><span class="rail-legend-swatch" aria-hidden="true" style="background:#FF8100"></span><span>Main line</span></button>
