@@ -852,5 +852,46 @@
     "supabaseAuthRls": "UNCHANGED",
     "ecrlOperationalMap": "UNCHANGED",
     "remainingR29Scope": "Pinyin-first full-China place-label fallback, all stations, rail-level map sync, actual station/train route and gate location are not part of this pin checkpoint"
+  },
+  "integrationR210": {
+    "checkedOn": "2026-10-25",
+    "project": "P01",
+    "title": "Beijing railway colour legend + compact Liuzhou LRVTC campus popup",
+    "sourceBaseline": {
+      "branch": "feature/mrs10-r29-lrvtc-guantang-campus-pin",
+      "commit": "3d9ddf280e5e10aa82e74a09d82bd793221ae6ab"
+    },
+    "branch": "feature/mrs10-r210-rail-legend-compact-lrvtc",
+    "latestDevelopmentCommit": "2eddfab054e9f9cc1697947cb3240704e699f2ca",
+    "filesChanged": [
+      "assets/map-language-lab.js",
+      "map-language-lab.html"
+    ],
+    "changes": "Collapsible six-category OpenRailwayMap standard legend with BM EN 中文 ไทย copy and explicit limitations, displayed only while technical overlay is ON; LRVTC popup maxWidth 290px to 255px with compact scrollable content. Campus coordinate and reference classification preserved.",
+    "classification": "Main orange #FF8100; highspeed red #FF0C00; branch yellow #DACA00; metro blue #0300C3; industrial/spur brown #87491D; other/yard black. Base-map purple roads are not necessarily railway. Colors do not prove electrification or operational speed.",
+    "sourceDocumentation": "https://github.com/OpenRailwayMap/OpenRailwayMap/blob/master/styles/standard.mapcss",
+    "QA": {
+      "sourceIntegrity": "2 files GitHub update/readback VERIFIED",
+      "staticChecks": "10/10 targeted structure checks PASS",
+      "nodeRegression": "NOT_RUN for R2.10; previous R2.9 251/251 PASS is historical only",
+      "catalogue": "NOT_RERUN; previous R2.9 14/14 PASS historical only",
+      "safariUat": "PENDING",
+      "fullDarkMode": "UNVERIFIED",
+      "deployment": "NOT_DEPLOYED",
+      "production": "UNCHANGED"
+    },
+    "vercelSnapshot": {
+      "checkedOn": "2026-10-25",
+      "priorR29StagingId": "dpl_CXessrUh9arLZ13GzaopzsKVHrqQ",
+      "priorR29StagingStatus": "READY",
+      "hostProject": "mrs10-r24-single-gateway-preview",
+      "priorR29Url": "https://mrs10-r29-guantang-campus-uat.vercel.app/map-language-lab.html",
+      "fileInventory": "48 files",
+      "deploymentGitSha": "UNVERIFIED",
+      "newR210Preview": "NOT_CREATED"
+    },
+    "releaseDecision": "NOT_READY_FOR_GO",
+    "ownerApproval": "LRVTC reference campus location only; no deploy, merge or production release approval",
+    "nextAction": "Verify exact R2.10 source with Node regression and catalogue and isolated artifact; obtain approval if deployment needed; Safari iPhone/iPad UAT for compact popup, 4 languages, collapsed legend, and dark mode. China pinyin overlays require validated name tags; technical raster labels cannot be translated."
   }
 }
