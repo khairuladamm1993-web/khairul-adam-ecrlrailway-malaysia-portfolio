@@ -3257,5 +3257,100 @@
       ],
       "verdict": "PARTIAL_PASS_KG13_GREEN_9_OF_29_LIGHT_MODE"
     }
+  },
+  "integrationR220": {
+    "project": "P01",
+    "issueId": "r220-mrt-putrajaya-yellow-service-registry",
+    "title": "MR-S10 R2.20 — MRT Putrajaya Line 36 operational stops and five provisional",
+    "checkedOn": "2026-10-26",
+    "state": "DEV_SOURCE_QA_PASS_OWNER_SAFARI_PENDING_PREVIEW_BLOCKED_PAUSED",
+    "ownerApproval": "NOT_APPROVED_FOR_PRODUCTION",
+    "development": {
+      "repository": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
+      "branch": "feature/mrs10-r220-putrajaya-yellow-service-registry",
+      "baseline": "f7084ffb124fc8d0d2e58bace98f86bd376109c1",
+      "firstQaCommit": "933b17b53bbcb7f5dda931ec333374823fce9e12",
+      "latestCommit": "2e58c6ccda65a364f30929b5cc983911ecd66d25",
+      "concurrentChange": "Source advanced by independently observed commit 2e58c6... changing service yellow HEX and source crosscheck; preserved as current HEAD, no reset/cherry-pick.",
+      "serviceOnly": true,
+      "geometry": "UNVERIFIED",
+      "physicalSegments": 0,
+      "currentFiles": [
+        "assets/railway-track-registry-kl.js",
+        "assets/map-language-lab.js",
+        "map-language-lab.html",
+        "package.json",
+        "tests/r216-kl-rail-registry.test.cjs",
+        "tests/r220-putrajaya-yellow-service.test.cjs",
+        ".github/workflows/r220-putrajaya-qa.yml"
+      ]
+    },
+    "sourceEvidence": {
+      "officialStops": "https://www.mymrt.com.my/projects/putrajaya-line/stations/",
+      "officialSummary": "https://www.mymrt.com.my/projects/putrajaya-line/",
+      "codeCrosscheck": "https://www.transportmalaysia.com/services/mrt-putrajaya-line/",
+      "activeStops": 36,
+      "activeServiceAdjacencies": 35,
+      "provisionalStops": 5,
+      "provisionalCodes": [
+        "PY02",
+        "PY25",
+        "PY26",
+        "PY30",
+        "PY35"
+      ],
+      "sourceCodes": "SECONDARY_CROSSCHECK_NOT_OPERATOR_CERTIFIED",
+      "yellowIdentity": "#FBCD20 — secondary colour crosscheck; official line yellow hue; exact HEX not operator-certified",
+      "mapPOI": "EXACT_SOURCE_PY_CODE_PLUS_STATION_NAME_CANDIDATES_ONLY",
+      "missingVectorPOI": "NO_SYNTHETIC_GEO_STATION_MARKERS_OR_PHYSICAL_ALIGNMENT"
+    },
+    "qa": {
+      "latestRunId": 40237971665,
+      "latestRunUrl": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40237971665",
+      "testedCommit": "2e58c6ccda65a364f30929b5cc983911ecd66d25",
+      "node": "330/330 PASS",
+      "catalogue": "14/14 PASS",
+      "publicBuild": "PASS_SOURCE_ONLY_WITH_AUTH_AND_ANALYTICS_DISABLED",
+      "artifactId": 12615558221,
+      "artifactDeployment": "NOT_DEPLOYED",
+      "ownerSafari": "NOT_TESTED"
+    },
+    "deployment": {
+      "dedicatedProject": "mrs10-r220-putrajaya-isolated-preview",
+      "projectId": "prj_qwGkfzoGjClPWMb51jXezSKofAHG",
+      "firstDeploymentId": "dpl_7aae5LiLtrpEwVB3dd4KTHQmf1LA",
+      "gitSource": "933b17b53bbcb7f5dda931ec333374823fce9e12",
+      "requested": "staging",
+      "returned": "production",
+      "readyState": "READY",
+      "discrepancyIssue": "R220_FIRST_DEPLOYMENT_WRONG_TARGET",
+      "protection": "VERCEL_AUTHENTICATION_ALL",
+      "mitigation": "pause_project CALLED after unexpected Production target; project live:false; no further deployment/production operations",
+      "pausedProjectPolicy": "DO_NOT_UNPAUSE_WITHOUT_EXPLICIT_OWNER_AUTHORIZATION",
+      "ownerPreview": "BLOCKED_NOT_A_CONFIRMED_STAGING_PREVIEW",
+      "HTTP": "UNVERIFIED",
+      "production": "NO_GO"
+    },
+    "integration": {
+      "state": "OPEN",
+      "dependency": "COMBINED_R217_R218_R219_R220_CI_SECURITY_SAFARI",
+      "observedR219VsR220FileOverlap": "NONE",
+      "repeatLiveSHACompareBeforeIntegration": true,
+      "branchChangesToOthers": "NONE",
+      "PRMerge": "NOT_DONE"
+    },
+    "releaseGates": {
+      "sourceQA": "PASS",
+      "catalogue": "PASS",
+      "sourcePublicBuild": "PASS",
+      "separatePreview": "BLOCKED",
+      "ownerSafari": "PENDING",
+      "HTTP": "UNVERIFIED",
+      "securityOfGitDeployment": "UNVERIFIED",
+      "integratedBranches": "NOT_TESTED",
+      "ownerProductionApproval": "NOT_APPROVED"
+    },
+    "decision": "NO-GO Preview UAT/Production/merge. Source current 330/330 PASS; first deployment was unexpectedly production-target and project was paused; recover a strictly non-production Preview with approval and safeguards.",
+    "nextAction": "Preserve source QA and pause. Resolve Vercel first-deployment target mismatch and secure a genuinely isolated non-production Preview before Owner Safari. Do not unpause, redeploy, merge, modify main, auth/RLS, R2.17/18/19 or simulators without appropriate approval."
   }
 }
