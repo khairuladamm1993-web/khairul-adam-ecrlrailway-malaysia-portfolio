@@ -26,7 +26,9 @@ test('railway technical detail is optional; English names remain in vector layer
  assert.match(js,/visibility:railVisibility\(railDetails\)/);
  assert.match(js,/function readableRails\(\)/);
  assert.match(js,/const rails=readableRails\(\)/);
- assert.match(js,/overlay\(\);applyLabels\(\);setRailVisibility\(\)/);
+ // R2.18.1 applies locale before raster/source changes, then retries if style is still loading.
+ assert.match(js,/applyLabels\\(\\);\\s*const rails=readableRails\\(\\);\\s*overlay\\(\\);setRailVisibility\\(\\)/);
+ assert.match(js,/if\\(labelUpdatePending\\)applyLabels\\(\\)/);
  assert.match(js,/railDetails\?readableRailLanguage\[lang\]\.technical/);
  assert.match(js,/map\.setLayoutProperty\(layer\.id,'text-field',nameExpression\(lang\)\)/);
  assert.match(html,/id="rail-vector-note"/);
