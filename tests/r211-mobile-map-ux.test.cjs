@@ -43,7 +43,7 @@ function setup(){
 
 test('R2.11 expand/exit retains the same map, selected popup, view and layers',()=>{
  const {w,map}=setup(),d=w.document,button=d.getElementById('map-expand');
- d.querySelector('[data-region="china"]').click();d.getElementById('campus-focus').click();
+ d.querySelector('[data-region="china"]').click();map.marker.togglePopup();
  d.getElementById('railway-btn').click();
  const marker=map.marker,popup=marker.getPopup(),view=map.lastFly,layers=JSON.stringify(map.layers);
  d.body.setAttribute('style','color: red;');
