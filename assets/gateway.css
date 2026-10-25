@@ -56,3 +56,9 @@
 .owner-center-shortcut[hidden]{display:none!important}
 .owner-center-shortcut:focus-visible{outline:2px solid #a6e6ee;outline-offset:3px}
 @media(max-width:650px){.gateway-identity-tools{align-items:stretch;width:100%}.owner-center-shortcut{width:100%}}
+
+/* R2.6: clear disclaimer for native-language raster basemap labels. */
+.map-localization-note{margin:2px 0 12px;padding:9px 12px;border-radius:10px;border:1px solid var(--line,#648696);font-size:.81rem;line-height:1.55;color:var(--text,#223944);background:var(--panel,#f2f6f9)}
+.map-localization-note strong{font-weight:850}
+:root[data-theme="light"] .map-localization-note{color:#24404f;background:#edf4f7;border-color:#b2c7d1}
+:root[data-theme="dark"] .map-localization-note{color:#d9e9f1;background:#152c3b;border-color:#426274}
