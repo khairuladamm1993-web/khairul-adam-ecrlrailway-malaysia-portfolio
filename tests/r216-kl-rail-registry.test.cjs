@@ -18,14 +18,40 @@ test('R2.16 official-reference registry has 10 service routes and no invented ph
  }
  assert.equal(api.findRoute('unknown'),null);
 });
-test('R2.16 only operator sourced ERL Transit has a complete ordered station sample',()=>{
+test('R2.16.1 operator sources confirm ERL and 29-stop MRT Kajang service sequences',()=>{
  const route=api.findRoute('erl-klia-transit'),names=route.stationSequence.map(id=>api.catalog.stations.find(s=>s.id===id)?.name);
  assert.equal(route.stationSequenceStatus,'SOURCE_CONFIRMED');
  assert.deepEqual(names,['KL Sentral','Bandar Tasik Selatan','Putrajaya & Cyberjaya','Salak Tinggi','KLIA T1','KLIA T2']);
+ assert.equal(api.catalog.routes.filter(x=>x.stationSequenceStatus==='SOURCE_CONFIRMED').length,2);
  assert(api.catalog.routes.filter(x=>x.stationSequenceStatus==='NOT_YET_VERIFIED').every(x=>!x.stationSequence.length));
  const mapPois=api.catalog.stations.filter(s=>s.confidence==='OWNER_SAFARI_VECTOR_POI');
  assert.deepEqual(mapPois.map(x=>x.name),['Maharajalela','Pasar Seni']);
  assert(mapPois.every(x=>x.linkedRouteId===null));
+});
+test('R2.16.1 Kajang official 29 stops and 28 passenger-service adjacency pairs are NOT physical track segments',()=>{
+ const c=api.catalog,r=api.findRoute('mrt-kajang');
+ assert.equal(r.stationSequence.length,29);
+ assert.equal(r.stationSequenceStatus,'SOURCE_CONFIRMED');
+ assert.equal(r.serviceAdjacencies.length,28);
+ const names=r.stationSequence.map(id=>c.stations.find(st=>st.id===id)?.name);
+ assert.equal(names[0],'Kwasa Damansara');
+ assert.equal(names[1],'Kwasa Sentral');
+ assert.equal(names[11],'Pasar Seni');
+ assert.equal(names[14],'Tun Razak Exchange (TRX)');
+ assert.equal(names[28],'Kajang');
+ assert.equal(new Set(names).size,29);
+ assert(!names.includes('Sungai Buloh'));
+ assert(!names.includes('Kampung Selamat'));
+ assert.equal(c.sourceAudit.mrtKajang.stationCount,29);
+ assert.match(c.sourceAudit.mrtKajang.conflict,/28 entries/);
+ assert.match(r.sourceUrls[0],/^https:\/\/www\.mymrt\.com\.my\//);
+ assert(r.serviceAdjacencies.every((e,i)=>e.fromStationId===r.stationSequence[i]&&
+   e.toStationId===r.stationSequence[i+1]&&e.relation==='CONSECUTIVE_SERVICE_STOPS'&&
+   e.physicalTrackId===null&&e.geometry===null));
+ assert.equal(c.physicalSegments.length,0);
+ const clone=JSON.parse(JSON.stringify(c));
+ clone.routes.find(x=>x.id==='mrt-kajang').serviceAdjacencies[0].physicalTrackId='T1';
+ assert.equal(api.validateRegistry(clone),false,'do not smuggle physical track IDs into service edges');
 });
 test('R2.16 validation rejects fabricated coordinates or asserted station order',()=>{
  const clone=JSON.parse(JSON.stringify(api.catalog));
@@ -79,10 +105,17 @@ test('R2.16 registry stays collapsed and outside map; Malaysia pilot shows read-
  assert.equal(panel.open,false);
  assert.equal(map.contains(panel),false);
  assert.equal(select.options.length,10);
+ assert.match(doc.getElementById('kl-registry-counts').textContent,/2 turutan laluan disahkan/);
  assert.match(doc.getElementById('kl-registry-counts').textContent,/0 trek fizikal disahkan/);
  assert.equal(doc.getElementById('kl-registry-station-order').hidden,true);
  select.value='erl-klia-transit';select.dispatchEvent(new w.Event('change'));
  assert.equal(doc.getElementById('kl-registry-station-order').querySelectorAll('li').length,6);
+ select.value='mrt-kajang';select.dispatchEvent(new w.Event('change'));
+ const kajangItems=Array.from(doc.getElementById('kl-registry-station-order').querySelectorAll('li')).map(x=>x.textContent);
+ assert.equal(kajangItems.length,29);
+ assert.deepEqual(kajangItems.slice(0,2),['Kwasa Damansara','Kwasa Sentral']);
+ assert.equal(kajangItems.at(-1),'Kajang');
+ assert.match(doc.getElementById('kl-registry-route-status').textContent,/Turutan perhentian disahkan/);
  assert(doc.getElementById('kl-registry-sources').querySelector('a[href^="https://"]'));
  w.close();
 });
