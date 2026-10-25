@@ -15,8 +15,11 @@ button[aria-pressed="true"]{border-color:#177b9a;background:#ceeaf3;color:#163f5
 .notice{margin:14px 0;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:9px}
 h1{font-size:clamp(1.35rem,4vw,2.1rem);line-height:1.2}p{max-width:85ch}#label-status{font-size:.88rem}
 </style>
-<script defer src="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.js"></script>
-<script defer src="assets/map-language-lab.js"></script></head>
+<script type="module">
+import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.mjs';
+window.maplibregl=maplibregl;
+await import('./assets/map-language-lab.js');
+</script></head>
 <body><main><header><a href="gateway.html">← MR-S10 Gateway</a><button id="theme-btn" type="button" aria-label="Dark Mode">☾</button></header>
 <h1 id="lab-title">Multilingual visitor map · BETA</h1><p id="lab-info">Switch map place names where translations exist.</p>
 <div class="controls" aria-label="Language selector">
