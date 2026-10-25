@@ -1631,5 +1631,74 @@
         "Production release and ECRL integration still unauthorized"
       ]
     }
+  },
+  "integrationR215": {
+    "project": "P01",
+    "issueId": "r215-rail-transit-tap-diagnostic",
+    "checkedOn": "2026-10-26",
+    "title": "R2.15 Rail + Urban Transit Source-Backed Tap Diagnostic",
+    "state": "STAGING_READY_SAFARI_UAT_PENDING",
+    "ownerObservation": "Owner Safari screenshot around 00:00 MYT: Railway details OFF leaves cyan conventional railway vectors near Kuala Lumpur; Owner zoomed in and tried tapping with no popup. Screenshot alone does not prove click handler failure root cause.",
+    "diagnosis": {
+      "confirmed": "R2.14.1 readable and clickable vector filter selected only transportation.class=rail, excluding transportation.class=transit used by subway, light_rail, monorail, tram in official OpenMapTiles schema.",
+      "remainingUnknown": "Actual click failure could arise from rendered hit width, absent vector feature at tap location, opacity/style pick behavior or tile coverage; Safari real-data test needed after R2.15.",
+      "sourceEvidence": "https://github.com/openmaptiles/openmaptiles/blob/master/layers/transportation/class.sql",
+      "distinction": "Conventional rail class is not exclusively KTM; data class is distinct from named operator. OpenRailwayMap raster and vector click targets are different datasets."
+    },
+    "development": {
+      "branch": "feature/mrs10-r215-rail-transit-tap-diagnostic",
+      "parentCommit": "09e7304e7e753603bec77c514e95cbfe2f66a8a4",
+      "sourceCommit": "1e79fae7c096cc76bdd8c36229caacdf468778d0",
+      "changedFiles": [
+        "assets/map-language-lab.js",
+        "tests/r213-interactive-rail-station-pilot.test.cjs",
+        "tests/r215-rail-transit-tap.test.cjs",
+        "tests/r28-readable-rail-liuzhou.test.cjs",
+        "tests/r212-map-first-ux.test.cjs",
+        "package.json"
+      ],
+      "changes": [
+        "Source-backed filter now accepts OpenMapTiles transportation classes rail and transit and the eight documented railway subclasses",
+        "Shared source filter used by visible railway vector layer and hit-test rail layer",
+        "Map click uses a bounded 12px pixel-radius queryRenderedFeatures area, station-first priority and existing safe popup builder",
+        "When no matching vector feature exists, show localized diagnostic rather than inventing a railway name",
+        "All non-pilot UI, China code lookup, LRVTC and map controls preserved"
+      ]
+    },
+    "qa": {
+      "node": "286/286 PASS, 0 FAIL/SKIP from exact Vercel staging SHA",
+      "catalogue": "14/14 PASS, 0 FAIL/SKIP",
+      "build": "PASS; restricted Member and analytics excluded",
+      "http": "HTML 200, JS 200; excluded Member and quiz assets both 404",
+      "staging": "READY, target=staging, source SHA exact",
+      "safari": "PENDING: post-fix actual KTM/LRT/MRT visible vectors and tap popup remain unverified",
+      "notes": "Earlier isolated candidates failed legacy assertions expecting rail-only and no queryRenderedFeatures. Assertions revised to distinguish vector hit queries from raster false attribution."
+    },
+    "staging": {
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_3ntGQTiGHHQ96sP82Tme3yGBqM7R",
+      "target": "staging",
+      "state": "READY",
+      "url": "https://mrs10-r211-mobile-map-hp67xcfc1-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "sourceSha": "1e79fae7c096cc76bdd8c36229caacdf468778d0",
+      "protection": "Existing Vercel Authentication retained"
+    },
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": []
+    },
+    "releaseDecision": "HOLD / NO-GO — source coverage and regression tests pass, Safari actual tap on rail/station not yet verified. No merge or Production approval.",
+    "nextAction": "Open isolated R2.15 staging Safari on iPhone with ?railPilot=1. Choose Malaysia, details OFF, zoom around Masjid Jamek to 14-16. Check whether LRT/MRT vector alignments are visible; tap thin vector line and capture actual rail segment popup or No selectable vector message. Continue station taps only after first interaction evidence. Never classify raster labels as clickable vector features.",
+    "boundaries": {
+      "main": "UNCHANGED",
+      "production": "UNCHANGED",
+      "supabase": "UNCHANGED",
+      "p02": "UNTOUCHED",
+      "p03": "UNTOUCHED",
+      "merge": "NOT DONE",
+      "ownerPhotos": "NOT PUBLISHED"
+    }
   }
 }
