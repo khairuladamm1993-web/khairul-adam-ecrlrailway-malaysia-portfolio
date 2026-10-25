@@ -56,15 +56,21 @@ function browser(qs){
  map.handlers['style.load']?.();
  return {w,doc:w.document,map};
 }
-test('R2.15.2 real pointer event and MapLibre click counters provide inspectable and privacy-safe Safari diagnosis',()=>{
+test('R2.15.5 panning and MapLibre taps are distinct and remain privacy-safe',()=>{
  const {w,doc,map}=browser('railPilot=1&railDebug=1');
  const node=doc.getElementById('rail-tap-diagnostic');
- assert.equal(node.hidden,false);assert.match(node.textContent,/TOUCH 0 \/ MAP CLICK 0/);
+ assert.equal(node.hidden,false);assert.match(node.textContent,/MAP TAPS 0 \/ PANS 0/);
+ // Pointerdown by itself is not a map click.
  doc.getElementById('visitor-map').dispatchEvent(new w.Event('pointerdown',{bubbles:true}));
- assert.match(node.textContent,/TOUCH 1 \/ MAP CLICK 0/);
- assert.match(node.textContent,/Canvas pointer received/);
+ assert.match(node.textContent,/MAP TAPS 0 \/ PANS 0/);
+ // Gesture drag does not count as a tap.
+ assert.equal(typeof map.handlers.dragstart,'function');
+ map.handlers.dragstart({});
+ assert.match(node.textContent,/MAP TAPS 0 \/ PANS 1/);
+ assert.match(node.textContent,/Map pan started; no tap counted/);
+ // A MapLibre click is counted and runs the source probe.
  map.handlers.click({point:{x:150,y:150},lngLat:{lng:101.68,lat:3.14}});
- assert.match(node.textContent,/TOUCH 1 \/ MAP CLICK 1/);
+ assert.match(node.textContent,/MAP TAPS 1 \/ PANS 1/);
  assert.match(node.textContent,/source features 0 \/ visible 0 \/ raw rail 0/);
  assert(!node.textContent.includes('101.68'));
  w.close();
