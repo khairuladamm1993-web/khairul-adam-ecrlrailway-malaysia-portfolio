@@ -1954,7 +1954,7 @@
     "issueId": "r2154-station-poi-source-recovery",
     "checkedOn": "2026-10-26",
     "title": "R2.15.4 Pilot station POI source selection fallback",
-    "state": "PARTIAL_SAFARI_RAIL_REGRESSION_PASS_STATION_LAYER_READY_TAP_PENDING",
+    "state": "RAIL_AND_MAHARAJALELA_STATION_SAFARI_TAP_PASS_NETWORK_AUDIT_OPEN",
     "reason": "Owner screenshot R2.15.3 confirmed rail READY and a valid light_rail popup, but station MISSING. Code previously picked POI source only from styled source-layer=poi references; if no POI style layer is present, existing vector tileset was not considered.",
     "development": {
       "branch": "feature/mrs10-r2154-station-poi-source-recovery",
@@ -1982,9 +1982,10 @@
       "catalogue": "14/14 PASS",
       "deployment": "READY target staging, exact source SHA",
       "artifact": "HTML and JS HTTP 200; excluded Member/quiz HTTP 404",
-      "safari": "PARTIAL PASS — Owner 2026-10-26 01:19 screenshots show visible turquoise station POI markers, and debug rail READY / station READY; source-backed light_rail rail popup still works. Station marker tap popup NOT YET DEMONSTRATED.",
+      "safari": "PASS for rail vector tap (earlier) and Maharajalela railway station marker tap (Owner 2026-10-26 01:23 iPhone Safari screenshot). rail READY / station READY; source features 2 / visible 1 / raw rail 4. This is pilot interaction validation, not full station coverage/release acceptance.",
       "previouslyPassed": "R2.15.3 and R2.15.4 Owner Safari rail segment source-backed popup PASS; station layer now READY but station selection UAT pending",
-      "sourceIntegrity": "Source fallback uses existing vector ID, no invented geometries"
+      "sourceIntegrity": "Source fallback uses existing vector ID, no invented geometries",
+      "stationTap": "PASS — one selected source-backed station: Maharajalela; Original name MR3 Maharajalela; source OpenMapTiles / OpenFreeMap"
     },
     "staging": {
       "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
@@ -2001,8 +2002,8 @@
       "verifiedAt": null,
       "evidence": []
     },
-    "releaseDecision": "HOLD / NO-GO for Production/merge — rail click and station layer recovery supported by Owner screenshots, station feature popup and KL route/physical track completeness remain unverified",
-    "nextAction": "On the same isolated R2.15.4 Safari Preview, choose an isolated blue station circle and tap once without dragging. Capture whether a station popup appears and its source-backed fields; do not count rail segment popup as station PASS. If station click fails, inspect POI hit priority / feature properties. Audit KL network separately before mapping each physical track.",
+    "releaseDecision": "HOLD / NO-GO Production or map merge — source-backed railway and one station interactions PASS on Safari; KL full railway/station topology plus Bangkok/Liuzhou station tests remain incomplete.",
+    "nextAction": "Preserve passed Malaysia rail and Maharajalela Station Safari UAT. Next test one sourced station marker and rail vector in Bangkok, then Liuzhou, on isolated staging. Separately audit authoritative Malaysian route/segment ordering and network completeness; do not fabricate track/lane IDs or infer from map colours.",
     "boundaries": {
       "main": "UNCHANGED",
       "production": "UNCHANGED",
@@ -2037,6 +2038,34 @@
         "Do not infer exact station/route identity from map label, circle position or rail colour"
       ],
       "nextStationTest": "Tap one isolated turquoise station circle (not its adjacent line) in expanded Malaysia staging map; inspect whether popup states Station and a source-backed name or honest fallback, and note 'source features' diagnostic."
+    },
+    "ownerStationTapUat": {
+      "observedAt": "2026-10-26T01:23:00+08:00",
+      "evidence": "Owner-supplied 01:23 MYT iPhone Safari screenshot in ChatGPT conversation. Image not published in public repository.",
+      "device": "iPhone Safari; Malaysia R2.15.4 expanded pilot",
+      "result": "PASS_SOURCED_STATION_CLICK_FOR_MAHARAJALELA",
+      "station": {
+        "displayedName": "Maharajalela",
+        "category": "Railway station",
+        "class": "station",
+        "sourceOriginalName": "MR3 Maharajalela",
+        "sourceLabel": "OpenMapTiles / OpenFreeMap data; not operational",
+        "nameNotExternallyVerifiedHere": true
+      },
+      "diagnostic": "TOUCH 25 / MAP CLICK 1 · source features 2 / visible 1 / raw rail 4 · monorail · rail READY / station READY",
+      "verified": [
+        "A turquoise map station marker can be selected on real iPhone Safari",
+        "Popup displays Railway station, Maharajalela, source original name MR3 Maharajalela and source disclaimer",
+        "MapLibre rail and station interactive layers are READY; last map click accepted",
+        "Source selection favors station over adjacent rail when both selectable geometry objects occur"
+      ],
+      "limits": [
+        "Only one Kuala Lumpur monorail station was source-selected and verified in this screenshot; no claim that every station works",
+        "raw rail 4 is count of rendered features, not count of physical lanes/tracks",
+        "No verified platforms/precise lane numbers/operational signalling chainage/lineup",
+        "Kuala Lumpur whole-network completeness and Bangkok/Liuzhou station popup UAT remain OPEN",
+        "Maharajalela name is sourced from displayed vector attribute, not independently validated operational registry"
+      ]
     }
   }
 }
