@@ -3328,14 +3328,14 @@
     "issueId": "r220-mrt-putrajaya-yellow-service-registry",
     "title": "MR-S10 R2.20 — MRT Putrajaya Line 36 operational stops and five provisional",
     "checkedOn": "2026-10-26",
-    "state": "DEV_QA_PASS_SAFE_PREVIEW_READY_SAFARI_UAT_PENDING",
+    "state": "R2201_KWASA_OSM_FINDER_DEV_QA_PASS_PREVIEW_READY_SAFARI_RETEST_PENDING",
     "ownerApproval": "NOT_APPROVED_FOR_PRODUCTION",
     "development": {
       "repository": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
       "branch": "feature/mrs10-r220-putrajaya-yellow-service-registry",
       "baseline": "f7084ffb124fc8d0d2e58bace98f86bd376109c1",
       "firstQaCommit": "933b17b53bbcb7f5dda931ec333374823fce9e12",
-      "latestCommit": "2e58c6ccda65a364f30929b5cc983911ecd66d25",
+      "latestCommit": "1e7440e9f4cdf9c47c45648ecc06e4da264f9005",
       "concurrentChange": "Source advanced by independently observed commit 2e58c6... changing service yellow HEX and source crosscheck; preserved as current HEAD, no reset/cherry-pick.",
       "serviceOnly": true,
       "geometry": "UNVERIFIED",
@@ -3348,7 +3348,9 @@
         "tests/r216-kl-rail-registry.test.cjs",
         "tests/r220-putrajaya-yellow-service.test.cjs",
         ".github/workflows/r220-putrajaya-qa.yml"
-      ]
+      ],
+      "previousCommit": "2e58c6ccda65a364f30929b5cc983911ecd66d25",
+      "lastFix": "R2.20.1: exact KG04 PY01 Kwasa Damansara station label (OSM Way 460387856), 73 sourced candidate labels, on-demand OSM reference pin and focus to mapped station centre. Existing 36/5 service-only count unchanged."
     },
     "sourceEvidence": {
       "officialStops": "https://www.mymrt.com.my/projects/putrajaya-line/stations/",
@@ -3367,18 +3369,32 @@
       "sourceCodes": "SECONDARY_CROSSCHECK_NOT_OPERATOR_CERTIFIED",
       "yellowIdentity": "#FBCD20 — secondary colour crosscheck; official line yellow hue; exact HEX not operator-certified",
       "mapPOI": "EXACT_SOURCE_PY_CODE_PLUS_STATION_NAME_CANDIDATES_ONLY",
-      "missingVectorPOI": "NO_SYNTHETIC_GEO_STATION_MARKERS_OR_PHYSICAL_ALIGNMENT"
+      "missingVectorPOI": "NO_SYNTHETIC_GEO_STATION_MARKERS_OR_PHYSICAL_ALIGNMENT",
+      "sharedKwasa": {
+        "station": "KG04/PY01 Kwasa Damansara",
+        "official": "https://www.mymrt.com.my/ms/awam/laluan-putrajaya/stesen/kwasa-damansara/",
+        "osmWayId": 460387856,
+        "osmName": "KG04 PY01 Kwasa Damansara",
+        "osmSource": "https://www.openstreetmap.org/way/460387856",
+        "referenceCentreLonLat": [
+          101.5724,
+          3.17631
+        ],
+        "semantics": "OSM_SOURCE_LOCATION_REFERENCE_NOT_SURVEYED_PLATFORM_OR_TRACK",
+        "matchedMapLayer": "mrl-putrajaya-code-poi",
+        "evidenceStatus": "OSM_SOURCE_NAMING_CONFIRMED_BY_EXTERNAL_SOURCE_BUT_ACTUAL_TILE_RENDER_ON_SAFARI_PENDING"
+      }
     },
     "qa": {
-      "latestRunId": 40237971665,
-      "latestRunUrl": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40237971665",
-      "testedCommit": "2e58c6ccda65a364f30929b5cc983911ecd66d25",
-      "node": "330/330 PASS",
+      "latestRunId": 40241238888,
+      "latestRunUrl": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40241238888",
+      "testedCommit": "1e7440e9f4cdf9c47c45648ecc06e4da264f9005",
+      "node": "331/331 PASS",
       "catalogue": "14/14 PASS",
       "publicBuild": "PASS_SOURCE_ONLY_WITH_AUTH_AND_ANALYTICS_DISABLED",
-      "artifactId": 12615558221,
+      "artifactId": 12616033413,
       "artifactDeployment": "NOT_DEPLOYED",
-      "ownerSafari": "NOT_TESTED"
+      "ownerSafari": "R2.20.1_RETEST_PENDING"
     },
     "deployment": {
       "dedicatedProject": "mrs10-r220-putrajaya-isolated-preview",
@@ -3398,15 +3414,16 @@
       "separatePreview": {
         "project": "mrs10-r211-mobile-map-uat",
         "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
-        "deploymentId": "dpl_F4bbF7EmMRBXHUZRbeRzUvz476Uj",
-        "url": "https://mrs10-r211-mobile-map-7n0m0gpab-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+        "deploymentId": "dpl_6NpEqLzDY1SVJvv15UTfcHYNDHR7",
+        "url": "https://mrs10-r211-mobile-map-1qwozl2hq-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
         "target": null,
         "targetExplanation": "No production target: Vercel preview, immutable URL, no staging alias target",
         "status": "READY",
-        "sourceSha": "2e58c6ccda65a364f30929b5cc983911ecd66d25",
+        "sourceSha": "1e7440e9f4cdf9c47c45648ecc06e4da264f9005",
         "protection": "VERCEL_AUTH_ALL; project live:false, custom domains []",
-        "ownerSafari": "PENDING",
-        "httpSmoke": "UNVERIFIED"
+        "ownerSafari": "R2201_KWASA_FINDER_RETEST_PENDING",
+        "httpSmoke": "UNVERIFIED",
+        "previousDeploymentId": "dpl_F4bbF7EmMRBXHUZRbeRzUvz476Uj"
       },
       "additionalProjectContainment": {
         "project": "mrs10-r220-putrajaya-isolated-uat",
@@ -3427,18 +3444,26 @@
       "PRMerge": "NOT_DONE"
     },
     "releaseGates": {
-      "sourceQA": "PASS",
-      "catalogue": "PASS",
+      "sourceQA": "PASS_331_OF_331",
+      "catalogue": "PASS_14_OF_14",
       "sourcePublicBuild": "PASS",
-      "separatePreview": "PASS_PREVIEW_METADATA_ONLY",
-      "ownerSafari": "PENDING",
+      "separatePreview": "READY_PROTECTED_UNALIASED_PREVIEW_METADATA",
+      "ownerSafari": "R2201_KWASA_FINDER_RETEST_PENDING",
       "HTTP": "UNVERIFIED",
       "securityOfGitDeployment": "PARTIAL_METADATA_ONLY",
       "integratedBranches": "NOT_TESTED",
       "ownerProductionApproval": "NOT_APPROVED"
     },
-    "decision": "NO-GO Production/merge. R2.20 source QA 330/330 PASS, catalogue 14/14 PASS, a non-production Preview is READY (protected, immutable URL). Owner Safari and HTTP/security audit remain pending. Unexpected production-target first deployments in standalone projects remain paused/blocked and MUST NOT be used for UAT.",
-    "nextAction": "Owner Safari: open the unique non-production Preview URL (R2.20; Malaysia > MRT Putrajaya), verify 36 operational yellow stations, five provisional excluded, dark/light contrast, 4 languages, route isolation. Do not unpause dedicated projects, merge, or promote without explicit approval."
+    "decision": "NO-GO merge/Production. Source QA 331/331 PASS and Catalogue 14/14 PASS, R2.20.1 source-backed KG04 PY01 on-demand locator Preview READY; Owner Safari retest and HTTP/security smoke pending. Other chat branches and Production untouched.",
+    "nextAction": "Owner open R2.20.1 isolated Preview (unique non-production URL), Malaysia > Registry > MRT Putrajaya > Cari PY01 Kwasa Damansara di peta; confirm a yellow PY01 sourced-reference marker appears at the Kwasa station, not Kampung Selamat. Verify changing to another route hides focus button. Do not claim full 36 vector POI points or physical alignment. No Production release.",
+    "ownerSafariFeedback": {
+      "observedOn": "2026-10-26",
+      "screenshot": "Owner screenshot of Registry shows first PY01 Kwasa Damansara, second PY03 Kampung Selamat; Owner reports first station absent/not found on map.",
+      "previousRegistry": "PASS_DISPLAY_FIRST_STOP",
+      "mapFirstStop": "FAIL_REPORTED_BY_OWNER_BEFORE_R2201_FIX",
+      "retest": "PENDING_NEW_PREVIEW",
+      "note": "Map viewport centred Kuala Lumpur; OSM feature labels use shared KG04 PY01; no claim that actual tile matching has been observed."
+    }
   },
   "integrationR2173": {
     "project": "P01",
