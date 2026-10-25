@@ -153,7 +153,7 @@ function installPilotVectorLayers(){
    rails=true;
   }catch(e){rails=false;}
  }else rails=!!map.getLayer('mrl-pilot-rail-hits');
- if((stations||rails)&&!pilotTapBound){
+ if(!pilotTapBound){
   map.on('click',e=>{
    const hit=queryPilotVectorFeature(map,e.point,12);
    if(hit){
@@ -164,7 +164,9 @@ function installPilotVectorLayers(){
        en:'No selectable vector rail or station at this point. Zoom in and try another segment.',
        zh:'此处无可选矢量铁路或车站。请放大后尝试其他轨道。',
        th:'ไม่มีข้อมูลรางหรือสถานีเวกเตอร์ที่จุดนี้ ลองซูมเข้าแล้วแตะรางอื่น'};
-    status.textContent=messages[lang]||messages.en;
+    // Always visibly confirm a genuine map tap, even if source tiles are missing.
+    const layers=['mrl-pilot-stations','mrl-pilot-rail-hits'].filter(id=>!!map.getLayer?.(id));
+    status.textContent=(messages[lang]||messages.en)+(!layers.length?' [vector source unavailable]':'');
    }
   });
   pilotTapBound=true;
@@ -259,8 +261,13 @@ function setRailVisibility(){
  const note=el('railway-note');if(note)note.textContent=railDetails?readableRailLanguage[lang].technical:uiText[lang].railNote;
  const quick=el('rail-mode-status');
  if(quick)quick.textContent=railDetails?readableRailLanguage[lang].technical:readableRailLanguage[lang].railLines;
- const legend=el('railway-legend');if(legend && !railDetails)legend.open=false;
-
+ // The palette describes the *raster* OpenRailwayMap overlay only. Hide it when
+ // railway details are OFF so it cannot cover the vector tap-test viewport.
+ const legend=el('railway-legend');
+ if(legend){
+  if(!railDetails)legend.open=false;
+  legend.hidden=!railDetails;
+ }
 }
 try{const v=localStorage.getItem('railway-language');if(locales.includes(v))lang=v;}catch{}
 function nameExpression(locale){
@@ -473,7 +480,9 @@ function init(){
    codeTrigger?.setAttribute('aria-expanded','false');
   }
   if(mapLegend.open&&!railDetails){
-  const note=el('railway-legend-note');if(note)note.textContent=railLegendI18n[lang].note;
+  // Prevent stale/open palette from swallowing taps in visitor-vector mode.
+  mapLegend.open=false;
+  return;
  }});
  el('theme-btn').addEventListener('click',()=>{
   const next=theme()==='dark'?'light':'dark';
