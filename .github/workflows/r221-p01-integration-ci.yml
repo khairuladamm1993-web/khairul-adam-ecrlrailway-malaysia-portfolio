@@ -30,6 +30,10 @@ jobs:
           node --check assets/mrs10-r219-map-bridge.js
           python3 scripts/build-preview.py dist-p01-qa
           test -f dist-p01-qa/ampang-line-r219.html
+          test -f dist-p01-qa/assets/mrs10-r219-ampang-gis-overlay.js
+          ! grep -iq '<iframe' dist-p01-qa/ampang-line-r219.html
+          test -f scripts/build-production.py
+          grep -Fq '"ampang-line-r219.html"' scripts/build-production.py
           test -f dist-p01-qa/assets/mrs10-r219-ampang-service.js
           test ! -f dist-p01-qa/assets/member-gateway.js
           test ! -f dist-p01-qa/assets/questions.js
