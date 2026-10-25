@@ -122,7 +122,7 @@ function render(){
  const legendTitle=el('railway-legend-title');if(legendTitle)legendTitle.textContent=legendCopy.title;
  const legendNote=el('railway-legend-note');if(legendNote)legendNote.textContent=legendCopy.note;
  const legendSummary=el('railway-legend-trigger');if(legendSummary){legendSummary.setAttribute('aria-label',legendCopy.title);legendSummary.title=legendCopy.title;}
- document.querySelectorAll('[data-rail-legend]').forEach(node=>{const i=Number(node.dataset.railLegend);if(Number.isInteger(i)&&i>=0&&i<legendCopy.items.length)node.textContent=legendCopy.items[i];});
+ document.querySelectorAll('[data-rail-legend]').forEach(node=>{const i=Number(node.dataset.railLegend);if(Number.isInteger(i)&&i>=0&&i<legendCopy.items.length)node.lastElementChild.textContent=legendCopy.items[i];});
  renderLegendDetail();
  const guideTitle=el('liuzhou-title');if(guideTitle)guideTitle.textContent=readableRailLanguage[lang].guide;
  const guideHint=el('liuzhou-hint');if(guideHint)guideHint.textContent=readableRailLanguage[lang].guideHint;
