@@ -33,7 +33,14 @@ test('R2.20 yellow theme identity and candidate matching never asserts actual tr
   assert.equal(candidate?.stopPosition,pos,raw);
   assert.equal(candidate?.geometry,null);
  }
- for(const props of [null,{}, {class:'railway',subclass:'station',name:'Kwasa Damansara'},
+ const shared=match({class:'railway',subclass:'station',name:'KG04 PY01 Kwasa Damansara','name:en':'Kwasa Damansara'});
+  assert.equal(shared?.stationCode,'PY01');assert.equal(shared?.stopPosition,1);
+  assert.equal(shared?.sharedCode,'KG04');assert.equal(shared?.geometry,null);
+  assert.deepEqual(api.kwasaSource.coords,[101.5724,3.17631]);
+  assert.equal(api.kwasaSource.osmWayId,460387856);
+  for(const props of [null,{}, {class:'railway',subclass:'station',name:'Kwasa Damansara'},
+   {class:'railway',subclass:'station',name:'KG04 Kwasa Damansara'},
+   {class:'railway',subclass:'station',name:'KG04 PY01 Kwasa Damansara','name:en':'Wrong'},
   {class:'railway',subclass:'station',name:'PY25 Bandar Malaysia Utara'},
   {class:'railway',subclass:'station',name:'PY26 Bandar Malaysia Selatan'},
   {class:'railway',subclass:'station',name:'PY02 Rubber Research Institute (RRI)'},
@@ -83,7 +90,8 @@ test('R2.20 mobile UI: yellow 36 numbered stops and isolated source POIs in all 
  assert(py&&kj&&kg);
  assert.equal(py.layout.visibility,'none');
  assert.equal(py.paint['circle-color'],'#FBCD20');
- assert.equal(py.filter[3][2][1].length,72);
+ assert.equal(py.filter[3][2][1].length,73);
+  assert(py.filter[3][2][1].includes('KG04 PY01 Kwasa Damansara'));
  sel.value='mrt-putrajaya';sel.dispatchEvent(new w.Event('change'));
  assert.equal(py.layout.visibility,'visible');
  assert.equal(kj.layout.visibility,'none');
@@ -104,5 +112,16 @@ test('R2.20 mobile UI: yellow 36 numbered stops and isolated source POIs in all 
  assert.equal(map.getLayer('mrl-putrajaya-code-poi').layout.visibility,'none');
  doc.querySelector('[data-region="malaysia"]').click();
  assert.equal(map.getLayer('mrl-putrajaya-code-poi').layout.visibility,'visible');
+ w.close();
+});
+
+test('R2.20.1: sourced Kwasa station locator button is route-scoped and uses OSM centre',()=>{
+ const {w,doc,map}=boot(),s=doc.getElementById('kl-registry-route'),b=doc.getElementById('putrajaya-kwasa-focus');
+ assert.equal(b.hidden,true);
+ s.value='mrt-putrajaya';s.dispatchEvent(new w.Event('change'));
+ assert.equal(b.hidden,false);b.click();
+ assert.match(b.textContent,/PY01/);
+ s.value='mrt-kajang';s.dispatchEvent(new w.Event('change'));
+ assert.equal(b.hidden,true);
  w.close();
 });

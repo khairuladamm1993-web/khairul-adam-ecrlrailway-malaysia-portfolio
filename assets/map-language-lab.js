@@ -286,9 +286,9 @@ function installPilotVectorLayers(){
    const ids=new Map((api?.catalog?.stations||[]).map(x=>[x.id,x]));
    const names=(route?.stationSequence||[]).flatMap(id=>{
     const st=ids.get(id);if(!st?.code)return[];
-    return [st.code+' '+st.name,'PY'+Number(st.code.slice(2))+' '+st.name];
+    return [st.code+' '+st.name,'PY'+Number(st.code.slice(2))+' '+st.name,...(st.id==='mrt-py01'?[api?.kwasaSource?.name]:[])];
    });
-   if(identity&&names.length===72)map.addLayer({
+   if(identity&&names.length===73&&names.every(Boolean))map.addLayer({
     id:'mrl-putrajaya-code-poi',type:'circle',source:poiSource,'source-layer':'poi',minzoom:10,
     filter:['all',['==',['get','class'],'railway'],
      ['in',['get','subclass'],['literal',['station','subway']]],
@@ -536,6 +536,11 @@ function renderKLRegistry(){
  const route=api.findRoute(selector.value)||registry.routes[0];
  if(!route)return;
  box.dataset.route=route.id;
+  const kwasaButton=el('putrajaya-kwasa-focus');
+  if(kwasaButton){kwasaButton.hidden=route.id!=='mrt-putrajaya';
+   kwasaButton.textContent={ms:'Cari PY01 Kwasa Damansara di peta',en:'Find PY01 Kwasa Damansara on map',
+    zh:'在地图查找 PY01 Kwasa Damansara',th:'ค้นหา PY01 Kwasa Damansara บนแผนที่'}[lang];
+  }
  syncKajangPoiHighlights();syncKelanaPoiHighlights();syncPutrajayaPoiHighlights();
  el('kl-registry-route-name').textContent=route.name;
  el('kl-registry-route-status').textContent=route.stationSequenceStatus==='SOURCE_CONFIRMED'?
@@ -744,6 +749,30 @@ function init(){
  document.querySelectorAll('[data-locale]').forEach(b=>b.addEventListener('click',()=>{setLanguage(b.dataset.locale);updateTheme();}));
  el('railway-btn').addEventListener('click',()=>{railDetails=!railDetails;setRailVisibility();});
  el('kl-registry-route')?.addEventListener('change',renderKLRegistry);
+  // The button pans to a sourced OSM way approximate centre; no new track geometry.
+  let kwasaPin=null;
+  el('putrajaya-kwasa-focus')?.addEventListener('click',()=>{
+   if(!pilotMode||activeRegion!=='malaysia'||el('kl-registry-route')?.value!=='mrt-putrajaya')return;
+   const ref=window.MRS10KLRegistry?.kwasaSource;
+   if(ref?.osmWayId!==460387856)return;
+   kwasaPin?.remove();
+   if(window.maplibregl?.Marker){
+    const button=document.createElement('button');button.className='py01-sourced-marker';
+    button.type='button';button.textContent='PY01';button.setAttribute('aria-label','KG04 PY01 Kwasa Damansara - OpenStreetMap sourced');
+    const content=document.createElement('div');content.className='campus-popup';
+    const title=document.createElement('strong');title.textContent='KG04 / PY01 Kwasa Damansara';content.appendChild(title);
+    const note=document.createElement('p');note.textContent='Approximate OpenStreetMap station reference only, not surveyed track or platform geometry.';content.appendChild(note);
+    const link=document.createElement('a');link.href=ref.url;link.target='_blank';link.rel='noopener noreferrer';
+    link.textContent='OpenStreetMap source';content.appendChild(link);
+    kwasaPin=new maplibregl.Marker({element:button,anchor:'bottom'}).setLngLat(ref.coords)
+      .setPopup(new maplibregl.Popup({offset:18,maxWidth:'255px',className:'mrl-campus-popup'}).setDOMContent(content)).addTo(map);
+   }
+   map.flyTo({center:ref.coords,zoom:15.3,duration:650});
+   el('map-shell')?.scrollIntoView?.({behavior:'smooth',block:'center'});
+  });
+  el('kl-registry-route')?.addEventListener('change',()=>{
+   if(el('kl-registry-route').value!=='mrt-putrajaya'){kwasaPin?.remove();kwasaPin=null;}
+  });
  document.querySelectorAll('[data-region]').forEach(b=>b.addEventListener('click',()=>{
   const target=pilotMode?pilotCenters[b.dataset.region]:null;
   const destination=target?[target.center,target.zoom]:centers[b.dataset.region];

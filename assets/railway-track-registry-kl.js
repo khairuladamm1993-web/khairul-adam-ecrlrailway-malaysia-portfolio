@@ -352,11 +352,17 @@
    status:'CANDIDATE_EXACT_CODE_NAME_VECTOR_MATCH_NOT_OWNER_OBSERVED',
    physicalTrackId:null,geometry:null,relationId:null,routeGeometryStatus:'UNVERIFIED'});
  }
+
+ // OSM way 460387856 approximate station centre, NOT surveyed platform/track geometry.
+ const kwasaSource=Object.freeze({name:'KG04 PY01 Kwasa Damansara',
+  coords:Object.freeze([101.5724,3.17631]),osmWayId:460387856,
+  url:'https://www.openstreetmap.org/way/460387856',status:'OSM_SOURCE_REFERENCE_ONLY'});
  // Only exact code+name, NEVER generic shared interchange name. POI unverified until observed.
  function matchSourcedPutrajayaPoi(props){
   if(!props||props.class!=='railway'||!['station','subway'].includes(props.subclass))return null;
   const raw=typeof props.name==='string'?props.name.trim():'';
-  const m=/^(PY(?:0?[1-9]|[1-3][0-9]|4[01])) (.+)$/.exec(raw);
+  const shared=raw===kwasaSource.name;
+  const m=shared?[raw,'PY01','Kwasa Damansara']:/^(PY(?:0?[1-9]|[1-3][0-9]|4[01])) (.+)$/.exec(raw);
   if(!m)return null;
   const code='PY'+String(Number(m[1].slice(2))).padStart(2,'0');
   const entry=catalog.stations.find(s=>s.code===code&&s.id.startsWith('mrt-py'));
@@ -367,7 +373,7 @@
   if(index<0)return null;
   return Object.freeze({routeId:route.id,routeName:route.name,stationId:entry.id,
     stationName:entry.name,stationCode:code,stopPosition:index+1,stopCount:36,
-    status:'CANDIDATE_EXACT_PY_CODE_NAME_NOT_OWNER_TILE_CONFIRMED',
+    status:shared?'CANDIDATE_OSM_SHARED_KG04_PY01':'CANDIDATE_EXACT_PY_CODE_NAME_NOT_OWNER_TILE_CONFIRMED',sharedCode:shared?'KG04':null,
     physicalTrackId:null,geometry:null,relationId:null,routeGeometryStatus:'UNVERIFIED'});
  }
  const osmRelationAudit=Object.freeze({
@@ -378,7 +384,7 @@
    'https://wiki.openstreetmap.org/wiki/Relation:route']),
   currentStatus:'NO_OSM_RELATION_OR_TRACK_WAY_MATCH_VERIFIED'
  });
- const api=Object.freeze({catalog,validateRegistry,findRoute,matchSourcedKajangPoi,matchSourcedKelanaPoi,matchSourcedPutrajayaPoi,osmRelationAudit});
+ const api=Object.freeze({catalog,validateRegistry,findRoute,matchSourcedKajangPoi,matchSourcedKelanaPoi,matchSourcedPutrajayaPoi,kwasaSource,osmRelationAudit});
  if(typeof module==='object'&&module.exports)module.exports=api;
  if(root)root.MRS10KLRegistry=api;
 })(typeof window!=='undefined'?window:null);
