@@ -27,6 +27,17 @@ jobs:
         run: node --test tests/r219-ampang-orange-service.test.cjs
       - name: Entire existing MR-S10 regression suite
         run: npm test
+      - name: Build isolated static staging artifact (no deployment)
+        shell: bash
+        run: |
+          python3 scripts/build-production.py "$RUNNER_TEMP/mrs10-r219-stage"
+          cp ampang-line-r219.html "$RUNNER_TEMP/mrs10-r219-stage/ampang-line-r219.html"
+          test -f "$RUNNER_TEMP/mrs10-r219-stage/ampang-line-r219.html"
+          test -f "$RUNNER_TEMP/mrs10-r219-stage/assets/mrs10-r219-ampang-service.js"
+          test -f "$RUNNER_TEMP/mrs10-r219-stage/map-language-lab.html"
+          test ! -f "$RUNNER_TEMP/mrs10-r219-stage/assets/questions.js"
+          test ! -f "$RUNNER_TEMP/mrs10-r219-stage/assets/quiz-core.js"
+          test ! -f "$RUNNER_TEMP/mrs10-r219-stage/assets/gateway.js"
       - name: Source restrictions
         shell: bash
         run: |
