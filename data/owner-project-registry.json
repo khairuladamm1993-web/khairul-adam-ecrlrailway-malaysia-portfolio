@@ -862,7 +862,7 @@
       "commit": "3d9ddf280e5e10aa82e74a09d82bd793221ae6ab"
     },
     "branch": "feature/mrs10-r210-rail-legend-compact-lrvtc",
-    "latestDevelopmentCommit": "2eddfab054e9f9cc1697947cb3240704e699f2ca",
+    "latestDevelopmentCommit": "79c7f86128134737576c05e7646fc9a9b12594b9",
     "filesChanged": [
       "assets/map-language-lab.js",
       "map-language-lab.html"
