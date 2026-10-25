@@ -2778,5 +2778,114 @@
         "If popup title is inaccessible without manual scroll, log popup layout regression and fix in isolated dev branch"
       ]
     }
+  },
+  "integrationR218": {
+    "project": "P01",
+    "issueId": "r218-kelana-jaya-ruby-service-registry",
+    "title": "R2.18 LRT Kelana Jaya 37-stop ruby service registry and conservative source-coded vector candidates",
+    "checkedOn": "2026-10-26",
+    "state": "SOURCE_QA_PASS_STAGING_READY_SAFARI_UAT_PENDING",
+    "ownerApproval": "Owner authorized isolated R2.18 development and staging checks, NOT production merge or promotion.",
+    "development": {
+      "branch": "feature/mrs10-r218-kelana-jaya-ruby-identity",
+      "baselineR217Sha": "5b507cf18e4c308ee1cb891ebe6a279b9f3d1671",
+      "sourceCommit": "1aec864daea46817c1283fc37108f280636771d7",
+      "changedFiles": [
+        "assets/railway-track-registry-kl.js",
+        "assets/map-language-lab.js",
+        "map-language-lab.html",
+        "package.json",
+        "tests/r216-kl-rail-registry.test.cjs",
+        "tests/r218-kelana-jaya-ruby-identity.test.cjs",
+        ".github/workflows/r218-kelana-qa.yml"
+      ],
+      "untouchedOtherBranches": [
+        "feature/mrs10-r217-kajang-green-identity",
+        "feature/mrs10-r219-ampang-orange-service-registry",
+        "main"
+      ]
+    },
+    "sources": {
+      "officialColour": "https://myrapid.com.my/rodjejakplat/",
+      "officialRouteScope": "https://www.mot.gov.my/en/land/infrastructure/current-rail-services",
+      "officialMapReference": "https://myrapid.com.my/wp-content/uploads/2021/07/28102018_Transit-Map.pdf",
+      "secondaryStopSequence": "https://www.mrt.com.my/lrt_kelana/index.htm",
+      "secondaryCodeCrosscheck": "https://www.mtrec.name.my/network/kjl.html",
+      "note": "Official service hex D50032 and 37 termini scope confirmed. Full KJ code list cross-checked in secondary directory, not independently certified from primary operator for every individual code. Historical operator PDF HTTP retrieval may be limited."
+    },
+    "coverage": {
+      "serviceStationCount": 37,
+      "serviceAdjacencies": 36,
+      "first": "KJ1 Gombak",
+      "last": "KJ37 Putra Heights",
+      "exactVectorCandidateMatcher": "KJ code + station name + class railway + station/subway only",
+      "actualVectorTilePoiCount": "UNVERIFIED",
+      "operatorIndividuallyVerifiedStationCodes": "UNVERIFIED",
+      "physicalTrackCountVerified": 0,
+      "routeRelationIdsVerified": 0,
+      "physicalWayIdsVerified": 0,
+      "operationalTrackPlatformAndTurnoutIdsVerified": 0,
+      "interchangeCaveat": "Service interchange is distinct from shared platform or track; do not infer from same names or nearby geometry."
+    },
+    "qa": {
+      "node": "322/322 PASS, 0 FAIL, 0 SKIP",
+      "catalogue": "14/14 PASS, 0 FAIL, 0 SKIP",
+      "githubActionsRunId": 40232319822,
+      "githubActionsUrl": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40232319822",
+      "testCommit": "1aec864daea46817c1283fc37108f280636771d7",
+      "jsSyntax": "PASS",
+      "sourceCodeAndTheme": "PASS in Node jsdom and static CSS checks; real Safari unverified",
+      "securityArtifact": "PASS public preview builder; excludes Member/Owner/quiz assets, analytics/auth disabled; deployed Git source contents HTTP not independently audited",
+      "qaArtifactId": 12613073641,
+      "artifactSha256": "404e994fe8a84e9b87409d35b39a6e9761badd25ebc3e16d3eaff984f132ec6e",
+      "artifactDeployment": "NOT_DEPLOYED; separate QA ZIP"
+    },
+    "staging": {
+      "project": "mrs10-r211-mobile-map-uat",
+      "projectId": "prj_3UQSLxwHjyqO4Lys5OqQNLphynz0",
+      "deploymentId": "dpl_3BfapWD3LwKDsG8MN29VpV8DDEFW",
+      "target": "staging",
+      "state": "READY",
+      "sourceSha": "1aec864daea46817c1283fc37108f280636771d7",
+      "url": "https://mrs10-r211-mobile-map-mpo4fygvf-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1",
+      "isolation": "Project live:false, no custom domains, Vercel Authentication all",
+      "responseSmoke": "BLOCKED/UNVERIFIED — protected web cannot retrieve deployment contents; Vercel deployment source file API 404 (Git-source file tree unavailable)",
+      "ownerSafari": "PENDING"
+    },
+    "integrationDependency": {
+      "id": "r218-r219-shared-components",
+      "type": "FUTURE_ISOLATED_INTEGRATION_AUDIT_REQUIRED",
+      "parallelBranch": "feature/mrs10-r219-ampang-orange-service-registry",
+      "parallelHeadObserved": "a8c67080d6d9b0add4a0f8c01d67ea815dac3ec6",
+      "files": [
+        "assets/map-language-lab.js",
+        "assets/railway-track-registry-kl.js",
+        "map-language-lab.html",
+        "package.json"
+      ],
+      "note": "R2.19 remains independent. Never merge/cherry-pick/reset or claim R2.19 QA based on R2.18. Reconcile shared files and verify combined regression under separately approved integration gate."
+    },
+    "resolution": {
+      "state": "OPEN",
+      "tests": "PASS_SOURCE_ONLY",
+      "verifiedAt": null,
+      "evidence": [
+        "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40232319822",
+        "https://vercel.com/1993khairuladam-3016/mrs10-r211-mobile-map-uat/3BfapWD3LwKDsG8MN29VpV8DDEFW"
+      ],
+      "releaseGates": {
+        "ci": "PASS",
+        "catalogue": "PASS",
+        "publicArtifact": "PASS_BUILD",
+        "deployment": "PASS_STAGING_METADATA_ONLY",
+        "httpSmoke": "UNVERIFIED",
+        "safariUat": "NOT_PASS",
+        "security": "PARTIAL_VERIFIED",
+        "integratedR217R218R219": "NOT_TESTED",
+        "ownerProductionApproval": "NOT_APPROVED"
+      }
+    },
+    "releaseDecision": "NO-GO merge/production; isolated staging source SHA target READY, Owner Safari UAT, deployment HTTP/security smoke and combined R2.17+R2.18+R2.19 integration remain pending.",
+    "nextAction": "Owner Safari: open isolated R2.18 URL, select LRT Kelana Jaya in Malaysia railPilot, confirm 37 ruby numbered stations KJ1–KJ37, popup code/contrast, theme and country isolation; capture no secrets. Separately audit Vercel-served HTTP file exposure and source vector POIs before any readiness gate. Do not merge/push Production."
   }
 }
