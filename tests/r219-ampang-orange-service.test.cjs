@@ -80,7 +80,7 @@ function boot(){
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};
  w.HTMLDialogElement.prototype.close=function(){this.open=false};
  w.eval(read('assets/mrs10-r219-ampang-service.js'));
- const inline=viewer.match(/<script>([\s\S]*?)<\/script>\s*<\/body>/);
+ const inline=viewer.match(/<script>([\s\S]*?)<\/script>/);
  assert(inline,'standalone viewer script');
  w.eval(inline[1]);return w;
 }
