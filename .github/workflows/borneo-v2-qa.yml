@@ -1,0 +1,34 @@
+name: MR-S10 Borneo V2 isolated QA
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-borneo-rail-art-v2
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: borneo-v2-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  isolated-contract-and-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci --ignore-scripts
+      - name: Borneo data and browser-DOM contract QA
+        run: node --test tests/borneo-v2.test.cjs
+      - name: Existing MR-S10 regression suite
+        run: npm test
+      - name: Production scope guard
+        run: |
+          test "${GITHUB_REF}" = "refs/heads/feature/mrs10-p01-borneo-rail-art-v2"
+          test ! -e .vercel
+          echo "Isolated QA only; no deployment or Production writes"
