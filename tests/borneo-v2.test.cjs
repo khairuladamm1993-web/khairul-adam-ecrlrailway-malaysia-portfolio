@@ -35,7 +35,7 @@ test("KUTS is trackless ART, schematic-only, with no deceptive operational label
 test("isolation: preview creates no production/Auth/RLS side effects",()=>{
  assert.match(html,/noindex,nofollow/);assert.ok(!/supabase|login|service.role|api.key/i.test(js));
  assert.ok(!/https?:\/\/[^"']*\.vercel\.app/.test(html));assert.ok(!/CONVENTIONAL_RAILWAY_TRACK/.test(JSON.stringify(registry.sarawak)));
- assert.match(html,/maplibre-gl@6\.13\.0/);assert.ok(!/<script[^>]*gateway\.js/.test(html));
+ assert.match(html,/maplibre-gl@6\.13\.0/);assert.ok(!/<script[^>]*gateway\.js/.test(html)); assert.match(html,/type="module"/); assert.ok(html.includes("dist/maplibre-gl.mjs")); assert.ok(!html.includes("dist/maplibre-gl.js"));
 });
 test("accessible controls and 4-language renderer present",()=>{
  for(const k of ["ALL","SABAH","SARAWAK","BLUE","RED","GREEN"])assert.ok(html.includes('data-category="'+k+'"'));
