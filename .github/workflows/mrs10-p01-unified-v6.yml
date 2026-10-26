@@ -1,0 +1,40 @@
+name: MR-S10 P01 Unified V6 isolated integration QA
+on:
+  push:
+    branches: [feature/mrs10-p01-unified-v6-sri-mono-erl-isolated]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Legacy and V4 V5 V6 regression
+        run: |
+          npm test
+          node --test tests/unified-v4-gis.test.cjs tests/unified-v5-regression.test.cjs tests/unified-v6-regression.test.cjs
+      - name: Map source syntax
+        run: |
+          node --check assets/unified-v6-map.js
+          node --check assets/unified-v6/adapter.js
+          node --check scripts/build-unified-v6.cjs
+      - name: V6 safe build
+        run: |
+          node scripts/build-unified-v6.cjs
+          test -f dist-unified-v6/unified-map-v6.html
+          test ! -e dist-unified-v6/assets/member-gateway.js
+          grep -q 'overpass.kumi.systems' dist-unified-v6/_headers
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v6-public-only-audit
+          path: dist-unified-v6/
+          retention-days: 3
