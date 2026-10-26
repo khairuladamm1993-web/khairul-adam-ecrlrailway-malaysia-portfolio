@@ -23,7 +23,8 @@ try{
   const status=await page.locator('#qa-note').textContent();
   const totals=await page.locator('.legend-item').allTextContents();
   const counts=totals.map(x=>{const m=x.match(/(\d+)\/(\d+)/);return m?{matched:Number(m[1]),expected:Number(m[2])}:null});
-  const result={viewport:viewport.name,status,counts,gisResponse,errors:errors.slice(0,20),title:await page.title()};
+  const visual=await page.evaluate(()=>window.MRS10V4Diagnostics?.snapshot?.()||null);
+  const result={viewport:viewport.name,status,counts,visual,gisResponse,errors:errors.slice(0,20),title:await page.title()};
   await page.screenshot({path:'artifacts/unified-v4-browser/'+viewport.name+'.png',fullPage:true});
   await fs.writeFile('artifacts/unified-v4-browser/'+viewport.name+'.json',JSON.stringify(result,null,2));
   console.log('BROWSER_RESULT',JSON.stringify(result));
@@ -32,6 +33,8 @@ try{
    assert.deepEqual(counts.map(x=>x.expected),[29,37,18,36]);
    assert(counts.every(x=>x.matched>0),'every route must display at least one source-backed GIS marker');
    assert(await page.locator('#map canvas').count()>0,'map canvas');
+   assert(result.visual?.renderedFeatureCount>0,'ACTUAL_VISIBLE_STATION_MARKERS_ZERO');
+   assert(result.visual?.styleLoaded,'MAPLIBRE_STYLE_NOT_LOADED');
    await page.locator('#filters button').filter({hasText:'LRT'}).click();
    assert.equal(await page.locator('.legend-item').count(),2);
    await page.locator('#reset').click();
