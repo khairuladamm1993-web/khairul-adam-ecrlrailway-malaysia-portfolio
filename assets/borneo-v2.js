@@ -68,7 +68,15 @@ function renderSchematic(){
 }
 function renderLineup(){
   const rows=selectedStations(), list=$("lineup");list.replaceChildren();displaySummary(rows);
-  if(!rows.length){list.append(attach("p","summary",tr("noResults")));return}
+  if(!rows.length){
+    if(state.category==="GREEN"&&!state.query.trim()){
+      const official=state.data.sarawak.lines.find(l=>l.id==="GREEN");
+      const label=attach("div","line-label",tr("green")+" · ART");
+      label.style.setProperty("--line-color",COLORS.GREEN);
+      list.append(label,attach("p","summary",official.start+" → "+official.end+" · "+tr("artNoStop")+" · "+tr("schematic")));
+    }else list.append(attach("p","summary",tr("noResults")));
+    return;
+  }
   let last=null;
   rows.forEach(s=>{
     const group=s.network==="SABAH"?(s.segment==="gorge"?"GORGE":s.segment==="reference_only"?"REFERENCE":"MAIN"):s.line;
