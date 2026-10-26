@@ -20,7 +20,7 @@ test('P01 Monorail V2: correct interchange concept and independent service ID',(
 test('P01 Monorail V2: reject unsupported candidate, code mismatch, duplicate, invalid coordinate',()=>{
  const mk=(name,id,extra={})=>({type:'node',id,lat:3.15,lon:101.70,
   tags:{name,railway:'station',monorail:'yes',...extra}});
- const result=api.sourceBacked([mk('KL Sentral',101),mk('Bukit Bintang',102,{ref:'MR6'}),
+ const result=api.sourceBacked([mk('KL Sentral',101),{...mk('Bukit Bintang',102,{ref:'MR6'}),lat:3.16},
   mk('Titiwangsa',103,{ref:'MR4'}),mk('Imbi',104,{monorail:'no'}),
   mk('Hang Tuah',105),mk('Hang Tuah',106)]);
  assert(result.ok);assert.deepEqual(result.stations.map(s=>s.code),['MR1','MR6']);

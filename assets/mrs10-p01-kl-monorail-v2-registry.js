@@ -52,7 +52,7 @@ function findStation(name){
 }
 function sourceBacked(features){
  if(!Array.isArray(features))return Object.freeze({ok:false,reason:'INVALID_SOURCE',stations:[],matched:0});
- const found=new Map(),rejected=[];
+ const found=new Map(),ambiguous=new Set(),rejected=[];
  for(const feature of features){
   const tags=feature?.tags??{};
   const raw=String(tags.name||'');
@@ -73,8 +73,8 @@ function sourceBacked(features){
    coordinates:Object.freeze([lon,lat]),osmType:feature.type,osmId:feature.id,
    osmUrl:'https://www.openstreetmap.org/'+feature.type+'/'+feature.id,
    status:'SOURCE_BACKED_PUBLIC_POI_NOT_SURVEY',interchangeServices:s.interchangeServices});
-  if(found.has(s.id)){found.set(s.id,null);rejected.push({code:s.code,sourceId:feature.id,reason:'AMBIGUOUS'});}
-  else found.set(s.id,rec);
+  if(found.has(s.id)){found.set(s.id,null);ambiguous.add(s.id);rejected.push({code:s.code,sourceId:feature.id,reason:'AMBIGUOUS'});}
+  else if(!ambiguous.has(s.id))found.set(s.id,rec);
  }
  const matches=Object.freeze(stations.map(s=>found.get(s.id)).filter(Boolean));
  const positions=new Set(matches.map(p=>p.coordinates.join(':')));

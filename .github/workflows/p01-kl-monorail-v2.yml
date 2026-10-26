@@ -22,6 +22,10 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci --ignore-scripts
+      - name: Syntax check isolated browser modules
+        run: |
+          node --check assets/mrs10-p01-kl-monorail-v2-registry.js
+          node --check assets/mrs10-p01-kl-monorail-v2-viewer.js
       - name: Isolated monorail Node tests
         run: node --test tests/p01-kl-monorail-v2.test.cjs
       - name: Full integrated regression
