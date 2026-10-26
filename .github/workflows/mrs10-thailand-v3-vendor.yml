@@ -1,0 +1,39 @@
+name: Thailand V3 vendor pinned MapLibre in isolated branch
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-thailand-v3-cross-border
+    paths:
+      - .github/workflows/mrs10-thailand-v3-vendor.yml
+permissions:
+  contents: write
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Copy reviewed npm release into Thailand V3 only
+        run: |
+          set -euo pipefail
+          npm ci
+          npm install --no-save --ignore-scripts maplibre-gl@6.13.0
+          mkdir -p assets/thailand-v3-vendor
+          cp node_modules/maplibre-gl/dist/maplibre-gl.js assets/thailand-v3-vendor/maplibre-gl-6.13.0.js
+          cp node_modules/maplibre-gl/dist/maplibre-gl.css assets/thailand-v3-vendor/maplibre-gl-6.13.0.css
+          cp node_modules/maplibre-gl/LICENSE.txt assets/thailand-v3-vendor/MAPLIBRE-LICENSE.txt
+          sha256sum assets/thailand-v3-vendor/maplibre-gl-6.13.0.js assets/thailand-v3-vendor/maplibre-gl-6.13.0.css > assets/thailand-v3-vendor/SHA256SUMS
+          node --check assets/thailand-v3-vendor/maplibre-gl-6.13.0.js
+      - name: Push vendor only to Thailand isolated feature branch, never force
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/thailand-v3-vendor
+          git diff --cached --quiet && exit 0
+          git commit -m "chore(thailand-v3): vendor MapLibre 6.13.0 npm runtime (BSD-3-Clause)"
+          git push origin HEAD:feature/mrs10-p01-thailand-v3-cross-border
