@@ -63,9 +63,9 @@ test("JSDOM runtime: source has 15 points by default; filters, search, reset, 4 
  const click=(category)=>w.document.querySelector('[data-category="'+category+'"]').click();
  assert.equal(instances.length,1);assert.equal(data().length,15);
  assert.equal(w.__BORNEO_V2_QA().stationCount,15);
- click("SARAWAK");assert.equal(data().length,0);assert.equal(w.__BORNEO_V2_QA().category,"SARAWAK");
+ click("SARAWAK");assert.equal(data().length,0);assert.equal(w.document.querySelectorAll(".schematic-line").length,3);assert.equal(w.__BORNEO_V2_QA().category,"SARAWAK");
  assert.match(w.document.getElementById("summary").textContent,/Skematik/);
- click("BLUE");assert.equal(data().length,0);
+ click("BLUE");assert.equal(data().length,0);assert.equal(w.document.querySelectorAll(".schematic-line").length,1);
  click("SABAH");assert.equal(data().length,15);
  const search=w.document.getElementById("search");search.value="Tenom";search.dispatchEvent(new w.Event("input",{bubbles:true}));assert.equal(data().length,1);
  w.document.getElementById("reset").click();assert.equal(data().length,15);assert.equal(search.value,"");
