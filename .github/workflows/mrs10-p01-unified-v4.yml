@@ -22,6 +22,8 @@ jobs:
         run: npm test
       - name: V4 exact station/source/security tests
         run: node --test tests/unified-v4-gis.test.cjs
+      - name: Live GIS station provenance audit (read only)
+        run: node scripts/audit-unified-v4-source.cjs
       - name: Syntax and public-only packaging
         run: |
           node --check assets/unified-v4-registry.js
