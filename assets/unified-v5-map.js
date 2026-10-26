@@ -224,7 +224,14 @@ function startMap(){
    state.mapReady=true;updateMapLayer();fitOnce();showStatus();
   });
   state.map.on('idle',()=>{
-    if(state.mapReady&&state.points.size&&!state.map.getSource(srcId(state.manifest[0]?.id))){updateMapLayer();fitOnce()}
+    // Safari/WebKit and Chromium can reach loaded style without a second 'load'
+    // event after setStyle(). Never gate recovery on stale mapReady=false.
+    if(state.map.isStyleLoaded()){
+     state.mapReady=true;
+     const missing=state.manifest.some(route=>
+      !state.map.getSource(srcId(route.id))||!state.map.getLayer(layerId(route.id)));
+     if(state.points.size&&missing){updateMapLayer();fitOnce();}
+    }
     showStatus();
    });
    state.map.on('error',()=>{if(!state.mapReady){state.networkError=true;showStatus()}});
