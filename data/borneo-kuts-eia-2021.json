@@ -1,0 +1,192 @@
+{
+  "schema": "mrs10.kuts.historical-eia-2021.v1",
+  "as_of": "2026-10-27",
+  "document_year": 2021,
+  "source_title": "KUTS Revised EIA DOE Volume 1 Main Text October 2021, Table 5-11",
+  "source_url": "https://www.scribd.com/document/727127303/KUTS-Revised-EIA-DOE-Volume-1-Main-Text-October-2021",
+  "disclaimer": "HISTORICAL proposal coordinates from 2021 EIA; NEVER represent as official current 2026 station site, final platform geometry, or service operation.",
+  "transport_type": "URBAN_TRANSIT_ART",
+  "no_route_geometry": true,
+  "records": [
+    {
+      "id": "EIA21-SM01",
+      "station_code": "SM01",
+      "operator_recent_name": "University",
+      "line": "BLUE",
+      "landmark_2021": "UNIMAS Pintu Timur",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.4546889,
+          1.4570667
+        ]
+      },
+      "coordinate_year": 2021,
+      "geometry_confidence": "HISTORICAL_EIA_PLANNED_NOT_CURRENT_STATION",
+      "source_table": "5-11",
+      "point_is_current_station": false
+    },
+    {
+      "id": "EIA21-SM03",
+      "station_code": "SM03",
+      "operator_recent_name": "Sigitin",
+      "line": "BLUE",
+      "landmark_2021": "Wisma SALCRA",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.4265333,
+          1.4579278
+        ]
+      },
+      "coordinate_year": 2021,
+      "geometry_confidence": "HISTORICAL_EIA_PLANNED_NOT_CURRENT_STATION",
+      "source_table": "5-11",
+      "point_is_current_station": false
+    },
+    {
+      "id": "EIA21-SM04",
+      "station_code": "SM04",
+      "operator_recent_name": "UNIMAS",
+      "line": "BLUE",
+      "landmark_2021": "UNIMAS",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.4186972,
+          1.4640278
+        ]
+      },
+      "coordinate_year": 2021,
+      "geometry_confidence": "HISTORICAL_EIA_PLANNED_NOT_CURRENT_STATION",
+      "source_table": "5-11",
+      "point_is_current_station": false
+    },
+    {
+      "id": "EIA21-SM05",
+      "station_code": "SM05",
+      "operator_recent_name": "Sarawak Heart Centre",
+      "line": "BLUE",
+      "landmark_2021": "Sarawak Heart Centre",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.4168889,
+          1.4732083
+        ]
+      },
+      "coordinate_year": 2021,
+      "geometry_confidence": "HISTORICAL_EIA_PLANNED_NOT_CURRENT_STATION",
+      "source_table": "5-11",
+      "point_is_current_station": false
+    },
+    {
+      "id": "EIA21-SM06",
+      "station_code": "SM06",
+      "operator_recent_name": "Riveria",
+      "line": "BLUE",
+      "landmark_2021": "Riveria",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.4026583,
+          1.4938694
+        ]
+      },
+      "coordinate_year": 2021,
+      "geometry_confidence": "HISTORICAL_EIA_PLANNED_NOT_CURRENT_STATION",
+      "source_table": "5-11",
+      "point_is_current_station": false
+    },
+    {
+      "id": "EIA21-SM11",
+      "station_code": "SM11",
+      "operator_recent_name": "The Spring",
+      "line": "BLUE",
+      "landmark_2021": "The Spring",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3572972,
+          1.53455
+        ]
+      },
+      "coordinate_year": 2021,
+      "geometry_confidence": "HISTORICAL_EIA_PLANNED_NOT_CURRENT_STATION",
+      "source_table": "5-11",
+      "point_is_current_station": false
+    },
+    {
+      "id": "EIA21-SM14",
+      "station_code": "SM14",
+      "operator_recent_name": "Hikmah Exchange",
+      "line": "BLUE",
+      "landmark_2021": "Hikmah Exchange",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3411889,
+          1.5577778
+        ]
+      },
+      "coordinate_year": 2021,
+      "geometry_confidence": "HISTORICAL_EIA_PLANNED_NOT_CURRENT_STATION",
+      "source_table": "5-11",
+      "point_is_current_station": false
+    },
+    {
+      "id": "EIA21-SR05",
+      "station_code": "SR05",
+      "operator_recent_name": "Kuching Sentral",
+      "line": "RED",
+      "landmark_2021": "Kuching Sentral",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3341972,
+          1.4812861
+        ]
+      },
+      "coordinate_year": 2021,
+      "geometry_confidence": "HISTORICAL_EIA_PLANNED_NOT_CURRENT_STATION",
+      "source_table": "5-11",
+      "point_is_current_station": false
+    },
+    {
+      "id": "EIA21-SR06",
+      "station_code": "SR06",
+      "operator_recent_name": "Kuching International Airport",
+      "line": "RED",
+      "landmark_2021": "Airport",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3415167,
+          1.4878417
+        ]
+      },
+      "coordinate_year": 2021,
+      "geometry_confidence": "HISTORICAL_EIA_PLANNED_NOT_CURRENT_STATION",
+      "source_table": "5-11",
+      "point_is_current_station": false
+    },
+    {
+      "id": "EIA21-SR09",
+      "station_code": "SR09",
+      "operator_recent_name": "Swinburne",
+      "line": "RED",
+      "landmark_2021": "Swinburne University",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          110.3582861,
+          1.5309611
+        ]
+      },
+      "coordinate_year": 2021,
+      "geometry_confidence": "HISTORICAL_EIA_PLANNED_NOT_CURRENT_STATION",
+      "source_table": "5-11",
+      "point_is_current_station": false
+    }
+  ]
+}
