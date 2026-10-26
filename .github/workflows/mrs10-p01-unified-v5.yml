@@ -1,0 +1,39 @@
+name: MR-S10 P01 Unified V5 full visual gate
+on:
+  push:
+    branches: [feature/mrs10-p01-unified-v5-visual-gate]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Full legacy regression
+        run: npm test
+      - name: Source GIS V4 regression + V5 strict regression
+        run: node --test tests/unified-v4-gis.test.cjs tests/unified-v5-regression.test.cjs
+      - name: Live public GIS source provenance (read-only)
+        run: node scripts/audit-unified-v4-source.cjs
+      - name: Security, syntax and public-only V5 package
+        run: |
+          node --check assets/unified-v5-map.js
+          node --check scripts/build-unified-v5.cjs
+          node scripts/build-unified-v5.cjs
+          test -f dist-unified-v5/unified-map-v5.html
+          test ! -e dist-unified-v5/assets/member-gateway.js
+          grep -q "worker-src" dist-unified-v5/_headers
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unified-v5-public-only
+          path: dist-unified-v5/
+          retention-days: 3
