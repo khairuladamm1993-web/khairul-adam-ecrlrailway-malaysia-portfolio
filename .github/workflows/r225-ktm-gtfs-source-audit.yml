@@ -1,0 +1,17 @@
+name: KTMB official GTFS coordinate-source audit (isolated)
+on:
+  push:
+    branches: [feature/mrs10-p01-ktm-v3-gtfs-station-coverage]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read only checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: KTMB GTFS official stop coordinate coverage
+        run: python3 scripts/ktm_gtfs_station_audit.py
