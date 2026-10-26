@@ -19,7 +19,7 @@ button,select{font:inherit;min-height:44px;border-radius:10px;border:1px solid v
 <div class="panel"><p id="map-status" role="status" aria-live="polite"></p><p class="security-note" id="evidence"></p><p><a href="https://www.ktmb.com.my/TrainTime.html" rel="noopener noreferrer" target="_blank">KTMB timetable</a> · <a href="https://developer.data.gov.my/realtime-api/gtfs-static.en" rel="noopener noreferrer" target="_blank">KTMB GTFS (CC BY 4.0)</a> · <a href="https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer/0" rel="noopener noreferrer" target="_blank">Klang Valley GIS</a> · <a href="https://service.mygeomap.gov.my/arcgis/rest/services/Transportation_services/1MM_Template_Servis_Pengangkutan/MapServer/2" rel="noopener noreferrer" target="_blank">MyGeoMap KTM candidate GIS</a></p></div>
 <section id="services" aria-label="KTM ordered stations"></section><div class="panel security-note"><p id="notice"></p></div>
 </main>
-<script src="./assets/mrs10-r223-ktm-service.js"></script><script>
+<script src="./assets/mrs10-r223-ktm-service.js"></script><script src="./assets/ktm-unified-preview-overlay.js"></script><script>
 (async function(){'use strict';
 const $=id=>document.getElementById(id),api=window.MRS10KTMV2;
 const t={
@@ -28,7 +28,7 @@ en:{heading:'KTM Komuter — six service identities',intro:'Lineup, legend and s
 zh:{heading:'KTM Komuter — 六条服务线路',intro:'列表线、图例和车站标记使用相同线路颜色。站序为示意图。',all:'全部 / 重置',count:'站',shared:'共用车站',pending:'正在检查公开 GIS；不会捏造位置。',matched:n=>'辅助 GIS：'+n+' 个已匹配站点（非运营测量坐标）。',noMapped:'该线路暂无匹配的 GIS 站点，仍可查看示意站序。',mapped:'个 GIS 匹配点',unavailable:'无法读取 GIS，车站列表仍可查看。',noPoint:'车站暂无可验证 GIS 位置，不生成虚假点位。',point:'二级 GIS 参考位置，非 KTMB 运营测量',code:'KTMB 车站代码：尚未核实',source:'地理来源：二级 GIS',sourceOfficial:'来源：data.gov.my · KTMB 官方 GTFS',officialPoint:'KTMB 官方 GTFS 站点坐标（非轨道测量数据）',note:'不绘制未经验证的真实铁路轨道。颜色为近似 UI 色，南部颜色为临时方案。'},
 th:{heading:'KTM Komuter — 6 บริการ',intro:'สีหมุด สัญลักษณ์ และลำดับสถานีตรงกับสีบริการ แผนผังเป็นเพียงลำดับ',all:'ทั้งหมด / รีเซ็ต',count:'สถานี',shared:'สถานีร่วม',pending:'กำลังตรวจสอบ GIS ไม่มีการสร้างพิกัดเอง',matched:n=>'GIS แหล่งข้อมูลรอง: จับคู่ได้ '+n+' สถานี (ไม่ใช่พิกัดสำรวจเดินรถ)',noMapped:'ยังไม่มีจุดสถานี GIS ที่จับคู่ได้สำหรับบริการนี้ สามารถดูแผนผังลำดับสถานี',mapped:'จุดสถานี GIS ที่จับคู่ได้',unavailable:'ไม่สามารถโหลด GIS ได้ แต่รายการสถานียังแสดง',noPoint:'ไม่มีตำแหน่ง GIS ที่ตรวจสอบได้ ไม่สร้างตำแหน่งหรือเส้นรางเอง',point:'พิกัด GIS รอง ไม่ใช่การสำรวจปฏิบัติการ',code:'รหัส KTMB: ยังไม่ยืนยัน',source:'แหล่ง GIS รอง',sourceOfficial:'แหล่งข้อมูล: data.gov.my · KTMB GTFS ทางการ',officialPoint:'ตำแหน่งสถานี GTFS ทางการ KTMB (ไม่ใช่แนวรางที่สำรวจ)',note:'ไม่มีการสร้างแนวรางจริง สีเป็นค่าประมาณของ UI และสีบริการใต้ยังไม่ใช่สีทางการ'}
 };
-let catalogue,focus='all',theme='light',map=null,lib=null,decoded=null,activePopup=null,activePopupFeature=null,styleReady=false,officialError='';
+let catalogue,focus='all',theme='light',map=null,lib=null,decoded=null,activePopup=null,activePopupFeature=null,styleReady=false,officialError='',extension=null;
 const baseLabelDefaults=new Map();
 const word=()=>t[$('lang').value]||t.en,txt=(id,s)=>{$(id).textContent=s;},routes=()=>catalogue.services;
 const regionLabel=sector=>({central:'Lembah Klang / Klang Valley',north:'Utara / North',south:'Selatan / South'})[sector];
@@ -101,6 +101,7 @@ function focusSelectedRoute(){
  return true;
 }
 function selectRoute(id){
+ extension?.clear();
  focus=id;
  activePopup?.remove();activePopup=null;activePopupFeature=null;
  render();
@@ -165,7 +166,7 @@ async function initGIS(){
  statusMessage();
  focusSelectedRoute();
 }
-$('lang').addEventListener('change',()=>{document.documentElement.lang=$('lang').value==='zh'?'zh-Hans':$('lang').value;render();statusMessage();localizeBaseMap();updateLayers();if(activePopupFeature)popup(activePopupFeature);});$('theme').addEventListener('click',()=>{theme=theme==='light'?'dark':'light';document.documentElement.dataset.theme=theme;styleReady=false;map?.setStyle('https://tiles.openfreemap.org/styles/'+(theme==='dark'?'dark':'positron'));});$('expand').addEventListener('click',()=>{const shell=$('map-shell'),isFull=!shell.classList.contains('expanded');shell.classList.toggle('expanded',isFull);$('expand').setAttribute('aria-expanded',String(isFull));setTimeout(()=>map?.resize(),100);});
-try{const response=await fetch('./assets/mrs10-r223-ktm-catalogue.json',{cache:'no-store'});if(!response.ok)throw Error('Catalog HTTP');catalogue=await response.json();if(!api?.validateCatalogue(catalogue))throw Error('Catalog invalid');render();await initMap();await initGIS();}catch{txt('map-status','KTM catalogue invalid / Data katalog gagal dimuatkan.');}
+$('lang').addEventListener('change',()=>{document.documentElement.lang=$('lang').value==='zh'?'zh-Hans':$('lang').value;render();statusMessage();localizeBaseMap();updateLayers();if(activePopupFeature)popup(activePopupFeature);extension?.refresh();});$('theme').addEventListener('click',()=>{theme=theme==='light'?'dark':'light';document.documentElement.dataset.theme=theme;styleReady=false;map?.setStyle('https://tiles.openfreemap.org/styles/'+(theme==='dark'?'dark':'positron'));});$('expand').addEventListener('click',()=>{const shell=$('map-shell'),isFull=!shell.classList.contains('expanded');shell.classList.toggle('expanded',isFull);$('expand').setAttribute('aria-expanded',String(isFull));setTimeout(()=>map?.resize(),100);});
+try{const response=await fetch('./assets/mrs10-r223-ktm-catalogue.json',{cache:'no-store'});if(!response.ok)throw Error('Catalog HTTP');catalogue=await response.json();if(!api?.validateCatalogue(catalogue))throw Error('Catalog invalid');render();await initMap();await initGIS();extension=window.KTMUnifiedOverlay?.mount({map,lib,selectKomuter:selectRoute})||null;}catch{txt('map-status','KTM catalogue invalid / Data katalog gagal dimuatkan.');}
 })();
 </script></body></html>
