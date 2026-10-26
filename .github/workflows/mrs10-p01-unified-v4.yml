@@ -59,7 +59,7 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Real browser GIS+UX smoke (separate Safari Owner gate)
         env:
-          UNIFIED_V4_URL: https://mrs10-p01-unified-v4-isolated-preview-b020jfogd.vercel.app/unified-map-v4.html
+          UNIFIED_V4_URL: https://mrs10-p01-unified-v4-isolated-preview-nncr89nsg.vercel.app/unified-map-v4.html
         run: node tests/unified-v4-browser-smoke.mjs
       - uses: actions/upload-artifact@v4
         if: always()
