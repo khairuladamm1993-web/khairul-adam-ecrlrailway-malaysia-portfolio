@@ -1,0 +1,86 @@
+{
+  "schema": "mrs10.integration-manifest.v1",
+  "name": "MR-S10 P01 Borneo Rail & ART V2",
+  "code_family": "borneo-v2",
+  "source_branch": "feature/mrs10-p01-borneo-rail-art-v2",
+  "integration_target": "P01 Malaysia Unified Railway Map (future owner-authorized integration only)",
+  "deployment": "STAGING_NON_PRODUCTION",
+  "production_merge_authorized": false,
+  "isolated": true,
+  "entry_point": "borneo-v2.html",
+  "module_files": [
+    "borneo-v2.html",
+    "assets/borneo-v2.css",
+    "assets/borneo-v2.js",
+    "data/borneo-v2-registry.json"
+  ],
+  "test_files": [
+    "tests/borneo-v2.test.cjs",
+    ".github/workflows/borneo-v2-qa.yml"
+  ],
+  "registry": {
+    "path": "data/borneo-v2-registry.json",
+    "schema": "mrs10.borneo.v2",
+    "sabah": {
+      "identity": "SABAH_JKNS",
+      "classification": "CONVENTIONAL_RAILWAY_TRACK",
+      "station_count": 15,
+      "points_type": "GeoJSON POINTS ONLY",
+      "coordinates": "WGS84 [longitude, latitude]",
+      "coordinate_authority": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+      "track_geometry": null,
+      "marker_color": "#008C95",
+      "source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/"
+    },
+    "sarawak": {
+      "identity": "SARAWAK_KUTS",
+      "classification": "URBAN_TRANSIT_ART",
+      "station_names_partial": 14,
+      "lines": [
+        "BLUE",
+        "RED",
+        "GREEN"
+      ],
+      "geometry": null,
+      "stop_coordinates": null,
+      "rail_track": false,
+      "colors_are_provisional": true,
+      "source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+    }
+  },
+  "namespace": {
+    "ids": [
+      "SSR-##",
+      "KUTS-SM##",
+      "KUTS-SR##"
+    ],
+    "maplibre": {
+      "sources": [
+        "borneo-points"
+      ],
+      "layers": [
+        "borneo-stations"
+      ]
+    },
+    "css_page_scope": "dedicated page; no shared global CSS injection",
+    "js_page_scope": "IIFE"
+  },
+  "quality_gate": {
+    "data_ci_required": true,
+    "rendered_browser_required": true,
+    "safari_owner_required": true,
+    "preview_ready_required": true,
+    "source_review_required": true,
+    "auto_merge": false
+  },
+  "restrictions": [
+    "Do not create connecting railway LineString from Sabah station points",
+    "Do not create KUTS steel railway track",
+    "Do not geocode KUTS names to fabricated station GPS",
+    "Do not promote staging to production",
+    "Do not merge or edit existing integrated mapping modules without owner review",
+    "Do not label all JKNS stations as stops on each service"
+  ],
+  "status_as_of": "2026-10-27",
+  "status": "PARTIAL_PENDING_BROWSER_AND_SAFARI_UAT"
+}
