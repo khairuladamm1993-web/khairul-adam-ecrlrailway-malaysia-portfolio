@@ -346,7 +346,7 @@
           "SM05",
           "SM06",
           "SM07",
-          "SM09",
+          "SM11",
           "SM14"
         ],
         "lineup_completeness": "PARTIAL_OFFICIAL_IDENTITIES_NOT_COMPLETE_ROUTE_SEQUENCE"
@@ -443,8 +443,8 @@
         "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
       },
       {
-        "id": "KUTS-SM09",
-        "code": "SM09",
+        "id": "KUTS-SM11",
+        "code": "SM11",
         "name": "The Spring",
         "line": "BLUE",
         "point": null,
@@ -550,6 +550,22 @@
         "location_confidence": "OPERATOR_PLACE_NAME_NO_STATION_GPS",
         "source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
       }
-    ]
+    ],
+    "map_reference": {
+      "id": "KUCHING_ART_REGIONAL_OVERVIEW",
+      "name": "Kuching",
+      "point": {
+        "type": "Point",
+        "coordinates": [
+          110.3494,
+          1.5606
+        ]
+      },
+      "classification": "CITY_REFERENCE_NOT_ART_STATION",
+      "point_confidence": "SECONDARY_OSM_CITY_CENTRE",
+      "source": "https://mapcarta.com/Kuching",
+      "osm_id": "node/4834272899",
+      "geo_warning": "City centre locator for the Kuching ART network only; not a station, depot, interchange or track alignment"
+    }
   }
 }
