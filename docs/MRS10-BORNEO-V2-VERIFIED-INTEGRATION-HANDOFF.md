@@ -115,3 +115,28 @@ Suggested safe integration:
 | Integration approval | NOT GIVEN |
 
 This document documents implementation and blockers. It does not assert production authorization or blanket visual PASS.
+
+
+## I. 27 October 2026 Owner screenshot corrective release — ART stop-level UI
+
+**Issue observed:** Sabah rendered 15 station markers, but the only Sarawak map object was a large Kuching city-area reference card. The below-page list was not comparable to a railway station map and offered no geographically distinguishable ART points.
+
+**Root cause:** Source-backed 2026 KUTS station location registry contains only null GPS values; the city label was the only geo-located Sarawak object. Previous JavaScript and CI only checked that the city object existed, not that individual site points or an immediately visible lineup appeared.
+
+**Remediation:**
+- Retain 15 Sabah true GIS station points unchanged.
+- Load `data/borneo-kuts-eia-2021.json` with **10 historical EIA 2021 planned-site coordinates**, not modern GPS. All records have `point_is_current_station:false` and `HISTORICAL_EIA_PLANNED_NOT_CURRENT_STATION` confidence. Do **not** confuse them with present stations or generate 2026 ART route LineStrings from them.
+- New unique MapLibre Source ID `borneo-kuts-eia21` and Layer ID `borneo-kuts-eia21-circles`, rendered as colored-rim light circles rather than solid Sabah stations, with year and source link in the popup.
+- Add an **on-map schematic stop sequence** and clickable named stations. Current operator-publication named roster still partial: 8 Blue and 6 Red; Green has no verified complete stop list. Unconfirmed stops remain sketched only, not geocoded.
+- Shrink Kuching city reference label from a wide three-button overlay to a compact label; selection is through category controls and station lineup.
+- Resolve Green Line current reported Phase 1 extent to **Pending–Bulatan Yayasan Sarawak (10.5km)**, distinguishing older Damai Central extended concepts; source: https://mot.sarawak.gov.my/web/subpage/news_view/960 (1 September 2026).
+- Reclassify The Spring station code: **official Sarawak Metro 2026 reports contradict each other** — SM11 in June, SM09 in October. Keep code dispute visible and **do not assert resolved identity** until official clarification; https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system .
+- Retain KUTS type `URBAN_TRANSIT_ART` and `rail_track:false`.
+
+**Historical coordinate source:** [KUTS Revised EIA DOE Volume 1 October 2021, Table 5-11](https://www.scribd.com/document/727127303/KUTS-Revised-EIA-DOE-Volume-1-Main-Text-October-2021). Coordinates have archival planning significance only; scheme is documented as subject to design changes. Do not silently upgrade `HISTORICAL_EIA_PLANNED_NOT_CURRENT_STATION` to `OFFICIAL_CURRENT_GIS`.
+
+**QA:** [GitHub Actions run 40411797108](https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40411797108) completed **SUCCESS** at runtime commit `11fb762ef22c662171cc6a3b2d21b211a72c212e`. True Chromium MapLibre browser tests for 1024×768 iPad-like and 390×844 iPhone-like viewport logged: 15 Sabah rendered; 10/10 historical EIA planned points rendered on Sarawak; zero purported current ART station GPS. Filter, dark mode, popup, station lineup, search, reset passed. Screenshots artifact ID `12693761586`.
+
+**Staging:** `dpl_ES8hj3iytRvG1cpoFaj63xxUcAbk`, target `staging`, status READY, exact audited runtime SHA `11fb762ef22c662171cc6a3b2d21b211a72c212e`, all five public assets HTTP 200. URL: https://mrs10-p01-borneo-v2-isolated-preview-d3fpzbl3l.vercel.app/borneo-v2.html . Owner Safari iPad visual acceptance **PENDING**.
+
+**Integration gate:** PARTIAL. To integrate into the unified map, carry historical EIA as a separate optional, well-labeled reference overlay; do not merge with live station layers or current ART track geometry. Do not merge into Integrated or Production without Owner sign-off. Rollback future integration by reverting only its reviewed integration commit. Historical city reference markers must not count as ART station coordinates.
