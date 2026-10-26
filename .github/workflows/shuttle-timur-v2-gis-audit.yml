@@ -57,7 +57,18 @@ jobs:
           assert [len(s['stops']) for s in t['services']]==[38,23,40]
           assert a['zipSha256']==t['zipSha256']
           assert len(a['stops'])==40
-          assert all(s['order']==i+1 and s['originalCoordinates']==s['effectiveCoordinates'] and not s['coordinatesChanged'] for i,s in enumerate(a['stops']))
+          assert all(
+              s['order']==i+1
+              and s['originalCoordinates']=={'lat':gtfs['lat'],'lon':gtfs['lon']}
+              and s['coordinatesChanged']==(s['originalCoordinates']!=s['effectiveCoordinates'])
+              and (not s['coordinatesChanged'] or (
+                s['replacementSourceUrl']
+                and s['decision'] in ('VERIFIED','APPROXIMATE')
+                and s['effectiveCoordinates']['lat']>1
+                and s['effectiveCoordinates']['lon']>99
+              ))
+              for i,(s,gtfs) in enumerate(zip(a['stops'],t['services'][2]['stops']))
+          )
           assert [s['id'] for s in t['services'][2]['stops']]==[s['stopId'] for s in a['stops']]
           print('SHUTTLE_GIS_SOURCE_GATE_PASS (NOT Safari visual acceptance)')
           print('KTM_UNIFIED_JSON='+json.dumps(t,ensure_ascii=True,separators=(',',':')))
