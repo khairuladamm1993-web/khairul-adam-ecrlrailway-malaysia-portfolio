@@ -32,3 +32,32 @@ jobs:
           test "${GITHUB_REF}" = "refs/heads/feature/mrs10-p01-borneo-rail-art-v2"
           test ! -e .vercel
           echo "Isolated QA only; no deployment or Production writes"
+
+  chromium-webgl-mobile-render:
+    needs: isolated-contract-and-regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install audited dependency tree
+        run: npm ci --ignore-scripts
+      - name: Install transient browser test toolchain
+        run: npm install --no-save --ignore-scripts playwright@1.56.0 maplibre-gl@6.13.0
+      - name: Install headless Chromium and Linux dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Actual MapLibre WebGL on iPad/iPhone viewport
+        run: node tests/borneo-v2-browser.test.cjs
+      - name: Preserve actual browser screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: borneo-v2-real-chromium-screens
+          path: qa-output/*.png
+          if-no-files-found: ignore
+          retention-days: 7
