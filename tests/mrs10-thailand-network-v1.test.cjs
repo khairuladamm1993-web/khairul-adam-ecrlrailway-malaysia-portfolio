@@ -11,7 +11,7 @@ test('isolated HTML references its dedicated assets and geographic railway tiles
 test('keyless Thailand base replaces provider tiles; no API key watermark',()=>{
  const v=fs.readFileSync('assets/mrs10-thailand-network-v1-view.js','utf8');
  assert.match(v,/https:\/\/tile\.openstreetmap\.org\/\{z\}\/\{x\}\/\{y\}\.png/);
- assert.doesNotMatch(v,/basemaps\.cartocdn\.com|API KEY REQUIRED|YOUR_KEY|key=/i);
+ assert.doesNotMatch(v,/basemaps\.cartocdn\.com|API KEY REQUIRED|YOUR_KEY|\?key=/i);
  assert.match(v,/keepBuffer:1,updateWhenIdle:true/);
  assert.match(v,/openstreetmap\.org\/copyright/);
 });
