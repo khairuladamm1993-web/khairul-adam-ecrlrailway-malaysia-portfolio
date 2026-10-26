@@ -19,7 +19,7 @@ function routes(deps){
   expected:29,decoder:'SRI',source:sriGIS.queryUrl,
   stops:sri.stations.map(s=>({id:s.id,name:s.name,code:s.serviceCode,order:s.order})),alignment:null};
  const mn={id:ids.mono,category:'Monorail',label:'KL Monorail',color:mono.visual.marker,
-  expected:11,decoder:'OSM',source:'https://overpass.kumi.systems/api/interpreter',
+  expected:11,decoder:'MONO_ARCGIS',source:'https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer/5/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=json',
   stops:mono.stations.map(s=>({id:s.id,name:s.name,code:s.code,order:s.order})),alignment:null};
  const e=Object.values(erl.services).map(s=>({
   id:s.id,category:'ERL',label:s.name,
@@ -34,6 +34,39 @@ function routes(deps){
   throw Error('V6_ROUTE_REGISTRY_WRONG');
  return ret.map(r=>Object.freeze({...r,stops:Object.freeze(r.stops)}));
 }
+
+/* Source layer 5: MONORAIL STATION (11 public POINT records).
+   This strict decoder does not turn station order into coordinates. */
+function decodeMonorailArcGIS(features,mono){
+ if(!mono?.validate?.()||!Array.isArray(features))return {ok:false,reason:'INVALID_ARCGIS_MONORAIL',points:[],matched:0};
+ const matched=new Map(),duplicates=new Set();
+ let rejected=0;
+ for(const feature of features){
+  const p=feature?.attributes||feature?.properties||{};
+  const rawName=String(p.STN_NAME??p.STATION_NAME??p.name??p.NAME??'').trim();
+  const rawCode=String(p.STN_CODE??p.STATION_CODE??p.code??p.CODE??'').trim();
+  const clean=rawName.replace(/^MR0*\d{1,2}\s+/i,'').replace(/\s+(?:monorail\s+)?(?:station|stesen)$/i,'').trim();
+  const station=mono.findStation(clean);
+  const code=rawCode.match(/^\s*MR0*(\d{1,2})\s*$/i);
+  const g=feature?.geometry||{},xy=Array.isArray(g.coordinates)?g.coordinates:[g.x,g.y];
+  const lon=Number(xy[0]),lat=Number(xy[1]),b=mono.bbox;
+  if(!station||!Number.isFinite(lon)||!Number.isFinite(lat)||
+     lon<b.w||lon>b.e||lat<b.s||lat>b.n||
+     (rawCode&&(!code||Number(code[1])!==station.order))){
+   rejected++;continue;
+  }
+  if(matched.has(station.id)){duplicates.add(station.id);rejected++;continue}
+  matched.set(station.id,{id:station.id,name:station.name,code:station.code,routeId:ids.mono,
+   coordinates:[lon,lat],sourceId:p.FID??p.OBJECTID??null,
+   provenance:'PUBLIC_ARCGIS_MONORAIL_LAYER_5_POINT_NOT_GUIDEWAY'});
+ }
+ for(const id of duplicates)matched.delete(id);
+ const points=mono.stations.map(s=>matched.get(s.id)).filter(Boolean);
+ if(new Set(points.map(p=>p.coordinates.join(':'))).size!==points.length)return {ok:false,reason:'MONORAIL_COORD_COLLISION',matched:0,points:[],rejected};
+ return {ok:true,reason:points.length===11?'MONORAIL_11_SOURCE_MATCHED':'MONORAIL_PARTIAL_SOURCE_MATCH',
+  matched:points.length,points,rejected};
+}
+
 const cache=new Map();
 function checkedFetch(url,opts){
  const promise=fetch(url,{mode:'cors',credentials:'omit',cache:'no-store',...opts}).then(r=>{
@@ -49,7 +82,11 @@ function osmQuery(mono){
 async function fetchRoute(route,deps){
  const {sri,sriGIS,mono,erl,erlGIS}=external(deps);
  let points=[],ok=false,reason='',matched=0;
- if(route.decoder==='OSM'){
+ if(route.decoder==='MONO_ARCGIS'){
+  const raw=await checkedFetch(route.source);
+  const found=decodeMonorailArcGIS(raw?.features,mono);
+  ok=found.ok;reason=found.reason;matched=found.matched;points=found.points;
+ }else if(route.decoder==='OSM'){
   const controller=new AbortController();
   const timeout=setTimeout(()=>controller.abort(),23000);
   try{
@@ -131,7 +168,7 @@ function transfersFor(point,manifest,legacy,normalise){
  }
  return pairs;
 }
-const api=Object.freeze({ids,routes,fetchRoute,osmQuery,transfersFor,edges});
+const api=Object.freeze({ids,routes,fetchRoute,decodeMonorailArcGIS,osmQuery,transfersFor,edges});
 if(typeof module==='object'&&module.exports)module.exports=api;
 if(root)root.MRS10UnifiedV6Adapter=api;
 })(typeof window!=='undefined'?window:null);

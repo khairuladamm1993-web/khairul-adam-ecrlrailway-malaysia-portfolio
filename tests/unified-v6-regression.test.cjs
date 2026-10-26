@@ -47,3 +47,13 @@ test('V6 isolated public packaging and exact module audit',()=>{
  assert(read('scripts/build-unified-v6.cjs').includes('V6_PRIVATE_FILE'));
  assert(read('docs/MRS10_P01_UNIFIED_V6_THREE_MODULE_HANDOFF.md').includes('Safari Owner UAT'));
 });
+
+test('V6 strict public ArcGIS layer5 Monorail matching: all 11 exact codes, duplicates rejected',()=>{
+ const fake=mono.stations.map((s,i)=>({attributes:{FID:i+1,STN_NAME:s.name.toUpperCase(),STN_CODE:'MR'+(i+1)},
+  geometry:{x:101.690+i*.001,y:3.135+i*.001}}));
+ const ok=adapter.decodeMonorailArcGIS(fake,mono);
+ assert.equal(ok.matched,11);
+ assert.equal(adapter.decodeMonorailArcGIS([...fake,fake[0]],mono).matched,10);
+ assert.equal(adapter.decodeMonorailArcGIS(fake.map((f,i)=>({...f,attributes:{...f.attributes,STN_CODE:'MR'+(i+2)}})),mono).matched,0);
+ assert.equal(adapter.routes(deps).find(r=>r.id==='kl-monorail').decoder,'MONO_ARCGIS');
+});

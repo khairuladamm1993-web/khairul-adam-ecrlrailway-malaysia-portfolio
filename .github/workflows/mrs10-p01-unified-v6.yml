@@ -27,6 +27,21 @@ jobs:
           node --check assets/unified-v6-map.js
           node --check assets/unified-v6/adapter.js
           node --check scripts/build-unified-v6.cjs
+      - name: Live Monorail ArcGIS layer5 source reconciliation
+        run: |
+          node - <<'NODE'
+          (async()=>{
+           const mono=require('./assets/unified-v6/monorail-registry.js');
+           const adapter=require('./assets/unified-v6/adapter.js');
+           const route='https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer/5/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=json';
+           const response=await fetch(route);if(!response.ok)throw Error('GIS_HTTP_'+response.status);
+           const raw=await response.json();
+           const data=adapter.decodeMonorailArcGIS(raw.features,mono);
+           console.log('MONORAIL_LAYER5_GIS_AUDIT',JSON.stringify({count:raw.features?.length,matched:data.matched,rejected:data.rejected,
+            names:raw.features?.map(f=>[f.attributes?.STN_NAME,f.attributes?.STN_CODE])}));
+           if(data.matched!==11)process.exitCode=1;
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
       - name: V6 safe build
         run: |
           node scripts/build-unified-v6.cjs
