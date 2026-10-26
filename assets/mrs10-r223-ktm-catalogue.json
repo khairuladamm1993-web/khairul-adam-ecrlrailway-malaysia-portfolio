@@ -1,0 +1,1080 @@
+{
+  "version": "R2.23-KTM-V2",
+  "scope": "KTMB_PASSENGER_SERVICE_REGISTRY_ONLY",
+  "physicalTrackGeometry": null,
+  "trackStatus": "UNVERIFIED",
+  "coordinatesPolicy": "ONLY_SOURCE_MATCHED_GIS",
+  "operatorSources": [
+    "https://www.ktmb.com.my/Komuter.html",
+    "https://www.ktmb.com.my/TrainTime.html",
+    "https://www.mymrt.com.my/wp-content/uploads/2023/06/https___www.mymrt_.com_.my_wp-content_uploads_2021_08_Peta-Transit-Berintegrasi-Lembah-Klang-V13_PY-Train-FA-01-01-scaled-1.pdf"
+  ],
+  "colorsEvidence": {
+    "central": "APAD official Klang Valley map: blue / dark red; approximate UI hex, not official hex",
+    "north": "KTMB Komuter Utara official historic diagram: green / blue; approximate UI hex, latest revalidation pending"
+  },
+  "laterAudit": [
+    "Current GTFS route and stop_times reconciliation still pending",
+    "GIS layer 0 covers Klang Valley only; northern and southern GIS not independently matched",
+    "Recheck schedule and provisional south colors before merge"
+  ],
+  "services": [
+    {
+      "id": "ktm-seremban",
+      "displayName": "Seremban Line · Batu Caves – Pulau Sebang",
+      "sector": "central",
+      "displayColor": "#1652A4",
+      "displayColorStatus": "EVIDENCE_BACKED_APPROXIMATION_NOT_OFFICIAL_HEX",
+      "sequenceStatus": "OPERATOR_TIMETABLE_OR_SERVICE_MAP_CROSSCHECK",
+      "sourceUrls": [
+        "https://www.ktmb.com.my/TrainTime.html"
+      ],
+      "geometry": null,
+      "stationSequence": [
+        {
+          "id": "ktm-seremban-01",
+          "order": 1,
+          "name": "Batu Caves",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-02",
+          "order": 2,
+          "name": "Taman Wahyu",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-03",
+          "order": 3,
+          "name": "Kampung Batu",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-04",
+          "order": 4,
+          "name": "Batu Kentonmen",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-05",
+          "order": 5,
+          "name": "Sentul",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-06",
+          "order": 6,
+          "name": "Putra",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-07",
+          "order": 7,
+          "name": "Bank Negara",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-08",
+          "order": 8,
+          "name": "Kuala Lumpur",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-09",
+          "order": 9,
+          "name": "KL Sentral",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-10",
+          "order": 10,
+          "name": "Mid Valley",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-11",
+          "order": 11,
+          "name": "Seputeh",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-12",
+          "order": 12,
+          "name": "Salak Selatan",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-13",
+          "order": 13,
+          "name": "Bandar Tasik Selatan",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-14",
+          "order": 14,
+          "name": "Serdang",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-15",
+          "order": 15,
+          "name": "Kajang",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-16",
+          "order": 16,
+          "name": "Kajang 2",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-17",
+          "order": 17,
+          "name": "UKM",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-18",
+          "order": 18,
+          "name": "Bangi",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-19",
+          "order": 19,
+          "name": "Batang Benar",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-20",
+          "order": 20,
+          "name": "Nilai",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-21",
+          "order": 21,
+          "name": "Labu",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-22",
+          "order": 22,
+          "name": "Tiroi",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-23",
+          "order": 23,
+          "name": "Seremban",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-24",
+          "order": 24,
+          "name": "Senawang",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-25",
+          "order": 25,
+          "name": "Sungai Gadut",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-26",
+          "order": 26,
+          "name": "Rembau",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-seremban-27",
+          "order": 27,
+          "name": "Pulau Sebang",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        }
+      ]
+    },
+    {
+      "id": "ktm-port-klang",
+      "displayName": "Port Klang Line · Tanjung Malim – Pelabuhan Klang",
+      "sector": "central",
+      "displayColor": "#C21842",
+      "displayColorStatus": "EVIDENCE_BACKED_APPROXIMATION_NOT_OFFICIAL_HEX",
+      "sequenceStatus": "OPERATOR_TIMETABLE_OR_SERVICE_MAP_CROSSCHECK",
+      "sourceUrls": [
+        "https://www.ktmb.com.my/TrainTime.html"
+      ],
+      "geometry": null,
+      "stationSequence": [
+        {
+          "id": "ktm-port-klang-01",
+          "order": 1,
+          "name": "Tanjung Malim",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-02",
+          "order": 2,
+          "name": "Kuala Kubu Bharu",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-03",
+          "order": 3,
+          "name": "Rasa",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-04",
+          "order": 4,
+          "name": "Batang Kali",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-05",
+          "order": 5,
+          "name": "Serendah",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-06",
+          "order": 6,
+          "name": "Rawang",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-07",
+          "order": 7,
+          "name": "Kuang",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-08",
+          "order": 8,
+          "name": "Sungai Buloh",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-09",
+          "order": 9,
+          "name": "Kepong Sentral",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-10",
+          "order": 10,
+          "name": "Kepong",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-11",
+          "order": 11,
+          "name": "Segambut",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-12",
+          "order": 12,
+          "name": "Putra",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-13",
+          "order": 13,
+          "name": "Bank Negara",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-14",
+          "order": 14,
+          "name": "Kuala Lumpur",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-15",
+          "order": 15,
+          "name": "KL Sentral",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-16",
+          "order": 16,
+          "name": "Abdullah Hukum",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-17",
+          "order": 17,
+          "name": "Angkasapuri",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-18",
+          "order": 18,
+          "name": "Pantai Dalam",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-19",
+          "order": 19,
+          "name": "Petaling",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-20",
+          "order": 20,
+          "name": "Jalan Templer",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-21",
+          "order": 21,
+          "name": "Kampung Dato Harun",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-22",
+          "order": 22,
+          "name": "Seri Setia",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-23",
+          "order": 23,
+          "name": "Setia Jaya",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-24",
+          "order": 24,
+          "name": "Subang Jaya",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-25",
+          "order": 25,
+          "name": "Batu Tiga",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-26",
+          "order": 26,
+          "name": "Shah Alam",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-27",
+          "order": 27,
+          "name": "Padang Jawa",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-28",
+          "order": 28,
+          "name": "Bukit Badak",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-29",
+          "order": 29,
+          "name": "Klang",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-30",
+          "order": 30,
+          "name": "Teluk Pulai",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-31",
+          "order": 31,
+          "name": "Teluk Gadong",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-32",
+          "order": 32,
+          "name": "Kampung Raja Uda",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-33",
+          "order": 33,
+          "name": "Jalan Kastam",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-port-klang-34",
+          "order": 34,
+          "name": "Pelabuhan Klang",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        }
+      ]
+    },
+    {
+      "id": "ktm-padang-besar",
+      "displayName": "Komuter Utara · Padang Besar – Butterworth",
+      "sector": "north",
+      "displayColor": "#008658",
+      "displayColorStatus": "EVIDENCE_BACKED_APPROXIMATION_NOT_OFFICIAL_HEX",
+      "sequenceStatus": "OPERATOR_TIMETABLE_OR_SERVICE_MAP_CROSSCHECK",
+      "sourceUrls": [
+        "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+      ],
+      "geometry": null,
+      "stationSequence": [
+        {
+          "id": "ktm-padang-besar-01",
+          "order": 1,
+          "name": "Padang Besar",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-padang-besar-02",
+          "order": 2,
+          "name": "Bukit Ketri",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-padang-besar-03",
+          "order": 3,
+          "name": "Arau",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-padang-besar-04",
+          "order": 4,
+          "name": "Kodiang",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-padang-besar-05",
+          "order": 5,
+          "name": "Anak Bukit",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-padang-besar-06",
+          "order": 6,
+          "name": "Alor Setar",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-padang-besar-07",
+          "order": 7,
+          "name": "Kobah",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-padang-besar-08",
+          "order": 8,
+          "name": "Gurun",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-padang-besar-09",
+          "order": 9,
+          "name": "Sungai Petani",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-padang-besar-10",
+          "order": 10,
+          "name": "Tasek Gelugor",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-padang-besar-11",
+          "order": 11,
+          "name": "Bukit Mertajam",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-padang-besar-12",
+          "order": 12,
+          "name": "Bukit Tengah",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-padang-besar-13",
+          "order": 13,
+          "name": "Butterworth",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        }
+      ]
+    },
+    {
+      "id": "ktm-ipoh",
+      "displayName": "Komuter Utara · Butterworth – Ipoh",
+      "sector": "north",
+      "displayColor": "#2071C4",
+      "displayColorStatus": "EVIDENCE_BACKED_APPROXIMATION_NOT_OFFICIAL_HEX",
+      "sequenceStatus": "OPERATOR_TIMETABLE_OR_SERVICE_MAP_CROSSCHECK",
+      "sourceUrls": [
+        "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+      ],
+      "geometry": null,
+      "stationSequence": [
+        {
+          "id": "ktm-ipoh-01",
+          "order": 1,
+          "name": "Butterworth",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-ipoh-02",
+          "order": 2,
+          "name": "Bukit Tengah",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-ipoh-03",
+          "order": 3,
+          "name": "Bukit Mertajam",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-ipoh-04",
+          "order": 4,
+          "name": "Simpang Ampat",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-ipoh-05",
+          "order": 5,
+          "name": "Nibong Tebal",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-ipoh-06",
+          "order": 6,
+          "name": "Parit Buntar",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-ipoh-07",
+          "order": 7,
+          "name": "Bagan Serai",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-ipoh-08",
+          "order": 8,
+          "name": "Kamunting",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-ipoh-09",
+          "order": 9,
+          "name": "Taiping",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-ipoh-10",
+          "order": 10,
+          "name": "Padang Rengas",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-ipoh-11",
+          "order": 11,
+          "name": "Kuala Kangsar",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-ipoh-12",
+          "order": 12,
+          "name": "Sungai Siput",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        },
+        {
+          "id": "ktm-ipoh-13",
+          "order": 13,
+          "name": "Ipoh",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/assets/pdf/2026/Jadual-Komuter-Utara_Update%2026022026.pdf"
+        }
+      ]
+    },
+    {
+      "id": "ktm-shuttle-selatan-paloh",
+      "displayName": "Komuter Selatan / Shuttle Selatan · Paloh – JB Sentral",
+      "sector": "south",
+      "displayColor": "#7853A6",
+      "displayColorStatus": "PROVISIONAL_UI_PALETTE_NOT_OPERATOR_COLOR",
+      "sequenceStatus": "KTMB_2026_TIMETABLE_AND_PUBLIC_AUTHORITY_REPORTS",
+      "sourceUrls": [
+        "https://www.ktmb.com.my/TrainTime.html",
+        "https://www.bernama.com/bm/news.php?id=2589900"
+      ],
+      "geometry": null,
+      "stationSequence": [
+        {
+          "id": "ktm-shuttle-selatan-paloh-01",
+          "order": 1,
+          "name": "Paloh",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-shuttle-selatan-paloh-02",
+          "order": 2,
+          "name": "Kluang",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-shuttle-selatan-paloh-03",
+          "order": 3,
+          "name": "Rengam",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-shuttle-selatan-paloh-04",
+          "order": 4,
+          "name": "Layang-Layang",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-shuttle-selatan-paloh-05",
+          "order": 5,
+          "name": "Kulai",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-shuttle-selatan-paloh-06",
+          "order": 6,
+          "name": "Kempas Baru",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-shuttle-selatan-paloh-07",
+          "order": 7,
+          "name": "JB Sentral",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        }
+      ]
+    },
+    {
+      "id": "ktm-shuttle-selatan-pasirgudang",
+      "displayName": "Komuter Selatan / Shuttle Selatan · Kempas Baru – Pasir Gudang",
+      "sector": "south",
+      "displayColor": "#8E654A",
+      "displayColorStatus": "PROVISIONAL_UI_PALETTE_NOT_OPERATOR_COLOR",
+      "sequenceStatus": "KTMB_2026_TIMETABLE_AND_PUBLIC_AUTHORITY_REPORTS",
+      "sourceUrls": [
+        "https://www.ktmb.com.my/TrainTime.html",
+        "https://rac.gov.my/index.php/en/media/news/shuttle-selatan-service-launched-benefit-two-million"
+      ],
+      "geometry": null,
+      "stationSequence": [
+        {
+          "id": "ktm-shuttle-selatan-pasirgudang-01",
+          "order": 1,
+          "name": "Kempas Baru",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        },
+        {
+          "id": "ktm-shuttle-selatan-pasirgudang-02",
+          "order": 2,
+          "name": "Pasir Gudang",
+          "code": null,
+          "codeStatus": "NOT_OPERATOR_VERIFIED",
+          "coordinates": null,
+          "coordinatesStatus": "GIS_MATCH_REQUIRED",
+          "sourceUrl": "https://www.ktmb.com.my/TrainTime.html"
+        }
+      ]
+    }
+  ],
+  "lastOperatorReview": "2026-10-26",
+  "dataAttribution": {
+    "ktmb": "https://www.ktmb.com.my/TrainTime.html",
+    "officialGovGTFS": "https://developer.data.gov.my/realtime-api/gtfs-static.en",
+    "gtfsLicense": "CC BY 4.0 (attribution required)",
+    "gtfsFeed": "https://api.data.gov.my/gtfs-static/ktmb",
+    "gtfsDataImported": false,
+    "arcgis": "https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer/0",
+    "arcgisLicense": "NOT VERIFIED; data not redistributed"
+  },
+  "sourceGeometryDecision": "STOP_POINTS_ONLY_PENDING_GIS_MATCH; NEVER_CONNECT_STOPS_WITH_LINES"
+}
