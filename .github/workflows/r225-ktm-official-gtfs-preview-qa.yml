@@ -1,7 +1,7 @@
 name: KTM official GTFS nationwide station coverage and protected Preview artifact
 on:
   push:
-    branches: [feature/mrs10-p01-ktm-v3-official-gtfs-focus-fix, feature/mrs10-p01-ktm-v3-safari-credentials-render-recovery]
+    branches: [feature/mrs10-p01-ktm-v3-official-gtfs-focus-fix, feature/mrs10-p01-ktm-v3-safari-credentials-render-recovery, feature/mrs10-p01-ktm-v3-zh-th-map-language-repair]
   workflow_dispatch:
 permissions:
   contents: read
