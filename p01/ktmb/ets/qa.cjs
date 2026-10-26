@@ -36,7 +36,7 @@ test('isolation, security and four-language static UI',()=>{
   const app=fs.readFileSync(path.join(base,'app.js'),'utf8');
   assert.match(html,/noindex,nofollow/);
   assert.match(html,/min-height:44px/);
-  for(const code of ['ms','en','zh','th'])assert.match(app,new RegExp(code+':\\{'));
+  for(const code of ['ms','en','zh','th'])assert.ok(app.includes('"'+code+'":{'),'Missing '+code+' locale');
   assert.doesNotMatch(html+app,/supabase\.co|service_role|access_token|member-dashboard|admin-panel/i);
   assert.doesNotMatch(app,/map\.addLayer|LineString|setLngLat/);
 });
