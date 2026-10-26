@@ -1,4 +1,4 @@
-name: KTM Unified ETS Intercity official GTFS audit
+name: KTM Unified ETS Intercity GIS and Preview QA
 on:
   push:
     branches:
@@ -7,11 +7,90 @@ on:
 permissions:
   contents: read
 jobs:
-  official-gtfs-audit:
+  verified-preview-package:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Checkout isolated KTM feature branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
-      - name: Audit official KTMB GTFS service routes, trips, and stops
-        run: python3 scripts/ktm_unified_gtfs_routes_audit.py
+          fetch-depth: 0
+      - name: Setup Node 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --include=dev --no-audit --no-fund
+      - name: Preserve all MR-S10 baseline tests
+        run: npm test
+      - name: All KTM Komuter and ETS Intercity map DOM regressions
+        run: node --test tests/r222-ktm-komuter.test.cjs tests/r223-ktm-komuter-v2.test.cjs tests/r224-ktm-v3-gis-uat-repair.test.cjs tests/r225-ktm-gtfs-station-map.test.cjs tests/r226-ktm-gtfs-focus-race.test.cjs tests/r227-ktm-safari-auth-render.test.cjs tests/ktm-unified-overlay.test.cjs
+      - name: Guard untouched MRT LRT ECRL map and Supabase
+        run: git diff --exit-code 6ee8a4a14ffbe5567c54ec575cbb812bde6d8e4c HEAD -- map-language-lab.html assets/map-language-lab.js assets/railway-track-registry-kl.js supabase
+      - name: Download official KTMB GTFS once, bounded and source checked
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/ktm-unified-preview/assets"
+          python3 - <<'PY'
+          import urllib.request,os
+          url='https://api.data.gov.my/gtfs-static/ktmb'
+          req=urllib.request.Request(url,headers={'User-Agent':'MR-S10-KTMB-Official-Data/1.0'})
+          with urllib.request.urlopen(req,timeout=60) as response:b=response.read(30_000_001)
+          if len(b)>30_000_000 or not b.startswith(b'PK'):raise ValueError('Invalid GTFS ZIP')
+          open(os.path.join(os.environ['RUNNER_TEMP'],'ktm-official.zip'),'wb').write(b)
+          print('OFFICIAL_GTFS_BYTES',len(b))
+          PY
+      - name: Build verified Komuter and observed ETS Intercity GTFS trips
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/ktm-unified-preview"
+          python3 scripts/build_ktmb_official_station_points.py --feed-zip "$RUNNER_TEMP/ktm-official.zip" --output "$out/assets/mrs10-r225-ktm-gtfs-stations.json"
+          python3 scripts/build_ktm_unified_gtfs_preview.py --feed-zip "$RUNNER_TEMP/ktm-official.zip" --output "$out/assets/ktm-unified-gtfs-example-trips.json"
+          node - "$out" <<'NODE'
+          const fs=require('node:fs'),path=require('node:path');
+          const dir=process.argv[2],komuter=JSON.parse(fs.readFileSync(path.join(dir,'assets/mrs10-r225-ktm-gtfs-stations.json'))),extra=JSON.parse(fs.readFileSync(path.join(dir,'assets/ktm-unified-gtfs-example-trips.json')));
+          if(komuter.zipSha256!==extra.zipSha256)throw Error('GTFS snapshot mismatch');
+          if(komuter.stops.length<77||extra.services.map(s=>s.routeId).join(',')!=='ETS,ERT,SH')throw Error('Wrong service data');
+          for(const s of extra.services){
+           if(s.stops.length<20)throw Error('Insufficient sourced station stops '+s.id);
+           if(s.stops.some((p,i)=>p.order!==i+1||!Number.isFinite(p.lat)||!Number.isFinite(p.lon)))throw Error('Bad stop coordinate');
+          }
+          console.log('KTM_UNIFIED_SOURCE_GATE_PASS',extra.services.map(x=>x.id+':'+x.stops.length).join('|'));
+          NODE
+      - name: Assemble public-only Preview and prepare immutable source manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/ktm-unified-preview"
+          cp ktm-komuter-v2.html "$out/index.html"
+          cp assets/mrs10-r223-ktm-service.js "$out/assets/"
+          cp assets/mrs10-r223-ktm-catalogue.json "$out/assets/"
+          cp assets/ktm-unified-preview-overlay.js "$out/assets/"
+          test "$(find "$out" -type f | wc -l)" -eq 6
+          grep -q 'noindex,nofollow' "$out/index.html"
+          ! grep -qiE 'supabase|service_role|sk_live|member-gateway' "$out/index.html"
+          node - "$out" <<'NODE'
+          const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+          const dir=process.argv[2],names=['index.html','assets/mrs10-r223-ktm-service.js','assets/mrs10-r223-ktm-catalogue.json','assets/mrs10-r225-ktm-gtfs-stations.json','assets/ktm-unified-preview-overlay.js','assets/ktm-unified-gtfs-example-trips.json'];
+          const u=JSON.parse(fs.readFileSync(path.join(dir,names[5])));
+          const manifest={state:'ISOLATED_PREVIEW_ONLY',commit:process.env.GITHUB_SHA,workflowRun:process.env.GITHUB_RUN_ID,sourceUrl:u.sourceUrl,gtfsZipSha256:u.zipSha256,files:Object.fromEntries(names.map(n=>[n,crypto.createHash('sha256').update(fs.readFileSync(path.join(dir,n))).digest('hex')]))};
+          fs.writeFileSync(path.join(dir,'PROVENANCE.json'),JSON.stringify(manifest,null,2));
+          NODE
+          (cd "$out" && sha256sum index.html assets/*.js assets/*.json > SHA256SUMS && sha256sum -c SHA256SUMS)
+      - name: Emit public-only preview trip payload for deployment verification
+        run: |
+          python3 - <<'PY'
+          import json,os,pathlib
+          file=pathlib.Path(os.environ['RUNNER_TEMP'])/'ktm-unified-preview/assets/ktm-unified-gtfs-example-trips.json'
+          data=json.loads(file.read_text(encoding='utf-8'))
+          print('KTM_UNIFIED_JSON='+json.dumps(data,ensure_ascii=True,separators=(',',':')))
+          PY
+      - name: Upload immutable public-only KTM Unified Preview artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ktm-unified-ets-intercity-official-gtfs-public-preview
+          path: ${{ runner.temp }}/ktm-unified-preview/
+          if-no-files-found: error
+          retention-days: 14
