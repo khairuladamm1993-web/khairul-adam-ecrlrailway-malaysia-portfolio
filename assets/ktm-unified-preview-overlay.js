@@ -80,12 +80,12 @@ function mount({map,lib,selectKomuter}){
   if(s.id===IDS[2]){
    const a=review(p),evidence=document.createElement('p');
    evidence.textContent='Stop ID '+p.id+' · GIS: '+(a?.decision||'UNRESOLVED')+' · '+(a?.confidence||'LOW')+' confidence · Track offset: '+(a?.offsetMeters==null?'unavailable':a.offsetMeters+' m');
-   const original=document.createElement('p');original.textContent='Original KTMB GTFS: '+p.lat+', '+p.lon+' (unchanged)';
+   const original=document.createElement('p');original.textContent='Original KTMB GTFS: '+(a?.originalCoordinates?.lat??p.lat)+', '+(a?.originalCoordinates?.lon??p.lon)+(a?.coordinatesChanged?' · Map position: '+p.lat+', '+p.lon+' (OSM station POI)':' · Unchanged');
    const reason=document.createElement('p');reason.textContent=a?.reason||'Railway geometry evidence not independently verified';
    root.append(evidence,original,reason);
-   if(a?.railwayAlignmentEvidence?.osmRailwayUrl){const track=document.createElement('a');track.href=a.railwayAlignmentEvidence.osmRailwayUrl;track.target='_blank';track.rel='noopener noreferrer';track.textContent='OSM railway evidence';root.append(track);}
+   if(a?.replacementSourceUrl||a?.railwayAlignmentEvidence?.osmRailwayUrl){const track=document.createElement('a');track.href=a.replacementSourceUrl||a.railwayAlignmentEvidence.osmRailwayUrl;track.target='_blank';track.rel='noopener noreferrer';track.textContent='OSM railway evidence';root.append(track);}
   }
-  root.append(h,detail,origin);popup=new lib.Popup({offset:14,maxWidth:'300px'}).setLngLat([p.lon,p.lat]).setDOMContent(root).addTo(map);
+  root.prepend(h,detail);root.append(origin);popup=new lib.Popup({offset:14,maxWidth:'300px'}).setLngLat([p.lon,p.lat]).setDOMContent(root).addTo(map);
  }
  function refresh(){const w=locale();title.textContent=w.title;desc.textContent=w.read;info.textContent=data?'GTFS '+new Date(data.snapshotUtc).toISOString().slice(0,10)+' · CC BY 4.0'+(audit?' · Shuttle GIS '+audit.qualityGate+' · suspect '+(audit.decisions.SUSPECTED_MISMATCH||0)+' / unresolved '+(audit.decisions.UNRESOLVED||0):' · GIS review unavailable / pending'):w.read;
   bar.replaceChildren();(data?.services||[]).forEach((s,i)=>{
@@ -98,7 +98,7 @@ function mount({map,lib,selectKomuter}){
    const head=document.createElement('h2');head.textContent=lang()[IDS.indexOf(s.id)]+' · '+s.stops.length+' '+w.stop;
    const sourceLine=document.createElement('p');sourceLine.textContent=w.trip+' '+s.tripId+' · '+w.source+' · '+w.read;
    const ol=document.createElement('ol');ol.style.cssText='padding-left:30px;max-height:400px;overflow:auto';
-   s.stops.forEach(p=>{const li=document.createElement('li'),button=document.createElement('button');button.type='button';button.textContent=(s.id===IDS[2]&&['SUSPECTED_MISMATCH','UNRESOLVED'].includes(review(p)?.decision||'UNRESOLVED')?'⚠ ':'')+p.name;
+   s.stops.forEach(p=>{const li=document.createElement('li'),button=document.createElement('button');button.type='button';button.textContent=(s.id===IDS[2]&&['SUSPECTED_MISMATCH','UNRESOLVED'].includes(review(p)?.decision||'UNRESOLVED')?'⚠ ':s.id===IDS[2]&&review(p)?.decision==='APPROXIMATE'?'≈ ':'')+p.name;
     if(s.id===IDS[2]){const a=review(p);button.title=(a?.decision||'UNRESOLVED')+' · '+(a?.offsetMeters==null?'track distance unavailable':a.offsetMeters+' m from mapped railway');}
     button.style.cssText='display:block;width:100%;min-height:42px;text-align:left;margin:3px 0';button.addEventListener('click',()=>{map.flyTo({center:[p.lon,p.lat],zoom:12.2,duration:250});openStop(p,s)});
     li.append(button);ol.append(li)});
@@ -127,6 +127,11 @@ function mount({map,lib,selectKomuter}){
    const auditResponse=await fetch('./assets/ktm-shuttle-v2-alignment-review.json',{credentials:'same-origin',cache:'no-store'});
    if(!auditResponse.ok)throw Error('GIS review HTTP '+auditResponse.status);
    const candidate=await auditResponse.json();if(!validateAudit(candidate))throw Error('GIS_REVIEW_SNAPSHOT_MISMATCH');audit=candidate;
+   const shuttle=data.services.find(s=>s.id===IDS[2]);
+   shuttle.stops=shuttle.stops.map(p=>{const a=audit.stops.find(x=>x.stopId===p.id);if(!a?.coordinatesChanged)return p;
+    const {lat,lon}=a.effectiveCoordinates;
+    if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat<1||lat>7.5||lon<99.5||lon>105||!a.replacementSourceUrl)throw Error('UNSOURCED_SHUTTLE_REPLACEMENT');
+    return {...p,gtfsLat:p.lat,gtfsLon:p.lon,lat,lon};});
   }catch(e){console.warn('KTM Shuttle GIS review unavailable; originals kept',e);audit=null;}
   refresh();layers();
  }catch(error){info.textContent='Official ETS/Intercity preview unavailable: '+String(error.message||error);console.warn('KTM Unified overlay',error);}})();
