@@ -22,7 +22,7 @@ function popupFor(s){const wrap=E('div');wrap.append(E('strong',s.nameEn+(s.name
  const href=geo.features.find(f=>f.properties.id===s.id)?.properties.sourceUrl||s.sourceUrls[0];
  const a=E('a','Source / OSM');a.href=href;a.target='_blank';a.rel='noopener noreferrer';wrap.append(a);return wrap;}
 function focusStation(id,camera){const s=M.station(id);if(!s)return;chosenStation=id;popup?.remove();popup=null;const p=coord(id);
- if(p&&map.loaded()){popup=new ML.Popup({offset:18,maxWidth:'300px'}).setLngLat(p).setDOMContent(popupFor(s)).addTo(map);if(camera)map.flyTo({center:p,zoom:Math.max(map.getZoom(),11),duration:550});}
+ if(p){popup=new ML.Popup({offset:18,maxWidth:'300px'}).setLngLat(p).setDOMContent(popupFor(s)).addTo(map);if(camera)map.flyTo({center:p,zoom:Math.max(map.getZoom(),11),duration:550});}
  if(!p)$('status').textContent=T('pending')+' — '+s.nameEn;
  for(const [key,marker] of markerMap)marker.getElement().classList.toggle('active',key===id);
  for(const b of document.querySelectorAll('#stations button'))b.classList.toggle('selected',b.dataset.id===id);
