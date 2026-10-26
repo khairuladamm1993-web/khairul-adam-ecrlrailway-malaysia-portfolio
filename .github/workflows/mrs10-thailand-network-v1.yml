@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/mrs10-p01-thailand-network-v1
+      - fix/mrs10-thailand-v1-keyless-basemap
   workflow_dispatch:
 permissions:
   contents: read

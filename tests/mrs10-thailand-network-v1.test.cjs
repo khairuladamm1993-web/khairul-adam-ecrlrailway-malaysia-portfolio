@@ -7,3 +7,21 @@ test('future projects not included among operational route catalog',()=>{assert.
 test('noncontinuity of Mae Klong separated; no exhaustive stop claims',()=>{assert.ok(m.route('th-srt-maeklong-a'));assert.ok(m.route('th-srt-maeklong-b'));assert.ok(m.routes.every(r=>r.geometry===null&&r.stopListCompleteness==='REPRESENTATIVE_NODES_ONLY'));});
 test('source-linked border and search discoverability',()=>{assert.ok(m.search('Padang Besar').some(r=>r.id==='th-srt-padang-besar'));assert.ok(m.borders.every(b=>b.sourceUrls.every(u=>u.startsWith('https://'))));});
 test('isolated HTML references its dedicated assets and geographic railway tiles',()=>{const h=fs.readFileSync('thailand-railway-v1.html','utf8');const v=fs.readFileSync('assets/mrs10-thailand-network-v1-view.js','utf8');for(const name of ['bm','en','zh','th'])assert.ok(h.includes('data-lang="'+name+'"'));assert.ok(h.includes('mrs10-thailand-network-v1-model.js'));assert.ok(v.includes('tiles.openrailwaymap.org'));assert.ok(v.includes('openstreetmap.org'));assert.ok(!v.includes('supabase'));});
+
+test('keyless Thailand base replaces provider tiles; no API key watermark',()=>{
+ const v=fs.readFileSync('assets/mrs10-thailand-network-v1-view.js','utf8');
+ assert.match(v,/https:\/\/tile\.openstreetmap\.org\/\{z\}\/\{x\}\/\{y\}\.png/);
+ assert.doesNotMatch(v,/basemaps\.cartocdn\.com|API KEY REQUIRED|YOUR_KEY|key=/i);
+ assert.match(v,/keepBuffer:1,updateWhenIdle:true/);
+ assert.match(v,/openstreetmap\.org\/copyright/);
+});
+test('light dark styling is isolated to basemap not OpenRailwayMap overlay',()=>{
+ const v=fs.readFileSync('assets/mrs10-thailand-network-v1-view.js','utf8');
+ const h=fs.readFileSync('thailand-railway-v1.html','utf8');
+ assert.match(v,/map\.createPane\('th-basemap'\)/);
+ assert.match(v,/map\.createPane\('th-railway'\)/);
+ assert.match(v,/pane:'th-railway'/);
+ assert.match(v,/basePane\.classList\.toggle\('is-dark',dark\)/);
+ assert.match(h,/th-basemap-pane\.is-dark/);
+ assert.doesNotMatch(v,/removeLayer\(dark\?d:l\)/);
+});

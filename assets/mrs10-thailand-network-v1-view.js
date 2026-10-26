@@ -9,9 +9,28 @@ th:{title:'แผนที่เครือข่ายรถไฟประเ
 let language='bm',filter='all',query='',dark=true,controller=null,prevQuery='',refreshTimer=null;
 const byId=id=>document.getElementById(id),tr=k=>words[language][k]||k;
 const map=L.map('th-map',{center:[14.3,101.1],zoom:6,preferCanvas:true,zoomControl:true});
-const l=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors / CARTO'});
-const d=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors / CARTO'}).addTo(map);
-const rail=L.tileLayer('https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',{maxZoom:19,attribution:'Rail © OpenRailwayMap, data © OpenStreetMap contributors'}).addTo(map);
+
+/* Keyless source: https://operations.osmfoundation.org/policies/tiles/.
+ * Only user-visible viewport tile requests; attribution/caching preserved.
+ * Theme CSS changes only the basemap, not the source-backed rail overlay.
+ */
+map.createPane('th-basemap');
+const basePane=map.getPane('th-basemap');
+basePane.classList.add('th-basemap-pane');
+basePane.style.zIndex='200';
+basePane.classList.toggle('is-dark',dark);
+map.createPane('th-railway');
+const railPane=map.getPane('th-railway');
+railPane.style.zIndex='250';
+railPane.style.pointerEvents='none';
+const base=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+ pane:'th-basemap',maxZoom:19,keepBuffer:1,updateWhenIdle:true,updateWhenZooming:false,
+ attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+}).addTo(map);
+const rail=L.tileLayer('https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',{
+ pane:'th-railway',maxZoom:19,keepBuffer:1,updateWhenIdle:true,
+ attribution:'Rail &copy; OpenRailwayMap / OpenStreetMap contributors'
+}).addTo(map);
 const stationLayer=L.layerGroup().addTo(map);
 function text(tag,val,cls){const el=document.createElement(tag);el.textContent=val;if(cls)el.className=cls;return el;}
 function createRoute(r){const b=text('button','', 'route '+r.group);b.type='button';b.append(text('strong',r.name),text('small',r.selectedNodes.join(' · ')));
@@ -53,6 +72,6 @@ function pull(){
 document.querySelectorAll('[data-lang]').forEach(el=>el.onclick=()=>{language=el.dataset.lang;document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b===el)));render();});
 for(const key of ['all','border','srt','bangkok'])byId('filter-'+key).onclick=()=>{filter=key;render();};
 byId('search').addEventListener('input',e=>{query=e.target.value;render();});
-byId('theme').onclick=()=>{map.removeLayer(dark?d:l);dark=!dark;(dark?d:l).addTo(map);rail.bringToFront();render();};
+byId('theme').onclick=()=>{dark=!dark;basePane.classList.toggle('is-dark',dark);render();};
 map.on('moveend zoomend',()=>{if(refreshTimer)clearTimeout(refreshTimer);refreshTimer=setTimeout(pull,700);});render();pull();
 })();
