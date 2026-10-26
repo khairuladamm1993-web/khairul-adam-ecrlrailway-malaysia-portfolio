@@ -51,3 +51,18 @@ test('V4 public packager allowlists GIS and blocks private modules',()=>{
  assert(p.includes('PRIVATE_ASSET_IN_PREVIEW'));
  assert(p.includes('member-gateway.js'));
 });
+
+test('V4 two exact live ArcGIS Kajang typo records match, but near matches are rejected',()=>{
+ const kajang=core.loadManifest(kl,am)[0];
+ const tuples=[
+  {attributes:{OBJECTID:21,STN_NAME:'TAMAN CONNAUGH',STN_CODE:'KG26'},geometry:{x:101.7,y:3.1}},
+  {attributes:{OBJECTID:25,STN_NAME:'BATU 11 CHERAS',STN_CODE:'KG3O'},geometry:{x:101.8,y:3.2}}
+ ];
+ const corrected=core.decodeArcgis(kajang,{features:tuples},gis,am);
+ assert.deepEqual(corrected.points.map(x=>x.id),['mrt-taman-connaught','mrt-batu-sebelas-cheras']);
+ const forged=core.decodeArcgis(kajang,{features:[
+  {...tuples[0],attributes:{...tuples[0].attributes,OBJECTID:500}},
+  {...tuples[1],attributes:{...tuples[1].attributes,STN_CODE:'KG30'}}
+ ]},gis,am);
+ assert.equal(forged.matched,0);
+});
