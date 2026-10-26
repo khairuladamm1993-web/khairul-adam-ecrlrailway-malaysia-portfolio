@@ -17,3 +17,23 @@ footer{font-size:.75rem;color:var(--muted);padding:12px 4px}footer a{color:var(-
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 
 .schematic{display:flex;flex-direction:column;gap:10px;margin-bottom:11px}.schematic:empty{display:none}.schematic-line{border:1px solid var(--border);border-radius:12px;background:var(--bg);padding:10px 11px}.schematic-title{font-size:.84rem;font-weight:850;margin:0 0 4px;display:flex;align-items:center;gap:8px}.schematic-title::before{content:"";display:inline-block;width:10px;height:10px;background:var(--line-color);border-radius:50%}.schematic-locations{color:var(--muted);font-size:.71rem;font-weight:600}.schematic-note{font-size:.68rem;color:var(--muted);margin:7px 0 0}.schematic-stop-strip{margin:10px 0 0;border-top:3px dashed var(--line-color);display:flex;gap:4px;justify-content:space-between;flex-wrap:wrap;padding-top:6px}.schematic-stop-strip span{font-size:.64rem;border:1px solid var(--border);border-radius:6px;padding:3px 4px;background:var(--card)}
+
+
+/* City-area KUTS locator: its real coordinate is Kuching CITY, never a station/ART alignment. */
+.borneo-art-locator{width:192px;min-width:192px;max-width:192px;border:2px solid #173b51;border-radius:12px;background:rgba(255,255,255,.98);color:#143044;box-shadow:0 6px 24px rgba(9,35,47,.26);padding:6px 8px 7px;pointer-events:auto;line-height:1.22;transform:translateZ(0)}
+.borneo-art-locator::after{content:"";position:absolute;left:7px;bottom:-7px;width:10px;height:10px;background:#173b51;transform:rotate(45deg);z-index:-1}
+.art-locator-head{display:flex;align-items:center;gap:5px;width:100%;min-height:31px;padding:2px 0;border:0;text-align:left;background:transparent;color:#143044;font-size:12px;font-weight:900;line-height:1.2}
+.art-locator-head .art-locator-bullet{font-size:19px;color:#007e8d;line-height:1}
+.art-locator-name{min-width:0;white-space:normal}
+.art-locator-explainer{font-size:9.5px;color:#395463;font-weight:650;line-height:1.2;padding:2px 0 7px}
+.art-locator-lines{display:flex;gap:4px;flex-wrap:wrap}
+.art-line-chip{flex:1 1 45px;min-width:45px;min-height:30px!important;padding:4px 5px!important;border:1px solid var(--art-chip)!important;border-left:5px solid var(--art-chip)!important;background:#fff!important;color:#243746!important;border-radius:6px!important;font-size:10px!important;font-weight:800;line-height:1.05}
+.art-line-chip:focus-visible,.art-locator-head:focus-visible{outline:2px solid #ea9d32;outline-offset:1px}
+.art-popup-route{font-size:.75rem;border-left:4px solid #007e8d;padding:4px 0 4px 8px;margin:6px 0;background:var(--bg)}
+.art-popup-dot{color:var(--muted)}
+:root[data-theme="dark"] .borneo-art-locator{background:#102e3e;color:#ebf8fc;border-color:#83bdcb}
+:root[data-theme="dark"] .borneo-art-locator::after{background:#83bdcb}
+:root[data-theme="dark"] .art-locator-head{color:#effbff}
+:root[data-theme="dark"] .art-locator-explainer{color:#c4dfed}
+:root[data-theme="dark"] .art-line-chip{background:#1b3b4c!important;color:#f8fdff!important}
+@media(max-width:480px){.borneo-art-locator{width:163px;min-width:163px;max-width:163px;padding:5px 6px}.art-locator-head{font-size:11px}.art-locator-explainer{font-size:9px}.art-line-chip{font-size:9px!important;min-height:29px!important;padding:3px 4px!important}}
