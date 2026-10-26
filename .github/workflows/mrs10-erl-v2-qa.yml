@@ -7,6 +7,7 @@ on:
       - 'erl-v2.html'
       - 'assets/mrs10-erl-v2-*.js'
       - 'tests/mrs10-erl-v2.test.cjs'
+      - 'scripts/erl-v2-live-gis-audit.cjs'
       - '.github/workflows/mrs10-erl-v2-qa.yml'
 permissions:
   contents: read
@@ -26,6 +27,8 @@ jobs:
         run: npm ci --ignore-scripts --no-audit
       - name: ERL model GIS and UI source tests
         run: node --test tests/mrs10-erl-v2.test.cjs
+      - name: Read-only live ArcGIS source audit (non-blocking evidence)
+        run: node scripts/erl-v2-live-gis-audit.cjs
       - name: Four-line regression
         run: npm test
       - name: Catalogue regression
