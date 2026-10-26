@@ -20,7 +20,7 @@ class Popup{
  remove(){}
 }
 test('GTFS trips validate exact route identity, source and coordinate evidence',()=>{
- const w=new JSDOM('').window;w.eval(script);
+ const w=new JSDOM('',{runScripts:'outside-only'}).window;w.eval(script);
  assert(w.KTMUnifiedOverlay.validate(fixture()));
  assert.equal(w.KTMUnifiedOverlay.validate({...fixture(),physicalTrackGeometry:{}}),false);
  assert.equal(w.KTMUnifiedOverlay.validate({...fixture(),sourceUrl:'https://untrusted.invalid'}),false);
