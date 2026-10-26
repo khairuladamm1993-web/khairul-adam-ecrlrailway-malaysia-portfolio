@@ -1,0 +1,88 @@
+name: KTM Shuttle Timur V2 GIS Source Audit and Preview QA
+on:
+  push:
+    branches: [feature/mrs10-p01-shuttle-timur-v2-gis-alignment-recovery]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  shuttle-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --include=dev --no-audit --no-fund
+      - name: Syntax verification and full MR-S10 regression
+        run: |
+          node --check assets/ktm-unified-preview-overlay.js
+          python3 -m py_compile scripts/audit_shuttle_timur_v2_alignment.py
+          npm test
+      - name: Isolated KTM regression
+        run: node --test tests/r222-ktm-komuter.test.cjs tests/r223-ktm-komuter-v2.test.cjs tests/r224-ktm-v3-gis-uat-repair.test.cjs tests/r225-ktm-gtfs-station-map.test.cjs tests/r226-ktm-gtfs-focus-race.test.cjs tests/r227-ktm-safari-auth-render.test.cjs tests/ktm-unified-overlay.test.cjs
+      - name: Isolation guard
+        run: git diff --exit-code bdfef366f328c32e5af9f85940209b51ec11991b HEAD -- map-language-lab.html assets/map-language-lab.js assets/railway-track-registry-kl.js supabase scripts/build_ktm_unified_gtfs_preview.py scripts/build_ktmb_official_station_points.py assets/mrs10-r223-ktm-service.js assets/mrs10-r223-ktm-catalogue.json
+      - name: Download live official GTFS
+        run: |
+          python3 - <<'PY'
+          import urllib.request,os
+          req=urllib.request.Request('https://api.data.gov.my/gtfs-static/ktmb',headers={'User-Agent':'MR-S10-Shuttle-V2-GTFS/1.0'})
+          with urllib.request.urlopen(req,timeout=75) as f:b=f.read(30000001)
+          if len(b)>30000000 or not b.startswith(b'PK'):raise ValueError('Invalid GTFS ZIP')
+          open(os.path.join(os.environ['RUNNER_TEMP'],'ktmb.zip'),'wb').write(b)
+          PY
+      - name: Build from one GTFS snapshot and audit railway geometry
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/shuttle-v2-preview"
+          mkdir -p "$out/assets"
+          python3 scripts/build_ktmb_official_station_points.py --feed-zip "$RUNNER_TEMP/ktmb.zip" --output "$out/assets/mrs10-r225-ktm-gtfs-stations.json"
+          python3 scripts/build_ktm_unified_gtfs_preview.py --feed-zip "$RUNNER_TEMP/ktmb.zip" --output "$out/assets/ktm-unified-gtfs-example-trips.json"
+          python3 scripts/audit_shuttle_timur_v2_alignment.py --feed-zip "$RUNNER_TEMP/ktmb.zip" --output "$out/assets/ktm-shuttle-v2-alignment-review.json"
+      - name: Immutable 40 stop audit and ETS ERT zero regression data gate
+        run: |
+          python3 - <<'PY'
+          import json,os,pathlib
+          d=pathlib.Path(os.environ['RUNNER_TEMP'])/'shuttle-v2-preview/assets'
+          t=json.loads((d/'ktm-unified-gtfs-example-trips.json').read_text())
+          a=json.loads((d/'ktm-shuttle-v2-alignment-review.json').read_text())
+          assert [s['tripId'] for s in t['services']]==['9442','26','51']
+          assert [len(s['stops']) for s in t['services']]==[38,23,40]
+          assert a['zipSha256']==t['zipSha256']
+          assert len(a['stops'])==40
+          assert all(s['order']==i+1 and s['originalCoordinates']==s['effectiveCoordinates'] and not s['coordinatesChanged'] for i,s in enumerate(a['stops']))
+          assert [s['id'] for s in t['services'][2]['stops']]==[s['stopId'] for s in a['stops']]
+          print('SHUTTLE_GIS_SOURCE_GATE_PASS (NOT Safari visual acceptance)')
+          print('KTM_UNIFIED_JSON='+json.dumps(t,ensure_ascii=True,separators=(',',':')))
+          PY
+      - name: Build noindex isolated public-only preview package
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/shuttle-v2-preview"
+          cp ktm-komuter-v2.html "$out/index.html"
+          cp assets/mrs10-r223-ktm-service.js assets/mrs10-r223-ktm-catalogue.json assets/ktm-unified-preview-overlay.js "$out/assets/"
+          test "$(find "$out" -type f | wc -l)" -eq 7
+          grep -q 'noindex,nofollow' "$out/index.html"
+          ! grep -qiE 'service_role|sk_live|member-gateway|supabase' "$out/index.html"
+          python3 - <<'PY'
+          import os,json,hashlib,pathlib
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'shuttle-v2-preview'
+          a=json.loads((p/'assets/ktm-shuttle-v2-alignment-review.json').read_text())
+          m={'state':'ISOLATED_PREVIEW_ONLY','commit':os.environ['GITHUB_SHA'],'workflowRun':os.environ['GITHUB_RUN_ID'],'gtfsZipSha256':a['zipSha256'],'gisQualityGate':a['qualityGate'],'sources':{'gtfs':a['sourceUrl'],'rail':a['alignmentSourceUrl']},'files':{str(f.relative_to(p)):hashlib.sha256(f.read_bytes()).hexdigest() for f in p.rglob('*') if f.is_file()}}
+          (p/'PROVENANCE.json').write_text(json.dumps(m,indent=2))
+          PY
+          (cd "$out" && sha256sum index.html assets/* > SHA256SUMS && sha256sum -c SHA256SUMS)
+      - name: Upload Shuttle V2 standalone preview
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: shuttle-v2-40-stop-gis-preview
+          path: ${{ runner.temp }}/shuttle-v2-preview/
+          if-no-files-found: error
+          retention-days: 14
