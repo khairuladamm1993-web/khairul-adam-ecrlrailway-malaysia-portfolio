@@ -1,7 +1,7 @@
 name: KTM official GTFS nationwide station coverage and protected Preview artifact
 on:
   push:
-    branches: [feature/mrs10-p01-ktm-v3-gtfs-station-coverage]
+    branches: [feature/mrs10-p01-ktm-v3-official-gtfs-focus-fix]
   workflow_dispatch:
 permissions:
   contents: read
@@ -24,7 +24,7 @@ jobs:
       - name: Full MR-S10 baseline regression
         run: npm test
       - name: KTM 2.22, V2, V3 and official nationwide-source unit regression
-        run: node --test tests/r222-ktm-komuter.test.cjs tests/r223-ktm-komuter-v2.test.cjs tests/r224-ktm-v3-gis-uat-repair.test.cjs tests/r225-ktm-gtfs-station-map.test.cjs
+        run: node --test tests/r222-ktm-komuter.test.cjs tests/r223-ktm-komuter-v2.test.cjs tests/r224-ktm-v3-gis-uat-repair.test.cjs tests/r225-ktm-gtfs-station-map.test.cjs tests/r226-ktm-gtfs-focus-race.test.cjs
       - name: Guard all four original integrated map source files
         run: git diff --exit-code 6ee8a4a14ffbe5567c54ec575cbb812bde6d8e4c HEAD -- map-language-lab.html assets/map-language-lab.js assets/railway-track-registry-kl.js
       - name: Build exact north and south station points from official government KTMB GTFS
@@ -32,6 +32,25 @@ jobs:
           mkdir -p "$RUNNER_TEMP/ktm-gtfs-preview/assets"
           python3 scripts/build_ktmb_official_station_points.py --output "$RUNNER_TEMP/ktm-gtfs-preview/assets/mrs10-r225-ktm-gtfs-stations.json"
           node -e "const p=require(process.argv[1]);const c=p.coverage;for(const id of ['ktm-padang-besar','ktm-ipoh','ktm-shuttle-selatan-paloh','ktm-shuttle-selatan-pasirgudang']){const x=c.find(y=>y.serviceId===id);if(!x||x.matched!==x.catalogueStops)process.exit(1)};console.log('NORTH_SOUTH_FULL_GTFS_COVERAGE_PASS',c.filter(x=>x.matched===x.catalogueStops).length)" "$RUNNER_TEMP/ktm-gtfs-preview/assets/mrs10-r225-ktm-gtfs-stations.json"
+      - name: Runtime decode of actual government GTFS artifact per service
+        run: |
+          node - <<'NODE'
+          const data=require('node:fs'),path=require('node:path');
+          const api=require('./assets/mrs10-r223-ktm-service.js');
+          const cat=require('./assets/mrs10-r223-ktm-catalogue.json');
+          const raw=JSON.parse(data.readFileSync(path.join(process.env.RUNNER_TEMP,'ktm-gtfs-preview/assets/mrs10-r225-ktm-gtfs-stations.json'),'utf8'));
+          const d=api.decodeOfficialGis(raw,cat);
+          if(!d.ok)throw Error('OFFICIAL_DECODE_FAILED');
+          const expected={'ktm-padang-besar':13,'ktm-ipoh':13,'ktm-shuttle-selatan-paloh':7,'ktm-shuttle-selatan-pasirgudang':2};
+          for(const [id,count] of Object.entries(expected)){
+           const f=api.featuresForRoute(d,id).features;
+           if(f.length!==count)throw Error(id+' RUNTIME_DECODE_GIS_MISMATCH: '+f.length+'/'+count);
+           const xs=f.map(x=>x.geometry.coordinates[0]),ys=f.map(x=>x.geometry.coordinates[1]);
+           const bounds=[[Math.min(...xs),Math.min(...ys)],[Math.max(...xs),Math.max(...ys)]];
+           if(bounds.flat().some(x=>!Number.isFinite(x)))throw Error(id+' INVALID_MAP_BOUNDS');
+           console.log('RUNTIME_GTFS_RENDER_CANDIDATE_PASS',id,f.length,JSON.stringify(bounds));
+          }
+          NODE
       - name: Assemble strictly public-only KTM UAT Preview candidate
         shell: bash
         run: |
@@ -64,7 +83,7 @@ jobs:
       - name: Preserve QA-provenance bound isolated public artifact, no Vercel deployment
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: ktm-v3-official-gtfs-public-provenance
+          name: ktm-v3-gtfs-focus-race-fix-public-provenance
           path: ${{ runner.temp }}/ktm-gtfs-preview/
           if-no-files-found: error
           retention-days: 14
