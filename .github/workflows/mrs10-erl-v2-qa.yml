@@ -1,0 +1,55 @@
+name: MR-S10 P01 ERL V2 isolated QA
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-erl-v2
+    paths:
+      - 'erl-v2.html'
+      - 'assets/mrs10-erl-v2-*.js'
+      - 'tests/mrs10-erl-v2.test.cjs'
+      - '.github/workflows/mrs10-erl-v2-qa.yml'
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b163ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install test dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit
+      - name: ERL model GIS and UI source tests
+        run: node --test tests/mrs10-erl-v2.test.cjs
+      - name: Four-line regression
+        run: npm test
+      - name: Catalogue regression
+        run: node --test tests/reading-library-framework.test.cjs
+      - name: Syntax and isolated public artifact smoke
+        run: |
+          set -euo pipefail
+          node --check assets/mrs10-erl-v2-model.js
+          node --check assets/mrs10-erl-v2-gis.js
+          node --check assets/mrs10-erl-v2-view.js
+          mkdir -p dist-erl-v2/assets
+          cp erl-v2.html dist-erl-v2/index.html
+          cp erl-v2.html dist-erl-v2/erl-v2.html
+          cp assets/mrs10-erl-v2-*.js dist-erl-v2/assets/
+          test -f dist-erl-v2/index.html
+          test -f dist-erl-v2/assets/mrs10-erl-v2-model.js
+          test ! -f dist-erl-v2/assets/member-gateway.js
+          test ! -f dist-erl-v2/assets/questions.js
+          test ! -f dist-erl-v2/assets/analytics.js
+          ! grep -Eiq '(SUPABASE_SERVICE_ROLE|VERCEL_TOKEN|GITHUB_TOKEN)' assets/mrs10-erl-v2-*.js erl-v2.html
+          ! grep -Eiq '<iframe' erl-v2.html
+      - name: Existing preview builder unchanged
+        run: |
+          python3 scripts/build-preview.py dist-original-preview
+          test -f dist-original-preview/ampang-line-r219.html
+          test ! -f dist-original-preview/erl-v2.html
+          test ! -f dist-original-preview/assets/member-gateway.js
