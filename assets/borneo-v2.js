@@ -9,7 +9,7 @@ const WORDS = {
   zh:{title:"婆罗洲铁路与智轨",subtitle:"沙巴州铁路 · 砂拉越都市交通系统",language:"语言",dark:"深色",light:"浅色",public:"仅公共数据",survey:"地图位置不代表列车停靠时刻",loading:"正在加载目录…",ready:"目录已加载",error:"目录加载失败",map:"交通网络地图",all:"整个婆罗洲",sabah:"沙巴铁路",sarawak:"砂拉越智轨",blue:"蓝线",red:"红线",green:"绿线",reset:"重置",confidence:"● 第二来源坐标 · □ 无GPS示意图",lineup:"车站顺序",searchLabel:"搜索车站、路线或代码",noRails:"车站坐标来自第二来源；未验证的铁路轨道不绘制。",mapFallback:"交互地图不可用。仍可使用下方车站列表。",disclaimer:"仅供教育参考，不用于铁路控制或实时发车查询。",stations:"座车站",visible:"处坐标标记",schematic:"仅示意图，尚无已核实的车站GPS",source:"坐标来源",status:"状态",network:"网络",statusSabah:"铁路网络存在；具体班次请查询官方时刻表",statusArt:"建设/测试中，公共运营尚未核实",selectStation:"选择车站查看",secondary:"OSM / 公开参考",noTrack:"尚无已验证的GIS路线",partial:"仅列出运营方已确认的部分站名",noResults:"无匹配结果",cityOnly:"仅展示古晋区域，并非车站GPS",sabahMap:"15个车站点，无铁路轨迹",rail:"铁路",main:"主线",gorge:"峡谷线",reference:"Sembulan参考站（核对时刻表）",pending:"未核实",historical:"2021年EIA规划点，非当前站址",historicalSource:"2021年EIA来源",unknownPosition:"2026年站址尚未核实",historicalCount:"处EIA历史规划点",cityHub:"古晋城市参考点",clickStop:"查看站点信息",artLineup:"智轨站点顺序（示意）",conflictCode:"SM09 / SM11 编码冲突",official:"运营方公布",artHub:"古晋 · KUTS 智轨",artArea:"城市参考点，并非车站GPS",artNetwork:"3条智轨线（示意）",artBlue:"蓝线",artRed:"红线",artGreen:"绿线",artOverview:"智轨区域点",artStationCount:"个示意站名",artPoints:"个沙巴站点",artClick:"点击查看线路",artNoStop:"车站位置未核实"},
   th:{title:"รถไฟและ ART เกาะบอร์เนียว",subtitle:"รถไฟรัฐซาบาห์ · Sarawak Metro KUTS",language:"ภาษา",dark:"โหมดมืด",light:"โหมดสว่าง",public:"เฉพาะข้อมูลสาธารณะ",survey:"ตำแหน่งบนแผนที่ไม่ใช่ตารางเดินรถ",loading:"กำลังโหลดข้อมูล…",ready:"โหลดข้อมูลแล้ว",error:"โหลดข้อมูลไม่สำเร็จ",map:"แผนที่เครือข่าย",all:"บอร์เนียวทั้งหมด",sabah:"รถไฟซาบาห์",sarawak:"ART ซาราวัก",blue:"สายสีน้ำเงิน",red:"สายสีแดง",green:"สายสีเขียว",reset:"รีเซ็ต",confidence:"● พิกัดแหล่งรอง · □ แผนผังไม่มี GPS",lineup:"ลำดับสถานี",searchLabel:"ค้นหาสถานี สาย หรือรหัส",noRails:"จุดสถานีอ้างอิง GIS รอง ไม่วาดรางรถไฟที่ยังไม่มีข้อมูลยืนยัน",mapFallback:"แผนที่ไม่พร้อมใช้งาน แต่ยังดูรายชื่อสถานีได้",disclaimer:"ข้อมูลเพื่อการศึกษา ไม่ใช้ควบคุมรถไฟหรือดูเวลาออกจริง",stations:"สถานี",visible:"จุดที่ระบุตำแหน่ง",schematic:"แผนผังเท่านั้น ยังไม่มี GPS สถานียืนยัน",source:"แหล่งตำแหน่ง",status:"สถานะ",network:"เครือข่าย",statusSabah:"มีเครือข่าย แต่ตรวจตารางเวลาแต่ละเที่ยว",statusArt:"ก่อสร้าง/ทดสอบ ยังไม่ยืนยันเปิดบริการสาธารณะ",selectStation:"เลือกสถานีเพื่อดูตำแหน่ง",secondary:"OSM / แหล่งสาธารณะ",noTrack:"ยังไม่มีแนวเส้นทาง GIS ยืนยัน",partial:"รายชื่อจากผู้ดำเนินงานบางส่วน ไม่ครบทั้งหมด",noResults:"ไม่พบผลลัพธ์",cityOnly:"แสดงพื้นที่กูชิง ไม่ใช่พิกัดสถานี",sabahMap:"15 จุดสถานี ไม่วาดเส้นราง",rail:"รางรถไฟ",main:"สายหลัก",gorge:"สายหุบเขา",reference:"Sembulan ใช้อ้างอิง (ตรวจตาราง)",pending:"ยังไม่ยืนยัน",historical:"จุดแผน EIA ปี 2021 ไม่ใช่สถานีปัจจุบัน",historicalSource:"แหล่ง EIA 2021",unknownPosition:"ยังไม่ยืนยันตำแหน่งในปี 2026",historicalCount:"จุดแผน EIA ปี 2021",cityHub:"จุดอ้างอิงเมืองกูชิง",clickStop:"ดูข้อมูลสถานี",artLineup:"ลำดับจุดจอด ART (แผนผัง)",conflictCode:"รหัส SM09 / SM11 ขัดแย้งกัน",official:"ผู้ดำเนินงานยืนยัน",artHub:"กูชิง · KUTS ART",artArea:"จุดอ้างอิงเมือง ไม่ใช่ GPS สถานี",artNetwork:"ART 3 สาย (แผนผัง)",artBlue:"น้ำเงิน",artRed:"แดง",artGreen:"เขียว",artOverview:"จุด ART",artStationCount:"ชื่อสถานีแบบแผนผัง",artPoints:"จุดสถานีซาบาห์",artClick:"แตะเพื่อดูสาย",artNoStop:"ยังไม่ยืนยันตำแหน่งสถานี"}
 };
-const state = {data:null,eia:null,lang:"ms",category:"ALL",query:"",theme:"light",map:null,mapLoaded:false,popup:null,artMarker:null,artMarkerEl:null,selectedId:null,focusVersion:0};
+const state = {data:null,eia:null,lang:"ms",category:"ALL",query:"",theme:"light",map:null,mapLoaded:false,popup:null,artMarker:null,artMarkerEl:null,selectedId:null,focusVersion:0,diagramExpanded:false};
 const tr = key => (WORDS[state.lang] || WORDS.ms)[key] || WORDS.en[key] || key;
 const norm = value => String(value||"").normalize("NFKD").toLocaleLowerCase().trim();
 const pointOK = item => item && item.point && item.point.type==="Point" && Array.isArray(item.point.coordinates) && item.point.coordinates.length===2 && item.point.coordinates.every(Number.isFinite);
@@ -108,6 +108,40 @@ function renderSchematic(){
    node.append(card);
  }
 }
+
+function renderMapDiagram(){
+ const root=$("art-map-diagram");
+ if(!root)return;
+ root.replaceChildren();
+ if(!state.data||state.category==="SABAH")return;
+ const top=attach("button","art-diagram-toggle",tr("artLineup")+" · "+(state.diagramExpanded?"−":"+"));
+ top.type="button";top.setAttribute("aria-expanded",String(state.diagramExpanded));
+ top.addEventListener("click",()=>{state.diagramExpanded=!state.diagramExpanded;renderMapDiagram()});
+ root.append(top);
+ const lines=artLinesForSelection();
+ for(const l of lines){
+  const wrap=attach("div","art-diagram-route");
+  wrap.style.setProperty("--route-color",l.color);
+  const label=attach("button","art-diagram-route-title",l.name+" · "+(state.data.sarawak.stations.filter(p=>p.line===l.id).length||"—"));
+  label.type="button";label.addEventListener("click",()=>setCategory(l.id));
+  wrap.append(label);
+  if(state.diagramExpanded){
+   const stops=state.data.sarawak.stations.filter(x=>x.line===l.id&&(!state.query||selectedStations().some(p=>p.id===x.id)));
+   if(stops.length){
+    const spine=attach("div","art-diagram-spine");
+    stops.forEach(x=>{
+     const b=attach("button","art-diagram-stop",x.name+(x.code_conflict?" · SM09/SM11":""));
+     b.type="button";b.dataset.diagramCode=x.code;b.setAttribute("aria-label",x.code+" "+x.name+" "+tr("historical"));
+     const mark=attach("span","art-diagram-node",x.code);b.prepend(mark);
+     b.addEventListener("click",()=>focusStation(x));spine.append(b);
+    });wrap.append(spine);
+   }else wrap.append(attach("div","art-diagram-empty",l.start+" → "+l.end+" · "+tr("unknownPosition")));
+  }
+  root.append(wrap);
+ }
+ root.append(attach("div","art-diagram-note",tr("historical")));
+}
+
 function renderLineup(){
   const rows=selectedStations(), list=$("lineup");list.replaceChildren();displaySummary(rows);
   if(!rows.length){
@@ -130,7 +164,7 @@ function renderLineup(){
   });
 }
 function updateData(){
-  renderLineup();renderSchematic();
+  renderLineup();renderSchematic();renderMapDiagram();
   if(state.mapLoaded&&state.map){
     const source=state.map.getSource("borneo-points");
     if(source)source.setData(pointFeatures(selectedStations()));
@@ -227,7 +261,7 @@ function focusCategory(){
     state.map.fitBounds([[109.50,0.65],[117.30,6.55]],{padding:{top:36,right:30,bottom:85,left:65},maxZoom:6.5,duration:400});$("map-info").textContent=tr("noRails");
   }
 }
-function setCategory(cat){if(!CATEGORIES.includes(cat))return;state.category=cat;state.selectedId=null;document.querySelectorAll("[data-category]").forEach(btn=>btn.setAttribute("aria-pressed",String(btn.dataset.category===cat)));updateData();focusCategory()}
+function setCategory(cat){if(!CATEGORIES.includes(cat))return;state.category=cat;state.diagramExpanded=!["ALL","SABAH"].includes(cat);state.selectedId=null;document.querySelectorAll("[data-category]").forEach(btn=>btn.setAttribute("aria-pressed",String(btn.dataset.category===cat)));updateData();focusCategory()}
 function setTheme(mode){
   state.theme=mode;document.documentElement.dataset.theme=mode;
   $("theme").textContent=tr(mode==="light"?"dark":"light");
