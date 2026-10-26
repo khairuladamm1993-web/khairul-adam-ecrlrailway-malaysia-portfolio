@@ -1,0 +1,36 @@
+name: MR-S10 P01 Unified V7 KTM no Shuttle Timur QA
+on:
+  push:
+    branches: [feature/mrs10-p01-unified-v7-ktm-no-shuttle-timur]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Full original regression plus V6 and V7
+        run: |
+          npm test
+          node --test tests/unified-v6-regression.test.cjs tests/unified-v7-regression.test.cjs
+      - name: Syntax and safe preview packaging
+        run: |
+          node --check assets/unified-v7-map.js
+          node --check assets/unified-v7/ktm-adapter.js
+          node --check assets/unified-v7/ktm-dataset.js
+          node scripts/build-unified-v7.cjs
+          test -f dist-unified-v7/unified-map-v7.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unified-v7-public-only-build
+          path: dist-unified-v7/
+          retention-days: 4
