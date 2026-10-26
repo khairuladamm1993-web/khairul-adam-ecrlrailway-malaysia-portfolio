@@ -1,0 +1,40 @@
+name: MR-S10 P01 Unified V4 isolated GIS and regression QA
+on:
+  push:
+    branches: [feature/mrs10-p01-unified-v4-isolated]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unified:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Legacy regression
+        run: npm test
+      - name: V4 exact station/source/security tests
+        run: node --test tests/unified-v4-gis.test.cjs
+      - name: Syntax and public-only packaging
+        run: |
+          node --check assets/unified-v4-registry.js
+          node --check assets/unified-v4-map.js
+          node --check scripts/build-unified-v4.cjs
+          node scripts/build-unified-v4.cjs
+          test -f dist-unified-v4/unified-map-v4.html
+          grep -q 'services5.arcgis.com' dist-unified-v4/_headers
+          grep -q "frame-ancestors 'none'" dist-unified-v4/_headers
+          test ! -e dist-unified-v4/assets/member-gateway.js
+          test ! -e dist-unified-v4/api
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unified-v4-public-only
+          path: dist-unified-v4/
+          retention-days: 3
