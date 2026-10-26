@@ -14,11 +14,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test tests/r222-ktm-komuter.test.cjs
+          cache: npm
+      - name: Install pinned QA dependencies
+        run: npm ci --ignore-scripts
+      - name: KTM catalogue, GIS and station marker tests
+        run: node --test tests/r222-ktm-komuter.test.cjs
       - name: Existing P01 cross-service regression
         run: node --test tests/r221-p01-crossline-integration.test.cjs
-      - name: Catalogue and HTML present without modifying integrated output
+      - name: Full existing Node regression
+        run: npm test
+      - name: Create isolated public-only preview artifact without deploying
         run: |
-          test -s ktm-komuter-r222.html
-          test -s assets/mrs10-r222-ktm-catalogue.json
+          python3 scripts/build-preview.py "$RUNNER_TEMP/ktm-r222-preview"
+          cp ktm-komuter-r222.html "$RUNNER_TEMP/ktm-r222-preview/"
+          cp assets/mrs10-r222-ktm-catalogue.json "$RUNNER_TEMP/ktm-r222-preview/assets/"
+          test -s "$RUNNER_TEMP/ktm-r222-preview/ktm-komuter-r222.html"
+          test -s "$RUNNER_TEMP/ktm-r222-preview/assets/mrs10-r222-ktm-service.js"
+          test -s "$RUNNER_TEMP/ktm-r222-preview/assets/mrs10-r222-ktm-catalogue.json"
+          test ! -e "$RUNNER_TEMP/ktm-r222-preview/assets/member-gateway.js"
+          test ! -e "$RUNNER_TEMP/ktm-r222-preview/assets/questions.js"
+          test ! -e "$RUNNER_TEMP/ktm-r222-preview/assets/owner-command-center.js"
+          grep -q 'noindex,nofollow' "$RUNNER_TEMP/ktm-r222-preview/ktm-komuter-r222.html"
+          grep -q 'content-security-policy\|Content-Security-Policy' "$RUNNER_TEMP/ktm-r222-preview/_headers"
+      - name: Read-only integrated checkpoint guard
+        run: |
+          test -s map-language-lab.html
+          test -s assets/railway-track-registry-kl.js
           git diff --exit-code HEAD -- map-language-lab.html assets/railway-track-registry-kl.js
