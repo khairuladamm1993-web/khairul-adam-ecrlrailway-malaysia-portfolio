@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
-const url='https://mrs10-p01-unified-v4-isolated-preview-8s4ee9zs4.vercel.app/unified-map-v6.html';
+const url='https://mrs10-p01-unified-v4-isolated-preview-ctj8ukowg.vercel.app/unified-map-v6.html';
 const browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',
  args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
 const report=[];
@@ -40,9 +40,12 @@ try{
    assert.equal(s.perRoute['lrt-ampang'].matched,18);
    assert.equal(s.perRoute['mrt-putrajaya'].matched,36);
    assert(img.quantizedColors>30,'BLANK_MAP_IMAGE');
-   assert(s.perRoute['lrt-sri-petaling'].matched>=1,'SRI_GIS_NONE');
-   assert(s.perRoute['erl-klia-transit'].matched>=1,'ERL_GIS_NONE');
-   assert(s.perRoute['kl-monorail'].matched>=1,'MONORAIL_GIS_NONE');
+   assert.equal(s.perRoute['lrt-sri-petaling'].matched,29,'SRI_GIS_NOT_29');
+   assert.equal(s.perRoute['erl-klia-transit'].matched,6,'ERL_TRANSIT_NOT_6');
+   assert.equal(s.perRoute['erl-klia-ekspres'].matched,3,'ERL_EXPRESS_NOT_3');
+   assert.equal(s.perRoute['kl-monorail'].matched,11,'MONORAIL_GIS_NOT_11');
+   assert.equal(s.sourceMatched,169,'TOTAL_169_SOURCE_NOT_MATCHED');
+   assert.equal(s.renderedFeatureCount,169,'TOTAL_169_NOT_RENDERED');
    await page.locator('#filters button').filter({hasText:'Monorail'}).click();
    assert((await snapshot()).perRoute['kl-monorail'].visible,'MONORAIL_FILTER_FAIL');
    await page.locator('#reset').click();
