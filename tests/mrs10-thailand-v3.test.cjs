@@ -37,3 +37,8 @@ test('Same-origin MapLibre worker is bundled and pointed to before rendering',()
  assert.match(boot,/maplibre-gl-worker-6\.13\.0\.mjs/);
  assert.ok(boot.indexOf('setWorkerUrl')<boot.indexOf('await import'));
 });
+test('Bangkok approach Southern physical order: Taling Chan before Bang Bamru',()=>{
+ const s=M.route('th-v3-main').selectedStationIds;
+ assert.ok(s.indexOf('th-taling-chan-junction')<s.indexOf('th-bang-bamru'));
+ assert.ok(s.indexOf('th-bang-bamru')<s.indexOf('th-krung-thep-aphiwat'));
+});
