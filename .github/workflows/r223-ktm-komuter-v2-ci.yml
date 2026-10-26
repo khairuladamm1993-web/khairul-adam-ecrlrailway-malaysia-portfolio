@@ -3,17 +3,52 @@ on:
   push:
     branches:
       - feature/mrs10-p01-ktm-komuter-v2
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Checkout exact candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - name: Configure Node 22 and npm cache
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
-      - run: npm test
-      - run: node --test tests/r223-ktm-komuter-v2.test.cjs
+          cache: npm
+      - name: Reproducible locked development dependency install
+        run: npm ci --ignore-scripts --include=dev --no-audit --no-fund
+      - name: Verify declared jsdom and installed package
+        run: |
+          node -e "const p=require('./package.json');const l=require('./package-lock.json'); if(p.devDependencies.jsdom!=='26.1.0'||l.packages[''].devDependencies.jsdom!==p.devDependencies.jsdom)process.exit(1)"
+          npm ls jsdom --depth=0
+      - name: Full existing Node regression (no skipped tests)
+        run: npm test
+      - name: KTM V2 catalogue, GIS integrity, station and mobile QA
+        run: node --test tests/r223-ktm-komuter-v2.test.cjs
+      - name: KTM R2.22 compatibility QA
+        run: node --test tests/r222-ktm-komuter.test.cjs
+      - name: Read-only four-line integrated baseline guard
+        run: |
+          test -s map-language-lab.html
+          test -s assets/railway-track-registry-kl.js
+          git diff --exit-code 6ee8a4a14ffbe5567c54ec575cbb812bde6d8e4c HEAD -- map-language-lab.html assets/map-language-lab.js assets/railway-track-registry-kl.js
+      - name: Assemble strictly isolated public KTM preview source (no deployment)
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/mrs10-ktm-v2-public"
+          mkdir -p "$out/assets"
+          cp ktm-komuter-v2.html "$out/index.html"
+          cp assets/mrs10-r223-ktm-service.js "$out/assets/"
+          cp assets/mrs10-r223-ktm-catalogue.json "$out/assets/"
+          test "$(find "$out" -type f | wc -l)" -eq 3
+          ! grep -iE 'supabase|member-gateway|owner-command-center|service_role|sk_live|GTM-' "$out/index.html"
+          ! grep -iE '"geometry": *\{|LineString' "$out/assets/mrs10-r223-ktm-catalogue.json"
+          grep -q 'noindex,nofollow' "$out/index.html"
+          grep -q 'MRS10KTMV2' "$out/assets/mrs10-r223-ktm-service.js"
+          echo 'KTM isolated public artifact files:'
+          find "$out" -type f | sort
