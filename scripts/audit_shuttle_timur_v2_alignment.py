@@ -21,9 +21,9 @@ from pathlib import Path
 
 GTFS_URL="https://api.data.gov.my/gtfs-static/ktmb"
 OSM_URLS=[
-    "https://overpass.kumi.systems/api/interpreter",
-    "https://overpass.private.coffee/api/interpreter",
     "https://overpass-api.de/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
 ]
 BBOX=(4.12,101.70,6.23,102.36)
 MAX_GTFS=30_000_000
