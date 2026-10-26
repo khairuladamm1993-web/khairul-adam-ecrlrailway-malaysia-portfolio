@@ -57,3 +57,12 @@ test('V6 strict public ArcGIS layer5 Monorail matching: all 11 exact codes, dupl
  assert.equal(adapter.decodeMonorailArcGIS(fake.map((f,i)=>({...f,attributes:{...f.attributes,STN_CODE:'MR'+(i+2)}})),mono).matched,0);
  assert.equal(adapter.routes(deps).find(r=>r.id==='kl-monorail').decoder,'MONO_ARCGIS');
 });
+
+test('Monorail exact source typo MEDAN TUNKU MR09 resolved without fuzzy matching',()=>{
+ const names=mono.stations.map((s,i)=>({attributes:{FID:i+1,STN_NAME:i===8?'MEDAN TUNKU':s.name,STN_CODE:'MR'+String(i+1).padStart(2,'0')},
+  geometry:{x:101.69+i*.001,y:3.135+i*.001}}));
+ assert.equal(adapter.decodeMonorailArcGIS(names,mono).matched,11);
+ const bad=structuredClone(names);
+ bad[8].attributes.STN_CODE='MR08';
+ assert.equal(adapter.decodeMonorailArcGIS(bad,mono).matched,10);
+});

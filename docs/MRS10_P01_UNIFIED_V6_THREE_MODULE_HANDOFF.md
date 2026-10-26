@@ -16,3 +16,5 @@ Roll back by opening the verified V5 isolated preview; do not change MR-S10 Prod
 
 ## V6 map remediation
 Initial 3-viewport browser test run 40411406524 exposed 158/169 actual features, with public Overpass returning zero verified Monorail markers (0/11). Other sources 120/120 V5 + 29/29 Sri + 9/9 ERL rendered. The new V6-only Monorail adapter uses additional verified public ArcGIS feature *station points* layer 5 (eleven records according to service GetEstimates) with exact name, MR code, extent, duplicate and coordinate checks. Source module's OSM matcher is preserved but not used to infer locations. Mandatory live GIS matching test added; do not claim 11/11 before it passes.
+
+CI run 40411910039 read all 11 raw Monorail Layer5 features; strict crosswalk matched 10/11. Source spelling exception found: `MEDAN TUNKU` + `MR09` corresponds to registry `Medan Tuanku` / `MR9`. An exact layer-scoped tuple correction was added (no change to source geometry, no fuzzy edits). New live QA must confirm all 11 before release.

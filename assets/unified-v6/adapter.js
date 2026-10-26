@@ -46,7 +46,10 @@ function decodeMonorailArcGIS(features,mono){
   const rawName=String(p.STN_NAME??p.STATION_NAME??p.name??p.NAME??'').trim();
   const rawCode=String(p.STN_CODE??p.STATION_CODE??p.code??p.CODE??'').trim();
   const clean=rawName.replace(/^MR0*\d{1,2}\s+/i,'').replace(/\s+(?:monorail\s+)?(?:station|stesen)$/i,'').trim();
-  const station=mono.findStation(clean);
+  // Audited layer5 source tuple on 2026-10-27: MEDAN TUNKU / MR09;
+  // only correct this exact spelling; source geometry is unchanged.
+  const sourceTypo=rawName.toUpperCase()==='MEDAN TUNKU'&&rawCode.toUpperCase()==='MR09';
+  const station=mono.findStation(clean)||(sourceTypo?mono.stations.find(s=>s.code==='MR9'):null);
   const code=rawCode.match(/^\s*MR0*(\d{1,2})\s*$/i);
   const g=feature?.geometry||{},xy=Array.isArray(g.coordinates)?g.coordinates:[g.x,g.y];
   const lon=Number(xy[0]),lat=Number(xy[1]),b=mono.bbox;
