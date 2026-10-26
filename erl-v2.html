@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ms" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>MR-S10 P01 — ERL V2 | Isolated Preview Candidate</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.css">
+<style>
+:root{color-scheme:light;--bg:#f2f5f8;--panel:#fff;--ink:#162536;--muted:#52677b;--border:#d2dce4;--express:#8C279C;--transit:#008C9D;--soft:#e8eff4}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0d1c2a;--panel:#172939;--ink:#e7f2fa;--muted:#bbcad7;--border:#355064;--express:#E7A8F2;--transit:#60DDE5;--soft:#213749}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.48 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{width:min(1120px,calc(100% - 24px));margin:auto;padding:12px 0 50px}
+a{color:inherit}
+nav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 0 12px}
+h1{font-size:clamp(1.36rem,4vw,2.25rem);line-height:1.17;letter-spacing:-.025em;margin:4px 0 8px}
+h2{font-size:1.08rem;letter-spacing:-.01em;margin:0}
+h3{font-size:1rem;margin:0}
+.kicker{font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.7rem;color:var(--muted)}
+.sub{margin:0 0 15px;max-width:65ch;color:var(--muted)}
+button{font:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid #ffb333;outline-offset:3px}
+button,.tab{min-height:42px;border:1px solid var(--border);border-radius:11px;padding:8px 11px;background:var(--panel);color:var(--ink)}
+button:hover{border-color:var(--transit)}
+button[aria-pressed="true"]{background:var(--soft);border-color:var(--ink);font-weight:750}
+.bar{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:13px}
+.label{color:var(--muted);font-size:.82rem;font-weight:700;margin-right:4px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:17px;padding:14px;margin:12px 0;overflow:hidden}
+.maphead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;margin-bottom:11px}
+.legend{display:flex;gap:11px;flex-wrap:wrap}
+.legend span{display:flex;gap:6px;align-items:center;font-size:.8rem;color:var(--muted);white-space:nowrap}
+.swatch{width:12px;height:12px;border-radius:50%;display:inline-block;border:1px solid currentColor}
+.express-swatch{background:var(--express)}.transit-swatch{background:var(--transit)}
+#erl-map{width:100%;height:clamp(360px,51vh,620px);border-radius:11px;background:var(--soft)}
+.status{color:var(--muted);font-size:.85rem;margin:11px 0 4px}
+.notice{border-left:4px solid var(--express);background:var(--soft);padding:10px 12px;border-radius:0 10px 10px 0;margin:12px 0}
+#geometry-note{font-weight:650}
+.lineup-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.route-card{padding:13px;border-radius:13px;border:1px solid var(--border);overflow-x:auto}
+.service-h{padding-left:10px;border-left:5px solid var(--transit)}
+#line-express .service-h{border-color:var(--express)}
+.substatus{font-size:.81rem;color:var(--muted);margin:4px 0 12px}
+.schematic-list{display:flex;list-style:none;padding:6px 3px 9px;margin:0;min-width:720px}
+#line-express .schematic-list{min-width:410px}
+.schematic-list li{position:relative;flex:1;min-width:0;text-align:center}
+.schematic-list li:not(:last-child)::after{content:"";height:5px;position:absolute;top:13px;left:52%;width:96%;background:var(--transit);z-index:0}
+.schematic-list.express li:not(:last-child)::after{background:var(--express)}
+.schematic-station{border:0;background:transparent!important;display:flex;flex-direction:column;align-items:center;gap:7px;width:100%;min-height:82px;padding:4px 2px;font-weight:600;font-size:.76rem;line-height:1.2;position:relative;z-index:1}
+.station-dot{width:22px;height:22px;border:4px solid var(--panel);border-radius:50%;background:var(--transit);box-shadow:0 0 0 2px var(--transit);flex:none}
+.express .station-dot{background:var(--express);box-shadow:0 0 0 2px var(--express)}
+.erl-pin{display:flex;align-items:stretch;justify-content:center;border:2px solid #fff;border-radius:50%;overflow:hidden;padding:0;width:24px;height:24px;min-height:24px;box-shadow:0 2px 8px #000b}
+.erl-pin .pin-half{flex:1}
+.erl-pin .ekspres{background:var(--express)}
+.erl-pin .transit{background:var(--transit)}
+.erl-pin:focus-visible{outline:3px solid #f9bb49;outline-offset:3px}
+.erl-popup{font-size:13px;color:#172535;max-width:260px}
+.erl-popup p{margin:7px 0}
+.erl-popup strong{font-size:15px}
+footer{color:var(--muted);font-size:.78rem;margin-top:18px}
+.source-links{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+.source-links a{font-size:.8rem}
+:root[data-theme="dark"] .maplibregl-popup-content{background:#eff7fd;color:#172535}
+@media(max-width:540px){main{width:calc(100% - 16px)}.panel{padding:10px;border-radius:14px}.controls{align-items:flex-start;flex-direction:column}.bar{gap:5px}.bar button{font-size:.82rem;padding:7px 9px;min-height:42px}#erl-map{height:410px}.maphead{align-items:flex-start;flex-direction:column}.legend{gap:10px}h1{font-size:1.48rem}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+</style>
+<script src="./assets/mrs10-erl-v2-model.js" defer></script>
+<script src="./assets/mrs10-erl-v2-gis.js" defer></script>
+<script src="./assets/mrs10-erl-v2-view.js" defer></script>
+</head>
+<body><main>
+<nav><a href="./map-language-lab.html" aria-label="Peta utama MR-S10">← MR-S10 Map</a><button type="button" id="theme">Mod Gelap</button></nav>
+<header><p class="kicker">MR-S10 / P01 · ERL V2 · Isolated Preview Only</p>
+<h1 id="title">ERL · KLIA Ekspres & KLIA Transit</h1>
+<p id="subtitle" class="sub">Dua identiti perkhidmatan, satu koridor berkongsi.</p></header>
+<div class="controls">
+ <div class="bar" role="group" aria-label="Language"><button id="locale-ms" aria-pressed="true" type="button">BM</button><button id="locale-en" aria-pressed="false" type="button">EN</button><button id="locale-zh" aria-pressed="false" type="button">中文</button><button id="locale-th" aria-pressed="false" type="button">ไทย</button></div>
+ <div class="bar" role="group" aria-label="Service focus"><span id="focus-label" class="label">Paparan</span><button id="btn-all" type="button" aria-pressed="true">Semua</button><button id="btn-express" type="button" aria-pressed="false">Fokus Ekspres</button><button id="btn-transit" type="button" aria-pressed="false">Fokus Transit</button><button id="btn-reset" type="button">Reset</button></div>
+</div>
+<section class="panel" aria-label="ERL GIS station map">
+ <div class="maphead"><h2 id="map-title">Peta stesen bersumber</h2><div class="legend"><span><i class="swatch express-swatch" aria-hidden="true"></i>KLIA Ekspres</span><span><i class="swatch transit-swatch" aria-hidden="true"></i>KLIA Transit</span></div></div>
+ <div id="erl-map" role="region" aria-label="Interactive GIS station map"></div>
+ <p id="gis-status" class="status" role="status" aria-live="polite">GIS: menunggu sumber</p>
+ <p id="geometry-note" class="status">Jajaran fizikal BELUM DISAHKAN.</p>
+ <p id="selection" class="status" aria-live="polite"></p>
+</section>
+<aside class="notice" id="late-note">Penting: KLIA Ekspres turut berhenti di semua stesen selepas 11 malam menurut operator. Semak jadual semasa.</aside>
+<section class="panel"><h2 id="schematic-title">Turutan hentian perkhidmatan (skematik)</h2>
+ <div class="lineup-grid"><section id="line-express" class="route-card"></section><section id="line-transit" class="route-card"></section></div>
+</section>
+<footer>
+ <p id="attribution">© OpenStreetMap contributors (ODbL); ArcGIS station references, reuse rights unverified.</p>
+ <div class="source-links">
+ <a href="https://www.kliaekspres.com/products-fares/klia-ekspres/" target="_blank" rel="noopener noreferrer">ERL · Ekspres (official)</a>
+ <a href="https://www.kliaekspres.com/products-fares/klia-transit/" target="_blank" rel="noopener noreferrer">ERL · Transit (official)</a>
+ <a href="https://www.kliaekspres.com/media/wkxnzajm/erl_kv-integrated-transit-map_updated-mar23.pdf" target="_blank" rel="noopener noreferrer">Official schematic & colour families</a>
+ <a href="https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer/4" target="_blank" rel="noopener noreferrer">Secondary ArcGIS GIS</a>
+ <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OSM licence</a>
+ </div>
+ <p>Secondary GIS live query; no offline coordinate cache · No authentication or analytics integration · No physical rail alignment authored</p>
+</footer>
+</main></body></html>
