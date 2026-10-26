@@ -11,7 +11,7 @@ const i18n={
   loading:'Memuatkan stesen daripada GIS awam…',offline:'Peta geografi gagal dimuatkan. Senarai stesen masih boleh digunakan.',
   partial:'GIS tidak lengkap: hanya penanda yang dipadankan dipaparkan.',complete:'Semua penanda dipadankan kepada sumber GIS awam.',
   located:'Penanda sumber GIS dipadankan',unlocated:'Tiada lokasi GIS yang disahkan untuk stesen ini.',source:'GIS awam pihak ketiga (bukan pengukuran operasi)',
-  transfer:'Pertukaran penumpang',status:'penanda GIS',noResults:'Tiada padanan carian.',pending:'Menunggu sumber GIS',notTrack:'Geometri trek belum disahkan; tiada garisan palsu.',
+  transfer:'Pertukaran penumpang',status:'penanda GIS',noResults:'Tiada padanan carian.',pending:'Menunggu sumber GIS',notTrack:'Geometri trek belum disahkan; tiada garisan palsu.',visualPending:'Data GIS dipadankan tetapi paparan peta belum disahkan.',
   rights:'Data sumber GIS: ArcGIS awam pihak ketiga · Turutan stesen: MR-S10 operator references · Basemap: OpenFreeMap / OSM · Bukan untuk operasi.',
   fail:'Ralat GIS',show:'Paparkan laluan',found:'daripada'},
  en:{title:'Unified Railway Map V5',desc:'Four services together. Station points from third-party public GIS; not operational coordinates or track alignments.',
@@ -19,7 +19,7 @@ const i18n={
   loading:'Loading public GIS stations…',offline:'Geographic map unavailable. The station list remains accessible.',
   partial:'GIS incomplete: only source-matched markers are shown.',complete:'All markers matched against public GIS sources.',
   located:'Source GIS marker matched',unlocated:'No verified GIS position for this station.',source:'Third-party public GIS (not an operational survey)',
-  transfer:'Passenger interchange',status:'GIS markers',noResults:'No search matches.',pending:'Awaiting GIS source',notTrack:'Track geometry not verified; no fictitious lines.',
+  transfer:'Passenger interchange',status:'GIS markers',noResults:'No search matches.',pending:'Awaiting GIS source',notTrack:'Track geometry not verified; no fictitious lines.',visualPending:'GIS matched but map rendering not yet verified.',
   rights:'GIS data: third-party ArcGIS · Station order: MR-S10 operator references · Basemap: OpenFreeMap / OSM · Not for operations.',
   fail:'GIS error',show:'Show route',found:'of'},
  zh:{title:'综合铁路地图 V5',desc:'四条线路同时显示。车站点位来自第三方公共 GIS，并非运营测量坐标或轨道线路。',
@@ -27,7 +27,7 @@ const i18n={
   loading:'正在加载公共 GIS 车站…',offline:'地理地图不可用，但车站列表仍可使用。',
   partial:'GIS 数据不完整：仅显示来源匹配的标记。',complete:'所有标记已与公共 GIS 来源匹配。',
   located:'已匹配 GIS 标记',unlocated:'该车站尚无已核对的 GIS 位置。',source:'第三方公共 GIS（非运营测量）',
-  transfer:'乘客换乘',status:'GIS 标记',noResults:'没有匹配结果。',pending:'等待 GIS 数据',notTrack:'轨道几何未经核实，不绘制虚构线路。',
+  transfer:'乘客换乘',status:'GIS 标记',noResults:'没有匹配结果。',pending:'等待 GIS 数据',notTrack:'轨道几何未经核实，不绘制虚构线路。',visualPending:'GIS 数据已匹配，但地图尚未通过显示验证。',
   rights:'GIS 来源：第三方 ArcGIS · 车站顺序：MR-S10 运营商参考资料 · 底图：OpenFreeMap / OSM · 不作运营用途。',
   fail:'GIS 错误',show:'显示线路',found:'／'},
  th:{title:'แผนที่รถไฟรวม V5',desc:'แสดง 4 เส้นทางพร้อมกัน จุดสถานีจาก GIS สาธารณะของบุคคลที่สาม ไม่ใช่พิกัดปฏิบัติการหรือแนวรางที่ตรวจวัด',
@@ -35,7 +35,7 @@ const i18n={
   loading:'กำลังโหลดสถานีจาก GIS สาธารณะ…',offline:'แผนที่ภูมิศาสตร์ไม่พร้อมใช้งาน แต่ยังดูรายชื่อสถานีได้',
   partial:'GIS ไม่ครบ: แสดงเฉพาะจุดที่จับคู่กับแหล่งข้อมูลได้',complete:'จับคู่หมุดทั้งหมดกับแหล่ง GIS สาธารณะแล้ว',
   located:'จับคู่หมุด GIS แล้ว',unlocated:'ยังไม่มีพิกัด GIS ที่ตรวจสอบแล้วสำหรับสถานีนี้',source:'GIS สาธารณะของบุคคลที่สาม (ไม่ใช่การสำรวจเพื่อปฏิบัติการ)',
-  transfer:'จุดเปลี่ยนสายผู้โดยสาร',status:'หมุด GIS',noResults:'ไม่พบผลการค้นหา',pending:'รอข้อมูล GIS',notTrack:'ยังไม่ยืนยันแนวราง จึงไม่สร้างเส้นสมมติ',
+  transfer:'จุดเปลี่ยนสายผู้โดยสาร',status:'หมุด GIS',noResults:'ไม่พบผลการค้นหา',pending:'รอข้อมูล GIS',notTrack:'ยังไม่ยืนยันแนวราง จึงไม่สร้างเส้นสมมติ',visualPending:'จับคู่ข้อมูล GIS แล้ว แต่ยังไม่ยืนยันการแสดงผลแผนที่',
   rights:'GIS: ArcGIS บุคคลที่สาม · ลำดับสถานี: MR-S10 ข้อมูลผู้ให้บริการ · แผนที่ฐาน: OpenFreeMap / OSM · ห้ามใช้เพื่อปฏิบัติการ',
   fail:'ข้อผิดพลาด GIS',show:'แสดงเส้นทาง',found:'จาก'}
 };
@@ -48,13 +48,17 @@ function selectedRoutes(){return state.manifest.filter(r=>state.category==='All'
 function routeStatus(r){const d=state.results.get(r.id);return d?d.matched+'/'+r.expected:r.expected?'0/'+r.expected:'0'}
 function currentCount(){return [...state.results.values()].reduce((n,r)=>n+r.matched,0)}
 function showStatus(){
- const total=state.manifest.reduce((n,r)=>n+r.expected,0),ready=currentCount(),finished=state.pending===0;
- say((finished&&ready===total?tr('complete'):finished?tr('partial'):tr('loading'))+
-  ' · '+ready+'/'+total+' '+tr('status')+' · '+tr('notTrack'));
- $('map-error').textContent=!state.mapReady&&state.networkError?tr('offline'):
-  state.pending?tr('loading'):
-  ready===total?tr('complete'):tr('partial');
- $('map-error').hidden=state.mapReady&&ready===total;
+ const total=state.manifest.reduce((n,r)=>n+r.expected,0),ready=currentCount();
+ const finished=state.pending===0;
+ const view=diagnosticSnapshot();
+ const loaded=finished&&ready===total&&view.mapReady&&view.styleLoaded&&view.tilesLoaded&&view.webglReady&&
+  Object.values(view.perRoute).length===state.manifest.length&&
+  Object.values(view.perRoute).every(x=>x.present&&x.rendered>0);
+ const message=!finished?tr('loading'):loaded?tr('complete'):
+  ready!==total?tr('partial'):tr('visualPending');
+ say(message+' · '+ready+'/'+total+' '+tr('status')+' · '+tr('notTrack'));
+ $('map-error').textContent=state.networkError?tr('offline'):message;
+ $('map-error').hidden=loaded;
 }
 function findGeo(routeId,id){return state.points.get(routeId+':'+id)||null}
 function buildFilters(){
@@ -220,11 +224,10 @@ function startMap(){
    state.mapReady=true;updateMapLayer();fitOnce();showStatus();
   });
   state.map.on('idle',()=>{
-   if(state.mapReady&&state.points.size&&!state.map.getSource(srcId(state.manifest[0]?.id))){
-    updateMapLayer();fitOnce();showStatus();
-   }
-  });
-  state.map.on('error',()=>{if(!state.mapReady){state.networkError=true;showStatus()}});
+    if(state.mapReady&&state.points.size&&!state.map.getSource(srcId(state.manifest[0]?.id))){updateMapLayer();fitOnce()}
+    showStatus();
+   });
+   state.map.on('error',()=>{if(!state.mapReady){state.networkError=true;showStatus()}});
   state.map.on('click',e=>{
    if(!state.mapReady)return;
    const layers=state.manifest.map(r=>'mrs10-v5-'+r.id).filter(id=>state.map.getLayer(id));
