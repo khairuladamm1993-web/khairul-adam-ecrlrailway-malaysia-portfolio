@@ -96,6 +96,7 @@ test("JSDOM runtime: source has 15 points by default; filters, search, reset, 4 
  assert.equal(w.__BORNEO_V2_QA().category,"RED");
  assert.equal(w.__BORNEO_V2_QA().artRegionalLocatorCount,1);
  assert.equal(w.document.querySelectorAll(".art-line-chip").length,1);
+ click("ALL");
  const h=instances[0].handlers["click:borneo-stations"];assert.equal(typeof h,"function");
  h({features:[{properties:{id:"SSR-10"}}]});assert.ok(w.document.querySelector('[data-id="SSR-10"][aria-current="true"]'));
  dom.window.close();
