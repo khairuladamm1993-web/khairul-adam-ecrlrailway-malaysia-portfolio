@@ -25,9 +25,11 @@ jobs:
           mkdir -p assets/thailand-v3-vendor
           cp node_modules/maplibre-gl/dist/maplibre-gl.mjs assets/thailand-v3-vendor/maplibre-gl-6.13.0.mjs
           cp node_modules/maplibre-gl/dist/maplibre-gl.css assets/thailand-v3-vendor/maplibre-gl-6.13.0.css
+          cp node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs assets/thailand-v3-vendor/maplibre-gl-worker-6.13.0.mjs
           if test -f node_modules/maplibre-gl/LICENSE.txt; then cp node_modules/maplibre-gl/LICENSE.txt assets/thailand-v3-vendor/MAPLIBRE-LICENSE.txt; else printf 'BSD-3-Clause, source: https://github.com/maplibre/maplibre-gl-js/blob/v6.13.0/LICENSE.txt\n' > assets/thailand-v3-vendor/LICENSE-REFERENCE.txt; fi
-          sha256sum assets/thailand-v3-vendor/maplibre-gl-6.13.0.mjs assets/thailand-v3-vendor/maplibre-gl-6.13.0.css > assets/thailand-v3-vendor/SHA256SUMS
+          sha256sum assets/thailand-v3-vendor/maplibre-gl-6.13.0.mjs assets/thailand-v3-vendor/maplibre-gl-6.13.0.css assets/thailand-v3-vendor/maplibre-gl-worker-6.13.0.mjs > assets/thailand-v3-vendor/SHA256SUMS
           node --check assets/thailand-v3-vendor/maplibre-gl-6.13.0.mjs
+          node --check assets/thailand-v3-vendor/maplibre-gl-worker-6.13.0.mjs
       - name: Push vendor only to Thailand isolated feature branch, never force
         run: |
           set -euo pipefail
