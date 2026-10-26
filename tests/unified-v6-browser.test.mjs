@@ -32,6 +32,12 @@ try{
     return s?.stage==='DONE'&&s?.styleLoaded&&s?.tilesLoaded&&s?.webglReady&&
      s?.layerCount===8&&['mrt-kajang','lrt-kelana-jaya','lrt-ampang','mrt-putrajaya'].every(id=>
        s.perRoute[id]?.present&&s.perRoute[id]?.rendered>0);},null,{timeout:75000});
+   // MapLibre fitBounds can transition through an empty rendered-frame even after
+   // all sources and 8 layers are ready. Assert actual 169 drawn after fit animation.
+   await page.waitForFunction(()=>{const d=window.MRS10V6Diagnostics?.snapshot?.();
+    return d?.stage==='DONE'&&d?.sourceMatched===169&&d?.renderedFeatureCount===169;
+   },null,{timeout:30000});
+   await page.waitForTimeout(650);
    const s=await snapshot(),img=imageStats(await page.locator('#map').screenshot({path:'artifacts/unified-v6-browser/'+vp.name+'.png'}));
    assert.equal(s.mapInstances,1,'NO_SINGLE_MAP');
    assert.equal(s.layerCount,8,'EIGHT_LAYERS_NOT_INSTALLED');
