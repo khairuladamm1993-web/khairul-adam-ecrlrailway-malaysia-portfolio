@@ -82,5 +82,36 @@
     "Do not label all JKNS stations as stops on each service"
   ],
   "status_as_of": "2026-10-27",
-  "status": "PARTIAL_PENDING_BROWSER_AND_SAFARI_UAT"
+  "status": "PARTIAL_PENDING_OWNER_SAFARI_UAT",
+  "code_verified_commit": "ffe06442ea64ab0ffc00bfc82ea18ca5a1a624c2",
+  "code_verified_ci_url": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40397870447",
+  "browser_qa": {
+    "engine": "Chromium 141 via Playwright 1.56",
+    "status": "PASS",
+    "ipad_viewport": "1024x768",
+    "iphone_viewport": "390x844",
+    "rendered_sabah_points": 15,
+    "art_gps_points": 0,
+    "art_schematic_lines": 3,
+    "checklist": [
+      "Actual WebGL rendered features",
+      "category filtering",
+      "search/reset",
+      "popup",
+      "dark theme",
+      "Chinese language",
+      "viewport screenshots"
+    ],
+    "screenshot_artifact": "borneo-v2-real-chromium-screens",
+    "safari_webkit_qa": "PENDING_OWNER"
+  },
+  "staging": {
+    "project_id": "prj_lANjBUS6Cq0l94Uox0SMeWFurwiw",
+    "deployment_id": "dpl_BGV4hVf6m72abjbv6oP1Z8haaVpg",
+    "target": "staging",
+    "ready_state": "READY",
+    "url": "https://mrs10-p01-borneo-v2-isolated-preview-ljtghfoaj.vercel.app/borneo-v2.html",
+    "runtime_assets_http_200": true,
+    "code_commit": "ffe06442ea64ab0ffc00bfc82ea18ca5a1a624c2"
+  }
 }
