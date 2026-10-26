@@ -47,3 +47,15 @@ test('V5 separate HTML, reversible branch, no leaked private scripts',()=>{
  assert(docs.includes('Owner Safari'));
  assert(!/assets\/member-gateway\.js/.test(html));
 });
+
+test('V5 style replacement recovers sources on idle without stale mapReady gate',()=>{
+ const js=get('assets/unified-v5-map.js');
+ const pos=js.indexOf("state.map.on('idle'");
+ const block=js.slice(pos,js.indexOf("state.map.on('error'",pos));
+ assert(block.includes('state.map.isStyleLoaded()'));
+ assert(block.includes('state.mapReady=true'));
+ assert(block.includes('state.manifest.some'));
+ assert(block.includes('!state.map.getSource(srcId(route.id))'));
+ assert(block.includes('!state.map.getLayer(layerId(route.id))'));
+ assert(!block.includes('if(state.mapReady&&'),'stale ready state must not prevent recovery');
+});
