@@ -37,3 +37,32 @@ jobs:
           name: unified-v5-public-only
           path: dist-unified-v5/
           retention-days: 3
+
+
+  browser:
+    needs: regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Install pinned browser API and PNG screenshot evaluator
+        run: |
+          which google-chrome
+          google-chrome --version
+          npm install --no-save --ignore-scripts playwright@1.56.1 pngjs@7.0.0
+      - name: Three actual Chromium visual gates (desktop / iPad / iPhone)
+        env:
+          UNIFIED_V5_URL: https://mrs10-p01-unified-v4-isolated-preview-1j2rxstyz.vercel.app/unified-map-v5.html
+        run: node tests/unified-v5-browser.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-v5-browser-screenshots-and-report
+          path: artifacts/unified-v5-browser/
+          retention-days: 3
