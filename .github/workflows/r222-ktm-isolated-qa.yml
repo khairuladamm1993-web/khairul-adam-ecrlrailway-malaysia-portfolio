@@ -1,0 +1,24 @@
+name: R2.22 KTM Komuter Isolated QA
+on:
+  push:
+    branches:
+      - feature/mrs10-r222-ktm-komuter-isolated
+  workflow_dispatch:
+jobs:
+  ktm-isolated:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/r222-ktm-komuter.test.cjs
+      - name: Existing P01 cross-service regression
+        run: node --test tests/r221-p01-crossline-integration.test.cjs
+      - name: Catalogue and HTML present without modifying integrated output
+        run: |
+          test -s ktm-komuter-r222.html
+          test -s assets/mrs10-r222-ktm-catalogue.json
+          git diff --exit-code HEAD -- map-language-lab.html assets/railway-track-registry-kl.js

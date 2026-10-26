@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>MR-S10 R2.22 | KTM Komuter</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.css">
+<style>
+:root{--bg:#f4f8fa;--fg:#193442;--panel:#fff;--muted:#405968;--border:#a7b9c4;color-scheme:light;font-family:system-ui,Arial,sans-serif}
+:root[data-theme=dark]{--bg:#0a1722;--fg:#f3faff;--panel:#163040;--muted:#cfe4ee;--border:#8ba9b8;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:12px}
+h1{font-size:1.26rem;line-height:1.3}p{color:var(--muted);margin:5px 0 12px}
+button,select{font:inherit;min-height:44px;color:var(--fg);background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:7px 10px}
+button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #4abdf0;outline-offset:2px}button[aria-pressed=true]{border:2px solid #259bc2;font-weight:800}
+.toolbar,.filters{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:8px 0}.swatch{display:inline-block;width:14px;height:14px;background:var(--swatch);vertical-align:middle;border-radius:50%;border:1px solid var(--border);margin-right:6px}
+#map{height:clamp(375px,60dvh,710px);border:1px solid var(--border);border-radius:11px;overflow:hidden}
+#map-shell.full{position:fixed;inset:0;z-index:9999;background:var(--bg);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#map-shell.full #map{height:calc(100dvh - 50px)}.panel{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:12px;margin:10px 0}
+#services{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px}
+.service{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:11px;min-width:0}
+.service h2{font-size:1rem;margin:0;padding:4px 8px;border-left:5px solid var(--route);line-height:1.5}
+.service ol{list-style:none;margin:10px 0 0;padding:0 0 0 8px;max-height:420px;overflow:auto;background:linear-gradient(var(--route),var(--route)) 20px 0/3px 100% no-repeat}
+.service li{min-height:45px}.service li button{background:transparent;border:0;min-height:44px;display:flex;align-items:center;text-align:left;gap:11px;width:100%;padding:4px 0}
+.stop-number{flex:0 0 32px;height:32px;display:grid;place-items:center;background:var(--route);color:#fff;border-radius:50%;font-size:.8rem;font-weight:800;box-shadow:0 0 0 2px var(--panel)}
+.notice{font-size:.85rem}a{color:inherit}#map .maplibregl-popup-content{background:var(--panel);color:var(--fg);border-radius:10px;max-width:285px}#map .maplibregl-popup-close-button{color:var(--fg);font-size:24px}
+@media(max-width:480px){#services{grid-template-columns:1fr}h1{font-size:1.16rem}}
+</style></head>
+<body><main><small>P01 · R2.22 · ISOLATED DEVELOPMENT · NO PRODUCTION</small><h1 id="heading">KTM Komuter · 4 service identities</h1>
+<div class="toolbar"><label for="locale">Language</label><select id="locale"><option value="ms">BM</option><option value="en">EN</option><option value="zh">中文</option><option value="th">ไทย</option></select><button type="button" id="theme">◐ Light / Dark</button></div>
+<p id="intro"></p><div id="filters" class="filters" role="group" aria-label="Route focus"></div>
+<div id="map-shell"><div id="map" role="region" aria-label="KTM GIS-backed MapLibre stations"></div><button id="expand" type="button" aria-expanded="false">⛶ Fullscreen</button></div>
+<div class="panel"><p id="status" aria-live="polite" role="status"></p><p id="note" class="notice"></p><a href="https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer/0" rel="noopener noreferrer" target="_blank">GIS source</a></div>
+<section id="services" aria-label="Official service station sequences"></section><div class="panel notice"><p>Colors are service identity approximations grounded in KTMB/APAD route diagrams, NOT certified HEX. Physical rail alignment is not sourced and is not drawn. Skypark suspended; Komuter Selatan separate audit.</p><a href="https://www.ktmb.com.my/TrainTime.html" rel="noopener noreferrer" target="_blank">KTMB Timetable</a></div>
+</main><script src="./assets/mrs10-r222-ktm-service.js"></script>
+<script>
+(async()=>{
+'use strict';
+const $=id=>document.getElementById(id),api=window.MRS10KTMServiceR222,language={
+ms:['KTM Komuter · empat perkhidmatan','Warna line dalam senarai dan marker stesen mesti sama. Tiada geometri fizikal rekaan.','Semua','Memuatkan koordinat GIS…','GIS tidak tersedia: senarai stesen masih sah.','Titik stesen dipadankan daripada GIS sekunder, bukan ukuran operasi','Tiada koordinat padanan GIS untuk stesen ini.'],
+en:['KTM Komuter · four services','Service color always matches station markers. No invented railway geometry.','All','Loading public GIS coordinates…','GIS unavailable: verified station order remains usable.','Public secondary GIS station point, not an operational survey','This station lacks a GIS-matched coordinate.'],
+zh:['KTM Komuter · 四条线路','线路列表和车站标记颜色一致；不虚构实体轨道。','全部','正在加载公开 GIS 坐标…','GIS 不可用；站点列表仍可查看。','公开 GIS 参考点，非运营测量','此站没有经过匹配的坐标。'],
+th:['KTM Komuter · 4 เส้นทาง','สีรายการเส้นทางตรงกับสีหมุดสถานี ไม่สร้างเส้นรางปลอม','ทั้งหมด','กำลังโหลดพิกัด GIS…','GIS ใช้งานไม่ได้ แต่รายชื่อสถานียังแสดง','ตำแหน่ง GIS อ้างอิง ไม่ใช่พิกัดปฏิบัติการ','ไม่มีพิกัด GIS ที่จับคู่ได้']};
+let catalogue,focus='all',theme='light',map=null,lib=null,matched=null,popup=null;
+const words=()=>language[$('locale').value]||language.en;
+function render(){if(!catalogue)return;const w=words();$('heading').textContent=w[0];$('intro').textContent=w[1];
+const f=$('filters');f.replaceChildren();for(const r of [{id:'all',displayName:w[2]},...catalogue.services]){const b=document.createElement('button');b.type='button';b.dataset.route=r.id;b.setAttribute('aria-pressed',String(focus===r.id));if(r.displayColor){const sw=document.createElement('span');sw.className='swatch';sw.style.setProperty('--swatch',r.displayColor);b.append(sw);}b.append(document.createTextNode(r.displayName));b.addEventListener('click',()=>{focus=r.id;render();layers();});f.append(b);}
+const list=$('services');list.replaceChildren();for(const r of catalogue.services.filter(x=>focus==='all'||x.id===focus)){const section=document.createElement('section');section.className='service';section.dataset.route=r.id;section.style.setProperty('--route',r.displayColor);const h=document.createElement('h2');h.textContent=r.displayName+' · '+r.stationSequence.length+' stations';section.append(h);const ol=document.createElement('ol');
+for(const st of r.stationSequence){const li=document.createElement('li'),b=document.createElement('button');b.type='button';const n=document.createElement('span');n.className='stop-number';n.textContent=String(st.order);const label=document.createElement('span');label.textContent=st.name;b.append(n,label);b.addEventListener('click',()=>focusStation(st,r));li.append(b);ol.append(li);}section.append(ol);list.append(section);}}
+function showPopup(feature){if(!map)return;popup?.remove();const div=document.createElement('div'),h=document.createElement('strong');h.textContent=feature.properties.name;const p=document.createElement('p');p.textContent=words()[5];const serv=document.createElement('p');serv.textContent=feature.properties.serviceIds.split('|').join(' · ');div.append(h,serv,p);popup=new lib.Popup({offset:15,maxWidth:'290px'}).setLngLat(feature.geometry.coordinates).setDOMContent(div).addTo(map);}
+function focusStation(st,r){const feature=matched?.features?.find(f=>api.normal(f.properties.name)===api.normal(st.name));if(feature&&map){map.flyTo({center:feature.geometry.coordinates,zoom:12});showPopup(feature);}else $('status').textContent=st.name+' — '+words()[6];}
+function layers(){if(!map?.getStyle?.()?.sources||!catalogue)return;for(const r of catalogue.services){const source='r222-'+r.id,points=source+'-points',labels=source+'-labels',geo=api.featuresForRoute(matched,r.id);if(!map.getSource(source))map.addSource(source,{type:'geojson',data:geo});else map.getSource(source).setData(geo);
+const shift=(r.id==='ktm-seremban'||r.id==='ktm-padang-besar')?-5:5;
+if(!map.getLayer(points))map.addLayer({id:points,type:'circle',source,paint:{'circle-radius':['interpolate',['linear'],['zoom'],5,5,10,8],'circle-color':r.displayColor,'circle-stroke-width':2,'circle-stroke-color':theme==='dark'?'#ffffff':'#142b3a','circle-translate':[shift,0]}});
+if(!map.getLayer(labels))map.addLayer({id:labels,type:'symbol',source,minzoom:8.5,layout:{'text-field':['get','name'],'text-size':12,'text-offset':[0,1.3],'text-anchor':'top','text-allow-overlap':false},paint:{'text-color':theme==='dark'?'#ffffff':'#123047','text-halo-color':theme==='dark'?'#0a1722':'#ffffff','text-halo-width':2.5}});
+map.setLayoutProperty(points,'visibility',focus==='all'||focus===r.id?'visible':'none');map.setLayoutProperty(labels,'visibility',focus==='all'||focus===r.id?'visible':'none');}}
+$('locale').addEventListener('change',render);
+$('theme').addEventListener('click',()=>{theme=theme==='light'?'dark':'light';document.documentElement.dataset.theme=theme;map?.setStyle('https://tiles.openfreemap.org/styles/'+(theme==='dark'?'dark':'positron'));});
+$('expand').addEventListener('click',()=>{const shell=$('map-shell'),on=!shell.classList.contains('full');shell.classList.toggle('full',on);$('expand').setAttribute('aria-expanded',String(on));setTimeout(()=>map?.resize(),60);});
+try{const r=await fetch('./assets/mrs10-r222-ktm-catalogue.json',{cache:'no-store'});if(!r.ok)throw Error('catalogue HTTP');catalogue=await r.json();if(!api?.validateCatalogue(catalogue))throw Error('invalid catalogue');render();$('status').textContent=words()[3];
+try{lib=await import('https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.mjs');map=new lib.Map({container:'map',style:'https://tiles.openfreemap.org/styles/positron',center:[101.52,4.32],zoom:6.4});map.addControl(new lib.NavigationControl({showCompass:false}));map.on('style.load',layers);map.on('click',e=>{for(const r of catalogue.services.filter(r=>focus==='all'||focus===r.id)){try{const box=[[e.point.x-12,e.point.y-12],[e.point.x+12,e.point.y+12]],q=map.queryRenderedFeatures(box,{layers:['r222-'+r.id+'-points']});if(q.length){const hit=matched?.features?.find(x=>x.id===q[0].id);if(hit)showPopup(hit);break;}}catch{}}});}catch(e){$('status').textContent=words()[4];}
+try{const rr=await fetch(api.GIS_URL,{credentials:'omit',mode:'cors',cache:'no-store'});if(!rr.ok)throw Error('GIS unavailable');matched=api.decodeGis(await rr.json(),catalogue);if(!matched.ok)throw Error('invalid GIS');$('status').textContent='GIS: '+matched.matched+' station points matched (secondary, unverified survey)';layers();}catch(e){$('status').textContent=words()[4];}
+$('note').textContent='Colored station symbols use source-matched coordinates. Service list lines represent order only, not surveyed physical track.';
+}catch(e){$('status').textContent='Catalogue validation blocked: '+String(e.message||e);}}
+)();
+</script></body></html>
