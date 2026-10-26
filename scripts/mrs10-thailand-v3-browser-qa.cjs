@@ -11,9 +11,9 @@ const name=entry[0],tool=entry[1],width=entry[2];
 const browser=await tool.launch({headless:true,...(name==='chromium'?{args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']}: {})});
 try{
 const page=await browser.newPage({viewport:{width,height:800},deviceScaleFactor:1});
-const errors=[];page.on('pageerror',e=>errors.push(e.message));
+const errors=[];const network=[];page.on('pageerror',e=>errors.push(e.message));page.on('requestfailed',req=>network.push(req.url()+' '+req.failure()?.errorText));page.on('console',msg=>{if(msg.type()==='error')errors.push('console:'+msg.text());});
 await page.goto('http://127.0.0.1:8765/thailand-railway-v3.html',{waitUntil:'domcontentloaded',timeout:25000});
-await page.locator('.railmarker').first().waitFor({state:'visible',timeout:36000});
+try{await page.locator('.railmarker').first().waitFor({state:'visible',timeout:36000});}catch(e){console.error('MARKER_DIAGNOSTICS',JSON.stringify({name,status:await page.locator('#status').textContent().catch(()=>null),title:await page.title(),maplibre:await page.evaluate(()=>typeof window.maplibregl),model:await page.evaluate(()=>typeof window.MRS10ThailandV3),gis:await page.evaluate(()=>typeof window.MRS10ThailandV3GIS),canvasCount:await page.locator('canvas').count(),errors,network:network.slice(0,18)}));await page.screenshot({path:'artifacts/thailand-v3-browser/'+name+'-failure.png',fullPage:true}).catch(()=>{});throw e;}
 const count=await page.locator('.railmarker').count();assert.ok(count>=13,name+' default markers '+count);
 await page.screenshot({path:'artifacts/thailand-v3-browser/'+name+'-default.png',fullPage:true});
 await page.locator('[data-filter="border"]').click();
