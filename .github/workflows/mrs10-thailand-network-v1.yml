@@ -1,0 +1,30 @@
+name: MR-S10 Thailand V1 isolated CI
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-thailand-network-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  railway-thailand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Thailand QA
+        run: node --test tests/mrs10-thailand-network-v1.test.cjs
+      - name: Source syntax QA
+        run: |
+          node --check assets/mrs10-thailand-network-v1-model.js
+          node --check assets/mrs10-thailand-network-v1-view.js
+      - name: Shared regression
+        run: |
+          npm ci
+          npm test
+      - name: New assets exist
+        run: |
+          test -s thailand-railway-v1.html
+          test -s assets/mrs10-thailand-network-v1-view.js
