@@ -1,0 +1,555 @@
+{
+  "schema": "mrs10.borneo.v2",
+  "as_of": "2026-10-27",
+  "safe_public_data_only": true,
+  "licensing": {
+    "geo": "OpenStreetMap ODbL; © OpenStreetMap contributors",
+    "source": "JKNS station roster; secondary OSM-linked point positions"
+  },
+  "sabah": {
+    "id": "SABAH_JKNS",
+    "classification": "CONVENTIONAL_RAILWAY_TRACK",
+    "color": "#008C95",
+    "network_status": "OPERATING_NETWORK_VERIFY_DAILY_SERVICE",
+    "route_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+    "timetable_source": "https://railway.sabah.gov.my/untuk-penumpang/jadual-keretapi/",
+    "line_sections": [
+      {
+        "id": "MAIN",
+        "title": "Main Line",
+        "from": "Tanjung Aru",
+        "to": "Beaufort",
+        "length_km": 85
+      },
+      {
+        "id": "GORGE",
+        "title": "Gorge Line",
+        "from": "Beaufort",
+        "to": "Tenom",
+        "length_km": 49
+      }
+    ],
+    "stations": [
+      {
+        "id": "SSR-01",
+        "name": "Sembulan",
+        "sequence": 1,
+        "segment": "reference_only",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            116.06847,
+            5.95893
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://mapcarta.com/W240920795",
+        "osm_id": "way/240920795",
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-02",
+        "name": "Tanjung Aru",
+        "sequence": 2,
+        "segment": "main",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            116.060222,
+            5.947583
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://en.wikipedia.org/wiki/Tanjung_Aru_railway_station",
+        "osm_id": null,
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-03",
+        "name": "Putatan",
+        "sequence": 3,
+        "segment": "main",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            116.04885,
+            5.89354
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://mapcarta.com/N1631278678",
+        "osm_id": "node/1631278678",
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-04",
+        "name": "Kinarut",
+        "sequence": 4,
+        "segment": "main",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            116.04385,
+            5.824
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://mapcarta.com/W1001789775",
+        "osm_id": "way/1001789775",
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-05",
+        "name": "Kawang",
+        "sequence": 5,
+        "segment": "main",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            116.01888,
+            5.77233
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://mapcarta.com/N1631278535",
+        "osm_id": "node/1631278535",
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-06",
+        "name": "Papar",
+        "sequence": 6,
+        "segment": "main",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            115.93241,
+            5.73256
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://mapcarta.com/N1631278497",
+        "osm_id": "node/1631278497",
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-07",
+        "name": "Kimanis",
+        "sequence": 7,
+        "segment": "main",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            115.88844,
+            5.61507
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://mapcarta.com/N1631278463",
+        "osm_id": "node/1631278463",
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-08",
+        "name": "Bongawan",
+        "sequence": 8,
+        "segment": "main",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            115.85613,
+            5.53936
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://mapcarta.com/N1631278442",
+        "osm_id": "node/1631278442",
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-09",
+        "name": "Membakut",
+        "sequence": 9,
+        "segment": "main",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            115.79678,
+            5.47263
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://mapcarta.com/N1631278426",
+        "osm_id": "node/1631278426",
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-10",
+        "name": "Beaufort",
+        "sequence": 10,
+        "segment": "interchange",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            115.74462,
+            5.34383
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://mapcarta.com/N3269432862",
+        "osm_id": "node/3269432862",
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-11",
+        "name": "Saliwangan",
+        "sequence": 11,
+        "segment": "gorge",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            115.80302,
+            5.27364
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://mapcarta.com/N11738293710",
+        "osm_id": "node/11738293710",
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-12",
+        "name": "Halogilat",
+        "sequence": 12,
+        "segment": "gorge",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            115.83077,
+            5.25493
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://mapcarta.com/N4532542405",
+        "osm_id": "node/4532542405",
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-13",
+        "name": "Rayoh",
+        "sequence": 13,
+        "segment": "gorge",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            115.8804944,
+            5.2086694
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://en.wikipedia.org/wiki/Rayoh_railway_station",
+        "osm_id": null,
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-14",
+        "name": "Pangi",
+        "sequence": 14,
+        "segment": "gorge",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            115.86622,
+            5.14008
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://mapcarta.com/N3269173808",
+        "osm_id": "node/3269173808",
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      },
+      {
+        "id": "SSR-15",
+        "name": "Tenom",
+        "sequence": 15,
+        "segment": "gorge",
+        "point": {
+          "type": "Point",
+          "coordinates": [
+            115.9449,
+            5.12302
+          ]
+        },
+        "point_confidence": "SECONDARY_OSM_OR_PUBLIC_REFERENCE",
+        "location_source": "https://mapcarta.com/N4510269532",
+        "osm_id": "node/4510269532",
+        "registry_source": "https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/",
+        "service_status": "CHECK_LIVE_TIMETABLE",
+        "passenger_service_confirmed_for_all_trips": false
+      }
+    ],
+    "track_geometry": null,
+    "geometry_confidence": "NO_VERIFIED_TRACK_LINE",
+    "sembulan_note": "JKNS includes Sembulan in 15-station catalogue; not asserted as a scheduled Tanjung Aru–Tenom service stop"
+  },
+  "sarawak": {
+    "id": "SARAWAK_KUTS",
+    "classification": "URBAN_TRANSIT_ART",
+    "rail_track": false,
+    "operator": "Sarawak Metro",
+    "network_status": "PROJECT_UNDER_CONSTRUCTION_NO_GENERAL_PASSENGER_OPENING_VERIFIED",
+    "overview_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system",
+    "phase1_operator_webpage_claim": "approximately 50.6 km, 24 stations/halts; map subject to alignment changes",
+    "route_geometry": null,
+    "geometry_confidence": "SCHEMATIC_ONLY",
+    "lines": [
+      {
+        "id": "BLUE",
+        "name": "Blue Line",
+        "color": "#1976D2",
+        "color_authority": "UI_PROVISIONAL",
+        "start": "Rembus",
+        "end": "Hikmah Exchange",
+        "point_geometry": null,
+        "station_codes_from_operator_coverage": [
+          "SM01",
+          "SM03",
+          "SM04",
+          "SM05",
+          "SM06",
+          "SM07",
+          "SM09",
+          "SM14"
+        ],
+        "lineup_completeness": "PARTIAL_OFFICIAL_IDENTITIES_NOT_COMPLETE_ROUTE_SEQUENCE"
+      },
+      {
+        "id": "RED",
+        "name": "Red Line",
+        "color": "#E0474C",
+        "color_authority": "UI_PROVISIONAL",
+        "start": "Kuching Sentral",
+        "end": "Pending",
+        "point_geometry": null,
+        "station_codes_from_operator_coverage": [
+          "SR05",
+          "SR06",
+          "SR07",
+          "SR08",
+          "SR09",
+          "SR10"
+        ],
+        "lineup_completeness": "PARTIAL_OFFICIAL_IDENTITIES_NOT_COMPLETE_ROUTE_SEQUENCE"
+      },
+      {
+        "id": "GREEN",
+        "name": "Green Line",
+        "color": "#1A9D70",
+        "color_authority": "UI_PROVISIONAL",
+        "start": "Pending",
+        "end": "Damai",
+        "point_geometry": null,
+        "station_codes_from_operator_coverage": [],
+        "lineup_completeness": "TERMINI_ONLY"
+      }
+    ],
+    "stations": [
+      {
+        "id": "KUTS-SM01",
+        "code": "SM01",
+        "name": "University",
+        "line": "BLUE",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      },
+      {
+        "id": "KUTS-SM03",
+        "code": "SM03",
+        "name": "Sigitin",
+        "line": "BLUE",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      },
+      {
+        "id": "KUTS-SM04",
+        "code": "SM04",
+        "name": "UNIMAS",
+        "line": "BLUE",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      },
+      {
+        "id": "KUTS-SM05",
+        "code": "SM05",
+        "name": "Sarawak Heart Centre",
+        "line": "BLUE",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      },
+      {
+        "id": "KUTS-SM06",
+        "code": "SM06",
+        "name": "Riveria",
+        "line": "BLUE",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      },
+      {
+        "id": "KUTS-SM07",
+        "code": "SM07",
+        "name": "Stutong",
+        "line": "BLUE",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      },
+      {
+        "id": "KUTS-SM09",
+        "code": "SM09",
+        "name": "The Spring",
+        "line": "BLUE",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      },
+      {
+        "id": "KUTS-SM14",
+        "code": "SM14",
+        "name": "Hikmah Exchange",
+        "line": "BLUE",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      },
+      {
+        "id": "KUTS-SR05",
+        "code": "SR05",
+        "name": "Kuching Sentral",
+        "line": "RED",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      },
+      {
+        "id": "KUTS-SR06",
+        "code": "SR06",
+        "name": "Kuching International Airport",
+        "line": "RED",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      },
+      {
+        "id": "KUTS-SR07",
+        "code": "SR07",
+        "name": "Pelita Heights",
+        "line": "RED",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      },
+      {
+        "id": "KUTS-SR08",
+        "code": "SR08",
+        "name": "Jalan Tun Jugah",
+        "line": "RED",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      },
+      {
+        "id": "KUTS-SR09",
+        "code": "SR09",
+        "name": "Swinburne",
+        "line": "RED",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      },
+      {
+        "id": "KUTS-SR10",
+        "code": "SR10",
+        "name": "Simpang Tiga",
+        "line": "RED",
+        "point": null,
+        "point_confidence": "SCHEMATIC_ONLY",
+        "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      }
+    ],
+    "interchanges": [
+      {
+        "id": "RED_BLUE_SIMPANG_TIGA",
+        "name": "Simpang Tiga",
+        "status": "SECONDARY_SCHEMATIC_UNCONFIRMED_CURRENT_ALIGNMENT",
+        "codes": [
+          "SR10",
+          "SM10"
+        ]
+      },
+      {
+        "id": "RED_GREEN_PENDING",
+        "name": "Pending",
+        "status": "SECONDARY_SCHEMATIC_UNCONFIRMED_CURRENT_ALIGNMENT",
+        "codes": [
+          "SR12",
+          "DM01"
+        ]
+      }
+    ],
+    "depot": [
+      {
+        "name": "Rembus depot / OCC",
+        "location": null,
+        "location_confidence": "OPERATOR_PLACE_NAME_NO_STATION_GPS",
+        "source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      }
+    ]
+  }
+}
