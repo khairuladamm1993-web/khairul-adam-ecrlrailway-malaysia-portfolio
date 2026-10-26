@@ -14,6 +14,13 @@ const gis=require('../assets/mrs10-erl-v2-gis.js');
   if(json.error||!Array.isArray(json.features)){
    console.log('ERL_GIS_STATUS SOURCE_SCHEMA_UNAVAILABLE',json.error?.code||'UNKNOWN');return;
   }
+  for(const [index,feature] of json.features.entries()){
+   const p=feature?.attributes||feature?.properties||{};
+   const geo=feature?.geometry||{},coords=Array.isArray(geo.coordinates)?geo.coordinates:[geo.x,geo.y];
+   const [lon,lat]=coords;
+   const inBounds=Number.isFinite(lon)&&Number.isFinite(lat)&&lon>=gis.bbox.minLon&&lon<=gis.bbox.maxLon&&lat>=gis.bbox.minLat&&lat<=gis.bbox.maxLat;
+   console.log('ERL_GIS_PUBLIC_SOURCE_ROW',JSON.stringify({index:index+1,name:String(p.STN_NAME||'').slice(0,95),code:String(p.STN_CODE||'').slice(0,35),sourceId:p.FID??p.OBJECTID??null,withinBounds:inBounds}));
+  }
   const out=gis.decode(json.features,api);
   console.log('ERL_GIS_TOTAL_SOURCE_FEATURES',json.features.length);
   console.log('ERL_GIS_MATCHED_UNIQUE_STATION_IDS',out.matched);
