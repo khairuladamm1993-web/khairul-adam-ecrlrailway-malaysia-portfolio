@@ -60,6 +60,14 @@
    <p><a href="https://railway.sabah.gov.my/untuk-penumpang/laluan-stesen/" target="_blank" rel="noopener noreferrer">JKNS</a> · <a href="https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system" target="_blank" rel="noopener noreferrer">Sarawak Metro</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a></p>
   </footer>
 </div>
-<script defer src="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.js"></script>
-<script defer src="./assets/borneo-v2.js"></script>
+<script type="module">
+  // MapLibre GL JS v6 is ESM-only; there is no UMD `maplibre-gl.js` bundle.
+  // Load the viewer regardless of CDN outcome so it can display a safe fallback.
+  try {
+    window.maplibregl = await import("https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.mjs");
+  } catch (error) {
+    console.warn("MapLibre module unavailable; station list fallback active", error);
+  }
+  await import("./assets/borneo-v2.js");
+</script>
 </body></html>
