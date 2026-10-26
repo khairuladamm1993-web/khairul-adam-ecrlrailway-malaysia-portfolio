@@ -4,12 +4,12 @@ const $ = id => document.getElementById(id);
 const CATEGORIES = ["ALL","SABAH","SARAWAK","BLUE","RED","GREEN"];
 const COLORS = {SABAH:"#008C95",BLUE:"#1976D2",RED:"#E0474C",GREEN:"#1A9D70"};
 const WORDS = {
-  ms:{title:"Borneo Rail & ART",subtitle:"Jabatan Keretapi Negeri Sabah · Sarawak Metro KUTS",language:"Bahasa",dark:"Gelap",light:"Cerah",public:"Data awam sahaja",survey:"Penunjuk lokasi bukan jadual operasi",loading:"Memuatkan katalog…",ready:"Katalog dimuatkan",error:"Katalog gagal dimuatkan",map:"Peta rangkaian",all:"Semua Borneo",sabah:"Sabah Railway",sarawak:"Sarawak ART",blue:"Blue Line",red:"Red Line",green:"Green Line",reset:"Tetapkan semula",confidence:"● Koordinat sekunder · □ Skematik tanpa GPS",lineup:"Susunan stesen",searchLabel:"Cari stesen, laluan atau kod",noRails:"Titik stesen disahkan daripada sumber GIS sekunder; geometri landasan tidak dilukis tanpa bukti.",mapFallback:"Peta interaktif tidak tersedia. Senarai stesen di bawah masih boleh digunakan.",disclaimer:"Paparan pendidikan, bukan sistem kawalan kereta api atau maklumat keberangkatan masa nyata.",stations:"stesen",visible:"marker kelihatan pada data",schematic:"Skematik sahaja — tiada GPS stesen disahkan",source:"Sumber lokasi",status:"Status",network:"Rangkaian",statusSabah:"Rangkaian wujud; semak jadual untuk perjalanan tertentu",statusArt:"Dalam pembangunan / ujian; operasi awam belum disahkan",selectStation:"Pilih stesen untuk fokus",secondary:"Koordinat OSM / rujukan awam",noTrack:"Jajaran sebenar belum diterbitkan sebagai GIS disahkan",partial:"Senarai rasmi separa, bukan semua hentian Fasa 1",noResults:"Tiada padanan",cityOnly:"Paparan kawasan Kuching sahaja, bukan lokasi hentian GPS",sabahMap:"15 titik stesen; landasan tidak dilukis",rail:"Rel",main:"Main Line",gorge:"Gorge Line",reference:"Rekod Sembulan (rujuk jadual)",pending:"Belum disahkan",official:"Rekod operator"},
-  en:{title:"Borneo Rail & ART",subtitle:"Sabah State Railway · Sarawak Metro KUTS",language:"Language",dark:"Dark",light:"Light",public:"Public data only",survey:"Map position does not prove scheduled service",loading:"Loading catalogue…",ready:"Catalogue loaded",error:"Unable to load catalogue",map:"Network map",all:"All Borneo",sabah:"Sabah Railway",sarawak:"Sarawak ART",blue:"Blue Line",red:"Red Line",green:"Green Line",reset:"Reset",confidence:"● Secondary coordinates · □ Schematic without GPS",lineup:"Station lineup",searchLabel:"Search station, route or code",noRails:"Station points from secondary GIS; railway track is not drawn without verified geometry.",mapFallback:"Interactive map unavailable. The station list below remains accessible.",disclaimer:"Educational viewer; not railway control or real-time departure information.",stations:"stations",visible:"visible point records",schematic:"Schematic only — no verified station GPS",source:"Location source",status:"Status",network:"Network",statusSabah:"Existing network; verify individual journeys against the timetable",statusArt:"Construction/testing; public passenger operation unverified",selectStation:"Choose a station to focus",secondary:"OSM / public reference point",noTrack:"Verified GIS alignment unavailable",partial:"Partial operator-named roster, not all Phase 1 stops",noResults:"No matching stations",cityOnly:"Kuching regional view only, not a stop coordinate",sabahMap:"15 station points; no rail track geometry",rail:"Rail",main:"Main Line",gorge:"Gorge Line",reference:"Sembulan reference (check timetable)",pending:"Unverified",official:"Operator-named"},
-  zh:{title:"婆罗洲铁路与智轨",subtitle:"沙巴州铁路 · 砂拉越都市交通系统",language:"语言",dark:"深色",light:"浅色",public:"仅公共数据",survey:"地图位置不代表列车停靠时刻",loading:"正在加载目录…",ready:"目录已加载",error:"目录加载失败",map:"交通网络地图",all:"整个婆罗洲",sabah:"沙巴铁路",sarawak:"砂拉越智轨",blue:"蓝线",red:"红线",green:"绿线",reset:"重置",confidence:"● 第二来源坐标 · □ 无GPS示意图",lineup:"车站顺序",searchLabel:"搜索车站、路线或代码",noRails:"车站坐标来自第二来源；未验证的铁路轨道不绘制。",mapFallback:"交互地图不可用。仍可使用下方车站列表。",disclaimer:"仅供教育参考，不用于铁路控制或实时发车查询。",stations:"座车站",visible:"处坐标标记",schematic:"仅示意图，尚无已核实的车站GPS",source:"坐标来源",status:"状态",network:"网络",statusSabah:"铁路网络存在；具体班次请查询官方时刻表",statusArt:"建设/测试中，公共运营尚未核实",selectStation:"选择车站查看",secondary:"OSM / 公开参考",noTrack:"尚无已验证的GIS路线",partial:"仅列出运营方已确认的部分站名",noResults:"无匹配结果",cityOnly:"仅展示古晋区域，并非车站GPS",sabahMap:"15个车站点，无铁路轨迹",rail:"铁路",main:"主线",gorge:"峡谷线",reference:"Sembulan参考站（核对时刻表）",pending:"未核实",official:"运营方公布"},
-  th:{title:"รถไฟและ ART เกาะบอร์เนียว",subtitle:"รถไฟรัฐซาบาห์ · Sarawak Metro KUTS",language:"ภาษา",dark:"โหมดมืด",light:"โหมดสว่าง",public:"เฉพาะข้อมูลสาธารณะ",survey:"ตำแหน่งบนแผนที่ไม่ใช่ตารางเดินรถ",loading:"กำลังโหลดข้อมูล…",ready:"โหลดข้อมูลแล้ว",error:"โหลดข้อมูลไม่สำเร็จ",map:"แผนที่เครือข่าย",all:"บอร์เนียวทั้งหมด",sabah:"รถไฟซาบาห์",sarawak:"ART ซาราวัก",blue:"สายสีน้ำเงิน",red:"สายสีแดง",green:"สายสีเขียว",reset:"รีเซ็ต",confidence:"● พิกัดแหล่งรอง · □ แผนผังไม่มี GPS",lineup:"ลำดับสถานี",searchLabel:"ค้นหาสถานี สาย หรือรหัส",noRails:"จุดสถานีอ้างอิง GIS รอง ไม่วาดรางรถไฟที่ยังไม่มีข้อมูลยืนยัน",mapFallback:"แผนที่ไม่พร้อมใช้งาน แต่ยังดูรายชื่อสถานีได้",disclaimer:"ข้อมูลเพื่อการศึกษา ไม่ใช้ควบคุมรถไฟหรือดูเวลาออกจริง",stations:"สถานี",visible:"จุดที่ระบุตำแหน่ง",schematic:"แผนผังเท่านั้น ยังไม่มี GPS สถานียืนยัน",source:"แหล่งตำแหน่ง",status:"สถานะ",network:"เครือข่าย",statusSabah:"มีเครือข่าย แต่ตรวจตารางเวลาแต่ละเที่ยว",statusArt:"ก่อสร้าง/ทดสอบ ยังไม่ยืนยันเปิดบริการสาธารณะ",selectStation:"เลือกสถานีเพื่อดูตำแหน่ง",secondary:"OSM / แหล่งสาธารณะ",noTrack:"ยังไม่มีแนวเส้นทาง GIS ยืนยัน",partial:"รายชื่อจากผู้ดำเนินงานบางส่วน ไม่ครบทั้งหมด",noResults:"ไม่พบผลลัพธ์",cityOnly:"แสดงพื้นที่กูชิง ไม่ใช่พิกัดสถานี",sabahMap:"15 จุดสถานี ไม่วาดเส้นราง",rail:"รางรถไฟ",main:"สายหลัก",gorge:"สายหุบเขา",reference:"Sembulan ใช้อ้างอิง (ตรวจตาราง)",pending:"ยังไม่ยืนยัน",official:"ผู้ดำเนินงานยืนยัน"}
+  ms:{title:"Borneo Rail & ART",subtitle:"Jabatan Keretapi Negeri Sabah · Sarawak Metro KUTS",language:"Bahasa",dark:"Gelap",light:"Cerah",public:"Data awam sahaja",survey:"Penunjuk lokasi bukan jadual operasi",loading:"Memuatkan katalog…",ready:"Katalog dimuatkan",error:"Katalog gagal dimuatkan",map:"Peta rangkaian",all:"Semua Borneo",sabah:"Sabah Railway",sarawak:"Sarawak ART",blue:"Blue Line",red:"Red Line",green:"Green Line",reset:"Tetapkan semula",confidence:"● Koordinat sekunder · □ Skematik tanpa GPS",lineup:"Susunan stesen",searchLabel:"Cari stesen, laluan atau kod",noRails:"Titik stesen disahkan daripada sumber GIS sekunder; geometri landasan tidak dilukis tanpa bukti.",mapFallback:"Peta interaktif tidak tersedia. Senarai stesen di bawah masih boleh digunakan.",disclaimer:"Paparan pendidikan, bukan sistem kawalan kereta api atau maklumat keberangkatan masa nyata.",stations:"stesen",visible:"marker kelihatan pada data",schematic:"Skematik sahaja — tiada GPS stesen disahkan",source:"Sumber lokasi",status:"Status",network:"Rangkaian",statusSabah:"Rangkaian wujud; semak jadual untuk perjalanan tertentu",statusArt:"Dalam pembangunan / ujian; operasi awam belum disahkan",selectStation:"Pilih stesen untuk fokus",secondary:"Koordinat OSM / rujukan awam",noTrack:"Jajaran sebenar belum diterbitkan sebagai GIS disahkan",partial:"Senarai rasmi separa, bukan semua hentian Fasa 1",noResults:"Tiada padanan",cityOnly:"Paparan kawasan Kuching sahaja, bukan lokasi hentian GPS",sabahMap:"15 titik stesen; landasan tidak dilukis",rail:"Rel",main:"Main Line",gorge:"Gorge Line",reference:"Rekod Sembulan (rujuk jadual)",pending:"Belum disahkan",official:"Rekod operator",artHub:"Kuching · KUTS ART",artArea:"Penanda kawasan bandar, bukan GPS stesen",artNetwork:"3 laluan ART (skimatik)",artBlue:"Biru",artRed:"Merah",artGreen:"Hijau",artOverview:"Hab ART",artStationCount:"nama hentian skematik",artPoints:"titik Sabah",artClick:"Tekan untuk lihat laluan",artNoStop:"Lokasi hentian belum disahkan"},
+  en:{title:"Borneo Rail & ART",subtitle:"Sabah State Railway · Sarawak Metro KUTS",language:"Language",dark:"Dark",light:"Light",public:"Public data only",survey:"Map position does not prove scheduled service",loading:"Loading catalogue…",ready:"Catalogue loaded",error:"Unable to load catalogue",map:"Network map",all:"All Borneo",sabah:"Sabah Railway",sarawak:"Sarawak ART",blue:"Blue Line",red:"Red Line",green:"Green Line",reset:"Reset",confidence:"● Secondary coordinates · □ Schematic without GPS",lineup:"Station lineup",searchLabel:"Search station, route or code",noRails:"Station points from secondary GIS; railway track is not drawn without verified geometry.",mapFallback:"Interactive map unavailable. The station list below remains accessible.",disclaimer:"Educational viewer; not railway control or real-time departure information.",stations:"stations",visible:"visible point records",schematic:"Schematic only — no verified station GPS",source:"Location source",status:"Status",network:"Network",statusSabah:"Existing network; verify individual journeys against the timetable",statusArt:"Construction/testing; public passenger operation unverified",selectStation:"Choose a station to focus",secondary:"OSM / public reference point",noTrack:"Verified GIS alignment unavailable",partial:"Partial operator-named roster, not all Phase 1 stops",noResults:"No matching stations",cityOnly:"Kuching regional view only, not a stop coordinate",sabahMap:"15 station points; no rail track geometry",rail:"Rail",main:"Main Line",gorge:"Gorge Line",reference:"Sembulan reference (check timetable)",pending:"Unverified",official:"Operator-named",artHub:"Kuching · KUTS ART",artArea:"City-area locator, not station GPS",artNetwork:"3 ART lines (schematic)",artBlue:"Blue",artRed:"Red",artGreen:"Green",artOverview:"ART hub",artStationCount:"schematic stop names",artPoints:"Sabah points",artClick:"Tap to view the lines",artNoStop:"Stop locations unverified"},
+  zh:{title:"婆罗洲铁路与智轨",subtitle:"沙巴州铁路 · 砂拉越都市交通系统",language:"语言",dark:"深色",light:"浅色",public:"仅公共数据",survey:"地图位置不代表列车停靠时刻",loading:"正在加载目录…",ready:"目录已加载",error:"目录加载失败",map:"交通网络地图",all:"整个婆罗洲",sabah:"沙巴铁路",sarawak:"砂拉越智轨",blue:"蓝线",red:"红线",green:"绿线",reset:"重置",confidence:"● 第二来源坐标 · □ 无GPS示意图",lineup:"车站顺序",searchLabel:"搜索车站、路线或代码",noRails:"车站坐标来自第二来源；未验证的铁路轨道不绘制。",mapFallback:"交互地图不可用。仍可使用下方车站列表。",disclaimer:"仅供教育参考，不用于铁路控制或实时发车查询。",stations:"座车站",visible:"处坐标标记",schematic:"仅示意图，尚无已核实的车站GPS",source:"坐标来源",status:"状态",network:"网络",statusSabah:"铁路网络存在；具体班次请查询官方时刻表",statusArt:"建设/测试中，公共运营尚未核实",selectStation:"选择车站查看",secondary:"OSM / 公开参考",noTrack:"尚无已验证的GIS路线",partial:"仅列出运营方已确认的部分站名",noResults:"无匹配结果",cityOnly:"仅展示古晋区域，并非车站GPS",sabahMap:"15个车站点，无铁路轨迹",rail:"铁路",main:"主线",gorge:"峡谷线",reference:"Sembulan参考站（核对时刻表）",pending:"未核实",official:"运营方公布",artHub:"古晋 · KUTS 智轨",artArea:"城市参考点，并非车站GPS",artNetwork:"3条智轨线（示意）",artBlue:"蓝线",artRed:"红线",artGreen:"绿线",artOverview:"智轨区域点",artStationCount:"个示意站名",artPoints:"个沙巴站点",artClick:"点击查看线路",artNoStop:"车站位置未核实"},
+  th:{title:"รถไฟและ ART เกาะบอร์เนียว",subtitle:"รถไฟรัฐซาบาห์ · Sarawak Metro KUTS",language:"ภาษา",dark:"โหมดมืด",light:"โหมดสว่าง",public:"เฉพาะข้อมูลสาธารณะ",survey:"ตำแหน่งบนแผนที่ไม่ใช่ตารางเดินรถ",loading:"กำลังโหลดข้อมูล…",ready:"โหลดข้อมูลแล้ว",error:"โหลดข้อมูลไม่สำเร็จ",map:"แผนที่เครือข่าย",all:"บอร์เนียวทั้งหมด",sabah:"รถไฟซาบาห์",sarawak:"ART ซาราวัก",blue:"สายสีน้ำเงิน",red:"สายสีแดง",green:"สายสีเขียว",reset:"รีเซ็ต",confidence:"● พิกัดแหล่งรอง · □ แผนผังไม่มี GPS",lineup:"ลำดับสถานี",searchLabel:"ค้นหาสถานี สาย หรือรหัส",noRails:"จุดสถานีอ้างอิง GIS รอง ไม่วาดรางรถไฟที่ยังไม่มีข้อมูลยืนยัน",mapFallback:"แผนที่ไม่พร้อมใช้งาน แต่ยังดูรายชื่อสถานีได้",disclaimer:"ข้อมูลเพื่อการศึกษา ไม่ใช้ควบคุมรถไฟหรือดูเวลาออกจริง",stations:"สถานี",visible:"จุดที่ระบุตำแหน่ง",schematic:"แผนผังเท่านั้น ยังไม่มี GPS สถานียืนยัน",source:"แหล่งตำแหน่ง",status:"สถานะ",network:"เครือข่าย",statusSabah:"มีเครือข่าย แต่ตรวจตารางเวลาแต่ละเที่ยว",statusArt:"ก่อสร้าง/ทดสอบ ยังไม่ยืนยันเปิดบริการสาธารณะ",selectStation:"เลือกสถานีเพื่อดูตำแหน่ง",secondary:"OSM / แหล่งสาธารณะ",noTrack:"ยังไม่มีแนวเส้นทาง GIS ยืนยัน",partial:"รายชื่อจากผู้ดำเนินงานบางส่วน ไม่ครบทั้งหมด",noResults:"ไม่พบผลลัพธ์",cityOnly:"แสดงพื้นที่กูชิง ไม่ใช่พิกัดสถานี",sabahMap:"15 จุดสถานี ไม่วาดเส้นราง",rail:"รางรถไฟ",main:"สายหลัก",gorge:"สายหุบเขา",reference:"Sembulan ใช้อ้างอิง (ตรวจตาราง)",pending:"ยังไม่ยืนยัน",official:"ผู้ดำเนินงานยืนยัน",artHub:"กูชิง · KUTS ART",artArea:"จุดอ้างอิงเมือง ไม่ใช่ GPS สถานี",artNetwork:"ART 3 สาย (แผนผัง)",artBlue:"น้ำเงิน",artRed:"แดง",artGreen:"เขียว",artOverview:"จุด ART",artStationCount:"ชื่อสถานีแบบแผนผัง",artPoints:"จุดสถานีซาบาห์",artClick:"แตะเพื่อดูสาย",artNoStop:"ยังไม่ยืนยันตำแหน่งสถานี"}
 };
-const state = {data:null,lang:"ms",category:"ALL",query:"",theme:"light",map:null,mapLoaded:false,popup:null,selectedId:null,focusVersion:0};
+const state = {data:null,lang:"ms",category:"ALL",query:"",theme:"light",map:null,mapLoaded:false,popup:null,artMarker:null,artMarkerEl:null,selectedId:null,focusVersion:0};
 const tr = key => (WORDS[state.lang] || WORDS.ms)[key] || WORDS.en[key] || key;
 const norm = value => String(value||"").normalize("NFKD").toLocaleLowerCase().trim();
 const pointOK = item => item && item.point && item.point.type==="Point" && Array.isArray(item.point.coordinates) && item.point.coordinates.length===2 && item.point.coordinates.every(Number.isFinite);
@@ -23,6 +23,10 @@ function validate(data){
   }
   for(const s of data.sarawak.stations){if(ids.has(s.id)||s.point!==null)throw Error("ART cannot have assumed GPS");ids.add(s.id)}
   if(data.sabah.track_geometry!==null||data.sarawak.route_geometry!==null||data.sarawak.classification!=="URBAN_TRANSIT_ART"||data.sarawak.rail_track!==false)throw Error("Track/ART classification breach");
+  const ref=data.sarawak.map_reference;
+  if(!ref||ref.id!=="KUCHING_ART_REGIONAL_OVERVIEW"||ref.classification!=="CITY_REFERENCE_NOT_ART_STATION"||!pointOK(ref)
+   ||ref.point_confidence!=="SECONDARY_OSM_CITY_CENTRE"||!ref.source?.startsWith("https://")
+   ||Math.abs(ref.point.coordinates[0]-110.3494)>0.02||Math.abs(ref.point.coordinates[1]-1.5606)>0.02)throw Error("Kuching city locator requires verified nonstation provenance");
 }
 function translated(){document.documentElement.lang=state.lang;document.querySelectorAll("[data-i18n]").forEach(el=>el.textContent=tr(el.dataset.i18n));$("theme").textContent=tr(state.theme==="light"?"dark":"light");}
 function selectedStations(){
@@ -42,7 +46,9 @@ function displaySummary(rows){
   view.append(attach("p",null,isArt?tr("schematic"):tr("sabahMap")));
   view.append(attach("p",null,tr("noTrack")));
   if(state.category==="ALL")view.append(attach("p",null,tr("partial")));
-  $("counts").textContent=n+" "+tr("visible")+" · "+rows.length+" "+tr("stations");
+  const artShown=artLinesForSelection().length>0;
+  const artNames=rows.filter(x=>x.network==="SARAWAK").length;
+  $("counts").textContent=n+" "+tr("artPoints")+" · "+(artShown?"1 "+tr("artOverview")+" · ":"")+artNames+" "+tr("artStationCount");
 }
 function renderSchematic(){
  const node=$("schematic");node.replaceChildren();
@@ -78,8 +84,69 @@ function updateData(){
   if(state.mapLoaded&&state.map){
     const source=state.map.getSource("borneo-points");
     if(source)source.setData(pointFeatures(selectedStations()));
+    updateArtMarker();
   }
 }
+
+function artLinesForSelection(){
+  if(!state.data||state.category==="SABAH")return [];
+  const all=state.data.sarawak.lines.filter(line=>["ALL","SARAWAK"].includes(state.category)||line.id===state.category);
+  if(!state.query.trim())return all;
+  const q=norm(state.query);
+  if(["kuching","sarawak","kuts","art"].some(w=>w.includes(q)))return all;
+  const matches=selectedStations().filter(x=>x.network==="SARAWAK").map(x=>x.line);
+  return all.filter(l=>matches.includes(l.id)||norm(l.id).includes(q)||norm(l.name).includes(q)||norm(l.start).includes(q)||norm(l.end).includes(q));
+}
+function ensureArtMarker(){
+  if(state.artMarker||!state.map||!state.data||!window.maplibregl?.Marker)return;
+  const city=state.data.sarawak.map_reference;
+  const el=attach("div","borneo-art-locator");
+  el.dataset.mapObject="KUCHING_CITY_REFERENCE_NOT_STATION";
+  el.setAttribute("role","group");
+  el.setAttribute("aria-label","Kuching urban transit reference — not a station");
+  state.artMarkerEl=el;
+  state.artMarker=new maplibregl.Marker({element:el,anchor:"bottom-left",offset:[6,-4]})
+      .setLngLat(city.point.coordinates).addTo(state.map);
+}
+function showArtPopup(){
+  if(!state.map||!state.data||!window.maplibregl?.Popup)return;
+  if(state.popup)state.popup.remove();
+  const city=state.data.sarawak.map_reference;
+  const root=attach("div","art-city-popup");
+  root.append(attach("div","popup-title",tr("artHub")));
+  root.append(attach("div","popup-sub",tr("artArea")));
+  root.append(attach("div","popup-sub",tr("status")+": "+tr("statusArt")));
+  const lines=artLinesForSelection();
+  lines.forEach(l=>{const p=attach("div","art-popup-route",l.name+" · "+l.start+" → "+l.end);p.style.borderColor=l.color;root.append(p)});
+  const operator=attach("a","popup-link",tr("official"));
+  operator.href=state.data.sarawak.overview_source;operator.rel="noopener noreferrer";operator.target="_blank";
+  const mapSource=attach("a","popup-link",tr("source")+" · OSM");
+  mapSource.href=city.source;mapSource.rel="noopener noreferrer";mapSource.target="_blank";
+  root.append(operator,attach("span","art-popup-dot"," · "),mapSource);
+  state.popup=new maplibregl.Popup({offset:22,maxWidth:"290px"}).setLngLat(city.point.coordinates).setDOMContent(root).addTo(state.map);
+}
+function updateArtMarker(){
+  ensureArtMarker();
+  if(!state.artMarkerEl)return;
+  const lines=artLinesForSelection(),show=lines.length>0;
+  state.artMarkerEl.style.display=show?"":"none";
+  state.artMarkerEl.replaceChildren();
+  if(!show)return;
+  const head=attach("button","art-locator-head");
+  head.type="button";
+  head.append(attach("span","art-locator-bullet","◎"),attach("span","art-locator-name",tr("artHub")));
+  head.addEventListener("click",evt=>{evt.stopPropagation();setCategory("SARAWAK");showArtPopup()});
+  state.artMarkerEl.append(head,attach("div","art-locator-explainer",tr("artArea")));
+  const strips=attach("div","art-locator-lines");
+  lines.forEach(l=>{
+    const chip=attach("button","art-line-chip",tr("art"+l.id[0]+l.id.slice(1).toLowerCase()));
+    chip.type="button";chip.style.setProperty("--art-chip",l.color);chip.dataset.artLine=l.id;
+    chip.addEventListener("click",evt=>{evt.stopPropagation();setCategory(l.id);showArtPopup()});
+    strips.append(chip);
+  });
+  state.artMarkerEl.append(strips);
+}
+
 function showPopup(s){
   if(!state.map||!pointOK(s)||typeof maplibregl==="undefined")return;
   if(state.popup)state.popup.remove();
@@ -94,7 +161,7 @@ function focusStation(s){
   state.selectedId=s.id;renderLineup();
   if(!state.map||!state.mapLoaded)return;
   if(pointOK(s)){state.map.easeTo({center:s.point.coordinates,zoom:11,duration:300});showPopup(s)}
-  else{state.map.easeTo({center:[110.3593,1.5535],zoom:10,duration:300});$("map-info").textContent=tr("cityOnly");}
+  else{state.map.easeTo({center:state.data.sarawak.map_reference.point.coordinates,zoom:9.2,duration:300});$("map-info").textContent=tr("cityOnly");showArtPopup();}
 }
 function focusCategory(){
   state.focusVersion++;
@@ -102,11 +169,11 @@ function focusCategory(){
   if(state.popup){state.popup.remove();state.popup=null}
   const current=state.category;
   if(["SARAWAK","BLUE","RED","GREEN"].includes(current)){
-    state.map.easeTo({center:[110.3593,1.5535],zoom:10,duration:400});$("map-info").textContent=tr("cityOnly");
+    state.map.easeTo({center:state.data.sarawak.map_reference.point.coordinates,zoom:9,duration:400});$("map-info").textContent=tr("cityOnly");
   }else if(current==="SABAH"){
     state.map.fitBounds([[115.64,5.03],[116.21,6.02]],{padding:45,maxZoom:10,duration:400});$("map-info").textContent=tr("noRails");
   }else{
-    state.map.fitBounds([[109.95,0.95],[117.30,6.55]],{padding:35,maxZoom:6.5,duration:400});$("map-info").textContent=tr("noRails");
+    state.map.fitBounds([[109.50,0.65],[117.30,6.55]],{padding:{top:36,right:30,bottom:85,left:65},maxZoom:6.5,duration:400});$("map-info").textContent=tr("noRails");
   }
 }
 function setCategory(cat){if(!CATEGORIES.includes(cat))return;state.category=cat;state.selectedId=null;document.querySelectorAll("[data-category]").forEach(btn=>btn.setAttribute("aria-pressed",String(btn.dataset.category===cat)));updateData();focusCategory()}
@@ -124,7 +191,7 @@ function initMap(){
     const restore=()=>{
       if(!state.map.getSource("borneo-points"))state.map.addSource("borneo-points",{type:"geojson",data:pointFeatures(selectedStations())});
       if(!state.map.getLayer("borneo-stations"))state.map.addLayer({id:"borneo-stations",type:"circle",source:"borneo-points",paint:{"circle-radius":["interpolate",["linear"],["zoom"],4,7,9,10,14,13],"circle-color":["get","color"],"circle-stroke-color":"#fff","circle-stroke-width":2.5,"circle-opacity":1}});
-      state.mapLoaded=true;updateData();setTheme(state.theme);focusCategory();
+      state.mapLoaded=true;ensureArtMarker();updateData();setTheme(state.theme);focusCategory();
     };
     state.map.on("style.load",restore);
     state.map.on("click","borneo-stations",evt=>{const id=evt.features?.[0]?.properties?.id;const s=state.data?.sabah.stations.find(x=>x.id===id);if(s)focusStation(s)});
@@ -137,7 +204,10 @@ function report(){
  const rows=selectedStations(), visible=rows.filter(pointOK).length;
  let rendered=null;
  try{if(state.mapLoaded&&state.map&&state.map.getLayer("borneo-stations"))rendered=state.map.queryRenderedFeatures({layers:["borneo-stations"]}).length;}catch(e){}
- return {schema:state.data?.schema||null,category:state.category,stationCount:state.data?.sabah?.stations?.length||0,visibleGeoJSONCount:visible,renderedFeatureCount:rendered,mapLoaded:state.mapLoaded,theme:state.theme,language:state.lang,railTrackGeoJSON:false,artFakeGPS:false};
+ return {schema:state.data?.schema||null,category:state.category,stationCount:state.data?.sabah?.stations?.length||0,
+ visibleGeoJSONCount:visible,renderedFeatureCount:rendered,artRegionalLocatorCount:state.artMarkerEl&&state.artMarkerEl.isConnected&&state.artMarkerEl.style.display!=="none"?1:0,
+ artStationGPSCount:0,artShownLines:artLinesForSelection().map(x=>x.id),mapLoaded:state.mapLoaded,
+ theme:state.theme,language:state.lang,railTrackGeoJSON:false,artFakeGPS:false};
 }
 window.__BORNEO_V2_QA=report;
 async function start(){
