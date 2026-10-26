@@ -35,10 +35,10 @@
         <button type="button" data-category="RED" aria-pressed="false" data-i18n="red">Red Line</button>
         <button type="button" data-category="GREEN" aria-pressed="false" data-i18n="green">Green Line</button>
       </div>
-      <div class="map-wrap"><div id="map" role="application" aria-label="Interactive MapLibre map of source-backed Sabah station points"></div><div id="map-fallback" hidden data-i18n="mapFallback">Peta interaktif tidak tersedia. Senarai stesen di bawah masih boleh digunakan.</div><div class="map-overlay"><div id="map-info" data-i18n="noRails">Titik stesen disahkan daripada sumber GIS sekunder; geometri landasan tidak dilukis tanpa bukti.</div></div></div>
+      <div class="map-wrap"><div id="map" role="application" aria-label="Interactive MapLibre map of source-backed Sabah station points"></div><div id="art-map-diagram" class="art-map-diagram" aria-live="polite"></div><div id="map-fallback" hidden data-i18n="mapFallback">Peta interaktif tidak tersedia. Senarai stesen di bawah masih boleh digunakan.</div><div class="map-overlay"><div id="map-info" data-i18n="noRails">Titik stesen disahkan daripada sumber GIS sekunder; geometri landasan tidak dilukis tanpa bukti.</div></div></div>
       <div class="map-actions">
         <button type="button" id="reset" data-i18n="reset">Tetapkan semula</button>
-        <span id="confidence" data-i18n="confidence">● Koordinat sekunder · □ Skematik tanpa GPS</span>
+        <span id="confidence" data-i18n="confidence">● Koordinat sekunder · □ Skematik tanpa GPS</span><span class="eia-legend">◉ EIA 2021 · cadangan sejarah, bukan kedudukan 2026</span>
       </div>
       <div class="legend">
         <span><i style="--legend:#008C95"></i><span data-i18n="sabah">Sabah Railway</span> <small data-i18n="rail">Rel</small></span>
