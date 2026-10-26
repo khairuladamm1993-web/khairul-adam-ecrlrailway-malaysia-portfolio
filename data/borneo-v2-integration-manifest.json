@@ -12,7 +12,8 @@
     "borneo-v2.html",
     "assets/borneo-v2.css",
     "assets/borneo-v2.js",
-    "data/borneo-v2-registry.json"
+    "data/borneo-v2-registry.json",
+    "data/borneo-kuts-eia-2021.json"
   ],
   "test_files": [
     "tests/borneo-v2.test.cjs",
@@ -60,7 +61,26 @@
         "code": "SM11",
         "name": "The Spring",
         "source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
-      }
+      },
+      "historical_eia_points": {
+        "schema": "mrs10.kuts.historical-eia-2021.v1",
+        "path": "data/borneo-kuts-eia-2021.json",
+        "count": 10,
+        "status": "2021 PLANNED SITE NOT CURRENT 2026 GPS",
+        "provenance": "KUTS revised EIA DOE Vol 1 Oct 2021 Table 5-11; source mirror Scribd",
+        "source": "https://www.scribd.com/document/727127303/KUTS-Revised-EIA-DOE-Volume-1-Main-Text-October-2021",
+        "maplibre_source": "borneo-kuts-eia21",
+        "maplibre_layer": "borneo-kuts-eia21-circles",
+        "warning": "Not operator-certified 2026 station geometry or track alignment"
+      },
+      "station_code_conflict": {
+        "name": "The Spring",
+        "june_2026": "SM11",
+        "october_2026": "SM09",
+        "status": "UNRESOLVED_OPERATOR_PUBLICATION_CONFLICT"
+      },
+      "green_phase1_current": "Pending to Bulatan Yayasan Sarawak (10.5 km, Sarawak MOT Sep 2026); Damai Central belongs older wider plan",
+      "lineup_current_named_stops": 14
     }
   },
   "namespace": {
@@ -71,10 +91,12 @@
     ],
     "maplibre": {
       "sources": [
-        "borneo-points"
+        "borneo-points",
+        "borneo-kuts-eia21"
       ],
       "layers": [
-        "borneo-stations"
+        "borneo-stations",
+        "borneo-kuts-eia21-circles"
       ]
     },
     "css_page_scope": "dedicated page; no shared global CSS injection",
@@ -100,40 +122,31 @@
     "Do not label all JKNS stations as stops on each service"
   ],
   "status_as_of": "2026-10-27",
-  "status": "PARTIAL_PENDING_OWNER_SAFARI_UAT",
-  "code_verified_commit": "a0ef6e4cb1e886d351af8e5a84a40864786db04b",
-  "code_verified_ci_url": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40402589027",
+  "status": "PARTIAL_SAFARI_OWNER_UAT_PENDING_AND_CURRENT_KUTS_GIS_UNVERIFIED",
+  "code_verified_commit": "11fb762ef22c662171cc6a3b2d21b211a72c212e",
+  "code_verified_ci_url": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40411797108",
   "browser_qa": {
-    "engine": "Chromium 141 via Playwright 1.56",
+    "engine": "Playwright Chromium 141",
     "status": "PASS",
-    "ipad_viewport": "1024x768",
-    "iphone_viewport": "390x844",
-    "rendered_sabah_points": 15,
-    "art_city_overview_markers": 1,
-    "art_city_marker_map_visible": true,
-    "art_gps_station_points": 0,
+    "iPad": "1024x768",
+    "iPhone": "390x844",
+    "sabah_actual_rendered": 15,
+    "kuts_historical_2021_actual_rendered": 10,
+    "kuts_historical_2021_geojson": 10,
+    "kuts_current_verified_stop_gps": 0,
+    "kuts_city_reference_marker": 1,
+    "kuts_schematic_named_stops": 14,
     "art_schematic_lines": 3,
-    "checklist": [
-      "Real WebGL Sabah markers 15",
-      "Kuching city-area ART locator rendered on ALL",
-      "Kuching locator 75%+ within viewport",
-      "ART city label not counted as station",
-      "Sarawak Blue/Red/Green controls",
-      "search/reset and popup",
-      "dark/light",
-      "iPad/iPhone screenshot"
-    ],
-    "screenshot_artifact": "borneo-v2-real-chromium-screens",
-    "artifact_id": 12688733758,
+    "screenshot_artifact_id": 12693761586,
     "safari_owner_uat": "PENDING"
   },
   "staging": {
     "project_id": "prj_lANjBUS6Cq0l94Uox0SMeWFurwiw",
-    "deployment_id": "dpl_GHSHMiKc2rNX7Yim6kDhEv6ydBEH",
+    "deployment_id": "dpl_ES8hj3iytRvG1cpoFaj63xxUcAbk",
     "target": "staging",
     "ready_state": "READY",
-    "url": "https://mrs10-p01-borneo-v2-isolated-preview-nkt85zipm.vercel.app/borneo-v2.html",
+    "url": "https://mrs10-p01-borneo-v2-isolated-preview-d3fpzbl3l.vercel.app/borneo-v2.html",
     "runtime_assets_http_200": true,
-    "code_commit": "a0ef6e4cb1e886d351af8e5a84a40864786db04b"
+    "code_commit": "11fb762ef22c662171cc6a3b2d21b211a72c212e"
   }
 }
