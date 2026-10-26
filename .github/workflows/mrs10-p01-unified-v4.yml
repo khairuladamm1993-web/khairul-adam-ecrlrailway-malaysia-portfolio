@@ -38,3 +38,30 @@ jobs:
           name: unified-v4-public-only
           path: dist-unified-v4/
           retention-days: 3
+
+  browser:
+    needs: unified
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Install pinned Playwright Chromium
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Real browser GIS+UX smoke (separate Safari Owner gate)
+        env:
+          UNIFIED_V4_URL: https://mrs10-p01-unified-v4-isolated-preview-radae1x00.vercel.app/unified-map-v4.html
+        run: node tests/unified-v4-browser-smoke.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-v4-browser-screenshots
+          path: artifacts/unified-v4-browser/
+          retention-days: 3
