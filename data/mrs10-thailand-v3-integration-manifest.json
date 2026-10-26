@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "3.0.0-partial",
+  "project": "MR-S10 P01 Thailand Railway V3",
+  "branch": "feature/mrs10-p01-thailand-v3-cross-border",
+  "sourceBase": "d9ae3e95e70ea62e93ed71d296a1245ab09ac944",
+  "modules": {
+    "model": "assets/mrs10-thailand-v3-model.js",
+    "gis": "assets/mrs10-thailand-v3-gis.js",
+    "view": "assets/mrs10-thailand-v3-view.js",
+    "html": "thailand-railway-v3.html"
+  },
+  "canonicalInterchange": "MRS10-XB-MY-TH-PADANG-BESAR",
+  "canonicalFacilityStationId": "th-my-padang-besar",
+  "separateThaiStationId": "th-th-padang-besar",
+  "operators": [
+    "KTMB",
+    "SRT"
+  ],
+  "countryTimezones": {
+    "MY": "Asia/Kuala_Lumpur",
+    "TH": "Asia/Bangkok"
+  },
+  "status": "PARTIAL_QA_PENDING",
+  "physicalWayRouteMapping": "UNVERIFIED",
+  "srtStationCodes": "PENDING_SOURCE",
+  "serviceTimetable": "NOT_BUNDLED",
+  "sourceStationCounts": {
+    "registry": 54,
+    "osmPointCrosschecked": 13,
+    "pendingGeo": 41
+  },
+  "crossBorderStatus": {
+    "padangBesar": "ACTIVE_RAIL_CONNECTION_WITH_SEPARATE_TRANSFER_SEMANTICS",
+    "sungaiKolok": "PLANNED_CONNECTION_ONLY"
+  },
+  "noMerge": true,
+  "noProduction": true
+}

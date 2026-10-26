@@ -1,0 +1,30 @@
+name: MR-S10 Thailand V3 isolated CI
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-thailand-v3-cross-border
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  thailand-v3-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Thailand V3 GIS and topology
+        run: node --test tests/mrs10-thailand-v3.test.cjs
+      - name: V3 syntax
+        run: |
+          node --check assets/mrs10-thailand-v3-model.js
+          node --check assets/mrs10-thailand-v3-gis.js
+          node --check assets/mrs10-thailand-v3-view.js
+      - name: Full MR-S10 regression
+        run: |
+          npm ci
+          npm test
+      - name: Integration manifest
+        run: |
+          node -e "let x=require('./data/mrs10-thailand-v3-integration-manifest.json');if(x.canonicalFacilityStationId!=='th-my-padang-besar')process.exit(1)"

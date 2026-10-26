@@ -1,0 +1,47 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MR-S10 Thailand V3 · Cross-Border Southern Railway</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.css">
+<style>
+:root{font:14px/1.47 system-ui,-apple-system,Arial,sans-serif;color-scheme:dark;color:#f2f7fb;background:#111d2a}*{box-sizing:border-box}
+body{margin:0}main{max-width:1650px;margin:auto;padding:10px 12px}header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:9px;padding:5px 0 12px}
+h1{font-size:clamp(19px,2.3vw,26px);margin:0}.muted{color:#bccbd9}.controls{display:flex;flex-wrap:wrap;gap:6px}
+button,input{font:inherit}button{cursor:pointer;background:#23364a;color:white;border:1px solid #4d667d;border-radius:9px;padding:8px 11px}
+button[aria-pressed="true"],button.active{background:#0c727c;border-color:#74e0d9}
+input{background:#142638;color:white;border:1px solid #536779;border-radius:9px;width:100%;padding:11px}
+a{color:#87dcff}.frame{display:grid;grid-template-columns:minmax(270px,355px) minmax(0,1fr);gap:10px}
+aside,.mapwrap{min-width:0;border:1px solid #455d73;border-radius:12px;background:#1b2c3e;padding:10px}
+#map{height:min(75vh,745px);min-height:395px;border-radius:9px}
+#routes{max-height:24vh;overflow:auto;display:grid;gap:6px;margin:8px 0}
+#routes button{text-align:left;border-left:5px solid #4ec0c9;display:grid;gap:2px}
+#routes small{font-size:11px;color:#d1d9e5}
+#stations{max-height:36vh;overflow-y:auto;display:grid;gap:4px;scrollbar-width:thin}
+#stations button{display:flex;align-items:center;gap:8px;text-align:left;font-size:13px;padding:7px 9px}
+#stations button .dot{height:10px;width:10px;border-radius:50%;background:var(--dot,#f5bc58);flex:none}
+#stations button small{margin-left:auto;color:#adbccc;font-size:10px}
+#stations button.selected{border-color:#f5c453;background:#3c4858}
+.hint{padding:8px 10px;border-left:4px solid #e4bc54;background:#293949;margin:7px 0;font-size:12px}
+.warning{border-left-color:#e58991}
+.meta{font-size:12px;margin:7px 0;line-height:1.5;color:#c8d6e1}
+#status{font-size:12px;color:#a8ebdd;min-height:20px}
+.railmarker{background:transparent;border:0;cursor:pointer}
+.railmarker span{width:16px;height:16px;display:block;border:2px solid #fff;background:var(--pin,#f1b94d);border-radius:50%;box-shadow:0 0 0 2px #101a28}
+.railmarker.active span{width:22px;height:22px;border-color:#ffe088}
+.maplibregl-popup-content{color:#16253a;border-radius:11px;font:13px/1.5 system-ui,-apple-system,sans-serif}
+.maplibregl-popup-content a{color:#0755a4}
+#map .maplibregl-ctrl-attrib{font-size:10px}
+@media(max-width:790px){.frame{display:flex;flex-direction:column-reverse}#map{height:54vh;min-height:330px}#routes{max-height:175px}#stations{max-height:235px}button{padding:8px}}
+</style></head><body><main>
+<header><div><h1 id="title">Thailand Railway V3</h1><div id="subtitle" class="muted"></div></div><div class="controls" aria-label="Language"><button data-lang="bm" aria-pressed="true">BM</button><button data-lang="en" aria-pressed="false">EN</button><button data-lang="zh" aria-pressed="false">中文</button><button data-lang="th" aria-pressed="false">ไทย</button><button id="theme" type="button">Light/Dark</button></div></header>
+<div class="hint" id="border-info"></div><div class="hint warning" id="kolok-info"></div>
+<div class="frame"><aside><input id="search" type="search" autocomplete="off" aria-label="Find station">
+<div class="controls" style="margin-top:8px"><button data-filter="all" aria-pressed="true">All</button><button data-filter="border" aria-pressed="false">Border</button><button data-filter="main" aria-pressed="false">Main</button><button data-filter="east" aria-pressed="false">East</button><button data-filter="branches" aria-pressed="false">Branches</button><button data-filter="planned" aria-pressed="false">Planned</button><button id="reset">Reset</button></div>
+<div id="routes"></div><h3 id="line-title" style="font-size:14px;margin:10px 0 5px">Station lineup</h3>
+<div id="stations" aria-live="polite"></div>
+<p class="meta" id="data-note"></p></aside>
+<section class="mapwrap"><div id="status" aria-live="polite"></div><div id="map" role="application" aria-label="MapLibre Southern Thailand Railway Map"></div>
+<div class="meta" id="geometry-note"></div><div class="meta"><a href="https://www.railway.co.th/" target="_blank" rel="noopener noreferrer">State Railway of Thailand</a> · <a href="https://www.ktmb.com.my/TrainTime.html" target="_blank" rel="noopener noreferrer">KTMB</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors (ODbL)</a> · <a href="https://openfreemap.org/" target="_blank" rel="noopener noreferrer">OpenFreeMap</a>. Educational visualization, NOT railway operational navigation. No inferred railway alignment or timetable.</div></section></div></main>
+<script defer src="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.js"></script>
+<script defer src="assets/mrs10-thailand-v3-model.js"></script>
+<script defer src="assets/mrs10-thailand-v3-gis.js"></script>
+<script defer src="assets/mrs10-thailand-v3-view.js"></script>
+</body></html>
