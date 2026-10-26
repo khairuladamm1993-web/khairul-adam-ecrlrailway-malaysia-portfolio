@@ -61,3 +61,11 @@ footer{font-size:.75rem;color:var(--muted);padding:12px 4px}footer a{color:var(-
 :root[data-theme="dark"] .art-diagram-note,:root[data-theme="dark"] .art-diagram-empty{color:#cce0e8}
 :root[data-theme="dark"] .historical-eia-popup .eia-warning{color:#ffc16b}
 @media(max-width:480px){.art-map-diagram{max-height:190px;width:min(247px,64%);left:5px;top:5px;padding:5px 7px}.art-diagram-toggle,.art-diagram-route-title{font-size:10px!important}.art-diagram-note{font-size:8px}}
+
+
+/* Compact network reference (not a station); station diagram is a separate UI. */
+.borneo-art-locator{width:142px!important;min-width:142px!important;max-width:142px!important;padding:3px 6px!important;border-radius:9px!important}
+.art-locator-head{font-size:11px!important;min-height:27px!important}
+.art-locator-mini-caption{display:block;font-size:8px;line-height:1.1;color:#466778;max-height:20px;overflow:hidden}
+:root[data-theme="dark"] .art-locator-mini-caption{color:#bdd2df}
+@media(max-width:480px){.borneo-art-locator{width:131px!important;min-width:131px!important;max-width:131px!important}}
