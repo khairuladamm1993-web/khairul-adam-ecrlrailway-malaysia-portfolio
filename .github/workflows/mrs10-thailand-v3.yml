@@ -25,6 +25,10 @@ jobs:
         run: |
           npm ci
           npm test
+      - name: Local MapLibre pinned archive integrity
+        run: |
+          cd assets/thailand-v3-vendor
+          sha256sum -c SHA256SUMS
       - name: Integration manifest
         run: |
           node -e "let x=require('./data/mrs10-thailand-v3-integration-manifest.json');if(x.canonicalFacilityStationId!=='th-my-padang-besar')process.exit(1)"

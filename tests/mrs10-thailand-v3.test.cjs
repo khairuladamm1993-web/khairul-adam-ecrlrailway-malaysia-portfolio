@@ -17,7 +17,15 @@ test('Four-language safe isolated zero-key MapLibre Preview',()=>{for(const k of
 test('MapLibre v6 uses ESM .mjs not removed UMD classic script',()=>{
  const b=fs.readFileSync('assets/mrs10-thailand-v3-bootstrap.mjs','utf8');
  assert.match(h,/mrs10-thailand-v3-bootstrap\.mjs/);
- assert.match(b,/maplibre-gl@6\.13\.0\/dist\/maplibre-gl\.mjs/);
+ assert.match(b,/thailand-v3-vendor\/maplibre-gl-6\.13\.0\.mjs/);
  assert.doesNotMatch(h+b,/maplibre-gl@6\.13\.0\/dist\/maplibre-gl\.js/);
  assert.match(b,/window\.maplibregl=maplibregl/);
+});
+test('local ESM vendor assets are pinned, licensed, and external runtime CDN is absent',()=>{
+ const css=fs.readFileSync('assets/thailand-v3-vendor/maplibre-gl-6.13.0.css','utf8');
+ const lic=fs.readFileSync('assets/thailand-v3-vendor/MAPLIBRE-LICENSE.txt','utf8');
+ const b=fs.readFileSync('assets/mrs10-thailand-v3-bootstrap.mjs','utf8');
+ assert.ok(css.length>20000);assert.match(lic,/BSD/);assert.match(b,/\.\/thailand-v3-vendor\/maplibre-gl-6\.13\.0\.mjs/);
+ assert.match(h,/assets\/thailand-v3-vendor\/maplibre-gl-6\.13\.0\.css/);
+ assert.doesNotMatch(h+b,/unpkg\.com\/maplibre|jsdelivr\.net\/npm\/maplibre/);
 });

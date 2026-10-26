@@ -24,3 +24,7 @@ Integration remains NOT READY without official data version licensing & full phy
 ## Browser runtime fix
 - MapLibre GL JS v6 is **ESM-only**; classic `dist/maplibre-gl.js` is not shipped and yielded HTTP / ORB failures on both unpkg and jsDelivr. This is not evidence of a provider authentication/API key issue.
 - New `assets/mrs10-thailand-v3-bootstrap.mjs` imports pinned version `6.13.0` as an ES module, then loads the existing three isolated model/GIS/view units in a controlled order.
+
+## Vendor repair completed: MapLibre v6.13.0
+- GitHub Actions vendored the official npm ESM `dist/maplibre-gl.mjs` and matching CSS into `assets/thailand-v3-vendor/`, preserved full BSD-3-Clause license, plus SHA256SUMS.
+- Page now imports the local `.mjs` and `.css` via the ESM bootstrap: no missing UMD, no runtime dependency on unpkg/jsDelivr. Verify checksums in isolated CI.
