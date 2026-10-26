@@ -58,7 +58,7 @@ jobs:
           npm install --no-save --ignore-scripts playwright@1.56.1 pngjs@7.0.0
       - name: Three actual Chromium visual gates (desktop / iPad / iPhone)
         env:
-          UNIFIED_V5_URL: https://mrs10-p01-unified-v4-isolated-preview-1j2rxstyz.vercel.app/unified-map-v5.html
+          UNIFIED_V5_URL: https://mrs10-p01-unified-v4-isolated-preview-fajlec05s.vercel.app/unified-map-v5.html
         run: node tests/unified-v5-browser.test.mjs
       - uses: actions/upload-artifact@v4
         if: always()
