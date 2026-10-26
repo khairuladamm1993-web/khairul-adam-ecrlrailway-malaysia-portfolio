@@ -1,0 +1,31 @@
+name: MR-S10 Thailand V3 MapLibre browser QA
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-thailand-v3-cross-border
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser dependencies
+        run: |
+          npm ci
+          npm install --no-save playwright@1.64.1
+          npx playwright install --with-deps chromium webkit
+      - name: Chromium and WebKit MapLibre station rendering and interaction
+        run: node scripts/mrs10-thailand-v3-browser-qa.cjs
+      - name: Save browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: thailand-v3-browser-screenshots
+          path: artifacts/thailand-v3-browser/
+          if-no-files-found: ignore
