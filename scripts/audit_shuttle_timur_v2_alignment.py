@@ -28,6 +28,18 @@ OSM_URLS=[
 BBOX=(4.12,101.70,6.23,102.36)
 MAX_GTFS=30_000_000
 CLASSIFICATIONS={"VERIFIED","ACCEPTABLE_STATION_OFFSET","APPROXIMATE","SUSPECTED_MISMATCH","UNRESOLVED"}
+# OpenStreetMap railway=station node candidate coordinates, documented 2026-10-27.
+# Not engineering track centerline geometry. Five decimal WGS84 coordinates.
+OSM_STATION_CANDIDATES={
+ "78900":(5.30011,102.02000,"node/2630752129","Kemubu"),
+ "78500":(5.24834,102.00964,"node/2630752130","Sri Mahligai"),
+ "78700":(5.26824,102.00952,"node/10971399485","Sri Jaya"),
+ "78400":(5.23068,102.01027,"node/11416821606","Sri Bintang"),
+ "79800":(5.39033,102.06428,"node/6997825867","Kuala Gris"),
+ "72200":(4.25781,101.92527,"node/12753679164","Bukit Betong"),
+ "72400":(4.29346,101.92210,"node/12753679163","Kampung Berkam"),
+ "78300":(5.21338,102.01248,"node/2630752132","Sungai Tasin"),
+}
 
 def table(z, name):
     p=next((x for x in z.namelist() if x.rsplit("/",1)[-1].lower()==name), None)
@@ -58,7 +70,9 @@ def read_url(url, size, timeout=60, data=None):
     return payload
 
 def norm(s):
-    s=unicodedata.normalize("NFKD",s.upper().replace("SG ","SUNGAI ").replace("KG ","KAMPUNG "))
+    s=re.sub(r'\bSG[. ]+', 'SUNGAI ', s.upper())
+    s=re.sub(r'\bKG[. ]+', 'KAMPUNG ', s)
+    s=unicodedata.normalize("NFKD",s)
     s="".join(x for x in s if not unicodedata.combining(x))
     return re.sub(r"[^A-Z0-9]","",s)
 
@@ -150,12 +164,45 @@ def main():
         else:
             cls,conf="APPROXIMATE","LOW"
             why="Only railway-way proximity established; named station or engineering track topology unverified"
+        # Named station node is not track geometry; never snap to nearest way.
+        candidate=OSM_STATION_CANDIDATES.get(s["id"])
+        proposed=point
+        replacement_source=None
+        correction_reason=None
+        original_offset=offset
+        if candidate:
+            station_xy=(candidate[0],candidate[1])
+            if dist(point,station_xy)>1000:
+                matches=sorted((dist(station_xy,xy),name,oid) for name,xy,oid in locations if norm(name)==norm(candidate[3]))
+                target_track=float("inf")
+                for wid,pts in ways:
+                    if all(abs(v[0]-station_xy[0])>0.04 or abs(v[1]-station_xy[1])>0.04 for v in pts):continue
+                    for a1,b1 in zip(pts,pts[1:]):
+                        target_track=min(target_track,metric(station_xy,a1,b1))
+                if matches and matches[0][0]<=80 and target_track<=160:
+                    proposed=station_xy
+                    cls,conf="VERIFIED","HIGH"
+                    why="Wrong-looking GTFS point corroborated by named OSM station and independently mapped railway (not survey grade)"
+                    replacement_source="https://www.openstreetmap.org/"+candidate[2]
+                    correction_reason="OSM named station and rail evidence; GTFS >1 km from documented point"
+                    offset=round(target_track,1)
+                elif not ways:
+                    proposed=station_xy
+                    cls,conf="APPROXIMATE","MEDIUM"
+                    why="Independent OSM railway station point strongly conflicts with GTFS; track centerline could not be checked"
+                    replacement_source="https://www.openstreetmap.org/"+candidate[2]
+                    correction_reason="Documented OSM station node, railway alignment unresolved"
+                    offset=None
+        changed=proposed!=point
         output.append({
             "order":s["order"],"station":s["name"],"stopId":s["id"],
             "stopSequence":s["stopSequence"],
             "originalCoordinates":{"lat":s["lat"],"lon":s["lon"]},
-            "effectiveCoordinates":{"lat":s["lat"],"lon":s["lon"]},
-            "coordinatesChanged":False,
+            "effectiveCoordinates":{"lat":proposed[0],"lon":proposed[1]},
+            "coordinatesChanged":changed,
+            "originalOffsetMeters":original_offset,
+            "replacementSourceUrl":replacement_source,
+            "replacementReason":correction_reason,
             "railwayAlignmentEvidence":{
                 "osmWayId":best[1],"osmRailwayUrl":("https://www.openstreetmap.org/way/"+best[1]) if best[1] else None,
                 "nearestNamedOsmStationId":named[1] if named else None,
@@ -174,7 +221,9 @@ def main():
         "gtfsLicense":"CC BY 4.0","alignmentSource":"OpenStreetMap railway ways / station POIs (ODbL 1.0)" if osm else None,
         "alignmentSourceUrl":osm_url,"alignmentSnapshotUtc":stamp if osm else None,
         "alignmentFetchErrors":errors,"osmWayCount":len(ways),"osmNamedStationCount":len(locations),
-        "coordinateRepairPolicy":"IMMUTABLE_GTFS_ONLY_UNTIL_INDEPENDENT_VERIFIED_CORRECTION",
+        "coordinateRepairPolicy":"ORIGINAL_GTFS_IMMUTABLE_AND_SOURCE_BACKED_STATION_REPLACEMENT_WITH_QUALITY_CLASSIFICATION",
+        "correctedCount":sum(x["coordinatesChanged"] for x in output),
+        "replacementEvidenceDate":"2026-10-27",
         "physicalTrackGeometry":None,
         "qualityGate":"PARTIAL_REVIEW_REQUIRED" if counts["SUSPECTED_MISMATCH"] or counts["UNRESOLVED"] or counts["APPROXIMATE"] else "GIS_EVIDENCE_REVIEWED_NOT_SURVEY_GRADE",
         "decisions":counts,"stops":output
