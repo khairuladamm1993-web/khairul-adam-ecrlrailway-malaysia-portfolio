@@ -12,7 +12,7 @@ const headers=[
  '  X-Robots-Tag: noindex, nofollow',
  '  X-Content-Type-Options: nosniff',
  '  Referrer-Policy: strict-origin-when-cross-origin',
- "  Content-Security-Policy: default-src 'none'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; font-src 'self' data: https://tiles.openfreemap.org; img-src 'self' data: blob: https://tiles.openfreemap.org https://tiles.openrailwaymap.org; connect-src 'self' https://tiles.openfreemap.org https://tiles.openrailwaymap.org https://services5.arcgis.com https://unpkg.com; worker-src blob:",
+ "  Content-Security-Policy: default-src 'none'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; font-src 'self' data: https://tiles.openfreemap.org; img-src 'self' data: blob: https://tiles.openfreemap.org https://tiles.openrailwaymap.org; connect-src 'self' https://tiles.openfreemap.org https://tiles.openrailwaymap.org https://services5.arcgis.com https://unpkg.com; worker-src 'self' blob:; child-src 'self' blob:",
  ''
 ].join('\n');
 fs.writeFileSync(path.join(out,'_headers'),headers);
