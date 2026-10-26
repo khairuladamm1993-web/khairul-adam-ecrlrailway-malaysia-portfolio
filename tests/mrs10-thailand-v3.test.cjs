@@ -13,3 +13,11 @@ test('Physical rail ways use OSM way geometry, not synthetic station segments',(
 test('OSM request bbox limits and physical-source safety',()=>{assert.equal(G.bboxValid([6.8,100.3,6.9,100.5]),true);assert.equal(G.bboxValid([6,100,9,102]),false);assert.equal(G.railwayWays([],[-1,0,99,99]).features.length,0);});
 test('MapLibre and live marker recovery after style.load and filters',()=>{assert.match(h,/maplibre-gl@6\.13\.0/);assert.match(v,/map\.on\('style\.load'/);assert.match(v,/new ML\.Marker/);assert.match(v,/new ML\.Popup/);assert.match(v,/setDOMContent/);assert.match(v,/fitBounds/);for(const k of ['all','border','main','east','branches','planned'])assert.ok(h.includes('data-filter="'+k+'"'));});
 test('Four-language safe isolated zero-key MapLibre Preview',()=>{for(const k of ['bm','en','zh','th'])assert.ok(h.includes('data-lang="'+k+'"'));assert.ok(h.includes('openstreetmap.org/copyright'));assert.match(v,/tiles\.openfreemap\.org\/styles/);assert.doesNotMatch(h+v,/cartocdn\.com|YOUR_KEY|apiKey:|supabase|localStorage/i);});
+
+test('MapLibre v6 uses ESM .mjs not removed UMD classic script',()=>{
+ const b=fs.readFileSync('assets/mrs10-thailand-v3-bootstrap.mjs','utf8');
+ assert.match(h,/mrs10-thailand-v3-bootstrap\.mjs/);
+ assert.match(b,/maplibre-gl@6\.13\.0\/dist\/maplibre-gl\.mjs/);
+ assert.doesNotMatch(h+b,/maplibre-gl@6\.13\.0\/dist\/maplibre-gl\.js/);
+ assert.match(b,/window\.maplibregl=maplibregl/);
+});

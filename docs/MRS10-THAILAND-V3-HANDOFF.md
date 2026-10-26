@@ -20,3 +20,7 @@ MapLibre GL JS 6.13.0, OpenFreeMap no-key style dark/positron, semantic DOM popu
 
 ## Gates and rollback
 Integration remains NOT READY without official data version licensing & full physical way/relation crosswalk, 41 station coordinates, all intermediate station QA, user iPad Safari UAT, production-ready tile/data service agreement, WebKit UAT and source identity crosswalk with current KTM version. Do not merge. Rollback: remove only V3 country link or return to prior isolated V1 Preview; leave canonical apps untouched.
+
+## Browser runtime fix
+- MapLibre GL JS v6 is **ESM-only**; classic `dist/maplibre-gl.js` is not shipped and yielded HTTP / ORB failures on both unpkg and jsDelivr. This is not evidence of a provider authentication/API key issue.
+- New `assets/mrs10-thailand-v3-bootstrap.mjs` imports pinned version `6.13.0` as an ES module, then loads the existing three isolated model/GIS/view units in a controlled order.
