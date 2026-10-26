@@ -41,6 +41,8 @@ test('actual HTML requests CI-bundled GTFS JSON without contacting public ZIP in
  a.match(html,/mrs10-r225-ktm-gtfs-stations\.json/);
  a.match(html,/api\.decodeOfficialGis/);
  a.match(html,/api\.mergeOfficialGis/);
+ a.match(html,/const secondaryPromise=Promise\.allSettled/);
+ a.match(html,/if\(official\?\.ok\)\{/);
  a.match(html,/OFFICIAL_KTMB_GTFS_STOP_COORDINATE/);
  a.match(html,/source\.textContent/);
  a.doesNotMatch(html,/fetch\('https:\/\/api\.data\.gov\.my\/gtfs-static\/ktmb'/);

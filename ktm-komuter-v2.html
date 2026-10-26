@@ -61,20 +61,28 @@ async function fetchGis(url){
 }
 async function initGIS(){
  txt('map-status',word().pending);
- // Independent public sources: one failure must not hide valid points from the other.
- const [central,national,official]=await Promise.allSettled([
+ // Start slower external GIS lookups independently, but never block official GTFS pins on CORS/timeouts.
+ const secondaryPromise=Promise.allSettled([
   fetchGis(api.GIS_URL).then(d=>api.decodeGis(d,catalogue)),
-  fetchGis(api.NATIONAL_GIS_URL).then(d=>api.decodeNationalGis(d,catalogue)),
-  fetch('./assets/mrs10-r225-ktm-gtfs-stations.json',{cache:'no-store',credentials:'omit'})
+  fetchGis(api.NATIONAL_GIS_URL).then(d=>api.decodeNationalGis(d,catalogue))
+ ]);
+ const official=await fetch('./assets/mrs10-r225-ktm-gtfs-stations.json',{cache:'no-store',credentials:'omit'})
    .then(r=>{if(!r.ok)throw Error('GTFS artifact unavailable');return r.json();})
    .then(d=>api.decodeOfficialGis(d,catalogue))
- ]);
+   .catch(()=>null);
+ // Show authoritative station markers immediately, even if secondary GIS hangs.
+ if(official?.ok){
+  decoded=api.mergeOfficialGis(null,official);
+  updateLayers();
+  statusMessage();
+ }
+ const [central,national]=await secondaryPromise;
  decoded=api.mergeOfficialGis(
    api.mergeGis(
      central.status==='fulfilled'?central.value:null,
      national.status==='fulfilled'?national.value:null
    ),
-   official.status==='fulfilled'?official.value:null
+   official
  );
  updateLayers();
  statusMessage();
