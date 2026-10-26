@@ -7,7 +7,7 @@ test('selected category always refocuses after official GTFS and secondary GIS f
  a.match(html,/function selectRoute\(id\)[\s\S]*?focusSelectedRoute\(\)/);
  a.match(html,/decoded=api\.mergeOfficialGis\(null,official\);[\s\S]*?focusSelectedRoute\(\)/);
  a.match(html,/decoded=api\.mergeOfficialGis\([\s\S]*?\n updateLayers\(\);\n statusMessage\(\);\n focusSelectedRoute\(\);/);
- a.match(html,/map\.on\('style\.load',\(\)=>\{styleReady=true;updateLayers\(\);focusSelectedRoute\(\);\}\)/);
+ a.match(html,/map\.on\('style\.load',\(\)=>\{styleReady=true;baseLabelDefaults\.clear\(\);localizeBaseMap\(\);updateLayers\(\);focusSelectedRoute\(\);\}\)/);
  a(html.split(wanted).length>=5);
 });
 test('map never invents coordinates for missing stations',()=>{
