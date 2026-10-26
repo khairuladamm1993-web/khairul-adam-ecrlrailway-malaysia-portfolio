@@ -38,6 +38,13 @@ test('Point matching requires source names and rejects mismatched code, duplicat
  const ok=gis.decode(fixture,sp);assert(ok.ok);assert.equal(ok.matched,29);assert.equal(ok.missing,0);
  assert.equal(gis.geojson(ok).features.length,29);
  assert.equal(gis.geojson(ok).features.every(f=>f.geometry.type==='Point'),true);
+ const typo=fixture.map(x=>structuredClone(x));
+ typo[2].attributes.STN_NAME='TITWANGSA';
+ const corrected=gis.decode(typo,sp);
+ assert.equal(corrected.matched,29);
+ assert.equal(corrected.data[2].matchMethod,'OBSERVED_GIS_FID3_TITWANGSA_SP03');
+ const wrongFid=typo.map(x=>structuredClone(x));wrongFid[2].attributes.FID=999;
+ assert.equal(gis.decode(wrongFid,sp).matched,28);
  const wrong=fixture.map(x=>structuredClone(x));wrong[0].attributes.STN_CODE='SP20';
  let out=gis.decode(wrong,sp);assert.equal(out.matched,28);assert.equal(out.missing,1);
  const missing=fixture.map(x=>structuredClone(x));missing[2].geometry.x=105;
