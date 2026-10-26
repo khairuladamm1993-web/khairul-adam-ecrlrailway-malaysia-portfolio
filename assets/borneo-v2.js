@@ -221,15 +221,9 @@ function updateArtMarker(){
   head.type="button";
   head.append(attach("span","art-locator-bullet","◎"),attach("span","art-locator-name",tr("artHub")));
   head.addEventListener("click",evt=>{evt.stopPropagation();setCategory("SARAWAK");showArtPopup()});
-  state.artMarkerEl.append(head,attach("div","art-locator-explainer",tr("artArea")));
-  const strips=attach("div","art-locator-lines");
-  lines.forEach(l=>{
-    const chip=attach("button","art-line-chip",tr("art"+l.id[0]+l.id.slice(1).toLowerCase()));
-    chip.type="button";chip.style.setProperty("--art-chip",l.color);chip.dataset.artLine=l.id;
-    chip.addEventListener("click",evt=>{evt.stopPropagation();setCategory(l.id);showArtPopup()});
-    strips.append(chip);
-  });
-  state.artMarkerEl.append(strips);
+  state.artMarkerEl.append(head);
+  state.artMarkerEl.append(attach("span","art-locator-mini-caption",tr("artArea")));
+
 }
 
 function showPopup(s){
