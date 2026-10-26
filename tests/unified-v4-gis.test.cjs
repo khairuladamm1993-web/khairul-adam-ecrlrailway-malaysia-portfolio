@@ -47,7 +47,7 @@ test('V4 public packager allowlists GIS and blocks private modules',()=>{
  const p=read('scripts/build-unified-v4.cjs');
  assert(p.includes('build-preview.py'));
  assert(p.includes('https://services5.arcgis.com'));
- assert(p.includes('worker-src blob:'));
+ assert(p.includes("worker-src 'self' blob:"));
  assert(p.includes('PRIVATE_ASSET_IN_PREVIEW'));
  assert(p.includes('member-gateway.js'));
 });
