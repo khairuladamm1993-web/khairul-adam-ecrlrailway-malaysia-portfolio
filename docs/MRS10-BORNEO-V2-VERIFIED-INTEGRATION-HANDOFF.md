@@ -1,15 +1,16 @@
 # MR-S10 BORNEO V2 — VERIFIED INTEGRATION HANDOFF
 
 **Audit date:** 2026-10-27 (Malaysia)  
-**Decision:** **PARTIAL — NOT INTEGRATION READY**; pending genuine browser visualization and Owner Safari iPad UAT.  
+**Decision:** **PARTIAL — NOT INTEGRATION READY**; **genuine Chromium WebGL QA PASS**, Owner Safari iPad UAT **PENDING**.  
 **Scope:** Isolated railway visitor viewer, public education only. No merge into Integrated or `main`, no MR-S10 Production changes, no Supabase/Auth/RLS changes.
 
 ## A. Source control / audited baseline
 - Repository: [khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio](https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio).
 - Branch: `feature/mrs10-p01-borneo-rail-art-v2`.
 - Isolated base: historical Integrated commit `6ee8a4a14ffbe5567c54ec575cbb812bde6d8e4c`. Not `main`. This baseline is historic; other projects continue on newer isolated branches.
-- Last source-only verified CI run (earlier checkpoint): [Actions run 40394816400](https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40394816400) — **SUCCESS** for `b9d69db59510b9cca858f8e1db4ca038bb81d0c3`; full regression + Node/JSDOM mock, **not actual MapLibre WebGL/Safari browser pass**.
-- After follow-on schematic/document amendments, verify the latest branch HEAD and CI again; do not represent the earlier successful run as testing later SHA.
+- Verified runtime code checkpoint: `ffe06442ea64ab0ffc00bfc82ea18ca5a1a624c2`. [GitHub Actions run 40397870447](https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40397870447): **completed SUCCESS**, including full existing MR-S10 regression, Borneo Node/JSDOM contract, and **real Chromium 141 MapLibre/WebGL checks** (1024×768 iPad-like and 390×844 iPhone-like viewports).
+- Screenshot artifact in that run: `borneo-v2-real-chromium-screens`, artifact ID `12687387453`. Logs record `BROWSER_RENDER_PASS ipad` and `BROWSER_RENDER_PASS iphone` with **15 visible rendered Sabah features**, three ART schematic lines, popup, filter/search/reset, dark mode and Chinese UI. This is **actual headless Chromium**, not Safari/WebKit.
+- Subsequent manifest/handoff-only commits change branch HEAD without changing these four runtime files. Reconfirm newest CI as necessary; the Vercel runtime deployment is explicitly pinned to verified code checkpoint above.
 - Runtime files: `borneo-v2.html`, `assets/borneo-v2.css`, `assets/borneo-v2.js`, `data/borneo-v2-registry.json`.
 - Contract: `data/borneo-v2-integration-manifest.json`; tests `tests/borneo-v2.test.cjs`, `.github/workflows/borneo-v2-qa.yml`. This handoff: `docs/MRS10-BORNEO-V2-VERIFIED-INTEGRATION-HANDOFF.md`.
 - No write to existing `assets/map-language-lab.js`, `assets/railway-track-registry-kl.js`, `data/owner-project-registry.json`, Supabase files, Production files, or `main`.
@@ -66,17 +67,19 @@ Primary operator: https://www.mysarawakmetro.com/what-we-do/kuching-urban-transp
 - GIS count, ordered official names, station IDs, coordinate ranges, duplicates, per-point provenance, ART classification and coordinate null, source schema.
 - DOM simulated test covers filter, search, reset, popup click, schematic cards, 4 languages, theme and points for mock MapLibre.
 - Github Actions workflow runs isolated tests plus existing `npm test`; it has no Vercel deploy step.
-- **Actual Chromium/Firefox/WebKit rendering / real Safari:** PENDING until independently evidenced.
-- **Owner Safari iPad UAT:** PENDING.
+- **Actual MapLibre Chromium rendering:** **PASS** in an automated real browser using vendored MapLibre v6 ESM fixtures with simulated OSM tiles; screenshot artifacts captured.
+- **Firefox/WebKit/Safari device testing:** **PENDING**; this CI proves neither live CDN reliability nor Safari/iPad ownership acceptance.
+- **Owner Safari iPad UAT:** **PENDING**.
 - Therefore **INTEGRATION READY = NO**, even if CI and Vercel HTTP status are both PASS.
 
 ## F. Vercel isolation / incident report
 
 - Account/team: `1993khairuladam-3016` / `team_0JRmhxIIyLuWMPHsxwWxJfTv`.
 - Dedicated new Vercel project: `mrs10-p01-borneo-v2-isolated-preview`, ID `prj_lANjBUS6Cq0l94Uox0SMeWFurwiw`. It is not Git-linked; only four public files were uploaded; SSO protection automatically enabled.
-- **Nonproduction staging deployment** `dpl_FHxgErk8eu2dDqVnAZh1uheXxKur`, `target: staging`, READY, commit metadata `b9d69db59510b9cca858f8e1db4ca038bb81d0c3`; URL: https://mrs10-p01-borneo-v2-isolated-preview-pszw3ufcd.vercel.app/borneo-v2.html. This initial staging deployment precedes the later schematic UI improvements, so it must be refreshed to latest code with a **staging** deployment before Owner UAT.
+- **Latest verified nonproduction staging deployment:** `dpl_BGV4hVf6m72abjbv6oP1Z8haaVpg`, `target: staging`, **READY**, exact verified runtime code metadata `ffe06442ea64ab0ffc00bfc82ea18ca5a1a624c2`; URL: **https://mrs10-p01-borneo-v2-isolated-preview-ljtghfoaj.vercel.app/borneo-v2.html**. Contains repaired **MapLibre v6 ESM import** and all four public runtime files. This is the URL for Owner Safari UAT.
 - **Incident — project-isolated unintended deployment target**: the Vercel API unexpectedly mapped an explicit `target:"preview"` request to **production** for the **new dedicated project**. Deployment `dpl_AHC1aT6fnJCoBKUGbSAmkqXKX1yf` became READY before it could be cancelled; cancellation returned 400 `deployment_not_canceled`. This is **not MR-S10 existing Production** (which was not accessed/altered), but it is still an unintended production-target deployment in the newly created isolated project. Record this openly. Later use `target:"staging"` explicitly; **do not promote** or assign any MR-S10 Production domain.
-- On initial staging asset smoke, HTML/CSS/JS/JSON each returned HTTP 200; browser canvas rendering not inspected by HTTP.
+- **Latest staging HTTP smoke:** HTML, CSS, JS and JSON each returned HTTP 200 and correct ESM signature. Separate GitHub CI validated actual Chromium canvas rendering with identical code, but no remote Safari canvas inspection has occurred.
+- **Root cause fixed:** MapLibre GL v6 is ESM-only. The original prototype used the nonexistent v6 UMD `dist/maplibre-gl.js`; this can leave the map blank despite HTTP 200. Fixed bootstrap to dynamic `import(".../dist/maplibre-gl.mjs")` and a safe station-list fallback if the CDN fails. Added a regression guard for this exact failure.
 
 ## G. Exact integration manifest and rollback
 Machine-readable contract: [`data/borneo-v2-integration-manifest.json`](../data/borneo-v2-integration-manifest.json).
@@ -97,11 +100,11 @@ Suggested safe integration:
 | Sabah secondary point extents / dedup | VERIFIED BY DATA QA, operator-grade survey UNVERIFIED |
 | KUTS official partial station names | VERIFIED PARTIALLY; complete roster PENDING |
 | ART verified GPS geometry | NOT AVAILABLE; safely SCHEMATIC |
-| Four-language controls and DOM mock | CI PASS at audited commit; follow-on CI to reconfirm |
-| Existing MR-S10 regression | CI PASS at audited commit; follow-on CI to reconfirm |
-| Isolated Vercel staging | READY for earlier code; latest refresh required |
-| Staging HTML/CSS/JS/JSON | HTTP 200 for initial code; refresh to reconfirm |
-| Real MapLibre canvas browser | PENDING |
+| Four-language controls and DOM mock | PASS, verified code CI 40397870447 |
+| Existing MR-S10 regression | PASS, verified code CI 40397870447 |
+| Isolated Vercel staging | READY for verified ESM runtime commit |
+| Staging HTML/CSS/JS/JSON | HTTP 200, verified latest staging |
+| Real MapLibre canvas browser | PASS, Chromium 141 at 1024×768 and 390×844; screenshots artifact 12687387453 |
 | Safari iPad Owner UAT | PENDING |
 | Integration approval | NOT GIVEN |
 
