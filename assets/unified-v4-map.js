@@ -240,4 +240,13 @@ function init(){
  });
  applyLanguage();startMap();void loadGIS();
 }
+function diagnosticSnapshot(){
+ const map=state.map;
+ const layers=state.manifest.map(r=>'mrs10-v4-'+r.id).filter(id=>map?.getLayer?.(id));
+ let rendered=0,styleLoaded=false;
+ try{styleLoaded=!!map?.isStyleLoaded?.();if(map&&styleLoaded&&layers.length)rendered=map.queryRenderedFeatures({layers}).length}catch(e){}
+ return Object.freeze({mapReady:state.mapReady,styleLoaded,renderedFeatureCount:rendered,layerCount:layers.length,
+  sourceMatched:state.points.size,stage:state.pending?'LOADING':'DONE',category:state.category});
+}
+window.MRS10V4Diagnostics=Object.freeze({snapshot:diagnosticSnapshot});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
