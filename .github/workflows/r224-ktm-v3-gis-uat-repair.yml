@@ -35,3 +35,34 @@ jobs:
           ! grep -qiE 'supabase|member-gateway|service_role|sk_live|GTM-' ktm-komuter-v2.html
           test -f assets/mrs10-r223-ktm-catalogue.json
           ! grep -qi 'LineString' assets/mrs10-r223-ktm-catalogue.json
+      - name: Assemble non-production-only KTM public preview candidate with provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/mrs10-ktm-v3-gis-public"
+          mkdir -p "$out/assets"
+          cp ktm-komuter-v2.html "$out/index.html"
+          cp assets/mrs10-r223-ktm-service.js "$out/assets/"
+          cp assets/mrs10-r223-ktm-catalogue.json "$out/assets/"
+          test "$(find "$out" -type f | wc -l)" -eq 3
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node <<'NODE'
+          const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+          const root=path.join(process.env.RUNNER_TEMP,'mrs10-ktm-v3-gis-public');
+          const files=['index.html','assets/mrs10-r223-ktm-service.js','assets/mrs10-r223-ktm-catalogue.json'];
+          const hashes=Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(path.join(root,f))).digest('hex')]));
+          fs.writeFileSync(path.join(root,'PROVENANCE.json'),JSON.stringify({
+            type:'KTMB_V3_GIS_NONPRODUCTION_PREVIEW_CANDIDATE_UNDEPLOYED',
+            sourceCommit:process.env.GITHUB_SHA,ciRunId:process.env.GITHUB_RUN_ID,
+            publicOnlyFileCount:3,sha256:hashes
+          },null,2)+'\n');
+          NODE
+          (cd "$out" && sha256sum index.html assets/mrs10-r223-ktm-service.js assets/mrs10-r223-ktm-catalogue.json > SHA256SUMS && sha256sum -c SHA256SUMS)
+          test "$(find "$out" -type f | wc -l)" -eq 5
+      - name: Upload isolated UAT candidate (no Vercel deployment)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ktm-v3-gis-repair-public-provenance
+          path: ${{ runner.temp }}/mrs10-ktm-v3-gis-public/
+          retention-days: 14
+          if-no-files-found: error
