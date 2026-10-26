@@ -375,10 +375,13 @@
         "color": "#1A9D70",
         "color_authority": "UI_PROVISIONAL",
         "start": "Pending",
-        "end": "Damai",
+        "end": "Bulatan Yayasan Sarawak",
         "point_geometry": null,
         "station_codes_from_operator_coverage": [],
-        "lineup_completeness": "TERMINI_ONLY"
+        "lineup_completeness": "TERMINI_ONLY",
+        "scope": "2026_PHASE1_PENDING_TO_YAYASAN_SARAWAK_ROUNDABOUT_10_5KM",
+        "historic_extension_not_in_current_phase1": "Damai Central",
+        "source": "https://mot.sarawak.gov.my/web/subpage/news_view/960"
       }
     ],
     "stations": [
@@ -450,7 +453,24 @@
         "point": null,
         "point_confidence": "SCHEMATIC_ONLY",
         "operation_status": "UNDER_CONSTRUCTION_OR_TESTING_NOT_OPEN_CONFIRMED",
-        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+        "name_source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system",
+        "code_conflict": {
+          "labels": [
+            {
+              "code": "SM09",
+              "year": 2026,
+              "month": "October"
+            },
+            {
+              "code": "SM11",
+              "year": 2026,
+              "month": "June"
+            }
+          ],
+          "resolution": "DISPUTED_CURRENT_CODE_OFFICIAL_SOURCE_CONFLICT",
+          "display": "The Spring (SM09/SM11 — semak)"
+        },
+        "source_status": "CONFLICTED_CODE_DO_NOT_TREAT_CURRENT_ID_AS_FINAL"
       },
       {
         "id": "KUTS-SM14",
@@ -566,6 +586,51 @@
       "source": "https://mapcarta.com/Kuching",
       "osm_id": "node/4834272899",
       "geo_warning": "City centre locator for the Kuching ART network only; not a station, depot, interchange or track alignment"
-    }
+    },
+    "phase1_update": {
+      "source": "https://mot.sarawak.gov.my/web/subpage/news_view/960",
+      "date": "2026-09-01",
+      "blue_km": 27.6,
+      "red_km": 12.3,
+      "green_phase1_km": 10.5,
+      "green_phase1_start": "Pending",
+      "green_phase1_end": "Bulatan Yayasan Sarawak"
+    },
+    "historical_coordinate_dataset": {
+      "path": "data/borneo-kuts-eia-2021.json",
+      "count": 10,
+      "status": "HISTORICAL_2021_PLANNED_STATION_SITES_NOT_CURRENT_GIS",
+      "current_operator_confirmation": false,
+      "display_allowed_if_badged_as_historical": true,
+      "never_derive_route_linestring": true
+    },
+    "schematic_codes": {
+      "blue": [
+        "SM01",
+        "SM02",
+        "SM03",
+        "SM04",
+        "SM05",
+        "SM06",
+        "SM07",
+        "SM08",
+        "SM09",
+        "SM10",
+        "SM11",
+        "SM12",
+        "SM13",
+        "SM14"
+      ],
+      "red": [
+        "SR05",
+        "SR06",
+        "SR07",
+        "SR08",
+        "SR09",
+        "SR10"
+      ],
+      "green": []
+    },
+    "schematic_codes_evidence": "Historical coding sequence only; not an approved current Phase 1 station roster"
   }
 }
