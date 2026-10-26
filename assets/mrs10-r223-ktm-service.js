@@ -84,8 +84,65 @@ function mergeGis(central,national){
  const features=[...found.values()];
  return {ok:true,features,matched:features.length,rejected,source:'MULTI_SECONDARY_GIS'};
 }
+
+// A pinned, public-only copy of authoritative government KTMB GTFS stop coordinates is
+// generated in a CI artifact. Never fetch ZIP in the browser or derive coordinates from lineup order.
+const OFFICIAL_GTFS_SOURCE='https://api.data.gov.my/gtfs-static/ktmb';
+const ALL_SECTOR_BOUNDS=Object.freeze({
+ central:[100.8,2.2,102.4,3.95],
+ north:[99.5,4.0,101.8,6.95],
+ south:[102.0,1.2,104.5,2.95]
+});
+function decodeOfficialGis(payload,c){
+ if(!validateCatalogue(c)||payload?.schemaVersion!==1||
+ payload?.source!=='KTMB_GTFS_STATIC_STOP_COORDINATES'||
+ payload?.sourceUrl!==OFFICIAL_GTFS_SOURCE||!Array.isArray(payload?.stops))
+  return {ok:false,features:[],matched:0,reason:'OFFICIAL_GTFS_NOT_VALID'};
+ const known=new Map();
+ for(const r of c.services)for(const s of r.stationSequence){
+  const k=normal(s.name),a=known.get(k)||[];
+  a.push({route:r,station:s});known.set(k,a);
+ }
+ const found=new Map(),duplicates=new Set(),rejected=[];
+ for(const s of payload.stops){
+  const k=normal(s?.name),matches=known.get(k);
+  if(!matches||!Array.isArray(s.serviceIds)){
+   rejected.push({name:String(s?.name||''),reason:'UNKNOWN_OFFICIAL_STOP'});continue;
+  }
+  const lon=Number(s.lon),lat=Number(s.lat);
+  const within=matches.filter(m=>{
+   const [w,so,e,n]=ALL_SECTOR_BOUNDS[m.route.sector];
+   return m.route.id===s.serviceIds.find(id=>id===m.route.id)&&
+          Number.isFinite(lon)&&Number.isFinite(lat)&&lon>=w&&lon<=e&&lat>=so&&lat<=n;
+  });
+  if(!within.length){rejected.push({name:s.name,reason:'INVALID_GTFS_SERVICE_OR_COORDINATES'});continue;}
+  if(found.has(k)){duplicates.add(k);rejected.push({name:s.name,reason:'DUPLICATE_OFFICIAL_STATION'});continue;}
+  found.set(k,{type:'Feature',id:'ktm-official-'+k,properties:{
+   name:matches[0].station.name,
+   serviceIds:within.map(m=>m.route.id).join('|'),
+   colors:within.map(m=>m.route.displayColor).join('|'),
+   status:'OFFICIAL_KTMB_GTFS_STOP_COORDINATE',
+   sourceUrl:OFFICIAL_GTFS_SOURCE,
+   sourceId:String(s.gtfsStopId||'')
+  },geometry:{type:'Point',coordinates:[lon,lat]}});
+ }
+ for(const k of duplicates)found.delete(k);
+ const features=[...found.values()];
+ return {ok:true,features,matched:features.length,rejected,source:'KTMB_GTFS_OFFICIAL'};
+}
+function mergeOfficialGis(secondary,official){
+ if(!official?.ok)return secondary;
+ const features=new Map();
+ for(const f of secondary?.features||[])features.set(normal(f.properties.name),f);
+ // Authoritative GTFS stop points supersede secondary approximate GIS matches.
+ for(const f of official.features)features.set(normal(f.properties.name),f);
+ const points=[...features.values()];
+ return {ok:true,features:points,matched:points.length,
+         rejected:[...(secondary?.rejected||[]),...(official.rejected||[])],
+         source:'KTMB_GTFS_WITH_SECONDARY_FALLBACK',officialMatched:official.matched};
+}
 function stationServices(c,name){const k=normal(name),out=[];for(const r of c.services){if(r.stationSequence.some(s=>normal(s.name)===k))out.push(r.id);}return out;}
 function visibleStations(d,id='all'){return {type:'FeatureCollection',features:(d?.features||[]).filter(f=>id==='all'||f.properties.serviceIds.split('|').includes(id))};}
 function featuresForRoute(d,id){return {type:'FeatureCollection',features:(d?.features||[]).filter(f=>f.properties.serviceIds.split('|').includes(id)).map(f=>({...f,properties:{...f.properties,serviceId:id,color:f.properties.colors.split('|')[f.properties.serviceIds.split('|').indexOf(id)]}}))};}
-return Object.freeze({GIS_BASE,GIS_URL,NATIONAL_GIS_BASE,NATIONAL_GIS_URL,SECTOR_BOUNDS,normal,validateCatalogue,decodeGis,decodeNationalGis,mergeGis,featuresForRoute,stationServices,visibleStations});
+return Object.freeze({GIS_BASE,GIS_URL,NATIONAL_GIS_BASE,NATIONAL_GIS_URL,SECTOR_BOUNDS,OFFICIAL_GTFS_SOURCE,normal,validateCatalogue,decodeGis,decodeNationalGis,decodeOfficialGis,mergeGis,mergeOfficialGis,featuresForRoute,stationServices,visibleStations});
 });
