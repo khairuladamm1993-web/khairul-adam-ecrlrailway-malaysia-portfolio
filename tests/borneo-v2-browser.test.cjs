@@ -19,8 +19,8 @@ const tick=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  try{
   browser=await chromium.launch({headless:true,args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader","--disable-dev-shm-usage"]});
   const cdn=path.join(base,"node_modules/maplibre-gl/dist");
-  const scriptName=path.join(cdn,"maplibre-gl.js"),cssName=path.join(cdn,"maplibre-gl.css");
-  assert.ok(fs.existsSync(scriptName)&&fs.existsSync(cssName),"Local MapLibre library missing");
+  const scriptName=path.join(cdn,"maplibre-gl.mjs"),workerName=path.join(cdn,"maplibre-gl-worker.mjs"),cssName=path.join(cdn,"maplibre-gl.css");
+  assert.ok(fs.existsSync(scriptName)&&fs.existsSync(workerName)&&fs.existsSync(cssName),"Local ESM MapLibre distribution missing");
   // Controlled local fixture prevents unrelated CDN/OSM outages from becoming false GIS failures.
   const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL/nwAAAABJRU5ErkJggg==","base64");
   const dir=path.join(base,"qa-output");fs.mkdirSync(dir,{recursive:true});
@@ -28,7 +28,8 @@ const tick=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   for(const cfg of [{label:"ipad",viewport:{width:1024,height:768}},{label:"iphone",viewport:{width:390,height:844}}]){
    const page=await browser.newPage({viewport:cfg.viewport,deviceScaleFactor:1});
    page.on("pageerror",e=>errors.push(cfg.label+": "+e.message));
-   await page.route("https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.js",route=>route.fulfill({status:200,contentType:"text/javascript",body:fs.readFileSync(scriptName)}));
+   await page.route("https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.mjs",route=>route.fulfill({status:200,contentType:"text/javascript",headers:{"access-control-allow-origin":"*"},body:fs.readFileSync(scriptName)}));
+   await page.route("https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl-worker.mjs",route=>route.fulfill({status:200,contentType:"text/javascript",headers:{"access-control-allow-origin":"*"},body:fs.readFileSync(workerName)}));
    await page.route("https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.css",route=>route.fulfill({status:200,contentType:"text/css",body:fs.readFileSync(cssName)}));
    await page.route("https://tile.openstreetmap.org/**",route=>route.fulfill({status:200,contentType:"image/png",body:png}));
    await page.goto(origin+"/borneo-v2.html",{waitUntil:"domcontentloaded"});
