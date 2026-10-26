@@ -6,7 +6,7 @@ import fs from 'node:fs/promises';
 const base=process.env.UNIFIED_V4_URL;
 if(!/^https:\/\/mrs10-p01-unified-v4-isolated-preview-[a-z0-9]+\.vercel\.app\/unified-map-v4\.html$/.test(base||''))throw new Error('UNAPPROVED_PREVIEW_URL');
 await fs.mkdir('artifacts/unified-v4-browser',{recursive:true});
-const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
+const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
 let failed=false;
 try{
  for(const viewport of [{width:1100,height:800,name:'desktop'},{width:390,height:844,name:'iphone'}]){
