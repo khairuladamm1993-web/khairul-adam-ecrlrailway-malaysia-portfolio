@@ -186,7 +186,17 @@ function startMap(){
   state.map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
   state.map.on('style.load',()=>{
    state.mapReady=true;state.networkError=false;
-   updateMapLayer();fitOnce();showStatus();
+   // style.load is earlier than isStyleLoaded() on some MapLibre builds.
+   // A second safe layer-install gate runs on load/idle.
+   updateMapLayer();showStatus();
+  });
+  state.map.on('load',()=>{
+   state.mapReady=true;updateMapLayer();fitOnce();showStatus();
+  });
+  state.map.on('idle',()=>{
+   if(state.mapReady&&state.points.size&&!state.map.getSource('mrs10-v4-point-source')){
+    updateMapLayer();fitOnce();showStatus();
+   }
   });
   state.map.on('error',()=>{if(!state.mapReady){state.networkError=true;showStatus()}});
   state.map.on('click',e=>{
