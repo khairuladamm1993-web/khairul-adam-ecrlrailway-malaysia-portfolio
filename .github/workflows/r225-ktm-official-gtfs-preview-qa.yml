@@ -1,0 +1,70 @@
+name: KTM official GTFS nationwide station coverage and protected Preview artifact
+on:
+  push:
+    branches: [feature/mrs10-p01-ktm-v3-gtfs-station-coverage]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read-only exact source checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Node 22 and locked npm cache
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Reproducible locked install
+        run: npm ci --ignore-scripts --include=dev --no-audit --no-fund
+      - name: Full MR-S10 baseline regression
+        run: npm test
+      - name: KTM 2.22, V2, V3 and official nationwide-source unit regression
+        run: node --test tests/r222-ktm-komuter.test.cjs tests/r223-ktm-komuter-v2.test.cjs tests/r224-ktm-v3-gis-uat-repair.test.cjs tests/r225-ktm-gtfs-station-map.test.cjs
+      - name: Guard all four original integrated map source files
+        run: git diff --exit-code 6ee8a4a14ffbe5567c54ec575cbb812bde6d8e4c HEAD -- map-language-lab.html assets/map-language-lab.js assets/railway-track-registry-kl.js
+      - name: Build exact north and south station points from official government KTMB GTFS
+        run: |
+          mkdir -p "$RUNNER_TEMP/ktm-gtfs-preview/assets"
+          python3 scripts/build_ktmb_official_station_points.py --output "$RUNNER_TEMP/ktm-gtfs-preview/assets/mrs10-r225-ktm-gtfs-stations.json"
+          node -e "const p=require(process.argv[1]);const c=p.coverage;for(const id of ['ktm-padang-besar','ktm-ipoh','ktm-shuttle-selatan-paloh','ktm-shuttle-selatan-pasirgudang']){const x=c.find(y=>y.serviceId===id);if(!x||x.matched!==x.catalogueStops)process.exit(1)};console.log('NORTH_SOUTH_FULL_GTFS_COVERAGE_PASS',c.filter(x=>x.matched===x.catalogueStops).length)" "$RUNNER_TEMP/ktm-gtfs-preview/assets/mrs10-r225-ktm-gtfs-stations.json"
+      - name: Assemble strictly public-only KTM UAT Preview candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/ktm-gtfs-preview"
+          cp ktm-komuter-v2.html "$out/index.html"
+          cp assets/mrs10-r223-ktm-service.js "$out/assets/"
+          cp assets/mrs10-r223-ktm-catalogue.json "$out/assets/"
+          test "$(find "$out" -type f | wc -l)" -eq 4
+          grep -q 'noindex,nofollow' "$out/index.html"
+          ! grep -qiE 'supabase|member-gateway|service_role|sk_live|GTM-' "$out/index.html"
+          ! grep -qi 'LineString' "$out/assets/mrs10-r223-ktm-catalogue.json"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node <<'NODE'
+          const fs=require('node:fs'),crypto=require('node:crypto'),path=require('node:path');
+          const root=path.join(process.env.RUNNER_TEMP,'ktm-gtfs-preview');
+          const files=['index.html','assets/mrs10-r223-ktm-service.js','assets/mrs10-r223-ktm-catalogue.json','assets/mrs10-r225-ktm-gtfs-stations.json'];
+          const source=JSON.parse(fs.readFileSync(path.join(root,files[3]),'utf8'));
+          const manifest={
+            artifactType:'KTMB_OFFICIAL_GTFS_NATIONWIDE_PREVIEW_CANDIDATE_UNDEPLOYED',
+            sourceCommit:process.env.GITHUB_SHA,ciRun:process.env.GITHUB_RUN_ID,
+            ktmbGTFSZipSha256:source.zipSha256,license:'CC BY 4.0',
+            publicFiles:files,sourceCoverage:source.coverage,
+            sha256:Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(path.join(root,f))).digest('hex')]))
+          };
+          fs.writeFileSync(path.join(root,'PROVENANCE.json'),JSON.stringify(manifest,null,2)+'\n');
+          NODE
+          (cd "$out" && sha256sum index.html assets/mrs10-r223-ktm-service.js assets/mrs10-r223-ktm-catalogue.json assets/mrs10-r225-ktm-gtfs-stations.json > SHA256SUMS && sha256sum -c SHA256SUMS)
+          test "$(find "$out" -type f | wc -l)" -eq 6
+      - name: Preserve QA-provenance bound isolated public artifact, no Vercel deployment
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ktm-v3-official-gtfs-public-provenance
+          path: ${{ runner.temp }}/ktm-gtfs-preview/
+          if-no-files-found: error
+          retention-days: 14
