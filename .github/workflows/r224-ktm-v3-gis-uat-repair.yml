@@ -1,0 +1,37 @@
+name: KTM V3 GIS and Safari UAT repair (isolated)
+on:
+  push:
+    branches: [feature/mrs10-p01-ktm-v3-gis-uat-repair]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Setup Node 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dev dependencies
+        run: npm ci --ignore-scripts --include=dev --no-audit --no-fund
+      - name: All existing Node regression
+        run: npm test
+      - name: KTM V2 regression
+        run: node --test tests/r223-ktm-komuter-v2.test.cjs tests/r222-ktm-komuter.test.cjs
+      - name: KTM V3 national GIS and Reset QA
+        run: node --test tests/r224-ktm-v3-gis-uat-repair.test.cjs
+      - name: Protect original integrated shell and catalog
+        run: git diff --exit-code 6ee8a4a14ffbe5567c54ec575cbb812bde6d8e4c HEAD -- map-language-lab.html assets/map-language-lab.js assets/railway-track-registry-kl.js
+      - name: Public-file and GIS source security checks
+        run: |
+          node --check assets/mrs10-r223-ktm-service.js
+          ! grep -qiE 'supabase|member-gateway|service_role|sk_live|GTM-' ktm-komuter-v2.html
+          test -f assets/mrs10-r223-ktm-catalogue.json
+          ! grep -qi 'LineString' assets/mrs10-r223-ktm-catalogue.json
