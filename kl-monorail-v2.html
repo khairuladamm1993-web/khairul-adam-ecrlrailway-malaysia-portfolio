@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><title>MR-S10 · KL Monorail V2 · Isolated Preview</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.css">
+<style>
+:root{font-family:system-ui,-apple-system,Arial,sans-serif;color-scheme:light;--bg:#F1F5F7;--card:#fff;--ink:#182C37;--muted:#455963;--border:#A6BAC3;--accent:#4C8619;--rail:#76B936;--pale:#E4F3D5;--focus:#005C9B}
+:root[data-theme=dark]{color-scheme:dark;--bg:#0D1B26;--card:#142C3B;--ink:#F3FBFF;--muted:#CBDDE5;--border:#637985;--accent:#B7F070;--rail:#76B936;--pale:#29452A;--focus:#91DFFF}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-size:15px}
+main{max-width:1200px;margin:0 auto;padding:12px max(12px,env(safe-area-inset-right)) 32px max(12px,env(safe-area-inset-left))}
+a{color:var(--accent);text-underline-offset:2px}h1{font-size:clamp(1.4rem,5vw,2rem);line-height:1.22;margin:8px 0 5px;color:var(--accent)}
+p{margin:7px 0;line-height:1.45}.muted,small{color:var(--muted)}.top,.tools{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.top{justify-content:space-between}.tools{margin:13px 0}button,select{font:inherit;min-height:44px;padding:8px 11px;background:var(--card);color:var(--ink);border:1px solid var(--border);border-radius:11px;cursor:pointer}
+button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+button[aria-pressed=true]{background:var(--pale);border:2px solid var(--accent);padding:7px 10px}
+.layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(285px,1fr);gap:12px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden}
+.panel-head{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:11px 12px;flex-wrap:wrap}
+#mr-map{height:clamp(420px,68dvh,750px);background:var(--bg)}
+#status{font-size:.82rem;padding:9px 12px;border-top:1px solid var(--border);min-height:40px}
+.legend{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:.86rem;font-weight:700}.dot{width:17px;height:17px;border-radius:50%;background:var(--rail);border:3px solid white;box-shadow:0 0 0 2px var(--accent)}
+.rail{height:5px;width:32px;border-radius:2px;background:var(--rail)}
+#list{padding:6px 10px 12px;overflow-y:auto;max-height:clamp(420px,68dvh,750px)}
+.stop{position:relative;width:100%;min-height:49px;display:flex;align-items:center;text-align:left;gap:10px;border:0;border-left:4px solid var(--rail);border-radius:0;background:transparent;padding:5px 7px 5px 12px}
+.stop::before{content:'';width:14px;height:14px;flex:0 0 14px;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 2px var(--accent);background:var(--rail)}
+.stop.active,.stop:hover{background:var(--pale)}.stop .number{font-weight:800;font-size:.8rem;min-width:38px;color:var(--accent)}
+.stop .station{flex:1;font-weight:680;line-height:1.25}.stop .changes{font-size:.72rem;color:var(--muted);max-width:40%;overflow-wrap:anywhere}
+.badge{display:inline-block;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-weight:730;color:var(--accent)}
+.notice{margin-top:12px;padding:11px 12px;border:1px solid var(--border);border-radius:11px;background:var(--card);font-size:.82rem;color:var(--muted)}
+#mr-map .maplibregl-popup-content{background:var(--card);color:var(--ink);border:1px solid var(--border);border-radius:9px;max-width:min(290px,80vw);overflow-wrap:anywhere}
+#mr-map .maplibregl-popup-close-button{font-size:23px;min-height:44px;min-width:44px;color:var(--ink)}
+.popup{padding:27px 3px 3px;max-height:44dvh;overflow:auto}.popup strong{color:var(--accent);font-size:1rem}
+.popup p{font-size:.85rem;color:var(--ink)}.popup a{overflow-wrap:anywhere}
+@media(max-width:750px){.layout{grid-template-columns:minmax(0,1fr)}#mr-map{height:54dvh;min-height:350px}#list{max-height:38dvh}.tools>*{flex:1}.top{align-items:start}}
+</style></head><body><main>
+<div class="top"><a href="./map-language-lab.html" id="back">‹ MR-S10</a><div class="top"><select id="lang" aria-label="Language"><option value="ms">Bahasa Melayu</option><option value="en">English</option><option value="zh">中文</option><option value="th">ไทย</option></select><button id="theme" type="button" aria-label="Toggle colour scheme">☾</button></div></div>
+<h1 id="title">KL Monorail · 11 stesen</h1><p id="intro" class="muted">KL Sentral → Titiwangsa · Laluan 8 · Paparan terasing P01</p>
+<div class="tools"><button id="all" aria-pressed="true">Semua · All</button><button id="focus" aria-pressed="false">Fokus · Focus</button><button id="reset">Set Semula · Reset</button><span class="badge">MR1–MR11</span></div>
+<div class="layout">
+<section class="panel" aria-label="MapLibre map"><div class="panel-head"><strong id="map-title">Peta GIS · POI bersumber sahaja</strong><span class="legend"><span class="dot" aria-hidden="true"></span><span id="legend">Monorel KL · Hijau muda</span></span></div>
+<div id="mr-map" role="region" aria-label="Interactive KL Monorail source-backed station map"></div><div id="status" aria-live="polite">Memeriksa sumber GIS awam…</div></section>
+<section class="panel"><div class="panel-head"><strong id="list-title">Susunan 11 stesen (skematik)</strong><span class="legend"><span class="rail" aria-hidden="true"></span> MR1–MR11</span></div><div id="list" role="list" aria-label="Monorail station order"></div></section></div>
+<div class="notice" id="notice">Garis hijau pada senarai ialah susunan perkhidmatan, BUKAN geometri trek/guideway. Pada peta, hanya titik daripada OSM dengan pengenalan monorel yang padan dipaparkan; sumber boleh tidak lengkap.</div>
+<div class="notice"><a href="https://www.mot.gov.my/en/land/infrastructure/current-rail-services" target="_blank" rel="noopener noreferrer">MOT</a> · <a href="https://developer.data.gov.my/realtime-api/gtfs-static.en" target="_blank" rel="noopener noreferrer">GTFS Prasarana</a> · <a href="https://www.mymrt.com.my/projects/travel-with-mrt/" target="_blank" rel="noopener noreferrer">MRT Corp network</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors / ODbL</a>. <strong>Preview only · no analytics/auth · no physical track representation.</strong></div>
+</main><script src="./assets/mrs10-p01-kl-monorail-v2-registry.js"></script><script src="./assets/mrs10-p01-kl-monorail-v2-viewer.js" defer></script></body></html>

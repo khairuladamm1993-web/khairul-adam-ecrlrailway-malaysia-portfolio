@@ -1,0 +1,38 @@
+name: P01 KL Monorail V2 isolated QA
+on:
+  push:
+    branches: [feature/mrs10-p01-kl-monorail-v2]
+    paths:
+      - 'kl-monorail-v2.html'
+      - 'assets/mrs10-p01-kl-monorail-v2-*.js'
+      - 'tests/p01-kl-monorail-v2.test.cjs'
+      - 'docs/p01-kl-monorail-v2.md'
+      - '.github/workflows/p01-kl-monorail-v2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-monoral-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Isolated monorail Node tests
+        run: node --test tests/p01-kl-monorail-v2.test.cjs
+      - name: Full integrated regression
+        run: npm test
+      - name: Build standalone non-production artifact without auth/production shell
+        run: |
+          mkdir -p "$RUNNER_TEMP/mrs10-monorail/assets"
+          cp kl-monorail-v2.html "$RUNNER_TEMP/mrs10-monorail/index.html"
+          cp assets/mrs10-p01-kl-monorail-v2-registry.js assets/mrs10-p01-kl-monorail-v2-viewer.js "$RUNNER_TEMP/mrs10-monorail/assets/"
+          printf '%s\n' 'User-agent: *' 'Disallow: /' > "$RUNNER_TEMP/mrs10-monorail/robots.txt"
+          test ! -f "$RUNNER_TEMP/mrs10-monorail/assets/gateway.js"
+          test ! -f "$RUNNER_TEMP/mrs10-monorail/assets/member-gateway.js"
+          test ! -f "$RUNNER_TEMP/mrs10-monorail/assets/owner-map.js"
+          ! grep -Eqi 'supabase|<iframe|/api/|analytics.js' "$RUNNER_TEMP/mrs10-monorail/index.html"
