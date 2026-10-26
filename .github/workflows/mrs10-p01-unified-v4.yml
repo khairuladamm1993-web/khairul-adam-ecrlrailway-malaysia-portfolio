@@ -53,10 +53,11 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci --ignore-scripts --no-audit
-      - name: Install pinned Playwright Chromium
+      - name: Use pre-installed GitHub runner Chrome with pinned Playwright
         run: |
+          which google-chrome
+          google-chrome --version
           npm install --no-save --ignore-scripts playwright@1.56.1
-          npx playwright install --with-deps chromium
       - name: Real browser GIS+UX smoke (separate Safari Owner gate)
         env:
           UNIFIED_V4_URL: https://mrs10-p01-unified-v4-isolated-preview-o5y7uep73.vercel.app/unified-map-v4.html
