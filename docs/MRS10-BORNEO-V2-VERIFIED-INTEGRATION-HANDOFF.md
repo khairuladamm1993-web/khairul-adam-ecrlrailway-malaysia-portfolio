@@ -8,8 +8,8 @@
 - Repository: [khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio](https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio).
 - Branch: `feature/mrs10-p01-borneo-rail-art-v2`.
 - Isolated base: historical Integrated commit `6ee8a4a14ffbe5567c54ec575cbb812bde6d8e4c`. Not `main`. This baseline is historic; other projects continue on newer isolated branches.
-- Verified runtime code checkpoint: `ffe06442ea64ab0ffc00bfc82ea18ca5a1a624c2`. [GitHub Actions run 40397870447](https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40397870447): **completed SUCCESS**, including full existing MR-S10 regression, Borneo Node/JSDOM contract, and **real Chromium 141 MapLibre/WebGL checks** (1024×768 iPad-like and 390×844 iPhone-like viewports).
-- Screenshot artifact in that run: `borneo-v2-real-chromium-screens`, artifact ID `12687387453`. Logs record `BROWSER_RENDER_PASS ipad` and `BROWSER_RENDER_PASS iphone` with **15 visible rendered Sabah features**, three ART schematic lines, popup, filter/search/reset, dark mode and Chinese UI. This is **actual headless Chromium**, not Safari/WebKit.
+- Verified runtime code checkpoint: `a0ef6e4cb1e886d351af8e5a84a40864786db04b`. [GitHub Actions run 40402589027](https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40402589027): **completed SUCCESS**, including full existing MR-S10 regression, Borneo Node/JSDOM contract, and **real Chromium 141 MapLibre/WebGL checks** (1024×768 iPad-like and 390×844 iPhone-like viewports).
+- Screenshot artifact in that run: `borneo-v2-real-chromium-screens`, artifact ID `12688733758`. Logs record `BROWSER_RENDER_PASS ipad` and `BROWSER_RENDER_PASS iphone` with **15 visible rendered Sabah features**, three ART schematic lines, popup, filter/search/reset, dark mode and Chinese UI. This is **actual headless Chromium**, not Safari/WebKit.
 - Subsequent manifest/handoff-only commits change branch HEAD without changing these four runtime files. Reconfirm newest CI as necessary; the Vercel runtime deployment is explicitly pinned to verified code checkpoint above.
 - Runtime files: `borneo-v2.html`, `assets/borneo-v2.css`, `assets/borneo-v2.js`, `data/borneo-v2-registry.json`.
 - Contract: `data/borneo-v2-integration-manifest.json`; tests `tests/borneo-v2.test.cjs`, `.github/workflows/borneo-v2-qa.yml`. This handoff: `docs/MRS10-BORNEO-V2-VERIFIED-INTEGRATION-HANDOFF.md`.
@@ -45,7 +45,7 @@ All coordinates are WGS84 GeoJSON `[longitude,latitude]`. Individual secondary s
 
 Primary operator: https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system. Operator website progress imagery from **October 2026** names several construction stations; roster here is **partial** and cannot be represented as the entire 24-station Fasa 1 roster. Route and detailed GIS alignment are **not verified** in a downloadable authoritative form. The KUTS concept is **rubber-tyred trackless ART**, not conventional railway with steel rails. As of this handoff, public passenger operation is **not verified** and is not labelled open.
 
-- **BLUE** (`#1976D2` temporary UI): `SM01 University`, `SM03 Sigitin`, `SM04 UNIMAS`, `SM05 Sarawak Heart Centre`, `SM06 Riveria`, `SM07 Stutong`, `SM09 The Spring`, `SM14 Hikmah Exchange`.
+- **BLUE** (`#1976D2` temporary UI): `SM01 University`, `SM03 Sigitin`, `SM04 UNIMAS`, `SM05 Sarawak Heart Centre`, `SM06 Riveria`, `SM07 Stutong`, `SM11 The Spring`, `SM14 Hikmah Exchange`.
 - **RED** (`#E0474C` temporary UI): `SR05 Kuching Sentral`, `SR06 Kuching International Airport`, `SR07 Pelita Heights`, `SR08 Jalan Tun Jugah`, `SR09 Swinburne`, `SR10 Simpang Tiga`.
 - **GREEN** (`#1A9D70` temporary UI): official project axis Pending–Damai / published Green Line package Pending–Bulatan Yayasan Sarawak, **no station GPS or accepted complete interim stop roster** in this release.
 - **Depot/OCC**: Rembus depot/OCC is identified from operator publication; no coordinate pin is invented.
@@ -53,6 +53,12 @@ Primary operator: https://www.mysarawakmetro.com/what-we-do/kuching-urban-transp
 - Line colors blue/red/green are UI presentation colors only; NOT claimed to be approved operator hex codes.
 - Operator website has presented about 50.6 km / 24 station-halts in some Phase 1 descriptions, while older publications refer to much larger network plans; do not merge conflicting scope figures or label them completed.
 - **Critical transport classification:** `URBAN_TRANSIT_ART`, `rail_track:false`, `route_geometry:null`. Only clearly labelled schematic sequences of *available* official codes are rendered, with gaps indicated, not GPS track vectors.
+
+- **V2 map visibility correction (27 October 2026):** A city-area ART locator at OSM Kuching city center `[110.3494,1.5606]` (OSM node 4834272899, https://mapcarta.com/Kuching) is rendered as an HTML MapLibre marker labelled **Kuching KUTS ART** with Blue/Red/Green line buttons. It is classified as `CITY_REFERENCE_NOT_ART_STATION`, **not** a geocoded station/track/depot. Thus the ALL view now renders 15 Sabah station points **plus one Kuching regional ART locator**, without adding any ART station GPS.
+- The ART city marker persists across `style.load`, theme switching, category focus, search and reset; it is hidden in Sabah-only selection, remains visible for Sarawak/line-specific selection, and clicking any color line selects the relevant schematic viewer. **Green** explicitly displays unverified stop-location guidance instead of an empty misleading lineup.
+- Real Chromium Playwright CI tested marker visible and at least 75% of its width within actual map viewport on 1024×768 and 390×844 screens; rendered Sabah point count remains 15, KUTS city marker count is 1 and KUTS station GPS count is 0. Real Owner Safari iPad remains PENDING.
+- **Provenance correction:** Sarawak Metro operator construction page identifies **`SM11 The Spring`**, not `SM09`; registry and Blue station-code coverage were amended accordingly.
+
 
 ## D. Rendering / interaction contract
 - Entry point: `/borneo-v2.html`, standalone public-only asset; no auth, Supabase writes, or collection of user location.
@@ -76,7 +82,7 @@ Primary operator: https://www.mysarawakmetro.com/what-we-do/kuching-urban-transp
 
 - Account/team: `1993khairuladam-3016` / `team_0JRmhxIIyLuWMPHsxwWxJfTv`.
 - Dedicated new Vercel project: `mrs10-p01-borneo-v2-isolated-preview`, ID `prj_lANjBUS6Cq0l94Uox0SMeWFurwiw`. It is not Git-linked; only four public files were uploaded; SSO protection automatically enabled.
-- **Latest verified nonproduction staging deployment:** `dpl_BGV4hVf6m72abjbv6oP1Z8haaVpg`, `target: staging`, **READY**, exact verified runtime code metadata `ffe06442ea64ab0ffc00bfc82ea18ca5a1a624c2`; URL: **https://mrs10-p01-borneo-v2-isolated-preview-ljtghfoaj.vercel.app/borneo-v2.html**. Contains repaired **MapLibre v6 ESM import** and all four public runtime files. This is the URL for Owner Safari UAT.
+- **Latest verified nonproduction staging deployment:** `dpl_GHSHMiKc2rNX7Yim6kDhEv6ydBEH`, `target: staging`, **READY**, exact verified runtime code metadata `a0ef6e4cb1e886d351af8e5a84a40864786db04b`; URL: **https://mrs10-p01-borneo-v2-isolated-preview-nkt85zipm.vercel.app/borneo-v2.html**. Contains repaired **MapLibre v6 ESM import**, Kuching ART city-only marker, three line chips and all four public runtime files. This is the URL for Owner Safari UAT.
 - **Incident — project-isolated unintended deployment target**: the Vercel API unexpectedly mapped an explicit `target:"preview"` request to **production** for the **new dedicated project**. Deployment `dpl_AHC1aT6fnJCoBKUGbSAmkqXKX1yf` became READY before it could be cancelled; cancellation returned 400 `deployment_not_canceled`. This is **not MR-S10 existing Production** (which was not accessed/altered), but it is still an unintended production-target deployment in the newly created isolated project. Record this openly. Later use `target:"staging"` explicitly; **do not promote** or assign any MR-S10 Production domain.
 - **Latest staging HTTP smoke:** HTML, CSS, JS and JSON each returned HTTP 200 and correct ESM signature. Separate GitHub CI validated actual Chromium canvas rendering with identical code, but no remote Safari canvas inspection has occurred.
 - **Root cause fixed:** MapLibre GL v6 is ESM-only. The original prototype used the nonexistent v6 UMD `dist/maplibre-gl.js`; this can leave the map blank despite HTTP 200. Fixed bootstrap to dynamic `import(".../dist/maplibre-gl.mjs")` and a safe station-list fallback if the CDN fails. Added a regression guard for this exact failure.
@@ -100,11 +106,11 @@ Suggested safe integration:
 | Sabah secondary point extents / dedup | VERIFIED BY DATA QA, operator-grade survey UNVERIFIED |
 | KUTS official partial station names | VERIFIED PARTIALLY; complete roster PENDING |
 | ART verified GPS geometry | NOT AVAILABLE; safely SCHEMATIC |
-| Four-language controls and DOM mock | PASS, verified code CI 40397870447 |
-| Existing MR-S10 regression | PASS, verified code CI 40397870447 |
+| Four-language controls and DOM mock | PASS, verified code CI 40402589027 |
+| Existing MR-S10 regression | PASS, verified code CI 40402589027 |
 | Isolated Vercel staging | READY for verified ESM runtime commit |
 | Staging HTML/CSS/JS/JSON | HTTP 200, verified latest staging |
-| Real MapLibre canvas browser | PASS, Chromium 141 at 1024×768 and 390×844; screenshots artifact 12687387453 |
+| Real MapLibre canvas browser | PASS, Chromium 141 at 1024×768 and 390×844; 15 Sabah points + 1 Kuching city locator; screenshots artifact 12688733758 |
 | Safari iPad Owner UAT | PENDING |
 | Integration approval | NOT GIVEN |
 
