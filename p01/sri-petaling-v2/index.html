@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ms"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<title>MR-S10 P01 · LRT Sri Petaling V2 | Isolated Preview</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.css">
+<style>
+:root{color-scheme:light;--bg:#f3f7fa;--card:#fff;--text:#142b37;--muted:#435966;--border:#adc1cb;--sp:#862448;--spsoft:#f9e9f0;--amp:#A65100;--halo:#fff;--link:#155579;--focus:#045980;font:15px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#101e2a;--card:#193140;--text:#f5faff;--muted:#d5e5ed;--border:#607987;--sp:#F2A6C0;--spsoft:#362634;--amp:#FFBB7B;--halo:#0f2230;--link:#9adcf7;--focus:#8bdcfc}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text)}
+main{max-width:1110px;margin:0 auto;padding:10px max(12px,env(safe-area-inset-right)) 28px max(12px,env(safe-area-inset-left))}
+h1{color:var(--sp);font-size:clamp(1.35rem,4vw,2rem);margin:8px 0 5px;line-height:1.2}
+h2{font-size:1.12rem;margin:0 0 8px}
+p{color:var(--muted);margin:6px 0 10px}
+a{color:var(--link);overflow-wrap:anywhere}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header a{font-weight:750}
+.small{font-size:.83rem}
+.meta{color:var(--muted);font-weight:700;font-size:.78rem;letter-spacing:.05em}
+.controls{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:11px 0}
+.controls>[role="group"]{display:flex;gap:5px;flex-wrap:wrap}
+button{font:inherit;min-height:44px;padding:7px 12px;border:1px solid var(--border);border-radius:11px;color:var(--text);background:var(--card);font-weight:680;cursor:pointer}
+button[aria-pressed="true"]{border:2px solid var(--sp);background:var(--spsoft);padding:6px 11px}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.shell{position:relative}
+#map{height:clamp(380px,59dvh,695px);border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--card)}
+#expand{position:absolute;top:11px;right:12px;z-index:2;background:var(--card)}
+.shell.expanded{position:fixed;inset:0;z-index:1000;background:var(--bg);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.shell.expanded #map{width:100%;height:100%;border-radius:0}
+.shell.expanded #expand{top:calc(10px + env(safe-area-inset-top));right:calc(10px + env(safe-area-inset-right))}
+.maplibregl-popup-content{border-radius:12px!important;background:var(--card)!important;color:var(--text)!important;max-width:min(80vw,310px);box-shadow:0 5px 16px #172b3970!important}
+.maplibregl-popup-close-button{min-width:44px;min-height:44px;color:var(--text)!important;font-size:25px}
+.popup{padding:20px 5px 4px;max-height:42dvh;overflow:auto;overflow-wrap:anywhere}
+.popup strong{color:var(--sp);font-size:1.03rem}
+.popup p{color:var(--text);margin:6px 0}
+.status{padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin:10px 0;font-weight:640;overflow-wrap:anywhere}
+.legend{display:flex;align-items:center;flex-wrap:wrap;gap:10px;background:var(--card);padding:9px 12px;border:1px solid var(--border);border-radius:12px;margin:10px 0}
+.swatch{display:inline-block;width:27px;border-top:5px solid var(--sp);vertical-align:middle}
+.circle{display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--sp);border:3px solid var(--halo);outline:2px solid var(--amp);vertical-align:middle}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.8fr);gap:12px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;min-width:0}
+ol{list-style:none;margin:10px 0 0;padding:2px 2px 2px 0;max-height:550px;overflow:auto;overscroll-behavior:contain}
+li{position:relative;display:flex;align-items:stretch;padding:0 4px 0 0}
+li:not(:last-child):before{content:'';position:absolute;left:18px;top:32px;bottom:-9px;border-left:4px solid var(--sp);z-index:0}
+li button{width:100%;display:flex;gap:11px;align-items:center;min-height:52px;text-align:left;border:0;border-radius:8px;background:transparent;padding:5px 6px 5px 0}
+li button:hover,li button:focus-visible{background:var(--spsoft)}
+.num{position:relative;z-index:1;display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:50%;background:var(--sp);color:var(--halo);border:3px solid var(--card);font-size:.72rem;font-weight:850}
+li[data-shared="true"] .num{box-shadow:0 0 0 2px var(--amp)}
+.sname{flex:1;min-width:0;overflow-wrap:anywhere;font-weight:700}
+.scode{display:block;color:var(--muted);font-size:.8rem}
+.shared{color:var(--amp);font-size:.75rem;font-weight:800}
+footer{margin-top:13px;font-size:.84rem;color:var(--muted)}
+details summary{cursor:pointer;font-weight:700;min-height:40px;padding:8px 0}
+#error{color:#b3261e}
+@media(max-width:740px){.layout{grid-template-columns:1fr}#map{height:58dvh}ol{max-height:47dvh}}
+@media(max-width:390px){.controls{gap:5px}.controls button{padding:7px 9px;font-size:.86rem}.legend{gap:6px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+<script src="./catalogue.js" defer></script><script src="./gis.js" defer></script><script src="./app.js" defer></script>
+</head><body><main>
+<header><a href="../../gateway.html" id="back" rel="nofollow">← MR-S10 Gateway</a>
+<button id="theme" type="button" aria-pressed="false">◐ <span id="theme-label">Mod Gelap</span></button></header>
+<div class="meta">P01 · LRT SRI PETALING V2 · ISOLATED NON-PRODUCTION CANDIDATE</div>
+<h1 id="title">LRT Sri Petaling · 29 stesen</h1><p id="description">Sentul Timur → Putra Heights. 11 stesen dikongsi bersama Ampang.</p>
+<div class="controls"><div role="group" aria-label="Map language" id="languages">
+<button type="button" data-lang="ms" aria-pressed="true">BM</button><button type="button" data-lang="en" aria-pressed="false">EN</button>
+<button type="button" data-lang="zh" aria-pressed="false">中文</button><button type="button" data-lang="th" aria-pressed="false">ไทย</button>
+</div></div>
+<div class="controls"><div role="group" aria-label="Map view">
+<button id="focus" type="button">Focus</button><button id="all" type="button">All</button><button id="reset" type="button">Reset</button>
+</div><button id="category" type="button" aria-pressed="true">● Sri Petaling</button></div>
+<div class="shell" id="map-shell"><div id="map" role="region" aria-label="MapLibre visitor station map"></div><button type="button" id="expand" aria-expanded="false" aria-label="Expand map">⛶</button></div>
+<div id="status" role="status" aria-live="polite" class="status">GIS source pending · Tiada koordinat rekaan.</div>
+<div class="legend"><strong id="legend-label">Petunjuk</strong><span><i class="swatch" aria-hidden="true"></i> <span id="legend-spline">Sri Petaling (skema)</span></span><span><i class="circle" aria-hidden="true"></i> <span id="legend-shared">Stesen bersama Ampang</span></span></div>
+<div class="layout"><section class="panel"><h2 id="lineup-heading">Lineup stesen ke stesen</h2>
+<p class="small" id="lineup-desc">Sambungan menegak ini skematik, bukan jajaran geografi trek.</p>
+<ol id="lineup" aria-label="29 Sri Petaling stations"></ol></section>
+<section class="panel"><h2 id="detail-heading">Maklumat stesen</h2><div id="detail" aria-live="polite"><p>Tekan stesen pada peta atau lineup.</p></div>
+<details><summary id="source-heading">Sumber & had ketepatan</summary><p id="disclaimer">Titik berdasarkan padanan sumber GIS awam; tidak sesuai untuk navigasi operasi. Trek fizikal belum disahkan.</p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://www.mot.gov.my/en/land/infrastructure/current-rail-services">MOT · service corridor</a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://myrapid.com.my/wp-content/uploads/2021/07/28102018_Transit-Map.pdf">Rapid KL · transit map</a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://services5.arcgis.com/2ZRAaoTSJbQ20ceg/arcgis/rest/services/SELANGOR_RAILWAY_MAP/FeatureServer/2">ArcGIS · station POIs</a></p></details></section></div>
+<footer id="footer">Public railway reference only · NOT train-operation/survey geometry · Production untouched.</footer>
+</main></body></html>
