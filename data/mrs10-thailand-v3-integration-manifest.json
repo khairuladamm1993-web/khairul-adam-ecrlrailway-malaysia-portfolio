@@ -20,7 +20,7 @@
     "MY": "Asia/Kuala_Lumpur",
     "TH": "Asia/Bangkok"
   },
-  "status": "PARTIAL_QA_PENDING",
+  "status": "PARTIAL_BROWSER_QA_PASS_SAFARI_OWNER_PENDING",
   "physicalWayRouteMapping": "UNVERIFIED",
   "srtStationCodes": "PENDING_SOURCE",
   "serviceTimetable": "NOT_BUNDLED",
@@ -34,5 +34,67 @@
     "sungaiKolok": "PLANNED_CONNECTION_ONLY"
   },
   "noMerge": true,
-  "noProduction": true
+  "noProduction": true,
+  "codeCheckpointSha": "bbee885b354a2c7f880f6027f9a3738cec2c3979",
+  "runtime": {
+    "maplibreVersion": "6.13.0",
+    "entry": "assets/mrs10-thailand-v3-bootstrap.mjs",
+    "module": "assets/thailand-v3-vendor/maplibre-gl-6.13.0.mjs",
+    "css": "assets/thailand-v3-vendor/maplibre-gl-6.13.0.css",
+    "worker": "assets/thailand-v3-vendor/maplibre-gl-worker-6.13.0.mjs",
+    "license": "BSD-3-Clause",
+    "sha256sums": "assets/thailand-v3-vendor/SHA256SUMS"
+  },
+  "qa": {
+    "nodeTests": {
+      "passed": 14,
+      "total": 14
+    },
+    "mrS10Regression": {
+      "passed": 367,
+      "total": 367
+    },
+    "chromium": {
+      "viewport": "390x800",
+      "markers": 13,
+      "borderMarkers": 3,
+      "errors": 0,
+      "passed": true
+    },
+    "webkit": {
+      "viewport": "1024x800",
+      "markers": 13,
+      "borderMarkers": 3,
+      "errors": 0,
+      "passed": true
+    },
+    "staticRun": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40400205703",
+    "browserRun": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40400205552",
+    "screenshotsArtifactId": 12689210796,
+    "ownerIpadSafari": "PENDING"
+  },
+  "preview": {
+    "url": "https://asia-railway-explorer-preview-l26ehlqx8-1993khairuladam-3016.vercel.app/",
+    "deploymentId": "dpl_d8Gn7bLWm9q5o6wD3173JMXkvAC7",
+    "projectId": "prj_cdfMEldu52twg5JTbbcipHxfyqoq",
+    "target": null,
+    "ready": true,
+    "protected": true
+  },
+  "layers": {
+    "osMPhysicalWaysLayer": "physical-osm-rail-layer",
+    "wayStatus": "OSM_WAY_GEOMETRY_UNMATCHED_TO_SRT_SERVICE",
+    "stationRendering": "MapLibre DOM Markers",
+    "stationGeojsonFunction": "MRS10ThailandV3GIS.points(MRS10ThailandV3)",
+    "type": "EDUCATIONAL_REFERENCE_ONLY"
+  },
+  "remainingGates": [
+    "41_STATION_GEO_PEND",
+    "FULL_SRT_WAY_RELATION_CROSSWALK",
+    "SRT_KTMB_OFFICIAL_STATION_IDS",
+    "OPERATOR_STOP_PATTERNS",
+    "PHYSICAL_IPAD_SAFARI_UAT",
+    "PRODUCTION_TILE_USAGE_LICENCE",
+    "KTM_CANONICAL_CROSSWALK"
+  ]
 }
