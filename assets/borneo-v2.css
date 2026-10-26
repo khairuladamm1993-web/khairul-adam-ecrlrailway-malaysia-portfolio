@@ -37,3 +37,27 @@ footer{font-size:.75rem;color:var(--muted);padding:12px 4px}footer a{color:var(-
 :root[data-theme="dark"] .art-locator-explainer{color:#c4dfed}
 :root[data-theme="dark"] .art-line-chip{background:#1b3b4c!important;color:#f8fdff!important}
 @media(max-width:480px){.borneo-art-locator{width:163px;min-width:163px;max-width:163px;padding:5px 6px}.art-locator-head{font-size:11px}.art-locator-explainer{font-size:9px}.art-line-chip{font-size:9px!important;min-height:29px!important;padding:3px 4px!important}}
+
+
+/* KUTS schematics are deliberately in screen space, not misleading map coordinates. */
+.art-map-diagram{position:absolute;z-index:3;top:10px;left:9px;width:min(285px,69%);max-height:min(46vh,270px);overflow:auto;background:rgba(255,255,255,.96);color:#17364a;border:1px solid #aabecb;border-radius:12px;box-shadow:0 4px 14px rgba(0,36,50,.16);padding:7px 9px;font-size:12px}
+.art-map-diagram:empty{display:none}
+.art-diagram-toggle{min-height:31px!important;display:block;width:100%;text-align:left;font-size:11px!important;font-weight:850;padding:5px 4px!important;color:#17364a;background:transparent;border:0;border-bottom:1px solid #c7d6de;border-radius:3px}
+.art-diagram-route{margin:6px 0 0;padding-left:7px;border-left:4px solid var(--route-color);border-radius:2px}
+.art-diagram-route-title{min-height:25px!important;padding:2px 4px!important;text-align:left;width:100%;background:none;border:0;color:#153a4d;font-size:11px!important;font-weight:780}
+.art-diagram-spine{border-left:2px solid var(--route-color);padding:3px 0 0 6px;margin:4px 0 0 7px;display:flex;flex-direction:column;gap:3px}
+.art-diagram-stop{position:relative;display:flex;align-items:center;gap:6px;text-align:left;min-height:30px!important;padding:3px 4px!important;border:1px solid #c5d3d9;border-radius:6px;background:#f4f9fa;color:#18374a;font-size:10px!important;line-height:1.25}
+.art-diagram-node{white-space:nowrap;font-variant-numeric:tabular-nums;flex:0 0 auto;font-size:9px!important;font-weight:800;background:#fff;border:1px solid var(--route-color);border-radius:50px;padding:3px 4px;color:#102d3d}
+.art-diagram-note{font-size:9px;line-height:1.3;color:#4d6170;border-top:1px solid #c8d6dc;margin-top:7px;padding-top:5px;font-weight:620}
+.art-diagram-empty{font-size:10px;line-height:1.35;margin:4px 2px;color:#536874}
+.art-schematic-stop{min-height:30px!important;padding:4px 6px!important;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--ink);font-size:10px!important;flex:1 1 auto}
+.art-schematic-stop:hover{background:var(--hover)}
+.eia-legend{font-size:11px;color:var(--muted);font-weight:750}
+.historical-eia-popup .eia-warning{font-size:.78rem;color:#ab630e;font-weight:800;line-height:1.4}
+:root[data-theme="dark"] .art-map-diagram{background:rgba(15,39,53,.97);color:#eaf8fb;border-color:#668594}
+:root[data-theme="dark"] .art-diagram-route-title,:root[data-theme="dark"] .art-diagram-toggle{color:#ecf8fc}
+:root[data-theme="dark"] .art-diagram-stop{background:#244457;color:#f0fafc;border-color:#637f91}
+:root[data-theme="dark"] .art-diagram-node{background:#112936;color:#e3f7fa}
+:root[data-theme="dark"] .art-diagram-note,:root[data-theme="dark"] .art-diagram-empty{color:#cce0e8}
+:root[data-theme="dark"] .historical-eia-popup .eia-warning{color:#ffc16b}
+@media(max-width:480px){.art-map-diagram{max-height:190px;width:min(247px,64%);left:5px;top:5px;padding:5px 7px}.art-diagram-toggle,.art-diagram-route-title{font-size:10px!important}.art-diagram-note{font-size:8px}}
