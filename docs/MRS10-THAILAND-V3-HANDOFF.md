@@ -28,3 +28,7 @@ Integration remains NOT READY without official data version licensing & full phy
 ## Vendor repair completed: MapLibre v6.13.0
 - GitHub Actions vendored the official npm ESM `dist/maplibre-gl.mjs` and matching CSS into `assets/thailand-v3-vendor/`, preserved full BSD-3-Clause license, plus SHA256SUMS.
 - Page now imports the local `.mjs` and `.css` via the ESM bootstrap: no missing UMD, no runtime dependency on unpkg/jsDelivr. Verify checksums in isolated CI.
+
+## Browser worker fix
+- Added locally vendored `assets/thailand-v3-vendor/maplibre-gl-worker-6.13.0.mjs` from the same npm 6.13.0 distribution, included in SHA256SUMS.
+- `bootstrap.mjs` calls `maplibregl.setWorkerUrl(new URL('./thailand-v3-vendor/maplibre-gl-worker-6.13.0.mjs', import.meta.url).href)` before rendering. Prevents worker requests to an unavailable relative path and ensures same-origin worker in Preview.

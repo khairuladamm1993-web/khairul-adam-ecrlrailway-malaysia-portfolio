@@ -29,3 +29,11 @@ test('local ESM vendor assets are pinned, licensed, and external runtime CDN is 
  assert.match(h,/assets\/thailand-v3-vendor\/maplibre-gl-6\.13\.0\.css/);
  assert.doesNotMatch(h+b,/unpkg\.com\/maplibre|jsdelivr\.net\/npm\/maplibre/);
 });
+test('Same-origin MapLibre worker is bundled and pointed to before rendering',()=>{
+ const boot=fs.readFileSync('assets/mrs10-thailand-v3-bootstrap.mjs','utf8');
+ const work=fs.readFileSync('assets/thailand-v3-vendor/maplibre-gl-worker-6.13.0.mjs','utf8');
+ assert.ok(work.length>100000);
+ assert.match(boot,/maplibregl\.setWorkerUrl\(new URL\('/);
+ assert.match(boot,/maplibre-gl-worker-6\.13\.0\.mjs/);
+ assert.ok(boot.indexOf('setWorkerUrl')<boot.indexOf('await import'));
+});

@@ -2,5 +2,6 @@
 import * as maplibregl from './thailand-v3-vendor/maplibre-gl-6.13.0.mjs';
 import './mrs10-thailand-v3-model.js';
 import './mrs10-thailand-v3-gis.js';
+maplibregl.setWorkerUrl(new URL('./thailand-v3-vendor/maplibre-gl-worker-6.13.0.mjs',import.meta.url).href);
 window.maplibregl=maplibregl;
 await import('./mrs10-thailand-v3-view.js');
