@@ -1,0 +1,37 @@
+name: P01 Sri Petaling V2 isolated QA
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-sri-petaling-v2
+    paths:
+      - 'p01/sri-petaling-v2/**'
+      - '.github/workflows/mrs10-p01-sri-petaling-v2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact feature commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Syntax and catalogue verification
+        run: |
+          node --check p01/sri-petaling-v2/catalogue.js
+          node --check p01/sri-petaling-v2/gis.js
+          node --check p01/sri-petaling-v2/app.js
+          node --check p01/sri-petaling-v2/qa.cjs
+          node --test p01/sri-petaling-v2/qa.cjs
+      - name: Scope and safety guard
+        run: |
+          test -f p01/sri-petaling-v2/index.html
+          ! grep -Ei '([Ss]upabase|secret.*token|access[-_]key)' p01/sri-petaling-v2/index.html
+          ! grep -q 'LineString' p01/sri-petaling-v2/app.js
+          git diff --name-only HEAD^ HEAD | grep -v '^p01/sri-petaling-v2/' | grep -v '^.github/workflows/mrs10-p01-sri-petaling-v2.yml' && exit 1 || true
