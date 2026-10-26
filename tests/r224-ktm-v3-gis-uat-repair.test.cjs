@@ -48,7 +48,7 @@ test('source duplicate cross-match cannot create phantom marker',()=>{
  assert.equal(m.matched,0);assert(m.rejected.some(x=>x.reason==='CROSS_SOURCE_DUPLICATE'));
 });
 test('browser resets obsolete no-point status and uses bounded independent GIS requests',()=>{
- assert.match(html,/function selectRoute\(id\)\{focus=id;activePopup\?\.remove\(\);activePopup=null;render\(\);updateLayers\(\);statusMessage\(\);/);
+ assert.match(html,/function selectRoute\(id\)\{[\s\S]*?focus=id;[\s\S]*?activePopup\?\.remove\(\);activePopup=null;[\s\S]*?render\(\);[\s\S]*?updateLayers\(\);[\s\S]*?statusMessage\(\);[\s\S]*?focusSelectedRoute\(\);/);
  assert.match(html,/Promise\.allSettled\(/);
  assert.match(html,/api\.NATIONAL_GIS_URL/);
  assert.match(html,/word\(\)\.noMapped/);
