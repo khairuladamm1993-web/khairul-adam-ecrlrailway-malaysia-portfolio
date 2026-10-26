@@ -120,8 +120,8 @@ test('authenticated browser GIS: source → MapLibre → category → reset → 
  lang.value='en';lang.dispatchEvent(new window.Event('change'));
  assert.equal(document.documentElement.lang,'en');
  assert.equal(document.getElementById('map-locale-note').hidden,true);
- assert.deepEqual(map.getLayer('basemap-place').layout['text-field'],['get','name'],'English restores provider label expression');
- assert.deepEqual(map.getLayer('ktmv2-unique-label').layout['text-field'],['get','name']);
+ assert.equal(JSON.stringify(map.getLayer('basemap-place').layout['text-field']),JSON.stringify(['get','name']),'English restores provider label expression');
+ assert.equal(JSON.stringify(map.getLayer('ktmv2-unique-label').layout['text-field']),JSON.stringify(['get','name']));
  assert.equal(JSON.stringify(map.getSource('ktmv2-unique-source').data),originalPoints);
  select('all');
  assert.equal(map.getSource('ktmv2-unique-source').data.features.length,8);
@@ -135,7 +135,7 @@ test('authenticated browser GIS: source → MapLibre → category → reset → 
 test('official request and style-layer loading never silently lose protected GTFS or all-stations focus',()=>{
  assert.match(html,/gtfs-stations\.json',\{cache:'no-store',credentials:'same-origin'\}/);
  assert.match(html,/if\(!styleReady\|\|!map\?\.getStyle/);
- assert.match(html,/map\.on\('style\.load',\(\)=>\{styleReady=true;updateLayers\(\);focusSelectedRoute\(\);\}\)/);
+ assert.match(html,/map\.on\('style\.load',\(\)=>\{styleReady=true;baseLabelDefaults\.clear\(\);localizeBaseMap\(\);updateLayers\(\);focusSelectedRoute\(\);\}\)/);
  assert.match(html,/maxZoom:focus==='all'\?9:10\.5/);
  assert.match(html,/INVALID_CONTENT_TYPE/);
  assert.match(html,/officialError=String\(error/);
