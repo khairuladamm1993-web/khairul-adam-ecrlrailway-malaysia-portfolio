@@ -19,6 +19,7 @@ const api=require('./catalogue.js'),gis=require('./gis.js');
   console.log('SOURCE_AUDIT_REJECTED: '+result.rejected);
   console.log('SOURCE_AUDIT_MISSING: '+api.stations.filter(s=>!result.data.find(p=>p.stationId===s.id)).map(s=>s.serviceCode+':'+s.name).join(' | '));
   console.log('SOURCE_AUDIT_REASONS: '+JSON.stringify(result.failures||[]));
+  console.log('SOURCE_AUDIT_RAW_REJECTS: '+JSON.stringify(payload.features.filter(f=>(result.failures||[]).some(r=>r.sourceId===(f?.attributes?.FID??f?.attributes?.OBJECTID??f?.attributes?.id))).map(f=>({FID:f.attributes?.FID,name:f.attributes?.STN_NAME,code:f.attributes?.STN_CODE}))));
   console.log('SOURCE_AUDIT_CLASSIFICATION: PUBLIC_POI_NOT_OPERATING_SURVEY');
   if(result.matched!==29)process.exitCode=3;
  }catch(e){
