@@ -75,6 +75,7 @@ test('authenticated browser GIS: source → MapLibre → category → reset → 
  assert.equal(count('ktm-shuttle-selatan-paloh'),3);
  assert.equal(count('ktm-shuttle-selatan-pasirgudang'),2);
  assert.equal(map.getSource('ktmv2-unique-source').data.features.length,8);
+ assert.match(document.getElementById('evidence').textContent,/GTFS rasmi/,'GTFS coordinates must not be labelled secondary GIS');
  assert.equal(map.getLayer('ktmv2-ktm-padang-besar-points').paint['circle-color'],'#008658');
  assert.equal(map.getLayer('ktmv2-ktm-shuttle-selatan-paloh-points').paint['circle-color'],'#7853A6');
  assert.equal(map.camera.at(-1).type,'bounds','default all view fits nationwide markers');
@@ -93,6 +94,7 @@ test('authenticated browser GIS: source → MapLibre → category → reset → 
  assert(map.popup.content.textContent.includes('Paloh'));
  assert(map.popup.content.textContent.includes('Paloh – JB Sentral')||map.popup.content.textContent.includes('Paloh'));
  assert(map.popup.content.textContent.includes('GTFS'));
+ assert(map.popup.content.textContent.includes('data.gov.my'),'popup must cite real GTFS source, not secondary GIS');
  select('all');
  assert.equal(map.getSource('ktmv2-unique-source').data.features.length,8);
  assert.equal(map.getLayer('ktmv2-ktm-ipoh-points').layout.visibility,'visible');
@@ -109,4 +111,6 @@ test('official request and style-layer loading never silently lose protected GTF
  assert.match(html,/maxZoom:focus==='all'\?9:10\.5/);
  assert.match(html,/INVALID_CONTENT_TYPE/);
  assert.match(html,/officialError=String\(error/);
+ assert.match(html,/function updateEvidence\(\)/);
+ assert.match(html,/sourceOfficial/);
 });
