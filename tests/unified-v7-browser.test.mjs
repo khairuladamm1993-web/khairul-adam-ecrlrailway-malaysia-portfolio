@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
-const url='https://mrs10-p01-unified-v4-isolated-preview-8eq32a6oo.vercel.app/unified-map-v7.html';
+const url='https://mrs10-p01-unified-v4-isolated-preview-h61wv78cp.vercel.app/unified-map-v7.html';
 const browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',
  args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
 const routes=['mrt-kajang','lrt-kelana-jaya','lrt-ampang','mrt-putrajaya',
