@@ -128,7 +128,7 @@ def main():
             if tags.get("railway") in ("station","halt","stop","platform"):
                 xy=feature.get("center") or feature
                 if "lat" in xy and "lon" in xy and (tags.get("name") or tags.get("name:en")):
-                    locations.append((tags.get("name") or tags.get("name:en"),(xy["lat"],xy["lon"]),str(feature["id"])))
+                    locations.append((tags.get("name") or tags.get("name:en"),(xy["lat"],xy["lon"]),feature["type"]+"/"+str(feature["id"])))
     stamp=dt.datetime.now(dt.timezone.utc).isoformat()
     output=[]
     for i,s in enumerate(stops):
@@ -193,6 +193,26 @@ def main():
                     replacement_source="https://www.openstreetmap.org/"+candidate[2]
                     correction_reason="Documented OSM station node, railway alignment unresolved"
                     offset=None
+        # Generic verified remedy for a grossly displaced GTFS stop:
+        # the OSM point must carry the *same named station* and be within
+        # 140 m of mapped railway, while the GTFS original is >750 m away
+        # from the named point and >400 m from mapped rail. No interpolation.
+        if proposed==point and named and named[0]>750 and original_offset is not None and original_offset>400:
+            candidates=sorted((dist(point,xy),xy,oid) for name,xy,oid in locations if norm(name)==norm(s["name"]))
+            if candidates and (len(candidates)==1 or dist(candidates[0][1],candidates[1][1])<=250):
+                station_xy=candidates[0][1]
+                rail_distance=float("inf")
+                for wid,pts in ways:
+                    if all(abs(v[0]-station_xy[0])>0.04 or abs(v[1]-station_xy[1])>0.04 for v in pts):continue
+                    for a1,b1 in zip(pts,pts[1:]):
+                        rail_distance=min(rail_distance,metric(station_xy,a1,b1))
+                if rail_distance<=140:
+                    proposed=station_xy
+                    cls,conf="VERIFIED","HIGH"
+                    why="Gross GTFS displacement corrected to independently named OSM railway station with nearby railway way; not survey-grade"
+                    replacement_source="https://www.openstreetmap.org/"+candidates[0][2]
+                    correction_reason="Exact named OSM station, nearby railway, original GTFS rail offset >400 m"
+                    offset=round(rail_distance,1)
         changed=proposed!=point
         output.append({
             "order":s["order"],"station":s["name"],"stopId":s["id"],
