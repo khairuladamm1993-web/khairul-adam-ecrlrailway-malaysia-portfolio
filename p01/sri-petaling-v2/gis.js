@@ -21,7 +21,12 @@ function decode(features,catalogue){
   const name=String(p.STN_NAME||p.StationNam||p.STATION_NAME||p.name||p.NAME||'').trim();
   const rawCode=String(p.STN_CODE||p.StationCode||p.STATION_CODE||p.code||'').trim();
   const codeMatch=rawCode.match(/\bSP\s*0*(\d{1,2})\b/i);
-  const station=byName.get(norm(name.replace(/^SP\s*\d+\s*/i,'')));
+  // Exact observed 2026-10-26 feature: FID=3, TITWANGSA, SP03.
+  // This is an audited source spelling correction ONLY, not a fabricated POI.
+  const observedSourceTypo=Number(p.FID??p.OBJECTID??p.id)===3 &&
+    name.toUpperCase()==='TITWANGSA' && rawCode.toUpperCase()==='SP03';
+  const station=byName.get(norm(name.replace(/^SP\s*\d+\s*/i,''))) ||
+    (observedSourceTypo?catalogue.findByCode('SP3'):null);
   const point=g.type==='Point'&&Array.isArray(g.coordinates)?
     {x:g.coordinates[0],y:g.coordinates[1]}:g;
   const x=point.x,y=point.y,sourceId=p.FID??p.OBJECTID??p.id??null;
@@ -42,6 +47,7 @@ function decode(features,catalogue){
    sharedStationKey:station.sharedStationKey,sharedService:station.sharedService,
    coordinates:Object.freeze([x,y]),sourceId,
    sourceName:name,sourceCode:rawCode,
+   matchMethod:observedSourceTypo?'OBSERVED_GIS_FID3_TITWANGSA_SP03':'EXACT_SOURCE_NAME',
    provenance:'PUBLIC_ARCGIS_STATION_POI_NOT_OPERATING_SURVEY',
    serviceVerifiedFromGIS:false,trackGeometry:null
   }));
