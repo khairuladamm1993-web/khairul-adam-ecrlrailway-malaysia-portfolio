@@ -60,7 +60,7 @@ jobs:
           npm install --no-save --ignore-scripts playwright@1.56.1
       - name: Real browser GIS+UX smoke (separate Safari Owner gate)
         env:
-          UNIFIED_V4_URL: https://mrs10-p01-unified-v4-isolated-preview-o5y7uep73.vercel.app/unified-map-v4.html
+          UNIFIED_V4_URL: https://mrs10-p01-unified-v4-isolated-preview-qzx1speov.vercel.app/unified-map-v4.html
         run: node tests/unified-v4-browser-smoke.mjs
       - uses: actions/upload-artifact@v4
         if: always()
