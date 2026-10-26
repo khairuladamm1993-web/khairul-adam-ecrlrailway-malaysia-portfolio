@@ -61,6 +61,21 @@ function loadManifest(kl,ampang){
    coordinateStatus:'LIVE_SECONDARY_GIS_UNVERIFIED_UNTIL_MATCHED',alignment:null});
  });
 }
+// Two exact FID/name/code source corrections observed on live ArcGIS layer 6.
+// The GIS geometry is untouched. Evidence: GitHub Actions 40402990961.
+// These are NOT blanket fuzzy-match rules or inferred source coordinates.
+const kajangCorrections=Object.freeze([
+ Object.freeze({fid:'21',rawName:'TAMAN CONNAUGH',rawCode:'KG26',stationId:'mrt-taman-connaught',
+   evidence:'https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40402990961'}),
+ Object.freeze({fid:'25',rawName:'BATU 11 CHERAS',rawCode:'KG3O',stationId:'mrt-batu-sebelas-cheras',
+   evidence:'https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40402990961'})
+]);
+function exactKajangCorrection(route,props){
+ if(route.id!=='mrt-kajang'||route.layer!==6)return null;
+ const hit=kajangCorrections.find(c=>props.objectId===c.fid&&
+  props.name.trim().toUpperCase()===c.rawName&&props.code.trim().toUpperCase()===c.rawCode);
+ return hit?route.stops.find(s=>s.id===hit.stationId)||null:null;
+}
 function decodeArcgis(route,payload,ampangGIS,ampangService){
  if(!Array.isArray(payload?.features)||payload?.error)return {ok:false,reason:'INVALID_GIS_RESPONSE',points:[],matched:0,expected:route.expected};
  if(route.id==='lrt-ampang'){
@@ -84,10 +99,12 @@ function decodeArcgis(route,payload,ampangGIS,ampangService){
   const codeCandidate=codes.get(normalise(props.code));
   // A source code must never override a contradictory matched name.
   if(nameCandidate&&codeCandidate&&nameCandidate.id!==codeCandidate.id)continue;
-  const s=nameCandidate||codeCandidate;
-  if(!s||!nameCandidate&&!codeCandidate)continue;
-  // Code-only reconciliation is allowed only for an exact registered service code.
-  if(!nameCandidate&&!s.code)continue;
+  const corrected=exactKajangCorrection(route,props);
+  if(corrected&&((nameCandidate&&nameCandidate.id!==corrected.id)||(codeCandidate&&codeCandidate.id!==corrected.id)))continue;
+  const s=nameCandidate||codeCandidate||corrected;
+  if(!s)continue;
+  // Code-only reconciliation requires registered code; correction requires exact source tuple.
+  if(!nameCandidate&&!corrected&&!s.code)continue;
   if(found.has(s.id)){ambiguous.add(s.id);continue}
   found.set(s.id,{id:s.id,name:s.name,code:s.code||'',routeId:route.id,
    coordinates:coords,sourceId:props.objectId,sourceName:props.name});
