@@ -1,0 +1,17 @@
+name: KTM Unified ETS Intercity official GTFS audit
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-ktm-unified-ets-intercity-live-map-preview
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  official-gtfs-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Audit official KTMB GTFS service routes, trips, and stops
+        run: python3 scripts/ktm_unified_gtfs_routes_audit.py
