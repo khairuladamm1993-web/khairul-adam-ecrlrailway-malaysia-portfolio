@@ -26,6 +26,14 @@ test("source-backed station geometry: no duplicates and no made-up coordinates",
 test("KUTS is trackless ART, schematic-only, with no deceptive operational labels",()=>{
  assert.equal(registry.sarawak.classification,"URBAN_TRANSIT_ART");assert.equal(registry.sarawak.rail_track,false);
  assert.equal(registry.sarawak.route_geometry,null);
+ const city=registry.sarawak.map_reference;
+ assert.equal(city.classification,"CITY_REFERENCE_NOT_ART_STATION");
+ assert.equal(city.point_confidence,"SECONDARY_OSM_CITY_CENTRE");
+ assert.deepEqual(city.point.coordinates,[110.3494,1.5606]);
+ assert.match(city.source,/^https:\/\/mapcarta.com\/Kuching/);
+ assert.ok(!registry.sarawak.stations.some(s=>s.id===city.id));
+ assert.ok(registry.sarawak.stations.some(s=>s.code==="SM11"&&s.name==="The Spring"));
+ assert.ok(!registry.sarawak.stations.some(s=>s.code==="SM09"&&s.name==="The Spring"));
  assert.deepEqual(registry.sarawak.lines.map(l=>l.id),["BLUE","RED","GREEN"]);
  assert.equal(new Set(registry.sarawak.stations.map(s=>s.id)).size,registry.sarawak.stations.length);
  for(const x of registry.sarawak.stations){assert.equal(x.point,null);assert.equal(x.point_confidence,"SCHEMATIC_ONLY");assert.ok(["BLUE","RED","GREEN"].includes(x.line))}
@@ -54,8 +62,14 @@ test("JSDOM runtime: source has 15 points by default; filters, search, reset, 4 
   addControl(){}fitBounds(){}easeTo(){}setPaintProperty(){}
   queryRenderedFeatures(){return this.sources["borneo-points"]?this.sources["borneo-points"]._data.features:[]}
  }
+ class Marker{
+  constructor({element}){this.element=element}
+  setLngLat(coords){this.coords=coords;return this}
+  addTo(){w.document.getElementById("map").append(this.element);return this}
+  remove(){this.element.remove();return this}
+ }
  class Popup {setLngLat(){return this}setDOMContent(n){this.content=n;return this}addTo(){return this}remove(){}}
- w.maplibregl={Map:M,Popup,NavigationControl:class{},supported:()=>true};
+ w.maplibregl={Map:M,Popup,Marker,NavigationControl:class{},supported:()=>true};
  w.fetch=async()=>({ok:true,json:async()=>registry});
  w.eval(js);w.document.dispatchEvent(new w.Event("DOMContentLoaded"));
  await new Promise(resolve=>setTimeout(resolve,20));
@@ -63,15 +77,25 @@ test("JSDOM runtime: source has 15 points by default; filters, search, reset, 4 
  const click=(category)=>w.document.querySelector('[data-category="'+category+'"]').click();
  assert.equal(instances.length,1);assert.equal(data().length,15);
  assert.equal(w.__BORNEO_V2_QA().stationCount,15);
- click("SARAWAK");assert.equal(data().length,0);assert.equal(w.document.querySelectorAll(".schematic-line").length,3);assert.equal(w.__BORNEO_V2_QA().category,"SARAWAK");
+ assert.equal(w.__BORNEO_V2_QA().artRegionalLocatorCount,1);
+ assert.equal(w.__BORNEO_V2_QA().artStationGPSCount,0);
+ assert.equal(w.document.querySelectorAll(".borneo-art-locator").length,1);
+ assert.equal(w.document.querySelectorAll(".art-line-chip").length,3);
+ assert.equal(w.document.querySelector(".borneo-art-locator").dataset.mapObject,"KUCHING_CITY_REFERENCE_NOT_STATION");
+ click("SARAWAK");assert.equal(data().length,0);assert.equal(w.__BORNEO_V2_QA().artRegionalLocatorCount,1);assert.equal(w.document.querySelectorAll(".schematic-line").length,3);assert.equal(w.__BORNEO_V2_QA().category,"SARAWAK");
  assert.match(w.document.getElementById("summary").textContent,/Skematik/);
- click("BLUE");assert.equal(data().length,0);assert.equal(w.document.querySelectorAll(".schematic-line").length,1);
- click("SABAH");assert.equal(data().length,15);
- const search=w.document.getElementById("search");search.value="Tenom";search.dispatchEvent(new w.Event("input",{bubbles:true}));assert.equal(data().length,1);
- w.document.getElementById("reset").click();assert.equal(data().length,15);assert.equal(search.value,"");
+ click("BLUE");assert.equal(data().length,0);assert.equal(w.document.querySelectorAll(".art-line-chip").length,1);assert.equal(w.document.querySelectorAll(".schematic-line").length,1);
+ click("GREEN");assert.equal(data().length,0);assert.equal(w.__BORNEO_V2_QA().artRegionalLocatorCount,1);assert.match(w.document.getElementById("lineup").textContent,/Pending/);
+ click("SABAH");assert.equal(data().length,15);assert.equal(w.__BORNEO_V2_QA().artRegionalLocatorCount,0);
+ const search=w.document.getElementById("search");search.value="Tenom";search.dispatchEvent(new w.Event("input",{bubbles:true}));assert.equal(data().length,1);assert.equal(w.__BORNEO_V2_QA().artRegionalLocatorCount,0);
+ w.document.getElementById("reset").click();assert.equal(data().length,15);assert.equal(search.value,"");assert.equal(w.__BORNEO_V2_QA().artRegionalLocatorCount,1);
  w.document.querySelector('[data-id="SSR-15"]').click();assert.ok(w.document.querySelector('[data-id="SSR-15"][aria-current="true"]'));
  const lng=w.document.getElementById("language");for(const l of ["en","zh","th","ms"]){lng.value=l;lng.dispatchEvent(new w.Event("change",{bubbles:true}));assert.equal(w.document.documentElement.lang,l)}
  w.document.getElementById("theme").click();assert.equal(w.document.documentElement.dataset.theme,"dark");
+ w.document.querySelector('.art-line-chip[data-art-line="RED"]').click();
+ assert.equal(w.__BORNEO_V2_QA().category,"RED");
+ assert.equal(w.__BORNEO_V2_QA().artRegionalLocatorCount,1);
+ assert.equal(w.document.querySelectorAll(".art-line-chip").length,1);
  const h=instances[0].handlers["click:borneo-stations"];assert.equal(typeof h,"function");
  h({features:[{properties:{id:"SSR-10"}}]});assert.ok(w.document.querySelector('[data-id="SSR-10"][aria-current="true"]'));
  dom.window.close();
