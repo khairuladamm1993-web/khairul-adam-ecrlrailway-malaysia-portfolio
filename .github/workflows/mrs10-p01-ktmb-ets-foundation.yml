@@ -1,0 +1,22 @@
+name: MR-S10 P01 KTMB ETS isolated foundation QA
+on:
+  push:
+    branches:
+      - 'feature/mrs10-p01-ktmb-ets-v1-isolated'
+  workflow_dispatch:
+jobs:
+  unit-and-readonly-regression:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install deterministic development dependencies
+        run: npm ci --ignore-scripts --include=dev --no-audit --no-fund
+      - name: KTMB isolated foundation safety checks
+        run: node --test p01/ktmb/ets/qa.cjs
+      - name: Existing MR-S10 integrated regression
+        run: npm test
