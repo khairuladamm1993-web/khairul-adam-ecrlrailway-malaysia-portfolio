@@ -26,7 +26,7 @@ jobs:
           python3 -m py_compile scripts/audit_shuttle_timur_v2_alignment.py
           npm test
       - name: Isolated KTM regression
-        run: node --test tests/r222-ktm-komuter.test.cjs tests/r223-ktm-komuter-v2.test.cjs tests/r224-ktm-v3-gis-uat-repair.test.cjs tests/r225-ktm-gtfs-station-map.test.cjs tests/r226-ktm-gtfs-focus-race.test.cjs tests/r227-ktm-safari-auth-render.test.cjs tests/ktm-unified-overlay.test.cjs
+        run: node --test tests/r222-ktm-komuter.test.cjs tests/r223-ktm-komuter-v2.test.cjs tests/r224-ktm-v3-gis-uat-repair.test.cjs tests/r225-ktm-gtfs-station-map.test.cjs tests/r226-ktm-gtfs-focus-race.test.cjs tests/r227-ktm-safari-auth-render.test.cjs tests/ktm-unified-overlay.test.cjs tests/ktm-shuttle-v2-alignment.test.cjs
       - name: Isolation guard
         run: git diff --exit-code bdfef366f328c32e5af9f85940209b51ec11991b HEAD -- map-language-lab.html assets/map-language-lab.js assets/railway-track-registry-kl.js supabase scripts/build_ktm_unified_gtfs_preview.py scripts/build_ktmb_official_station_points.py assets/mrs10-r223-ktm-service.js assets/mrs10-r223-ktm-catalogue.json
       - name: Download live official GTFS
