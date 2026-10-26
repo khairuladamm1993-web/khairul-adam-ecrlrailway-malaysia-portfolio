@@ -60,11 +60,11 @@ try{
    await page.locator('#reset').click();
    await page.locator('#theme').click();
    await page.waitForFunction(()=>{const s=window.MRS10V7Diagnostics?.snapshot?.();
-    return s?.styleLoaded&&s?.tilesLoaded&&s?.layerCount===16&&s.perRoute['mrt-kajang'].present&&s.perRoute['ktmb-ets-v1'].present;
+    return s?.mapReady&&s?.styleLoaded&&s?.tilesLoaded&&s?.layerCount===16&&s.perRoute['mrt-kajang'].present&&s.perRoute['ktmb-ets-v1'].present;
    },null,{timeout:35000});
    await page.locator('#theme').click();
    await page.waitForFunction(()=>{const s=window.MRS10V7Diagnostics?.snapshot?.();
-    return s?.styleLoaded&&s?.tilesLoaded&&s?.layerCount===16;
+    return s?.mapReady&&s?.styleLoaded&&s?.tilesLoaded&&s?.layerCount===16;
    },null,{timeout:35000});
    await page.locator('#language').click();
    assert((await page.locator('#title').textContent()).includes('Unified'));

@@ -105,7 +105,11 @@ function focusStation(routeId,id){
  const point=findGeo(routeId,id);
  if(!point){say(tr('unlocated'));return}
  say(point.name+' · '+tr('located'));
- if(state.map&&state.mapReady){state.map.easeTo({center:point.coordinates,zoom:Math.max(state.map.getZoom(),12.3),duration:360});showPopup(point)}
+ if(state.map){
+  const open=()=>{state.map.easeTo({center:point.coordinates,zoom:Math.max(state.map.getZoom(),12.3),duration:360});showPopup(point)};
+  if(state.map.isStyleLoaded())open();
+  else state.map.once('idle',()=>{if(state.map?.isStyleLoaded())open()});
+ }
 }
 function buildLineup(){
  const host=$('lineup');host.replaceChildren();
