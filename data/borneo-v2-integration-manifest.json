@@ -45,7 +45,22 @@
       "stop_coordinates": null,
       "rail_track": false,
       "colors_are_provisional": true,
-      "source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      "source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system",
+      "city_overview_reference": {
+        "id": "KUCHING_ART_REGIONAL_OVERVIEW",
+        "kind": "CITY_REFERENCE_NOT_ART_STATION",
+        "longitude": 110.3494,
+        "latitude": 1.5606,
+        "source": "https://mapcarta.com/Kuching",
+        "osm_id": "node/4834272899",
+        "map_display": "HTML MapLibre Marker with 3 color-coded ART line chips",
+        "not_a_station_gps": true
+      },
+      "station_name_correction": {
+        "code": "SM11",
+        "name": "The Spring",
+        "source": "https://www.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system"
+      }
     }
   },
   "namespace": {
@@ -71,7 +86,10 @@
     "safari_owner_required": true,
     "preview_ready_required": true,
     "source_review_required": true,
-    "auto_merge": false
+    "auto_merge": false,
+    "data_ci_pass": true,
+    "chromium_visual_qa_pass": true,
+    "owner_safari_uat": "PENDING"
   },
   "restrictions": [
     "Do not create connecting railway LineString from Sabah station points",
@@ -83,35 +101,39 @@
   ],
   "status_as_of": "2026-10-27",
   "status": "PARTIAL_PENDING_OWNER_SAFARI_UAT",
-  "code_verified_commit": "ffe06442ea64ab0ffc00bfc82ea18ca5a1a624c2",
-  "code_verified_ci_url": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40397870447",
+  "code_verified_commit": "a0ef6e4cb1e886d351af8e5a84a40864786db04b",
+  "code_verified_ci_url": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40402589027",
   "browser_qa": {
     "engine": "Chromium 141 via Playwright 1.56",
     "status": "PASS",
     "ipad_viewport": "1024x768",
     "iphone_viewport": "390x844",
     "rendered_sabah_points": 15,
-    "art_gps_points": 0,
+    "art_city_overview_markers": 1,
+    "art_city_marker_map_visible": true,
+    "art_gps_station_points": 0,
     "art_schematic_lines": 3,
     "checklist": [
-      "Actual WebGL rendered features",
-      "category filtering",
-      "search/reset",
-      "popup",
-      "dark theme",
-      "Chinese language",
-      "viewport screenshots"
+      "Real WebGL Sabah markers 15",
+      "Kuching city-area ART locator rendered on ALL",
+      "Kuching locator 75%+ within viewport",
+      "ART city label not counted as station",
+      "Sarawak Blue/Red/Green controls",
+      "search/reset and popup",
+      "dark/light",
+      "iPad/iPhone screenshot"
     ],
     "screenshot_artifact": "borneo-v2-real-chromium-screens",
-    "safari_webkit_qa": "PENDING_OWNER"
+    "artifact_id": 12688733758,
+    "safari_owner_uat": "PENDING"
   },
   "staging": {
     "project_id": "prj_lANjBUS6Cq0l94Uox0SMeWFurwiw",
-    "deployment_id": "dpl_BGV4hVf6m72abjbv6oP1Z8haaVpg",
+    "deployment_id": "dpl_GHSHMiKc2rNX7Yim6kDhEv6ydBEH",
     "target": "staging",
     "ready_state": "READY",
-    "url": "https://mrs10-p01-borneo-v2-isolated-preview-ljtghfoaj.vercel.app/borneo-v2.html",
+    "url": "https://mrs10-p01-borneo-v2-isolated-preview-nkt85zipm.vercel.app/borneo-v2.html",
     "runtime_assets_http_200": true,
-    "code_commit": "ffe06442ea64ab0ffc00bfc82ea18ca5a1a624c2"
+    "code_commit": "a0ef6e4cb1e886d351af8e5a84a40864786db04b"
   }
 }
