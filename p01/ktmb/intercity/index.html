@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><title>KTM Intercity V1 — MR-S10 Isolated</title>
+<style>
+:root{color-scheme:light;--bg:#f5f7fa;--panel:#fff;--text:#102432;--muted:#526373;--border:#c5d3dc;--accent:#304ba6}
+[data-theme=dark]{color-scheme:dark;--bg:#09141d;--panel:#142734;--text:#f0f6fb;--muted:#b6c8d1;--border:#4b6574}
+*{box-sizing:border-box}body{font:16px/1.5 system-ui,sans-serif;margin:0;background:var(--bg);color:var(--text)}main{max-width:950px;margin:0 auto;padding:24px 17px 65px}
+header{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}h1{margin:0;font-size:clamp(1.35rem,4vw,2rem)}p{margin:9px 0}.muted{color:var(--muted)}.panel{background:var(--panel);border:1px solid var(--border);border-radius:15px;padding:18px;margin-top:18px}
+button,select{min-height:44px;min-width:44px;font:inherit;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text);padding:9px 13px}
+.controls{display:flex;gap:8px;flex-wrap:wrap}.card{display:flex;align-items:center;gap:14px;margin:11px 0;padding:12px;border:1px solid var(--border);border-radius:12px}.swatch{width:34px;height:34px;border:2px solid currentColor;border-radius:50%;flex-shrink:0}.card strong{display:block}.card small{color:var(--muted)}a{color:inherit;text-underline-offset:3px}.note{border-left:5px solid #b17b25;padding:12px 15px;background:var(--panel);border-radius:7px}
+</style></head>
+<body><main><header><div><h1>KTM Intercity V1</h1><p id="subtitle" class="muted"></p></div><div class="controls"><label><span class="muted">Language</span><select id="language" aria-label="Language"><option value="ms">BM</option><option value="en">EN</option><option value="zh">中文</option><option value="th">ไทย</option></select></label><button id="theme" type="button"></button></div></header>
+<p class="note" id="notice" role="status"></p><section class="panel"><h2 id="service-title"></h2><div id="services"></div></section>
+<section class="panel"><h2 id="lineup-title"></h2><p id="lineup-note"></p><p id="geographic-note" class="muted"></p></section>
+<section class="panel"><h2 id="sources-title"></h2><ul id="sources"></ul></section><p id="footer" class="muted"></p>
+<script src="model.js"></script><script src="app.js"></script></main></body></html>
