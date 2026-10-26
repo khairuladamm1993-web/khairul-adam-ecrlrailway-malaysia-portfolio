@@ -53,3 +53,29 @@ jobs:
           grep -q 'MRS10KTMV2' "$out/assets/mrs10-r223-ktm-service.js"
           echo 'KTM isolated public artifact files:'
           find "$out" -type f | sort
+      - name: Generate cryptographic provenance for allowlisted KTM public files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const crypto = require('node:crypto');
+          const root = path.join(process.env.RUNNER_TEMP, 'mrs10-ktm-v2-public');
+          const files = ['index.html', 'assets/mrs10-r223-ktm-service.js', 'assets/mrs10-r223-ktm-catalogue.json'];
+          const digests = Object.fromEntries(files.map(file => [file, crypto.createHash('sha256').update(fs.readFileSync(path.join(root, file))).digest('hex')]));
+          const provenance = {schemaVersion: 1, project: 'MR-S10 P01 KTM Komuter V2', artifactClass: 'PUBLIC_ONLY_UNDEPLOYED_PREVIEW_CANDIDATE', gitBranch: process.env.GITHUB_REF_NAME, sourceCommit: process.env.GITHUB_SHA, ciRunId: process.env.GITHUB_RUN_ID, fileSHA256: digests, publicSourceFileCount: files.length, signed: false};
+          fs.writeFileSync(path.join(root, 'PROVENANCE.json'), JSON.stringify(provenance, null, 2) + '\n');
+          NODE
+          out="$RUNNER_TEMP/mrs10-ktm-v2-public"
+          (cd "$out" && sha256sum index.html assets/mrs10-r223-ktm-service.js assets/mrs10-r223-ktm-catalogue.json > SHA256SUMS && sha256sum -c SHA256SUMS)
+          test "$(find "$out" -type f | wc -l)" -eq 5
+          cat "$out/PROVENANCE.json"
+      - name: Preserve public-only KTM artifact for controlled offline Preview handoff
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ktm-v2-public-provenance
+          path: ${{ runner.temp }}/mrs10-ktm-v2-public/
+          if-no-files-found: error
+          retention-days: 14
