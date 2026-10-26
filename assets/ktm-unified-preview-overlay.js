@@ -32,13 +32,17 @@ function mount({map,lib,selectKomuter}){
  bar.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin:8px 0'; info.style.cssText='font-size:.83rem;color:var(--muted)';
  container.append(title,desc,bar,info);$('filters').after(container);
  const panel=document.createElement('section');panel.id='ktm-unified-lineup';panel.className='panel';panel.hidden=true;$('services').after(panel);
- let data=null,selected=null,popup=null;
+ let data=null,selected=null,popup=null,audit=null;
+ const review=p=>selectedReview(p);
+ function selectedReview(p){return audit?.stops?.find(x=>x.stopId===p.id)||null;}
+ function validateAudit(a){const sh=data?.services.find(s=>s.id===IDS[2]);return !!(a&&sh&&a.schemaVersion===2&&a.tripId===sh.tripId&&a.zipSha256===data.zipSha256&&a.sourceUrl===data.sourceUrl&&Array.isArray(a.stops)&&a.stops.length===sh.stops.length&&a.stops.every((x,i)=>x.stopId===sh.stops[i].id&&x.order===i+1&&Math.abs(x.originalCoordinates.lat-sh.stops[i].lat)<1e-7&&Math.abs(x.originalCoordinates.lon-sh.stops[i].lon)<1e-7&&['VERIFIED','ACCEPTABLE_STATION_OFFSET','APPROXIMATE','SUSPECTED_MISMATCH','UNRESOLVED'].includes(x.decision)));}
  const source='ktm-unified-source',circle='ktm-unified-circles',labels='ktm-unified-labels';
  function service(){return data?.services.find(s=>s.id===selected)||null;}
  function names(){return (data?.services||[]).map((s,i)=>lang()[i]);}
  function elements(s){
   return {type:'FeatureCollection',features:s?s.stops.map(p=>({type:'Feature',
-    properties:{name:p.name,stopId:p.id,order:p.order,color:s.color,serviceId:s.id,tripId:s.tripId},
+    properties:{name:p.name,stopId:p.id,order:p.order,color:s.color,serviceId:s.id,tripId:s.tripId,
+    gisDecision:s.id===IDS[2]?(review(p)?.decision||'UNRESOLVED'):'GTFS_ONLY'},
     geometry:{type:'Point',coordinates:[p.lon,p.lat]}})):[]};
  }
  function focus(s){if(!s||!map?.getStyle()?.sources)return;const lon=s.stops.map(p=>p.lon),lat=s.stops.map(p=>p.lat);
@@ -61,7 +65,8 @@ function mount({map,lib,selectKomuter}){
   if(!map.getLayer(circle))map.addLayer({id:circle,type:'circle',source,
    paint:{'circle-radius':['interpolate',['linear'],['zoom'],6,6.5,12,10],
    'circle-color':['get','color'],'circle-stroke-width':2.5,
-   'circle-stroke-color':'#102a39','circle-opacity':.97}});
+   'circle-stroke-color':['case',['==',['get','gisDecision'],'SUSPECTED_MISMATCH'],'#c62626',['==',['get','gisDecision'],'UNRESOLVED'],'#d98b1b','#102a39'],
+   'circle-opacity':.97}});
   if(!map.getLayer(labels))map.addLayer({id:labels,type:'symbol',source,minzoom:8.2,
    layout:{'text-field':['get','name'],'text-size':12,'text-offset':[0,1.2],
      'text-anchor':'top','text-allow-overlap':false},
@@ -72,9 +77,17 @@ function mount({map,lib,selectKomuter}){
   const root=document.createElement('div'),h=document.createElement('strong'),detail=document.createElement('p'),origin=document.createElement('a');
   h.textContent=p.name;detail.textContent=lang()[IDS.indexOf(s.id)]+' · '+locale().trip+' '+s.tripId+' · '+locale().stop+' '+p.order;
   origin.href=data.sourceUrl;origin.target='_blank';origin.rel='noopener noreferrer';origin.textContent=locale().source;
+  if(s.id===IDS[2]){
+   const a=review(p),evidence=document.createElement('p');
+   evidence.textContent='Stop ID '+p.id+' · GIS: '+(a?.decision||'UNRESOLVED')+' · '+(a?.confidence||'LOW')+' confidence · Track offset: '+(a?.offsetMeters==null?'unavailable':a.offsetMeters+' m');
+   const original=document.createElement('p');original.textContent='Original KTMB GTFS: '+p.lat+', '+p.lon+' (unchanged)';
+   const reason=document.createElement('p');reason.textContent=a?.reason||'Railway geometry evidence not independently verified';
+   root.append(evidence,original,reason);
+   if(a?.railwayAlignmentEvidence?.osmRailwayUrl){const track=document.createElement('a');track.href=a.railwayAlignmentEvidence.osmRailwayUrl;track.target='_blank';track.rel='noopener noreferrer';track.textContent='OSM railway evidence';root.append(track);}
+  }
   root.append(h,detail,origin);popup=new lib.Popup({offset:14,maxWidth:'300px'}).setLngLat([p.lon,p.lat]).setDOMContent(root).addTo(map);
  }
- function refresh(){const w=locale();title.textContent=w.title;desc.textContent=w.read;info.textContent=data?'GTFS '+new Date(data.snapshotUtc).toISOString().slice(0,10)+' · CC BY 4.0':w.read;
+ function refresh(){const w=locale();title.textContent=w.title;desc.textContent=w.read;info.textContent=data?'GTFS '+new Date(data.snapshotUtc).toISOString().slice(0,10)+' · CC BY 4.0'+(audit?' · Shuttle GIS '+audit.qualityGate+' · suspect '+(audit.decisions.SUSPECTED_MISMATCH||0)+' / unresolved '+(audit.decisions.UNRESOLVED||0):' · GIS review unavailable / pending'):w.read;
   bar.replaceChildren();(data?.services||[]).forEach((s,i)=>{
    const button=document.createElement('button');button.type='button';button.dataset.unifiedService=s.id;
    button.setAttribute('aria-pressed',String(selected===s.id));button.textContent='● '+lang()[i]+' ('+s.stops.length+')';
@@ -85,7 +98,8 @@ function mount({map,lib,selectKomuter}){
    const head=document.createElement('h2');head.textContent=lang()[IDS.indexOf(s.id)]+' · '+s.stops.length+' '+w.stop;
    const sourceLine=document.createElement('p');sourceLine.textContent=w.trip+' '+s.tripId+' · '+w.source+' · '+w.read;
    const ol=document.createElement('ol');ol.style.cssText='padding-left:30px;max-height:400px;overflow:auto';
-   s.stops.forEach(p=>{const li=document.createElement('li'),button=document.createElement('button');button.type='button';button.textContent=p.name;
+   s.stops.forEach(p=>{const li=document.createElement('li'),button=document.createElement('button');button.type='button';button.textContent=(s.id===IDS[2]&&['SUSPECTED_MISMATCH','UNRESOLVED'].includes(review(p)?.decision||'UNRESOLVED')?'⚠ ':'')+p.name;
+    if(s.id===IDS[2]){const a=review(p);button.title=(a?.decision||'UNRESOLVED')+' · '+(a?.offsetMeters==null?'track distance unavailable':a.offsetMeters+' m from mapped railway');}
     button.style.cssText='display:block;width:100%;min-height:42px;text-align:left;margin:3px 0';button.addEventListener('click',()=>{map.flyTo({center:[p.lon,p.lat],zoom:12.2,duration:250});openStop(p,s)});
     li.append(button);ol.append(li)});
    panel.append(head,sourceLine,ol);
@@ -108,7 +122,13 @@ function mount({map,lib,selectKomuter}){
   const response=await fetch('./assets/ktm-unified-gtfs-example-trips.json',{credentials:'same-origin',cache:'no-store'});
   if(!response.ok)throw Error('HTTP '+response.status);
   const result=await response.json();if(!validate(result))throw Error('GTFS_VALIDATION_FAILED');
-  data=result;refresh();layers();
+  data=result;
+  try{
+   const auditResponse=await fetch('./assets/ktm-shuttle-v2-alignment-review.json',{credentials:'same-origin',cache:'no-store'});
+   if(!auditResponse.ok)throw Error('GIS review HTTP '+auditResponse.status);
+   const candidate=await auditResponse.json();if(!validateAudit(candidate))throw Error('GIS_REVIEW_SNAPSHOT_MISMATCH');audit=candidate;
+  }catch(e){console.warn('KTM Shuttle GIS review unavailable; originals kept',e);audit=null;}
+  refresh();layers();
  }catch(error){info.textContent='Official ETS/Intercity preview unavailable: '+String(error.message||error);console.warn('KTM Unified overlay',error);}})();
  return Object.freeze({clear,refresh,syncVisibility});
 }
