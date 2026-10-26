@@ -128,3 +128,11 @@ test('ERL V2: untouched four-line integration artifacts checked by immutable ref
  assert.match(read('tests/r221-p01-crossline-integration.test.cjs'),/four services coexist/);
  assert.match(read('scripts/build-preview.py'),/'ampang-line-r219\.html'/);
 });
+
+test('ERL V2: station labels visible on MapLibre point markers, including small screens',()=>{
+ const html=read('erl-v2.html'),ui=read('assets/mrs10-erl-v2-view.js');
+ assert(ui.includes("make('span',s.name,'pin-label')"));
+ assert(html.includes('.pin-label{position:absolute'));
+ assert(html.includes('@media(max-width:540px)'));
+ assert(ui.includes("map.fitBounds"));
+});

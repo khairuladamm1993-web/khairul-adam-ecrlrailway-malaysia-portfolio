@@ -104,7 +104,9 @@
    const right=make('span',null,'pin-half transit');
    if(focus==='express'){left.className='pin-half ekspres';right.className='pin-half ekspres'}
    else if(focus==='transit'){left.className='pin-half transit';right.className='pin-half transit'}
-   button.append(left,right);
+   const pinCore=make('span',null,'pin-core');pinCore.append(left,right);
+   const pinLabel=make('span',s.name,'pin-label');
+   button.append(pinCore,pinLabel);
    button.addEventListener('click',()=>showPopup(s,row.coordinates));
    const marker=new maplibre.Marker({element:button,anchor:'center'}).setLngLat(row.coordinates).addTo(map);
    markers.push(marker);
