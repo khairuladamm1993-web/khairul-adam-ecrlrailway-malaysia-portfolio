@@ -30,10 +30,10 @@ test('authenticated browser GIS: source → MapLibre → category → reset → 
  const {window}=dom,{document}=window;
  let map;
  class FakeMap{
-  constructor(){this.sources={};this.layers={};this.handlers={};this.camera=[];map=this;}
+  constructor(){this.sources={};this.layers={'basemap-place':{id:'basemap-place',type:'symbol',layout:{'text-field':['get','name']}}};this.handlers={};this.camera=[];map=this;}
   addControl(){}
   on(event,callback){this.handlers[event]=callback;if(event==='style.load')queueMicrotask(callback);}
-  getStyle(){return {sources:{base:{}}};}
+  getStyle(){return {sources:{base:{}},layers:Object.values(this.layers)};}
   addSource(id,opts){this.sources[id]={data:opts.data,setData(data){this.data=data;}};}
   getSource(id){return this.sources[id]||null;}
   addLayer(spec){this.layers[spec.id]={...spec,layout:{...(spec.layout||{})}};}
@@ -43,7 +43,7 @@ test('authenticated browser GIS: source → MapLibre → category → reset → 
   flyTo(options){this.camera.push({type:'fly',options});}
   getContainer(){return document.getElementById('map');}
   queryRenderedFeatures(){return [];}
-  setStyle(){this.sources={};this.layers={};queueMicrotask(()=>this.handlers['style.load']());}
+  setStyle(){this.sources={};this.layers={'basemap-place':{id:'basemap-place',type:'symbol',layout:{'text-field':['get','name']}}};queueMicrotask(()=>this.handlers['style.load']());}
   resize(){}
  }
  window.__fakeMaplibre={Map:FakeMap,Popup:FakePopup,NavigationControl:class {}};
@@ -95,6 +95,34 @@ test('authenticated browser GIS: source → MapLibre → category → reset → 
  assert(map.popup.content.textContent.includes('Paloh – JB Sentral')||map.popup.content.textContent.includes('Paloh'));
  assert(map.popup.content.textContent.includes('GTFS'));
  assert(map.popup.content.textContent.includes('data.gov.my'),'popup must cite real GTFS source, not secondary GIS');
+ // Language changes must immediately update map-owned text, basemap source fields, route UI,
+ // status and an open popup, without recentering or changing source-backed station coordinates.
+ const lang=document.getElementById('lang');
+ const originalPoints=JSON.stringify(map.getSource('ktmv2-unique-source').data);
+ const originalCameraCalls=map.camera.length;
+ lang.value='zh';lang.dispatchEvent(new window.Event('change'));
+ assert.equal(document.documentElement.lang,'zh-Hans');
+ assert(document.getElementById('map-locale-note').textContent.includes('中文'));
+ assert.match(document.querySelector('#filters [data-route="ktm-padang-besar"]').textContent,/北部通勤/);
+ assert.match(map.getLayer('ktmv2-unique-label').layout['text-field'][2],/车站/);
+ assert.match(map.popup.content.textContent,/南部通勤/,'open station popup rerenders in Chinese');
+ assert.equal(map.getLayer('basemap-place').layout['text-field'][1][1],'name:zh');
+ assert.equal(map.camera.length,originalCameraCalls,'changing language must not pan or zoom');
+ assert.equal(JSON.stringify(map.getSource('ktmv2-unique-source').data),originalPoints);
+ lang.value='th';lang.dispatchEvent(new window.Event('change'));
+ assert.equal(document.documentElement.lang,'th');
+ assert(document.getElementById('map-locale-note').textContent.includes('ไทย'));
+ assert.match(document.querySelector('#filters [data-route="ktm-padang-besar"]').textContent,/สายเหนือ/);
+ assert.match(map.getLayer('ktmv2-unique-label').layout['text-field'][2],/สถานี/);
+ assert.match(map.popup.content.textContent,/สายใต้/,'open popup rerenders in Thai');
+ assert.equal(map.getLayer('basemap-place').layout['text-field'][1][1],'name:th');
+ assert.equal(map.camera.length,originalCameraCalls);
+ lang.value='en';lang.dispatchEvent(new window.Event('change'));
+ assert.equal(document.documentElement.lang,'en');
+ assert.equal(document.getElementById('map-locale-note').hidden,true);
+ assert.deepEqual(map.getLayer('basemap-place').layout['text-field'],['get','name'],'English restores provider label expression');
+ assert.deepEqual(map.getLayer('ktmv2-unique-label').layout['text-field'],['get','name']);
+ assert.equal(JSON.stringify(map.getSource('ktmv2-unique-source').data),originalPoints);
  select('all');
  assert.equal(map.getSource('ktmv2-unique-source').data.features.length,8);
  assert.equal(map.getLayer('ktmv2-ktm-ipoh-points').layout.visibility,'visible');
@@ -113,4 +141,7 @@ test('official request and style-layer loading never silently lose protected GTF
  assert.match(html,/officialError=String\(error/);
  assert.match(html,/function updateEvidence\(\)/);
  assert.match(html,/sourceOfficial/);
+ assert.match(html,/function localizeBaseMap\(\)/);
+ assert.match(html,/function stationTextExpression\(\)/);
+ assert.match(html,/activePopupFeature\)popup\(activePopupFeature\)/);
 });
