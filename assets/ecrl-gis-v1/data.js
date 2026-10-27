@@ -1,6 +1,7 @@
 /* Public educational ECRL intelligence. Coordinates are LOCALITY REFERENCES, never surveyed railway asset locations. */
 (function(g){'use strict';
 const sources=Object.freeze({
+ MRL24:{url:'https://www.mida.gov.my/wp-content/uploads/2024/06/Slides-MRL.pdf',revision:'MRL presentation 13 June 2024, station classification and technical overview',kind:'OFFICIAL_PUBLIC_PRESENTATION'},
  MRL23:{url:'https://www.mrl.com.my/wp-content/uploads/2023/05/ECRL-Alignment-1552023.pdf',revision:'2023 schematic alignment',kind:'SCHEMATIC_REFERENCE'},
  C2_25:{url:'https://www.mrl.com.my/wp-content/uploads/2025/12/Plan-Profile.pdf',revision:'October 2025 revised C2 proposed Puncak Alam freight yard',kind:'SCHEMATIC_REFERENCE'},
  SEL:{url:'https://dewan.selangor.gov.my/question/projek-landasan-keretapi-pantai-timur-ecrl-5/',revision:'Selangor public assembly C2 scheme record',kind:'PUBLIC_OFFICIAL_RECORD'},
@@ -31,15 +32,24 @@ const defs=[
  ['Kapar','C2',null,null,'FUTURE_PASSENGER'],
  ['Jalan Kastam (Port Klang)','C2',null,null,'PASSENGER_FREIGHT']
 ];
+const revisedService=Object.freeze({
+ 'Kota Bharu':'PASSENGER','Pasir Puteh':'PASSENGER_FREIGHT','Jerteh':'PASSENGER','Bandar Permaisuri':'PASSENGER',
+ 'Kuala Terengganu':'PASSENGER','Dungun':'PASSENGER_FREIGHT','Kemasik':'PASSENGER','Chukai':'PASSENGER_FREIGHT',
+ 'Cherating':'PASSENGER','Kuantan Port City':'PASSENGER_FREIGHT','Kota SAS':'PASSENGER',
+ 'Paya Besar':'PASSENGER_FREIGHT','Maran':'PASSENGER_FREIGHT','Temerloh':'PASSENGER_FREIGHT',
+ 'Bentong':'PASSENGER_FREIGHT','ITT Gombak':'PASSENGER','Serendah Baru':'PASSENGER_FREIGHT',
+ 'Puncak Alam':'UNKNOWN','Kapar':'FUTURE_PASSENGER','Jalan Kastam (Port Klang)':'UNKNOWN'
+});
 const clean=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const stations=Object.freeze(defs.map(([name,section,lat,lon,serviceType],i)=>Object.freeze({
- assetId:'ecrl-stn-'+String(i+1).padStart(2,'0'),assetType:'STATION',officialName:name,section,serviceType,
- sourceIds:section==='C2'?['MRL23','SEL','SEL_STN']:['MRL23','SEL_STN'],
+ assetId:'ecrl-stn-'+String(i+1).padStart(2,'0'),assetType:'STATION',officialName:name,alternativeNames:name==='Serendah Baru'?['Bandar Serendah']:[],section,serviceType:revisedService[name],
+ sourceIds:section==='C2'?['MRL23','MRL24','SEL','SEL_STN']:['MRL23','MRL24','SEL_STN'],
  chainageStartKm:null,chainageEndKm:null,chainageDatum:null,trackCount:null,
- assetStatus:'PLANNED_NOT_OPERATIONAL',verificationStatus:section==='C2'?'PARTIAL':'CONFIRMED',
+ assetStatus:'PLANNED_NOT_OPERATIONAL',verificationStatus:['Puncak Alam','Jalan Kastam (Port Klang)'].includes(name)?'SOURCE_CONFLICT':section==='C2'?'PARTIAL':'CONFIRMED',
  point:lat!==null?[lon,lat]:null,geometryType:lat!==null?'LOCALITY_REFERENCE_POINT':'NONE',
  geometryProvenance:lat!==null?'LEGACY_PUBLIC_LOCALITY_REFERENCE':'NO_PUBLIC_ASSET_GIS',
  coordinateReferenceSystem:lat!==null?'EPSG:4326':null,sourceId:lat!==null?'LEGACY':null,
+ conflicts:name==='Puncak Alam'?[{field:'serviceType',sourceIds:['SEL','MRL24'],reason:'Official Selangor passenger/future station designation versus MRL 2024 passenger+freight designation; 2025 proposed freight yard is a separate asset.'}]:name==='Jalan Kastam (Port Klang)'?[{field:'serviceType',sourceIds:['SEL_STN','MRL24'],reason:'Selangor government passenger+freight designation versus MRL 2024 passenger-only slide.'}]:[],
  geometryAccuracy:'NOT_ASSET_SURVEY',iconType:'STATION_CIRCLE',stationOrder:i+1,
  notes:section==='C2'?'Official C2 station designation; no verified station-track coordinates.':'Station designation confirmed; plotted position is only historical public locality reference.',
  speed:{designPassengerKmh:null,designFreightKmh:null,permittedKmh:null,approachKmh:null,throughKmh:null,curveKmh:null,tsr:null}
@@ -78,5 +88,6 @@ const segments=Object.freeze([{segmentId:'ecrl-c2-scheme',section:'C2',from:'ITT
  sourceIds:['MRL23','SEL','C2_25'],verificationStatus:'PARTIAL'}]);
 g.MRS10ECRLGISV1=Object.freeze({version:'1.0.0',sources,stations,loops,facilities,segments,topology,
  schemeSpeedReference:Object.freeze({passengerKmh:160,freightKmh:80,sourceId:'MIDA',scope:'PROJECT_LEVEL_ONLY'}),
+ schemeTechnicalReference:Object.freeze({gaugeMm:1435,electrificationVolts:25000,trackFormation:'SINGLE_TRACK_ON_DOUBLE_TRACK_FORMATION',sourceId:'MRL24',scope:'PROJECT_LEVEL_SCHEME_NOT_SEGMENT_SURVEY'}),
  geometryPolicy:'REFERENCE_POINTS_ONLY_NO_PHYSICAL_TRACK'});
 })(window);
