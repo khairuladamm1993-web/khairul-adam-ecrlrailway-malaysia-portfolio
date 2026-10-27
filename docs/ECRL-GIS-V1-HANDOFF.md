@@ -9,6 +9,7 @@
 - October 2025 proposed freight yard: https://www.mrl.com.my/wp-content/uploads/2025/12/Plan-Profile.pdf (proposed, not operating).
 - Selangor C2 scheme: https://dewan.selangor.gov.my/question/projek-landasan-keretapi-pantai-timur-ecrl-5/
 - Selangor station identity: https://dewan.selangor.gov.my/question/projek-ecrl-2/
+- MRL 13 June 2024 station classification/track formation: https://www.mida.gov.my/wp-content/uploads/2024/06/Slides-MRL.pdf
 - MIDA project speed: https://www.mida.gov.my/ecrl-overview/
 
 ## Reconciliation and gates
@@ -18,10 +19,12 @@
 - C2 four stations: **no verified station-track coordinates**. UI offers C2 asset list without misleading markers.
 - 7 historical MR-S10 `PL` labels remain separate, `PENDING_VALIDATION` with no marker. **0 verified crossing loops**.
 - `PL07 Alang Sedayu` remains historical C1 record, NOT copied into C2.
+- **SOURCE_CONFLICT:** Puncak Alam is Passenger + Freight in June 2024 MRL slides but a passenger/future station in earlier Selangor record; a proposed 2025 freight yard is a distinct facility. Its service type is UNKNOWN until reconciled.
+- **SOURCE_CONFLICT:** Jalan Kastam is passenger-only in June 2024 MRL slides but passenger + freight in Selangor record; port interfaces are not assumed to be station tracks.
 - Puncak Alam Freight Yard is **proposed** in October 2025 railway-scheme material; remains an unplotted information asset.
 - Jalan Kastam (Port Klang) is the official port-interchange station identity. Northport/Westports interfaces are document-level schematic connections, NOT mapped geometry.
 - C2 topology relation list is non-geometric adjacency metadata, NOT a claim of surveyed junction/turnout.
-- ECRL 1,435 mm standard gauge given for scheme reference; track count remains unknown. MRL map's "double gauge" designation must not be equated to survey-verified three-rail dual gauge.
+- ECRL 1,435 mm standard gauge, 25 kV and single-track on double-track formation are published **scheme-wide reference**, NOT verified track arrangement at every section; segment track count remains unknown. MRL map's "double gauge" designation must not be equated to survey-verified three-rail dual gauge.
 - Project-level 160 km/h passenger and 80 km/h freight are not approach/through/permitted station limits. Speed fields remain null; live TSR unavailable.
 - Tunnel/bridge chains, portals and exact lengths remain data gaps, not fabricated geographic features.
 
