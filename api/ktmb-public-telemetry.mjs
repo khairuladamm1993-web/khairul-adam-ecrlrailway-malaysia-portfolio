@@ -63,6 +63,6 @@ export default async function handler(req,res){
     stationApproachSpeed:{status:'NOT_PUBLISHED',valueKmh:null},
     stationThroughSpeed:{status:'NOT_PUBLISHED',valueKmh:null},
     temporarySpeedRestriction:{status:'NOT_PUBLISHED',valueKmh:null},
-    error:'PUBLIC_FEED_UNAVAILABLE',note:'No substitute inferred speeds; retry later.'}));
+    error:'PUBLIC_FEED_UNAVAILABLE',failureKind:(/^UPSTREAM_STATUS_[0-9]{3}$/.test(String(e?.message))?String(e.message):e?.name==='TimeoutError'?'UPSTREAM_TIMEOUT':String(e?.message||'').includes('fetch failed')?'UPSTREAM_CONNECT_FAILED':'INVALID_UPSTREAM_FEED'),note:'No substitute inferred speeds; retry later.'}));
  }
 }
