@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow">
+<title>MR-S10 P01 — ECRL GIS V1 · Isolated Infrastructure Intelligence</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.css">
+<link rel="stylesheet" href="./assets/ecrl-gis-v1/styles.css"></head>
+<body>
+<main class="app" id="ecrl-app">
+<header class="topbar">
+ <div class="brand"><strong id="app-title">ECRL · Risikan Infrastruktur</strong><small id="app-subtitle">Peta pendidikan berasaskan sumber</small></div>
+ <div class="header-controls" role="group" aria-label="Language and display">
+ <div id="language-group" class="lang-group"><button type="button" data-lang="ms" aria-pressed="true">BM</button><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="zh" aria-pressed="false">中文</button><button type="button" data-lang="th" aria-pressed="false">ไทย</button></div>
+ <button type="button" id="theme" aria-label="Theme" title="Theme">◐</button>
+ </div>
+</header>
+<section class="map-frame" id="map-frame">
+ <div id="ecrl-map" role="region" aria-label="ECRL geographic reference map"></div>
+ <div class="map-tools">
+  <div class="map-toolbar">
+   <div class="scope-switch" role="group" aria-label="Map scope"><button id="scope-c2" type="button" aria-pressed="true">C2</button><button id="scope-all" type="button" aria-pressed="false">A–C2</button></div>
+   <button type="button" id="reset" title="Reset">↺</button>
+   <button type="button" id="show-list" aria-controls="asset-list" aria-expanded="true">☷</button>
+  </div>
+  <label class="searchbox"><span aria-hidden="true">⌕</span><input id="asset-search" type="search" autocomplete="off" spellcheck="false" placeholder="Cari stesen atau aset" aria-label="Search station and assets"></label>
+ </div>
+ <div class="legend" id="legend">
+  <button type="button" id="legend-toggle" aria-expanded="false" aria-controls="legend-body">ⓘ <span id="legend-title">Petunjuk</span></button>
+  <div id="legend-body" hidden>
+   <div><i class="marker-demo station-demo"></i><span id="legend-station">Stesen (bulat)</span></div>
+   <div><i class="marker-demo loop-demo"></i><span id="legend-loop">Crossing loop disahkan (petak)</span></div>
+   <div><i class="marker-demo pending-demo"></i><span id="legend-pending">Loop belum disahkan (petak putus)</span></div>
+   <p id="legend-notice">Tiada crossing loop yang disahkan untuk diplot.</p>
+  </div>
+ </div>
+ <section class="asset-browser" id="asset-browser" aria-label="Railway assets">
+  <div class="browser-head"><strong id="asset-list-title">Senarai aset · C2</strong><span id="browser-count"></span></div>
+  <div id="asset-list" class="asset-list"></div>
+ </section>
+ <aside class="detail-panel" id="detail-panel" hidden aria-label="Infrastructure detail"><div class="detail-head"><div><small id="detail-type">Station Intelligence</small><h2 id="detail-title"></h2></div><button id="detail-close" type="button" aria-label="Close panel">×</button></div><div class="detail-scroll" id="detail-content"></div></aside>
+ <div id="map-status" class="map-status" role="status" aria-live="polite">Memuatkan peta…</div>
+</section>
+<footer><span id="legal">Sumber: MRL, Dewan Negeri Selangor dan MIDA. Bukan untuk operasi.</span> · © <a href="https://openfreemap.org/" target="_blank" rel="noopener noreferrer">OpenFreeMap</a> / <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> · <span>MR-S10 P01 · ECRL V1 ISOLATED</span></footer>
+</main>
+<script src="./assets/ecrl-gis-v1/data.js"></script>
+<script src="./assets/ecrl-gis-v1/i18n.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js"></script>
+<script src="./assets/ecrl-gis-v1/app.js" defer></script>
+</body></html>
