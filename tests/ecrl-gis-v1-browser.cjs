@@ -37,12 +37,24 @@ const cases=[{name:'desktop',width:1440,height:900,isMobile:false,hasTouch:false
       snap:window.MRS10ECRLV1QA.getSnapshot()}));
     assert.equal(before.map,true,'MapLibre canvas not mounted');
     assert.ok(before.snap.styleLoaded,'Map style not ready');assert.ok(before.snap.sourcePresent,'GIS source missing');assert.ok(before.snap.layerPresent,'GIS layer missing');
-    assert.ok(before.snap.referenceMarkers>0,'No reference markers rendered');
+    assert.equal(before.snap.referenceMarkers,7,'C2 needs four EIA 2017 site references + two port maritime references + Gombak');
+     assert.equal(before.snap.c2PlanningReferences,4);assert.equal(before.snap.portAreaReferences,2);
+     assert.equal(before.snap.verifiedLoops,0);
     row.mapReady=true;row.markers=before.snap.referenceMarkers;
     await page.locator('#asset-list button[data-asset-id="ecrl-stn-17"]').click();
     const selected=await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot().selectedAssetId);
     assert.equal(selected,'ecrl-stn-17');
-    const canvasHandle=await page.locator('#ecrl-map canvas').elementHandle();
+    for(const id of ['ecrl-stn-17','ecrl-stn-18','ecrl-stn-19','ecrl-stn-20','ecrl-yard-puncak-alam','ecrl-port-northport','ecrl-port-westports']){
+       await page.locator('#asset-list button[data-asset-id="'+id+'"]').click();
+       assert.equal(await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot().selectedAssetId),id);
+       assert.equal(await page.locator('#detail-panel').isVisible(),true);
+       const note=await page.locator('#detail-content').innerText();
+       if(id.includes('port-'))assert.ok(/PKA|港务|PKA/.test(note),id+' PKA maritime provenance');
+       if(id==='ecrl-yard-puncak-alam')assert.ok(/2017/.test(note),'Yard reference is proxy, not actual site');
+       await page.locator('#detail-close').click();
+     }
+     await page.locator('#asset-list button[data-asset-id="ecrl-stn-17"]').click();
+     const canvasHandle=await page.locator('#ecrl-map canvas').elementHandle();
     for(const lang of ['ms','en','zh','th']){
       await page.locator('[data-lang="'+lang+'"]').click();
       const snap=await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot());
@@ -57,13 +69,13 @@ const cases=[{name:'desktop',width:1440,height:900,isMobile:false,hasTouch:false
     await page.locator('#scope-all').click();
     await page.waitForTimeout(450);
     const full=await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot());
-    assert.equal(full.referenceMarkers,16,'All-corridor reference count');
+    assert.equal(full.referenceMarkers,22,'All-corridor reference count');
     assert.equal(full.physicalTrackFeatures,0);
     const targets=await page.locator('.ecrl-pin').evaluateAll(els=>els.map(el=>{
       const r=el.getBoundingClientRect();
       return {assetId:el.dataset.assetId,x:r.left+r.width/2,y:r.top+r.height/2,width:r.width,height:r.height};
     }));
-    assert.equal(targets.length,16,'All-corridor marker count in DOM');
+    assert.equal(targets.length,22,'All-corridor marker count in DOM');
     assert.ok(targets.every(t=>t.width>=43.9&&t.height>=43.9),
       '44px marker hit-target CSS dimensions '+JSON.stringify(targets.filter(t=>t.width<43.9||t.height<43.9)));
     await page.locator('#show-list').click(); // remove list overlay before testing real map marker tap
@@ -80,7 +92,9 @@ const cases=[{name:'desktop',width:1440,height:900,isMobile:false,hasTouch:false
     await page.locator('.ecrl-pin[data-asset-id="'+accessible+'"]').click({timeout:4000});
     assert.equal(await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot().selectedAssetId),accessible,
       'MapLibre station-marker tap must select matching asset');
-    const square=await page.locator('.loop-demo').evaluate(el=>getComputedStyle(el).borderRadius);
+    assert.equal(await page.locator('.ecrl-pin[data-shape="historical-reference"]').count(),4);
+     assert.equal(await page.locator('.ecrl-pin[data-shape="port-reference"]').count(),2);
+     const square=await page.locator('.loop-demo').evaluate(el=>getComputedStyle(el).borderRadius);
     assert.equal(square,'3px','square crossing-loop sample shape');
     await page.locator('#theme').click();
     const dark=await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot());

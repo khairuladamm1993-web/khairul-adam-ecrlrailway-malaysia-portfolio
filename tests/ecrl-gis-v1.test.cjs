@@ -97,3 +97,24 @@ test('No legacy/Unified/production content is directly modified',()=>{
  const html=file('ecrl-gis-v1.html');assert.match(html,/ISOLATED/);
  assert.doesNotMatch(html,/supabase\.co/);
 });
+
+test('C2 historic EIA site proposal coordinates come from 2017 Table 1-2, not current station GIS',()=>{
+ const coords=[['ecrl-stn-17',101+35/60+19.36/3600,3+21/60+51.93/3600],['ecrl-stn-18',101+24/60+42.42/3600,3+14/60+55.31/3600],['ecrl-stn-19',101+23/60+39.86/3600,3+7/60+30/3600],['ecrl-stn-20',101+24/60+11.85/3600,3+55.16/3600]];
+ for(const [id,lon,lat] of coords){const a=D.stations.find(x=>x.assetId===id);assert.equal(a.point,null);assert.equal(a.geometryType,'NONE');assert.equal(a.referenceKind,'HISTORICAL_EIA2017_PROPOSED_STATION');assert.equal(a.referenceSourceId,'EIA17');assert.ok(Math.abs(a.referencePoint[0]-lon)<1e-8);assert.ok(Math.abs(a.referencePoint[1]-lat)<1e-8);}
+});
+test('Both port maritime reference coordinates preserve null ECRL railway point',()=>{
+ const ports=[['ecrl-port-northport',101+22/60,3+1/60],['ecrl-port-westports',101+18.5/60,2+57/60]];
+ for(const [id,lon,lat] of ports){const a=D.facilities.find(x=>x.assetId===id);assert.equal(a.point,null);assert.equal(a.referenceKind,'PORT_FACILITY_AREA_PKA22');assert.equal(a.referenceSourceId,'PKA22');assert.ok(Math.abs(a.referencePoint[0]-lon)<1e-8);assert.ok(Math.abs(a.referencePoint[1]-lat)<1e-8);assert.ok(a.sourceIds.includes('DOE_D26'));}
+});
+test('Proposed freight yard uses a Puncak Alam area-focus proxy, no invented yard coordinates',()=>{
+ const y=D.facilities.find(x=>x.assetId==='ecrl-yard-puncak-alam');
+ assert.equal(y.point,null);assert.equal(y.referencePoint,undefined);assert.equal(y.focusReferenceAssetId,'ecrl-stn-18');
+});
+test('Four languages provide EIA and PKA non-survey warnings and a distinct marker legend',()=>{
+ for(const lang of ['ms','en','zh','th'])for(const k of ['historicRef','portArea','proxyArea','legendHistoric','legendPort','referenceWarning','portReferenceWarning','yardFocusWarning','referenceBadge'])assert.ok(I[lang][k]);
+ const html=file('ecrl-gis-v1.html'),css=file('assets/ecrl-gis-v1/styles.css'),app=file('assets/ecrl-gis-v1/app.js');
+ for(const x of ['legend-historic','legend-port'])assert.ok(html.includes(x));
+ for(const shape of ['historical-reference','port-reference'])assert.ok(css.includes('data-shape="'+shape+'"'));
+ assert.match(app,/const geoPoint=a=>a\?\.point\|\|a\?\.referencePoint\|\|null/);
+ assert.match(app,/const focusPoint=a=>/);
+});
