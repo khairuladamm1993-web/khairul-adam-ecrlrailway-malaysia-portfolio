@@ -56,11 +56,21 @@ await page.locator("#route-drawer").evaluate(x=>x.open=true);
 await page.locator("#lines button").filter({hasText:"KTM Shuttle Tebrau"}).click();
 assert.equal(await page.locator("#lineup .station-item").count(),2,"TEBRAU_TWO_TERMINALS_MISSING");
 assert.deepEqual(await page.locator("#lineup .station-item").evaluateAll(a=>a.map(x=>x.dataset.stationId)),["MY-JB-SENTRAL","SG-WOODLANDS-TCP"]);
+await page.waitForFunction(()=>window.__sgRailMap?.queryRenderedFeatures({layers:["sg-border-circles"]}).length>=2,null,{timeout:12000});
+const shuttleMapCount=await page.evaluate(()=>window.__sgRailMap.queryRenderedFeatures({layers:["sg-border-circles"]}).length);
+assert(shuttleMapCount>=2,"SHUTTLE_TWO_BORDER_MARKERS_NOT_RENDERED");
+console.log("CROSS_BORDER_RENDERED",JSON.stringify({viewport:vp.name,route:"SHUTTLE_TEBRAU",markers:shuttleMapCount}));
+
 await page.locator("#direction").selectOption("SHUTTLE_TEBRAU_SG_MY");
 assert.deepEqual(await page.locator("#lineup .station-item").evaluateAll(a=>a.map(x=>x.dataset.stationId)),["SG-WOODLANDS-TCP","MY-JB-SENTRAL"]);
 await page.locator("#route-drawer").evaluate(x=>x.open=true);
 await page.locator("#lines button").filter({hasText:"RTS"}).click();
 assert.deepEqual(await page.locator("#lineup .station-item").evaluateAll(a=>a.map(x=>x.dataset.stationId)),["MY-BUKIT-CHAGAR","SG-WOODLANDS-NORTH-RTS"]);
+await page.waitForFunction(()=>window.__sgRailMap?.queryRenderedFeatures({layers:["sg-border-circles"]}).length>=2,null,{timeout:12000});
+const rtsMapCount=await page.evaluate(()=>window.__sgRailMap.queryRenderedFeatures({layers:["sg-border-circles"]}).length);
+assert(rtsMapCount>=2,"RTS_FUTURE_TWO_BORDER_MARKERS_NOT_RENDERED");
+console.log("CROSS_BORDER_RENDERED",JSON.stringify({viewport:vp.name,route:"RTS",markers:rtsMapCount}));
+
 const borderGeo=await page.evaluate(()=>window.__sgRailMap.getSource("sg-border-terminals")?.serialize?.());
 assert(borderGeo,"BORDER_SOURCE_MISSING");
 await page.locator("#direction").selectOption("RTS_SG_MY");
