@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.2.0",
+  "relations": [
+    {
+      "from": "MY-JB-SENTRAL",
+      "to": "SG-WOODLANDS-TCP",
+      "routeId": "SHUTTLE_TEBRAU",
+      "type": "OPERATIONAL_PASSENGER_SERVICE_NO_VERIFIED_GIS_LINESTRING",
+      "geometry": null,
+      "sourceUrl": "https://online.ktmb.com.my/Home/ShuttleFAQ"
+    },
+    {
+      "from": "MY-BUKIT-CHAGAR",
+      "to": "SG-WOODLANDS-NORTH-RTS",
+      "routeId": "RTS",
+      "type": "FUTURE_PASSENGER_SERVICE_NO_VERIFIED_GIS_LINESTRING",
+      "geometry": null,
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/10/news-releases/grantors-informed-rts-link-service-targeted-feb-2027.html"
+    },
+    {
+      "from": "SG-WOODLANDS-NORTH-RTS",
+      "to": "SG-TE1",
+      "type": "WALKING_PASSENGER_TRANSFER_NO_THROUGH_TRACK",
+      "geometry": null,
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/JB-Singapore_RTS_link.html"
+    },
+    {
+      "from": "MY-BUKIT-CHAGAR",
+      "to": "MY-JB-SENTRAL",
+      "type": "GEOGRAPHIC_AREA_RELATION_NO_THROUGH_TRACK",
+      "geometry": null,
+      "sourceUrl": "https://rtslink.mymrt.com.my/"
+    }
+  ]
+}

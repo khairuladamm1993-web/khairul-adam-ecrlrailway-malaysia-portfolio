@@ -1,5 +1,5 @@
 {
-  "adapterVersion": "1.0.0",
+  "adapterVersion": "1.2.0",
   "namespace": "mr-s10.sg.v1",
   "root": "singapore/",
   "entry": "singapore/index.html",
@@ -19,7 +19,7 @@
   ],
   "gate": {
     "integrationReady": false,
-    "why": "Visual UAT remains separate; physical track GIS, cross-border point evidence, official chainage and speed profiles still unavailable; source-backed secondary features cannot be promoted."
+    "why": "Requires Owner Safari V1.2 UAT; future patterns partial; 13 track geometries still secondary and not physical-verified."
   },
   "uiVersion": "1.1.0",
   "basemap": {
@@ -31,9 +31,10 @@
     "runtimeNetworkDependency": true
   },
   "routePointCoverage": {
-    "SHUTTLE_TEBRAU": 0,
-    "RTS": 0,
-    "reason": "source-backed station identities only; no verified geocoded features for cross-border module"
+    "SHUTTLE_TEBRAU": 2,
+    "RTS": 2,
+    "evidenceClass": "SECONDARY_OSM_POI_AND_POLYGON_CENTROID_NOT_AUTHORITATIVE",
+    "physicalTrackGeometry": false
   },
   "railwayIntelligence": {
     "popup": "Track Intelligence Adapter",
@@ -42,5 +43,14 @@
     "officialChainageAvailable": false,
     "officialSpeedProfileAvailable": false,
     "doNotPromoteSecondaryAsVerified": true
+  },
+  "topology": "singapore/data/route-topology.json",
+  "crossBorderConnections": "singapore/data/cross-border-connections.json",
+  "crossBorderStationPoints": "singapore/data/cross-border-terminals.geojson",
+  "lineupGate": {
+    "crossBorderTextTopologyReady": true,
+    "stationOrderFromExplicitRegistry": true,
+    "allRoutesVerified": false,
+    "reason": "Future corridors and LRT active service directional patterns partly unresolved"
   }
 }
