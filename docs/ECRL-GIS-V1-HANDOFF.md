@@ -45,7 +45,11 @@
 
 ## QA scope
 
-GitHub source syntax/provenance validation is available. Real browser render tests, actual tile availability, iPad Safari Owner UAT and isolated Vercel deployment readiness are separate gates: never infer PASS from syntax or HTTP 200.
+**Verified**: 16/16 ECRL source/multilingual data tests PASS on GitHub Actions; 6/6 headless real browser configurations Chromium × WebKit × Desktop/iPad/iPhone PASS on commit `7a28f1b4e74b18cc67b969d0867a6ac5872c176f`, including all 4 languages, marker tap, 44 px marker CSS targets and dark mode. Evidence: https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40446497111 ; screenshots: https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40446497111/artifacts/12708322992
+
+**Still PENDING**: actual Owner iPad Safari UAT, remote Preview rendering (remote crawling restricted), physical C2 track surveyed geometry, 7 historic PL verification, port turnouts and speed/TSR. A Vercel isolated preview deployment being READY does not establish end-user Safari success.
+
+**Vercel target incident (isolated project only)**: initial deploy API unexpectedly returned `target=production` despite explicit preview request, and cancellation was rejected after it became READY. This newly created isolated Vercel project is not the original MR-S10 Production project. Subsequent isolated deploys omitted target and returned target=null (Preview); only Preview URL is Owner UAT candidate. No Production deployment was made to MR-S10 site.
 
 ## Rollback
 
