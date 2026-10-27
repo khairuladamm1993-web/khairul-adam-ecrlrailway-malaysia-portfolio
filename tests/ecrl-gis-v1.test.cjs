@@ -52,8 +52,19 @@ test('C2 topology relations are metadata, not geometry',()=>{
  assert.equal(D.topology.length,7);
  for(const link of D.topology){assert.ok(ids.has(link.from));assert.ok(ids.has(link.to));assert.ok(['PLANNED_CONNECTION','FREIGHT_INTERFACE'].includes(link.relation));}
 });
+test('MOT-approved Section D is separate standard-gauge and metre-gauge tracks without fake geometry',()=>{
+ const sectionD=D.segments.find(s=>s.section==='D');
+ assert.equal(sectionD.schemeLengthKm,25);
+ assert.equal(sectionD.geometry,null);
+ assert.equal(sectionD.trackArrangement,'SEPARATE_PARALLEL_STANDARD_AND_METRE_GAUGE');
+ assert.equal(sectionD.ktmbMetreGaugeMm,1000);
+ assert.equal(sectionD.olderProposal,'SINGLE_DUAL_GAUGE_SUPERSEDED');
+ for(const id of ['ecrl-port-northport','ecrl-port-westports']){
+   const p=D.facilities.find(a=>a.assetId===id);assert.equal(p.section,'D');assert.ok(p.sourceIds.includes('MOT_D25'));
+ }
+});
 test('No fabricated LineString and no unsourced permitted/station/TSR speed',()=>{
- assert.equal(D.segments.length,1);
+ assert.equal(D.segments.length,2);
  for(const s of D.segments){assert.equal(s.geometry,null);assert.equal(s.maximumPermittedSpeedKmh,null);assert.equal(s.stationApproachSpeedKmh,null);assert.equal(s.stationThroughSpeedKmh,null);assert.equal(s.tsr,null);}
  for(const station of D.stations){assert.equal(station.speed.approachKmh,null);assert.equal(station.speed.throughKmh,null);assert.equal(station.speed.tsr,null);}
  assert.equal(D.schemeSpeedReference.scope,'PROJECT_LEVEL_ONLY');
