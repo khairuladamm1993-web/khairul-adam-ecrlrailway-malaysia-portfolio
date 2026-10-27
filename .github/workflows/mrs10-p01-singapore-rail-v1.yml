@@ -1,0 +1,32 @@
+name: MR-S10 Singapore Railway V1 isolated
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-singapore-rail-v1-isolated
+    paths:
+      - 'singapore/**'
+      - 'tests/singapore-rail-v1.test.cjs'
+      - '.github/workflows/mrs10-p01-singapore-rail-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  data-and-contract-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Validate source-backed GIS and adapter contract
+        run: node --test tests/singapore-rail-v1.test.cjs
+      - name: Parse app and adapter syntax
+        run: |
+          node --check singapore/app.js
+          node --check singapore/track-intelligence-adapter.js
+      - name: Check no untrusted remote script injections
+        run: |
+          ! grep -RInE 'eval\\(|new Function\\(|supabase\\.auth|service_role|SECRET|VITE_.*KEY' singapore --exclude='README.md'
