@@ -1,0 +1,24 @@
+{
+  "adapterVersion": "1.0.0",
+  "namespace": "mr-s10.sg.v1",
+  "root": "singapore/",
+  "entry": "singapore/index.html",
+  "manifest": "singapore/data/lines.json",
+  "stations": "singapore/data/stations.geojson",
+  "tracks": "singapore/data/tracks.geojson",
+  "adapter": "singapore/track-intelligence-adapter.js",
+  "requires": [
+    "MapLibre GL JS 4.7.1"
+  ],
+  "doesNotModify": [
+    "main",
+    "Supabase",
+    "UnifiedV6",
+    "UnifiedV7",
+    "ShuttleTimur"
+  ],
+  "gate": {
+    "integrationReady": false,
+    "why": "Secondary sampled geometry lacks OSM feature IDs and whole-network physical GIS; Safari evidence pending."
+  }
+}

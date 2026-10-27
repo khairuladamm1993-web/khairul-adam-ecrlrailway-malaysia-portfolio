@@ -1,0 +1,295 @@
+{
+  "schemaVersion": "1.0.0",
+  "scope": "SG_ISOLATED",
+  "asOf": "2026-10-27",
+  "baselineV7": "c64aa0b19b68aeafbaeb03e568e5cd07e7e4790f",
+  "routes": [
+    {
+      "lineId": "NSL",
+      "name": "North–South Line",
+      "displayColor": "#D32F36",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "MRT",
+      "operatorId": "SMRT",
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network.html",
+      "railSystemType": "STEEL_WHEEL_MRT"
+    },
+    {
+      "lineId": "EWL",
+      "name": "East–West Line",
+      "displayColor": "#168B4C",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "MRT",
+      "operatorId": "SMRT",
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network.html",
+      "railSystemType": "STEEL_WHEEL_MRT"
+    },
+    {
+      "lineId": "NEL",
+      "name": "North East Line",
+      "displayColor": "#8041B2",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "MRT",
+      "operatorId": "SBS_TRANSIT",
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network.html",
+      "railSystemType": "STEEL_WHEEL_MRT"
+    },
+    {
+      "lineId": "CCL",
+      "name": "Circle Line",
+      "displayColor": "#DC9F20",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "MRT",
+      "operatorId": "SMRT",
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/circle_line_6.html",
+      "railSystemType": "STEEL_WHEEL_MRT"
+    },
+    {
+      "lineId": "DTL",
+      "name": "Downtown Line",
+      "displayColor": "#1676B8",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "MRT",
+      "operatorId": "SBS_TRANSIT",
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network/downtown_line.html",
+      "railSystemType": "STEEL_WHEEL_MRT"
+    },
+    {
+      "lineId": "TEL",
+      "name": "Thomson–East Coast Line",
+      "displayColor": "#94684D",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "MRT",
+      "operatorId": "SMRT",
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network.html",
+      "railSystemType": "STEEL_WHEEL_MRT"
+    },
+    {
+      "lineId": "BPLRT",
+      "name": "Bukit Panjang LRT",
+      "displayColor": "#758795",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "LRT",
+      "operatorId": "SMRT",
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network.html",
+      "railSystemType": "AUTOMATED_GUIDEWAY"
+    },
+    {
+      "lineId": "SK_E",
+      "name": "Sengkang LRT · East Loop",
+      "displayColor": "#72A982",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "LRT",
+      "operatorId": "SBS_TRANSIT",
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network.html",
+      "railSystemType": "AUTOMATED_GUIDEWAY"
+    },
+    {
+      "lineId": "SK_W",
+      "name": "Sengkang LRT · West Loop",
+      "displayColor": "#417C65",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "LRT",
+      "operatorId": "SBS_TRANSIT",
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network.html",
+      "railSystemType": "AUTOMATED_GUIDEWAY"
+    },
+    {
+      "lineId": "PG_E",
+      "name": "Punggol LRT · East Loop",
+      "displayColor": "#A3B96C",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "LRT",
+      "operatorId": "SBS_TRANSIT",
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network.html",
+      "railSystemType": "AUTOMATED_GUIDEWAY"
+    },
+    {
+      "lineId": "PG_W",
+      "name": "Punggol LRT · West Loop",
+      "displayColor": "#64793C",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "LRT",
+      "operatorId": "SBS_TRANSIT",
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network.html",
+      "railSystemType": "AUTOMATED_GUIDEWAY"
+    },
+    {
+      "lineId": "JRL",
+      "name": "Jurong Region Line",
+      "displayColor": "#36A68B",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "FUTURE",
+      "operatorId": "SG_ONE_RAIL",
+      "operationalStatus": "UNDER_CONSTRUCTION",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/jurong_region_line.html",
+      "railSystemType": null
+    },
+    {
+      "lineId": "CRL",
+      "name": "Cross Island Line",
+      "displayColor": "#7EAB9A",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "FUTURE",
+      "operatorId": null,
+      "operationalStatus": "UNDER_CONSTRUCTION",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion.html",
+      "railSystemType": null
+    },
+    {
+      "lineId": "SHUTTLE_TEBRAU",
+      "name": "KTM Shuttle Tebrau",
+      "displayColor": "#3B9C9F",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "CROSS_BORDER",
+      "operatorId": "KTMB",
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": "https://www.ktmb.com.my/traintime.html",
+      "railSystemType": null
+    },
+    {
+      "lineId": "RTS",
+      "name": "JB–Singapore RTS Link",
+      "displayColor": "#17ADCF",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "CROSS_BORDER",
+      "operatorId": "RTSO",
+      "operationalStatus": "UNDER_CONSTRUCTION",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/10/news-releases/grantors-informed-rts-link-service-targeted-feb-2027.html",
+      "railSystemType": null
+    },
+    {
+      "lineId": "SENTOSA",
+      "name": "Sentosa Express",
+      "displayColor": "#BE668B",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "OTHER_GUIDED_TRANSIT",
+      "operatorId": null,
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": null,
+      "railSystemType": "AUTOMATED_GUIDEWAY"
+    },
+    {
+      "lineId": "CHANGI_APM",
+      "name": "Changi Airport Skytrain",
+      "displayColor": "#7E8CB8",
+      "displayColorEvidence": "UI_APPROXIMATION_OF_LTA_LINE_IDENTITY_NOT_OFFICIAL_HEX",
+      "category": "OTHER_GUIDED_TRANSIT",
+      "operatorId": null,
+      "operationalStatus": "OPERATIONAL",
+      "sourceUrl": null,
+      "railSystemType": "AUTOMATED_GUIDEWAY"
+    }
+  ],
+  "unlocatedStations": [
+    {
+      "stationId": "SG-WOODLANDS-TCP",
+      "name": "Woodlands Train Checkpoint",
+      "routeIds": [
+        "SHUTTLE_TEBRAU"
+      ],
+      "status": "OPERATIONAL",
+      "sourceUrl": "https://www.ktmb.com.my/traintime.html",
+      "geometry": null
+    },
+    {
+      "stationId": "MY-JB-SENTRAL",
+      "name": "JB Sentral",
+      "routeIds": [
+        "SHUTTLE_TEBRAU"
+      ],
+      "status": "OPERATIONAL",
+      "sourceUrl": "https://www.ktmb.com.my/traintime.html",
+      "geometry": null
+    },
+    {
+      "stationId": "SG-WOODLANDS-NORTH-RTS",
+      "name": "Woodlands North RTS",
+      "routeIds": [
+        "RTS"
+      ],
+      "status": "UNDER_CONSTRUCTION",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/JB-Singapore_RTS_link.html",
+      "geometry": null
+    },
+    {
+      "stationId": "MY-BUKIT-CHAGAR",
+      "name": "Bukit Chagar RTS",
+      "routeIds": [
+        "RTS"
+      ],
+      "status": "UNDER_CONSTRUCTION",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/JB-Singapore_RTS_link.html",
+      "geometry": null
+    }
+  ],
+  "crossBorderRules": {
+    "SHUTTLE_TEBRAU": {
+      "differentFrom": "SHUTTLE_TIMUR",
+      "trackGaugeMm": 1000,
+      "gaugeProvenance": "STANDARD_METRE_GAUGE_KTM_NOT_SITE_SPECIFIC_SURVEY"
+    },
+    "RTS": {
+      "trackGaugeMm": null,
+      "serviceTarget": "2027-02",
+      "statusProvenance": "https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/10/news-releases/grantors-informed-rts-link-service-targeted-feb-2027.html"
+    }
+  },
+  "safetyPolicy": {
+    "allowEstimatedOfficialChainage": false,
+    "allowStationStraightLineGeometry": false,
+    "requirePhysicalSourceFeatureIdForVerifiedTracks": true,
+    "showUnknownAs": null
+  },
+  "sourceRegistry": [
+    {
+      "id": "URA_LTA_POINTS",
+      "url": "https://github.com/elliotwutingfeng/singapore_train_station_coordinates",
+      "license": "Singapore Open Data Licence 1.0; redistributed government coordinates with upstream metadata",
+      "coordinateSources": [
+        "ura",
+        "lta"
+      ]
+    },
+    {
+      "id": "LTA_RAIL",
+      "url": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network.html"
+    },
+    {
+      "id": "LTA_CCL6",
+      "url": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/circle_line_6.html"
+    },
+    {
+      "id": "LTA_RTS_2026_10_02",
+      "url": "https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/10/news-releases/grantors-informed-rts-link-service-targeted-feb-2027.html"
+    },
+    {
+      "id": "OSM_SECONDARY_SAMPLE",
+      "url": "https://github.com/cheeaun/sgraildata",
+      "license": "OSM ODbL attribution required; third-party derived geometry; source way IDs not supplied; not physical-verified"
+    }
+  ],
+  "coverage": {
+    "stationPoints": 273,
+    "secondaryGeometryFeatures": 13,
+    "verifiedPhysicalTrackFeatures": 0,
+    "omittedRows": [
+      "PTC",
+      "STC",
+      "DE1",
+      "DE2",
+      "TE4A:manual-coordinate"
+    ]
+  }
+}
