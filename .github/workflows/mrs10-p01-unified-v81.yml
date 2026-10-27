@@ -1,0 +1,47 @@
+name: MR-S10 P01 V8.1 Map-first QA
+on:
+  push:
+    branches: [feature/mrs10-p01-unified-v81-map-first-20261028]
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: Immutable isolated staging map URL
+        required: false
+        type: string
+permissions:
+  contents: read
+jobs:
+  map-first:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node --test tests/unified-v81-focus.test.cjs
+      - run: node scripts/build-unified-v8.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Actual MapLibre canvas interaction QA
+        env:
+          V8_URL: ${{ inputs.preview_url }}
+        run: |
+          python3 -m http.server 8765 --directory dist-unified-v8 > /tmp/v81-server.log 2>&1 &
+          node tests/unified-v81-browser.test.mjs
+      - name: Full baseline regression
+        if: inputs.preview_url == ''
+        run: |
+          npm test
+          node --test tests/unified-v6-regression.test.cjs tests/unified-v7-regression.test.cjs tests/unified-v8-regression.test.cjs
+          node scripts/audit-unified-v8-networks.cjs
+          node tests/unified-v8-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: unified-v81-browser-evidence
+          path: artifacts/unified-v8*browser/
+          retention-days: 7

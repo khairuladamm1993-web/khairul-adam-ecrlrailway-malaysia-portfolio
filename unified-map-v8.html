@@ -2,7 +2,7 @@
 <html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow"><title>MR-S10 P01 · Unified Railway Map V8 (isolated)</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.css">
-<link rel="stylesheet" href="./assets/unified-v5.css"><style>#path-select{max-width:100%;padding:10px;margin:8px 0;background:var(--bg);color:inherit}#geometry-label{display:flex;gap:8px;align-items:center}.rail-panel{overflow-wrap:anywhere}.maplibregl-popup-content{color:#172033}#path-status{font-size:.85rem}</style></head>
+<link rel="stylesheet" href="./assets/unified-v5.css"><style>#path-select{max-width:100%;padding:10px;margin:8px 0;background:var(--bg);color:inherit}#geometry-label{display:flex;gap:8px;align-items:center}.rail-panel{overflow-wrap:anywhere}.maplibregl-popup-content{color:#172033}#path-status{font-size:.85rem}[hidden]{display:none!important}#details-toggle{display:block;margin:4px auto;min-width:44px;min-height:44px}#details-toggle[aria-expanded="true"] span{display:inline-block;transform:rotate(180deg)}.intelligence-lineup{max-height:180px;overflow:auto;padding-left:24px}.maplibregl-popup-content{max-height:60vh;overflow:auto}.maplibregl-popup-close-button{min-width:36px;min-height:36px}</style></head>
 <body><main>
 <header><a href="https://mrs10-r211-mobile-map-j3q04xcac-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1">← MR-S10 Visitor Map</a><div class="toolbar"><button id="language" type="button" aria-label="Language">BM</button><button id="theme" type="button" aria-label="Dark / Light">◐</button></div></header>
 <h1 id="title">Unified Railway Map V8</h1>
@@ -13,9 +13,12 @@
  <div id="map" role="region" aria-label="Railway stations on a geographical map"></div>
  <div id="map-error" class="map-error" role="status" aria-live="polite">Memuatkan sumber peta dan GIS…</div>
 </section>
+<button id="details-toggle" type="button" aria-expanded="false" aria-controls="map-details" aria-label="Maklumat peta"><span aria-hidden="true">⌄</span></button>
+<div id="map-details" hidden>
 <section class="legend" id="legend" aria-label="Route colour legend"></section>
 <p id="qa-note" class="notice" role="status" aria-live="polite"></p>
 <section class="rail-panel"><label id="geometry-label"><input id="approximate" type="checkbox"> <span id="approximate-label"></span></label><p id="geometry-status" class="notice"></p><h2 id="lineup-title">Senarai stesen</h2><nav id="route-buttons" aria-label="Select a railway route"></nav><label for="path-select" id="path-label"></label><select id="path-select"></select><p id="path-status" class="notice"></p><ol id="lineup"></ol></section>
+</div>
 <section id="search-results" class="search-results" aria-live="polite" hidden></section>
 <footer><p id="attribution">Rujukan GIS: ArcGIS awam dan GTFS rasmi KTMB (CC BY 4.0) · Stesen dan turutan: registry MR-S10 · Basemap: OpenFreeMap / OpenStreetMap. Tiada geometri trek direka. ETS dan ERT ialah corak hentian satu perjalanan GTFS, bukan semua jadual.</p><p><a href="https://mrs10-r211-mobile-map-j3q04xcac-1993khairuladam-3016.vercel.app/map-language-lab.html?railPilot=1">Visitor Map asal</a> · <a href="https://mrs10-r211-mobile-map-j3q04xcac-1993khairuladam-3016.vercel.app/ampang-line-r219.html">Ampang GIS standalone</a></p><small>Isolated integration · No Production merge · No operational use</small></footer>
 </main>
@@ -34,5 +37,7 @@
 <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js"></script>
 <script src="./assets/unified-v8/singapore-adapter.js"></script>
 <script src="./assets/unified-v8/geometry-engine.js"></script>
+<script src="./assets/unified-v81/focus-controller.js"></script>
+<script src="./assets/unified-v81/relationships.js"></script>
 <script type="module" src="./assets/unified-v8-map.js"></script>
 </body></html>

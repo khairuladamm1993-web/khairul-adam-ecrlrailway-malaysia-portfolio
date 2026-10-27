@@ -44,6 +44,44 @@ const i18n={
 };
 const state={locale:'ms',category:'All',selected:'mrt-kajang',theme:'light',map:null,mapReady:false,zoomDone:false,
  results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
+// V8.1 owns temporary focus only; underlying registries and controls remain intact.
+let pendingRestore=null;
+const relationsFor=p=>window.MRS10V81Relationships.resolve(p,state.manifest,integration,core,singapore);
+function ownedLayers(){return (state.map?.getStyle()?.layers||[]).filter(l=>l.id.startsWith('mrs10-v8-'))}
+function layerSnapshot(){return ownedLayers().map(l=>({id:l.id,visibility:state.map.getLayoutProperty(l.id,'visibility')||'visible',filter:state.map.getFilter(l.id)||null}))}
+function restoreLayers(saved){
+ if(!state.map?.isStyleLoaded()){pendingRestore=saved;return}
+ for(const l of saved)if(state.map.getLayer(l.id)){state.map.setLayoutProperty(l.id,'visibility',l.visibility);state.map.setFilter(l.id,l.filter)}
+ pendingRestore=null;
+}
+const focus=window.MRS10V81Focus.create({
+ capture:()=>({layers:layerSnapshot(),category:state.category,selected:state.selected}),
+ apply:selection=>{
+  if(!state.map?.isStyleLoaded())return;
+  const visible=new Set(selection.routeIds);
+  for(const r of state.manifest)for(const suffix of ['', '-ring','-inner','-interchange']){
+   const id=layerId(r.id)+suffix;if(state.map.getLayer(id))state.map.setLayoutProperty(id,'visibility',visible.has(r.id)?'visible':'none');
+  }
+  const ids=selection.segmentIds||physical.segments.filter(s=>s.routeIds.some(id=>visible.has(id))).map(s=>s.segmentId);
+  if(state.map.getLayer('mrs10-v8-geometry'))state.map.setFilter('mrs10-v8-geometry',['in',['get','segmentId'],['literal',ids]]);
+ },
+ restore:saved=>{state.category=saved.category;state.selected=saved.selected;restoreLayers(saved.layers);buildFilters();buildLegend();buildRoutes();buildLineup()}
+});
+function closeFocus(){if(state.popup){const old=state.popup;state.popup=null;old.remove()}focus.exit()}
+function mountPopup(host,position){
+ const old=state.popup;state.popup=null;old?.remove();
+ const popup=new maplibregl.Popup({offset:15,maxWidth:'330px',closeOnClick:false}).setLngLat(position).setDOMContent(host);
+ state.popup=popup;popup.on('close',()=>{if(state.popup===popup){state.popup=null;focus.exit()}});popup.addTo(state.map);
+}
+function appendFocusLineup(host,routeIds){
+ for(const id of routeIds){const r=state.manifest.find(r=>r.id===id);if(!r)continue;
+  const patterns=r.paths||[{label:r.label,orderedStationIds:r.stops.map(s=>s.id)}];
+  for(const path of patterns){const details=el('details'),summary=el('summary',null,r.label+' · '+(path.label||tr('lineup'))),list=el('ol','intelligence-lineup');
+   for(const sid of path.orderedStationIds){const stop=r.stops.find(s=>s.id===sid);if(stop)list.append(el('li',null,(stop.code?stop.code+' · ':'')+stop.name))}
+   details.append(summary,list);host.append(details);
+  }
+ }
+}
 function tr(k){return i18n[state.locale][k]}
 function say(message){$('qa-note').textContent=message}
 function el(tag,cls,text){const x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=String(text);return x}
@@ -70,7 +108,7 @@ function buildFilters(){
  for(const category of ['All','MRT','LRT','Monorail','ERL','KTM','ETS','Intercity','Singapore']){
   const btn=el('button',null,category==='All'?tr('all'):category);
   btn.type='button';btn.setAttribute('aria-pressed',String(category===state.category));
-  btn.onclick=()=>{state.category=category;const allowed=selectedRoutes();if(!allowed.some(x=>x.id===state.selected))state.selected=allowed[0]?.id||state.selected;
+  btn.onclick=()=>{closeFocus();state.category=category;const allowed=selectedRoutes();if(!allowed.some(x=>x.id===state.selected))state.selected=allowed[0]?.id||state.selected;
     buildFilters();buildLegend();buildRoutes();buildLineup();applyVisibility();};
   host.append(btn);
  }
@@ -87,7 +125,7 @@ function buildRoutes(){
  for(const r of selectedRoutes()){
   const btn=el('button',null,r.label);
   btn.type='button';btn.setAttribute('aria-pressed',String(r.id===state.selected));
-  btn.onclick=()=>{state.selected=r.id;buildRoutes();buildLineup();focusRoute(r.id)};
+  btn.onclick=()=>{closeFocus();state.selected=r.id;buildRoutes();buildLineup();focusRoute(r.id)};
   host.append(btn);
  }
 }
@@ -158,6 +196,7 @@ function updateSearch(){
 }
 function applyLanguage(){
  document.documentElement.lang=state.locale;
+ $('details-toggle').setAttribute('aria-label',tr('mapDetails'));
  $('title').textContent=tr('title');$('description').textContent=tr('desc');
  $('lineup-title').textContent=tr('lineup');$('search').placeholder=tr('search');
  $('reset').textContent=tr('reset');$('language').textContent=state.locale==='ms'?'BM':state.locale==='en'?'EN':state.locale==='zh'?'中文':'ไทย';
@@ -177,7 +216,7 @@ function updateMapLayer(){
   for(const r of state.manifest){
    const source=srcId(r.id),lid=layerId(r.id);
    const data=core.toGeoJSON([state.results.get(r.id)]);
-   for(const f of data.features){const p=findGeo(r.id,f.properties.id);f.properties.future=!!p?.status&&p.status!=='OPERATIONAL';f.properties.pending=!p?.provenance?.startsWith('OFFICIAL_KTMB_GTFS');}
+   for(const f of data.features){const p=findGeo(r.id,f.properties.id);f.properties.interchange=!!p&&relationsFor(p).isInterchange;f.properties.future=!!p?.status&&p.status!=='OPERATIONAL';f.properties.pending=!p?.provenance?.startsWith('OFFICIAL_KTMB_GTFS');}
    if(!map.getSource(source))map.addSource(source,{type:'geojson',data});
    else map.getSource(source).setData(data);
    if(!map.getLayer(lid))map.addLayer({id:lid,type:'circle',source,
@@ -192,7 +231,7 @@ function updateMapLayer(){
      'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.35:1
     }});
   }
-  installInnerDots();applyVisibility();
+  installInnerDots();applyVisibility();if(pendingRestore)restoreLayers(pendingRestore);
  }catch(e){
   state.networkError=true;
   $('map-error').hidden=false;
@@ -201,9 +240,11 @@ function updateMapLayer(){
  }
 }
 function applyVisibility(){
+ if(focus.current.mode!=='NORMAL'){focus.reapply();return}
  if(!state.map||!state.map.isStyleLoaded())return;
  for(const r of state.manifest){
   const id=layerId(r.id);
+  if(state.map.getLayer(id+'-interchange'))state.map.setLayoutProperty(id+'-interchange','visibility',state.category==='All'||state.category===r.category?'visible':'none');
   if(state.map.getLayer(id+'-ring'))state.map.setLayoutProperty(id+'-ring','visibility',state.category==='All'||state.category===r.category?'visible':'none');
   if(state.map.getLayer(id+'-inner'))state.map.setLayoutProperty(id+'-inner','visibility',state.category==='All'||state.category===r.category?'visible':'none');
   if(state.map.getLayer(id))state.map.setLayoutProperty(id,'visibility',
@@ -213,9 +254,12 @@ function applyVisibility(){
 }
 function showPopup(point){
  if(!state.map)return;
- if(state.popup)state.popup.remove();
+ const relationship=relationsFor(point);
+ focus.enter({mode:relationship.isInterchange?'INTERCHANGE_FOCUS':'STATION_FOCUS',routeIds:relationship.routeIds,stationId:point.id});
+ state.selected=point.routeId;buildRoutes();buildLineup();
  const route=state.manifest.find(r=>r.id===point.routeId);
  const container=el('div');
+ container.append(el('h3',null,tr(relationship.isInterchange?'interchangeIntelligence':'stationIntelligence')));
  container.append(el('strong',null,point.name),el('p',null,route.label+(point.code?' · '+point.code:'')),
   el('p',null,point.provenance?.startsWith('OFFICIAL_KTMB_GTFS')?
   'KTMB GTFS rasmi · koordinat hentian, bukan geometri trek':point.provenance?.startsWith('SECONDARY_ARCGIS_KTM')?
@@ -233,7 +277,9 @@ function showPopup(point){
   }
   container.append(shared);
  }
- state.popup=new maplibregl.Popup({offset:15,maxWidth:'300px'}).setLngLat(point.coordinates).setDOMContent(container).addTo(state.map);
+ for(const rel of relationship.relations){container.append(el('p',null,rel.type+' · '+rel.status+(rel.name?' · '+rel.name:'')));appendSource(container,rel.sourceUrl)}
+ container.append(el('p',null,tr('serviceNotTrack')));appendFocusLineup(container,relationship.routeIds);
+ mountPopup(container,point.coordinates);
 }
 function fitOnce(){
  if(state.zoomDone||!state.mapReady)return;
@@ -276,14 +322,16 @@ function startMap(){
    const layers=state.manifest.map(r=>'mrs10-v8-'+r.id).filter(id=>state.map.getLayer(id));
    if(!layers.length)return;
    const hits=state.map.queryRenderedFeatures([[e.point.x-11,e.point.y-11],[e.point.x+11,e.point.y+11]],{layers});
+   hits.sort((a,b)=>{const pa=state.map.project(a.geometry.coordinates),pb=state.map.project(b.geometry.coordinates);return Math.hypot(pa.x-e.point.x,pa.y-e.point.y)-Math.hypot(pb.x-e.point.x,pb.y-e.point.y)});
    const hit=hits[0];if(!hit){showTrackAt(e);return;}
    const point=findGeo(hit.properties.routeId,hit.properties.id);if(!point)return;
-   state.selected=point.routeId;buildRoutes();buildLineup();showPopup(point);
+   showPopup(point);
   });
  }catch(e){state.networkError=true;showStatus()}
 }
 function styleURL(){return 'https://tiles.openfreemap.org/styles/'+(state.theme==='dark'?'dark':'positron')}
 function reset(){
+ closeFocus();
  state.category='All';state.selected='mrt-kajang';$('search').value='';$('search-results').hidden=true;
  buildFilters();buildLegend();buildRoutes();buildLineup();applyVisibility();
  state.zoomDone=false;fitOnce();
@@ -314,10 +362,11 @@ async function loadGIS(){
 }
 async function init(){
  try{singapore=await window.MRS10V8Singapore.load();physical=await fetch('./data/unified-v8/physical-network.json').then(r=>{if(!r.ok)throw Error('GEOMETRY_HTTP_'+r.status);return r.json()});window.MRS10V8Geometry.validate(physical);state.manifest=[...core.loadManifest(kl,ampang),...integration.routes(),...ktm.routes(),...singapore.routes()]}catch(e){$('map-error').textContent='Registry: '+e.message;return}
- $('approximate').addEventListener('change',()=>{installGeometry();applyVisibility();geometryStatus()});
+ $('details-toggle').addEventListener('click',()=>{const expanded=$('details-toggle').getAttribute('aria-expanded')!=='true';$('details-toggle').setAttribute('aria-expanded',String(expanded));$('map-details').hidden=!expanded});
+ $('approximate').addEventListener('change',()=>{closeFocus();installGeometry();applyVisibility();geometryStatus()});
  $('search').addEventListener('input',updateSearch);
  $('reset').addEventListener('click',reset);
- $('language').addEventListener('click',()=>{state.locale=locales[(locales.indexOf(state.locale)+1)%4];applyLanguage();if(state.popup){state.popup.remove();state.popup=null}});
+ $('language').addEventListener('click',()=>{state.locale=locales[(locales.indexOf(state.locale)+1)%4];applyLanguage();if(state.popup){closeFocus()}});
  $('theme').addEventListener('click',()=>{
   state.theme=state.theme==='dark'?'light':'dark';
   document.documentElement.dataset.theme=state.theme;
@@ -385,7 +434,9 @@ function trackHitTargets(){
  }
  return hits;
 }
-window.MRS10V8Diagnostics=Object.freeze({snapshot:diagnosticSnapshot,focusTrackInspection,trackHitTargets});
+function inspectStation(routeId,id){const p=findGeo(routeId,id);if(!p||!state.map?.isStyleLoaded())return false;state.map.resize();state.map.jumpTo({center:p.coordinates,zoom:15});return true}
+function stationHitTarget(routeId,id){const p=findGeo(routeId,id);if(!p||!state.map)return null;const q=state.map.project(p.coordinates);return {x:q.x,y:q.y}}
+window.MRS10V8Diagnostics=Object.freeze({snapshot:diagnosticSnapshot,focusTrackInspection,trackHitTargets,inspectStation,stationHitTarget,focusSnapshot:()=>({current:focus.current,original:focus.original,layers:layerSnapshot(),approximate:$('approximate').checked})});
 
 const v8texts={
 ms:{desc:'Malaysia V7 + 17 laluan Singapore. Turutan perkhidmatan dan geometri fizikal diasingkan. Shuttle Timur dikecualikan.',direction:'Arah / cabang',approximate:'Paparkan 13 geometri sekunder — anggaran, bukan landasan disahkan',operational:'Beroperasi (registry sumber)',future:'Akan datang / status terhad — bukan pengesahan operasi',partialTopology:'Turutan sebahagian; jurang sumber',sourceTopology:'Turutan berpaut sumber',serviceNotTrack:'Turutan perkhidmatan bukan sambungan fizikal landasan.',secondaryPoint:'Titik GIS sekunder; bukan ukuran rasmi.',coverageNote:'Rekod laluan-stesen, bukan bilangan stesen fizikal unik. Lokasi belum tersedia kekal dalam turutan.',physical:'Segmen fizikal disahkan',approx:'Geometri anggaran',unresolved:'Jajaran lain belum disahkan',track:'Maklumat landasan',verification:'Pengesahan geometri',confidence:'Keyakinan',railwayType:'Jenis landasan',sourceLabel:'Sumber',sourceDate:'Tarikh sumber',unknown:'Belum disahkan',serviceRelation:'Hubungan perkhidmatan',walk:'Pertukaran penumpang; tiada through-track',area:'Kawasan berdekatan; tiada through-track'},
@@ -393,7 +444,8 @@ en:{desc:'Malaysia V7 + 17 Singapore routes. Service order and physical geometry
 zh:{desc:'马来西亚 V7 加新加坡17条线路。服务顺序与实体轨道几何分开。暂不包含东海岸接驳列车。',direction:'方向／支线',approximate:'显示13条次级近似几何；并非已核实轨道',operational:'运营中（来源登记）',future:'未来／有限状态；非运营确认',partialTopology:'部分顺序；来源存在缺口',sourceTopology:'来源关联顺序',serviceNotTrack:'服务顺序不代表实体轨道连接。',secondaryPoint:'次级 GIS 点；非官方测量。',coverageNote:'线路车站记录，不等于独立实体车站数量。无坐标车站仍保留在列表中。',physical:'已核实实体段',approx:'近似几何',unresolved:'其他线路几何未核实',track:'轨道信息',verification:'几何核实',confidence:'可信度',railwayType:'轨道类型',sourceLabel:'来源',sourceDate:'来源日期',unknown:'未核实',serviceRelation:'服务关系',walk:'乘客换乘；无直通轨道',area:'邻近区域；无直通轨道'},
 th:{desc:'มาเลเซีย V7 และสิงคโปร์ 17 เส้นทาง แยกลำดับบริการจากแนวรางจริง ไม่รวมรถรับส่งฝั่งตะวันออก',direction:'ทิศทาง / สาขา',approximate:'แสดงแนวประมาณ 13 รายการจากแหล่งรอง ไม่ใช่รางที่ยืนยันแล้ว',operational:'ให้บริการตามทะเบียนแหล่งข้อมูล',future:'อนาคต / สถานะจำกัด ไม่ใช่การยืนยันเปิดบริการ',partialTopology:'ลำดับบางส่วน มีช่องว่างข้อมูล',sourceTopology:'ลำดับอ้างอิงแหล่งข้อมูล',serviceNotTrack:'ลำดับบริการไม่ใช่การเชื่อมรางจริง',secondaryPoint:'จุด GIS แหล่งรอง ไม่ใช่การสำรวจทางการ',coverageNote:'ระเบียนสถานีต่อเส้นทาง ไม่ใช่จำนวนสถานีจริงที่ไม่ซ้ำ สถานีไม่มีพิกัดยังอยู่ในรายการ',physical:'ช่วงรางจริงที่ยืนยัน',approx:'แนวประมาณ',unresolved:'แนวอื่นยังไม่ยืนยัน',track:'ข้อมูลราง',verification:'การยืนยันแนวราง',confidence:'ความเชื่อมั่น',railwayType:'ประเภทราง',sourceLabel:'แหล่งข้อมูล',sourceDate:'วันที่แหล่งข้อมูล',unknown:'ยังไม่ยืนยัน',serviceRelation:'ความสัมพันธ์บริการ',walk:'เปลี่ยนสายผู้โดยสาร ไม่มีรางเชื่อมตรง',area:'พื้นที่ใกล้เคียง ไม่มีรางเชื่อมตรง'}
 };
-for(const lang of locales)Object.assign(i18n[lang],v8texts[lang]);
+const focusTexts={ms:['Maklumat peta','Maklumat stesen','Maklumat pertukaran'],en:['Map details','Station Intelligence','Interchange Intelligence'],zh:['地图详情','车站信息','换乘信息'],th:['รายละเอียดแผนที่','ข้อมูลสถานี','ข้อมูลจุดเปลี่ยนสาย']};
+for(const lang of locales){Object.assign(i18n[lang],v8texts[lang]);[i18n[lang].mapDetails,i18n[lang].stationIntelligence,i18n[lang].interchangeIntelligence]=focusTexts[lang]}
 function appendSource(host,url){if(!url)return;try{const u=new URL(url);if(u.protocol!=='https:')return;const a=el('a',null,tr('sourceLabel'));a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';host.append(a)}catch{}}
 function appendSGTransfers(host,point){
  for(const r of singapore.relations.filter(r=>r.from===point.id||r.to===point.id)){
@@ -427,13 +479,20 @@ function installInnerDots(){for(const r of state.manifest){
   const c=document.createElement('canvas');c.width=c.height=40;const ctx=c.getContext('2d');ctx.strokeStyle=r.color;ctx.lineWidth=3;ctx.fillStyle=kind==='future'?'#fff3c4':'white';if(kind!=='solid')ctx.setLineDash([5,4]);ctx.beginPath();ctx.arc(20,20,14,0,Math.PI*2);ctx.fill();ctx.stroke();state.map.addImage(name,ctx.getImageData(0,0,40,40));
  }}
  if(!state.map.getLayer(layerId(r.id)+'-ring'))state.map.addLayer({id:layerId(r.id)+'-ring',type:'symbol',source:srcId(r.id),layout:{'icon-image':['case',['get','future'],r.id+'-future',['get','pending'],r.id+'-pending',r.id+'-solid'],'icon-size':0.6,'icon-allow-overlap':true,'icon-ignore-placement':true}});
+ const outer=layerId(r.id)+'-interchange';if(!state.map.getLayer(outer))state.map.addLayer({id:outer,type:'circle',source:srcId(r.id),filter:['==',['get','interchange'],true],paint:{'circle-radius':12,'circle-color':'rgba(0,0,0,0)','circle-stroke-width':2,'circle-stroke-color':r.color}});
  const id=layerId(r.id)+'-inner';if(!state.map.getLayer(id))state.map.addLayer({id,type:'circle',source:srcId(r.id),paint:{'circle-color':r.color,'circle-radius':2,'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.45:1}})}}
 function showTrackAt(e){
  if(!state.map.getLayer('mrs10-v8-geometry'))return;
- const hit=state.map.queryRenderedFeatures([[e.point.x-8,e.point.y-8],[e.point.x+8,e.point.y+8]],{layers:['mrs10-v8-geometry']})[0];if(!hit)return;
- const s=physical.segments.find(s=>s.segmentId===hit.properties.segmentId),host=el('div');host.append(el('strong',null,tr('track')));
- for(const [label,value] of [['railwayType',s.railwayType],['verification',s.geometryVerification],['confidence',s.confidence],['sourceDate',s.sourceDate]])host.append(el('p',null,tr(label)+': '+(value||tr('unknown'))));
- appendSource(host,s.sourceUrl);state.popup?.remove();state.popup=new maplibregl.Popup({maxWidth:'300px'}).setLngLat(e.lngLat).setDOMContent(host).addTo(state.map);
+ const hit=state.map.queryRenderedFeatures([[e.point.x-12,e.point.y-12],[e.point.x+12,e.point.y+12]],{layers:['mrs10-v8-geometry']})[0];if(!hit)return;
+ const s=physical.segments.find(s=>s.segmentId===hit.properties.segmentId);if(!s)return;
+ const segmentIds=window.MRS10V81Focus.component(physical,s.segmentId);
+ const routeIds=[...new Set(physical.segments.filter(x=>segmentIds.includes(x.segmentId)).flatMap(x=>x.routeIds))];
+ focus.enter({mode:'TRACK_FOCUS',segmentIds,routeIds,segmentId:s.segmentId});
+ const host=el('div');host.append(el('strong',null,tr('track')),el('p',null,s.segmentId));
+ for(const [label,value] of [['railwayType',s.railwayType],['verification',s.geometryVerification],['confidence',s.confidence],['sourceDate',s.sourceDate]])host.append(el('p',null,tr(label)+': '+(value??'UNKNOWN')));
+ for(const key of ['trackCount','gauge','electrification','bridge','tunnel','operationalStatus','topologyValidation'])host.append(el('p',null,key+': '+(s[key]==null?'UNKNOWN':typeof s[key]==='object'?JSON.stringify(s[key]):s[key])));
+ host.append(el('p',null,tr('serviceRelation')+': '+(routeIds.join(' / ')||'UNKNOWN')),el('p',null,'Station–track anchors: UNKNOWN'));
+ appendSource(host,s.sourceUrl);mountPopup(host,e.lngLat);
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();

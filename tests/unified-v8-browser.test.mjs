@@ -11,6 +11,7 @@ for(const engine of ['chromium','webkit']){
   try{
    await page.goto(url,{waitUntil:'domcontentloaded'});
    await page.waitForFunction(()=>{const s=window.MRS10V8Diagnostics?.snapshot();return s?.stage==='DONE'&&s.styleLoaded&&s.webglReady&&s.layerCount===33},null,{timeout:90000});
+   await page.locator('#details-toggle').click();
    const s=await snap();assert.equal(s.mapInstances,1);assert.equal(s.singaporeSourceRecords,273);assert.equal(s.borderRecords,4);
    const baseline={'mrt-kajang':29,'lrt-kelana-jaya':37,'lrt-ampang':18,'mrt-putrajaya':36,'lrt-sri-petaling':29,'kl-monorail':11,'erl-klia-ekspres':3,'erl-klia-transit':6,'ktmb-ets-v1':38,'ktmb-ert':23};
    for(const [id,n] of Object.entries(baseline))assert.equal(s.perRoute[id].matched,n,id);
