@@ -19,6 +19,7 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit
       - run: npm test
       - run: node --test tests/unified-v6-regression.test.cjs tests/unified-v7-regression.test.cjs tests/unified-v8-regression.test.cjs
+      - run: node scripts/audit-unified-v8-networks.cjs
       - run: node scripts/build-unified-v8.cjs
       - run: npm install --no-save --ignore-scripts playwright@1.56.1
       - run: npx playwright install --with-deps webkit
@@ -26,9 +27,15 @@ jobs:
         run: |
           python3 -m http.server 8765 --directory dist-unified-v8 > /tmp/v8-server.log 2>&1 &
           node tests/unified-v8-browser.test.mjs
+      - name: Verify immutable deployed preview in Chromium and WebKit
+        env:
+          V8_URL: https://mrs10-p01-unified-v8-sg-geometry-a1prol8ss-1993khairuladam-3016.vercel.app/unified-map-v8.html
+        run: |
+          mv artifacts/unified-v8-browser artifacts/unified-v8-local-browser
+          node tests/unified-v8-browser.test.mjs
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: unified-v8-browser-evidence
-          path: artifacts/unified-v8-browser/
+          path: artifacts/unified-v8*browser/
           retention-days: 7
