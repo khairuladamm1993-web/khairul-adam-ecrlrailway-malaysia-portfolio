@@ -1,0 +1,105 @@
+{
+  "asOf": "2026-10-27",
+  "baselineV7": "c64aa0b19b68aeafbaeb03e568e5cd07e7e4790f",
+  "singaporeSource": "81c8ef8af2b1d2354ad1ffd56c3e54f0ee7ca697",
+  "files": [
+    {
+      "path": "singapore/integration-manifest.json",
+      "sha256": "8c626ca28c08d2dfc11c2dc87876e8e30ea2664b2976d0b008c53bbda9738da7"
+    },
+    {
+      "path": "singapore/data/route-topology.json",
+      "sha256": "b9551139f9de862f746219d2fbf2a8f204776e5a239d15a9085777dd2acc1f94"
+    },
+    {
+      "path": "singapore/data/stations.geojson",
+      "sha256": "d308b6067b6720e1622973137d5737c3e1eebce8d7e3bc6fc5986462ca1c8616"
+    },
+    {
+      "path": "singapore/data/cross-border-terminals.geojson",
+      "sha256": "558372d6f65d13681dd849327722c0f9bc9116fa880b1540c64112999e8cee93"
+    },
+    {
+      "path": "singapore/data/tracks.geojson",
+      "sha256": "716bd1c4d9f24a6607402a1871d3bddbbd48f5d80706f98fea4bc8257af08102"
+    },
+    {
+      "path": "data/unified-v8/osm-border-raw.json",
+      "sha256": "1cf274f87de109cb38272c2462800b294da15428cfc076f9fa1848deea8d20de"
+    }
+  ],
+  "geometrySources": [
+    "https://github.com/cheeaun/sgraildata/blob/master/data/raw/tel-line.json",
+    "https://github.com/cheeaun/sgraildata/blob/master/data/raw/dtl-way.json",
+    "https://github.com/cheeaun/sgraildata/blob/master/data/raw/punggol-lrt-east-loop.json",
+    "https://www.openstreetmap.org/way/178591205",
+    "https://www.openstreetmap.org/way/257190243",
+    "https://www.openstreetmap.org/way/257190245",
+    "https://www.openstreetmap.org/way/257190246",
+    "https://www.openstreetmap.org/way/257190247",
+    "https://www.openstreetmap.org/way/257190248",
+    "https://www.openstreetmap.org/way/257190249",
+    "https://www.openstreetmap.org/way/257190250",
+    "https://www.openstreetmap.org/way/257190251",
+    "https://www.openstreetmap.org/way/257190252",
+    "https://www.openstreetmap.org/way/257190253",
+    "https://www.openstreetmap.org/way/257190254",
+    "https://www.openstreetmap.org/way/257190255",
+    "https://www.openstreetmap.org/way/257190256",
+    "https://www.openstreetmap.org/way/257190257",
+    "https://www.openstreetmap.org/way/490878228",
+    "https://www.openstreetmap.org/way/490878229",
+    "https://www.openstreetmap.org/way/545059768",
+    "https://www.openstreetmap.org/way/564917542",
+    "https://www.openstreetmap.org/way/760479331",
+    "https://www.openstreetmap.org/way/760479332",
+    "https://www.openstreetmap.org/way/760479333",
+    "https://www.openstreetmap.org/way/760479334",
+    "https://www.openstreetmap.org/way/760479335",
+    "https://www.openstreetmap.org/way/760479336",
+    "https://www.openstreetmap.org/way/768424509",
+    "https://www.openstreetmap.org/way/925109454",
+    "https://www.openstreetmap.org/way/925109455",
+    "https://www.openstreetmap.org/way/932909311",
+    "https://www.openstreetmap.org/way/932909312",
+    "https://www.openstreetmap.org/way/932909313",
+    "https://www.openstreetmap.org/way/1003088316",
+    "https://www.openstreetmap.org/way/1150177132",
+    "https://www.openstreetmap.org/way/1296328609",
+    "https://www.openstreetmap.org/way/1296328610",
+    "https://www.openstreetmap.org/way/1315150130",
+    "https://www.openstreetmap.org/way/1389592586",
+    "https://www.openstreetmap.org/way/1389592587",
+    "https://www.openstreetmap.org/way/1389592588",
+    "https://www.openstreetmap.org/way/1389592589",
+    "https://www.openstreetmap.org/way/1389592590",
+    "https://www.openstreetmap.org/way/1389592591",
+    "https://www.openstreetmap.org/way/1389592592",
+    "https://www.openstreetmap.org/way/1389592593",
+    "https://www.openstreetmap.org/way/1389592594",
+    "https://www.openstreetmap.org/way/1389592602",
+    "https://www.openstreetmap.org/way/1455806847",
+    "https://www.openstreetmap.org/way/1455806848",
+    "https://www.openstreetmap.org/way/1455806849",
+    "https://www.openstreetmap.org/way/1455806850",
+    "https://www.openstreetmap.org/way/1455806851",
+    "https://www.openstreetmap.org/way/1455806852",
+    "https://www.openstreetmap.org/way/1455806853",
+    "https://www.openstreetmap.org/way/1455806854",
+    "https://www.openstreetmap.org/way/1482579601",
+    "https://www.openstreetmap.org/way/1496998179"
+  ],
+  "classes": [
+    "OFFICIAL_VERIFIED",
+    "OSM_TOPOLOGY_MATCHED",
+    "SECONDARY_APPROXIMATE",
+    "UNRESOLVED"
+  ],
+  "notes": [
+    "OSM retrieved date is not a survey date.",
+    "Node adjacency proves OSM graph connectivity, not official engineering verification.",
+    "No station-to-physical-track anchor is asserted.",
+    "OSM ref RTS is a source attribution, not proof the complete passenger service path is resolved.",
+    "Shared physical segments stored once. Route associations can be many-to-one."
+  ]
+}

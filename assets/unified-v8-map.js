@@ -351,7 +351,12 @@ function diagnosticSnapshot(){
   layerCount:Object.values(rows).filter(r=>r.present).length,sourceMatched:state.points.size,
   geometry:geometrySnapshot(),singaporeSourceRecords:singapore?.sourceRecordCount,borderRecords:singapore?.borderRecordCount,mapInstances:state.map?1:0,stage:state.pending?'LOADING':'DONE',category:state.category});
 }
-window.MRS10V8Diagnostics=Object.freeze({snapshot:diagnosticSnapshot});
+function trackHitTargets(){
+ const map=state.map;if(!map?.isStyleLoaded())return [];
+ const rect=map.getCanvas().getBoundingClientRect();const hits=[];
+ for(const s of physical.segments.filter(s=>s.routeIds.includes('sg-RTS'))){for(const c of s.geometry.coordinates){const p=map.project(c);if(p.x>20&&p.y>20&&p.x<rect.width-20&&p.y<rect.height-20)hits.push({x:p.x,y:p.y,segmentId:s.segmentId})}}return hits;
+}
+window.MRS10V8Diagnostics=Object.freeze({snapshot:diagnosticSnapshot,trackHitTargets});
 
 const v8texts={
 ms:{desc:'Malaysia V7 + 17 laluan Singapore. Turutan perkhidmatan dan geometri fizikal diasingkan. Shuttle Timur dikecualikan.',direction:'Arah / cabang',approximate:'Paparkan 13 geometri sekunder — anggaran, bukan landasan disahkan',operational:'Beroperasi (registry sumber)',future:'Akan datang / status terhad — bukan pengesahan operasi',partialTopology:'Turutan sebahagian; jurang sumber',sourceTopology:'Turutan berpaut sumber',serviceNotTrack:'Turutan perkhidmatan bukan sambungan fizikal landasan.',secondaryPoint:'Titik GIS sekunder; bukan ukuran rasmi.',coverageNote:'Rekod laluan-stesen, bukan bilangan stesen fizikal unik. Lokasi belum tersedia kekal dalam turutan.',physical:'Segmen fizikal disahkan',approx:'Geometri anggaran',unresolved:'Jajaran lain belum disahkan',track:'Maklumat landasan',verification:'Pengesahan geometri',confidence:'Keyakinan',railwayType:'Jenis landasan',sourceLabel:'Sumber',sourceDate:'Tarikh sumber',unknown:'Belum disahkan',serviceRelation:'Hubungan perkhidmatan',walk:'Pertukaran penumpang; tiada through-track',area:'Kawasan berdekatan; tiada through-track'},
