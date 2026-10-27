@@ -241,7 +241,7 @@ function updateMapLayer(){
 }
 function applyVisibility(){
  if(focus.current.mode!=='NORMAL'){focus.reapply();return}
- if(!state.map||!state.map.isStyleLoaded())return;
+ if(!state.map?.getLayer('mrs10-v8-geometry'))return;
  for(const r of state.manifest){
   const id=layerId(r.id);
   if(state.map.getLayer(id+'-interchange'))state.map.setLayoutProperty(id+'-interchange','visibility',state.category==='All'||state.category===r.category?'visible':'none');
