@@ -1,6 +1,6 @@
 {
   "id": "mrs10-p01-ecrl-gis-v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "integrationStatus": "ISOLATED_NOT_MERGED",
   "route": "./ecrl-gis-v1.html",
   "dataEntry": "./assets/ecrl-gis-v1/data.js",
@@ -60,7 +60,9 @@
     "integratedCandidateQA": "NOT_RUN",
     "ownerSafariV11": "PENDING_NEW_PREVIEW",
     "multilingualV11": "PENDING_NEW_QA",
-    "browserV11": "PENDING_NEW_QA"
+    "browserV11": "PENDING_NEW_QA",
+    "browserV12": "PENDING_NEW_QA",
+    "ownerSafariV12": "PENDING_OWNER_VISUAL_REVIEW"
   },
   "prohibitedMerges": [
     "main",
@@ -136,7 +138,9 @@
     },
     "ownerSafariV11": "PENDING",
     "dataV11": "PENDING",
-    "browserV11": "PENDING"
+    "browserV11": "PENDING",
+    "browserV12": "PENDING",
+    "dataV12": "PENDING"
   },
   "integrationReadiness": {
     "auditedOn": "2026-10-27",
@@ -182,5 +186,13 @@
       "verifiedCrossingLoop": "OUTER_SQUARE_INNER_CIRCLE_VERIFIED_ONLY"
     },
     "caution": "2017 EIA proposed coordinates are NOT evidence of current 2026 C2 station site; port facility grid points NOT railway interfaces; no physical railway line or port rail track geometry"
+  },
+  "visualDesign": {
+    "defaultBasemapStyle": "https://tiles.openfreemap.org/styles/positron",
+    "optionalBasemapStyle": "https://tiles.openfreemap.org/styles/liberty",
+    "default": "MUTED_ROADS_RAIL_ASSET_FOCUS",
+    "switch": "REVERSIBLE_BUTTON_4_LANGUAGES",
+    "mapStyleLayerRecovery": "style.load and idle",
+    "noNewPhysicalRailwayGeometry": true
   }
 }

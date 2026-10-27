@@ -13,7 +13,8 @@ note:'Nota',select:'Pilih penanda atau aset untuk butiran',close:'Tutup',back:'T
 unknown:'TIDAK DIKETAHUI',referenceOnly:'LOKASI RUJUKAN',noPoint:'TIDAK ADA TITIK SAH',loading:'Memuatkan peta…',mapError:'Basemap gagal dimuatkan; senarai aset masih boleh digunakan.',
 passenger:'Penumpang',passengerFreight:'Penumpang & kargo',futurePassenger:'Penumpang (masa hadapan)',
 historicRef:"SKIM EIA 2017 (BUKAN STESEN TERKINI)",portArea:"KAWASAN PELABUHAN (BUKAN TREK ECRL)",proxyArea:"KAWASAN PUNCAK ALAM SAHAJA; TAPAK YARD TIDAK DIKETAHUI",legendHistoric:"Rujukan EIA 2017 (bulat jingga putus)",legendPort:"Rujukan kawasan pelabuhan (bulat ungu putus)",referenceWarning:"AMARAN: Koordinat EIA 2017 ialah cadangan sejarah; mungkin berbeza daripada stesen C2 semasa. Bukan koordinat landasan atau peron yang disahkan.",portReferenceWarning:"Titik ini rujukan grid kemudahan maritim PKA, BUKAN terminal atau trek ECRL.",yardFocusWarning:"Fokus ini ialah lokasi cadangan Puncak Alam EIA 2017 sahaja, BUKAN lokasi freight yard.",referenceBadge:"Rujukan kawasan sahaja",
- notOperational:'Belum operasi awam',legal:'Sumber: MRL, Dewan Negeri Selangor dan MIDA. Koordinat rujukan lama bukan pengukuran trek. Tidak untuk pengendalian tren.'
+ basemapQuiet:"Jalan malap",basemapStandard:"Jalan biasa",basemapSwitch:"Tukar gaya asas peta",
+notOperational:'Belum operasi awam',legal:'Sumber: MRL, Dewan Negeri Selangor dan MIDA. Koordinat rujukan lama bukan pengukuran trek. Tidak untuk pengendalian tren.'
 },
 en:{
 title:'ECRL · Infrastructure Intelligence',subtitle:'Source-led educational map · not an operational chart',
@@ -28,7 +29,8 @@ note:'Note',select:'Select a marker or asset for details',close:'Close',back:'Cl
 unknown:'UNKNOWN',referenceOnly:'REFERENCE LOCATION',noPoint:'NO VALID POINT',loading:'Loading map…',mapError:'Basemap failed to load; asset list remains accessible.',
 passenger:'Passenger',passengerFreight:'Passenger & freight',futurePassenger:'Future passenger',
 historicRef:"2017 EIA PLAN (NOT CURRENT STATION SITE)",portArea:"MARITIME PORT AREA (NOT ECRL TRACK)",proxyArea:"PUNCAK ALAM AREA ONLY; YARD SITE UNKNOWN",legendHistoric:"2017 EIA site reference (dashed orange circle)",legendPort:"Maritime port-area reference (dashed purple circle)",referenceWarning:"WARNING: 2017 EIA coordinates represent an old plan and may differ from current C2 sites. Not surveyed station, track or platform GIS.",portReferenceWarning:"The point is a PKA maritime facility grid reference, NOT an ECRL track, junction or rail terminus.",yardFocusWarning:"Map focuses on the historical 2017 Puncak Alam proposal only, NOT the freight yard itself.",referenceBadge:"Area reference only",
- notOperational:'Not publicly operating',legal:'Sources: MRL, Selangor State Assembly and MIDA. Legacy reference coordinates are not track surveys. Not for train operation.'
+ basemapQuiet:"Muted roads",basemapStandard:"Standard roads",basemapSwitch:"Switch basemap style",
+notOperational:'Not publicly operating',legal:'Sources: MRL, Selangor State Assembly and MIDA. Legacy reference coordinates are not track surveys. Not for train operation.'
 },
 zh:{
 title:'东海岸铁路 · 基础设施信息',subtitle:'有来源依据的教育地图 · 非运营行车图',
@@ -43,7 +45,8 @@ note:'备注',select:'选择地图标记或设施查看详情',close:'关闭',ba
 unknown:'未知',referenceOnly:'参考位置',noPoint:'无有效坐标',loading:'正在加载地图…',mapError:'底图加载失败，仍可使用设施列表。',
 passenger:'客运',passengerFreight:'客运及货运',futurePassenger:'未来客运',
 historicRef:"2017年EIA历史规划点（非现行车站）",portArea:"港区海事设施（非ECRL铁路）",proxyArea:"仅参考Puncak Alam地区，货运场位置未知",legendHistoric:"2017年EIA规划参考点（橙色虚线圆）",legendPort:"海港区域参考点（紫色虚线圆）",referenceWarning:"注意：2017年EIA坐标属于历史方案，可能与现行C2站址不同，并非实际站台、车站或轨道测量坐标。",portReferenceWarning:"此点来自巴生港务局海事设施区位网格，并非ECRL轨道、道岔或铁路终点。",yardFocusWarning:"地图仅聚焦2017年Puncak Alam历史规划点，并非货运场位置。",referenceBadge:"仅供区域参考",
- notOperational:'尚未公开运营',legal:'来源：MRL、雪兰莪州议会及 MIDA。历史参考坐标不属于轨道测量数据，不得用于列车运营。'
+ basemapQuiet:"弱化道路",basemapStandard:"普通道路",basemapSwitch:"切换底图样式",
+notOperational:'尚未公开运营',legal:'来源：MRL、雪兰莪州议会及 MIDA。历史参考坐标不属于轨道测量数据，不得用于列车运营。'
 },
 th:{
 title:'ECRL · ข้อมูลโครงสร้างพื้นฐาน',subtitle:'แผนที่การศึกษาที่อ้างอิงแหล่งข้อมูล · ไม่ใช่แผนที่ปฏิบัติการ',
@@ -58,7 +61,8 @@ note:'หมายเหตุ',select:'เลือกหมุดหรือ�
 unknown:'ไม่ทราบ',referenceOnly:'ตำแหน่งอ้างอิง',noPoint:'ไม่มีพิกัดยืนยัน',loading:'กำลังโหลดแผนที่…',mapError:'โหลดแผนที่ฐานไม่สำเร็จ แต่ยังใช้รายการทรัพย์สินได้',
 passenger:'ผู้โดยสาร',passengerFreight:'ผู้โดยสารและสินค้า',futurePassenger:'ผู้โดยสารในอนาคต',
 historicRef:"จุดแผน EIA ปี 2017 (ไม่ใช่สถานีปัจจุบัน)",portArea:"พื้นที่ท่าเรือ (ไม่ใช่ราง ECRL)",proxyArea:"พื้นที่ Puncak Alam เท่านั้น ไม่ทราบจุดลานสินค้า",legendHistoric:"จุดอ้างอิง EIA 2017 (วงกลมประสีส้ม)",legendPort:"พื้นที่ท่าเรืออ้างอิง (วงกลมประสีม่วง)",referenceWarning:"คำเตือน: พิกัด EIA ปี 2017 เป็นแผนเดิม อาจต่างจากสถานี C2 ปัจจุบัน ไม่ใช่ตำแหน่งสถานี ชานชาลา หรือรางที่สำรวจแล้ว",portReferenceWarning:"หมุดเป็นพิกัดพื้นที่ทางทะเลจาก PKA ไม่ใช่รางหรือปลายทางรถไฟ ECRL",yardFocusWarning:"จุดโฟกัสเป็นข้อเสนอ EIA ปี 2017 ของ Puncak Alam เท่านั้น ไม่ใช่ตำแหน่งลานขนส่งสินค้า",referenceBadge:"เป็นจุดอ้างอิงพื้นที่เท่านั้น",
- notOperational:'ยังไม่เปิดบริการสาธารณะ',legal:'แหล่งข้อมูล: MRL, สภารัฐสลังงอร์ และ MIDA พิกัดอ้างอิงเดิมไม่ใช่การสำรวจทางรถไฟ ห้ามใช้ปฏิบัติการรถไฟ'
+ basemapQuiet:"ถนนสีอ่อน",basemapStandard:"ถนนปกติ",basemapSwitch:"เปลี่ยนรูปแบบแผนที่",
+notOperational:'ยังไม่เปิดบริการสาธารณะ',legal:'แหล่งข้อมูล: MRL, สภารัฐสลังงอร์ และ MIDA พิกัดอ้างอิงเดิมไม่ใช่การสำรวจทางรถไฟ ห้ามใช้ปฏิบัติการรถไฟ'
 }};
 g.MRS10ECRLI18N=Object.freeze(Object.fromEntries(Object.entries(dict).map(([k,v])=>[k,Object.freeze(v)])));
 })(window);

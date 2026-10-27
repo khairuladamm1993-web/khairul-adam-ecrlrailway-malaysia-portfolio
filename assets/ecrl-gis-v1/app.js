@@ -5,10 +5,11 @@ const get=id=>d.getElementById(id);
 if(!D||!I){get('map-status').textContent='ECRL data unavailable';return;}
 const A=[...D.stations,...D.loops,...D.facilities];
 const byId=new Map(A.map(a=>[a.assetId,a]));
+const basemapStyles=Object.freeze({quiet:'https://tiles.openfreemap.org/styles/positron',standard:'https://tiles.openfreemap.org/styles/liberty'});
 const geoPoint=a=>a?.point||a?.referencePoint||null;
 const focusPoint=a=>geoPoint(a)||(a?.focusReferenceAssetId?geoPoint(byId.get(a.focusReferenceAssetId)):null);
 const geoLabel=a=>a?.referenceKind==='HISTORICAL_EIA2017_PROPOSED_STATION'?T('historicRef'):a?.referenceKind==='PORT_FACILITY_AREA_PKA22'?T('portArea'):a?.focusReferenceAssetId?T('proxyArea'):a?.point?T('referenceOnly'):T('noPoint');
-const state={lang:'ms',theme:'light',scope:'C2',search:'',selectedId:null,map:null,markers:new Map(),mapReady:false,listOpen:true};
+const state={lang:'ms',theme:'light',basemap:'quiet',scope:'C2',search:'',selectedId:null,map:null,markers:new Map(),mapReady:false,listOpen:true};
 const keys={
  STATION:'station',HISTORICAL_PL_DESIGNATION:'crossing',FREIGHT_YARD:'yard',PORT_INTERFACE:'ports',DEPOT:'facility',TUNNEL:'tunnel',
  PASSENGER:'passenger',PASSENGER_FREIGHT:'passengerFreight',FUTURE_PASSENGER:'futurePassenger',
@@ -110,11 +111,26 @@ function renderList(){
   b.append(name,small);b.addEventListener('click',()=>choose(a.assetId,true));list.appendChild(b);
  }
 }
+function syncBasemapControl(){
+ const b=get('basemap-style');
+ b.textContent=T(state.basemap==='quiet'?'basemapQuiet':'basemapStandard');
+ b.setAttribute('aria-pressed',String(state.basemap==='quiet'));
+ b.setAttribute('aria-label',T('basemapSwitch')+' · '+b.textContent);
+}
+function setBasemap(next){
+ if(!basemapStyles[next]||next===state.basemap)return;
+ state.basemap=next;
+ syncBasemapControl();
+ if(!state.map)return;
+ state.mapReady=false;
+ get('map-status').textContent=T('loading');
+ try{state.map.setStyle(basemapStyles[next]);}catch(e){get('map-status').textContent=T('mapError');}
+}
 function translate(){
  d.documentElement.lang=state.lang;
  get('app-title').textContent=T('title');get('app-subtitle').textContent=T('subtitle');
  get('asset-search').placeholder=T('search');get('asset-search').setAttribute('aria-label',T('search'));
- get('theme').setAttribute('aria-label',T('theme'));get('reset').setAttribute('aria-label',T('reset'));
+ get('theme').setAttribute('aria-label',T('theme'));get('reset').setAttribute('aria-label',T('reset'));syncBasemapControl();
  get('show-list').setAttribute('aria-label',T('list'));get('legend-title').textContent=T('legend');
  get('legend-station').textContent=T('regular');get('legend-historic').textContent=T('legendHistoric');get('legend-port').textContent=T('legendPort');get('legend-loop').textContent=T('verified');get('legend-pending').textContent=T('pending');
  get('legend-notice').textContent=T('noLoops');get('legal').textContent=T('legal');
@@ -165,10 +181,20 @@ function renderMarkers(){
 function initMap(){
  if(!ML||typeof ML.Map!=='function'){get('map-status').textContent=T('mapError');return;}
  try{
-  state.map=new ML.Map({container:'ecrl-map',style:'https://tiles.openfreemap.org/styles/liberty',center:[101.67,3.33],zoom:8.4,
+  state.map=new ML.Map({container:'ecrl-map',style:basemapStyles[state.basemap],center:[101.67,3.33],zoom:8.4,
    attributionControl:true,cooperativeGestures:false,maxZoom:17});
   state.map.addControl(new ML.NavigationControl({showCompass:false}),'bottom-left');
-  state.map.on('style.load',()=>{try{syncGeoJSON();}catch(e){get('map-status').textContent=T('mapError');}});
+  state.map.on('style.load',()=>{try{
+    if(state.map.isStyleLoaded())syncGeoJSON();
+    state.mapReady=true;get('map-status').textContent=T('noTrack');
+   }catch(e){get('map-status').textContent=T('mapError');}});
+   state.map.on('idle',()=>{try{
+    if(!state.map.isStyleLoaded())return;
+    state.mapReady=true;
+    // After a setStyle(), style.load may precede full style readiness on WebKit.
+    if(!state.map.getSource(sourceName)||!state.map.getLayer(layerName))syncGeoJSON();
+    get('map-status').textContent=T('noTrack');
+   }catch(e){get('map-status').textContent=T('mapError');}});
   state.map.on('load',()=>{state.mapReady=true;syncGeoJSON();renderMarkers();fitScope();get('map-status').textContent=T('noTrack');});
   state.map.on('error',e=>{if(!state.mapReady)get('map-status').textContent=T('mapError');});
  }catch(e){get('map-status').textContent=T('mapError');}
@@ -177,6 +203,7 @@ function boot(){
  get('asset-search').addEventListener('input',e=>{state.search=e.target.value;renderList();});
  d.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>{state.lang=b.dataset.lang;translate();renderMarkers();}));
  get('theme').addEventListener('click',()=>{state.theme=state.theme==='light'?'dark':'light';d.documentElement.dataset.theme=state.theme;});
+ get('basemap-style').addEventListener('click',()=>setBasemap(state.basemap==='quiet'?'standard':'quiet'));
  get('reset').addEventListener('click',()=>{state.search='';get('asset-search').value='';state.selectedId=null;renderDetail();setScope('C2');});
  get('scope-c2').addEventListener('click',()=>setScope('C2'));get('scope-all').addEventListener('click',()=>setScope('ALL'));
  get('detail-close').addEventListener('click',()=>{state.selectedId=null;renderDetail();renderList();});
@@ -184,7 +211,7 @@ function boot(){
  get('legend-toggle').addEventListener('click',()=>{const open=get('legend-body').hidden;get('legend-body').hidden=!open;get('legend-toggle').setAttribute('aria-expanded',String(open));});
  translate();initMap();
  w.MRS10ECRLV1QA=Object.freeze({getSnapshot:()=>({
- version:D.version,language:state.lang,theme:state.theme,scope:state.scope,
+ version:D.version,language:state.lang,theme:state.theme,basemap:state.basemap,basemapStyleUrl:basemapStyles[state.basemap],scope:state.scope,
  selectedAssetId:state.selectedId,stationCount:D.stations.length,c2Stations:D.stations.filter(a=>a.section==='C2').length,
  verifiedLoops:D.loops.filter(a=>a.verificationStatus==='CONFIRMED').length,pendingLoops:D.loops.filter(a=>a.verificationStatus==='PENDING_VALIDATION').length,
  physicalTrackFeatures:0,referenceMarkers:state.markers.size,c2PlanningReferences:D.stations.filter(a=>a.section==='C2'&&a.referencePoint).length,portAreaReferences:D.facilities.filter(a=>a.section==='D'&&a.referencePoint).length,mapReady:state.mapReady,styleLoaded:!!state.map?.isStyleLoaded(),

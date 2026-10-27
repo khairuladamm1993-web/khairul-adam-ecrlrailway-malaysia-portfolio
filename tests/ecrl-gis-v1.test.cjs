@@ -82,7 +82,8 @@ test('Multilingual buttons and persistent UX use the isolated MapLibre viewer',(
  for(const lang of ['ms','en','zh','th'])assert.match(html,new RegExp('data-lang="'+lang+'"'));
  assert.match(js,/state\.selectedId=id/);
  assert.match(js,/state\.lang=b\.dataset\.lang;translate\(\);renderMarkers\(\)/);
- assert.doesNotMatch(js,/setStyle\s*\(/);
+ assert.match(js,/setStyle\s*\(/);
+ assert.match(js,/basemapStyles\[state\.basemap\]/);
  assert.doesNotMatch(js,/ML\.supported\s*\(/);
  assert.match(js,/getSource\(sourceName\)/);
  assert.match(html,/tiles\.openfreemap\.org|assets\/ecrl-gis-v1\/app\.js/);
@@ -117,4 +118,18 @@ test('Four languages provide EIA and PKA non-survey warnings and a distinct mark
  for(const shape of ['historical-reference','port-reference'])assert.ok(css.includes('data-shape="'+shape+'"'));
  assert.match(app,/const geoPoint=a=>a\?\.point\|\|a\?\.referencePoint\|\|null/);
  assert.match(app,/const focusPoint=a=>/);
+});
+
+test('Quiet OpenFreeMap Positron replaces high-contrast roads by default with reversible Liberty choice',()=>{
+ const js=file('assets/ecrl-gis-v1/app.js'),html=file('ecrl-gis-v1.html'),css=file('assets/ecrl-gis-v1/styles.css');
+ assert.match(js,/basemap:'quiet'/);
+ assert.match(js,/quiet:'https:\/\/tiles\.openfreemap\.org\/styles\/positron'/);
+ assert.match(js,/standard:'https:\/\/tiles\.openfreemap\.org\/styles\/liberty'/);
+ assert.match(js,/setStyle\(basemapStyles\[next\]\)/);
+ assert.match(js,/state\.map\.on\('idle'/);
+ assert.match(js,/!state\.map\.getSource\(sourceName\)\|\|!state\.map\.getLayer\(layerName\)/);
+ assert.match(html,/id="basemap-style"/);
+ assert.match(css,/\.basemap-choices button/);
+ for(const lang of ['ms','en','zh','th'])for(const key of ['basemapQuiet','basemapStandard','basemapSwitch'])assert.ok(I[lang][key]);
+ assert.equal(D.segments.every(s=>s.geometry===null),true);
 });

@@ -69,6 +69,23 @@ const cases=[{name:'desktop',width:1440,height:900,isMobile:false,hasTouch:false
       assert.equal(await page.locator('#detail-panel').isVisible(),true);
       row.languages.push(lang);
     }
+    // Switch styles twice: state, layers, markers and selection must persist.
+    assert.equal(await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot().basemap),'quiet');
+    assert.match(await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot().basemapStyleUrl),/positron$/);
+    await page.locator('#basemap-style').click();
+    await page.waitForFunction(()=>{const x=window.MRS10ECRLV1QA.getSnapshot();return x.basemap==='standard'&&x.styleLoaded&&x.sourcePresent&&x.layerPresent&&x.mapReady;},null,{timeout:20000});
+    let switched=await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot());
+    assert.equal(switched.selectedAssetId,'ecrl-stn-17');
+    assert.equal(switched.referenceMarkers,7);
+    assert.equal(switched.physicalTrackFeatures,0);
+    assert.match(switched.basemapStyleUrl,/liberty$/);
+    await page.locator('#basemap-style').click();
+    await page.waitForFunction(()=>{const x=window.MRS10ECRLV1QA.getSnapshot();return x.basemap==='quiet'&&x.styleLoaded&&x.sourcePresent&&x.layerPresent&&x.mapReady;},null,{timeout:20000});
+    switched=await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot());
+    assert.equal(switched.referenceMarkers,7);
+    assert.equal(switched.selectedAssetId,'ecrl-stn-17');
+    assert.equal(switched.language,'th');
+    assert.match(switched.basemapStyleUrl,/positron$/);
     await page.locator('#scope-all').click();
     await page.waitForTimeout(450);
     const full=await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot());
