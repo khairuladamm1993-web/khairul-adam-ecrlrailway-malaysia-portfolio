@@ -51,8 +51,8 @@
     "localityReference": "DISCLOSED",
     "physicalTrack": "NOT_AVAILABLE",
     "loopGeometries": "NOT_AVAILABLE",
-    "multilingualStatic": "READY_FOR_TEST",
-    "browserQA": "PENDING",
+    "multilingualStatic": "PASS_16_OF_16",
+    "browserQA": "PASS_6_OF_6_CHROMIUM_WEBKIT",
     "ownerSafariUAT": "PENDING",
     "unifiedIntegration": "NOT_AUTHORIZED",
     "portScheme": "OFFICIAL_APPROVED_SCOPE_NO_SURVEYED_GEOMETRY"
@@ -100,5 +100,26 @@
     "previousDualGaugeProposal": "SUPERSEDED",
     "sourceId": "MOT_D25",
     "trackGeometry": null
+  },
+  "qaEvidence": {
+    "dataRun": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40446497187",
+    "browserRun": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40446497111",
+    "browserScreenshotArtifact": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40446497111/artifacts/12708322992",
+    "browserMatrix": [
+      "chromium-desktop",
+      "chromium-ipad",
+      "chromium-iphone",
+      "webkit-desktop",
+      "webkit-ipad",
+      "webkit-iphone"
+    ],
+    "languagesPerCase": [
+      "ms",
+      "en",
+      "zh",
+      "th"
+    ],
+    "testingTarget": "GitHub Actions local web server; Vercel remote UI not externally browser-verified",
+    "browserSourceCommit": "7a28f1b4e74b18cc67b969d0867a6ac5872c176f"
   }
 }
