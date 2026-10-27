@@ -16,7 +16,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Run isolated ECRL dataset QA
-        run: node --test tests/ecrl-gis-v1.test.cjs
+        run: node --test tests/ecrl-gis-v1.test.cjs tests/ecrl-gis-v1-readiness.test.cjs
       - name: Parse browser modules
         run: |
           node --check assets/ecrl-gis-v1/data.js

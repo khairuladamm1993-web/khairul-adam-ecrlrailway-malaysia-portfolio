@@ -53,9 +53,11 @@
     "loopGeometries": "NOT_AVAILABLE",
     "multilingualStatic": "PASS_16_OF_16",
     "browserQA": "PASS_6_OF_6_CHROMIUM_WEBKIT",
-    "ownerSafariUAT": "PENDING",
-    "unifiedIntegration": "NOT_AUTHORIZED",
-    "portScheme": "OFFICIAL_APPROVED_SCOPE_NO_SURVEYED_GEOMETRY"
+    "ownerSafariUAT": "PASS_OWNER_REPORTED_5_OF_5_IPAD_2026-10-27",
+    "unifiedIntegration": "NO_GO_DIRECT_IMPORT__CONDITIONAL_DATA_HANDOFF_ONLY",
+    "portScheme": "OFFICIAL_APPROVED_SCOPE_NO_SURVEYED_GEOMETRY",
+    "integrationAdapter": "NOT_IMPLEMENTED",
+    "integratedCandidateQA": "NOT_RUN"
   },
   "prohibitedMerges": [
     "main",
@@ -102,9 +104,9 @@
     "trackGeometry": null
   },
   "qaEvidence": {
-    "dataRun": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40446497187",
-    "browserRun": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40446497111",
-    "browserScreenshotArtifact": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40446497111/artifacts/12708322992",
+    "dataRun": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40446719381",
+    "browserRun": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40446719384",
+    "browserScreenshotArtifact": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40446719384/artifacts/12707944636",
     "browserMatrix": [
       "chromium-desktop",
       "chromium-ipad",
@@ -120,6 +122,41 @@
       "th"
     ],
     "testingTarget": "GitHub Actions local web server; Vercel remote UI not externally browser-verified",
-    "browserSourceCommit": "7a28f1b4e74b18cc67b969d0867a6ac5872c176f"
+    "browserSourceCommit": "86900c8c9c2df1ba162b6fcdda63d1c82e3505f0",
+    "ownerSafari": {
+      "date": "2026-10-27",
+      "device": "iPad Safari",
+      "result": "PASS",
+      "checksPassed": 5,
+      "checksTotal": 5,
+      "reportType": "OWNER_SELF_REPORTED"
+    }
+  },
+  "integrationReadiness": {
+    "auditedOn": "2026-10-27",
+    "decision": "GO_STANDALONE__GO_DATA_HANDOFF__NO_GO_DIRECT_UNIFIED_MERGE",
+    "ownerSafariUAT": "PASS_5_OF_5",
+    "unifiedTarget": "feature/mrs10-p01-unified-v7-ktm-no-shuttle-timur",
+    "unifiedTargetSha": "c64aa0b19b68aeafbaeb03e568e5cd07e7e4790f",
+    "standaloneValidatedSha": "86900c8c9c2df1ba162b6fcdda63d1c82e3505f0",
+    "isolatedPreviewDeploymentId": "dpl_84jyX7fjGtqtDzLTAgUw3LTGby3j",
+    "isolatedPreviewUrl": "https://mrs10-p01-ecrl-gis-v1-isolated-preview-jd6a8gi1r.vercel.app/ecrl-gis-v1.html",
+    "safeReusable": [
+      "assets/ecrl-gis-v1/data.js",
+      "assets/ecrl-gis-v1/i18n.js"
+    ],
+    "doNotDirectImport": [
+      "assets/ecrl-gis-v1/app.js",
+      "assets/ecrl-gis-v1/styles.css",
+      "ecrl-gis-v1.html"
+    ],
+    "blockers": [
+      "Unified adapter missing: standalone app constructs a second MapLibre map and assumes isolated DOM element IDs",
+      "Standalone CSS contains page-wide :root/body/button/.legend selectors that would affect Unified V7",
+      "Unified V7 route manifest and 100%-matched GIS gate cannot accept unverified locality reference points as verified station geometry",
+      "C2 surveyed point coverage 0/4, confirmed crossing-loop geometry 0/7, physical track geometry 0",
+      "Puncak Alam and Jalan Kastam station service classification SOURCE_CONFLICT; Section D port access is topology metadata only"
+    ],
+    "nextSafeStage": "Prepare a separate non-production integration candidate on top of current Unified HEAD; use a single shared MapLibre instance with a new non-route infrastructure overlay adapter and scoped styles. No merge without separate approval."
   }
 }
