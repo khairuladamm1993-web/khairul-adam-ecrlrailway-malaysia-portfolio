@@ -72,6 +72,7 @@ test('Multilingual buttons and persistent UX use the isolated MapLibre viewer',(
  assert.match(js,/state\.selectedId=id/);
  assert.match(js,/state\.lang=b\.dataset\.lang;translate\(\);renderMarkers\(\)/);
  assert.doesNotMatch(js,/setStyle\s*\(/);
+ assert.doesNotMatch(js,/ML\.supported\s*\(/);
  assert.match(js,/getSource\(sourceName\)/);
  assert.match(html,/tiles\.openfreemap\.org|assets\/ecrl-gis-v1\/app\.js/);
 });
