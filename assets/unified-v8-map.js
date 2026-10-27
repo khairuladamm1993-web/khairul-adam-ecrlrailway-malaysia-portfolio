@@ -320,12 +320,13 @@ function startMap(){
    state.map.on('error',()=>{if(!state.mapReady){state.networkError=true;showStatus()}});
   state.map.on('click',e=>{
    if(!state.mapReady)return;
-   const layers=state.manifest.map(r=>'mrs10-v8-'+r.id).filter(id=>state.map.getLayer(id));
-   if(!layers.length)return;
-   const hits=state.map.queryRenderedFeatures([[e.point.x-11,e.point.y-11],[e.point.x+11,e.point.y+11]],{layers});
-   hits.sort((a,b)=>{const pa=state.map.project(a.geometry.coordinates),pb=state.map.project(b.geometry.coordinates);return Math.hypot(pa.x-e.point.x,pa.y-e.point.y)-Math.hypot(pb.x-e.point.x,pb.y-e.point.y)});
-   const hit=hits[0];if(!hit){showTrackAt(e);return;}
-   const point=findGeo(hit.properties.routeId,hit.properties.id);if(!point)return;
+   state.lastTap={x:e.point.x,y:e.point.y,time:Date.now()};
+   // Screen-space hit testing uses the same source points as the rendered icons.
+   // It is never used to infer railway connectivity or interchange membership.
+   const candidates=[...state.points.values()].filter(p=>state.map.getLayer(layerId(p.routeId))&&state.map.getLayoutProperty(layerId(p.routeId),'visibility')!=='none').map(p=>{const q=state.map.project(p.coordinates);return {point:p,distance:Math.hypot(q.x-e.point.x,q.y-e.point.y)}}).filter(p=>p.distance<=14).sort((a,b)=>a.distance-b.distance);
+   const point=candidates[0]?.point;
+   state.lastTap.stationId=point?.id||null;
+   if(!point){showTrackAt(e);return;}
    showPopup(point);
   });
  }catch(e){state.networkError=true;showStatus()}
@@ -398,7 +399,7 @@ function diagnosticSnapshot(){
  }catch(e){console.error('V8_DIAGNOSTIC_ERROR',e)}
  return Object.freeze({mapReady:state.mapReady,styleLoaded,tilesLoaded,webglReady,
   rect,perRoute:rows,renderedFeatureCount:Object.values(rows).reduce((n,r)=>n+r.rendered,0),
-  layerCount:Object.values(rows).filter(r=>r.present).length,sourceMatched:state.points.size,
+  lastTap:state.lastTap||null,layerCount:Object.values(rows).filter(r=>r.present).length,sourceMatched:state.points.size,
   geometry:geometrySnapshot(),singaporeSourceRecords:singapore?.sourceRecordCount,borderRecords:singapore?.borderRecordCount,mapInstances:state.map?1:0,stage:state.pending?'LOADING':'DONE',category:state.category});
 }
 // QA camera uses only existing OSM-backed geometry; it never derives service alignment.
@@ -425,6 +426,7 @@ function trackHitTargets(){
    const mid=[(coords[i-1][0]+coords[i][0])/2,(coords[i-1][1]+coords[i][1])/2];
    const p=map.project(mid);
    if(p.x<24||p.y<24||p.x>rect.width-24||p.y>rect.height-24)continue;
+   if(document.elementFromPoint(rect.left+p.x,rect.top+p.y)!==map.getCanvas())continue;
    const tracks=map.queryRenderedFeatures([[p.x-4,p.y-4],[p.x+4,p.y+4]],{layers:['mrs10-v8-geometry']});
    if(!tracks.some(f=>f.properties.geometryVerification==='OSM_TOPOLOGY_MATCHED'))continue;
    const nearbyStations=stationLayers.length?map.queryRenderedFeatures(
@@ -436,7 +438,7 @@ function trackHitTargets(){
  return hits;
 }
 function inspectStation(routeId,id){const p=findGeo(routeId,id);if(!p||!state.map?.getLayer(layerId(routeId)))return false;state.map.resize();state.map.jumpTo({center:p.coordinates,zoom:15});return true}
-function stationHitTarget(routeId,id){const p=findGeo(routeId,id);if(!p||!state.map)return null;const q=state.map.project(p.coordinates);return {x:q.x,y:q.y}}
+function stationHitTarget(routeId,id){const p=findGeo(routeId,id);if(!p||!state.map)return null;const q=state.map.project(p.coordinates);const rect=state.map.getCanvas().getBoundingClientRect();if(document.elementFromPoint(rect.left+q.x,rect.top+q.y)!==state.map.getCanvas())return null;return {x:q.x,y:q.y}}
 window.MRS10V8Diagnostics=Object.freeze({snapshot:diagnosticSnapshot,focusTrackInspection,trackHitTargets,inspectStation,stationHitTarget,focusSnapshot:()=>({current:focus.current,original:focus.original,layers:layerSnapshot(),approximate:$('approximate').checked})});
 
 const v8texts={
@@ -485,8 +487,20 @@ function installInnerDots(){for(const r of state.manifest){
  const id=layerId(r.id)+'-inner';if(!state.map.getLayer(id))state.map.addLayer({id,type:'circle',source:srcId(r.id),paint:{'circle-color':r.color,'circle-radius':2,'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.45:1}})}}
 function showTrackAt(e){
  if(!state.map.getLayer('mrs10-v8-geometry'))return;
- const hit=state.map.queryRenderedFeatures([[e.point.x-12,e.point.y-12],[e.point.x+12,e.point.y+12]],{layers:['mrs10-v8-geometry']})[0];if(!hit)return;
- const s=physical.segments.find(s=>s.segmentId===hit.properties.segmentId);if(!s)return;
+ // Source-geometry hit fallback avoids thin-line GPU query differences on WebKit.
+ // Only already-visible source segments participate; no alignment is generated.
+ const filter=state.map.getFilter('mrs10-v8-geometry');
+ const allowed=filter?.[2]?.[1];
+ const distance=(p,a,b)=>{const dx=b.x-a.x,dy=b.y-a.y;const t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1)));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy)};
+ let s=null,best=12;
+ for(const candidate of physical.segments){
+  if(allowed&&!allowed.includes(candidate.segmentId))continue;
+  if(candidate.geometryVerification==='SECONDARY_APPROXIMATE'&&!$('approximate').checked)continue;
+  const lines=candidate.geometry?.type==='LineString'?[candidate.geometry.coordinates]:candidate.geometry?.type==='MultiLineString'?candidate.geometry.coordinates:[];
+  for(const line of lines)for(let i=1;i<line.length;i++){const d=distance(e.point,state.map.project(line[i-1]),state.map.project(line[i]));if(d<best){best=d;s=candidate}}
+ }
+ if(!s)return;
+ if(state.lastTap)state.lastTap.segmentId=s.segmentId;
  const segmentIds=window.MRS10V81Focus.component(physical,s.segmentId);
  const routeIds=[...new Set(physical.segments.filter(x=>segmentIds.includes(x.segmentId)).flatMap(x=>x.routeIds))];
  focus.enter({mode:'TRACK_FOCUS',segmentIds,routeIds,segmentId:s.segmentId});

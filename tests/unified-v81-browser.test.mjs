@@ -9,7 +9,7 @@ for(const engine of ['chromium','webkit']){
   const page=await browser.newPage({viewport:{width:vp.width,height:vp.height},hasTouch:vp.name!=='desktop'});const errors=[],checks=[];page.on('pageerror',e=>errors.push(e.message));
   const snapshot=()=>page.evaluate(()=>window.MRS10V8Diagnostics.focusSnapshot());
   async function canvasTap(target){const box=await page.locator('#map').boundingBox();if(vp.name==='desktop')await page.mouse.click(box.x+target.x,box.y+target.y);else await page.touchscreen.tap(box.x+target.x,box.y+target.y)}
-  async function tapStation(route,id){await page.locator('#map').scrollIntoViewIfNeeded();assert(await page.evaluate(([r,id])=>window.MRS10V8Diagnostics.inspectStation(r,id),[route,id]));await page.waitForTimeout(600);const target=await page.evaluate(([r,id])=>window.MRS10V8Diagnostics.stationHitTarget(r,id),[route,id]);assert(target);await canvasTap(target);await page.waitForFunction(id=>window.MRS10V8Diagnostics.focusSnapshot().current.stationId===id,id,{timeout:10000});await page.locator('.maplibregl-popup').waitFor();}
+  async function tapStation(route,id){await page.locator('#map').scrollIntoViewIfNeeded();assert(await page.evaluate(([r,id])=>window.MRS10V8Diagnostics.inspectStation(r,id),[route,id]));await page.waitForTimeout(600);await page.waitForFunction(([r,id])=>window.MRS10V8Diagnostics.stationHitTarget(r,id),[route,id],{timeout:10000});const target=await page.evaluate(([r,id])=>window.MRS10V8Diagnostics.stationHitTarget(r,id),[route,id]);assert(target);await canvasTap(target);await page.waitForFunction(id=>window.MRS10V8Diagnostics.focusSnapshot().current.stationId===id,id,{timeout:10000});await page.locator('.maplibregl-popup').waitFor();}
   async function close(){await page.locator('.maplibregl-popup-close-button').click();await page.waitForFunction(()=>window.MRS10V8Diagnostics.focusSnapshot().current.mode==='NORMAL');assert.equal((await snapshot()).current.mode,'NORMAL')}
   try{
    const response=await page.goto(url,{waitUntil:'domcontentloaded'});assert.equal(response.status(),200);
@@ -32,7 +32,7 @@ for(const engine of ['chromium','webkit']){
    for(let i=0;i<2;i++){await page.locator('#theme').click();await page.waitForFunction(()=>{const s=window.MRS10V8Diagnostics.snapshot();return s.styleLoaded&&s.layerCount===33},null,{timeout:45000})}
    await tapStation('mrt-putrajaya','mrt-py08');await page.locator('#details-toggle').click();assert.equal((await snapshot()).current.mode,'INTERCHANGE_FOCUS');await close();checks.push('theme-language-disclosure-regression');
    assert.equal(errors.length,0,errors.join(';'));report.push({engine,viewport:vp.name,status:'PASS',checks,snapshot:await page.evaluate(()=>window.MRS10V8Diagnostics.snapshot())});
-  }catch(e){report.push({engine,viewport:vp.name,status:'FAIL',checks,error:String(e.stack),focus:await snapshot().catch(()=>null),errors});await page.screenshot({path:`${out}/${engine}-${vp.name}-fail.png`,fullPage:true}).catch(()=>{})}
+  }catch(e){report.push({engine,viewport:vp.name,status:'FAIL',checks,error:String(e.stack),focus:await snapshot().catch(()=>null),errors,mapSnapshot:await page.evaluate(()=>window.MRS10V8Diagnostics.snapshot())});await page.screenshot({path:`${out}/${engine}-${vp.name}-fail.png`,fullPage:true}).catch(()=>{})}
   await page.close();await fs.writeFile(out+'/report.json',JSON.stringify(report,null,2));
  }
  await browser.close();
