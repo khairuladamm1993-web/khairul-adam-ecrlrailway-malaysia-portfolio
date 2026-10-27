@@ -140,7 +140,7 @@ const sourceName='mrs10-ecrl-v1-locality-reference-points',layerName='mrs10-ecrl
 function syncGeoJSON(){
  if(!state.map||!state.map.isStyleLoaded())return;
  const features=[...D.stations,...D.facilities].filter(x=>geoPoint(x)).map(a=>({
-  type:'Feature',id:a.assetId,properties:{assetId:a.assetId,geometryProvenance:a.geometryProvenance,physicalTrack:false},
+  type:'Feature',id:a.assetId,properties:{assetId:a.assetId,geometryProvenance:a.referenceKind||a.geometryProvenance,referenceSourceId:a.referenceSourceId||a.sourceId,physicalTrack:false},
   geometry:{type:'Point',coordinates:geoPoint(a)}}));
  const geo={type:'FeatureCollection',features};
  if(!state.map.getSource(sourceName))state.map.addSource(sourceName,{type:'geojson',data:geo});

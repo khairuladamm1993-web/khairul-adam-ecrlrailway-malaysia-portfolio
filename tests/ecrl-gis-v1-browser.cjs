@@ -33,7 +33,9 @@ const cases=[{name:'desktop',width:1440,height:900,isMobile:false,hasTouch:false
       })));
       throw e;
     });
-    const before=await page.evaluate(()=>({map:document.querySelector('#ecrl-map canvas')?.isConnected,
+    await page.waitForTimeout(700); // allow initial fitBounds animation and tile/style transitions to settle
+     await page.waitForFunction(()=>{const s=window.MRS10ECRLV1QA.getSnapshot();return s.mapReady&&s.styleLoaded&&s.sourcePresent&&s.layerPresent;},null,{timeout:20000});
+     const before=await page.evaluate(()=>({map:document.querySelector('#ecrl-map canvas')?.isConnected,
       snap:window.MRS10ECRLV1QA.getSnapshot()}));
     assert.equal(before.map,true,'MapLibre canvas not mounted');
     assert.ok(before.snap.styleLoaded,'Map style not ready');assert.ok(before.snap.sourcePresent,'GIS source missing');assert.ok(before.snap.layerPresent,'GIS layer missing');
@@ -44,6 +46,7 @@ const cases=[{name:'desktop',width:1440,height:900,isMobile:false,hasTouch:false
     await page.locator('#asset-list button[data-asset-id="ecrl-stn-17"]').click();
     const selected=await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot().selectedAssetId);
     assert.equal(selected,'ecrl-stn-17');
+     await page.locator('#detail-close').click(); // close the original selection before the multi-item C2 tap matrix
     for(const id of ['ecrl-stn-17','ecrl-stn-18','ecrl-stn-19','ecrl-stn-20','ecrl-yard-puncak-alam','ecrl-port-northport','ecrl-port-westports']){
        await page.locator('#asset-list button[data-asset-id="'+id+'"]').click();
        assert.equal(await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot().selectedAssetId),id);
