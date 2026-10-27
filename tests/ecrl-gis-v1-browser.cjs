@@ -79,6 +79,10 @@ const cases=[{name:'desktop',width:1440,height:900,isMobile:false,hasTouch:false
     assert.equal(switched.referenceMarkers,7);
     assert.equal(switched.physicalTrackFeatures,0);
     assert.match(switched.basemapStyleUrl,/liberty$/);
+    // Ordinary-road mode is 40% softer. Train markers and selected assets are unchanged.
+    assert.equal(switched.roadOpacityFactor,0.6);
+    assert.ok(switched.roadDimmedPaintProperties>0,'Liberty road paint was not dimmed');
+
     await page.locator('#basemap-style').click();
     await page.waitForFunction(()=>{const x=window.MRS10ECRLV1QA.getSnapshot();return x.basemap==='quiet'&&x.styleLoaded&&x.sourcePresent&&x.layerPresent&&x.mapReady;},null,{timeout:20000});
     switched=await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot());
