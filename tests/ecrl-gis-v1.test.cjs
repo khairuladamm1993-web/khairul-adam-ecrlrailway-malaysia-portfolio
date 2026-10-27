@@ -133,3 +133,39 @@ test('Quiet OpenFreeMap Positron replaces high-contrast roads by default with re
  for(const lang of ['ms','en','zh','th'])for(const key of ['basemapQuiet','basemapStandard','basemapSwitch'])assert.ok(I[lang][key]);
  assert.equal(D.segments.every(s=>s.geometry===null),true);
 });
+
+test('Ordinary-road mode dims road paint 40 percent, never ECRL rail markers',()=>{
+ const sandbox2={window:{}};vm.createContext(sandbox2);
+ vm.runInContext(file('assets/ecrl-gis-v1/road-style.js'),sandbox2);
+ const road=sandbox2.window.MRS10ECRLRoadStyle;
+ assert.equal(road.factor,0.6);
+ const changed=[];const map={
+  getStyle:()=>({layers:[
+   {id:'road_major',type:'line',paint:{'line-opacity':0.8}},
+   {id:'road_secondary',type:'line',paint:{}},
+   {id:'road_label',type:'symbol',layout:{'text-field':'name'},paint:{'text-opacity':0.9}},
+   {id:'road_area',type:'fill',paint:{'fill-opacity':0.4}},
+   {id:'railway_line',type:'line',paint:{'line-opacity':1}},
+   {id:'metro_station',type:'symbol',layout:{'text-field':'name'}},
+   {id:'landcover',type:'fill',paint:{'fill-opacity':1}}
+  ]}),
+  setPaintProperty:(id,prop,val)=>changed.push({id,prop,val})
+ };
+ assert.equal(road.apply(map),4);
+ assert.equal(changed.length,4);
+ assert.ok(changed.every(c=>c.id.startsWith('road_')));
+ assert.equal(changed.find(c=>c.id==='road_major').val,0.48);
+ assert.equal(changed.find(c=>c.id==='road_secondary').val,0.6);
+ assert.ok(Math.abs(changed.find(c=>c.id==='road_label').val-0.54)<1e-10);
+ assert.equal(changed.find(c=>c.id==='road_area').val,0.24);
+});
+test('Road dimming stays in standard basemap and reapplies after style reload',()=>{
+ const html=file('ecrl-gis-v1.html'),js=file('assets/ecrl-gis-v1/app.js');
+ assert.match(html,/assets\/ecrl-gis-v1\/road-style\.js/);
+ assert.ok(html.indexOf('road-style.js')<html.indexOf('app.js'));
+ assert.match(js,/state\.basemap!=='standard'/);
+ assert.match(js,/applyStandardRoadDimming\(\)/);
+ assert.match(js,/state\.roadDimmingApplied=false/);
+ assert.match(js,/roadOpacityFactor:/);
+ assert.match(js,/ROAD\.apply\(state\.map\)/);
+});
