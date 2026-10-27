@@ -1,6 +1,6 @@
 /* MR-S10 ECRL GIS V1 — isolated, no Unified mutation. Physical track remains absent until sourced. */
 (function(w,d){'use strict';
-const D=w.MRS10ECRLGISV1,I=w.MRS10ECRLI18N,ML=w.maplibregl;
+const D=w.MRS10ECRLGISV1,I=w.MRS10ECRLI18N,ML=w.maplibregl,ROAD=w.MRS10ECRLRoadStyle;
 const get=id=>d.getElementById(id);
 if(!D||!I){get('map-status').textContent='ECRL data unavailable';return;}
 const A=[...D.stations,...D.loops,...D.facilities];
@@ -9,7 +9,7 @@ const basemapStyles=Object.freeze({quiet:'https://tiles.openfreemap.org/styles/p
 const geoPoint=a=>a?.point||a?.referencePoint||null;
 const focusPoint=a=>geoPoint(a)||(a?.focusReferenceAssetId?geoPoint(byId.get(a.focusReferenceAssetId)):null);
 const geoLabel=a=>a?.referenceKind==='HISTORICAL_EIA2017_PROPOSED_STATION'?T('historicRef'):a?.referenceKind==='PORT_FACILITY_AREA_PKA22'?T('portArea'):a?.focusReferenceAssetId?T('proxyArea'):a?.point?T('referenceOnly'):T('noPoint');
-const state={lang:'ms',theme:'light',basemap:'quiet',scope:'C2',search:'',selectedId:null,map:null,markers:new Map(),mapReady:false,listOpen:true};
+const state={lang:'ms',theme:'light',basemap:'quiet',scope:'C2',search:'',selectedId:null,map:null,markers:new Map(),mapReady:false,listOpen:true,roadDimmingApplied:false,roadDimmedPaintProperties:0};
 const keys={
  STATION:'station',HISTORICAL_PL_DESIGNATION:'crossing',FREIGHT_YARD:'yard',PORT_INTERFACE:'ports',DEPOT:'facility',TUNNEL:'tunnel',
  PASSENGER:'passenger',PASSENGER_FREIGHT:'passengerFreight',FUTURE_PASSENGER:'futurePassenger',
@@ -123,6 +123,7 @@ function setBasemap(next){
  syncBasemapControl();
  if(!state.map)return;
  state.mapReady=false;
+ state.roadDimmingApplied=false;state.roadDimmedPaintProperties=0;
  get('map-status').textContent=T('loading');
  try{state.map.setStyle(basemapStyles[next]);}catch(e){get('map-status').textContent=T('mapError');}
 }
@@ -178,6 +179,11 @@ function renderMarkers(){
  }
  if(state.selectedId&&geoPoint(byId.get(state.selectedId)))state.markers.get(state.selectedId)?.getElement().setAttribute('data-selected','true');
 }
+function applyStandardRoadDimming(){
+ if(state.basemap!=='standard'||state.roadDimmingApplied||!state.map||!ROAD)return;
+ state.roadDimmedPaintProperties=ROAD.apply(state.map);
+ state.roadDimmingApplied=true;
+}
 function initMap(){
  if(!ML||typeof ML.Map!=='function'){get('map-status').textContent=T('mapError');return;}
  try{
@@ -185,6 +191,7 @@ function initMap(){
    attributionControl:true,cooperativeGestures:false,maxZoom:17});
   state.map.addControl(new ML.NavigationControl({showCompass:false}),'bottom-left');
   state.map.on('style.load',()=>{try{
+    applyStandardRoadDimming();
     if(state.map.isStyleLoaded())syncGeoJSON();
     state.mapReady=true;get('map-status').textContent=T('noTrack');
    }catch(e){get('map-status').textContent=T('mapError');}});
@@ -193,6 +200,7 @@ function initMap(){
     state.mapReady=true;
     // After a setStyle(), style.load may precede full style readiness on WebKit.
     if(!state.map.getSource(sourceName)||!state.map.getLayer(layerName))syncGeoJSON();
+    applyStandardRoadDimming();
     get('map-status').textContent=T('noTrack');
    }catch(e){get('map-status').textContent=T('mapError');}});
   state.map.on('load',()=>{state.mapReady=true;syncGeoJSON();renderMarkers();fitScope();get('map-status').textContent=T('noTrack');});
@@ -211,7 +219,7 @@ function boot(){
  get('legend-toggle').addEventListener('click',()=>{const open=get('legend-body').hidden;get('legend-body').hidden=!open;get('legend-toggle').setAttribute('aria-expanded',String(open));});
  translate();initMap();
  w.MRS10ECRLV1QA=Object.freeze({getSnapshot:()=>({
- version:D.version,language:state.lang,theme:state.theme,basemap:state.basemap,basemapStyleUrl:basemapStyles[state.basemap],scope:state.scope,
+ version:D.version,language:state.lang,theme:state.theme,basemap:state.basemap,basemapStyleUrl:basemapStyles[state.basemap],roadOpacityFactor:state.basemap==='standard'&&state.roadDimmingApplied?ROAD?.factor:1,roadDimmedPaintProperties:state.roadDimmedPaintProperties,scope:state.scope,
  selectedAssetId:state.selectedId,stationCount:D.stations.length,c2Stations:D.stations.filter(a=>a.section==='C2').length,
  verifiedLoops:D.loops.filter(a=>a.verificationStatus==='CONFIRMED').length,pendingLoops:D.loops.filter(a=>a.verificationStatus==='PENDING_VALIDATION').length,
  physicalTrackFeatures:0,referenceMarkers:state.markers.size,c2PlanningReferences:D.stations.filter(a=>a.section==='C2'&&a.referencePoint).length,portAreaReferences:D.facilities.filter(a=>a.section==='D'&&a.referencePoint).length,mapReady:state.mapReady,styleLoaded:!!state.map?.isStyleLoaded(),
