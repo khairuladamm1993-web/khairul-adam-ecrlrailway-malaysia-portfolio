@@ -19,3 +19,14 @@
 - Cross-border Shuttle Tebrau and RTS 0 GIS points represent an explicit data provenance gap. Do not manufacture coordinates or lines.
 - Operational speed, approach speed, through speed, TSR, chainage and crossing loop metadata are unknown unless verified source-backed field values exist.
 - Integration: ingest `integration-manifest.json`, lines, stations, tracks, and adapter under singapore namespace without changing Unified V7. Physical Track Intelligence gate remains CLOSED even when visual QA passes.
+
+## Singapore V1.2 — Explicit station topology and safe cross-border recovery
+- Four additional **OSM-secondary markers** are loaded as a separate GeoJSON source. They are NOT merged into the existing 273 Singapore station-code points. The 13 original secondary polylines remain unchanged. No border track LineString has been invented.
+- Shuttle Tebrau: JB Sentral ↔ Woodlands Train Checkpoint (two terminal passenger service). RTS: Bukit Chagar ↔ Woodlands North RTS (future passenger service; target Feb 2027 subject certification).
+- Terminal OSM point / polygon centre coordinates are for orientation only, not surveyed station/platform geometry; stations mapped from OSM building polygons are approximate.
+- Station order is resolved by explicit path arrays in `data/route-topology.json`; no `stationCode.localeCompare` or coordinate-proximity route derivation. User selects direction/branch using the compact `#direction` selector.
+- A stop with `geometry:null` remains selectable in the lineup; UI does not navigate to synthetic coordinates.
+- CCL6 continuous loop separated from Dhoby Ghaut spur. EW4 / CG branch separated from EWL through service. Sengkang and Punggol LRT loops retain explicit forward/reverse schematic adjacency, **not verified live operating direction**.
+- Future JRL/CRL/TEL5/DTL3e and airport terminal service details remain explicitly PARTIAL and must not be treated as certified operating paths.
+- References: LTA system map, LTA CCL6 and wayfinding, LTA JRL/CRL, KTMB Shuttle FAQ, RTS Link official, Singapore MOT Sentosa Monorail report, Changi Airport transfer guide, OSM feature IDs.
+- Owner Safari test for V1.2 is a separate acceptance gate, regardless of browser CI success.
