@@ -144,7 +144,7 @@ function renderMarkers(){
  if(state.selectedId&&byId.get(state.selectedId)?.point)state.markers.get(state.selectedId)?.getElement().setAttribute('data-selected','true');
 }
 function initMap(){
- if(!ML||!ML.supported()){get('map-status').textContent=T('mapError');return;}
+ if(!ML||typeof ML.Map!=='function'){get('map-status').textContent=T('mapError');return;}
  try{
   state.map=new ML.Map({container:'ecrl-map',style:'https://tiles.openfreemap.org/styles/liberty',center:[101.67,3.33],zoom:8.4,
    attributionControl:true,cooperativeGestures:false,maxZoom:17});
