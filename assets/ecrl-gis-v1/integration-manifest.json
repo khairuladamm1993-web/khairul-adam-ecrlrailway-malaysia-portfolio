@@ -54,7 +54,8 @@
     "multilingualStatic": "READY_FOR_TEST",
     "browserQA": "PENDING",
     "ownerSafariUAT": "PENDING",
-    "unifiedIntegration": "NOT_AUTHORIZED"
+    "unifiedIntegration": "NOT_AUTHORIZED",
+    "portScheme": "OFFICIAL_APPROVED_SCOPE_NO_SURVEYED_GEOMETRY"
   },
   "prohibitedMerges": [
     "main",
@@ -89,5 +90,15 @@
     "trackFormation": "SINGLE_TRACK_ON_DOUBLE_TRACK_FORMATION",
     "sectionTrackCount": "UNKNOWN",
     "source": "MRL24"
+  },
+  "portAccess": {
+    "section": "D",
+    "lengthKm": 25,
+    "trackArrangement": "SEPARATE_PARALLEL_STANDARD_AND_METRE_GAUGE",
+    "ecrlGaugeMm": 1435,
+    "ktmbGaugeMm": 1000,
+    "previousDualGaugeProposal": "SUPERSEDED",
+    "sourceId": "MOT_D25",
+    "trackGeometry": null
   }
 }
