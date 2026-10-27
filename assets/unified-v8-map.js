@@ -405,7 +405,7 @@ function diagnosticSnapshot(){
 function focusTrackInspection(){
  const map=state.map;
  const segments=physical?.segments.filter(s=>s.routeIds.includes('sg-RTS')&&s.geometry?.type==='LineString')||[];
- if(!map?.isStyleLoaded()||!segments.length)return false;
+ if(!map?.getLayer('mrs10-v8-geometry')||!segments.length)return false;
  map.resize(); // Reconcile WebGL/canvas viewport after iPad page scrolling.
  const coords=segments.flatMap(s=>s.geometry.coordinates);
  const x=coords.map(c=>c[0]),y=coords.map(c=>c[1]);
@@ -435,7 +435,7 @@ function trackHitTargets(){
  }
  return hits;
 }
-function inspectStation(routeId,id){const p=findGeo(routeId,id);if(!p||!state.map?.isStyleLoaded())return false;state.map.resize();state.map.jumpTo({center:p.coordinates,zoom:15});return true}
+function inspectStation(routeId,id){const p=findGeo(routeId,id);if(!p||!state.map?.getLayer(layerId(routeId)))return false;state.map.resize();state.map.jumpTo({center:p.coordinates,zoom:15});return true}
 function stationHitTarget(routeId,id){const p=findGeo(routeId,id);if(!p||!state.map)return null;const q=state.map.project(p.coordinates);return {x:q.x,y:q.y}}
 window.MRS10V8Diagnostics=Object.freeze({snapshot:diagnosticSnapshot,focusTrackInspection,trackHitTargets,inspectStation,stationHitTarget,focusSnapshot:()=>({current:focus.current,original:focus.original,layers:layerSnapshot(),approximate:$('approximate').checked})});
 
