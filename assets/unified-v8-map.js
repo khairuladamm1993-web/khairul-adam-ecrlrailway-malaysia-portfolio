@@ -452,11 +452,12 @@ function appendSGTransfers(host,point){
   const other=r.from===point.id?r.to:r.from;
   const match=state.manifest.find(x=>x.decoder==='SG'&&x.stops.some(s=>s.id===other));
   const kind=r.type.includes('WALKING')?'walk':r.type.includes('AREA')?'area':'serviceRelation';
-  host.append(el('p',null,tr(kind)));
+  host.append(el('p',null,tr(kind)+(kind==='walk'?' · PLANNED_CONNECTION · '+tr('future'):'')));
   if(match){const btn=el('button',null,match.stops.find(s=>s.id===other).name);btn.onclick=()=>focusStation(match.id,other);host.append(btn)}appendSource(host,r.sourceUrl);
  }
  for(const r of singapore.topology.interchanges.filter(r=>r.stationId===point.id||r.connectingStationId===point.id)){
-  host.append(el('p',null,tr('walk')+' · '+(r.connectingRouteIds||[]).join(' / ')));appendSource(host,r.sourceUrl);
+  const future=[r.stationId,r.connectingStationId].filter(Boolean).some(id=>{const status=singapore.stationById.get(id)?.properties.status;return status&&status!=='OPERATIONAL'});
+  host.append(el('p',null,(future?'PLANNED_CONNECTION · '+tr('future'):tr('walk'))+' · '+(r.connectingRouteIds||[]).join(' / ')));appendSource(host,r.sourceUrl);
  }
 }
 function geometrySnapshot(){return {official:physical?.segments.filter(s=>s.geometryVerification==='OFFICIAL_VERIFIED').length||0,osm:physical?.segments.filter(s=>s.geometryVerification==='OSM_TOPOLOGY_MATCHED').length||0,approximate:physical?.segments.filter(s=>s.geometryVerification==='SECONDARY_APPROXIMATE').length||0,rendered:state.map?.getLayer('mrs10-v8-geometry')&&state.map.isStyleLoaded()?state.map.queryRenderedFeatures({layers:['mrs10-v8-geometry']}).length:0,sourcePresent:!!state.map?.getSource('mrs10-v8-physical')}}

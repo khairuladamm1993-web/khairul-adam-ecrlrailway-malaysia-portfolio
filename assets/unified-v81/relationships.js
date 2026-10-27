@@ -18,6 +18,12 @@ function resolve(point,manifest,integration,core,sg){
   const type=/SHARED/.test(m.relation)?'SHARED_STATION':'PASSENGER_TRANSFER';
   add(m.route.id,m.stop.id,type,m.route.source);relations.push({type,status:'REGISTRY_SOURCE',sourceUrl:m.route.source});
  }
+ // Explicit same-station complexes combine their documented direct members;
+ // this does not walk onward through another station or interchange.
+ const complexEdges=(integration.edges||[]).filter(([a,b])=>core.normalise(a[1])===core.normalise(point.name)&&core.normalise(b[1])===core.normalise(point.name));
+ if(complexEdges.some(([a,b])=>a[0]===point.routeId||b[0]===point.routeId)){
+  for(const [a,b] of complexEdges)for(const [rid,name] of [a,b]){const r=manifest.find(x=>x.id===rid),stop=r?.stops.find(x=>core.normalise(x.name)===core.normalise(name));if(stop)add(rid,stop.id,'PASSENGER_TRANSFER',r.source)}
+ }
  for(const rel of supplementary){
   const key=[point.routeId,point.id].join(':');let other;
   if(rel.a.join(':')===key)other=rel.b;else if(rel.b.join(':')===key)other=rel.a;else continue;
@@ -28,6 +34,9 @@ function resolve(point,manifest,integration,core,sg){
    if(rel.stationId!==point.id&&rel.connectingStationId!==point.id)continue;
    if(/AREA|PLANNED/.test(rel.connectionType))continue;
    const opposite=rel.stationId===point.id?rel.connectingStationId:rel.stationId;
+   const endpointIds=[rel.stationId,rel.connectingStationId].filter(Boolean);
+   const planned=endpointIds.some(id=>{const status=sg.stationById?.get(id)?.properties.status;return status&&status!=='OPERATIONAL'});
+   if(planned){relations.push({type:'PLANNED_CONNECTION',status:'PLANNED',sourceUrl:rel.sourceUrl});continue;}
    for(const r of manifest.filter(r=>r.id.startsWith('sg-'))){
     const explicit=(rel.connectingRouteIds||[]).includes(r.sgId);
     const stop=r.stops.find(s=>s.id===opposite)||(explicit?r.stops.find(s=>s.id===point.id||core.normalise(s.name)===core.normalise(point.name)):null);
