@@ -45,7 +45,7 @@ console.log("TRACK_TAP_RESULT",JSON.stringify(await page.evaluate(()=>({lastClic
 await page.waitForTimeout(150);
 const popup=await page.locator(".maplibregl-popup").allTextContents();
 assert(popup.some(x=>/Maklumat teknikal trek|Technical Track Information/.test(x)),"TRACK_TAP_POPUP_MISSING");
-assert(popup.some(x=>/Belum disahkan|UNVERIFIED/.test(x)),"TRACK_PROVENANCE_WARNING_MISSING");
+assert(popup.some(x=>/Belum disahkan|UNVERIFIED/.test(x)),"TRACK_PROVENANCE_WARNING_MISSING");assert.equal(await page.locator(".maplibregl-popup").count(),1,"DUPLICATE_TRACK_POPUPS_AFTER_STYLE_RELOAD");
 await page.locator(".maplibregl-popup-close-button").click();
 const stationPoint=await page.evaluate(async()=>{const data=await (await fetch("./data/stations.geojson")).json();const f=data.features.find(x=>x.properties.stationCode==="CC30");window.__sgRailMap.jumpTo({center:f.geometry.coordinates,zoom:15});return f.geometry.coordinates;});
 await page.waitForTimeout(700);
