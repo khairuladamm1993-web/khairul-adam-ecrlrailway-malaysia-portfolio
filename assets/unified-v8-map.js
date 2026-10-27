@@ -108,7 +108,8 @@ function focusStation(routeId,id){
  if(!point){say(tr('unlocated'));return}
  say(point.name+' · '+tr('located'));
  if(state.map){
-  const open=()=>{state.map.easeTo({center:point.coordinates,zoom:Math.max(state.map.getZoom(),12.3),duration:360});showPopup(point)};
+  showPopup(point);
+  const open=()=>{state.map.easeTo({center:point.coordinates,zoom:Math.max(state.map.getZoom(),12.3),duration:360})};
   if(state.map.isStyleLoaded())open();
   else state.map.once('idle',()=>{if(state.map?.isStyleLoaded())open()});
  }
@@ -176,17 +177,18 @@ function updateMapLayer(){
   for(const r of state.manifest){
    const source=srcId(r.id),lid=layerId(r.id);
    const data=core.toGeoJSON([state.results.get(r.id)]);
+   for(const f of data.features){const p=findGeo(r.id,f.properties.id);f.properties.future=!!p?.status&&p.status!=='OPERATIONAL';f.properties.pending=!p?.provenance?.startsWith('OFFICIAL_KTMB_GTFS');}
    if(!map.getSource(source))map.addSource(source,{type:'geojson',data});
    else map.getSource(source).setData(data);
    if(!map.getLayer(lid))map.addLayer({id:lid,type:'circle',source,
     paint:{
-     'circle-color':'#fff',
+     'circle-color':'rgba(255,255,255,0.05)',
      'circle-radius':r.id==='erl-klia-ekspres'?
        ['interpolate',['linear'],['zoom'],7,9,11,13,14,16]:
        r.id==='erl-klia-transit'?['interpolate',['linear'],['zoom'],7,4.2,11,7,14,9.5]:
        ['interpolate',['linear'],['zoom'],7,5.5,11,8.5,14,11],
      'circle-stroke-color':r.color,
-     'circle-stroke-width':2,
+     'circle-stroke-width':0,
      'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.35:1
     }});
   }
@@ -202,6 +204,7 @@ function applyVisibility(){
  if(!state.map||!state.map.isStyleLoaded())return;
  for(const r of state.manifest){
   const id=layerId(r.id);
+  if(state.map.getLayer(id+'-ring'))state.map.setLayoutProperty(id+'-ring','visibility',state.category==='All'||state.category===r.category?'visible':'none');
   if(state.map.getLayer(id+'-inner'))state.map.setLayoutProperty(id+'-inner','visibility',state.category==='All'||state.category===r.category?'visible':'none');
   if(state.map.getLayer(id))state.map.setLayoutProperty(id,'visibility',
    state.category==='All'||state.category===r.category?'visible':'none');
@@ -385,7 +388,12 @@ function applyGeometryVisibility(){
  const ids=physical.segments.filter(s=>state.category==='All'||s.routeIds.some(id=>visible.has(id))).map(s=>s.segmentId);
  state.map.setFilter('mrs10-v8-geometry',['in',['get','segmentId'],['literal',ids]]);
 }
-function installInnerDots(){for(const r of state.manifest){const id=layerId(r.id)+'-inner';if(!state.map.getLayer(id))state.map.addLayer({id,type:'circle',source:srcId(r.id),paint:{'circle-color':r.color,'circle-radius':2,'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.45:1}})}}
+function installInnerDots(){for(const r of state.manifest){
+ for(const kind of ['solid','pending','future']){const name=r.id+'-'+kind;if(!state.map.hasImage(name)){
+  const c=document.createElement('canvas');c.width=c.height=40;const ctx=c.getContext('2d');ctx.strokeStyle=r.color;ctx.lineWidth=3;ctx.fillStyle=kind==='future'?'#fff3c4':'white';if(kind!=='solid')ctx.setLineDash([5,4]);ctx.beginPath();ctx.arc(20,20,14,0,Math.PI*2);ctx.fill();ctx.stroke();state.map.addImage(name,ctx.getImageData(0,0,40,40));
+ }}
+ if(!state.map.getLayer(layerId(r.id)+'-ring'))state.map.addLayer({id:layerId(r.id)+'-ring',type:'symbol',source:srcId(r.id),layout:{'icon-image':['case',['get','future'],r.id+'-future',['get','pending'],r.id+'-pending',r.id+'-solid'],'icon-size':0.6,'icon-allow-overlap':true,'icon-ignore-placement':true}});
+ const id=layerId(r.id)+'-inner';if(!state.map.getLayer(id))state.map.addLayer({id,type:'circle',source:srcId(r.id),paint:{'circle-color':r.color,'circle-radius':2,'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.45:1}})}}
 function showTrackAt(e){
  if(!state.map.getLayer('mrs10-v8-geometry'))return;
  const hit=state.map.queryRenderedFeatures([[e.point.x-8,e.point.y-8],[e.point.x+8,e.point.y+8]],{layers:['mrs10-v8-geometry']})[0];if(!hit)return;

@@ -18,8 +18,8 @@ for(const engine of ['chromium','webkit']){
    await page.locator('#filters button').getByText('Singapore',{exact:true}).click();assert.equal((await snap()).perRoute['mrt-kajang'].visible,false);
    await page.locator('#route-buttons button').getByText('East–West Line',{exact:true}).click();assert.equal(await page.locator('#path-select option').count(),4);
    await page.locator('#path-select').selectOption({index:2});assert.equal(await page.locator('#lineup li').count(),3);
-   await page.locator('#lineup button').first().click();assert.equal(await page.locator('.maplibregl-popup').count(),1);
-   await page.locator('#route-buttons button').filter({hasText:'RTS'}).first().click();await page.locator('#lineup button').first().click();assert((await page.locator('.maplibregl-popup').innerText()).includes('Bukit Chagar'));
+   await page.locator('#lineup button').first().click();await page.locator('.maplibregl-popup').waitFor({state:'visible',timeout:15000});assert.equal(await page.locator('.maplibregl-popup').count(),1);
+   await page.locator('#route-buttons button').filter({hasText:'RTS'}).first().click();await page.locator('#lineup button').first().click();await page.locator('.maplibregl-popup').waitFor({state:'visible',timeout:15000});assert((await page.locator('.maplibregl-popup').innerText()).includes('Bukit Chagar'));
    for(let i=0;i<4;i++){await page.locator('#language').click();assert.equal((await snap()).layerCount,33);assert.equal(await page.locator('#lineup li').count(),2)}
    for(let i=0;i<2;i++){await page.locator('#theme').click();await page.waitForFunction(()=>{const s=window.MRS10V8Diagnostics.snapshot();return s.styleLoaded&&s.layerCount===33&&s.geometry.sourcePresent},null,{timeout:45000});}
    await page.locator('#reset').click();assert.equal((await snap()).category,'All');
@@ -27,7 +27,7 @@ for(const engine of ['chromium','webkit']){
    await page.screenshot({path:`artifacts/unified-v8-browser/${engine}-${vp.name}.png`,fullPage:true});
    assert.equal(errors.length,0,errors.join(';'));
    report.push({engine,viewport:vp.name,status:'PASS',snapshot:await snap(),errors});
-  }catch(e){report.push({engine,viewport:vp.name,status:'FAIL',error:String(e),snapshot:await snap().catch(()=>null),errors});await page.screenshot({path:`artifacts/unified-v8-browser/${engine}-${vp.name}-fail.png`,fullPage:true}).catch(()=>{});}finally{await page.close()}
+  }catch(e){report.push({engine,viewport:vp.name,status:'FAIL',error:e.stack||String(e),snapshot:await snap().catch(()=>null),errors});await page.screenshot({path:`artifacts/unified-v8-browser/${engine}-${vp.name}-fail.png`,fullPage:true}).catch(()=>{});}finally{await page.close()}
  }}finally{await browser.close();await fs.writeFile('artifacts/unified-v8-browser/report.json',JSON.stringify(report,null,2));}
 }
 console.log(JSON.stringify(report,null,2));if(report.some(r=>r.status!=='PASS'))process.exitCode=1;
