@@ -29,7 +29,7 @@ jobs:
           node tests/unified-v8-browser.test.mjs
       - name: Verify immutable deployed preview in Chromium and WebKit
         env:
-          V8_URL: https://mrs10-p01-unified-v8-sg-geometry-7v6txprwe-1993khairuladam-3016.vercel.app/unified-map-v8.html
+          V8_URL: https://mrs10-p01-unified-v8-sg-geometry-4sjirdqsh-1993khairuladam-3016.vercel.app/unified-map-v8.html
         run: |
           mv artifacts/unified-v8-browser artifacts/unified-v8-local-browser
           node tests/unified-v8-browser.test.mjs
