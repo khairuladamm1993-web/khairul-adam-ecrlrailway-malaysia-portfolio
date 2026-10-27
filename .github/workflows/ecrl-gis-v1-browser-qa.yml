@@ -1,0 +1,37 @@
+name: ECRL GIS V1 browser rendering QA (non-production)
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-ecrl-gis-c2-infrastructure-isolated
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    name: MapLibre Chromium/WebKit 4-language × 3 viewports
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install isolated browser test runner
+        run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - name: Prepare Chromium and WebKit
+        run: npx playwright install --with-deps chromium webkit
+      - name: Start isolated static local server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/ecrl-static-server.log 2>&1 &
+          echo $! > /tmp/ecrl-static-server.pid
+      - name: Run real map and mobile viewport tests
+        run: node tests/ecrl-gis-v1-browser.cjs
+        env:
+          ECRL_TEST_URL: http://127.0.0.1:8765/ecrl-gis-v1.html
+      - name: Retain non-secret QA screenshots and summary
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ecrl-gis-v1-browser-qa
+          path: qa-ecrl-screens/
+          if-no-files-found: ignore
+          retention-days: 7
