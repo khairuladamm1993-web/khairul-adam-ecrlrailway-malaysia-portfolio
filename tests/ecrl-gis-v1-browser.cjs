@@ -22,6 +22,17 @@ const cases=[{name:'desktop',width:1440,height:900,isMobile:false,hasTouch:false
     await page.goto(TARGET,{waitUntil:'domcontentloaded',timeout:20000});
     await page.waitForFunction(()=>!!window.MRS10ECRLV1QA,null,{timeout:15000});
     await page.waitForFunction(()=>window.MRS10ECRLV1QA.getSnapshot().mapReady,null,{timeout:20000});
+    await page.waitForFunction(()=>{
+      const s=window.MRS10ECRLV1QA.getSnapshot();
+      return s.mapReady&&s.styleLoaded&&s.sourcePresent&&s.layerPresent;
+    },null,{timeout:12000}).catch(async e=>{
+      row.errors.push('DIAGNOSTIC:'+JSON.stringify(await page.evaluate(()=>{
+       const ss=window.MRS10ECRLV1QA.getSnapshot();
+       return {...ss,mapErrorText:document.getElementById('map-status')?.textContent,
+         canvasSize:[document.querySelector('#ecrl-map canvas')?.width,document.querySelector('#ecrl-map canvas')?.height]};
+      })));
+      throw e;
+    });
     const before=await page.evaluate(()=>({map:document.querySelector('#ecrl-map canvas')?.isConnected,
       snap:window.MRS10ECRLV1QA.getSnapshot()}));
     assert.equal(before.map,true,'MapLibre canvas not mounted');
