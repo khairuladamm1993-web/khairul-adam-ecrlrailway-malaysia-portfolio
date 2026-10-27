@@ -1,6 +1,7 @@
 /* Public educational ECRL intelligence. Coordinates are LOCALITY REFERENCES, never surveyed railway asset locations. */
 (function(g){'use strict';
 const sources=Object.freeze({
+ MOT_D25:{url:'https://www.mot.gov.my/my/Kenyataan%20Media/Tahun%202025/%28MOT%29%20KENYATAAN%20MEDIA%20-%20KABINET%20LULUS%20PERUBAHAN%20SKOP%20PEMBINAAN%20LANDASAN%20SEKSYEN%20D%20PROJEK%20ECRL%20.pdf',revision:'17 February 2025 Cabinet-approved Section D scope change',kind:'OFFICIAL_APPROVED_SCOPE'},
  MRL24:{url:'https://www.mida.gov.my/wp-content/uploads/2024/06/Slides-MRL.pdf',revision:'MRL presentation 13 June 2024, station classification and technical overview',kind:'OFFICIAL_PUBLIC_PRESENTATION'},
  MRL23:{url:'https://www.mrl.com.my/wp-content/uploads/2023/05/ECRL-Alignment-1552023.pdf',revision:'2023 schematic alignment',kind:'SCHEMATIC_REFERENCE'},
  C2_25:{url:'https://www.mrl.com.my/wp-content/uploads/2025/12/Plan-Profile.pdf',revision:'October 2025 revised C2 proposed Puncak Alam freight yard',kind:'SCHEMATIC_REFERENCE'},
@@ -67,8 +68,8 @@ const loops=Object.freeze([
 })));
 const facilities=Object.freeze([
  {assetId:'ecrl-yard-puncak-alam',assetType:'FREIGHT_YARD',officialName:'Puncak Alam Freight Yard',section:'C2',assetStatus:'PROPOSED_OFFICIAL',verificationStatus:'CONFIRMED',sourceIds:['C2_25'],geometryType:'SCHEMATIC_REFERENCE',point:null,iconType:'FREIGHT_YARD',notes:'October 2025 proposed revised C2 railway scheme; not an operating yard.'},
- {assetId:'ecrl-port-northport',assetType:'PORT_INTERFACE',officialName:'Northport',section:'C2',assetStatus:'PLANNED_CONNECTION',verificationStatus:'PARTIAL',sourceIds:['MRL23','MIDA'],geometryType:'NONE',point:null,iconType:'FREIGHT_YARD',notes:'Port connectivity indicated; no validated individual ECRL track geometry.'},
- {assetId:'ecrl-port-westports',assetType:'PORT_INTERFACE',officialName:'Westports',section:'C2',assetStatus:'PLANNED_CONNECTION',verificationStatus:'PARTIAL',sourceIds:['MRL23','MIDA'],geometryType:'NONE',point:null,iconType:'FREIGHT_YARD',notes:'Port connectivity indicated; no validated individual ECRL track geometry.'},
+ {assetId:'ecrl-port-northport',assetType:'PORT_INTERFACE',officialName:'Northport',section:'D',assetStatus:'PLANNED_CONNECTION',verificationStatus:'PARTIAL',sourceIds:['MOT_D25','MRL23','MIDA'],geometryType:'NONE',point:null,iconType:'FREIGHT_YARD',notes:'Section D (25 km): separate new ECRL standard-gauge and retained KTMB metre-gauge tracks; no verified physical geometry.'},
+ {assetId:'ecrl-port-westports',assetType:'PORT_INTERFACE',officialName:'Westports',section:'D',assetStatus:'PLANNED_CONNECTION',verificationStatus:'PARTIAL',sourceIds:['MOT_D25','MRL23','MIDA'],geometryType:'NONE',point:null,iconType:'FREIGHT_YARD',notes:'Section D (25 km): separate new ECRL standard-gauge and retained KTMB metre-gauge tracks; no verified physical geometry.'},
  {assetId:'ecrl-depot-gombak-north',assetType:'DEPOT',officialName:'Gombak North EMU Depot',section:'C1',assetStatus:'PENDING_VALIDATION',verificationStatus:'PENDING_VALIDATION',sourceIds:['LEGACY'],geometryType:'NONE',point:null,notes:'Historical MR-S10 depot record; no public surveyed point.'},
  {assetId:'ecrl-depot-kuantan',assetType:'DEPOT',officialName:'Kuantan Port City Depot',section:'B',assetStatus:'PENDING_VALIDATION',verificationStatus:'PENDING_VALIDATION',sourceIds:['LEGACY'],geometryType:'NONE',point:null,notes:'Historical MR-S10 depot record; no public surveyed point.'},
  {assetId:'ecrl-tunnel-gombak',assetType:'TUNNEL',officialName:'Gombak Tunnel',section:'C1',assetStatus:'CONSTRUCTION_REFERENCE',verificationStatus:'PARTIAL',sourceIds:['SEL'],geometryType:'NONE',point:null,notes:'Published tunnel-work references only; portal coordinates, length and track arrangement not verified.'}
@@ -85,7 +86,13 @@ const topology=Object.freeze([
 const segments=Object.freeze([{segmentId:'ecrl-c2-scheme',section:'C2',from:'ITT Gombak',to:'Jalan Kastam (Port Klang)',geometry:null,
  geometryType:'SCHEMATIC_REFERENCE',chainageStartKm:null,chainageEndKm:null,trackGaugeMm:1435,trackCount:null,
  designSpeedKmh:null,maximumPermittedSpeedKmh:null,stationApproachSpeedKmh:null,stationThroughSpeedKmh:null,tsr:null,
- sourceIds:['MRL23','SEL','C2_25'],verificationStatus:'PARTIAL'}]);
+ sourceIds:['MRL23','SEL','C2_25'],verificationStatus:'PARTIAL'},
+ {segmentId:'ecrl-d-port-access',section:'D',from:'Jalan Kastam (Port Klang)',to:'Northport / Westports',
+ geometry:null,geometryType:'SCHEMATIC_REFERENCE',chainageStartKm:null,chainageEndKm:null,
+ schemeLengthKm:25,trackGaugeMm:1435,ktmbMetreGaugeMm:1000,trackCount:2,
+ trackArrangement:'SEPARATE_PARALLEL_STANDARD_AND_METRE_GAUGE',olderProposal:'SINGLE_DUAL_GAUGE_SUPERSEDED',
+ designSpeedKmh:null,maximumPermittedSpeedKmh:null,stationApproachSpeedKmh:null,stationThroughSpeedKmh:null,tsr:null,
+ sourceIds:['MOT_D25','MRL23'],verificationStatus:'PARTIAL'}]);
 g.MRS10ECRLGISV1=Object.freeze({version:'1.0.0',sources,stations,loops,facilities,segments,topology,
  schemeSpeedReference:Object.freeze({passengerKmh:160,freightKmh:80,sourceId:'MIDA',scope:'PROJECT_LEVEL_ONLY'}),
  schemeTechnicalReference:Object.freeze({gaugeMm:1435,electrificationVolts:25000,trackFormation:'SINGLE_TRACK_ON_DOUBLE_TRACK_FORMATION',sourceId:'MRL24',scope:'PROJECT_LEVEL_SCHEME_NOT_SEGMENT_SURVEY'}),
