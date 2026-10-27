@@ -47,7 +47,7 @@
     "th"
   ],
   "gate": {
-    "sourceVerification": "PARTIAL",
+    "sourceVerification": "PARTIAL_WITH_RECORDED_CONFLICTS",
     "localityReference": "DISCLOSED",
     "physicalTrack": "NOT_AVAILABLE",
     "loopGeometries": "NOT_AVAILABLE",
@@ -61,5 +61,33 @@
     "feature/mrs10-p01-unified-v6-sri-mono-erl-isolated",
     "feature/mrs10-p01-unified-v7-ktm-no-shuttle-timur"
   ],
-  "rollback": "Remove this independent Vercel preview only; delete isolated branch following Owner approval. No shared files changed."
+  "rollback": "Remove this independent Vercel preview only; delete isolated branch following Owner approval. No shared files changed.",
+  "sourceConflicts": [
+    {
+      "assetId": "ecrl-stn-18",
+      "field": "serviceType",
+      "status": "SOURCE_CONFLICT",
+      "sources": [
+        "SEL",
+        "MRL24",
+        "C2_25"
+      ]
+    },
+    {
+      "assetId": "ecrl-stn-20",
+      "field": "serviceType",
+      "status": "SOURCE_CONFLICT",
+      "sources": [
+        "SEL_STN",
+        "MRL24"
+      ]
+    }
+  ],
+  "projectWideTechnicalReference": {
+    "gaugeMm": 1435,
+    "electrificationVolts": 25000,
+    "trackFormation": "SINGLE_TRACK_ON_DOUBLE_TRACK_FORMATION",
+    "sectionTrackCount": "UNKNOWN",
+    "source": "MRL24"
+  }
 }
