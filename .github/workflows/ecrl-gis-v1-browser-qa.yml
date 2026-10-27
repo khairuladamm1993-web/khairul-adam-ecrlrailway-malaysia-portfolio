@@ -4,6 +4,9 @@ on:
     branches:
       - feature/mrs10-p01-ecrl-gis-c2-infrastructure-isolated
   workflow_dispatch:
+concurrency:
+  group: ecrl-browser-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
