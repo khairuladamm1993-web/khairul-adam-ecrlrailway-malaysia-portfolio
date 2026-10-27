@@ -29,13 +29,14 @@ for(const engine of ['chromium','webkit']){
    await page.locator('#route-buttons button').filter({hasText:'RTS'}).first().click();
    // Inspect genuine RTS-tagged OSM segments at a usable map scale; verify
    // a real pointer click, not a synthetic call to the popup implementation.
+   // Scroll first. Scrolling AFTER sampling hit coordinates can trigger a
+   // responsive canvas resize and invalidate projected targets on iPad.
+   await page.locator('#map').scrollIntoViewIfNeeded();
    await page.evaluate(()=>{if(!window.MRS10V8Diagnostics.focusTrackInspection())throw Error('RTS_TRACK_CAMERA_UNAVAILABLE')});
    await page.waitForFunction(()=>{
     const d=window.MRS10V8Diagnostics;
     return d.snapshot().geometry.rendered>0&&d.trackHitTargets().length>0;
    },null,{timeout:30000});
-   await page.locator('#map').scrollIntoViewIfNeeded();
-   await page.waitForTimeout(350);
    const targets=await page.evaluate(()=>window.MRS10V8Diagnostics.trackHitTargets());
    const box=await page.locator('#map').boundingBox();
    let trackClicked=false;

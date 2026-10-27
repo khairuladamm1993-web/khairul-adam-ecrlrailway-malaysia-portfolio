@@ -356,6 +356,7 @@ function focusTrackInspection(){
  const map=state.map;
  const segments=physical?.segments.filter(s=>s.routeIds.includes('sg-RTS')&&s.geometry?.type==='LineString')||[];
  if(!map?.isStyleLoaded()||!segments.length)return false;
+ map.resize(); // Reconcile WebGL/canvas viewport after iPad page scrolling.
  const coords=segments.flatMap(s=>s.geometry.coordinates);
  const x=coords.map(c=>c[0]),y=coords.map(c=>c[1]);
  map.jumpTo({center:[(Math.min(...x)+Math.max(...x))/2,(Math.min(...y)+Math.max(...y))/2],zoom:14.5});
