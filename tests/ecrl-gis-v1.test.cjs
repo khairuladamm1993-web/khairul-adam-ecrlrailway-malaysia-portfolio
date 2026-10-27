@@ -11,8 +11,14 @@ test('A/B/C1/C2 register precisely 20 official station identities',()=>{
 test('C2 station order and passenger/freight/future distinction',()=>{
  assert.deepEqual(Array.from(D.stations.filter(a=>a.section==='C2').map(a=>a.officialName)),
  ['Serendah Baru','Puncak Alam','Kapar','Jalan Kastam (Port Klang)']);
- assert.equal(D.stations[17].serviceType,'FUTURE_PASSENGER');assert.equal(D.stations[18].serviceType,'FUTURE_PASSENGER');
+ assert.equal(D.stations[17].serviceType,'UNKNOWN');assert.equal(D.stations[17].verificationStatus,'SOURCE_CONFLICT');
+ assert.equal(D.stations[18].serviceType,'FUTURE_PASSENGER');
  assert.equal(D.stations[16].serviceType,'PASSENGER_FREIGHT');
+ assert.equal(D.stations[19].serviceType,'UNKNOWN');assert.equal(D.stations[19].verificationStatus,'SOURCE_CONFLICT');
+});
+test('Source conflict reason retained for Puncak Alam and Jalan Kastam',()=>{
+ assert.equal(D.stations[17].conflicts.length,1);assert.equal(D.stations[19].conflicts.length,1);
+ assert.ok(D.sources.MRL24.url.endsWith('/Slides-MRL.pdf'));
 });
 test('All records have stable unique IDs and grounded sources',()=>{
  const assets=[...D.stations,...D.loops,...D.facilities];
