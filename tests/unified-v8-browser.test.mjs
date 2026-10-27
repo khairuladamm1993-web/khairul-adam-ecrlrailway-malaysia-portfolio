@@ -27,13 +27,22 @@ for(const engine of ['chromium','webkit']){
    await page.waitForFunction(()=>{const s=window.MRS10V8Diagnostics.snapshot();return s.styleLoaded&&s.tilesLoaded&&s.renderedFeatureCount>=596},null,{timeout:60000});
    const fullSnapshot=await snap();
    await page.locator('#route-buttons button').filter({hasText:'RTS'}).first().click();
-   await page.waitForFunction(()=>window.MRS10V8Diagnostics.snapshot().geometry.rendered>0,null,{timeout:20000});
+   // Inspect genuine RTS-tagged OSM segments at a usable map scale; verify
+   // a real pointer click, not a synthetic call to the popup implementation.
+   await page.evaluate(()=>{if(!window.MRS10V8Diagnostics.focusTrackInspection())throw Error('RTS_TRACK_CAMERA_UNAVAILABLE')});
+   await page.waitForFunction(()=>{
+    const d=window.MRS10V8Diagnostics;
+    return d.snapshot().geometry.rendered>0&&d.trackHitTargets().length>0;
+   },null,{timeout:30000});
    await page.locator('#map').scrollIntoViewIfNeeded();
-   await page.waitForTimeout(600);
+   await page.waitForTimeout(350);
    const targets=await page.evaluate(()=>window.MRS10V8Diagnostics.trackHitTargets());
    const box=await page.locator('#map').boundingBox();
    let trackClicked=false;
-   for(const target of targets.slice(0,40)){await page.mouse.click(box.x+target.x,box.y+target.y);if((await page.locator('.maplibregl-popup').allTextContents()).join(' ').includes('OSM_TOPOLOGY_MATCHED')){trackClicked=true;break}}
+   for(const target of targets.slice(0,40)){
+    await page.mouse.click(box.x+target.x,box.y+target.y);
+    if((await page.locator('.maplibregl-popup').allTextContents()).join(' ').includes('OSM_TOPOLOGY_MATCHED')){trackClicked=true;break}
+   }
    assert(trackClicked,'OSM_TRACK_POPUP_MISSING:'+JSON.stringify({targets:targets.length,box,popup:await page.locator('.maplibregl-popup').allTextContents()}));
    await page.locator('#map').screenshot({path:`artifacts/unified-v8-browser/${engine}-${vp.name}-track.png`});
    await page.locator('#reset').click();

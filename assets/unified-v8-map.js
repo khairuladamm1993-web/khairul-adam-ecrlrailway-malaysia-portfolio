@@ -351,12 +351,40 @@ function diagnosticSnapshot(){
   layerCount:Object.values(rows).filter(r=>r.present).length,sourceMatched:state.points.size,
   geometry:geometrySnapshot(),singaporeSourceRecords:singapore?.sourceRecordCount,borderRecords:singapore?.borderRecordCount,mapInstances:state.map?1:0,stage:state.pending?'LOADING':'DONE',category:state.category});
 }
-function trackHitTargets(){
- const map=state.map;if(!map?.isStyleLoaded())return [];
- const rect=map.getCanvas().getBoundingClientRect();const hits=[];
- for(const s of physical.segments.filter(s=>s.routeIds.includes('sg-RTS'))){for(const c of s.geometry.coordinates){const p=map.project(c);if(p.x>20&&p.y>20&&p.x<rect.width-20&&p.y<rect.height-20)hits.push({x:p.x,y:p.y,segmentId:s.segmentId})}}return hits;
+// QA camera uses only existing OSM-backed geometry; it never derives service alignment.
+function focusTrackInspection(){
+ const map=state.map;
+ const segments=physical?.segments.filter(s=>s.routeIds.includes('sg-RTS')&&s.geometry?.type==='LineString')||[];
+ if(!map?.isStyleLoaded()||!segments.length)return false;
+ const coords=segments.flatMap(s=>s.geometry.coordinates);
+ const x=coords.map(c=>c[0]),y=coords.map(c=>c[1]);
+ map.jumpTo({center:[(Math.min(...x)+Math.max(...x))/2,(Math.min(...y)+Math.max(...y))/2],zoom:14.5});
+ return true;
 }
-window.MRS10V8Diagnostics=Object.freeze({snapshot:diagnosticSnapshot,trackHitTargets});
+// Return actual hit-testable track points, excluding station hit boxes. A screen
+// projection alone does not prove the painted/filtered MapLibre layer is clickable.
+function trackHitTargets(){
+ const map=state.map;if(!map?.isStyleLoaded()||!map.getLayer('mrs10-v8-geometry'))return [];
+ const rect=map.getCanvas().getBoundingClientRect(),hits=[];
+ const stationLayers=state.manifest.map(r=>layerId(r.id))
+  .filter(id=>map.getLayer(id)&&map.getLayoutProperty(id,'visibility')!=='none');
+ for(const s of physical.segments.filter(s=>s.routeIds.includes('sg-RTS')&&s.geometry?.type==='LineString')){
+  const coords=s.geometry.coordinates;
+  for(let i=1;i<coords.length;i++){
+   const mid=[(coords[i-1][0]+coords[i][0])/2,(coords[i-1][1]+coords[i][1])/2];
+   const p=map.project(mid);
+   if(p.x<24||p.y<24||p.x>rect.width-24||p.y>rect.height-24)continue;
+   const tracks=map.queryRenderedFeatures([[p.x-4,p.y-4],[p.x+4,p.y+4]],{layers:['mrs10-v8-geometry']});
+   if(!tracks.some(f=>f.properties.geometryVerification==='OSM_TOPOLOGY_MATCHED'))continue;
+   const nearbyStations=stationLayers.length?map.queryRenderedFeatures(
+    [[p.x-12,p.y-12],[p.x+12,p.y+12]],{layers:stationLayers}):[];
+   if(nearbyStations.length)continue;
+   hits.push({x:p.x,y:p.y,segmentId:s.segmentId});
+  }
+ }
+ return hits;
+}
+window.MRS10V8Diagnostics=Object.freeze({snapshot:diagnosticSnapshot,focusTrackInspection,trackHitTargets});
 
 const v8texts={
 ms:{desc:'Malaysia V7 + 17 laluan Singapore. Turutan perkhidmatan dan geometri fizikal diasingkan. Shuttle Timur dikecualikan.',direction:'Arah / cabang',approximate:'Paparkan 13 geometri sekunder — anggaran, bukan landasan disahkan',operational:'Beroperasi (registry sumber)',future:'Akan datang / status terhad — bukan pengesahan operasi',partialTopology:'Turutan sebahagian; jurang sumber',sourceTopology:'Turutan berpaut sumber',serviceNotTrack:'Turutan perkhidmatan bukan sambungan fizikal landasan.',secondaryPoint:'Titik GIS sekunder; bukan ukuran rasmi.',coverageNote:'Rekod laluan-stesen, bukan bilangan stesen fizikal unik. Lokasi belum tersedia kekal dalam turutan.',physical:'Segmen fizikal disahkan',approx:'Geometri anggaran',unresolved:'Jajaran lain belum disahkan',track:'Maklumat landasan',verification:'Pengesahan geometri',confidence:'Keyakinan',railwayType:'Jenis landasan',sourceLabel:'Sumber',sourceDate:'Tarikh sumber',unknown:'Belum disahkan',serviceRelation:'Hubungan perkhidmatan',walk:'Pertukaran penumpang; tiada through-track',area:'Kawasan berdekatan; tiada through-track'},
