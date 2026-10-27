@@ -52,6 +52,27 @@ await page.waitForTimeout(700);
 const stationPx=await page.evaluate(c=>{const m=window.__sgRailMap,p=m.project(c),r=m.getContainer().getBoundingClientRect();return {x:r.left+p.x,y:r.top+p.y};},stationPoint);
 await page.mouse.click(stationPx.x,stationPx.y);await page.waitForTimeout(130);
 assert((await page.locator(".maplibregl-popup").allTextContents()).some(s=>s.includes("Keppel")),"MAP_STATION_MARKER_TAP_POPUP_MISSING");
+await page.locator("#route-drawer").evaluate(x=>x.open=true);
+await page.locator("#lines button").filter({hasText:"KTM Shuttle Tebrau"}).click();
+assert.equal(await page.locator("#lineup .station-item").count(),2,"TEBRAU_TWO_TERMINALS_MISSING");
+assert.deepEqual(await page.locator("#lineup .station-item").evaluateAll(a=>a.map(x=>x.dataset.stationId)),["MY-JB-SENTRAL","SG-WOODLANDS-TCP"]);
+await page.locator("#direction").selectOption("SHUTTLE_TEBRAU_SG_MY");
+assert.deepEqual(await page.locator("#lineup .station-item").evaluateAll(a=>a.map(x=>x.dataset.stationId)),["SG-WOODLANDS-TCP","MY-JB-SENTRAL"]);
+await page.locator("#route-drawer").evaluate(x=>x.open=true);
+await page.locator("#lines button").filter({hasText:"RTS"}).click();
+assert.deepEqual(await page.locator("#lineup .station-item").evaluateAll(a=>a.map(x=>x.dataset.stationId)),["MY-BUKIT-CHAGAR","SG-WOODLANDS-NORTH-RTS"]);
+const borderGeo=await page.evaluate(()=>window.__sgRailMap.getSource("sg-border-terminals")?.serialize?.());
+assert(borderGeo,"BORDER_SOURCE_MISSING");
+await page.locator("#direction").selectOption("RTS_SG_MY");
+assert.deepEqual(await page.locator("#lineup .station-item").evaluateAll(a=>a.map(x=>x.dataset.stationId)),["SG-WOODLANDS-NORTH-RTS","MY-BUKIT-CHAGAR"]);
+await page.locator("#route-drawer").evaluate(x=>x.open=true);
+await page.locator("#lines button").filter({hasText:"Circle Line"}).click();
+await page.locator("#direction").selectOption("CCL_CLOCKWISE");
+const cc=await page.locator("#lineup .station-item").evaluateAll(a=>a.map(x=>x.dataset.stationId));
+assert.deepEqual(cc.slice(cc.indexOf("SG-CC29"),cc.indexOf("SG-CC33")+1),["SG-CC29","SG-CC30","SG-CC31","SG-CC32","SG-CC33"]);
+await page.locator("#direction").selectOption("CCL_DHOBY_SPUR");
+assert.deepEqual(await page.locator("#lineup .station-item").evaluateAll(a=>a.map(x=>x.dataset.stationId)),["SG-CC1","SG-CC2","SG-CC3","SG-CC4"]);
+
 
 assert.equal(errors.filter(x=>/Uncaught|TypeError|ReferenceError|SyntaxError/.test(x)).length,0,"BROWSER_JS_ERRORS");
 const result={viewport:vp.name,pass:true,rendered:ev.rendered,renderedTrack:ev.renderedTrack,pixelColors:pixels(png),tileSuccess:responses.filter(x=>x.status===200).length,consoleErrors:errors.slice(0,3),openFreeMapResponses:responses.filter(x=>/openfreemap/.test(x.url)).length};all.push(result);console.log("SINGAPORE_BROWSER_PASS",JSON.stringify(result));
