@@ -1,0 +1,56 @@
+{
+  "adapterVersion": "1.2.0",
+  "namespace": "mr-s10.sg.v1",
+  "root": "singapore/",
+  "entry": "singapore/index.html",
+  "manifest": "singapore/data/lines.json",
+  "stations": "singapore/data/stations.geojson",
+  "tracks": "singapore/data/tracks.geojson",
+  "adapter": "singapore/track-intelligence-adapter.js",
+  "requires": [
+    "MapLibre GL JS 4.7.1"
+  ],
+  "doesNotModify": [
+    "main",
+    "Supabase",
+    "UnifiedV6",
+    "UnifiedV7",
+    "ShuttleTimur"
+  ],
+  "gate": {
+    "integrationReady": false,
+    "why": "Requires Owner Safari V1.2 UAT; future patterns partial; 13 track geometries still secondary and not physical-verified."
+  },
+  "uiVersion": "1.1.0",
+  "basemap": {
+    "provider": "OpenFreeMap",
+    "lightStyle": "https://tiles.openfreemap.org/styles/positron",
+    "darkStyle": "https://tiles.openfreemap.org/styles/dark",
+    "requiresApiKey": false,
+    "attribution": "OpenFreeMap / OpenMapTiles / OpenStreetMap",
+    "runtimeNetworkDependency": true
+  },
+  "routePointCoverage": {
+    "SHUTTLE_TEBRAU": 2,
+    "RTS": 2,
+    "evidenceClass": "SECONDARY_OSM_POI_AND_POLYGON_CENTROID_NOT_AUTHORITATIVE",
+    "physicalTrackGeometry": false
+  },
+  "railwayIntelligence": {
+    "popup": "Track Intelligence Adapter",
+    "physicalVerifiedFeatures": 0,
+    "secondaryPreviewFeatures": 13,
+    "officialChainageAvailable": false,
+    "officialSpeedProfileAvailable": false,
+    "doNotPromoteSecondaryAsVerified": true
+  },
+  "topology": "singapore/data/route-topology.json",
+  "crossBorderConnections": "singapore/data/cross-border-connections.json",
+  "crossBorderStationPoints": "singapore/data/cross-border-terminals.geojson",
+  "lineupGate": {
+    "crossBorderTextTopologyReady": true,
+    "stationOrderFromExplicitRegistry": true,
+    "allRoutesVerified": false,
+    "reason": "Future corridors and LRT active service directional patterns partly unresolved"
+  }
+}

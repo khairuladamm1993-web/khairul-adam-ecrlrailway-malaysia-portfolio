@@ -1,0 +1,1870 @@
+{
+  "schemaVersion": "1.2.0",
+  "asOfDate": "2026-10-27",
+  "sourceType": "OFFICIAL_SERVICE_SCHEMATIC_NOT_SURVEYED_RAIL_GEOMETRY",
+  "routes": [
+    {
+      "routeId": "NSL",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "NSL_SOUTH",
+          "directionId": "NSL_SOUTH",
+          "label": "Jurong East → Marina South Pier",
+          "orderedStationIds": [
+            "SG-NS1",
+            "SG-NS2",
+            "SG-NS3",
+            "SG-NS4",
+            "SG-NS5",
+            "SG-NS7",
+            "SG-NS8",
+            "SG-NS9",
+            "SG-NS10",
+            "SG-NS11",
+            "SG-NS12",
+            "SG-NS13",
+            "SG-NS14",
+            "SG-NS15",
+            "SG-NS16",
+            "SG-NS17",
+            "SG-NS18",
+            "SG-NS19",
+            "SG-NS20",
+            "SG-NS21",
+            "SG-NS22",
+            "SG-NS23",
+            "SG-NS24",
+            "SG-NS25",
+            "SG-NS26",
+            "SG-NS27",
+            "SG-NS28"
+          ],
+          "terminalIds": [
+            "SG-NS1",
+            "SG-NS28"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "NSL_NORTH",
+          "directionId": "NSL_NORTH",
+          "label": "Marina South Pier → Jurong East",
+          "orderedStationIds": [
+            "SG-NS28",
+            "SG-NS27",
+            "SG-NS26",
+            "SG-NS25",
+            "SG-NS24",
+            "SG-NS23",
+            "SG-NS22",
+            "SG-NS21",
+            "SG-NS20",
+            "SG-NS19",
+            "SG-NS18",
+            "SG-NS17",
+            "SG-NS16",
+            "SG-NS15",
+            "SG-NS14",
+            "SG-NS13",
+            "SG-NS12",
+            "SG-NS11",
+            "SG-NS10",
+            "SG-NS9",
+            "SG-NS8",
+            "SG-NS7",
+            "SG-NS5",
+            "SG-NS4",
+            "SG-NS3",
+            "SG-NS2",
+            "SG-NS1"
+          ],
+          "terminalIds": [
+            "SG-NS28",
+            "SG-NS1"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+      "lineupCompleteness": "SOURCE_LINKED_TOPOLOGY",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [
+        "SG-NS3A",
+        "SG-NS6"
+      ],
+      "branches": [],
+      "loops": [],
+      "interchanges": []
+    },
+    {
+      "routeId": "EWL",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "EWL_TO_TUAS",
+          "directionId": "EWL_TO_TUAS",
+          "label": "Pasir Ris → Tuas Link",
+          "orderedStationIds": [
+            "SG-EW1",
+            "SG-EW2",
+            "SG-EW3",
+            "SG-EW4",
+            "SG-EW5",
+            "SG-EW6",
+            "SG-EW7",
+            "SG-EW8",
+            "SG-EW9",
+            "SG-EW10",
+            "SG-EW11",
+            "SG-EW12",
+            "SG-EW13",
+            "SG-EW14",
+            "SG-EW15",
+            "SG-EW16",
+            "SG-EW17",
+            "SG-EW18",
+            "SG-EW19",
+            "SG-EW20",
+            "SG-EW21",
+            "SG-EW22",
+            "SG-EW23",
+            "SG-EW24",
+            "SG-EW25",
+            "SG-EW26",
+            "SG-EW27",
+            "SG-EW28",
+            "SG-EW29",
+            "SG-EW30",
+            "SG-EW31",
+            "SG-EW32",
+            "SG-EW33"
+          ],
+          "terminalIds": [
+            "SG-EW1",
+            "SG-EW33"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "EWL_TO_PASIR_RIS",
+          "directionId": "EWL_TO_PASIR_RIS",
+          "label": "Tuas Link → Pasir Ris",
+          "orderedStationIds": [
+            "SG-EW33",
+            "SG-EW32",
+            "SG-EW31",
+            "SG-EW30",
+            "SG-EW29",
+            "SG-EW28",
+            "SG-EW27",
+            "SG-EW26",
+            "SG-EW25",
+            "SG-EW24",
+            "SG-EW23",
+            "SG-EW22",
+            "SG-EW21",
+            "SG-EW20",
+            "SG-EW19",
+            "SG-EW18",
+            "SG-EW17",
+            "SG-EW16",
+            "SG-EW15",
+            "SG-EW14",
+            "SG-EW13",
+            "SG-EW12",
+            "SG-EW11",
+            "SG-EW10",
+            "SG-EW9",
+            "SG-EW8",
+            "SG-EW7",
+            "SG-EW6",
+            "SG-EW5",
+            "SG-EW4",
+            "SG-EW3",
+            "SG-EW2",
+            "SG-EW1"
+          ],
+          "terminalIds": [
+            "SG-EW33",
+            "SG-EW1"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "EWL_AIRPORT",
+          "directionId": "EWL_AIRPORT",
+          "label": "Changi branch · Tanah Merah → Airport",
+          "orderedStationIds": [
+            "SG-EW4",
+            "SG-CG1",
+            "SG-CG2"
+          ],
+          "terminalIds": [
+            "SG-EW4",
+            "SG-CG2"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.changiairport.com/en/at-changi/transport-and-directions/getting-to-changi-airport.html",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "EWL_AIRPORT_REVERSE",
+          "directionId": "EWL_AIRPORT_REVERSE",
+          "label": "Changi branch · Airport → Tanah Merah",
+          "orderedStationIds": [
+            "SG-CG2",
+            "SG-CG1",
+            "SG-EW4"
+          ],
+          "terminalIds": [
+            "SG-CG2",
+            "SG-EW4"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+      "lineupCompleteness": "SOURCE_LINKED_TOPOLOGY",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [],
+      "branches": [
+        {
+          "branchId": "CHANGI_BRANCH",
+          "junctionStationId": "SG-EW4",
+          "serviceConnectionNotPhysicalLineThrough": true
+        }
+      ],
+      "loops": [],
+      "interchanges": []
+    },
+    {
+      "routeId": "NEL",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "NEL_TO_COAST",
+          "directionId": "NEL_TO_COAST",
+          "label": "HarbourFront → Punggol Coast",
+          "orderedStationIds": [
+            "SG-NE1",
+            "SG-NE3",
+            "SG-NE4",
+            "SG-NE5",
+            "SG-NE6",
+            "SG-NE7",
+            "SG-NE8",
+            "SG-NE9",
+            "SG-NE10",
+            "SG-NE11",
+            "SG-NE12",
+            "SG-NE13",
+            "SG-NE14",
+            "SG-NE15",
+            "SG-NE16",
+            "SG-NE17",
+            "SG-NE18"
+          ],
+          "terminalIds": [
+            "SG-NE1",
+            "SG-NE18"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "NEL_TO_HARBOURFRONT",
+          "directionId": "NEL_TO_HARBOURFRONT",
+          "label": "Punggol Coast → HarbourFront",
+          "orderedStationIds": [
+            "SG-NE18",
+            "SG-NE17",
+            "SG-NE16",
+            "SG-NE15",
+            "SG-NE14",
+            "SG-NE13",
+            "SG-NE12",
+            "SG-NE11",
+            "SG-NE10",
+            "SG-NE9",
+            "SG-NE8",
+            "SG-NE7",
+            "SG-NE6",
+            "SG-NE5",
+            "SG-NE4",
+            "SG-NE3",
+            "SG-NE1"
+          ],
+          "terminalIds": [
+            "SG-NE18",
+            "SG-NE1"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+      "lineupCompleteness": "SOURCE_LINKED_TOPOLOGY",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [],
+      "branches": [],
+      "loops": [],
+      "interchanges": []
+    },
+    {
+      "routeId": "CCL",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "CCL_CLOCKWISE",
+          "directionId": "CCL_CLOCKWISE",
+          "label": "CCL complete loop · orientation 1",
+          "orderedStationIds": [
+            "SG-CC4",
+            "SG-CC5",
+            "SG-CC6",
+            "SG-CC7",
+            "SG-CC8",
+            "SG-CC9",
+            "SG-CC10",
+            "SG-CC11",
+            "SG-CC12",
+            "SG-CC13",
+            "SG-CC14",
+            "SG-CC15",
+            "SG-CC16",
+            "SG-CC17",
+            "SG-CC19",
+            "SG-CC20",
+            "SG-CC21",
+            "SG-CC22",
+            "SG-CC23",
+            "SG-CC24",
+            "SG-CC25",
+            "SG-CC26",
+            "SG-CC27",
+            "SG-CC28",
+            "SG-CC29",
+            "SG-CC30",
+            "SG-CC31",
+            "SG-CC32",
+            "SG-CC33",
+            "SG-CC34",
+            "SG-CC4"
+          ],
+          "terminalIds": [
+            "SG-CC4",
+            "SG-CC4"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": true,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/circle_line_6.html",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "CCL_ANTICLOCKWISE",
+          "directionId": "CCL_ANTICLOCKWISE",
+          "label": "CCL complete loop · orientation 2",
+          "orderedStationIds": [
+            "SG-CC4",
+            "SG-CC34",
+            "SG-CC33",
+            "SG-CC32",
+            "SG-CC31",
+            "SG-CC30",
+            "SG-CC29",
+            "SG-CC28",
+            "SG-CC27",
+            "SG-CC26",
+            "SG-CC25",
+            "SG-CC24",
+            "SG-CC23",
+            "SG-CC22",
+            "SG-CC21",
+            "SG-CC20",
+            "SG-CC19",
+            "SG-CC17",
+            "SG-CC16",
+            "SG-CC15",
+            "SG-CC14",
+            "SG-CC13",
+            "SG-CC12",
+            "SG-CC11",
+            "SG-CC10",
+            "SG-CC9",
+            "SG-CC8",
+            "SG-CC7",
+            "SG-CC6",
+            "SG-CC5",
+            "SG-CC4"
+          ],
+          "terminalIds": [
+            "SG-CC4",
+            "SG-CC4"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": true,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/circle_line_6.html",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "CCL_DHOBY_SPUR",
+          "directionId": "CCL_DHOBY_SPUR",
+          "label": "Dhoby Ghaut spur → Promenade",
+          "orderedStationIds": [
+            "SG-CC1",
+            "SG-CC2",
+            "SG-CC3",
+            "SG-CC4"
+          ],
+          "terminalIds": [
+            "SG-CC1",
+            "SG-CC4"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/cclwayfinding/education/spur",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "CCL_DHOBY_SPUR_REVERSE",
+          "directionId": "CCL_DHOBY_SPUR_REVERSE",
+          "label": "Promenade → Dhoby Ghaut spur",
+          "orderedStationIds": [
+            "SG-CC4",
+            "SG-CC3",
+            "SG-CC2",
+            "SG-CC1"
+          ],
+          "terminalIds": [
+            "SG-CC4",
+            "SG-CC1"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/circle_line_6.html",
+      "lineupCompleteness": "SOURCE_LINKED_TOPOLOGY",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [
+        "SG-CC18"
+      ],
+      "branches": [
+        {
+          "branchId": "CCL_DHOBY_GHAUT_SPUR",
+          "junctionStationId": "SG-CC4",
+          "stationIds": [
+            "SG-CC1",
+            "SG-CC2",
+            "SG-CC3"
+          ],
+          "note": "Spur separate from closed main loop; train patterns vary"
+        }
+      ],
+      "loops": [
+        {
+          "loopId": "CCL_COMPLETE",
+          "stationIds": [
+            "SG-CC4",
+            "SG-CC5",
+            "SG-CC6",
+            "SG-CC7",
+            "SG-CC8",
+            "SG-CC9",
+            "SG-CC10",
+            "SG-CC11",
+            "SG-CC12",
+            "SG-CC13",
+            "SG-CC14",
+            "SG-CC15",
+            "SG-CC16",
+            "SG-CC17",
+            "SG-CC19",
+            "SG-CC20",
+            "SG-CC21",
+            "SG-CC22",
+            "SG-CC23",
+            "SG-CC24",
+            "SG-CC25",
+            "SG-CC26",
+            "SG-CC27",
+            "SG-CC28",
+            "SG-CC29",
+            "SG-CC30",
+            "SG-CC31",
+            "SG-CC32",
+            "SG-CC33",
+            "SG-CC34"
+          ],
+          "closureStationId": "SG-CC4"
+        }
+      ],
+      "interchanges": []
+    },
+    {
+      "routeId": "DTL",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "DTL_TO_EXPO",
+          "directionId": "DTL_TO_EXPO",
+          "label": "Bukit Panjang → Expo",
+          "orderedStationIds": [
+            "SG-DT1",
+            "SG-DT2",
+            "SG-DT3",
+            "SG-DT4",
+            "SG-DT5",
+            "SG-DT6",
+            "SG-DT7",
+            "SG-DT8",
+            "SG-DT9",
+            "SG-DT10",
+            "SG-DT11",
+            "SG-DT12",
+            "SG-DT13",
+            "SG-DT14",
+            "SG-DT15",
+            "SG-DT16",
+            "SG-DT17",
+            "SG-DT18",
+            "SG-DT19",
+            "SG-DT20",
+            "SG-DT21",
+            "SG-DT22",
+            "SG-DT23",
+            "SG-DT24",
+            "SG-DT25",
+            "SG-DT26",
+            "SG-DT27",
+            "SG-DT28",
+            "SG-DT29",
+            "SG-DT30",
+            "SG-DT31",
+            "SG-DT32",
+            "SG-DT33",
+            "SG-DT34",
+            "SG-DT35"
+          ],
+          "terminalIds": [
+            "SG-DT1",
+            "SG-DT35"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "DTL_TO_BUKIT_PANJANG",
+          "directionId": "DTL_TO_BUKIT_PANJANG",
+          "label": "Expo → Bukit Panjang",
+          "orderedStationIds": [
+            "SG-DT35",
+            "SG-DT34",
+            "SG-DT33",
+            "SG-DT32",
+            "SG-DT31",
+            "SG-DT30",
+            "SG-DT29",
+            "SG-DT28",
+            "SG-DT27",
+            "SG-DT26",
+            "SG-DT25",
+            "SG-DT24",
+            "SG-DT23",
+            "SG-DT22",
+            "SG-DT21",
+            "SG-DT20",
+            "SG-DT19",
+            "SG-DT18",
+            "SG-DT17",
+            "SG-DT16",
+            "SG-DT15",
+            "SG-DT14",
+            "SG-DT13",
+            "SG-DT12",
+            "SG-DT11",
+            "SG-DT10",
+            "SG-DT9",
+            "SG-DT8",
+            "SG-DT7",
+            "SG-DT6",
+            "SG-DT5",
+            "SG-DT4",
+            "SG-DT3",
+            "SG-DT2",
+            "SG-DT1"
+          ],
+          "terminalIds": [
+            "SG-DT35",
+            "SG-DT1"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "DTL3E_FUTURE",
+          "directionId": "DTL3E_FUTURE",
+          "label": "DTL3 Extension · future",
+          "orderedStationIds": [
+            "SG-DT35",
+            "SG-DT36",
+            "SG-DT37"
+          ],
+          "terminalIds": [
+            "SG-DT35",
+            "SG-DT37"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "UNDER_CONSTRUCTION",
+          "isCircular": false,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+      "lineupCompleteness": "PARTIAL_TOPOLOGY_SOURCE_LIMITED",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [],
+      "branches": [],
+      "loops": [],
+      "interchanges": []
+    },
+    {
+      "routeId": "TEL",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "TEL_TO_BAYSHORE",
+          "directionId": "TEL_TO_BAYSHORE",
+          "label": "Woodlands North → Bayshore",
+          "orderedStationIds": [
+            "SG-TE1",
+            "SG-TE2",
+            "SG-TE3",
+            "SG-TE4",
+            "SG-TE5",
+            "SG-TE6",
+            "SG-TE7",
+            "SG-TE8",
+            "SG-TE9",
+            "SG-TE11",
+            "SG-TE12",
+            "SG-TE13",
+            "SG-TE14",
+            "SG-TE15",
+            "SG-TE16",
+            "SG-TE17",
+            "SG-TE18",
+            "SG-TE19",
+            "SG-TE20",
+            "SG-TE22",
+            "SG-TE23",
+            "SG-TE24",
+            "SG-TE25",
+            "SG-TE26",
+            "SG-TE27",
+            "SG-TE28",
+            "SG-TE29"
+          ],
+          "terminalIds": [
+            "SG-TE1",
+            "SG-TE29"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "TEL_TO_WOODLANDS",
+          "directionId": "TEL_TO_WOODLANDS",
+          "label": "Bayshore → Woodlands North",
+          "orderedStationIds": [
+            "SG-TE29",
+            "SG-TE28",
+            "SG-TE27",
+            "SG-TE26",
+            "SG-TE25",
+            "SG-TE24",
+            "SG-TE23",
+            "SG-TE22",
+            "SG-TE20",
+            "SG-TE19",
+            "SG-TE18",
+            "SG-TE17",
+            "SG-TE16",
+            "SG-TE15",
+            "SG-TE14",
+            "SG-TE13",
+            "SG-TE12",
+            "SG-TE11",
+            "SG-TE9",
+            "SG-TE8",
+            "SG-TE7",
+            "SG-TE6",
+            "SG-TE5",
+            "SG-TE4",
+            "SG-TE3",
+            "SG-TE2",
+            "SG-TE1"
+          ],
+          "terminalIds": [
+            "SG-TE29",
+            "SG-TE1"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "TEL5_FUTURE",
+          "directionId": "TEL5_FUTURE",
+          "label": "TEL Stage 5 · future",
+          "orderedStationIds": [
+            "SG-TE29",
+            "SG-TE30",
+            "SG-TE31",
+            "SG-TE32"
+          ],
+          "terminalIds": [
+            "SG-TE29",
+            "SG-TE32"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "UNDER_CONSTRUCTION",
+          "isCircular": false,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+      "lineupCompleteness": "PARTIAL_TOPOLOGY_SOURCE_LIMITED",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [
+        "SG-TE10",
+        "SG-TE21",
+        "SG-TE22A"
+      ],
+      "branches": [],
+      "loops": [],
+      "interchanges": []
+    },
+    {
+      "routeId": "BPLRT",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "BPLRT_SERVICE_A",
+          "directionId": "BPLRT_SERVICE_A",
+          "label": "Service A · via Senja",
+          "orderedStationIds": [
+            "SG-BP1",
+            "SG-BP2",
+            "SG-BP3",
+            "SG-BP4",
+            "SG-BP5",
+            "SG-BP6",
+            "SG-BP13",
+            "SG-BP12",
+            "SG-BP11",
+            "SG-BP10",
+            "SG-BP9",
+            "SG-BP8",
+            "SG-BP7",
+            "SG-BP6",
+            "SG-BP5",
+            "SG-BP4",
+            "SG-BP3",
+            "SG-BP2",
+            "SG-BP1"
+          ],
+          "terminalIds": [
+            "SG-BP1",
+            "SG-BP1"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": true,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://landtransportguru.net/bukit-panjang-station/",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "BPLRT_SERVICE_B",
+          "directionId": "BPLRT_SERVICE_B",
+          "label": "Service B · via Petir",
+          "orderedStationIds": [
+            "SG-BP1",
+            "SG-BP2",
+            "SG-BP3",
+            "SG-BP4",
+            "SG-BP5",
+            "SG-BP6",
+            "SG-BP7",
+            "SG-BP8",
+            "SG-BP9",
+            "SG-BP10",
+            "SG-BP11",
+            "SG-BP12",
+            "SG-BP13",
+            "SG-BP6",
+            "SG-BP5",
+            "SG-BP4",
+            "SG-BP3",
+            "SG-BP2",
+            "SG-BP1"
+          ],
+          "terminalIds": [
+            "SG-BP1",
+            "SG-BP1"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": true,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://landtransportguru.net/bukit-panjang-station/",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+      "lineupCompleteness": "SOURCE_LINKED_TOPOLOGY",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [],
+      "branches": [],
+      "loops": [
+        {
+          "loopId": "BPLRT_LOOP",
+          "via": [
+            "SG-BP6",
+            "SG-BP7",
+            "SG-BP8",
+            "SG-BP9",
+            "SG-BP10",
+            "SG-BP11",
+            "SG-BP12",
+            "SG-BP13"
+          ],
+          "type": "CIRCULAR_GUIDEWAY"
+        }
+      ],
+      "interchanges": []
+    },
+    {
+      "routeId": "SK_E",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "SK_E_NETWORK_FORWARD",
+          "directionId": "SK_E_NETWORK_FORWARD",
+          "label": "Sengkang East · station adjacency A",
+          "orderedStationIds": [
+            "SG-NE16",
+            "SG-SE1",
+            "SG-SE2",
+            "SG-SE3",
+            "SG-SE4",
+            "SG-SE5",
+            "SG-NE16"
+          ],
+          "terminalIds": [
+            "SG-NE16",
+            "SG-NE16"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": true,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "SK_E_NETWORK_REVERSE",
+          "directionId": "SK_E_NETWORK_REVERSE",
+          "label": "Sengkang East · station adjacency B",
+          "orderedStationIds": [
+            "SG-NE16",
+            "SG-SE5",
+            "SG-SE4",
+            "SG-SE3",
+            "SG-SE2",
+            "SG-SE1",
+            "SG-NE16"
+          ],
+          "terminalIds": [
+            "SG-NE16",
+            "SG-NE16"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": true,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+      "lineupCompleteness": "PARTIAL_TOPOLOGY_SOURCE_LIMITED",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [],
+      "branches": [],
+      "loops": [
+        {
+          "loopId": "SK_E_LOOP",
+          "hubStationId": "SG-NE16",
+          "stationIds": [
+            "SG-NE16",
+            "SG-SE1",
+            "SG-SE2",
+            "SG-SE3",
+            "SG-SE4",
+            "SG-SE5",
+            "SG-NE16"
+          ],
+          "note": "Direction adjacency is NOT a verified promise of the active one-way passenger service"
+        }
+      ],
+      "interchanges": []
+    },
+    {
+      "routeId": "SK_W",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "SK_W_NETWORK_FORWARD",
+          "directionId": "SK_W_NETWORK_FORWARD",
+          "label": "Sengkang West · station adjacency A",
+          "orderedStationIds": [
+            "SG-NE16",
+            "SG-SW1",
+            "SG-SW2",
+            "SG-SW3",
+            "SG-SW4",
+            "SG-SW5",
+            "SG-SW6",
+            "SG-SW7",
+            "SG-SW8",
+            "SG-NE16"
+          ],
+          "terminalIds": [
+            "SG-NE16",
+            "SG-NE16"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": true,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "SK_W_NETWORK_REVERSE",
+          "directionId": "SK_W_NETWORK_REVERSE",
+          "label": "Sengkang West · station adjacency B",
+          "orderedStationIds": [
+            "SG-NE16",
+            "SG-SW8",
+            "SG-SW7",
+            "SG-SW6",
+            "SG-SW5",
+            "SG-SW4",
+            "SG-SW3",
+            "SG-SW2",
+            "SG-SW1",
+            "SG-NE16"
+          ],
+          "terminalIds": [
+            "SG-NE16",
+            "SG-NE16"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": true,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+      "lineupCompleteness": "PARTIAL_TOPOLOGY_SOURCE_LIMITED",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [],
+      "branches": [],
+      "loops": [
+        {
+          "loopId": "SK_W_LOOP",
+          "hubStationId": "SG-NE16",
+          "stationIds": [
+            "SG-NE16",
+            "SG-SW1",
+            "SG-SW2",
+            "SG-SW3",
+            "SG-SW4",
+            "SG-SW5",
+            "SG-SW6",
+            "SG-SW7",
+            "SG-SW8",
+            "SG-NE16"
+          ],
+          "note": "Direction adjacency is NOT a verified promise of the active one-way passenger service"
+        }
+      ],
+      "interchanges": []
+    },
+    {
+      "routeId": "PG_E",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "PG_E_NETWORK_FORWARD",
+          "directionId": "PG_E_NETWORK_FORWARD",
+          "label": "Punggol East · station adjacency A",
+          "orderedStationIds": [
+            "SG-NE17",
+            "SG-PE1",
+            "SG-PE2",
+            "SG-PE3",
+            "SG-PE4",
+            "SG-PE5",
+            "SG-PE6",
+            "SG-PE7",
+            "SG-NE17"
+          ],
+          "terminalIds": [
+            "SG-NE17",
+            "SG-NE17"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": true,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "PG_E_NETWORK_REVERSE",
+          "directionId": "PG_E_NETWORK_REVERSE",
+          "label": "Punggol East · station adjacency B",
+          "orderedStationIds": [
+            "SG-NE17",
+            "SG-PE7",
+            "SG-PE6",
+            "SG-PE5",
+            "SG-PE4",
+            "SG-PE3",
+            "SG-PE2",
+            "SG-PE1",
+            "SG-NE17"
+          ],
+          "terminalIds": [
+            "SG-NE17",
+            "SG-NE17"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": true,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+      "lineupCompleteness": "PARTIAL_TOPOLOGY_SOURCE_LIMITED",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [],
+      "branches": [],
+      "loops": [
+        {
+          "loopId": "PG_E_LOOP",
+          "hubStationId": "SG-NE17",
+          "stationIds": [
+            "SG-NE17",
+            "SG-PE1",
+            "SG-PE2",
+            "SG-PE3",
+            "SG-PE4",
+            "SG-PE5",
+            "SG-PE6",
+            "SG-PE7",
+            "SG-NE17"
+          ],
+          "note": "Direction adjacency is NOT a verified promise of the active one-way passenger service"
+        }
+      ],
+      "interchanges": []
+    },
+    {
+      "routeId": "PG_W",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "PG_W_NETWORK_FORWARD",
+          "directionId": "PG_W_NETWORK_FORWARD",
+          "label": "Punggol West · station adjacency A",
+          "orderedStationIds": [
+            "SG-NE17",
+            "SG-PW1",
+            "SG-PW2",
+            "SG-PW3",
+            "SG-PW4",
+            "SG-PW5",
+            "SG-PW6",
+            "SG-PW7",
+            "SG-NE17"
+          ],
+          "terminalIds": [
+            "SG-NE17",
+            "SG-NE17"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": true,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "PG_W_NETWORK_REVERSE",
+          "directionId": "PG_W_NETWORK_REVERSE",
+          "label": "Punggol West · station adjacency B",
+          "orderedStationIds": [
+            "SG-NE17",
+            "SG-PW7",
+            "SG-PW6",
+            "SG-PW5",
+            "SG-PW4",
+            "SG-PW3",
+            "SG-PW2",
+            "SG-PW1",
+            "SG-NE17"
+          ],
+          "terminalIds": [
+            "SG-NE17",
+            "SG-NE17"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": true,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+      "lineupCompleteness": "PARTIAL_TOPOLOGY_SOURCE_LIMITED",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [],
+      "branches": [],
+      "loops": [
+        {
+          "loopId": "PG_W_LOOP",
+          "hubStationId": "SG-NE17",
+          "stationIds": [
+            "SG-NE17",
+            "SG-PW1",
+            "SG-PW2",
+            "SG-PW3",
+            "SG-PW4",
+            "SG-PW5",
+            "SG-PW6",
+            "SG-PW7",
+            "SG-NE17"
+          ],
+          "note": "Direction adjacency is NOT a verified promise of the active one-way passenger service"
+        }
+      ],
+      "interchanges": []
+    },
+    {
+      "routeId": "JRL",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "JRL_SOUTH",
+          "directionId": "JRL_SOUTH",
+          "label": "JS corridor · future",
+          "orderedStationIds": [
+            "SG-JS1",
+            "SG-JS2",
+            "SG-JS3",
+            "SG-JS4",
+            "SG-JS5",
+            "SG-JS6",
+            "SG-JS7",
+            "SG-JS8",
+            "SG-JS9",
+            "SG-JS10",
+            "SG-JS11",
+            "SG-JS12"
+          ],
+          "terminalIds": [
+            "SG-JS1",
+            "SG-JS12"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "UNDER_CONSTRUCTION",
+          "isCircular": false,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "JRL_WEST",
+          "directionId": "JRL_WEST",
+          "label": "JW branch · future",
+          "orderedStationIds": [
+            "SG-JW1",
+            "SG-JW2",
+            "SG-JW3",
+            "SG-JW4",
+            "SG-JW5"
+          ],
+          "terminalIds": [
+            "SG-JW1",
+            "SG-JW5"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "UNDER_CONSTRUCTION",
+          "isCircular": false,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "JRL_EAST",
+          "directionId": "JRL_EAST",
+          "label": "JE branch · future",
+          "orderedStationIds": [
+            "SG-JE1",
+            "SG-JE2",
+            "SG-JE3",
+            "SG-JE4",
+            "SG-JE5",
+            "SG-JE6",
+            "SG-JE7"
+          ],
+          "terminalIds": [
+            "SG-JE1",
+            "SG-JE7"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "UNDER_CONSTRUCTION",
+          "isCircular": false,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+      "lineupCompleteness": "PARTIAL_TOPOLOGY_SOURCE_LIMITED",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [
+        "SG-JS2A"
+      ],
+      "branches": [
+        {
+          "branchId": "JRL_BRANCHES",
+          "physicalJunctionStationId": null,
+          "note": "Conceptual branches; incomplete surveyed connectivity"
+        }
+      ],
+      "loops": [],
+      "interchanges": []
+    },
+    {
+      "routeId": "CRL",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "CRL_MAIN",
+          "directionId": "CRL_MAIN",
+          "label": "CRL corridor · future",
+          "orderedStationIds": [
+            "SG-CR1",
+            "SG-CR2",
+            "SG-CR3",
+            "SG-CR4",
+            "SG-CR5",
+            "SG-CR6",
+            "SG-CR7",
+            "SG-CR8",
+            "SG-CR9",
+            "SG-CR10",
+            "SG-CR11",
+            "SG-CR12",
+            "SG-CR13",
+            "SG-CR14",
+            "SG-CR15",
+            "SG-CR16",
+            "SG-CR17",
+            "SG-CR18",
+            "SG-CR19"
+          ],
+          "terminalIds": [
+            "SG-CR1",
+            "SG-CR19"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "UNDER_CONSTRUCTION",
+          "isCircular": false,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "CRL_PUNGGOL",
+          "directionId": "CRL_PUNGGOL",
+          "label": "Punggol extension · future",
+          "orderedStationIds": [
+            "SG-CP1",
+            "SG-CP2",
+            "SG-CP3",
+            "SG-CP4"
+          ],
+          "terminalIds": [
+            "SG-CP1",
+            "SG-CP4"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "PLANNED",
+          "isCircular": false,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf",
+      "lineupCompleteness": "PARTIAL_TOPOLOGY_SOURCE_LIMITED",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [],
+      "branches": [],
+      "loops": [],
+      "interchanges": []
+    },
+    {
+      "routeId": "SHUTTLE_TEBRAU",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "SHUTTLE_TEBRAU_MY_SG",
+          "directionId": "SHUTTLE_TEBRAU_MY_SG",
+          "label": "Johor Bahru → Singapore",
+          "orderedStationIds": [
+            "MY-JB-SENTRAL",
+            "SG-WOODLANDS-TCP"
+          ],
+          "terminalIds": [
+            "MY-JB-SENTRAL",
+            "SG-WOODLANDS-TCP"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://online.ktmb.com.my/Home/ShuttleFAQ",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "SHUTTLE_TEBRAU_SG_MY",
+          "directionId": "SHUTTLE_TEBRAU_SG_MY",
+          "label": "Singapore → Johor Bahru",
+          "orderedStationIds": [
+            "SG-WOODLANDS-TCP",
+            "MY-JB-SENTRAL"
+          ],
+          "terminalIds": [
+            "SG-WOODLANDS-TCP",
+            "MY-JB-SENTRAL"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://online.ktmb.com.my/Home/ShuttleFAQ",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://online.ktmb.com.my/Home/ShuttleFAQ",
+      "lineupCompleteness": "SOURCE_LINKED_TOPOLOGY",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [],
+      "branches": [],
+      "loops": [],
+      "interchanges": []
+    },
+    {
+      "routeId": "RTS",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "RTS_MY_SG",
+          "directionId": "RTS_MY_SG",
+          "label": "Johor Bahru → Singapore",
+          "orderedStationIds": [
+            "MY-BUKIT-CHAGAR",
+            "SG-WOODLANDS-NORTH-RTS"
+          ],
+          "terminalIds": [
+            "MY-BUKIT-CHAGAR",
+            "SG-WOODLANDS-NORTH-RTS"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "UNDER_CONSTRUCTION",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/10/news-releases/grantors-informed-rts-link-service-targeted-feb-2027.html",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "RTS_SG_MY",
+          "directionId": "RTS_SG_MY",
+          "label": "Singapore → Johor Bahru",
+          "orderedStationIds": [
+            "SG-WOODLANDS-NORTH-RTS",
+            "MY-BUKIT-CHAGAR"
+          ],
+          "terminalIds": [
+            "SG-WOODLANDS-NORTH-RTS",
+            "MY-BUKIT-CHAGAR"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "UNDER_CONSTRUCTION",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/10/news-releases/grantors-informed-rts-link-service-targeted-feb-2027.html",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/10/news-releases/grantors-informed-rts-link-service-targeted-feb-2027.html",
+      "lineupCompleteness": "SOURCE_LINKED_TOPOLOGY",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [],
+      "branches": [],
+      "loops": [],
+      "interchanges": []
+    },
+    {
+      "routeId": "SENTOSA",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "SENTOSA_TO_BEACH",
+          "directionId": "SENTOSA_TO_BEACH",
+          "label": "VivoCity → Beach",
+          "orderedStationIds": [
+            "SG-SENTOSA-VVC",
+            "SG-SENTOSA-RWS",
+            "SG-SENTOSA-IMB",
+            "SG-SENTOSA-BEA"
+          ],
+          "terminalIds": [
+            "SG-SENTOSA-VVC",
+            "SG-SENTOSA-BEA"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.mot.gov.sg/docs/default-source/about-mot/sentosa-express-pax-trapped-on-11-march-2024.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "SENTOSA_TO_VIVOCITY",
+          "directionId": "SENTOSA_TO_VIVOCITY",
+          "label": "Beach → VivoCity",
+          "orderedStationIds": [
+            "SG-SENTOSA-BEA",
+            "SG-SENTOSA-IMB",
+            "SG-SENTOSA-RWS",
+            "SG-SENTOSA-VVC"
+          ],
+          "terminalIds": [
+            "SG-SENTOSA-BEA",
+            "SG-SENTOSA-VVC"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "SCHEMATIC_ADJACENCY_SOURCE_BACKED",
+          "sourceUrl": "https://www.mot.gov.sg/docs/default-source/about-mot/sentosa-express-pax-trapped-on-11-march-2024.pdf",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.mot.gov.sg/docs/default-source/about-mot/sentosa-express-pax-trapped-on-11-march-2024.pdf",
+      "lineupCompleteness": "SOURCE_LINKED_TOPOLOGY",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [],
+      "branches": [],
+      "loops": [],
+      "interchanges": []
+    },
+    {
+      "routeId": "CHANGI_APM",
+      "asOfDate": "2026-10-27",
+      "paths": [
+        {
+          "pathId": "SKYTRAIN_LINK_T1_T2",
+          "directionId": "SKYTRAIN_LINK_T1_T2",
+          "label": "T1 ↔ T2 connection (service graph)",
+          "orderedStationIds": [
+            "SG-CHANGI-T1",
+            "SG-CHANGI-T2"
+          ],
+          "terminalIds": [
+            "SG-CHANGI-T1",
+            "SG-CHANGI-T2"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.changiairport.com/en/at-changi/transport-and-directions/transferring-between-terminals-jewel.html",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        },
+        {
+          "pathId": "SKYTRAIN_LINK_T1_T3",
+          "directionId": "SKYTRAIN_LINK_T1_T3",
+          "label": "T1 ↔ T3 connection (service graph)",
+          "orderedStationIds": [
+            "SG-CHANGI-T1",
+            "SG-CHANGI-T3"
+          ],
+          "terminalIds": [
+            "SG-CHANGI-T1",
+            "SG-CHANGI-T3"
+          ],
+          "connectionType": "PASSENGER_SERVICE_TOPOLOGY",
+          "operatingStatus": "OPERATIONAL",
+          "isCircular": false,
+          "pathCompleteness": "PARTIAL_SERVICE_PATTERN",
+          "sourceUrl": "https://www.changiairport.com/en/at-changi/transport-and-directions/transferring-between-terminals-jewel.html",
+          "sourceRevision": "LTA 2025 SCHEMATIC AND 2026 OFFICIAL UPDATES",
+          "geometryVerification": "NO_NEW_PHYSICAL_TRACK_GEOMETRY",
+          "directionEvidence": "Route service adjacency; path direction only where supported"
+        }
+      ],
+      "sourceUrl": "https://www.changiairport.com/en/at-changi/transport-and-directions/transferring-between-terminals-jewel.html",
+      "lineupCompleteness": "PARTIAL_TOPOLOGY_SOURCE_LIMITED",
+      "physicalConnectionStatus": "UNVERIFIED_SEGMENT_LEVEL",
+      "geometryVerification": "SERVICE_TOPOLOGY_NOT_TRACK_SURVEY",
+      "reservedStationIds": [],
+      "branches": [],
+      "loops": [],
+      "interchanges": []
+    }
+  ],
+  "unlocatedStations": [
+    {
+      "stationId": "SG-SENTOSA-VVC",
+      "name": "VivoCity Station",
+      "country": "SG",
+      "routeIds": [
+        "SENTOSA"
+      ],
+      "status": "OPERATIONAL",
+      "geometry": null,
+      "sourceUrl": "https://www.mot.gov.sg/docs/default-source/about-mot/sentosa-express-pax-trapped-on-11-march-2024.pdf"
+    },
+    {
+      "stationId": "SG-SENTOSA-RWS",
+      "name": "Resorts World Station",
+      "country": "SG",
+      "routeIds": [
+        "SENTOSA"
+      ],
+      "status": "OPERATIONAL",
+      "geometry": null,
+      "sourceUrl": "https://www.mot.gov.sg/docs/default-source/about-mot/sentosa-express-pax-trapped-on-11-march-2024.pdf"
+    },
+    {
+      "stationId": "SG-SENTOSA-IMB",
+      "name": "Imbiah Station",
+      "country": "SG",
+      "routeIds": [
+        "SENTOSA"
+      ],
+      "status": "OPERATIONAL",
+      "geometry": null,
+      "sourceUrl": "https://www.mot.gov.sg/docs/default-source/about-mot/sentosa-express-pax-trapped-on-11-march-2024.pdf"
+    },
+    {
+      "stationId": "SG-SENTOSA-BEA",
+      "name": "Beach Station",
+      "country": "SG",
+      "routeIds": [
+        "SENTOSA"
+      ],
+      "status": "OPERATIONAL",
+      "geometry": null,
+      "sourceUrl": "https://www.mot.gov.sg/docs/default-source/about-mot/sentosa-express-pax-trapped-on-11-march-2024.pdf"
+    },
+    {
+      "stationId": "SG-CHANGI-T1",
+      "name": "Changi Skytrain T1",
+      "country": "SG",
+      "routeIds": [
+        "CHANGI_APM"
+      ],
+      "status": "OPERATIONAL",
+      "geometry": null,
+      "sourceUrl": "https://www.changiairport.com/en/at-changi/transport-and-directions/transferring-between-terminals-jewel.html"
+    },
+    {
+      "stationId": "SG-CHANGI-T2",
+      "name": "Changi Skytrain T2",
+      "country": "SG",
+      "routeIds": [
+        "CHANGI_APM"
+      ],
+      "status": "OPERATIONAL",
+      "geometry": null,
+      "sourceUrl": "https://www.changiairport.com/en/at-changi/transport-and-directions/transferring-between-terminals-jewel.html"
+    },
+    {
+      "stationId": "SG-CHANGI-T3",
+      "name": "Changi Skytrain T3",
+      "country": "SG",
+      "routeIds": [
+        "CHANGI_APM"
+      ],
+      "status": "OPERATIONAL",
+      "geometry": null,
+      "sourceUrl": "https://www.changiairport.com/en/at-changi/transport-and-directions/transferring-between-terminals-jewel.html"
+    }
+  ],
+  "interchanges": [
+    {
+      "stationId": "SG-WOODLANDS-NORTH-RTS",
+      "connectingStationId": "SG-TE1",
+      "connectionType": "WALKING_TRANSFER_NOT_THROUGH_RAIL",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/JB-Singapore_RTS_link.html"
+    },
+    {
+      "stationId": "SG-NE16",
+      "connectingRouteIds": [
+        "NEL",
+        "SK_E",
+        "SK_W"
+      ],
+      "connectionType": "PASSENGER_TRANSFER"
+    },
+    {
+      "stationId": "SG-NE17",
+      "connectingRouteIds": [
+        "NEL",
+        "PG_E",
+        "PG_W"
+      ],
+      "connectionType": "PASSENGER_TRANSFER"
+    },
+    {
+      "stationId": "MY-BUKIT-CHAGAR",
+      "connectingStationId": "MY-JB-SENTRAL",
+      "connectionType": "LOCAL_AREA_ONLY_NOT_THROUGH_RAIL"
+    },
+    {
+      "stationId": "SG-CC29",
+      "connectingStationId": "SG-NE1",
+      "connectingRouteIds": [
+        "CCL",
+        "NEL"
+      ],
+      "connectionType": "PASSENGER_INTERCHANGE_LTA_SYSTEM_MAP",
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf"
+    },
+    {
+      "stationId": "SG-CC33",
+      "connectingStationId": "SG-NS27",
+      "connectingRouteIds": [
+        "CCL",
+        "NSL",
+        "TEL"
+      ],
+      "connectionType": "PASSENGER_INTERCHANGE_LTA_SYSTEM_MAP",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/circle_line_6.html"
+    },
+    {
+      "stationId": "SG-CC34",
+      "connectingStationId": "SG-DT16",
+      "connectingRouteIds": [
+        "CCL",
+        "DTL"
+      ],
+      "connectionType": "PASSENGER_INTERCHANGE_LTA_SYSTEM_MAP",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/circle_line_6.html"
+    },
+    {
+      "stationId": "SG-BP6",
+      "connectingStationId": "SG-DT1",
+      "connectingRouteIds": [
+        "BPLRT",
+        "DTL"
+      ],
+      "connectionType": "PASSENGER_TRANSFER_LINK_LTA_SYSTEM_MAP",
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf"
+    }
+  ],
+  "accuracyNotes": [
+    "Never infer track from station sequence or OSM centroid",
+    "LRT opposite directions are schematic adjacency, not live operating patterns",
+    "Circle Line uses main circle and Dhoby Ghaut spur",
+    "Changi Skytrain terminal graph partial"
+  ]
+}
