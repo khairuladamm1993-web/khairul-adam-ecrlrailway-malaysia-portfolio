@@ -29,7 +29,7 @@ jobs:
       - run: node tests/unified-v81-deployment.test.mjs
       - name: Actual MapLibre canvas interaction QA
         env:
-          V8_URL: ${{ inputs.preview_url || 'https://mrs10-p01-unified-v8-sg-geometry-ir8mwk30m-1993khairuladam-3016.vercel.app/unified-map-v8.html' }}
+          V8_URL: ${{ inputs.preview_url || 'https://mrs10-p01-unified-v8-sg-geometry-f2f43xnik-1993khairuladam-3016.vercel.app/unified-map-v8.html' }}
         run: |
           python3 -m http.server 8765 --directory dist-unified-v8 > /tmp/v81-server.log 2>&1 &
           node tests/unified-v81-browser.test.mjs
