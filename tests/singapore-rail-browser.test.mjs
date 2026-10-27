@@ -41,7 +41,7 @@ const tapDiagnostic=await page.evaluate(p=>{const m=window.__sgRailMap,r=m.getCo
 console.log("TRACK_TAP_DIAGNOSTIC",JSON.stringify({viewport:vp.name,...tapDiagnostic}));
 await page.mouse.click(pos.x,pos.y);
 await page.waitForTimeout(250);
-console.log("TRACK_TAP_RESULT",JSON.stringify(await page.evaluate(()=>({lastClick:window.__sgRailLastClick,popups:[...document.querySelectorAll(".maplibregl-popup")].map(x=>x.innerText.slice(0,100))}))));
+console.log("TRACK_TAP_RESULT",JSON.stringify(await page.evaluate(()=>({lastClick:window.__sgRailLastClick,detailProbe:window.__sgRailTrackDetailProbe,popups:[...document.querySelectorAll(".maplibregl-popup")].map(x=>x.innerText.slice(0,100))}))));
 await page.waitForTimeout(150);
 const popup=await page.locator(".maplibregl-popup").allTextContents();
 assert(popup.some(x=>/Maklumat teknikal trek|Technical Track Information/.test(x)),"TRACK_TAP_POPUP_MISSING");
