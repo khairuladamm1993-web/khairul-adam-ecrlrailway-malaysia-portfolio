@@ -6,6 +6,8 @@ on:
     paths:
       - 'singapore/**'
       - 'tests/singapore-rail-v1.test.cjs'
+      - 'tests/singapore-basemap-ui.test.cjs'
+      - 'tests/singapore-rail-browser.test.mjs'
       - '.github/workflows/mrs10-p01-singapore-rail-v1.yml'
   workflow_dispatch:
 permissions:
@@ -22,7 +24,7 @@ jobs:
         with:
           node-version: '22'
       - name: Validate source-backed GIS and adapter contract
-        run: node --test tests/singapore-rail-v1.test.cjs
+        run: node --test tests/singapore-rail-v1.test.cjs tests/singapore-basemap-ui.test.cjs
       - name: Parse app and adapter syntax
         run: |
           node --check singapore/app.js

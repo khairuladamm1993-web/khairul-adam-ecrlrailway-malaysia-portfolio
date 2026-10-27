@@ -10,16 +10,16 @@ const pixels=b=>{const im=PNG.sync.read(b);const s=new Set();for(let y=0;y<im.he
 try {
 for(const vp of [{name:"desktop",width:1440,height:900},{name:"ipad",width:1024,height:768},{name:"iphone",width:390,height:844}]){
 const page=await browser.newPage({viewport:{width:vp.width,height:vp.height},deviceScaleFactor:1});
-const errors=[],responses=[];page.on("pageerror",e=>errors.push(e.message));page.on("console",e=>{if(e.type()==="error")errors.push(e.text())});page.on("response",r=>{if(/cartocdn|maplibre-gl@/.test(r.url()))responses.push({status:r.status(),url:r.url().slice(0,80)})});
+const errors=[],responses=[];page.on("pageerror",e=>errors.push(e.message));page.on("console",e=>{if(e.type()==="error")errors.push(e.text())});page.on("response",r=>{if(/openfreemap|maplibre-gl@|cartocdn/.test(r.url()))responses.push({status:r.status(),url:r.url().slice(0,80)})});
 try{
 await page.goto(url,{waitUntil:"domcontentloaded",timeout:45000});
 await page.waitForFunction(()=>window.__sgRailEvidence?.loaded===true&&window.__sgRailMap?.getLayer("sg-station-circles"),null,{timeout:28000});
-await page.waitForTimeout(1500);
+await page.waitForTimeout(1400);const isPhone=vp.name==="iphone";if(isPhone){assert.equal(await page.locator("#route-drawer").evaluate(x=>x.open),false,"MOBILE_DRAWER_MUST_START_COLLAPSED");await page.locator("#route-summary").click();}
 const ev=await page.evaluate(()=>{const m=window.__sgRailMap;return {stationTotal:window.__sgRailEvidence.stationTotal,rendered:m.queryRenderedFeatures({layers:["sg-station-circles"]}).length,renderedTrack:m.queryRenderedFeatures({layers:["sg-track-lines"]}).length,hasStationSource:!!m.getSource("sg-stations"),hasTrackSource:!!m.getSource("sg-tracks"),canvasRect:m.getCanvas().getBoundingClientRect().toJSON()};});
 assert.equal(ev.stationTotal,273);assert(ev.rendered>15,"NO_RENDERED_STATIONS");assert(ev.hasStationSource&&ev.hasTrackSource);assert(ev.canvasRect.width>250&&ev.canvasRect.height>200);
 const png=await page.locator("#map").screenshot({path:out+"/"+vp.name+"-map.png"});
 assert(pixels(png)>30,"NO_MAP_PIXEL_VARIATION");
-assert(responses.some(x=>x.status===200),"MAP_TILES_OR_LIBRARY_HTTP_MISSING");
+assert(responses.some(x=>/openfreemap/.test(x.url)&&x.status===200),"OPENFREEMAP_STYLE_OR_TILE_MISSING");assert(!responses.some(x=>/cartocdn/.test(x.url)),"LEGACY_CARTO_WATERMARK_RISK");assert(!responses.some(x=>/openfreemap/.test(x.url)&&[401,402,403].includes(x.status)),"OPENFREEMAP_AUTH_ERROR");assert((await page.locator("#map").screenshot()).length>2000,"MAP_IMAGE_EMPTY");
 await page.locator("#search").fill("Keppel");assert((await page.locator("#lineup .station-item").count())>0,"SEARCH_KEPPEL_FAILED");
 await page.locator("#lineup .station-item").first().click();assert(await page.locator(".maplibregl-popup").count(),"STATION_POPUP_MISSING");
 await page.locator("#search").fill("");
@@ -54,7 +54,7 @@ await page.mouse.click(stationPx.x,stationPx.y);await page.waitForTimeout(130);
 assert((await page.locator(".maplibregl-popup").allTextContents()).some(s=>s.includes("Keppel")),"MAP_STATION_MARKER_TAP_POPUP_MISSING");
 
 assert.equal(errors.filter(x=>/Uncaught|TypeError|ReferenceError|SyntaxError/.test(x)).length,0,"BROWSER_JS_ERRORS");
-const result={viewport:vp.name,pass:true,rendered:ev.rendered,renderedTrack:ev.renderedTrack,pixelColors:pixels(png),tileSuccess:responses.filter(x=>x.status===200).length,consoleErrors:errors.slice(0,3)};all.push(result);console.log("SINGAPORE_BROWSER_PASS",JSON.stringify(result));
+const result={viewport:vp.name,pass:true,rendered:ev.rendered,renderedTrack:ev.renderedTrack,pixelColors:pixels(png),tileSuccess:responses.filter(x=>x.status===200).length,consoleErrors:errors.slice(0,3),openFreeMapResponses:responses.filter(x=>/openfreemap/.test(x.url)).length};all.push(result);console.log("SINGAPORE_BROWSER_PASS",JSON.stringify(result));
 }catch(e){failed++;const diagnostic=await page.evaluate(()=>({hasMapLibre:!!window.maplibregl,hasMap:!!window.__sgRailMap,ready:window.__sgRailEvidence,styleLoaded:window.__sgRailMap?.isStyleLoaded(),hasStationLayer:!!window.__sgRailMap?.getLayer("sg-station-circles"),status:document.getElementById("status")?.textContent,mapError:document.getElementById("map-error")?.textContent})).catch(()=>null);const failure={viewport:vp.name,pass:false,error:String(e),errors:errors.slice(0,7),diagnostic};all.push(failure);console.error("SINGAPORE_BROWSER_FAIL",JSON.stringify(failure));await page.screenshot({path:out+"/"+vp.name+"-FAIL.png",fullPage:true}).catch(()=>{});}
 finally{await page.close();}
 }

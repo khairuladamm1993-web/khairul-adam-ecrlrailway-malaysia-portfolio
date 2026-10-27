@@ -19,6 +19,28 @@
   ],
   "gate": {
     "integrationReady": false,
-    "why": "Secondary sampled geometry lacks OSM feature IDs and whole-network physical GIS; Safari evidence pending."
+    "why": "Visual UAT remains separate; physical track GIS, cross-border point evidence, official chainage and speed profiles still unavailable; source-backed secondary features cannot be promoted."
+  },
+  "uiVersion": "1.1.0",
+  "basemap": {
+    "provider": "OpenFreeMap",
+    "lightStyle": "https://tiles.openfreemap.org/styles/positron",
+    "darkStyle": "https://tiles.openfreemap.org/styles/dark",
+    "requiresApiKey": false,
+    "attribution": "OpenFreeMap / OpenMapTiles / OpenStreetMap",
+    "runtimeNetworkDependency": true
+  },
+  "routePointCoverage": {
+    "SHUTTLE_TEBRAU": 0,
+    "RTS": 0,
+    "reason": "source-backed station identities only; no verified geocoded features for cross-border module"
+  },
+  "railwayIntelligence": {
+    "popup": "Track Intelligence Adapter",
+    "physicalVerifiedFeatures": 0,
+    "secondaryPreviewFeatures": 13,
+    "officialChainageAvailable": false,
+    "officialSpeedProfileAvailable": false,
+    "doNotPromoteSecondaryAsVerified": true
   }
 }
