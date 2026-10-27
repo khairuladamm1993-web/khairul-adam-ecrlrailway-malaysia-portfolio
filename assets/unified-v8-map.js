@@ -50,14 +50,14 @@ const relationsFor=p=>window.MRS10V81Relationships.resolve(p,state.manifest,inte
 function ownedLayers(){return (state.map?.getStyle()?.layers||[]).filter(l=>l.id.startsWith('mrs10-v8-'))}
 function layerSnapshot(){return ownedLayers().map(l=>({id:l.id,visibility:state.map.getLayoutProperty(l.id,'visibility')||'visible',filter:state.map.getFilter(l.id)||null}))}
 function restoreLayers(saved){
- if(!state.map?.isStyleLoaded()){pendingRestore=saved;return}
+ if(!state.map?.getLayer('mrs10-v8-geometry')){pendingRestore=saved;return}
  for(const l of saved)if(state.map.getLayer(l.id)){state.map.setLayoutProperty(l.id,'visibility',l.visibility);state.map.setFilter(l.id,l.filter)}
  pendingRestore=null;
 }
 const focus=window.MRS10V81Focus.create({
  capture:()=>({layers:layerSnapshot(),category:state.category,selected:state.selected}),
  apply:selection=>{
-  if(!state.map?.isStyleLoaded())return;
+  if(!state.map?.getLayer('mrs10-v8-geometry'))return;
   const visible=new Set(selection.routeIds);
   for(const r of state.manifest)for(const suffix of ['', '-ring','-inner','-interchange']){
    const id=layerId(r.id)+suffix;if(state.map.getLayer(id))state.map.setLayoutProperty(id,'visibility',visible.has(r.id)?'visible':'none');
@@ -314,6 +314,7 @@ function startMap(){
       !state.map.getSource(srcId(route.id))||!state.map.getLayer(layerId(route.id)));
      if(state.points.size&&missing){updateMapLayer();fitOnce();}
     }
+    if(pendingRestore)restoreLayers(pendingRestore);
     showStatus();
    });
    state.map.on('error',()=>{if(!state.mapReady){state.networkError=true;showStatus()}});
