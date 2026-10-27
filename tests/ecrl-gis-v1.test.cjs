@@ -158,6 +158,9 @@ test('Ordinary-road mode dims road paint 40 percent, never ECRL rail markers',()
  assert.equal(changed.find(c=>c.id==='road_secondary').val,0.6);
  assert.ok(Math.abs(changed.find(c=>c.id==='road_label').val-0.54)<1e-10);
  assert.equal(changed.find(c=>c.id==='road_area').val,0.24);
+ const zoomFade=road.scaledOpacity({stops:[[12,0],[12.5,1]]});
+ assert.deepEqual(Array.from(zoomFade),['interpolate',['linear'],['zoom'],12,0,12.5,0.6]);
+ assert.equal(road.scaledOpacity({property:'kind',stops:[['road',1]]}),null);
 });
 test('Road dimming stays in standard basemap and reapplies after style reload',()=>{
  const html=file('ecrl-gis-v1.html'),js=file('assets/ecrl-gis-v1/app.js');
