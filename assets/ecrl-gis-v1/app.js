@@ -129,12 +129,13 @@ function syncGeoJSON(){
  if(!state.map.getLayer(layerName))state.map.addLayer({id:layerName,type:'circle',source:sourceName,
   layout:{visibility:'visible'},paint:{'circle-radius':12,'circle-opacity':0,'circle-stroke-opacity':0}});
 }
+function verifiedLoop(a){return a.assetType==='HISTORICAL_PL_DESIGNATION'&&a.verificationStatus==='CONFIRMED'&&a.geometryType==='VERIFIED_ASSET_POINT'&&Array.isArray(a.point)&&a.sourceIds.some(id=>D.sources[id]?.kind==='SURVEYED_OR_VALIDATED_GIS');}
 function renderMarkers(){
  if(!state.mapReady||!ML)return;
  for(const [id,m] of state.markers){m.remove();state.markers.delete(id);}
- for(const a of D.stations.filter(a=>a.point&&(state.scope==='ALL'||a.assetId==='ecrl-stn-16'))){
+ for(const a of [...D.stations.filter(a=>a.point&&(state.scope==='ALL'||a.assetId==='ecrl-stn-16')),...D.loops.filter(a=>verifiedLoop(a)&&(state.scope==='ALL'||a.section==='C2'))]){
   const b=d.createElement('button');b.type='button';b.className='ecrl-pin';
-  b.setAttribute('aria-label',label(a)+' · '+T('referenceOnly'));b.dataset.assetId=a.assetId;b.dataset.shape='station';
+  b.setAttribute('aria-label',label(a)+' · '+(verifiedLoop(a)?T('verified'):T('referenceOnly')));b.dataset.assetId=a.assetId;b.dataset.shape=verifiedLoop(a)?'loop':'station';
   const icon=d.createElement('span');icon.className='pin-visual';icon.setAttribute('aria-hidden','true');b.appendChild(icon);
   b.addEventListener('click',ev=>{ev.stopPropagation();choose(a.assetId);});
   const marker=new ML.Marker({element:b,anchor:'center'}).setLngLat(a.point).addTo(state.map);
