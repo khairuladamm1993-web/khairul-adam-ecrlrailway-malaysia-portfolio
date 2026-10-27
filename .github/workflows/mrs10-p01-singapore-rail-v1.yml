@@ -30,3 +30,29 @@ jobs:
       - name: Check no untrusted remote script injections
         run: |
           ! grep -RInE 'eval\\(|new Function\\(|supabase\\.auth|service_role|SECRET|VITE_.*KEY' singapore --exclude='README.md'
+
+  browser-maplibre:
+    needs: data-and-contract-qa
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1 pngjs@7.0.0
+      - name: Start isolated static viewer
+        run: |
+          python3 -m http.server 8765 > /tmp/sg-server.log 2>&1 &
+          sleep 2
+      - name: Desktop iPad iPhone actual WebGL visual and interaction QA
+        run: node tests/singapore-rail-browser.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: singapore-v1-browser-evidence
+          path: artifacts/singapore-v1-browser/
+          retention-days: 5
