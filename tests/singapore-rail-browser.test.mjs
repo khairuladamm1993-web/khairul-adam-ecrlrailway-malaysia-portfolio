@@ -46,6 +46,13 @@ await page.waitForTimeout(150);
 const popup=await page.locator(".maplibregl-popup").allTextContents();
 assert(popup.some(x=>/Maklumat teknikal trek|Technical Track Information/.test(x)),"TRACK_TAP_POPUP_MISSING");
 assert(popup.some(x=>/Belum disahkan|UNVERIFIED/.test(x)),"TRACK_PROVENANCE_WARNING_MISSING");
+await page.locator(".maplibregl-popup-close-button").click();
+const stationPoint=await page.evaluate(async()=>{const data=await (await fetch("./data/stations.geojson")).json();const f=data.features.find(x=>x.properties.stationCode==="CC30");window.__sgRailMap.jumpTo({center:f.geometry.coordinates,zoom:15});return f.geometry.coordinates;});
+await page.waitForTimeout(700);
+const stationPx=await page.evaluate(c=>{const m=window.__sgRailMap,p=m.project(c),r=m.getContainer().getBoundingClientRect();return {x:r.left+p.x,y:r.top+p.y};},stationPoint);
+await page.mouse.click(stationPx.x,stationPx.y);await page.waitForTimeout(130);
+assert((await page.locator(".maplibregl-popup").allTextContents()).some(s=>s.includes("Keppel")),"MAP_STATION_MARKER_TAP_POPUP_MISSING");
+
 assert.equal(errors.filter(x=>/Uncaught|TypeError|ReferenceError|SyntaxError/.test(x)).length,0,"BROWSER_JS_ERRORS");
 const result={viewport:vp.name,pass:true,rendered:ev.rendered,renderedTrack:ev.renderedTrack,pixelColors:pixels(png),tileSuccess:responses.filter(x=>x.status===200).length,consoleErrors:errors.slice(0,3)};all.push(result);console.log("SINGAPORE_BROWSER_PASS",JSON.stringify(result));
 }catch(e){failed++;const diagnostic=await page.evaluate(()=>({hasMapLibre:!!window.maplibregl,hasMap:!!window.__sgRailMap,ready:window.__sgRailEvidence,styleLoaded:window.__sgRailMap?.isStyleLoaded(),hasStationLayer:!!window.__sgRailMap?.getLayer("sg-station-circles"),status:document.getElementById("status")?.textContent,mapError:document.getElementById("map-error")?.textContent})).catch(()=>null);const failure={viewport:vp.name,pass:false,error:String(e),errors:errors.slice(0,7),diagnostic};all.push(failure);console.error("SINGAPORE_BROWSER_FAIL",JSON.stringify(failure));await page.screenshot({path:out+"/"+vp.name+"-FAIL.png",fullPage:true}).catch(()=>{});}
