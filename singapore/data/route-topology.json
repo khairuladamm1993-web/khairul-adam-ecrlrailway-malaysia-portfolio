@@ -1818,6 +1818,47 @@
       "stationId": "MY-BUKIT-CHAGAR",
       "connectingStationId": "MY-JB-SENTRAL",
       "connectionType": "LOCAL_AREA_ONLY_NOT_THROUGH_RAIL"
+    },
+    {
+      "stationId": "SG-CC29",
+      "connectingStationId": "SG-NE1",
+      "connectingRouteIds": [
+        "CCL",
+        "NEL"
+      ],
+      "connectionType": "PASSENGER_INTERCHANGE_LTA_SYSTEM_MAP",
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf"
+    },
+    {
+      "stationId": "SG-CC33",
+      "connectingStationId": "SG-NS27",
+      "connectingRouteIds": [
+        "CCL",
+        "NSL",
+        "TEL"
+      ],
+      "connectionType": "PASSENGER_INTERCHANGE_LTA_SYSTEM_MAP",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/circle_line_6.html"
+    },
+    {
+      "stationId": "SG-CC34",
+      "connectingStationId": "SG-DT16",
+      "connectingRouteIds": [
+        "CCL",
+        "DTL"
+      ],
+      "connectionType": "PASSENGER_INTERCHANGE_LTA_SYSTEM_MAP",
+      "sourceUrl": "https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/circle_line_6.html"
+    },
+    {
+      "stationId": "SG-BP6",
+      "connectingStationId": "SG-DT1",
+      "connectingRouteIds": [
+        "BPLRT",
+        "DTL"
+      ],
+      "connectionType": "PASSENGER_TRANSFER_LINK_LTA_SYSTEM_MAP",
+      "sourceUrl": "https://www.lta.gov.sg/content/dam/ltagov/getting_around/public_transport/rail_network/pdf/SM_20250704_BI.pdf"
     }
   ],
   "accuracyNotes": [
