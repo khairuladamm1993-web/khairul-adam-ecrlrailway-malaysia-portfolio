@@ -59,8 +59,27 @@ const cases=[{name:'desktop',width:1440,height:900,isMobile:false,hasTouch:false
     const full=await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot());
     assert.equal(full.referenceMarkers,16,'All-corridor reference count');
     assert.equal(full.physicalTrackFeatures,0);
-    const first=page.locator('.ecrl-pin').first();
-    const bbox=await first.boundingBox();assert.ok(bbox&&bbox.width>=44&&bbox.height>=44,'marker hit target');
+    const targets=await page.locator('.ecrl-pin').evaluateAll(els=>els.map(el=>{
+      const r=el.getBoundingClientRect();
+      return {assetId:el.dataset.assetId,x:r.left+r.width/2,y:r.top+r.height/2,width:r.width,height:r.height};
+    }));
+    assert.equal(targets.length,16,'All-corridor marker count in DOM');
+    assert.ok(targets.every(t=>t.width>=43.9&&t.height>=43.9),
+      '44px marker hit-target CSS dimensions '+JSON.stringify(targets.filter(t=>t.width<43.9||t.height<43.9)));
+    await page.locator('#show-list').click(); // remove list overlay before testing real map marker tap
+    const accessible=await page.locator('.ecrl-pin').evaluateAll(els=>{
+      for(const el of els){
+        const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+        if(x<23||x>innerWidth-23||y<56||y>innerHeight-60)continue;
+        const hit=document.elementFromPoint(x,y);
+        if(hit&&(hit===el||el.contains(hit)))return el.dataset.assetId;
+      }
+      return null;
+    });
+    assert.ok(accessible,'At least one marker must be visually tappable within the map');
+    await page.locator('.ecrl-pin[data-asset-id="'+accessible+'"]').click({timeout:4000});
+    assert.equal(await page.evaluate(()=>window.MRS10ECRLV1QA.getSnapshot().selectedAssetId),accessible,
+      'MapLibre station-marker tap must select matching asset');
     const square=await page.locator('.loop-demo').evaluate(el=>getComputedStyle(el).borderRadius);
     assert.equal(square,'3px','square crossing-loop sample shape');
     await page.locator('#theme').click();
