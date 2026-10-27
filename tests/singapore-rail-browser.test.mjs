@@ -13,7 +13,7 @@ const page=await browser.newPage({viewport:{width:vp.width,height:vp.height},dev
 const errors=[],responses=[];page.on("pageerror",e=>errors.push(e.message));page.on("console",e=>{if(e.type()==="error")errors.push(e.text())});page.on("response",r=>{if(/cartocdn|maplibre-gl@/.test(r.url()))responses.push({status:r.status(),url:r.url().slice(0,80)})});
 try{
 await page.goto(url,{waitUntil:"domcontentloaded",timeout:45000});
-await page.waitForFunction(()=>window.__sgRailEvidence?.loaded===true&&window.__sgRailMap?.isStyleLoaded()&&window.__sgRailMap?.getLayer("sg-station-circles"),null,{timeout:70000});
+await page.waitForFunction(()=>window.__sgRailEvidence?.loaded===true&&window.__sgRailMap?.getLayer("sg-station-circles"),null,{timeout:28000});
 await page.waitForTimeout(1500);
 const ev=await page.evaluate(()=>{const m=window.__sgRailMap;return {stationTotal:window.__sgRailEvidence.stationTotal,rendered:m.queryRenderedFeatures({layers:["sg-station-circles"]}).length,renderedTrack:m.queryRenderedFeatures({layers:["sg-track-lines"]}).length,hasStationSource:!!m.getSource("sg-stations"),hasTrackSource:!!m.getSource("sg-tracks"),canvasRect:m.getCanvas().getBoundingClientRect().toJSON()};});
 assert.equal(ev.stationTotal,273);assert(ev.rendered>15,"NO_RENDERED_STATIONS");assert(ev.hasStationSource&&ev.hasTrackSource);assert(ev.canvasRect.width>250&&ev.canvasRect.height>200);
@@ -44,7 +44,7 @@ assert(popup.some(x=>/Maklumat teknikal trek|Technical Track Information/.test(x
 assert(popup.some(x=>/Belum disahkan|UNVERIFIED/.test(x)),"TRACK_PROVENANCE_WARNING_MISSING");
 assert.equal(errors.filter(x=>/Uncaught|TypeError|ReferenceError|SyntaxError/.test(x)).length,0,"BROWSER_JS_ERRORS");
 const result={viewport:vp.name,pass:true,rendered:ev.rendered,renderedTrack:ev.renderedTrack,pixelColors:pixels(png),tileSuccess:responses.filter(x=>x.status===200).length,consoleErrors:errors.slice(0,3)};all.push(result);console.log("SINGAPORE_BROWSER_PASS",JSON.stringify(result));
-}catch(e){failed++;const failure={viewport:vp.name,pass:false,error:String(e),errors:errors.slice(0,7)};all.push(failure);console.error("SINGAPORE_BROWSER_FAIL",JSON.stringify(failure));await page.screenshot({path:out+"/"+vp.name+"-FAIL.png",fullPage:true}).catch(()=>{});}
+}catch(e){failed++;const diagnostic=await page.evaluate(()=>({hasMapLibre:!!window.maplibregl,hasMap:!!window.__sgRailMap,ready:window.__sgRailEvidence,styleLoaded:window.__sgRailMap?.isStyleLoaded(),hasStationLayer:!!window.__sgRailMap?.getLayer("sg-station-circles"),status:document.getElementById("status")?.textContent,mapError:document.getElementById("map-error")?.textContent})).catch(()=>null);const failure={viewport:vp.name,pass:false,error:String(e),errors:errors.slice(0,7),diagnostic};all.push(failure);console.error("SINGAPORE_BROWSER_FAIL",JSON.stringify(failure));await page.screenshot({path:out+"/"+vp.name+"-FAIL.png",fullPage:true}).catch(()=>{});}
 finally{await page.close();}
 }
 }finally{await browser.close();await fs.writeFile(out+"/report.json",JSON.stringify(all,null,2));}
