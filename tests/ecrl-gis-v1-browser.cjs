@@ -20,8 +20,8 @@ const cases=[{name:'desktop',width:1440,height:900,isMobile:false,hasTouch:false
     page=await context.newPage();
     page.on('pageerror',e=>row.errors.push('JS:'+e.message));
     await page.goto(TARGET,{waitUntil:'domcontentloaded',timeout:20000});
-    await page.waitForFunction(()=>!!window.MRS10ECRLV1QA,{timeout:15000});
-    await page.waitForFunction(()=>window.MRS10ECRLV1QA.getSnapshot().mapReady,{timeout:25000});
+    await page.waitForFunction(()=>!!window.MRS10ECRLV1QA,null,{timeout:15000});
+    await page.waitForFunction(()=>window.MRS10ECRLV1QA.getSnapshot().mapReady,null,{timeout:20000});
     const before=await page.evaluate(()=>({map:document.querySelector('#ecrl-map canvas')?.isConnected,
       snap:window.MRS10ECRLV1QA.getSnapshot()}));
     assert.equal(before.map,true,'MapLibre canvas not mounted');
