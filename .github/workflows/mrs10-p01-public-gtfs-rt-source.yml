@@ -1,0 +1,32 @@
+name: MR-S10 P01 KTMB Live Source Gate isolated QA
+on:
+  push:
+    branches: [feature/mrs10-p01-live-speed-source-gate-isolated]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit
+      - run: npm test
+      - run: node --test tests/unified-v7-regression.test.cjs tests/rail-live-source-gate.test.mjs
+      - run: |
+          node --check api/ktmb-public-telemetry.mjs
+          node --check assets/rail-live-source-gate.js
+          node --check assets/unified-v7-live-map.js
+          node scripts/build-unified-v7-live.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-v7-live-source-lab
+          path: dist-unified-v7-live/
+          retention-days: 3
