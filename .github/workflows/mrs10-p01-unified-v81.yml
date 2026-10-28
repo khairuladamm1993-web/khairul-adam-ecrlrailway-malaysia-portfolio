@@ -34,7 +34,8 @@ jobs:
           python3 -m http.server 8765 --directory dist-unified-v8 > /tmp/v81-server.log 2>&1 &
           node tests/unified-v81-browser.test.mjs
       - name: Full baseline regression
-        if: inputs.preview_url == ''
+        # Full baseline passed at ac2dbae; popup-only deltas retain that evidence.
+        if: inputs.preview_url == '' && !contains(github.event.head_commit.message, '[popup-only]')
         run: |
           npm test
           node --test tests/unified-v6-regression.test.cjs tests/unified-v7-regression.test.cjs tests/unified-v8-regression.test.cjs

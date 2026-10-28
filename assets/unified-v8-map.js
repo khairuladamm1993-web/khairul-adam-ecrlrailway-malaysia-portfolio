@@ -70,8 +70,8 @@ const focus=window.MRS10V81Focus.create({
 function closeFocus(){if(state.popup){const old=state.popup;state.popup=null;old.remove()}focus.exit()}
 function mountPopup(host,position){
  const old=state.popup;state.popup=null;old?.remove();
- const popup=new maplibregl.Popup({offset:15,maxWidth:'330px',closeOnClick:false}).setLngLat(position).setDOMContent(host);
- state.popup=popup;popup.on('close',()=>{if(state.popup===popup){state.popup=null;focus.exit()}});popup.addTo(state.map);
+ const popup=new maplibregl.Popup({offset:15,maxWidth:'330px',closeOnClick:false,focusAfterOpen:false}).setLngLat(position).setDOMContent(host);
+ state.popup=popup;popup.on('close',()=>{if(state.popup===popup){state.popup=null;focus.exit()}});popup.addTo(state.map);popup.getElement().querySelector('.maplibregl-popup-close-button')?.focus({preventScroll:true});
 }
 function appendFocusLineup(host,routeIds){
  for(const id of routeIds){const r=state.manifest.find(r=>r.id===id);if(!r)continue;
