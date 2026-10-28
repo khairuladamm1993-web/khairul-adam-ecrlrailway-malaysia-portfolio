@@ -57,6 +57,14 @@ function update(){
  if(all)all.textContent=t.all;
  if(note)note.textContent=t.warning;
  if(state){const st=STATUS[locale];state.textContent= !on?st.hidden:tileStatus==='SOURCE_ERROR'||tileStatus==='INSTALL_ERROR'?st.error:tileStatus==='SOURCE_FINISHED_CHECK_VISUAL'?st.loaded:installed?st.ready:st.waiting;
+  const zoom=map?.getZoom?.();
+  if(on&&Number.isFinite(zoom)&&zoom<9&&tileStatus!=='SOURCE_ERROR'&&tileStatus!=='INSTALL_ERROR'){
+   const hint={ms:' · Paparan koridor; tekan Fokus Kerteh untuk melihat rel (zum ≥9).',
+    en:' · Corridor view; choose Focus Kerteh for railway detail (zoom ≥9).',
+    zh:' · 走廊总览；选择 Kerteh 聚焦以查看铁路（缩放 ≥9）。',
+    th:' · ภาพรวมแนวเส้นทาง; กดดู Kerteh เพื่อดูราง (ซูม ≥9)'};
+   state.textContent+=hint[locale];
+  }
   if(lastError&&on)state.title=lastError;
   state.dataset.tileStatus=tileStatus;
  }
@@ -78,7 +86,7 @@ function connect(m){
  retry();update();
 }
 const api=Object.freeze({connect,install,toggle,focus,corridor,setLocale,
- snapshot:()=>({sourceId:SOURCE,layerId:LAYER,visible:on,installed:!!(map?.getLayer?.(LAYER)),tileStatus,lastError,installAttempts,tileTemplate:TILE,classification:'OSM_RASTER_VISUAL_REFERENCE_ONLY',asBuiltVerified:false,trainGeometryAvailable:false})});
+ snapshot:()=>({sourceId:SOURCE,layerId:LAYER,visible:on,installed:!!(map?.getLayer?.(LAYER)),tileStatus,lastError,installAttempts,zoom:map?.getZoom?.()??null,tileTemplate:TILE,classification:'OSM_RASTER_VISUAL_REFERENCE_ONLY',asBuiltVerified:false,trainGeometryAvailable:false})});
 root.MRS10ECRLRailOverlay=api;
 if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:null);
