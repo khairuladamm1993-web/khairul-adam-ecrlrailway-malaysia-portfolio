@@ -15,6 +15,6 @@ test('accepted STN codes skip STN10 without renumbering stable ECRL asset IDs',(
  const records=[['ecrl-stn-09','STN09','Cherating'],['ecrl-stn-10','STN11','Kuantan Port City'],['ecrl-stn-11','STN12','Kota SAS'],['ecrl-stn-15','STN16','Bentong'],['ecrl-stn-16','STN17','ITT Gombak']];
  for(const [assetId,stationCode,name] of records){const a=adapter.get(assetId);assert.equal(a.stationCode,stationCode);assert.equal(a.officialName,name);assert.equal(adapter.features().features.find(f=>f.id===assetId)?.properties.stationCode,stationCode)}
  assert.equal(adapter.stations.filter(a=>a.stationCode).length,16);assert.equal(adapter.stations.filter(a=>a.section==='C2'&&a.stationCode).length,0);
- assert.deepEqual(adapter.search('STN11').map(a=>a.assetId),['ecrl-stn-10']);assert.deepEqual(adapter.search('STN16').map(a=>a.assetId),['ecrl-stn-15']);assert.deepEqual(adapter.search('STN17').map(a=>a.assetId),['ecrl-stn-16']);assert.deepEqual(adapter.search('STN10'),[]);
+ for(const [code,assetId] of [['STN11','ecrl-stn-10'],['STN16','ecrl-stn-15'],['STN17','ecrl-stn-16']]){const found=adapter.search(code);assert.equal(found.length,1);assert.equal(found[0].assetId,assetId)}assert.equal(adapter.search('STN10').length,0);
  assert.equal(adapter.search('ecrl-stn-16')[0].stationCode,'STN17');assert.equal(raw.stations[9].stationCode,undefined);
 });
