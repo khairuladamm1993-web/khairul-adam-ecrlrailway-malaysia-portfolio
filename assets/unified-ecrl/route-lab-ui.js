@@ -29,7 +29,19 @@ function updateMap(){if(!map||!map.isStyleLoaded())return;
 function status(){const t=d[locale],p=E.progress(session,rows);let text=t.none;
  if(assembled)text=assembled.status+' · '+assembled.paths.length+' path(s) · '+Math.round(assembled.paths.reduce((n,x)=>n+x.metres,0)/1000*100)/100+' km OSM · '+(anchors?.status||'UNMATCHED_ANCHORS');
  return {t,p,text};}
-function render(){const {t,p,text}=status();h.replaceChildren();root.MRS10ECRLRailOverlay?.setLocale(locale);h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
+function render(){const {t,p,text}=status();h.replaceChildren();root.MRS10ECRLRailOverlay?.setLocale(locale);
+ const spec=root.MRS10ECRLRailEngineering;
+ const box=document.getElementById('lab-track-metadata');
+ if(box&&spec){
+  const labels={ms:['Spesifikasi projek ECRL (MRL)','Garisan oren OpenRailwayMap bukan kod gauge. Tren hanya boleh diletakkan pada geometri vektor rel dengan CH anchor yang lulus semakan.','Sumber teknikal MRL'],
+   en:['ECRL project technical specification (MRL)','The orange OpenRailwayMap line does not encode gauge. Train movement on the map requires continuous rail vectors and calibrated CH anchors.','MRL technical source'],
+   zh:['ECRL 项目技术规格 (MRL)','OpenRailwayMap 的橙色线条不代表轨距。地图上的列车须有连续铁路矢量与经校准的 CH 控制点。','MRL 技术资料'],
+   th:['ข้อมูลทางเทคนิคโครงการ ECRL (MRL)','เส้นสีส้ม OpenRailwayMap ไม่ได้บอกขนาดราง การแสดงรถไฟบนแผนที่ต้องใช้แนวรางเวกเตอร์และจุด CH ที่ตรวจสอบแล้ว','เอกสาร MRL']};
+  const v=labels[locale];box.querySelector('strong').textContent=v[0]+': '+spec.ecrl.gaugeMm.toLocaleString('en-US')+' mm · 25 kV AC';
+  box.querySelector('p').textContent=v[1];
+  box.querySelector('a').textContent=v[2];
+ }
+h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
  const lang=el('div',null,'lab-row');for(const code of ['ms','en','zh','th']){const b=el('button',code.toUpperCase());b.type='button';b.setAttribute('aria-pressed',String(locale===code));b.onclick=()=>{locale=code;render()};lang.append(b)}h.append(lang);
  const config=el('div',null,'lab-grid');for(const [key,label] of [['origin',t.origin],['destination',t.destination]]){const wrap=el('label',label),sel=el('select');sel.id='lab-'+key;for(const p of rows){const opt=el('option',p.code+' · '+formatCH(p.metres));opt.value=p.code;sel.append(opt)}sel.value=session[key];wrap.append(sel);config.append(wrap)}h.append(config);
  const rebuild=el('button',t.start);rebuild.onclick=()=>{try{session=E.start(rows,document.getElementById('lab-origin').value,document.getElementById('lab-destination').value);message='';store();render()}catch(e){message=e.message;render()}};h.append(rebuild);
@@ -56,5 +68,5 @@ function render(){const {t,p,text}=status();h.replaceChildren();root.MRS10ECRLRa
  updateMap();
 }
 store();getMap();render();
-root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,mapPinAvailability:!!E.positionAt(session.currentCH,assembled,anchors),storage:memoryStatus})});
+root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,trackSpecification:root.MRS10ECRLRailEngineering?.ecrl||null,mapPinAvailability:!!E.positionAt(session.currentCH,assembled,anchors),storage:memoryStatus})});
 })(window);
