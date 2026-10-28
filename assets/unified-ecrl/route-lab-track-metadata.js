@@ -42,7 +42,7 @@ function auditSegment(tags={}){
  const roadConflict=highwayTag||tags.area==='yes'||tags.motor_vehicle==='yes';
  // Orange ORM raster tiles never provide gauge or a safe movement centreline.
  // Each accepted vector feature must explicitly state exactly 1435 mm.
- const match=/^\\d{3,4}$/.test(raw)?Number(raw):null;
+ const match=/^\d{3,4}$/.test(raw)?Number(raw):null;
  const tagGaugeVerified=match===1435;
  const status=!isRailGeometry?'NOT_RAILWAY_CANDIDATE':
     roadConflict?'ROAD_OR_AREA_TAG_CONFLICT':
