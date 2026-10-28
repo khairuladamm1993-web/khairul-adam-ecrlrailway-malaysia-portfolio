@@ -318,7 +318,7 @@ function startMap(){
     showStatus();
    });
    state.map.on('error',()=>{if(!state.mapReady){state.networkError=true;showStatus()}});
-  state.map.on('click',e=>{
+  const selectMapPoint=e=>{
    if(!state.mapReady)return;
    state.lastTap={x:e.point.x,y:e.point.y,time:Date.now()};
    // Screen-space hit testing uses the same source points as the rendered icons.
@@ -328,6 +328,22 @@ function startMap(){
    state.lastTap.stationId=point?.id||null;
    if(!point){showTrackAt(e);return;}
    showPopup(point);
+  };
+  let touchTap=null;
+  state.map.on('click',e=>{
+   if(touchTap&&Date.now()-touchTap.time<650&&Math.hypot(e.point.x-touchTap.x,e.point.y-touchTap.y)<16)return;
+   selectMapPoint(e);
+  });
+  // A short single-pointer tap is distinct from drag/pinch. Native MapLibre
+  // click can be suppressed by touch gesture arbitration on Chromium Android.
+  const canvas=state.map.getCanvas(),tracker=window.MRS10V81Focus.tapTracker();
+  canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')tracker.down(e)});
+  canvas.addEventListener('pointermove',e=>{if(e.pointerType==='touch')tracker.move(e)});
+  canvas.addEventListener('pointercancel',e=>tracker.cancel(e));
+  canvas.addEventListener('pointerup',e=>{
+   if(e.pointerType!=='touch'||!tracker.up(e))return;
+   const rect=canvas.getBoundingClientRect(),point={x:e.clientX-rect.left,y:e.clientY-rect.top};
+   touchTap={...point,time:Date.now()};selectMapPoint({point,lngLat:state.map.unproject([point.x,point.y])});
   });
  }catch(e){state.networkError=true;showStatus()}
 }
