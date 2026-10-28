@@ -13,9 +13,11 @@ for(const [engineName,engine] of [['chromium',chromium],['webkit',webkit]]){
    await page.waitForFunction(()=>window.MRS10ECRLRouteLab?.snapshot()?.railVisual?.installed===true,null,{timeout:60000});
    const state=await page.evaluate(()=>window.MRS10ECRLRouteLab.snapshot());
    assert.equal(state.railVisual.visible,true);assert.equal(state.railVisual.classification,'OSM_RASTER_VISUAL_REFERENCE_ONLY');
+   assert.notEqual(state.railVisual.tileStatus,'WAITING_FOR_STYLE');
    assert.equal(state.trackSpecification.gaugeMm,1435);
    assert.equal(state.mapPinAvailability,false);assert.equal(state.alignmentStatus,'NO_GEOMETRY');
-   checks.push('orm-railway-overlay-installed-gauge-spec-separate-no-train-pin');
+   assert(tileRequests>0,'ORM overlay registered but 0 railway tile HTTP requests were made');
+   checks.push('orm-railway-overlay-installed-gauge-spec-separate-no-train-pin','railway-tile-http-request-attempted');
    const input=page.locator('#lab-orm-toggle');
    await input.uncheck();assert.equal((await page.evaluate(()=>window.MRS10ECRLRouteLab.snapshot())).railVisual.visible,false);
    await input.check();assert.equal((await page.evaluate(()=>window.MRS10ECRLRouteLab.snapshot())).railVisual.visible,true);
@@ -29,7 +31,7 @@ for(const [engineName,engine] of [['chromium',chromium],['webkit',webkit]]){
    assert.equal(errors.length,0,errors.join('; '));
    report.push({engine:engineName,viewport:viewport.name,status:'PASS',tileRequests,tileOk,checks});
    await page.screenshot({path:`${out}/${engineName}-${viewport.name}.png`,fullPage:true});
-  }catch(e){report.push({engine:engineName,viewport:viewport.name,status:'FAIL',tileRequests,tileOk,checks,error:String(e.stack||e),pageErrors:errors});await page.screenshot({path:`${out}/${engineName}-${viewport.name}-fail.png`,fullPage:true}).catch(()=>{});}
+  }catch(e){report.push({engine:engineName,viewport:viewport.name,status:'FAIL',tileRequests,tileOk,checks,error:String(e.stack||e),pageErrors:errors,railVisual:await page.evaluate(()=>window.MRS10ECRLRouteLab?.snapshot()?.railVisual||null).catch(()=>null)});await page.screenshot({path:`${out}/${engineName}-${viewport.name}-fail.png`,fullPage:true}).catch(()=>{});}
   await fs.writeFile(out+'/report.json',JSON.stringify(report,null,2));await page.close();
  }await browser.close();
 }
