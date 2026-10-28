@@ -8,6 +8,8 @@ function create(registry,translations){
  const kerteh=(root&&root.MRS10ECRLKertehFreight)||(typeof require==='function'?require('./kerteh-freight-reference.js'):null);
  if(!kerteh||kerteh.assets.length!==2)throw Error('ECRL_KERTEH_FREIGHT_REFERENCE_MISSING');
  if(!chainage||chainage.records.length!==23)throw Error('ECRL_CHAINAGE_MANIFEST_MISSING');
+ const alignmentEvidence=(root&&root.MRS10ECRLAlignmentEvidence)||(typeof require==='function'?require('./alignment-evidence-r2.js'):null);
+ if(!alignmentEvidence||alignmentEvidence.passingLoops.length!==7||alignmentEvidence.spurs.length!==7)throw Error('ECRL_ALIGNMENT_EVIDENCE_MISSING');
  const annotate=a=>{const c=chainage.get(a.assetId);return Object.freeze({...a,chainageCode:c?.code||null,plCode:c?.code?.startsWith('PL')?c.code:null,chainageKm:c?.km??null,chainageLabel:c?.label||null,chainageDatum:c?.datum||null,chainageStatus:c?.status||'UNKNOWN',chainageProvenance:c?.provenance||null})};
  // Owner-accepted ECRL station designations. STN10 is absent; assetId is an immutable ordinal key.
 const CORRIDOR_STATION_CODES=Object.freeze({
@@ -59,7 +61,7 @@ const loops=registry.loops.map(annotate);
  function hit(map,point){if(!map?.getLayer(NS+'-hit')||map.getLayoutProperty(NS+'-hit','visibility')==='none')return null;return refs.filter(r=>flags[r.kind]).map(r=>{const p=map.project(r.coordinates);return {...r,distance:Math.hypot(p.x-point.x,p.y-point.y)}}).filter(r=>r.distance<=14).sort((a,b)=>a.distance-b.distance)[0]||null}
  function search(q){const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');const text=norm(q);if(!text)return [];if(/^stn\d{1,2}$/.test(text))return stations.filter(a=>norm(a.stationCode)===text);if(/^pl0?[1-7]$/.test(text))return loops.filter(a=>norm(a.plCode)===text||norm(a.plCode)===text.replace(/^pl([1-7])$/,'pl0$1'));return assets.filter(a=>norm(['ECRL',a.officialName,a.historicalName,a.assetId,a.section,a.stationCode,a.plCode,a.chainageLabel,...(a.alternativeNames||[])].join(' ')).includes(text))}
  function snapshot(map){return {assetCount:assets.length,stationCount:registry.stations.length,referenceCount:refs.length,referenceKinds:Object.fromEntries(Object.keys(flags).map(k=>[k,refs.filter(r=>r.kind===k).length])),flags:{...flags},verifiedStationPoints:0,verifiedLoopPoints:0,physicalSegments:0,sourcePresent:!!map?.getSource(NS),layersPresent:!!map?.getLayer(NS+'-inner'),visible:!!map?.getLayer(NS+'-hit')&&map.getLayoutProperty(NS+'-hit','visibility')!=='none'}}
- return Object.freeze({namespace:NS,assets,stations,loops,chainage,registry:enhancedRegistry,portCatalogue,kerteh,flags,refs,get,reference,t,features,install,setVisibility,hit,search,snapshot});
+ return Object.freeze({namespace:NS,assets,stations,loops,chainage,registry:enhancedRegistry,portCatalogue,kerteh,alignmentEvidence,flags,refs,get,reference,t,features,install,setVisibility,hit,search,snapshot});
 }
 const api={create,NS};if(typeof module==='object')module.exports=api;if(root)root.MRS10UnifiedECRL=api;
 })(typeof window!=='undefined'?window:null);
