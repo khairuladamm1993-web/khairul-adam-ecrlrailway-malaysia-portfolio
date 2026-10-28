@@ -1,0 +1,42 @@
+name: P01 Secure Owner Ledger R1 (isolated)
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-secure-ledger-r1-20261028
+    paths:
+      - 'assets/access.js'
+      - 'assets/owner-instruction-ledger.js'
+      - 'owner-command-center.html'
+      - 'assets/owner-command-center.css'
+      - 'supabase/migrations/20261028_owner_instruction_ledger_r1.sql'
+      - 'tests/owner-instruction-ledger.test.cjs'
+      - 'package.json'
+      - '.github/workflows/mrs10-p01-ledger-r1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ledger-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Owner ledger auth/privacy regression (no database writes)
+        run: node --test tests/owner-instruction-ledger.test.cjs
+      - name: Check all new browser scripts
+        run: node --check assets/owner-instruction-ledger.js && node --check assets/access.js
+      - name: Build static production-shaped artifact locally (not deployed)
+        run: python3 scripts/build-production.py dist-ledger-ci
+      - name: Confirm no secrets or ledger private data published
+        run: |
+          test ! -e dist-ledger-ci/supabase/migrations/20261028_owner_instruction_ledger_r1.sql
+          test ! -e dist-ledger-ci/api/owner-project-status.mjs
+          test -f dist-ledger-ci/assets/owner-instruction-ledger.js
+          test -f dist-ledger-ci/owner-command-center.html
