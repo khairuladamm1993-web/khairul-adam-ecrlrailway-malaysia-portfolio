@@ -21,13 +21,27 @@ jobs:
       - run: node scripts/build-unified-v8.cjs
       - run: npm install --no-save --ignore-scripts playwright@1.56.1
       - run: npx playwright install --with-deps webkit
+      - name: Verify immutable staging files
+        if: contains(github.event.head_commit.message, '[preview-verification]')
+        run: node tests/unified-ecrl-deployment.test.mjs
       - name: ECRL canvas and consumer foundation QA
+        env:
+          V8_URL: ${{ contains(github.event.head_commit.message, '[preview-verification]') && 'https://mrs10-p01-unified-v8-sg-geometry-2xx50vmky-1993khairuladam-3016.vercel.app/unified-map-v8.html' || '' }}
         run: |
           python3 -m http.server 8765 --directory dist-unified-v8 > /tmp/ecrl-candidate-server.log 2>&1 &
           node tests/unified-ecrl-browser.test.mjs
+      - name: Isolated WebKit iPad legacy capture verification
+        if: contains(github.event.head_commit.message, '[preview-verification]')
+        env:
+          V8_URL: https://mrs10-p01-unified-v8-sg-geometry-2xx50vmky-1993khairuladam-3016.vercel.app/unified-map-v8.html
+          V8_QA_ENGINES: webkit
+          V8_QA_VIEWPORTS: ipad
+        run: node tests/unified-v8-browser.test.mjs
       - name: V8.1 map-first regression
+        if: "!contains(github.event.head_commit.message, '[preview-verification]')"
         run: node tests/unified-v81-browser.test.mjs
       - name: Full Malaysia and Singapore regression
+        if: "!contains(github.event.head_commit.message, '[preview-verification]')"
         run: |
           npm test
           node --test tests/unified-v6-regression.test.cjs tests/unified-v7-regression.test.cjs tests/unified-v8-regression.test.cjs
@@ -39,5 +53,6 @@ jobs:
           name: unified-ecrl-candidate-evidence
           path: |
             artifacts/unified-ecrl-browser/
+            artifacts/unified-ecrl-deployment/
             artifacts/unified-v8*browser/
           retention-days: 14

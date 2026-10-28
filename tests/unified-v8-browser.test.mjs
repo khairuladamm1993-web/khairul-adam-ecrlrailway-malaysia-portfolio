@@ -3,9 +3,9 @@ import fs from 'node:fs/promises';
 import {chromium,webkit} from 'playwright';
 const url=process.env.V8_URL||'http://127.0.0.1:8765/unified-map-v8.html';
 const report=[];await fs.mkdir('artifacts/unified-v8-browser',{recursive:true});
-for(const engine of ['chromium','webkit']){
+for(const engine of ['chromium','webkit'].filter(e=>!process.env.V8_QA_ENGINES||process.env.V8_QA_ENGINES.split(',').includes(e))){
  const browser=await (engine==='chromium'?chromium:webkit).launch(engine==='chromium'?{headless:true,executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']}:{headless:true});
- try{for(const vp of [{name:'desktop',width:1180,height:820},{name:'ipad',width:810,height:1080},{name:'iphone',width:390,height:844}]){
+ try{for(const vp of [{name:'desktop',width:1180,height:820},{name:'ipad',width:810,height:1080},{name:'iphone',width:390,height:844}].filter(v=>!process.env.V8_QA_VIEWPORTS||process.env.V8_QA_VIEWPORTS.split(',').includes(v.name))){
   const page=await browser.newPage({viewport:{width:vp.width,height:vp.height},deviceScaleFactor:1});const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const snap=()=>page.evaluate(()=>window.MRS10V8Diagnostics.snapshot());
   try{
@@ -46,13 +46,14 @@ for(const engine of ['chromium','webkit']){
     if((await page.locator('.maplibregl-popup').allTextContents()).join(' ').includes('OSM_TOPOLOGY_MATCHED')){trackClicked=true;break}
    }
    assert(trackClicked,'OSM_TRACK_POPUP_MISSING:'+JSON.stringify({targets:targets.length,box,popup:await page.locator('.maplibregl-popup').allTextContents()}));
-   await page.locator('#map').screenshot({path:`artifacts/unified-v8-browser/${engine}-${vp.name}-track.png`});
+   await page.waitForFunction(()=>{const s=window.MRS10V8Diagnostics.snapshot();return s.mapReady&&s.styleLoaded&&s.tilesLoaded},null,{timeout:45000});
+   await page.screenshot({animations:'disabled',path:`artifacts/unified-v8-browser/${engine}-${vp.name}-track.png`});
    await page.locator('#reset').click();
    await page.waitForFunction(()=>window.MRS10V8Diagnostics.snapshot().renderedFeatureCount>=596,null,{timeout:45000});
-   await page.screenshot({path:`artifacts/unified-v8-browser/${engine}-${vp.name}.png`,fullPage:true});
+   await page.screenshot({path:`artifacts/unified-v8-browser/${engine}-${vp.name}.png`,fullPage:false});
    assert.equal(errors.length,0,errors.join(';'));
    report.push({engine,viewport:vp.name,status:'PASS',snapshot:await snap(),fullSnapshot,trackClicked,errors});
-  }catch(e){report.push({engine,viewport:vp.name,status:'FAIL',error:e.stack||String(e),snapshot:await snap().catch(()=>null),errors});await page.screenshot({path:`artifacts/unified-v8-browser/${engine}-${vp.name}-fail.png`,fullPage:true}).catch(()=>{});}finally{await page.close()}
+  }catch(e){report.push({engine,viewport:vp.name,status:'FAIL',error:e.stack||String(e),snapshot:await snap().catch(()=>null),errors});await page.screenshot({path:`artifacts/unified-v8-browser/${engine}-${vp.name}-fail.png`,fullPage:false}).catch(()=>{});}finally{await page.close()}
  }}finally{await browser.close();await fs.writeFile('artifacts/unified-v8-browser/report.json',JSON.stringify(report,null,2));}
 }
 console.log(JSON.stringify(report,null,2));if(report.some(r=>r.status!=='PASS'))process.exitCode=1;
