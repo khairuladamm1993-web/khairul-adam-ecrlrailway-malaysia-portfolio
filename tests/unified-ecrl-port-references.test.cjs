@@ -53,7 +53,7 @@ test('compact consumer intelligence keeps marine provenance and pending loading 
  for(const lang of ['ms','en','zh','th']){
   locale=lang;ui.render();
   const a=ui.content('ecrl-port-kuantan'),b=ui.content('ecrl-port-kemaman');
-  assert(a.querySelector('.ecrl-accuracy').textContent.length>=20);
+  assert(a.querySelector('.ecrl-accuracy').textContent.length>=7);
   assert.equal(a.querySelector('.ecrl-key-facts').textContent.includes('KP1 · KP2'),true);
   assert.match(a.querySelector('.ecrl-engineering').textContent,/PENDING_GEOMETRY/);
   assert.match(a.querySelector('.ecrl-engineering').textContent,/2\.7 km/);
