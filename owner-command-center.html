@@ -12,6 +12,7 @@
   <script defer src="assets/owner-checkpoint-policy.js"></script>
   <script defer src="assets/owner-two-way-workflow.js"></script>
   <script defer src="assets/owner-issue-handoff.js"></script>
+  <script defer src="assets/owner-instruction-ledger.js"></script>
   <script defer src="assets/owner-command-center.js"></script>
 </head>
 <body>
@@ -49,6 +50,24 @@
  <h2>Verified Two-Way Workflow · R2.5</h2>
  <div id="two-way-state" role="status" aria-live="polite">Checking GitHub Registry…</div>
  <p class="support">Dashboard → ChatGPT sends issue context. A connected and authorized ChatGPT session → GitHub may write a verified checkpoint. Refresh imports that record. This is not an automatic feed of private chats.</p>
+ </section>
+ <section class="ledger-panel" id="instruction-ledger" hidden aria-label="Private Owner instruction ledger">
+  <div class="section-head">
+   <h2>AI Execution Mirror · Instruction Ledger R1</h2>
+   <button id="ledger-refresh" type="button" class="refresh">↻ Refresh ledger</button>
+  </div>
+  <p class="support">Owner-only instruction and checkpoint storage. Saved instructions do NOT authorize AI coding, deployments or Production release. Direct ChatGPT bridge is not yet connected.</p>
+  <p id="ledger-state" class="ledger-state" role="status" aria-live="polite" data-mode="pending">Checking Owner access…</p>
+  <form id="ledger-form" class="ledger-form">
+   <label for="ledger-summary">Approved P01 instruction</label>
+   <textarea id="ledger-summary" rows="2" minlength="12" maxlength="1200" required placeholder="Specific approved task and boundaries"></textarea>
+   <label for="ledger-acceptance">Acceptance / calibration criteria</label>
+   <textarea id="ledger-acceptance" rows="2" minlength="12" maxlength="1500" required placeholder="Required evidence before work can be called complete"></textarea>
+   <label for="ledger-scope">Allowed source paths (optional; comma or newline separated, max 8)</label>
+   <textarea id="ledger-scope" rows="2" maxlength="1280" placeholder="assets/unified-v8-map.js"></textarea>
+   <button id="ledger-submit" class="refresh" type="submit">Record Owner instruction (no execution)</button>
+  </form>
+  <div id="ledger-items" class="ledger-items" aria-label="Recent private instruction records"></div>
  </section>
  <section class="action-hub" id="action-hub" aria-label="Latest progress and issues requiring action"></section>
       <div class="section-head"><h2>Current development</h2><span id="registry-date" class="section-aside"></span></div>
