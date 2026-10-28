@@ -1,1 +1,23 @@
-.ecrl-overlay-controls{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;display:grid;gap:8px;font-size:.85rem}.ecrl-overlay-controls label{display:flex;align-items:center;gap:8px;min-height:36px}.ecrl-overlay-controls input{width:20px;height:20px;flex:none}.ecrl-assets{display:grid;gap:6px;margin-top:16px}.ecrl-assets button{text-align:left;overflow-wrap:anywhere}.ecrl-intelligence{overflow-wrap:anywhere}.ecrl-no-point{position:absolute;z-index:4;left:12px;right:12px;bottom:35px;max-width:360px;max-height:45%;overflow:auto;background:var(--card);color:var(--fg);padding:12px;border:1px solid var(--line);border-radius:10px}.ecrl-no-point>button{float:right;min-width:44px;min-height:44px}.consumer-foundation{border:1px solid var(--line);border-radius:10px;margin-top:14px;padding:12px;overflow-wrap:anywhere}.consumer-foundation label{display:block;margin:8px 0}.consumer-foundation select{display:block;width:100%;padding:10px;background:var(--bg);color:var(--fg)}.consumer-foundation button{margin:4px;min-height:44px}.consumer-foundation progress{width:100%;accent-color:#0f8b8d}.consumer-foundation ol{max-height:240px;overflow:auto}
+/* P01 consumer map UX: ECRL-only styles. Shared MapLibre and route layers unchanged. */
+.ecrl-overlay-controls{border:1px solid var(--line);border-radius:12px;padding:9px 11px;margin:8px 0;display:grid;gap:7px;font-size:.83rem}
+.ecrl-switches{display:flex;flex-wrap:wrap;gap:7px}
+.ecrl-switches label{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid var(--line);border-radius:20px;background:var(--card);font-size:.8rem;line-height:1.2;max-width:100%;cursor:pointer}
+.ecrl-switches input{width:18px;height:18px;flex:none;min-height:18px;margin:0}
+.ecrl-source-policy summary,.ecrl-asset-list summary{cursor:pointer;font-size:.79rem;color:var(--sub);padding:4px 0}
+.ecrl-source-policy p{font-size:.8rem;line-height:1.35}
+.ecrl-assets{margin:9px 0}.ecrl-assets button{display:block;text-align:left;overflow-wrap:anywhere;width:100%;margin:4px 0}
+.ecrl-intelligence{overflow-wrap:anywhere;font-size:13px;line-height:1.38;max-width:100%;color:#162d3a}
+.ecrl-intelligence .ecrl-kicker{display:block;color:#4b6472;text-transform:uppercase;letter-spacing:.035em;font-size:10px;font-weight:700;margin:0 28px 4px 0}
+.ecrl-intelligence .ecrl-name{display:block;font-size:16px;font-weight:760;line-height:1.27;margin:0 27px 7px 0;color:#102b3a}
+.ecrl-intelligence .ecrl-status{display:inline-block!important;background:#e9f5ef;color:#12614e!important;border-radius:7px;padding:4px 8px;margin:1px 0 6px;font-weight:650;font-size:12px}
+.ecrl-intelligence .ecrl-accuracy{border-left:3px solid #b57b2d;background:#fff7e8;padding:5px 8px;margin:3px 0 7px;color:#715022!important;font-size:11.5px;line-height:1.3}
+.ecrl-key-facts{display:grid;gap:2px;margin:4px 0 6px}.ecrl-key-facts .ecrl-fact{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:12px!important;margin:3px 0!important}.ecrl-fact span{color:#526976}.ecrl-fact b{font-weight:650;text-align:right;color:#1b3c4a}
+.ecrl-engineering,.ecrl-sources{border-top:1px solid #e2eaee;margin-top:7px;padding:3px 0}
+.ecrl-engineering summary,.ecrl-sources summary{cursor:pointer;min-height:30px;display:list-item;padding:4px 0;color:#24566e;font-weight:700;font-size:12px}
+.ecrl-engineering[open],.ecrl-sources[open]{max-height:240px;overflow-y:auto;overscroll-behavior:contain}
+.ecrl-engineering p,.ecrl-sources p{font-size:11.5px!important;line-height:1.35!important;margin:6px 0!important}
+.ecrl-popup .maplibregl-popup-content{padding:12px 14px!important;max-height:min(44dvh,390px)!important;overflow-y:auto!important;overscroll-behavior:contain}
+.ecrl-no-point{position:absolute;z-index:4;left:12px;right:12px;bottom:35px;max-width:360px;max-height:55%;overflow:auto;background:var(--card);color:var(--fg);padding:12px;border:1px solid var(--line);border-radius:10px}
+.ecrl-no-point>button{float:right;min-width:44px;min-height:44px}
+.consumer-foundation{border:1px solid var(--line);border-radius:10px;margin-top:14px;padding:12px;overflow-wrap:anywhere}.consumer-foundation label{display:block;margin:8px 0}.consumer-foundation select{display:block;width:100%;padding:10px;background:var(--bg);color:var(--fg)}.consumer-foundation button{margin:4px;min-height:44px}.consumer-foundation progress{width:100%;accent-color:#0f8b8d}.consumer-foundation ol{max-height:240px;overflow:auto}
+@media(max-width:600px){.ecrl-popup .maplibregl-popup-content{max-height:min(43dvh,340px)!important}.ecrl-switches label{font-size:.75rem}}
