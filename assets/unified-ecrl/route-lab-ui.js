@@ -32,7 +32,7 @@ function render(){const {t,p,text}=status();h.replaceChildren();h.append(el('h1'
  const lang=el('div',null,'lab-row');for(const code of ['ms','en','zh','th']){const b=el('button',code.toUpperCase());b.type='button';b.setAttribute('aria-pressed',String(locale===code));b.onclick=()=>{locale=code;render()};lang.append(b)}h.append(lang);
  const config=el('div',null,'lab-grid');for(const [key,label] of [['origin',t.origin],['destination',t.destination]]){const wrap=el('label',label),sel=el('select');sel.id='lab-'+key;for(const p of rows){const opt=el('option',p.code+' · '+p.label);opt.value=p.code;sel.append(opt)}sel.value=session[key];wrap.append(sel);config.append(wrap)}h.append(config);
  const rebuild=el('button',t.start);rebuild.onclick=()=>{try{session=E.start(rows,document.getElementById('lab-origin').value,document.getElementById('lab-destination').value);message='';store();render()}catch(e){message=e.message;render()}};h.append(rebuild);
- const section=el('section',null,'lab-panel');section.append(el('h2',t.train+' · '+session.trainId),el('p','CH'+Math.floor(session.currentCH/1000)+'+'+String(session.currentCH%1000).padStart(3,'0')));
+ const section=el('section',null,'lab-panel');section.append(el('h2',t.train+' · '+session.trainId),el('p','CH'+String(Math.floor(session.currentCH/1000)).padStart(3,'0')+'+'+String(session.currentCH%1000).padStart(3,'0')));
  section.append(el('strong',t.remain+': '+p.remainingKm.toFixed(3)+' km'));
  const meter=el('progress');meter.max=100;meter.value=p.pct;section.append(meter);
  section.append(el('p',(p.next?.code||'ARRIVED')+' · '+(p.next?.label||'')+' · '+p.nextDistanceKm.toFixed(3)+' km'));
