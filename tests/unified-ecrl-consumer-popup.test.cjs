@@ -42,9 +42,9 @@ test('four locales maintain public-safe reference and engineering disclosure',()
  locale='ms';
 });
 test('all source references and category toggles remain accessible without changing GIS',()=>{
- ui.render();const switches=w.document.querySelectorAll('#ecrl-controls input[type=checkbox]');assert.equal(switches.length,3);
- assert.equal(w.document.querySelectorAll('#ecrl-assets button').length,35);
- assert.equal(adapter.refs.length,24);assert.equal(adapter.snapshot().physicalSegments,0);
+ ui.render();const switches=w.document.querySelectorAll('#ecrl-controls input[type=checkbox]');assert.equal(switches.length,4);
+ assert.equal(w.document.querySelectorAll('#ecrl-assets button').length,37);
+ assert.equal(adapter.refs.length,25);assert.equal(adapter.snapshot().physicalSegments,0);
  assert.equal(w.document.querySelector('details.ecrl-source-policy'),null);assert(w.document.querySelector('details.ecrl-asset-list'));
  category='MRT';ui.render();assert.equal(w.document.getElementById('ecrl-controls').hidden,true);
 });
