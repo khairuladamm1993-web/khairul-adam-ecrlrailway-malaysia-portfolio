@@ -10,6 +10,7 @@ let locale='ms',session,geo=null,assembled=null,anchors=null,map=null,memoryStat
 function load(){try{const r=JSON.parse(localStorage.getItem(KEY)||'null');if(r?.schema===1&&rows.some(p=>p.code===r.origin)&&rows.some(p=>p.code===r.destination)){E.progress(r,rows);return r}}catch(_){}return E.start(rows)}
 function restore(){try{const g=JSON.parse(localStorage.getItem(GEO)||'null');if(g){const a=E.assemble(g);return {geo:g,assembly:a,match:E.fit(rows,a,g.anchors||[])}}}catch(_){}return null}
 session=load();const recovered=restore();if(recovered){geo=recovered.geo;assembled=recovered.assembly;anchors=recovered.match}
+const formatCH=metres=>'CH'+String(Math.floor(metres/1000)).padStart(3,'0')+'+'+String(metres%1000).padStart(3,'0');
 const h=document.getElementById('route-lab'),el=(tag,txt,cl)=>{const n=document.createElement(tag);if(txt!==undefined&&txt!==null)n.textContent=txt;if(cl)n.className=cl;return n};
 function store(){try{localStorage.setItem(KEY,JSON.stringify(session));if(geo){const s=JSON.stringify(geo);if(s.length>1500000)throw Error('GEOMETRY_TOO_LARGE_FOR_LOCAL_AUTOSAVE');localStorage.setItem(GEO,s)}memoryStatus='SAVED_ON_THIS_BROWSER'}catch(e){memoryStatus='SAVE_ERROR_'+e.message}}
 function getMap(){if(map||!root.maplibregl)return map;try{map=new root.maplibregl.Map({container:'lab-map',style:'https://tiles.openfreemap.org/styles/positron',center:[102.4,4.1],zoom:6.5});map.addControl(new root.maplibregl.NavigationControl({showCompass:false}),'top-right');map.on('style.load',updateMap)}catch(e){message=String(e.message)}return map}
@@ -30,12 +31,12 @@ function status(){const t=d[locale],p=E.progress(session,rows);let text=t.none;
  return {t,p,text};}
 function render(){const {t,p,text}=status();h.replaceChildren();h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
  const lang=el('div',null,'lab-row');for(const code of ['ms','en','zh','th']){const b=el('button',code.toUpperCase());b.type='button';b.setAttribute('aria-pressed',String(locale===code));b.onclick=()=>{locale=code;render()};lang.append(b)}h.append(lang);
- const config=el('div',null,'lab-grid');for(const [key,label] of [['origin',t.origin],['destination',t.destination]]){const wrap=el('label',label),sel=el('select');sel.id='lab-'+key;for(const p of rows){const opt=el('option',p.code+' · '+p.label);opt.value=p.code;sel.append(opt)}sel.value=session[key];wrap.append(sel);config.append(wrap)}h.append(config);
+ const config=el('div',null,'lab-grid');for(const [key,label] of [['origin',t.origin],['destination',t.destination]]){const wrap=el('label',label),sel=el('select');sel.id='lab-'+key;for(const p of rows){const opt=el('option',p.code+' · '+formatCH(p.metres));opt.value=p.code;sel.append(opt)}sel.value=session[key];wrap.append(sel);config.append(wrap)}h.append(config);
  const rebuild=el('button',t.start);rebuild.onclick=()=>{try{session=E.start(rows,document.getElementById('lab-origin').value,document.getElementById('lab-destination').value);message='';store();render()}catch(e){message=e.message;render()}};h.append(rebuild);
  const section=el('section',null,'lab-panel');section.append(el('h2',t.train+' · '+session.trainId),el('p','CH'+String(Math.floor(session.currentCH/1000)).padStart(3,'0')+'+'+String(session.currentCH%1000).padStart(3,'0')));
  section.append(el('strong',t.remain+': '+p.remainingKm.toFixed(3)+' km'));
  const meter=el('progress');meter.max=100;meter.value=p.pct;section.append(meter);
- section.append(el('p',(p.next?.code||'ARRIVED')+' · '+(p.next?.label||'')+' · '+p.nextDistanceKm.toFixed(3)+' km'));
+ section.append(el('p',(p.next?.code||'ARRIVED')+' · '+(p.next?formatCH(p.next.metres):'')+' · '+p.nextDistanceKm.toFixed(3)+' km'));
  const slider=el('input');slider.type='range';const route=E.locateRun(session,rows);slider.min=route.min;slider.max=route.max;slider.step=10;slider.value=session.currentCH;slider.setAttribute('aria-label','Simulated train CH');slider.onchange=()=>{try{session=E.advance(session,rows,Number(slider.value));store();message='';render()}catch(e){message=e.message;render()}};section.append(slider);
  const manual=el('div',null,'lab-row'),input=el('input');input.type='number';input.value=session.currentCH;input.min=route.min;input.max=route.max;input.step=1;input.setAttribute('aria-label','CH in metres');manual.append(input);
  const move=el('button','Set CH');move.onclick=()=>{try{session=E.advance(session,rows,Number(input.value));store();message='';render()}catch(e){message=e.message;render()}};manual.append(move);
@@ -50,7 +51,7 @@ function render(){const {t,p,text}=status();h.replaceChildren();h.append(el('h1'
  h.append(el('p',t.privacy,'lab-note'),el('p',t.save+': '+memoryStatus,'lab-note'));
  if(message)h.append(el('p',message,'lab-alert'));
  const list=el('details');list.append(el('summary','23 CH checkpoints · '+session.reviews.length+' Owner UAT'));const ul=el('ol');
- for(const x of rows){const li=el('li',x.code+' · '+x.label+(session.reviews.some(v=>v.code===x.code)?' ✓ OWNER MODEL':''));ul.append(li)}list.append(ul);h.append(list);
+ for(const x of rows){const li=el('li',x.code+' · '+formatCH(x.metres)+(session.reviews.some(v=>v.code===x.code)?' ✓ OWNER MODEL':''));ul.append(li)}list.append(ul);h.append(list);
  const events=el('details');events.append(el('summary','Autosave events: '+session.events.length));const ul2=el('ol');for(const e of session.events.slice(-30))ul2.append(el('li',e.type+' · '+(e.code||e.to)+' · '+(e.time||'')));events.append(ul2);h.append(events);
  updateMap();
 }
