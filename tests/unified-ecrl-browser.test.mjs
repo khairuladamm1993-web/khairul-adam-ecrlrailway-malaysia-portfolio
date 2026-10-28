@@ -10,7 +10,7 @@ for(const engine of ['chromium','webkit']){
   const snap=()=>page.evaluate(()=>window.MRS10ECRLCandidateQA.snapshot());
   const layers=()=>page.evaluate(()=>window.MRS10V8Diagnostics.focusSnapshot().layers);
   async function tapAsset(id){await page.locator('#map').scrollIntoViewIfNeeded();assert(await page.evaluate(id=>window.MRS10ECRLCandidateQA.inspectAsset(id),id));const handle=await page.waitForFunction(id=>window.MRS10ECRLCandidateQA.assetHitTarget(id),id,{timeout:15000});const p=await handle.jsonValue(),canvas=page.locator('#map .maplibregl-canvas');if(vp.name==='desktop')await canvas.click({position:p});else await canvas.tap({position:p});await page.waitForFunction(id=>window.MRS10ECRLCandidateQA.snapshot().focus.assetId===id,id,{timeout:10000});await page.locator('.maplibregl-popup .ecrl-intelligence').waitFor()}
-  async function closePopup(){await page.locator('.maplibregl-popup-close-button').click();await page.waitForFunction(()=>window.MRS10ECRLCandidateQA.snapshot().focus.mode==='NORMAL')}
+  async function closePopup(){await page.locator('.maplibregl-popup-close-button').click();await page.waitForFunction(()=>{const d=window.MRS10V8Diagnostics.snapshot();return window.MRS10ECRLCandidateQA.snapshot().focus.mode==='NORMAL'&&d.mapReady&&d.styleLoaded&&d.layerCount===33&&d.ecrl.layersPresent},null,{timeout:45000})}
   async function searchAsset(name,id){await page.locator('#search').fill(name);await page.locator('#search-results button').filter({hasText:id}).click();await page.waitForFunction(id=>window.MRS10ECRLCandidateQA.snapshot().focus.assetId===id,id)}
   try{
    assert.equal((await page.goto(url,{waitUntil:'domcontentloaded'})).status(),200);

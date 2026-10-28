@@ -32,7 +32,7 @@ function create(registry,translations){
   if(!map.getLayer(NS+'-inner'))map.addLayer({id:NS+'-inner',type:'circle',source:NS,paint:{'circle-radius':2.5,'circle-color':['get','color']}});
  }
  function hit(map,point){if(!map?.getLayer(NS+'-hit')||map.getLayoutProperty(NS+'-hit','visibility')==='none')return null;return refs.filter(r=>flags[r.kind]).map(r=>{const p=map.project(r.coordinates);return {...r,distance:Math.hypot(p.x-point.x,p.y-point.y)}}).filter(r=>r.distance<=14).sort((a,b)=>a.distance-b.distance)[0]||null}
- function search(q){const norm=s=>String(s||'').toLowerCase().replace(/\s+/g,'');const text=norm(q);return text?assets.filter(a=>norm(['ECRL',a.officialName,a.historicalName,a.assetId,a.section,...(a.alternativeNames||[])].join(' ')).includes(text)):[]}
+ function search(q){const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');const text=norm(q);return text?assets.filter(a=>norm(['ECRL',a.officialName,a.historicalName,a.assetId,a.section,...(a.alternativeNames||[])].join(' ')).includes(text)):[]}
  function snapshot(map){return {assetCount:assets.length,stationCount:registry.stations.length,referenceCount:refs.length,referenceKinds:Object.fromEntries(Object.keys(flags).map(k=>[k,refs.filter(r=>r.kind===k).length])),flags:{...flags},verifiedStationPoints:0,verifiedLoopPoints:0,physicalSegments:0,sourcePresent:!!map?.getSource(NS),layersPresent:!!map?.getLayer(NS+'-inner'),visible:!!map?.getLayer(NS+'-hit')&&map.getLayoutProperty(NS+'-hit','visibility')!=='none'}}
  return Object.freeze({namespace:NS,assets,stations:registry.stations,registry,flags,refs,get,reference,t,features,install,setVisibility,hit,search,snapshot});
 }
