@@ -24,7 +24,7 @@ test('independent licensed dataset can be isolated from OSM, but not auto-publis
  assert.equal(v.attribution,null);
 });
 test('unknown, restricted and mixed geometry cannot be silently converted to proprietary MR-S10',()=>{
- const unknown=P.inspect({features:[line({source:'Unknown private map'})]});
+ const unknown=P.inspect({features:[line({source:'Unverified nonregistered reference'})]});
  assert.equal(unknown.provenanceComplete,false);
  const restricted=P.inspect({features:[line({source:'confidential restricted engineering sheet'})]});
  assert.equal(restricted.hasRestricted,true);
