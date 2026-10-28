@@ -1,0 +1,49 @@
+name: MR-S10 P01 Manual CH Alignment Lab isolated QA
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-route-lab-manual-ch-r1-20261029
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node --check assets/unified-ecrl/route-lab-engine.js
+      - run: node --check assets/unified-ecrl/route-lab-ui.js
+      - run: node --test tests/unified-ecrl-manual-route-lab.test.cjs tests/unified-ecrl-alignment-r2.test.cjs tests/unified-ecrl-chainage.test.cjs tests/ecrl-public-geoservice-source.test.mjs
+      - run: node scripts/build-unified-v8.cjs
+      - run: test -f dist-unified-v8/ecrl-alignment-lab.html
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node scripts/build-unified-v8.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Manual CH lab six-viewport resume and owner model review
+        run: |
+          python3 -m http.server 8765 --directory dist-unified-v8 >/tmp/lab.log 2>&1 &
+          node tests/unified-ecrl-manual-route-lab-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: ecrl-route-lab-owner-uat-evidence
+          path: artifacts/ecrl-route-lab/
+          retention-days: 14
