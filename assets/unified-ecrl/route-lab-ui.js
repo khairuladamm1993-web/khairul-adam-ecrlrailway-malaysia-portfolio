@@ -13,7 +13,7 @@ session=load();const recovered=restore();if(recovered){geo=recovered.geo;assembl
 const formatCH=metres=>'CH'+String(Math.floor(metres/1000)).padStart(3,'0')+'+'+String(metres%1000).padStart(3,'0');
 const h=document.getElementById('route-lab'),el=(tag,txt,cl)=>{const n=document.createElement(tag);if(txt!==undefined&&txt!==null)n.textContent=txt;if(cl)n.className=cl;return n};
 function store(){try{localStorage.setItem(KEY,JSON.stringify(session));if(geo){const s=JSON.stringify(geo);if(s.length>1500000)throw Error('GEOMETRY_TOO_LARGE_FOR_LOCAL_AUTOSAVE');localStorage.setItem(GEO,s)}memoryStatus='SAVED_ON_THIS_BROWSER'}catch(e){memoryStatus='SAVE_ERROR_'+e.message}}
-function getMap(){if(map||!root.maplibregl)return map;try{map=new root.maplibregl.Map({container:'lab-map',style:'https://tiles.openfreemap.org/styles/positron',center:[102.4,4.1],zoom:6.5});map.addControl(new root.maplibregl.NavigationControl({showCompass:false}),'top-right');map.on('style.load',updateMap)}catch(e){message=String(e.message)}return map}
+function getMap(){if(map||!root.maplibregl)return map;try{map=new root.maplibregl.Map({container:'lab-map',style:'https://tiles.openfreemap.org/styles/positron',center:[103.435,4.56],zoom:10.3});map.addControl(new root.maplibregl.NavigationControl({showCompass:false}),'top-right');root.MRS10ECRLRailOverlay?.connect(map);map.on('style.load',updateMap)}catch(e){message=String(e.message)}return map}
 const routeID='ecrl-lab-rail-candidate',trainID='ecrl-lab-train-position';
 function updateMap(){if(!map||!map.isStyleLoaded())return;
  const good=assembled?.status==='CONTINUOUS_CANDIDATE';
@@ -29,7 +29,7 @@ function updateMap(){if(!map||!map.isStyleLoaded())return;
 function status(){const t=d[locale],p=E.progress(session,rows);let text=t.none;
  if(assembled)text=assembled.status+' · '+assembled.paths.length+' path(s) · '+Math.round(assembled.paths.reduce((n,x)=>n+x.metres,0)/1000*100)/100+' km OSM · '+(anchors?.status||'UNMATCHED_ANCHORS');
  return {t,p,text};}
-function render(){const {t,p,text}=status();h.replaceChildren();h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
+function render(){const {t,p,text}=status();h.replaceChildren();root.MRS10ECRLRailOverlay?.setLocale(locale);h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
  const lang=el('div',null,'lab-row');for(const code of ['ms','en','zh','th']){const b=el('button',code.toUpperCase());b.type='button';b.setAttribute('aria-pressed',String(locale===code));b.onclick=()=>{locale=code;render()};lang.append(b)}h.append(lang);
  const config=el('div',null,'lab-grid');for(const [key,label] of [['origin',t.origin],['destination',t.destination]]){const wrap=el('label',label),sel=el('select');sel.id='lab-'+key;for(const p of rows){const opt=el('option',p.code+' · '+formatCH(p.metres));opt.value=p.code;sel.append(opt)}sel.value=session[key];wrap.append(sel);config.append(wrap)}h.append(config);
  const rebuild=el('button',t.start);rebuild.onclick=()=>{try{session=E.start(rows,document.getElementById('lab-origin').value,document.getElementById('lab-destination').value);message='';store();render()}catch(e){message=e.message;render()}};h.append(rebuild);
@@ -56,5 +56,5 @@ function render(){const {t,p,text}=status();h.replaceChildren();h.append(el('h1'
  updateMap();
 }
 store();getMap();render();
-root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),alignmentStatus:assembled?.status||'NO_GEOMETRY',mapPinAvailability:!!E.positionAt(session.currentCH,assembled,anchors),storage:memoryStatus})});
+root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,mapPinAvailability:!!E.positionAt(session.currentCH,assembled,anchors),storage:memoryStatus})});
 })(window);
