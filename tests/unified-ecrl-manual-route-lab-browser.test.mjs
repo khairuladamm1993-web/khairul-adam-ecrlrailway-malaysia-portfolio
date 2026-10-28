@@ -9,7 +9,10 @@ for(const [name,driver] of [['chromium',chromium],['webkit',webkit]]){
   await page.waitForFunction(()=>!!window.MRS10ECRLRouteLab?.snapshot(),null,{timeout:30000});
   assert.equal((await page.evaluate(()=>window.MRS10ECRLRouteLab.snapshot())).session.currentCH,670);
   assert.equal((await page.locator('#route-lab').innerText()).includes('CH000+670'),true);
-  checks.push('one-train-initial-CH');
+  assert.equal(await page.locator('#lab-origin option').first().innerText(),'STN01 · CH000+670');
+  assert.equal(await page.locator('#lab-destination option').last().innerText(),'STN17 · CH524+160');
+  assert.match(await page.locator('#route-lab').innerText(),/STN02 · CH033\+700/);
+  checks.push('one-train-initial-CH','padded-CH-labels');
   await page.getByRole('button',{name:'Ke checkpoint seterusnya'}).click();
   assert.equal((await page.evaluate(()=>window.MRS10ECRLRouteLab.snapshot())).session.currentCH,33700);
   await page.reload({waitUntil:'domcontentloaded'});
