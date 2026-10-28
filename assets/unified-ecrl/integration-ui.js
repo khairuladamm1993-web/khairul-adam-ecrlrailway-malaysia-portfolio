@@ -1,30 +1,67 @@
 (function(root){'use strict';
+// Consumer summary is intentionally separate from the complete engineering/source record.
+const COPY={
+ ms:{station:'Stesen ECRL',facility:'Aset infrastruktur',location:'Titik rujukan kawasan · bukan lokasi stesen sebenar',historic:'Rujukan perancangan EIA 2017 · bukan lokasi stesen terkini',maritime:'Rujukan kawasan pelabuhan · bukan terminal rel',noPoint:'Tiada lokasi stesen yang disahkan',type:'Jenis aset',section:'Seksyen',service:'Perkhidmatan',verified:'Identiti disahkan',partial:'Pengesahan separa',conflict:'Konflik sumber',pending:'Belum disahkan',technical:'Butiran kejuruteraan',internal:'ID teknikal dalaman',references:'Sumber & rujukan',layers:'Ketepatan data dan peta',list:'Senarai aset ECRL',passenger:'Penumpang',freight:'Kargo',future:'Perancangan masa depan',unknown:'Belum disahkan'},
+ en:{station:'ECRL station',facility:'Infrastructure asset',location:'Area reference · not the actual station location',historic:'2017 EIA planning reference · not the current station site',maritime:'Port area reference · not a rail terminal',noPoint:'No verified station location',type:'Asset type',section:'Section',service:'Service',verified:'Identity verified',partial:'Partially verified',conflict:'Source conflict',pending:'Unverified',technical:'Engineering details',internal:'Internal technical ID',references:'Sources & references',layers:'Data and map accuracy',list:'ECRL assets',passenger:'Passenger',freight:'Freight',future:'Future proposal',unknown:'Not verified'},
+ zh:{station:'ECRL 车站',facility:'基础设施资产',location:'区域参考点 · 非车站实际位置',historic:'2017 年环评规划位置 · 非现行车站地点',maritime:'港口区域参考点 · 非铁路货运终点站',noPoint:'没有已核实的车站位置',type:'资产类型',section:'区段',service:'服务',verified:'车站身份已核实',partial:'部分已核实',conflict:'来源存在冲突',pending:'尚未核实',technical:'工程详细信息',internal:'内部技术编号',references:'来源与参考资料',layers:'数据与地图准确性',list:'ECRL 资产',passenger:'客运',freight:'货运',future:'未来规划',unknown:'尚未核实'},
+ th:{station:'สถานี ECRL',facility:'สินทรัพย์โครงสร้างพื้นฐาน',location:'จุดอ้างอิงพื้นที่ · ไม่ใช่ตำแหน่งสถานีจริง',historic:'จุดอ้างอิงแผน EIA ปี 2017 · ไม่ใช่ที่ตั้งสถานีปัจจุบัน',maritime:'จุดอ้างอิงพื้นที่ท่าเรือ · ไม่ใช่สถานีรถไฟ',noPoint:'ยังไม่มีพิกัดสถานีที่ยืนยันแล้ว',type:'ประเภทสินทรัพย์',section:'ช่วง',service:'บริการ',verified:'ยืนยันตัวตนสถานี',partial:'ยืนยันบางส่วน',conflict:'แหล่งข้อมูลขัดแย้ง',pending:'ยังไม่ยืนยัน',technical:'รายละเอียดทางวิศวกรรม',internal:'รหัสเทคนิคภายใน',references:'แหล่งข้อมูลและเอกสารอ้างอิง',layers:'ความถูกต้องของข้อมูลและแผนที่',list:'สินทรัพย์ ECRL',passenger:'ผู้โดยสาร',freight:'สินค้า',future:'แผนในอนาคต',unknown:'ยังไม่ยืนยัน'}
+};
 function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
- const $=id=>document.getElementById(id),el=(tag,text)=>{const n=document.createElement(tag);if(text!=null)n.textContent=String(text);return n},t=k=>adapter.t(getLocale(),k);
+ const $=id=>document.getElementById(id);
+ const el=(tag,value,cls)=>{const n=document.createElement(tag);if(value!=null)n.textContent=String(value);if(cls)n.className=cls;return n};
+ const t=k=>adapter.t(getLocale(),k), ui=k=>(COPY[getLocale()]||COPY.en)[k]||COPY.en[k]||k;
+ function summary(host,text){const s=el('summary',text);host.append(s);return s}
+ function serviceLabel(value){
+  if(value==='PASSENGER_FREIGHT')return ui('passenger')+' + '+ui('freight');
+  if(value==='PASSENGER')return ui('passenger');
+  if(value==='FUTURE_PASSENGER')return ui('future')+' · '+ui('passenger');
+  if(value==='UNKNOWN')return ui('unknown');
+  return value||ui('unknown');
+ }
+ function field(host,label,value){const row=el('p',null,'ecrl-fact');row.append(el('span',label),el('b',value));host.append(row)}
+ function referenceLabel(ref){return ref?.kind==='HISTORICAL'?ui('historic'):ref?.kind==='MARITIME'?ui('maritime'):ref?ui('location'):ui('noPoint')}
  function render(){
   const host=$('ecrl-controls');host.hidden=getCategory()!=='ECRL';host.replaceChildren(el('strong','ECRL · '+t('title')));
   const labels={LOCALITY:t('reference'),HISTORICAL:t('legendHistoric'),MARITIME:t('legendPort')};
-  for(const kind of Object.keys(adapter.flags)){const label=el('label'),box=el('input');box.type='checkbox';box.id='ecrl-reference-'+kind.toLowerCase();box.checked=adapter.flags[kind];box.onchange=()=>onFlags(kind,box.checked);label.append(box,document.createTextNode(labels[kind]));host.append(label)}
-  host.append(el('small',t('noTrack')+' '+t('noLoops')));
-  const assets=$('ecrl-assets');assets.replaceChildren(el('h2','ECRL · '+t('list')));
-  assets.append(el('p',t('reference')+' · '+t('noTrack')));
-  for(const a of adapter.assets){const b=el('button',(a.stationCode?a.stationCode+' · ':'')+(a.officialName||a.historicalName)+' · '+a.assetType+' · '+a.verificationStatus);b.type='button';b.dataset.ecrlAsset=a.assetId;b.onclick=()=>onSelect(a.assetId);assets.append(b)}
+  const switches=el('div',null,'ecrl-switches');
+  for(const kind of Object.keys(adapter.flags)){const label=el('label'),box=el('input');box.type='checkbox';box.id='ecrl-reference-'+kind.toLowerCase();box.checked=adapter.flags[kind];box.onchange=()=>onFlags(kind,box.checked);label.append(box,document.createTextNode(labels[kind]));switches.append(label)}
+  host.append(switches);
+  const policy=el('details',null,'ecrl-source-policy');summary(policy,ui('layers'));policy.append(el('p',t('noTrack')+' '+t('noLoops')));host.append(policy);
+  const assets=$('ecrl-assets');assets.replaceChildren();
+  const list=el('details',null,'ecrl-asset-list');summary(list,ui('list')+' ('+adapter.assets.length+')');
+  for(const a of adapter.assets){const btn=el('button',(a.stationCode?a.stationCode+' · ':'')+(a.officialName||a.historicalName)+' · '+a.assetType+' · '+a.verificationStatus);btn.type='button';btn.dataset.ecrlAsset=a.assetId;btn.onclick=()=>onSelect(a.assetId);list.append(btn)}
+  assets.append(list);
  }
- function content(id){const a=adapter.get(id);if(!a)return null;const host=el('div');host.className='ecrl-intelligence';host.dataset.ecrlAsset=id;
-  host.append(el('h3',a.assetType==='STATION'?t('stationIntel'):t('infraIntel')),el('strong',(a.stationCode?a.stationCode+' · ':'')+(a.officialName||a.historicalName)));
-  const ref=adapter.reference(id);host.append(el('p',ref?.kind==='HISTORICAL'?t('referenceWarning'):ref?.kind==='MARITIME'?t('portReferenceWarning'):ref?t('reference'):t('noPoint')));
-  for(const [label,value] of [['assetType',a.assetType],['section',a.section],['status',a.assetStatus],['verification',a.verificationStatus],['service',a.serviceType],['geometry',a.geometryProvenance||a.geometryType],['chainage',a.chainageStartKm==null&&a.chainageEndKm==null?null:[a.chainageStartKm??'UNKNOWN',a.chainageEndKm??'UNKNOWN'].join(' – ')],['trackCount',a.trackCount]])host.append(el('p',t(label)+': '+(value==='CONFIRMED'&&label==='verification'?t('confirmed')+' · CONFIRMED':value??(t('unknown')+' · UNKNOWN'))));
-  host.append(el('p',t('notOperational')));
-  const internalLabels={ms:'ID teknikal dalaman',en:'Internal technical ID',zh:'内部技术编号',th:'รหัสเทคนิคภายใน'};
-  host.append(el('p',(internalLabels[getLocale()]||internalLabels.en)+': '+a.assetId),el('p',t('noTrack')));
-  if(ref)host.append(el('p','REFERENCE_ONLY · '+ref.kind+' · '+ref.sourceId));
-  if(id==='ecrl-stn-16')host.append(el('p','PLANNED_CONNECTION · LRT KJ1 Gombak · '+t('notOperational')));
-  for(const rel of adapter.registry.topology.filter(r=>r.from===id||r.to===id))host.append(el('p',rel.relation+' · '+rel.status+' · '+(rel.from===id?rel.to:rel.from)));
-  for(const conflict of a.conflicts||[])host.append(el('p',t('conflict')+' · SOURCE_CONFLICT · '+conflict.field+' · '+conflict.sourceIds.join(' / ')+' · '+conflict.reason));
-  if(a.notes){const d=el('details'),summary=el('summary',t('note'));d.append(summary,el('p',a.notes));host.append(d)}
-  const sources=el('details'),summary=el('summary',t('sources'));sources.append(summary);
+ function content(id){
+  const a=adapter.get(id);if(!a)return null;
+  const host=el('div',null,'ecrl-intelligence');host.dataset.ecrlAsset=id;
+  const ref=adapter.reference(id);
+  host.append(el('span',a.assetType==='STATION'?ui('station'):ui('facility'),'ecrl-kicker'));
+  host.append(el('strong',(a.stationCode?a.stationCode+' · ':'')+(a.officialName||a.historicalName),'ecrl-name'));
+  host.append(el('p',t('notOperational'),'ecrl-status'));
+  host.append(el('p',referenceLabel(ref),'ecrl-accuracy'));
+  const key=el('div',null,'ecrl-key-facts');
+  field(key,ui('type'),a.assetType);
+  if(a.section)field(key,ui('section'),a.section);
+  if(a.assetType==='STATION')field(key,ui('service'),serviceLabel(a.serviceType));
+  const validation=a.verificationStatus==='CONFIRMED'?ui('verified'):a.verificationStatus==='SOURCE_CONFLICT'?ui('conflict'):a.verificationStatus==='PARTIAL'?ui('partial'):ui('pending');
+  field(key,t('verification'),validation+(a.verificationStatus==='CONFIRMED'?' · '+t('confirmed'):''));
+  host.append(key);
+  const tech=el('details',null,'ecrl-engineering');summary(tech,ui('technical'));
+  for(const [label,value] of [['status',a.assetStatus],['verification',a.verificationStatus],['service',a.serviceType],['geometry',a.geometryProvenance||a.geometryType],['chainage',a.chainageStartKm==null&&a.chainageEndKm==null?null:[a.chainageStartKm??'UNKNOWN',a.chainageEndKm??'UNKNOWN'].join(' – ')],['trackCount',a.trackCount]]){
+   tech.append(el('p',t(label)+': '+(value??(t('unknown')+' · UNKNOWN'))));
+  }
+  tech.append(el('p',ui('internal')+': '+a.assetId),el('p',t('noTrack')));
+  if(ref)tech.append(el('p','REFERENCE_ONLY · '+ref.kind+' · '+ref.sourceId));
+  if(id==='ecrl-stn-16')tech.append(el('p','PLANNED_CONNECTION · LRT KJ1 Gombak · '+t('notOperational')));
+  for(const rel of adapter.registry.topology.filter(r=>r.from===id||r.to===id))tech.append(el('p',rel.relation+' · '+rel.status+' · '+(rel.from===id?rel.to:rel.from)));
+  for(const conflict of a.conflicts||[])tech.append(el('p',t('conflict')+' · SOURCE_CONFLICT · '+conflict.field+' · '+conflict.sourceIds.join(' / ')+' · '+conflict.reason));
+  if(a.notes)tech.append(el('p',a.notes));
+  host.append(tech);
+  const sources=el('details',null,'ecrl-sources');summary(sources,ui('references'));
   const ids=[...new Set([...(a.sourceIds||[]),...(ref?[ref.sourceId]:[])])];
-  for(const sid of ids){const source=adapter.registry.sources[sid];if(!source)continue;const p=el('p'),link=el('a',sid+' · '+source.kind);link.href=source.url;link.target='_blank';link.rel='noopener noreferrer';p.append(link,el('span',' · '+source.revision));sources.append(p)}host.append(sources);return host;
+  for(const sid of ids){const source=adapter.registry.sources[sid];if(!source)continue;const p=el('p'),link=el('a',sid+' · '+source.kind);link.href=source.url;link.target='_blank';link.rel='noopener noreferrer';p.append(link,el('span',' · '+source.revision));sources.append(p)}host.append(sources);
+  return host;
  }
  return {render,content};
 }
