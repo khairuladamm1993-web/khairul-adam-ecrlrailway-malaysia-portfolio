@@ -47,3 +47,25 @@
 
 ## To request permission via MRL (not sent)
 Request a public-release-authorized ECRL alignment GIS dataset or availability of a redacted consumer geometry, engineering chainage datum and 7 loop turnouts; also request an approved list of freight interfaces and terms of reuse. Do not ask for restricted operational/security drawings or publish safety-sensitive site plans.
+
+## Live ArcGIS Results — 29 October 2026 (GitHub runner, read-only queries)
+Execution: https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/40778324518
+
+| Layer | HTTP API metadata | Feature count | EPSG | Outcome |
+| --- | --- | ---: | ---: | --- |
+| MOT MyGeoportal /16 | Available | 122 | 4326 | Generic railway; a literal `NAM LIKE '%ECRL%'` returned 0; **not a categorical proof that every feature excludes ECRL** |
+| Selangor RSN /22 | Available | 2 | 3857 | ECRL-named planning polylines; no CH controls |
+| Selangor alternate /17 | Available | 2 | 3857 | Same ECRL public attribute values; **not evidence of 4 distinct alignments** |
+| Majlis Klang railway /9 | Available | 7 | 3375 | Generic railway network, unconfirmed ECRL |
+
+Two publicly accessible features in each Selangor RSN ECRL layer expose ONLY these reviewed nonspatial attributes:
+- `jenis`: Rel berkembar; `nama`: East Coast Rail Link (ECRL); `status`: Komited; `jarak`: '53.2489' and '54.3769' (field data **without independently confirmed units**).
+- There are NO chainage, surveyed PL, turnout, as-built revision or railway-end fields in the returned layer metadata.
+- The status `Komited` and plan-format `jenis` do not imply physical double tracking. Compare MRL 13 June 2024 project specification: single track on double-track formation. Treat the difference as a **scheme terminology/engineering-provenance discrepancy**, not as permission to correct physical rail count.
+- Neither Selangor layer has a validated source license for incorporation into an independent public consumer application.
+- We did **not** download these polylines or infer PL coordinates from them.
+
+R3 code source-contract regression passed 13/13. The exact live-script commit is `7430efbd55b399dfab458c5b8f0ab64dc303f59d`, and both jobs succeeded. Re-run only on demand; no background monitor was scheduled.
+
+### Decision
+**Data acquisition attempt succeeded for public metadata and planning identities, not for survey-grade/as-built ECRL geometry.** Matching the 23 accepted CH control records to the railway centreline, PL01–PL07 positions, loading facilities or land parcels remains **NO-GO** until authoritative engineering referencing is supplied under terms permitting the intended use.
