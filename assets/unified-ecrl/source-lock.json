@@ -1,0 +1,12 @@
+{
+  "sourceRepository": "khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio",
+  "sourceBranch": "feature/mrs10-p01-ecrl-gis-c2-infrastructure-isolated",
+  "sourceCommit": "900705e2b109ba281c5be2a04812c7e401f03cf3",
+  "baselineCommit": "e7e10b7644dabd1cd7c42af0eba1cfec27689596",
+  "consumption": "READ_ONLY_SOURCE_MODULES_NEW_INFRASTRUCTURE_ADAPTER",
+  "files": {
+    "assets/unified-ecrl/source/data.js": "00e5ca2148d266703e170e40aa8ed7e5b5cbf84308b11fd8172674f6c82c9f6e",
+    "assets/unified-ecrl/source/i18n.js": "2c8729f223ff3781c93d8b5b2e82c3d4da646dca7fdd2289a94bad421c96258e",
+    "assets/unified-ecrl/source/integration-manifest.json": "60c95df7f4a1c65cfd7efa034c361ca5f1dc169f7a65369f697ef6eaddb0c80a"
+  }
+}
