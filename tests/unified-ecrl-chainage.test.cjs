@@ -23,7 +23,7 @@ test('PL01–PL07 have accessible identities and reference CH without manufactur
   const id='ecrl-loop-historical-'+String(i).padStart(2,'0');
   const loop=adapter.get(id);
   assert.equal(loop.plCode,'PL'+String(i).padStart(2,'0'));
-  assert.match(loop.chainageLabel,/^CH\\d+\\+\\d{3}$/);
+  assert.match(loop.chainageLabel,/^CH\d+\+\d{3}$/);
   assert.equal(loop.point,null);assert.equal(adapter.reference(id),undefined);
   assert.equal(adapter.search(loop.plCode).length,1);
   assert.equal(adapter.search(loop.plCode)[0].assetId,id);
@@ -65,13 +65,13 @@ test('consumer popup and PL list present project CH in all four languages and ke
  for(const language of ['ms','en','zh','th']){
   locale=language;ui.render();
   const pop=ui.content('ecrl-stn-13');
-  assert.match(pop.querySelector('.ecrl-key-facts').textContent,/CH396\\+900/);
+  assert.match(pop.querySelector('.ecrl-key-facts').textContent,/CH396\+900/);
   assert.match(pop.querySelector('.ecrl-engineering').textContent,/MR_S10_OWNER_ACCEPTED_CORRIDOR_MANIFEST/);
   const loop=ui.content('ecrl-loop-historical-05');
   assert.match(loop.querySelector('.ecrl-name').textContent,/PL05/);
-  assert.match(loop.querySelector('.ecrl-key-facts').textContent,/CH415\\+180/);
+  assert.match(loop.querySelector('.ecrl-key-facts').textContent,/CH415\+180/);
   assert.equal(window.document.querySelectorAll('.ecrl-pl-guide-item').length,7);
-  assert.match(window.document.querySelector('.ecrl-chainage-guide').textContent,/CH515\\+725/);
+  assert.match(window.document.querySelector('.ecrl-chainage-guide').textContent,/CH515\+725/);
   assert.equal(window.document.querySelectorAll('#ecrl-assets button').length,33);
  }
 });
