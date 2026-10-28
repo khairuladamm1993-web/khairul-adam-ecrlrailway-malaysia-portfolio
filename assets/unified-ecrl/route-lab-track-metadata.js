@@ -35,30 +35,57 @@ const orm=Object.freeze({
  sourceUrl:'https://github.com/OpenRailwayMap/OpenRailwayMap/blob/master/styles/standard.mapcss'
 });
 function auditSegment(tags={}){
- const raw=tags.gauge==null?'':String(tags.gauge).trim();
- const gauges=raw.match(/\d{3,4}/g)?.map(Number)||[];
- const report={classification:'ECRL_SIMULATION_CANDIDATE',label:'1435 mm PROJECT SPEC; OSM gauge NOT VERIFIED',
-    gaugeMm:raw?null:undefined,gaugeTag:raw||null,
-    status:'GAUGE_TAG_MISSING_NEEDS_SOURCE_REVIEW',
-    isRailGeometry:typeof tags.railway==='string'&&['rail','construction','proposed'].includes(tags.railway),
-    gaugeCompatible:null,source:source.id};
- if(gauges.length){
-  report.gaugeMm=gauges.length===1?gauges[0]:null;
-  report.gaugeCompatible=gauges.length===1&&gauges[0]===1435;
-  report.status=report.gaugeCompatible?'GAUGE_TAG_MATCHES_PROJECT_SPEC_NOT_SURVEYED':'GAUGE_CONFLICT_OR_MULTIPLE_VALUES';
- }
- if(!report.isRailGeometry)report.status='NOT_RAILWAY_CANDIDATE';
- return Object.freeze(report);
+ const raw=tags.gauge===undefined||tags.gauge===null?'':String(tags.gauge).trim();
+ const railwayTag=String(tags.railway||'').trim();
+ const isRailGeometry=['rail','construction','proposed'].includes(railwayTag);
+ const highwayTag=tags.highway!==undefined&&tags.highway!==null&&String(tags.highway).trim()!=='';
+ const roadConflict=highwayTag||tags.area==='yes'||tags.motor_vehicle==='yes';
+ // Orange ORM raster tiles never provide gauge or a safe movement centreline.
+ // Each accepted vector feature must explicitly state exactly 1435 mm.
+ const match=/^\\d{3,4}$/.test(raw)?Number(raw):null;
+ const tagGaugeVerified=match===1435;
+ const status=!isRailGeometry?'NOT_RAILWAY_CANDIDATE':
+    roadConflict?'ROAD_OR_AREA_TAG_CONFLICT':
+    !raw?'GAUGE_TAG_MISSING_NEEDS_SOURCE_REVIEW':
+    !tagGaugeVerified?'GAUGE_CONFLICT_OR_MULTIPLE_VALUES':
+    'GAUGE_TAG_MATCHES_PROJECT_SPEC_NOT_SURVEYED';
+ return Object.freeze({
+  classification:'ECRL_SIMULATION_CANDIDATE',
+  label:'1435 mm PROJECT SPEC; OSM segment gauge requires separate evidence',
+  gaugeMm:match,
+  gaugeTag:raw||null,
+  status,
+  isRailGeometry,
+  roadConflict,
+  gaugeCompatible:tagGaugeVerified,
+  source:source.id
+ });
 }
 function movementEligibility({assembly,matched,sourceTags=[]}={}){
  const reasons=[];
- if(!assembly||assembly.status!=='CONTINUOUS_CANDIDATE')reasons.push('TRACK_CANDIDATE_NOT_CONTINUOUS');
- if(!matched||matched.status!=='INFERRED_CH_MATCH_ONLY')reasons.push('CH_GEO_ANCHORS_NOT_CALIBRATED');
- if(sourceTags.some(t=>auditSegment(t).status==='GAUGE_CONFLICT_OR_MULTIPLE_VALUES'))reasons.push('GAUGE_CONFLICT');
+ if(!assembly||assembly.status!=='CONTINUOUS_CANDIDATE'||assembly.paths?.length!==1||
+    !Number.isFinite(assembly.paths?.[0]?.metres)||assembly.paths[0].metres<=0)
+   reasons.push('TRACK_CANDIDATE_NOT_CONTINUOUS');
+ if(!matched||matched.status!=='INFERRED_CH_MATCH_ONLY'||matched.anchors?.length<2)
+   reasons.push('CH_GEO_ANCHORS_NOT_CALIBRATED');
+ if(!Array.isArray(sourceTags)||sourceTags.length===0)
+   reasons.push('NO_VECTOR_RAIL_SEGMENT_METADATA');
+ else{
+  const audits=sourceTags.map(auditSegment);
+  if(audits.some(a=>!a.isRailGeometry))reasons.push('ROAD_OR_NON_RAIL_VECTOR_REJECTED');
+  if(audits.some(a=>a.roadConflict))reasons.push('ROAD_OR_AREA_TAG_CONFLICT');
+  if(audits.some(a=>a.status==='GAUGE_TAG_MISSING_NEEDS_SOURCE_REVIEW'))reasons.push('GAUGE_NOT_VERIFIED_ON_EVERY_SEGMENT');
+  if(audits.some(a=>a.status==='GAUGE_CONFLICT_OR_MULTIPLE_VALUES'))reasons.push('GAUGE_CONFLICT');
+ }
+ // This is a MODEL-ONLY candidate, not a surveyed alignment or an assurance that
+ // OSM has no positional mapping error. Crossing over roads on a bridge or level
+ // crossing is legitimate; train movement remains constrained to the rail vector.
  return Object.freeze({
- trainingTrainPinAllowed:reasons.length===0,
- officialSurveyAccepted:false,operationalOrPassengerLocationAllowed:false,
- source:'OSM_VECTOR_SIMULATION_ONLY',reasons:Object.freeze(reasons)
+  trainingTrainPinAllowed:reasons.length===0,
+  officialSurveyAccepted:false,operationalOrPassengerLocationAllowed:false,
+  roadParcelGeometryIndependentlyVerified:false,
+  source:'OSM_VECTOR_SIMULATION_ONLY',
+  reasons:Object.freeze(reasons)
  });
 }
 const api=Object.freeze({source,ecrl,orm,auditSegment,movementEligibility});
