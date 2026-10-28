@@ -21,7 +21,8 @@ function create(registry,translations){
   for(const suffix of ['-hit','-ring','-inner']){map.setLayoutProperty(NS+suffix,'visibility',kinds.length?'visible':'none');map.setFilter(NS+suffix,['in',['get','kind'],['literal',kinds]])}
  }
  function install(map){
-  if(!map?.isStyleLoaded())return;
+  // The host has passed its style gate; other GeoJSON sources may now be loading.
+  if(!map?.getStyle())return;
   if(!map.getSource(NS))map.addSource(NS,{type:'geojson',data:features()});
   if(!map.getLayer(NS+'-hit'))map.addLayer({id:NS+'-hit',type:'circle',source:NS,paint:{'circle-radius':14,'circle-opacity':0}});
   for(const [kind,color] of Object.entries(COLORS))if(!map.hasImage(NS+'-'+kind)){
