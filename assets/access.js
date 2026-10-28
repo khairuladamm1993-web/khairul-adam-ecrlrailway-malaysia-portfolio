@@ -324,10 +324,38 @@
   const {data,error}=await requireClient().auth.getSession();
   return error?null:(data?.session?.access_token||null);
  }
+ // P01 Owner-only ledger RPC. Every operation is re-authorized by the database.
+ async function instructionRpc(name,params){
+  if(!snapshot().canAdmin||state.status!=='authenticated')throw new Error('Owner/Admin session required.');
+  if(!['admin_instruction_submit','admin_instruction_list','admin_instruction_checkpoint','admin_instruction_history'].includes(name))
+   throw new Error('Ledger operation not permitted.');
+  const revision=authRevision;
+  const {data,error}=await requireClient().rpc(name,params);
+  if(revision!==authRevision||!snapshot().canAdmin||state.status!=='authenticated')
+   throw new Error('Owner session changed; ledger response discarded.');
+  if(error)throw new Error(error.code==='PGRST202'?'Ledger database migration is not active.':error.message||'Ledger unavailable.');
+  return data;
+ }
+ function adminInstructionSubmit(input){
+  return instructionRpc('admin_instruction_submit',{
+   p_nonce:input.nonce,p_summary:input.summary,p_acceptance:input.acceptance,p_scope:input.scope||[]
+  });
+ }
+ function adminInstructionCheckpoint(input){
+  return instructionRpc('admin_instruction_checkpoint',{
+   p_instruction_id:input.id,p_expected_revision:input.revision,p_event_type:input.type,p_summary:input.summary
+  });
+ }
+ function adminInstructionList(limit=15){
+  return instructionRpc('admin_instruction_list',{p_limit:Math.min(Math.max(Number(limit)||15,1),30)});
+ }
+ function adminInstructionHistory(id){
+  return instructionRpc('admin_instruction_history',{p_instruction_id:id});
+ }
  window.RailwayAccess=Object.freeze({
   get level(){return state.level;},get status(){return state.status;},get canReadMemberContent(){return state.level==='member'||state.level==='admin';},get canAdmin(){return state.level==='admin';},
   get email(){return state.email;},get error(){return state.error;},get retryAfterSeconds(){return state.retryAfterSeconds;},get activityConsent(){return consent;},get cachedData(){return dataCache;},
-  init,refresh,sendMagicLink,logout,ownerDashboardAccessToken,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,adminPublishLocation,adminLocationHistory,adminRestoreLocation,snapshot
+  init,refresh,sendMagicLink,logout,ownerDashboardAccessToken,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,adminPublishLocation,adminLocationHistory,adminRestoreLocation,adminInstructionSubmit,adminInstructionCheckpoint,adminInstructionList,adminInstructionHistory,snapshot
  });
  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',()=>init(),{once:true}):init();
 })();
