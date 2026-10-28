@@ -72,6 +72,27 @@ h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
  if(assembled?.status==='CONTINUOUS_CANDIDATE')align.append(el('p',t.unverified,'lab-warning'));
  const upload=el('label',t.upload),file=el('input');file.type='file';file.accept='.json,.geojson,application/json';file.onchange=async()=>{try{if(!file.files?.[0]||file.files[0].size>1800000)throw Error('FILE_LIMIT_1_8MB');const g=JSON.parse(await file.files[0].text()),a=E.assemble(g);geo=g;assembled=a;anchors=E.fit(rows,a,g.anchors||[]);store();message=t.imported;render();updateMap()}catch(e){message=t.badFile+' · '+e.message;render()}};upload.append(file);align.append(upload);
  align.append(el('p',t.noPoint,'lab-note'),el('p','© OpenStreetMap contributors · ODbL 1.0 · OpenRailwayMap visual context', 'lab-note'));h.append(align);
+ const lineage=root.MRS10ECRLGeometryLineage;
+ const lineReport=geo?lineage?.inspect(geo,{ownerReviewed:session.reviews.length>0,simulationQAPassed:false}):null;
+ const lineageSummary=el('details');lineageSummary.append(el('summary',({
+  ms:'Provenance · Hak penggunaan data',en:'Provenance · Data reuse rights',
+  zh:'数据来源及许可',th:'ที่มาข้อมูลและสิทธิ์การใช้งาน'
+ })[locale]));
+ lineageSummary.append(el('p',lineReport?
+  lineReport.datasetClass+' · '+lineReport.publicHandoff:
+  'NO_IMPORTED_VECTOR · OSM/ORM VISUAL REFERENCE ONLY','lab-note'));
+ if(lineReport?.includesOSM){const credit=el('a','© OpenStreetMap contributors · ODbL 1.0');credit.href=lineage.OSM_COPYRIGHT;credit.rel='noopener noreferrer';credit.target='_blank';lineageSummary.append(credit)}
+ const manifestExport=el('button',({ms:'Eksport manifest kalibrasi (tanpa geometri)',
+ en:'Export calibration manifest (no geometry)',zh:'导出校准记录（不含几何）',
+ th:'ส่งออกข้อมูลการปรับเทียบ (ไม่มีพิกัดราง)'})[locale]);
+ manifestExport.onclick=()=>{
+   const manifest=lineage.packageCandidate(geo,session,{ownerReviewed:session.reviews.length>0,simulationQAPassed:false});
+   const blob=new Blob([JSON.stringify(manifest,null,2)],{type:'application/json'});
+   const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;
+   a.download='mrs10-ecrl-calibration-provenance-manifest.json';a.click();
+   setTimeout(()=>URL.revokeObjectURL(url),5000);
+ };
+ lineageSummary.append(manifestExport);h.append(lineageSummary);
  const backup=el('button',t.backup);backup.onclick=()=>{const blob=new Blob([JSON.stringify({schema:1,session,geo,source:'OWNER_SIMULATION_ONLY',savedAt:new Date().toISOString()},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='mrs10-ecrl-owner-lab-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000)};h.append(backup);
  h.append(el('p',t.privacy,'lab-note'),el('p',t.save+': '+memoryStatus,'lab-note'));
  if(message)h.append(el('p',message,'lab-alert'));
@@ -81,5 +102,5 @@ h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
  updateMap();
 }
 store();getMap();render();
-root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,trackSpecification:root.MRS10ECRLRailEngineering?.ecrl||null,mapPinAvailability:!!(root.MRS10ECRLRailEngineering?.movementEligibility({assembly:assembled,matched:anchors,sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})})?.trainingTrainPinAllowed&&E.positionAt(session.currentCH,assembled,anchors)),storage:memoryStatus})});
+root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),geometryLineage:root.MRS10ECRLGeometryLineage?.inspect(geo||{features:[]})||null,alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,trackSpecification:root.MRS10ECRLRailEngineering?.ecrl||null,mapPinAvailability:!!(root.MRS10ECRLRailEngineering?.movementEligibility({assembly:assembled,matched:anchors,sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})})?.trainingTrainPinAllowed&&E.positionAt(session.currentCH,assembled,anchors)),storage:memoryStatus})});
 })(window);
