@@ -38,12 +38,22 @@ async function inspect(source){
   summary.geometryType=meta.geometryType||null;
   summary.coordinateSystem=meta.extent?.spatialReference?.latestWkid||meta.extent?.spatialReference?.wkid||null;
   summary.fieldNames=(meta.fields||[]).map(f=>f.name).filter(Boolean).slice(0,50);
+  summary.hasChainageControlField=summary.fieldNames.some(n=>/^(CH|chainage|chainage_km|km_marker|km_post)$/i.test(n));
   summary.identityAssessment=classify(meta,source);
   if(summary.identityAssessment==='NOT_A_TRACK_LINE')return summary;
   try{
    const q=await getJson(source.url+'/query?where=1%3D1&returnCountOnly=true&f=json',12000);
    summary.featureCount=Number.isInteger(q.count)?q.count:null;
   }catch(e){summary.countQueryError=String(e.message).slice(0,120)}
+  if(source.id.startsWith('SELANGOR_RSN_ECRL')&&['jenis','nama','jarak','status'].every(x=>summary.fieldNames.includes(x))){
+   try{
+    const fields='jenis,nama,jarak,status';
+    const q=await getJson(source.url+'/query?where=1%3D1&outFields='+encodeURIComponent(fields)+'&returnGeometry=false&resultRecordCount=5&f=json',12000);
+    summary.publicClassification=(q.features||[]).slice(0,5).map(f=>{
+     const a=f.attributes||{};return Object.fromEntries(fields.split(',').map(k=>[k,typeof a[k]==='string'?a[k].slice(0,90):a[k]??null]));
+    });
+   }catch(e){summary.attributeQueryError=String(e.message).slice(0,120)}
+  }
   if(source.id==='MOT_MYGEOPORTAL_RAIL'&&summary.fieldNames.includes('NAM')){
    try{
     const q=await getJson(source.url+'/query?where='+encodeURIComponent("NAM LIKE '%ECRL%'")+'&returnCountOnly=true&f=json',12000);
