@@ -10,7 +10,7 @@ for(const [engineName,engine] of [['chromium',chromium],['webkit',webkit]]){
   assert.equal((await page.goto(base,{waitUntil:'domcontentloaded'})).status(),200);
   await page.waitForFunction(()=>{const d=window.MRS10V8Diagnostics?.snapshot();return d?.stage==='DONE'&&d?.ecrl?.layersPresent},null,{timeout:90000});
   await page.locator('#filters button').getByText('ECRL',{exact:true}).click();
-  const audit=page.locator('.ecrl-alignment-readiness');await audit.locator('summary').click();
+  const audit=page.locator('.ecrl-alignment-readiness');await audit.locator(':scope > summary').click();
   assert.equal(await audit.locator('.ecrl-evidence-row').count(),14);
   assert.match(await audit.innerText(),/CH415\+180/);
   assert.match(await audit.innerText(),/SCHEMATIC_ONLY/);
