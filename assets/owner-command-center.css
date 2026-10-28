@@ -130,3 +130,28 @@ footer{font-size:.72rem;color:var(--sub);padding:24px 2px}
 #two-way-state[data-mode="live"]{color:var(--good);border-color:#3d7765;background:#0a2829}
 #two-way-state[data-mode="snapshot"]{color:var(--warn);border-color:#a67b49;background:#302419}
 .two-way-panel>.support{font-size:.76rem;line-height:1.45;margin-top:8px}
+
+/* P01 AI Execution Mirror R1: private ledger panel follows the existing dashboard theme. */
+.ledger-panel{margin:1.1rem 0;padding:1rem;border:1px solid var(--border,#3b4d5c);border-radius:14px;background:var(--card,#132332)}
+.ledger-panel[hidden]{display:none!important}
+.ledger-panel .section-head{display:flex;align-items:center;justify-content:space-between;gap:.7rem;flex-wrap:wrap}
+.ledger-form{display:grid;gap:.55rem;margin:1rem 0}
+.ledger-form label{font-weight:650;font-size:.9rem}
+.ledger-form textarea,.ledger-checkpoint-form textarea,.ledger-checkpoint-form select{box-sizing:border-box;width:100%;padding:.65rem;border:1px solid #748597;border-radius:8px;background:#101f2d;color:#f6f8fa;font:inherit}
+.ledger-form textarea:focus-visible,.ledger-checkpoint-form textarea:focus-visible{outline:2px solid #80ceff;outline-offset:2px}
+.ledger-form button{justify-self:start;max-width:100%;white-space:normal}
+.ledger-state{padding:.55rem .8rem;border-radius:8px;background:#253647;font-size:.85rem;overflow-wrap:anywhere}
+.ledger-state[data-mode="live"]{border-left:3px solid #5fc7a2}
+.ledger-state[data-mode="blocked"]{border-left:3px solid #ffc076}
+.ledger-items{display:grid;gap:.75rem}
+.ledger-record{padding:.9rem;border:1px solid #52667a;border-radius:10px;overflow-wrap:anywhere}
+.ledger-record-head{display:flex;justify-content:space-between;align-items:flex-start;gap:.7rem;flex-wrap:wrap}
+.ledger-record-head strong{font-size:.94rem;max-width:100%}
+.ledger-record .support{margin:.35rem 0}
+.ledger-criteria{font-size:.88rem;line-height:1.45}
+.ledger-checkpoints{margin-top:.45rem}
+.ledger-checkpoints summary{cursor:pointer;min-height:40px;padding:.4rem}
+.ledger-history-line{border-bottom:1px solid #52667a;padding:.35rem 0;font-size:.85rem}
+.ledger-checkpoint-form{display:grid;gap:.55rem;margin:.55rem 0}
+.ledger-action{min-height:40px;justify-self:start;padding:.4rem .75rem;border-radius:8px}
+@media(max-width:680px){.ledger-panel{padding:.75rem}.ledger-form button{width:100%}.ledger-record{padding:.75rem}}
