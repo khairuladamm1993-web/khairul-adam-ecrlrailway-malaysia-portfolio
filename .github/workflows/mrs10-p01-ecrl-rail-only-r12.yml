@@ -22,7 +22,7 @@ jobs:
         run: |
           node --check assets/unified-ecrl/route-lab-ui.js
           node --check assets/unified-ecrl/route-lab-track-metadata.js
-          node --test tests/unified-ecrl-route-lab-orm-overlay.test.cjs tests/unified-ecrl-route-lab-track-metadata.test.cjs tests/unified-ecrl-manual-route-lab.test.cjs tests/unified-ecrl-alignment-r2.test.cjs
+          node --test tests/unified-ecrl-route-lab-orm-overlay.test.cjs tests/unified-ecrl-route-lab-track-metadata.test.cjs tests/unified-ecrl-route-lab-lineage.test.cjs tests/unified-ecrl-manual-route-lab.test.cjs tests/unified-ecrl-alignment-r2.test.cjs
       - run: node scripts/build-unified-v8.cjs
   browser:
     runs-on: ubuntu-latest
