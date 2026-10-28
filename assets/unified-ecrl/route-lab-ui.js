@@ -17,21 +17,30 @@ function getMap(){if(map||!root.maplibregl)return map;try{map=new root.maplibreg
 const routeID='ecrl-lab-rail-candidate',trainID='ecrl-lab-train-position';
 function updateMap(){if(!map||!map.isStyleLoaded())return;
  const good=assembled?.status==='CONTINUOUS_CANDIDATE';
- if(good){const data={type:'FeatureCollection',features:[{type:'Feature',properties:{classification:'OSM_SIMULATION_CANDIDATE_NOT_AS_BUILT'},geometry:{type:'LineString',coordinates:assembled.paths[0].coords}}]};
- if(map.getSource(routeID))map.getSource(routeID).setData(data);else map.addSource(routeID,{type:'geojson',data});
- if(!map.getLayer(routeID))map.addLayer({id:routeID,type:'line',source:routeID,paint:{'line-color':'#7c3aed','line-width':4,'line-opacity':0.82}});
- }else if(map.getSource(routeID))map.getSource(routeID).setData({type:'FeatureCollection',features:[]});
  const eligibility=root.MRS10ECRLRailEngineering?.movementEligibility({
    assembly:assembled,matched:anchors,
    sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})
  });
+ // No colored simulated-track line without full 1435-mm railway vector checks.
+ // OpenRailwayMap's independently sourced orange raster remains reference only.
+ if(good&&eligibility?.trainingTrainPinAllowed){const data={type:'FeatureCollection',features:[{type:'Feature',properties:{classification:'OSM_SIMULATION_CANDIDATE_NOT_AS_BUILT'},geometry:{type:'LineString',coordinates:assembled.paths[0].coords}}]};
+ if(map.getSource(routeID))map.getSource(routeID).setData(data);else map.addSource(routeID,{type:'geojson',data});
+ if(!map.getLayer(routeID))map.addLayer({id:routeID,type:'line',source:routeID,paint:{'line-color':'#7c3aed','line-width':4,'line-opacity':0.82}});
+ }else if(map.getSource(routeID))map.getSource(routeID).setData({type:'FeatureCollection',features:[]});
  const pos=good&&eligibility?.trainingTrainPinAllowed?E.positionAt(session.currentCH,assembled,anchors):null;
  const feature={type:'FeatureCollection',features:pos?[{type:'Feature',properties:{status:'SIMULATION_INFERRED'},geometry:{type:'Point',coordinates:pos.coordinates}}]:[]};
  if(map.getSource(trainID))map.getSource(trainID).setData(feature);else map.addSource(trainID,{type:'geojson',data:feature});
  if(!map.getLayer(trainID))map.addLayer({id:trainID,type:'circle',source:trainID,paint:{'circle-color':'#d92942','circle-radius':10,'circle-stroke-width':3,'circle-stroke-color':'white'}});
 }
 function status(){const t=d[locale],p=E.progress(session,rows);let text=t.none;
- if(assembled)text=assembled.status+' · '+assembled.paths.length+' path(s) · '+Math.round(assembled.paths.reduce((n,x)=>n+x.metres,0)/1000*100)/100+' km OSM · '+(anchors?.status||'UNMATCHED_ANCHORS');
+ if(assembled){
+ const gate=root.MRS10ECRLRailEngineering?.movementEligibility({
+   assembly:assembled,matched:anchors,
+   sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})
+ });
+ text=assembled.status+' · '+assembled.paths.length+' path(s) · '+Math.round(assembled.paths.reduce((n,x)=>n+x.metres,0)/1000*100)/100+' km OSM · '+(anchors?.status||'UNMATCHED_ANCHORS')+
+   ' · '+(gate?.trainingTrainPinAllowed?'VECTOR MODEL ONLY':'TRAIN MAP LOCKED: '+(gate?.reasons||['NO_SOURCE']).join(', '));
+ }
  return {t,p,text};}
 function render(){const {t,p,text}=status();h.replaceChildren();root.MRS10ECRLRailOverlay?.setLocale(locale);
  const spec=root.MRS10ECRLRailEngineering;
