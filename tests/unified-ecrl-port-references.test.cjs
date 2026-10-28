@@ -4,8 +4,8 @@ const {JSDOM}=require('jsdom'),ports=require('../assets/unified-ecrl/port-refere
 const w={};for(const f of ['assets/unified-ecrl/source/data.js','assets/unified-ecrl/source/i18n.js'])vm.runInNewContext(fs.readFileSync(f,'utf8'),{window:w});
 const adapter=require('../assets/unified-ecrl/adapter.js').create(w.MRS10ECRLGISV1,w.MRS10ECRLI18N);
 test('two official area anchors, with four maritime references total, never rail ends',()=>{
- assert.equal(ports.assets.length,2);assert.equal(adapter.assets.length,35);
- assert.equal(adapter.refs.length,24);assert.equal(adapter.snapshot().referenceKinds.MARITIME,4);
+ assert.equal(ports.assets.length,2);assert.equal(adapter.assets.length,37);
+ assert.equal(adapter.refs.length,25);assert.equal(adapter.snapshot().referenceKinds.MARITIME,4);
  assert.deepEqual(adapter.refs.filter(r=>r.kind==='MARITIME').map(r=>r.assetId),[
   'ecrl-port-northport','ecrl-port-westports','ecrl-port-kuantan','ecrl-port-kemaman']);
  for(const a of ports.assets){
@@ -63,6 +63,6 @@ test('compact consumer intelligence keeps marine provenance and pending loading 
   assert.match(b.querySelector('.ecrl-sources').textContent,/EPIC_2026/);
   assert(!a.querySelector('.ecrl-engineering').open);
  }
- assert.equal(browser.document.querySelectorAll('#ecrl-assets button').length,35);
+ assert.equal(browser.document.querySelectorAll('#ecrl-assets button').length,37);
  dom.window.close();
 });
