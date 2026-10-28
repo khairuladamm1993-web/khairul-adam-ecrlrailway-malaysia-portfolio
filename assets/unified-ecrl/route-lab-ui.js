@@ -21,7 +21,11 @@ function updateMap(){if(!map||!map.isStyleLoaded())return;
  if(map.getSource(routeID))map.getSource(routeID).setData(data);else map.addSource(routeID,{type:'geojson',data});
  if(!map.getLayer(routeID))map.addLayer({id:routeID,type:'line',source:routeID,paint:{'line-color':'#7c3aed','line-width':4,'line-opacity':0.82}});
  }else if(map.getSource(routeID))map.getSource(routeID).setData({type:'FeatureCollection',features:[]});
- const pos=good?E.positionAt(session.currentCH,assembled,anchors):null;
+ const eligibility=root.MRS10ECRLRailEngineering?.movementEligibility({
+   assembly:assembled,matched:anchors,
+   sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})
+ });
+ const pos=good&&eligibility?.trainingTrainPinAllowed?E.positionAt(session.currentCH,assembled,anchors):null;
  const feature={type:'FeatureCollection',features:pos?[{type:'Feature',properties:{status:'SIMULATION_INFERRED'},geometry:{type:'Point',coordinates:pos.coordinates}}]:[]};
  if(map.getSource(trainID))map.getSource(trainID).setData(feature);else map.addSource(trainID,{type:'geojson',data:feature});
  if(!map.getLayer(trainID))map.addLayer({id:trainID,type:'circle',source:trainID,paint:{'circle-color':'#d92942','circle-radius':10,'circle-stroke-width':3,'circle-stroke-color':'white'}});
@@ -68,5 +72,5 @@ h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
  updateMap();
 }
 store();getMap();render();
-root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,trackSpecification:root.MRS10ECRLRailEngineering?.ecrl||null,mapPinAvailability:!!E.positionAt(session.currentCH,assembled,anchors),storage:memoryStatus})});
+root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,trackSpecification:root.MRS10ECRLRailEngineering?.ecrl||null,mapPinAvailability:!!(root.MRS10ECRLRailEngineering?.movementEligibility({assembly:assembled,matched:anchors,sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})})?.trainingTrainPinAllowed&&E.positionAt(session.currentCH,assembled,anchors)),storage:memoryStatus})});
 })(window);
