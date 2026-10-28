@@ -11,24 +11,24 @@ for(const [name,browserType] of [['chromium',chromium],['webkit',webkit]]){
   await page.addInitScript(()=>{window.__locationRequests=0;for(const method of ['getCurrentPosition','watchPosition'])if(navigator.geolocation)navigator.geolocation[method]=()=>{window.__locationRequests++;throw Error('UNEXPECTED_GPS_REQUEST')}});
   try{
    const response=await page.goto(url,{waitUntil:'domcontentloaded'});assert.equal(response.status(),200);
-   await page.waitForFunction(()=>{const d=window.MRS10V8Diagnostics?.snapshot();return d?.stage==='DONE'&&d.ecrl?.layersPresent},{timeout:90000});
+   await page.waitForFunction(()=>{const d=window.MRS10V8Diagnostics?.snapshot();return d?.stage==='DONE'&&d.ecrl?.layersPresent},null,{timeout:90000});
    await page.locator('#filters button').getByText('ECRL',{exact:true}).click();
    assert.equal(await page.locator('.ecrl-pl-guide-item').count(),7);
    checks.push('seven-pl-records-accessible');
    await page.locator('.ecrl-chainage-guide>summary').click();
    const pl=page.locator('.ecrl-pl-guide-item').filter({hasText:'PL05'});
-   assert.match(await pl.innerText(),/CH415\\+180/);
+   assert.match(await pl.innerText(),/CH415\+180/);
    await pl.click();
    assert(await page.locator('#ecrl-no-point').isVisible());
    assert.match(await page.locator('#ecrl-no-point').innerText(),/PL05/);
-   assert.match(await page.locator('#ecrl-no-point').innerText(),/CH415\\+180/);
+   assert.match(await page.locator('#ecrl-no-point').innerText(),/CH415\+180/);
    checks.push('pl05-list-only-with-CH-no-fake-map-pin');
    await page.locator('#ecrl-no-point>button').click();
    await page.locator('#search').fill('STN14');
    const station=page.locator('#search-results button').filter({hasText:'ecrl-stn-13'});
    await station.click();
    await page.waitForFunction(()=>window.MRS10ECRLCandidateQA.snapshot().focus.assetId==='ecrl-stn-13');
-   assert.match(await page.locator('.maplibregl-popup .ecrl-key-facts').innerText(),/CH396\\+900/);
+   assert.match(await page.locator('.maplibregl-popup .ecrl-key-facts').innerText(),/CH396\+900/);
    assert.match(await page.locator('.maplibregl-popup .ecrl-accuracy').innerText(),/rujukan kawasan/);
    await page.locator('.maplibregl-popup .ecrl-engineering>summary').click();
    assert.match(await page.locator('.maplibregl-popup .ecrl-engineering').innerText(),/MR_S10_OWNER_ACCEPTED_CORRIDOR_MANIFEST/);
