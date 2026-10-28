@@ -1,0 +1,46 @@
+name: MR-S10 P01 CH and PL01-PL07 isolated QA
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-ecrl-chainage-pl-registry-20261029
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chainage-units:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node --test tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-consumer-popup.test.cjs tests/unified-ecrl-chainage.test.cjs tests/unified-v81-focus.test.cjs
+      - run: node scripts/build-unified-v8.cjs
+  chainage-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node scripts/build-unified-v8.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Six-viewport CH/PL browser QA
+        run: |
+          python3 -m http.server 8765 --directory dist-unified-v8 >/tmp/chainage-http.log 2>&1 &
+          node tests/unified-ecrl-chainage-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: ecrl-ch-pl-browser-evidence
+          path: artifacts/ecrl-chainage-pl/
+          retention-days: 14
