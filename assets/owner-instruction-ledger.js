@@ -8,7 +8,7 @@
  const state=$('ledger-state'),list=$('ledger-items'),form=$('ledger-form');
  const summary=$('ledger-summary'),acceptance=$('ledger-acceptance'),scope=$('ledger-scope');
  const button=$('ledger-submit'),refresh=$('ledger-refresh');
- let inFlight=false,serial=0,nonce=null,items=[];
+ let inFlight=false,reloadQueued=false,serial=0,nonce=null,items=[],lastLoadedAt=0;
  const node=(tag,cls,label)=>{
   const e=document.createElement(tag);
   if(cls)e.className=cls;
@@ -100,7 +100,9 @@
   }
  }
  async function load(){
-  if(!authorized()||inFlight)return;
+  if(!authorized())return;
+  if(inFlight){reloadQueued=true;return;}
+  inFlight=true;
   const ticket=++serial;
   setState('Validating Owner session and reading private ledger…');
   refresh.disabled=true;
@@ -109,10 +111,14 @@
    if(ticket!==serial||!authorized())return;
    if(!Array.isArray(result))throw new Error('Unexpected ledger response');
    render(result);
+   lastLoadedAt=Date.now();
    setState('PRIVATE LEDGER LIVE · '+result.length+' recent instruction(s) · Source: Supabase Owner RPC','live');
   }catch(error){
    if(ticket===serial&&authorized()){list.replaceChildren();setState(safeError(error),'blocked');}
-  }finally{refresh.disabled=false;}
+  }finally{
+   inFlight=false;refresh.disabled=false;
+   if(reloadQueued){reloadQueued=false;if(authorized())void load();}
+  }
  }
  for(const field of [summary,acceptance,scope])field.addEventListener('input',()=>{nonce=null;});
  form.addEventListener('submit',async e=>{
@@ -137,5 +143,9 @@
  document.getElementById('refresh-dashboard')?.addEventListener('click',()=>void load());
  window.addEventListener('railway-access-change',reflectAuth);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&authorized())void load();});
+ // At most one private read per cycle; the browser may suspend inactive tabs.
+ if(typeof setInterval==='function')setInterval(()=>{
+  if(!document.hidden&&authorized()&&Date.now()-lastLoadedAt>=120000)void load();
+ },120000);
  reflectAuth();
 })();
