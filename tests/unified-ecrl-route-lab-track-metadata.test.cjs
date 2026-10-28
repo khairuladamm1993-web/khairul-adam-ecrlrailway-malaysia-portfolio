@@ -18,12 +18,19 @@ test('gauge source tag conflict blocks train marker, missing tag stays unverifie
  assert.equal(meta.auditSegment({railway:'rail',gauge:'1000'}).status,'GAUGE_CONFLICT_OR_MULTIPLE_VALUES');
  assert.equal(meta.auditSegment({railway:'rail'}).status,'GAUGE_TAG_MISSING_NEEDS_SOURCE_REVIEW');
  assert.equal(meta.auditSegment({railway:'rail',gauge:'1435;1000'}).gaugeCompatible,false);
- const good={status:'CONTINUOUS_CANDIDATE'},anchors={status:'INFERRED_CH_MATCH_ONLY'};
+ const good={status:'CONTINUOUS_CANDIDATE',paths:[{metres:33030}]},anchors={status:'INFERRED_CH_MATCH_ONLY',anchors:[{code:'STN01'},{code:'STN02'}]};
  assert.equal(meta.movementEligibility({assembly:good,matched:anchors,sourceTags:[{railway:'construction',gauge:'1000'}]}).trainingTrainPinAllowed,false);
  assert.equal(meta.movementEligibility({assembly:good,matched:anchors,sourceTags:[{railway:'construction',gauge:'1435'}]}).trainingTrainPinAllowed,true);
  assert.equal(meta.movementEligibility({assembly:{status:'GAPS_OR_BRANCHES'},matched:anchors}).trainingTrainPinAllowed,false);
  assert.equal(meta.movementEligibility({assembly:good,matched:{status:'ANCHORS_REQUIRE_REVIEW'}}).trainingTrainPinAllowed,false);
  assert.equal(meta.movementEligibility({assembly:good,matched:anchors}).officialSurveyAccepted,false);
+ assert.equal(meta.movementEligibility({assembly:good,matched:anchors}).trainingTrainPinAllowed,false);
+ assert.equal(meta.movementEligibility({assembly:good,matched:anchors,sourceTags:[{railway:'rail'}]}).trainingTrainPinAllowed,false);
+ assert.equal(meta.movementEligibility({assembly:good,matched:anchors,sourceTags:[{railway:'rail',gauge:'1435'},{railway:'rail'}]}).trainingTrainPinAllowed,false);
+ assert.equal(meta.movementEligibility({assembly:good,matched:anchors,sourceTags:[{railway:'rail',gauge:'1435',highway:'primary'}]}).trainingTrainPinAllowed,false);
+ assert.equal(meta.movementEligibility({assembly:good,matched:anchors,sourceTags:[{railway:'rail',gauge:'1435'},{railway:'rail',gauge:'1000'}]}).trainingTrainPinAllowed,false);
+ assert.equal(meta.movementEligibility({assembly:good,matched:anchors,sourceTags:[{railway:'rail',gauge:'1435'},{railway:'construction',gauge:'1435'}]}).trainingTrainPinAllowed,true);
+ assert.equal(meta.movementEligibility({assembly:good,matched:anchors,sourceTags:[{railway:'rail',gauge:'1435'}]}).roadParcelGeometryIndependentlyVerified,false);
 });
 test('raster layer cannot become a track geometry for simulation or other operator routes',()=>{
  const ui=fs.readFileSync('assets/unified-ecrl/route-lab-ui.js','utf8');
