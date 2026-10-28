@@ -28,3 +28,12 @@
 .ecrl-ch-warning{font-size:.75rem;color:var(--sub);margin:5px 0 9px}
 .ecrl-chainage-guide .ecrl-pl-guide-item{display:block;width:100%;text-align:left;white-space:normal;overflow-wrap:anywhere;font-size:.77rem;font-weight:600;line-height:1.28;margin:4px 0;min-height:38px;padding:7px 9px;border-style:dashed}
 .ecrl-chainage-guide .ecrl-pl-guide-item:hover{border-color:#b57b2d}
+
+/* Owner Safari UAT: short consumer facts; long raw strings remain inside Engineering. */
+.ecrl-popup .ecrl-key-facts .ecrl-fact{display:grid!important;grid-template-columns:minmax(0,43%) minmax(0,57%);gap:8px;align-items:start}
+.ecrl-popup .ecrl-key-facts .ecrl-fact>span,.ecrl-popup .ecrl-key-facts .ecrl-fact>b{min-width:0;overflow-wrap:anywhere;word-break:normal}
+.ecrl-popup .ecrl-key-facts .ecrl-fact>b{text-align:right}
+.ecrl-popup .maplibregl-popup-content{scrollbar-width:thin;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.ecrl-popup .ecrl-engineering summary,.ecrl-popup .ecrl-sources summary{scroll-margin-bottom:28px}
+@media(max-width:600px){.ecrl-popup .ecrl-key-facts .ecrl-fact{grid-template-columns:minmax(0,42%) minmax(0,58%)}
+.ecrl-popup .maplibregl-popup-content{max-height:min(47dvh,365px)!important}}
