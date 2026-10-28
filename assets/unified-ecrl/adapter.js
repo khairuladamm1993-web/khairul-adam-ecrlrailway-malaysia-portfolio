@@ -2,6 +2,9 @@
 (function(root){'use strict';
 const NS='mrs10-v8-ecrl-infra',COLORS={LOCALITY:'#0f8b8d',HISTORICAL:'#c76a1b',MARITIME:'#7c3aed'};
 function create(registry,translations){
+ const chainage=(root&&root.MRS10ECRLChainage)||(typeof require==='function'?require('./chainage-manifest.js'):null);
+ if(!chainage||chainage.records.length!==23)throw Error('ECRL_CHAINAGE_MANIFEST_MISSING');
+ const annotate=a=>{const c=chainage.get(a.assetId);return Object.freeze({...a,chainageCode:c?.code||null,plCode:c?.code?.startsWith('PL')?c.code:null,chainageKm:c?.km??null,chainageLabel:c?.label||null,chainageDatum:c?.datum||null,chainageStatus:c?.status||'UNKNOWN',chainageProvenance:c?.provenance||null})};
  // Owner-accepted ECRL station designations. STN10 is absent; assetId is an immutable ordinal key.
 const CORRIDOR_STATION_CODES=Object.freeze({
  'Kota Bharu':'STN01','Pasir Puteh':'STN02','Jerteh':'STN03','Bandar Permaisuri':'STN04',
@@ -12,11 +15,13 @@ const CORRIDOR_STATION_CODES=Object.freeze({
 const stations=registry.stations.map(a=>{
  const stationCode=CORRIDOR_STATION_CODES[a.officialName]||null;
  if(a.section!=='C2'&&!stationCode)throw Error('ECRL_MISSING_ACCEPTED_STATION_CODE:'+a.officialName);
- return Object.freeze({...a,stationCode});
+ return annotate({...a,stationCode});
 });
 const knownCodes=stations.filter(a=>a.stationCode).map(a=>a.stationCode);
 if(knownCodes.length!==16||new Set(knownCodes).size!==16||stations.some(a=>a.section==='C2'&&a.stationCode))throw Error('ECRL_STATION_CODE_MANIFEST_MISMATCH');
-const assets=[...stations,...registry.loops,...registry.facilities];
+const loops=registry.loops.map(annotate);
+ if(loops.length!==7||loops.some((a,i)=>a.plCode!=='PL'+String(i+1).padStart(2,'0')))throw Error('ECRL_PL_MANIFEST_MISMATCH');
+ const assets=[...stations,...loops,...registry.facilities];
  if(new Set(assets.map(a=>a.assetId)).size!==assets.length)throw Error('ECRL_DUPLICATE_ID');
  const flags={LOCALITY:false,HISTORICAL:false,MARITIME:false};
  function references(){return assets.flatMap(a=>{
@@ -46,9 +51,9 @@ const assets=[...stations,...registry.loops,...registry.facilities];
   if(!map.getLayer(NS+'-inner'))map.addLayer({id:NS+'-inner',type:'circle',source:NS,paint:{'circle-radius':2.5,'circle-color':['get','color']}});
  }
  function hit(map,point){if(!map?.getLayer(NS+'-hit')||map.getLayoutProperty(NS+'-hit','visibility')==='none')return null;return refs.filter(r=>flags[r.kind]).map(r=>{const p=map.project(r.coordinates);return {...r,distance:Math.hypot(p.x-point.x,p.y-point.y)}}).filter(r=>r.distance<=14).sort((a,b)=>a.distance-b.distance)[0]||null}
- function search(q){const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');const text=norm(q);if(!text)return [];if(/^stn\d{1,2}$/.test(text))return stations.filter(a=>norm(a.stationCode)===text);return assets.filter(a=>norm(['ECRL',a.officialName,a.historicalName,a.assetId,a.section,a.stationCode,...(a.alternativeNames||[])].join(' ')).includes(text))}
+ function search(q){const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');const text=norm(q);if(!text)return [];if(/^stn\d{1,2}$/.test(text))return stations.filter(a=>norm(a.stationCode)===text);if(/^pl0?[1-7]$/.test(text))return loops.filter(a=>norm(a.plCode)===text||norm(a.plCode)===text.replace(/^pl([1-7])$/,'pl0$1'));return assets.filter(a=>norm(['ECRL',a.officialName,a.historicalName,a.assetId,a.section,a.stationCode,a.plCode,a.chainageLabel,...(a.alternativeNames||[])].join(' ')).includes(text))}
  function snapshot(map){return {assetCount:assets.length,stationCount:registry.stations.length,referenceCount:refs.length,referenceKinds:Object.fromEntries(Object.keys(flags).map(k=>[k,refs.filter(r=>r.kind===k).length])),flags:{...flags},verifiedStationPoints:0,verifiedLoopPoints:0,physicalSegments:0,sourcePresent:!!map?.getSource(NS),layersPresent:!!map?.getLayer(NS+'-inner'),visible:!!map?.getLayer(NS+'-hit')&&map.getLayoutProperty(NS+'-hit','visibility')!=='none'}}
- return Object.freeze({namespace:NS,assets,stations,registry,flags,refs,get,reference,t,features,install,setVisibility,hit,search,snapshot});
+ return Object.freeze({namespace:NS,assets,stations,loops,chainage,registry,flags,refs,get,reference,t,features,install,setVisibility,hit,search,snapshot});
 }
 const api={create,NS};if(typeof module==='object')module.exports=api;if(root)root.MRS10UnifiedECRL=api;
 })(typeof window!=='undefined'?window:null);
