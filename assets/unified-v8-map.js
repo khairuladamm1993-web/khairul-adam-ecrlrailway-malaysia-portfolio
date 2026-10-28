@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const core=window.MRS10UnifiedV4Registry, kl=window.MRS10KLRegistry,
  ampang=window.MRS10AmpangR219, ampangGIS=window.MRS10AmpangGISR219,
  integration=window.MRS10UnifiedV6Adapter,ktm=window.MRS10UnifiedV7KTM;
-let singapore,physical,ecrl,ecrlUI,journeyView;
+let singapore,physical,ecrl,ecrlUI,journeyView,ownerCalibration;
 const paths=new Map();
 const locales=['ms','en','zh','th'];
 const i18n={
@@ -236,7 +236,7 @@ function updateMapLayer(){
      'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.35:1
     }});
   }
-  installInnerDots();ecrl?.install(map);applyVisibility();if(pendingRestore)restoreLayers(pendingRestore);
+  installInnerDots();ecrl?.install(map);ownerCalibration?.install();applyVisibility();if(pendingRestore)restoreLayers(pendingRestore);
  }catch(e){
   state.networkError=true;
   $('map-error').hidden=false;
@@ -255,7 +255,7 @@ function applyVisibility(){
   if(state.map.getLayer(id))state.map.setLayoutProperty(id,'visibility',
    state.category==='All'||state.category===r.category?'visible':'none');
  }
- applyGeometryVisibility();ecrl?.setVisibility(state.map,state.category);
+ applyGeometryVisibility();ecrl?.setVisibility(state.map,state.category);ownerCalibration?.visibility();
 }
 function showPopup(point){
  if(!state.map)return;
@@ -288,10 +288,20 @@ function showPopup(point){
 }
 function showInfrastructure(assetId,moveCamera=false){
  const asset=ecrl?.get(assetId);if(!asset)return;
- const host=ecrlUI.content(assetId),ref=ecrl.reference(assetId);
- if(moveCamera&&ref&&ecrl.flags[ref.kind]&&state.map)state.map.easeTo({center:ref.coordinates,zoom:Math.max(state.map.getZoom(),12.5),duration:300});
+ const host=ecrlUI.content(assetId),officialRef=ecrl.reference(assetId),ownerRef=ownerCalibration?.reference(assetId)||null;
+ const ref=officialRef||ownerRef,visible=Boolean(ref&&(ownerRef||ecrl.flags[ref.kind]));
+ if(ownerRef){
+  const label={ms:'Rujukan koordinat diluluskan Owner · bukan lokasi jajaran fizikal yang disahkan',
+  en:'Owner-approved coordinate reference · not a survey-verified railway location',
+  zh:'Owner 已批准的坐标参考 · 非测量核实的铁路位置',
+  th:'พิกัดอ้างอิงที่เจ้าของอนุมัติ · ไม่ใช่ตำแหน่งรางที่ยืนยันด้วยการสำรวจ'};
+  const note=document.createElement('p');note.className='ecrl-owner-coordinate-warning';
+  note.textContent=(label[state.locale]||label.en)+' · '+ownerRef.locationConfidence;
+  host.append(note);
+ }
+ if(moveCamera&&visible&&state.map)state.map.easeTo({center:ref.coordinates,zoom:Math.max(state.map.getZoom(),12.5),duration:300});
  focus.enter({mode:'INFRASTRUCTURE_FOCUS',routeIds:[],assetId});
- if(ref&&ecrl.flags[ref.kind]&&state.map){mountPopup(host,ref.coordinates)}
+ if(visible&&state.map){mountPopup(host,ref.coordinates)}
  else{const old=state.popup;state.popup=null;old?.remove();const panel=$('ecrl-no-point');panel.replaceChildren();const close=el('button',null,'×');close.type='button';close.setAttribute('aria-label',ecrl.t(state.locale,'close'));close.onclick=closeFocus;panel.append(close,host);panel.hidden=false;close.focus({preventScroll:true})}
 }
 function fitOnce(){
@@ -337,8 +347,10 @@ function startMap(){
    // Screen-space hit testing uses the same source points as the rendered icons.
    // It is never used to infer railway connectivity or interchange membership.
    const candidates=[...state.points.values()].filter(p=>state.map.getLayer(layerId(p.routeId))&&state.map.getLayoutProperty(layerId(p.routeId),'visibility')!=='none').map(p=>{const q=state.map.project(p.coordinates);return {point:p,distance:Math.hypot(q.x-e.point.x,q.y-e.point.y)}}).filter(p=>p.distance<=14).sort((a,b)=>a.distance-b.distance);
-   const infrastructure=ecrl?.hit(state.map,e.point);
-   if(infrastructure&&(!candidates.length||infrastructure.distance<candidates[0].distance)){showInfrastructure(infrastructure.assetId);return}
+   const infrastructure=ecrl?.hit(state.map,e.point),ownerLoop=ownerCalibration?.hit(e.point);
+   const closest=[...(infrastructure?[{assetId:infrastructure.assetId,distance:infrastructure.distance}]:[]),
+     ...(ownerLoop?[{assetId:ownerLoop.ref.assetId,distance:ownerLoop.distance}]:[])].sort((a,b)=>a.distance-b.distance)[0];
+   if(closest&&(!candidates.length||closest.distance<candidates[0].distance)){showInfrastructure(closest.assetId);return}
    const point=candidates[0]?.point;
    state.lastTap.stationId=point?.id||null;
    if(!point){showTrackAt(e);return;}
@@ -398,6 +410,8 @@ async function init(){
  ecrl=window.MRS10UnifiedECRL.create(window.MRS10ECRLGISV1,window.MRS10ECRLI18N);
  ecrlUI=window.MRS10ECRLIntegrationUI.create(ecrl,{getLocale:()=>state.locale,getCategory:()=>state.category,onSelect:id=>showInfrastructure(id,true),onFlags:(kind,enabled)=>{closeFocus();ecrl.flags[kind]=enabled;applyVisibility();ecrlUI.render()}});
  journeyView=window.MRS10JourneyView.create({host:$('journey-foundation'),stations:ecrl.stations,getLocale:()=>state.locale});
+ // Preview remains public-only; a separately authenticated RailwayAccess session is
+ // required for the Owner map to show canonical approved PL references.
  $('details-toggle').addEventListener('click',()=>{const expanded=$('details-toggle').getAttribute('aria-expanded')!=='true';$('details-toggle').setAttribute('aria-expanded',String(expanded));$('map-details').hidden=!expanded});
  $('approximate').addEventListener('change',()=>{closeFocus();installGeometry();applyVisibility();geometryStatus()});
  $('search').addEventListener('input',updateSearch);
@@ -409,7 +423,12 @@ async function init(){
   if(state.map){state.mapReady=false;state.map.setStyle(styleURL())}
   showStatus();
  });
- applyLanguage();startMap();void loadGIS();
+ applyLanguage();startMap();
+ if(state.map){
+  ownerCalibration=window.MRS10ECRLOwnerCalibration.create({map:state.map,getCategory:()=>state.category,onSelect:id=>showInfrastructure(id)});
+  ownerCalibration.connect();
+ }
+ void loadGIS();
 }
 function diagnosticSnapshot(){
  const map=state.map,rows={};
