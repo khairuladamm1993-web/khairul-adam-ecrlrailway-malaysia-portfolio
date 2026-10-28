@@ -28,7 +28,7 @@ test('PETRONAS industrial end lane is list-only pending actual survey, no fabric
  assert.equal(a.referencePoint,null);assert.equal(a.railEndPoint,null);
  assert.equal(a.loadingBayPoint,null);assert.equal(a.transitLanePoint,null);
  assert.equal(a.physicalRailLineString,null);
- assert.equal(adapter.search('PETRONAS Kerteh')[0].assetId,'ecrl-yard-kerteh-petronas');
+ assert.equal(adapter.search('Kerteh Railway Yard')[0].assetId,'ecrl-yard-kerteh-petronas');assert.equal(adapter.search('PETRONAS Kerteh')[0].assetId,a.assetId);
  const logical=adapter.registry.topology.find(x=>x.to===a.assetId);
  assert(logical&&logical.physicalLineString===null&&logical.loadingBayPoint===null&&logical.transitLanePoint===null);
  assert.equal(kerteh.logicalInterfaces[0].branchChainage,null);
