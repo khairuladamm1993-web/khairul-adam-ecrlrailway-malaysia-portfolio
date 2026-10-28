@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-const base='https://mrs10-p01-unified-v8-sg-geometry-59w058xqh-1993khairuladam-3016.vercel.app/';
+const base='https://mrs10-p01-unified-v8-sg-geometry-fz1bsf7c5-1993khairuladam-3016.vercel.app/';
 const html=await fs.readFile('unified-map-v8.html','utf8');
 const files=['unified-map-v8.html',...[...html.matchAll(/(?:src|href)="\.\/([^"]+)"/g)].map(m=>m[1]),'data/unified-v8/physical-network.json',...['lines.json','stations.geojson','route-topology.json','cross-border-terminals.geojson','cross-border-connections.json'].map(p=>'singapore/data/'+p)];
 const digest=b=>createHash('sha256').update(b).digest('hex');
