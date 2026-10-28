@@ -1,0 +1,50 @@
+name: P01 ECRL 1435-mm rail-only train movement and OpenRailwayMap QA
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-route-lab-openrailwaymap-overlay-r12-20261029
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Syntax + rail-only transport rule + prior CH lab
+        run: |
+          node --check assets/unified-ecrl/route-lab-ui.js
+          node --check assets/unified-ecrl/route-lab-track-metadata.js
+          node --test tests/unified-ecrl-route-lab-orm-overlay.test.cjs tests/unified-ecrl-route-lab-track-metadata.test.cjs tests/unified-ecrl-manual-route-lab.test.cjs tests/unified-ecrl-alignment-r2.test.cjs
+      - run: node scripts/build-unified-v8.cjs
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 23
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node scripts/build-unified-v8.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Six viewport railway overlay + anti-road movement
+        run: |
+          python3 -m http.server 8765 --directory dist-unified-v8 >/tmp/ecrl-orm-r12.log 2>&1 &
+          node tests/unified-ecrl-route-lab-orm-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: ecrl-route-lab-orm-1435-qa
+          path: artifacts/ecrl-orm-r12/
+          retention-days: 14
