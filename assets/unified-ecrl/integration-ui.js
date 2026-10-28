@@ -30,7 +30,6 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
   plGuide.append(el('p',ui('chSafety'),'ecrl-ch-warning'));
   for(const a of adapter.loops){const btn=el('button',(a.plCode||'PL?')+' · '+(a.historicalName||'')+' · '+(a.chainageLabel||ui('unknown')),'ecrl-pl-guide-item');btn.type='button';btn.dataset.ecrlAsset=a.assetId;btn.onclick=()=>onSelect(a.assetId);plGuide.append(btn)}
   host.append(plGuide);
-  const policy=el('details',null,'ecrl-source-policy');summary(policy,ui('layers'));policy.append(el('p',t('noTrack')+' '+t('noLoops')));host.append(policy);
   const assets=$('ecrl-assets');assets.replaceChildren();
   const list=el('details',null,'ecrl-asset-list');summary(list,ui('list')+' ('+adapter.assets.length+')');
   for(const a of [...adapter.assets].sort((a,b)=>(a.chainageKm??Infinity)-(b.chainageKm??Infinity))){const btn=el('button',(a.stationCode||a.plCode?(a.stationCode||a.plCode)+' · ':'')+(a.officialName||a.historicalName)+(a.chainageLabel?' · '+a.chainageLabel:'')+' · '+a.assetType+' · '+a.verificationStatus);btn.type='button';btn.dataset.ecrlAsset=a.assetId;btn.onclick=()=>onSelect(a.assetId);list.append(btn)}
