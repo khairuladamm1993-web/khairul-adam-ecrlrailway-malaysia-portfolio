@@ -1,0 +1,61 @@
+'use strict';
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const {JSDOM}=require('jsdom'),kerteh=require('../assets/unified-ecrl/kerteh-freight-reference.js');
+const win={};for(const path of ['assets/unified-ecrl/source/data.js','assets/unified-ecrl/source/i18n.js'])vm.runInNewContext(fs.readFileSync(path,'utf8'),{window:win});
+const adapter=require('../assets/unified-ecrl/adapter.js').create(win.MRS10ECRLGISV1,win.MRS10ECRLI18N);
+test('OSM mapped railway-land yard does not pretend to be final ECRL end lane',()=>{
+ assert.equal(adapter.assets.length,37);assert.equal(adapter.refs.length,25);
+ assert.equal(adapter.snapshot().referenceKinds.YARD,1);
+ const a=adapter.get('ecrl-yard-kerteh-petronas'),r=adapter.reference(a.assetId);
+ assert.equal(a.referenceKind,'OSM_HISTORICAL_RAILWAY_LANDUSE_AREA');
+ assert.equal(r.kind,'YARD');assert.equal(r.sourceId,'OSM_KERTEH_RAILWAY_AREA');
+ assert.equal(JSON.stringify(r.coordinates),JSON.stringify([103.43875,4.56803]));
+ assert.equal(a.railEndPoint,null);assert.equal(a.loadingBayPoint,null);
+ assert.equal(a.transitLanePoint,null);assert.equal(a.physicalRailLineString,null);
+ assert.equal(a.checkedAgainstRoadPolygon,false);
+ assert.equal(a.checkedAgainstResidentialPolygon,false);
+ assert.equal(a.independentlySurveyVerified,false);
+ assert.equal(a.asBuilt2026Verified,false);
+ assert.match(adapter.registry.sources.OSM_KERTEH_RAILWAY_AREA.url,/537934577/);
+ const feature=adapter.features().features.find(x=>x.id===a.assetId);
+ assert.equal(feature.geometry.type,'Point');assert.equal(feature.properties.kind,'YARD');
+ assert.equal(feature.properties.geometryVerification,'REFERENCE_ONLY');
+ assert.equal(adapter.snapshot().physicalSegments,0);
+});
+test('PETRONAS industrial end lane is list-only pending actual survey, no fabricated point',()=>{
+ const a=adapter.get('ecrl-kerteh-petronas-loading-interface');
+ assert(a);assert.equal(adapter.reference(a.assetId),undefined);
+ assert.equal(a.referencePoint,null);assert.equal(a.railEndPoint,null);
+ assert.equal(a.loadingBayPoint,null);assert.equal(a.transitLanePoint,null);
+ assert.equal(a.physicalRailLineString,null);
+ assert.equal(adapter.search('PETRONAS Kerteh')[0].assetId,'ecrl-yard-kerteh-petronas');
+ const logical=adapter.registry.topology.find(x=>x.to===a.assetId);
+ assert(logical&&logical.physicalLineString===null&&logical.loadingBayPoint===null&&logical.transitLanePoint===null);
+ assert.equal(kerteh.logicalInterfaces[0].branchChainage,null);
+ assert.equal(kerteh.logicalInterfaces[0].actualSpurLengthKm,null);
+ assert.match(kerteh.sources.EIA_KERTEH_2017.revision,/Historical 2017 EIA/);
+ assert.equal(win.MRS10ECRLGISV1.facilities.length,6);
+});
+test('localized Kerteh yard reference is a square icon with source and no fake exactness',()=>{
+ const map={getStyle:()=>({version:8}),getSource:()=>null,getLayer:()=>null,addSource(){},addLayer(){},hasImage:()=>true};
+ adapter.install(map);
+ const dom=new JSDOM('<!doctype html><body><section id="ecrl-controls"></section><section id="ecrl-assets"></section></body>',{url:'https://preview.example.test'});
+ const window=dom.window;
+ vm.runInNewContext(fs.readFileSync('assets/unified-ecrl/integration-ui.js','utf8'),{window,document:window.document});
+ let locale='ms';
+ const ui=window.MRS10ECRLIntegrationUI.create(adapter,{getLocale:()=>locale,getCategory:()=> 'ECRL',onSelect:()=>{},onFlags:()=>{}});
+ for(const lang of ['ms','en','zh','th']){
+  locale=lang;ui.render();
+  const yard=ui.content('ecrl-yard-kerteh-petronas');
+  const loading=ui.content('ecrl-kerteh-petronas-loading-interface');
+  assert.equal(window.document.querySelectorAll('#ecrl-controls input[type=checkbox]').length,4);
+  assert.equal(window.document.querySelectorAll('#ecrl-assets button').length,37);
+  assert(yard.querySelector('.ecrl-accuracy').textContent.length>10);
+  assert.match(yard.querySelector('.ecrl-key-facts').textContent,/UNKNOWN/);
+  assert.match(yard.querySelector('.ecrl-sources').textContent,/OSM_KERTEH_RAILWAY_AREA/);
+  assert.match(yard.querySelector('.ecrl-engineering').textContent,/NO_END_LANE_COORDINATE/);
+  assert.match(loading.querySelector('.ecrl-key-facts').textContent,/UNKNOWN/);
+  assert(!loading.querySelector('.ecrl-engineering').open);
+ }
+ dom.window.close();
+});
