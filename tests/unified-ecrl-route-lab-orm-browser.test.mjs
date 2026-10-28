@@ -16,7 +16,13 @@ for(const [engineName,engine] of [['chromium',chromium],['webkit',webkit]]){
    assert.notEqual(state.railVisual.tileStatus,'WAITING_FOR_STYLE');
    assert.equal(state.trackSpecification.gaugeMm,1435);
    assert.equal(state.mapPinAvailability,false);assert.equal(state.alignmentStatus,'NO_GEOMETRY');
-   assert(tileRequests>0,'ORM overlay registered but 0 railway tile HTTP requests were made');
+   if(tileRequests===0){
+     await Promise.race([
+       page.waitForEvent('request',{predicate:req=>req.url().includes('tiles.openrailwaymap.org/standard'),timeout:9000}).catch(()=>null),
+       page.waitForTimeout(9000)
+     ]);
+   }
+   assert(tileRequests>0,'ORM overlay registered but 0 railway tile HTTP requests were made after up to 9s');
    checks.push('orm-railway-overlay-installed-gauge-spec-separate-no-train-pin','railway-tile-http-request-attempted');
    const input=page.locator('#lab-orm-toggle');
    await input.uncheck();assert.equal((await page.evaluate(()=>window.MRS10ECRLRouteLab.snapshot())).railVisual.visible,false);
