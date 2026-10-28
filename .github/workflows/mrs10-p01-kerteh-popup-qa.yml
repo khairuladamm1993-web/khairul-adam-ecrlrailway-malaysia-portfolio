@@ -1,0 +1,46 @@
+name: P01 Kerteh mobile popup isolated QA
+on:
+  push:
+    branches:
+      - fix/mrs10-p01-kerteh-mobile-popup-r1-20261029
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node --test tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-consumer-popup.test.cjs tests/unified-ecrl-chainage.test.cjs tests/unified-ecrl-owner-calibration.test.cjs tests/unified-ecrl-port-references.test.cjs tests/unified-ecrl-kerteh-freight.test.cjs tests/unified-v81-focus.test.cjs
+      - run: node scripts/build-unified-v8.cjs
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node scripts/build-unified-v8.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Six-viewport Kerteh popup UX WebKit regression
+        run: |
+          python3 -m http.server 8765 --directory dist-unified-v8 >/tmp/kerteh-popup-http.log 2>&1 &
+          node tests/unified-ecrl-kerteh-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: kerteh-mobile-popup-owner-uat-evidence
+          path: artifacts/ecrl-kerteh-freight/
+          retention-days: 14
