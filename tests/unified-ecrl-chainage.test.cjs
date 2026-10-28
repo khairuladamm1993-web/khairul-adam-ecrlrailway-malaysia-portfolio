@@ -17,8 +17,8 @@ test('CH project manifest is chronological, protected and distinct from official
  assert.match(chainage.status,/PENDING_INDEPENDENT_VERIFICATION/);
 });
 test('PL01–PL07 have accessible identities and reference CH without manufactured GIS points',()=>{
- assert.equal(adapter.loops.length,7);assert.equal(adapter.assets.length,35);
- assert.equal(adapter.refs.length,24);assert.equal(adapter.features().features.length,24);
+ assert.equal(adapter.loops.length,7);assert.equal(adapter.assets.length,37);
+ assert.equal(adapter.refs.length,25);assert.equal(adapter.features().features.length,25);
  for(let i=1;i<=7;i++){
   const id='ecrl-loop-historical-'+String(i).padStart(2,'0');
   const loop=adapter.get(id);
@@ -72,6 +72,6 @@ test('consumer popup and PL list present project CH in all four languages and ke
   assert.match(loop.querySelector('.ecrl-key-facts').textContent,/CH415\+180/);
   assert.equal(window.document.querySelectorAll('.ecrl-pl-guide-item').length,7);
   assert.match(window.document.querySelector('.ecrl-chainage-guide').textContent,/CH515\+725/);
-  assert.equal(window.document.querySelectorAll('#ecrl-assets button').length,35);
+  assert.equal(window.document.querySelectorAll('#ecrl-assets button').length,37);
  }
 });
