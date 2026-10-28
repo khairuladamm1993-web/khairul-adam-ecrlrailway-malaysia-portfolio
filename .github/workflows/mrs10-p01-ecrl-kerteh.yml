@@ -1,0 +1,46 @@
+name: MR-S10 P01 Kerteh PETRONAS freight reference isolated QA
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-kerteh-petronas-freight-yard-20261029
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kerteh-unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node --test tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-consumer-popup.test.cjs tests/unified-ecrl-chainage.test.cjs tests/unified-ecrl-owner-calibration.test.cjs tests/unified-ecrl-port-references.test.cjs tests/unified-ecrl-kerteh-freight.test.cjs tests/unified-v81-focus.test.cjs
+      - run: node scripts/build-unified-v8.cjs
+  kerteh-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node scripts/build-unified-v8.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Six-device historical-railway yard and list-only end lane
+        run: |
+          python3 -m http.server 8765 --directory dist-unified-v8 >/tmp/mrs10-kerteh-http.log 2>&1 &
+          node tests/unified-ecrl-kerteh-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: mrs10-kerteh-freight-railway-area-evidence
+          path: artifacts/ecrl-kerteh-freight/
+          retention-days: 14
