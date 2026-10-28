@@ -10,7 +10,7 @@
 #lab-orm-status{margin:0;color:#506b77;font-size:.75rem;flex-basis:100%}
 .lab-orm-note{font-size:.77rem;color:#745419;border-left:3px solid #bf7929;margin:7px 0 14px;padding:7px 9px;background:#fff8e9}
 @media(max-width:650px){.lab-rail-tools{gap:7px;padding:9px}.lab-rail-buttons{width:100%}.lab-rail-buttons button{flex:1 1 auto}.lab-rail-caution summary{padding:10px}.lab-orm-note{font-size:.74rem}}
-</style>
+.lab-track-meta{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:9px;font-size:.84rem}.lab-track-meta strong{display:block}.lab-track-meta p{margin:5px 0;color:#526773}.lab-track-meta a{color:#0b7377;font-weight:650}</style>
 </head><body><header><a href="./unified-map-v8.html">← MR-S10 Unified Map V8.1</a><strong>ECRL · Single Train Alignment Laboratory</strong></header>
 <main>
 <details class="lab-rail-caution"><summary>SIMULASI · Rujukan peta bukan as-built / GPS</summary><p><strong>EXPERIMENTAL / SIMULASI</strong> · This private-use learning workflow is not a secured Owner portal. No real train telemetry, tickets, georeferenced as-built railway or site safety suitability is asserted. Do not import restricted railway engineering drawings.</p></details>
@@ -20,8 +20,10 @@
  <p id="lab-orm-status" aria-live="polite">Rujukan rel OpenRailwayMap diaktifkan</p>
 </div>
 <div id="lab-map" aria-label="OpenRailwayMap railway visual layer on OpenFreeMap, not engineering verified ECRL centerline"></div>
-<p id="lab-orm-note" class="lab-orm-note">Jalur berwarna ialah rujukan OSM/OpenRailwayMap, BUKAN geometri ECRL yang disahkan. Zoom ≥9 untuk melihat rel dalam pembinaan.</p><section id="route-lab" aria-label="ECRL Manual Simulation"></section></main>
+<p id="lab-orm-note" class="lab-orm-note">Jalur berwarna ialah rujukan OSM/OpenRailwayMap, BUKAN geometri ECRL yang disahkan. Zoom ≥9 untuk melihat rel dalam pembinaan.</p>
+<div id="lab-track-metadata" class="lab-track-meta" aria-live="polite"><strong>Spesifikasi projek ECRL (MRL): 1,435 mm · 25 kV AC</strong><p>Garisan oren bukan penanda ukuran gauge. Model tren di peta memerlukan geometri vektor dan anchor CH yang sepadan.</p><a href="https://www.mida.gov.my/wp-content/uploads/2024/06/Slides-MRL.pdf" target="_blank" rel="noopener noreferrer">Sumber teknikal MRL</a></div><section id="route-lab" aria-label="ECRL Manual Simulation"></section></main>
 <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js"></script>
 <script src="./assets/unified-ecrl/chainage-manifest.js"></script><script src="./assets/unified-ecrl/route-lab-engine.js"></script>
 <script src="./assets/unified-ecrl/route-lab-rail-overlay.js"></script>
+<script src="./assets/unified-ecrl/route-lab-track-metadata.js"></script>
 <script src="./assets/unified-ecrl/route-lab-ui.js"></script></body></html>
