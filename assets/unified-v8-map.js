@@ -73,7 +73,7 @@ function mountPopup(host,position){
  $('ecrl-no-point').hidden=true;
  const old=state.popup;state.popup=null;old?.remove();
  const popup=new maplibregl.Popup({offset:15,maxWidth:'330px',closeOnClick:false,focusAfterOpen:false}).setLngLat(position).setDOMContent(host);
- state.popup=popup;popup.on('close',()=>{if(state.popup===popup){state.popup=null;focus.exit()}});popup.addTo(state.map);popup.getElement().querySelector('.maplibregl-popup-close-button')?.focus({preventScroll:true});
+ state.popup=popup;popup.on('close',()=>{if(state.popup===popup){state.popup=null;focus.exit()}});popup.addTo(state.map);if(host.classList?.contains('ecrl-intelligence'))popup.getElement().classList.add('ecrl-popup');popup.getElement().querySelector('.maplibregl-popup-close-button')?.focus({preventScroll:true});
 }
 function appendFocusLineup(host,routeIds){
  for(const id of routeIds){const r=state.manifest.find(r=>r.id===id);if(!r)continue;
