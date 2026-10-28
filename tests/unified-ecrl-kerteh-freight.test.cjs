@@ -51,10 +51,13 @@ test('localized Kerteh yard reference is a square icon with source and no fake e
   assert.equal(window.document.querySelectorAll('#ecrl-controls input[type=checkbox]').length,4);
   assert.equal(window.document.querySelectorAll('#ecrl-assets button').length,37);
   assert(yard.querySelector('.ecrl-accuracy').textContent.length>10);
-  assert.match(yard.querySelector('.ecrl-key-facts').textContent,/UNKNOWN/);
+  assert(yard.querySelector('.ecrl-key-facts').textContent.includes(({ms:'Belum disahkan',en:'Not verified',zh:'尚未核实',th:'ยังไม่ยืนยัน'})[lang]));
   assert.match(yard.querySelector('.ecrl-sources').textContent,/OSM_KERTEH_RAILWAY_AREA/);
   assert.match(yard.querySelector('.ecrl-engineering').textContent,/NO_END_LANE_COORDINATE/);
-  assert.match(loading.querySelector('.ecrl-key-facts').textContent,/UNKNOWN/);
+  assert.match(yard.querySelector('.ecrl-engineering').textContent,/HISTORICAL_RAIL_YARD_AREA/);
+  assert.equal(yard.querySelector('.ecrl-key-facts').textContent.includes('HISTORICAL_RAIL_YARD_AREA'),false);
+  assert.equal(yard.querySelector('.ecrl-key-facts').textContent.includes('Titik hujung rel \/ loading bay'),false);
+  assert(loading.querySelector('.ecrl-key-facts').textContent.includes(({ms:'Belum disahkan',en:'Not verified',zh:'尚未核实',th:'ยังไม่ยืนยัน'})[lang]));
   assert(!loading.querySelector('.ecrl-engineering').open);
  }
  dom.window.close();
