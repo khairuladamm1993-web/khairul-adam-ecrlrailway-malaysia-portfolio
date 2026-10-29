@@ -153,6 +153,7 @@ root.MRS10AssistantUI?.connect({rows,session:()=>session,
  openLayout:code=>root.MRS10D102JourneyUI.showLayout(code),
  requestMove:target=>root.MRS10D102JourneyUI.request(target),
  showJourneyPending:()=>root.MRS10D102JourneyUI.showPending(),
+ hideJourneyPending:()=>{const d=document.getElementById('lab-r16-dialog');if(d?.open)d.close()},
  registerInfrastructure:data=>root.MRS10D102JourneyUI.registerInfrastructure(data),
  reviewGeometry:async()=>{throw Error('GEOMETRY_EVIDENCE_GATE_NOT_READY')},
  geometryQA:()=>root.MRS10GeometryIntelligenceR17.inspect(rows,geo)
