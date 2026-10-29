@@ -84,11 +84,14 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
    // Keep provenance in the engineering DOM for source audit, but never render
    // it while collapsed. Inline display avoids responsive CSS leakage.
    engineeringBody.style.setProperty('display','none','important');
+   engineeringBody.style.setProperty('visibility','hidden','important');
    tech.querySelector('summary').addEventListener('click',()=>{
     engineeringBody.style.setProperty('display',tech.open?'none':'block','important');
+    engineeringBody.style.setProperty('visibility',tech.open?'hidden':'visible','important');
    });
    tech.addEventListener('toggle',()=>{
     engineeringBody.style.setProperty('display',tech.open?'block':'none','important');
+    engineeringBody.style.setProperty('visibility',tech.open?'visible':'hidden','important');
    });
    for(const [label,value] of [['status',a.assetStatus],['verification',a.verificationStatus],['service',a.serviceType],['geometry',a.geometryProvenance||a.geometryType],['chainage',a.chainageStartKm==null&&a.chainageEndKm==null?null:[a.chainageStartKm??'UNKNOWN',a.chainageEndKm??'UNKNOWN'].join(' – ')],['trackCount',a.trackCount]]){
    engineeringBody.append(el('p',t(label)+': '+(value??(t('unknown')+' · UNKNOWN'))));
