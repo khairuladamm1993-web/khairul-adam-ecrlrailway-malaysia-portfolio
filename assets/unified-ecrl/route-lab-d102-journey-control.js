@@ -111,6 +111,10 @@ function create(storage,rows){
     if(rowAt(session.currentCH)&&session.currentCH!==byCode.get(session.destination)?.metres){
       state.confirmedDepartures=state.confirmedDepartures.filter(x=>x!==session.currentCH);
     }
+    if(p.phase==='ARRIVAL'&&session.currentCH===byCode.get(session.destination)?.metres){
+      record('JOURNEY_COMPLETE_CH_ONLY',{CH:session.currentCH,station:session.destination,
+       modelOnly:true,asBuiltVerified:false,geographicRailTraceAvailable:false});
+    }
     state.resumeTarget=null;save();return {action:'CONFIRMED_STOP',pending:null};
   }
   throw Error('UNKNOWN_JOURNEY_PHASE');
