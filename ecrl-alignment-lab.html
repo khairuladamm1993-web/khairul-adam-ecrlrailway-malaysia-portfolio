@@ -11,7 +11,7 @@
 .lab-orm-note{font-size:.77rem;color:#745419;border-left:3px solid #bf7929;margin:7px 0 14px;padding:7px 9px;background:#fff8e9}
 @media(max-width:650px){.lab-rail-tools{gap:7px;padding:9px}.lab-rail-buttons{width:100%}.lab-rail-buttons button{flex:1 1 auto}.lab-rail-caution summary{padding:10px}.lab-orm-note{font-size:.74rem}}
 .lab-track-meta{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:9px;font-size:.84rem}.lab-track-meta strong{display:block}.lab-track-meta p{margin:5px 0;color:#526773}.lab-track-meta a{color:#0b7377;font-weight:650}.lab-basemap-selector{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}.lab-basemap-selector button{min-height:36px;font-size:.85rem;padding:6px 12px}.lab-basemap-selector button[aria-pressed=true]{background:#dceced;border-color:#0b7377}.lab-basemap-selector span{font-size:.74rem;color:#536975}.lab-station-panel-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:9px 0;color:#38576a;font-size:.84rem}.lab-station-card{background:#fff;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin:10px 0}.lab-station-card h2{margin:0 0 4px}.lab-station-card h3{margin:4px 0 7px;font-size:1rem}.lab-station-card .lab-warning{margin:6px 0 10px;padding:7px;font-size:.82rem}.lab-station-grid{display:grid;grid-template-columns:minmax(110px,42%) 1fr;gap:5px 9px;font-size:.85rem;margin:5px 0}.lab-station-grid dt{color:#526773}.lab-station-grid dd{margin:0;font-weight:600;overflow-wrap:anywhere}.lab-station-card details a{display:block;font-size:.74rem;overflow-wrap:anywhere;padding:4px}.lab-trail-list{max-height:230px;overflow:auto}.lab-trail-list li{font-variant-numeric:tabular-nums}.lab-trail-note{font-size:.82rem;color:#76501a;background:#fff8e7;padding:8px;border-left:3px solid #b6802d}@media(max-width:650px){.lab-station-card{padding:9px}.lab-basemap-selector span{flex-basis:100%}}
-</style>
+.lab-owner-counter{padding:7px 10px;background:#e8f4f2;border-radius:8px;font-weight:650}.lab-owner-checkbox{display:flex;gap:10px;align-items:flex-start;margin:10px 0;padding:10px;background:#fff4df;border-radius:7px}.lab-owner-checkbox input{width:20px;height:20px;flex:0 0 20px;accent-color:#b97b1d}#lab-d102-preflight progress{width:100%;height:12px;margin-bottom:10px;accent-color:#097d80}#lab-d102-preflight input,#lab-d102-observations input,#lab-d102-preflight textarea,#lab-d102-observations textarea{margin:5px 0 12px}.lab-station-card>label{margin:8px 0}</style>
 </head><body><header><a href="./unified-map-v8.html">← MR-S10 Unified Map V8.1</a><strong>ECRL · Single Train Alignment Laboratory</strong></header>
 <main>
 <details class="lab-rail-caution"><summary>SIMULASI · Rujukan peta bukan as-built / GPS</summary><p><strong>EXPERIMENTAL / SIMULASI</strong> · This private-use learning workflow is not a secured Owner portal. No real train telemetry, tickets, georeferenced as-built railway or site safety suitability is asserted. Do not import restricted railway engineering drawings.</p></details>
@@ -28,6 +28,8 @@
 <div class="lab-station-panel-head"><strong>16 STN · 7 PL (rekod CH)</strong><span>Tap penanda stesen pada peta untuk Station Intelligence. PL belum dipetakan secara tepat.</span></div>
 <div id="lab-station-intelligence" class="lab-station-card" aria-label="ECRL station intelligence"></div>
 <div id="lab-freight-intelligence" class="lab-station-card" aria-label="Port Klang, Kemaman, Kuantan and Kerteh freight references"></div>
+<section id="lab-d102-preflight" class="lab-station-card" aria-label="Owner coordinates verification before D102 georeferenced run"></section>
+<section id="lab-d102-observations" class="lab-station-card" aria-label="D102 simulation observation collection"></section>
 <p id="lab-orm-note" class="lab-orm-note">Jalur berwarna ialah rujukan OSM/OpenRailwayMap, BUKAN geometri ECRL yang disahkan. Zoom ≥9 untuk melihat rel dalam pembinaan.</p>
 <div id="lab-track-metadata" class="lab-track-meta" aria-live="polite"><strong>Spesifikasi projek ECRL (MRL): 1,435 mm · 25 kV AC</strong><p>Garisan oren bukan penanda ukuran gauge. Model tren di peta memerlukan geometri vektor dan anchor CH yang sepadan.</p><a href="https://www.mida.gov.my/wp-content/uploads/2024/06/Slides-MRL.pdf" target="_blank" rel="noopener noreferrer">Sumber teknikal MRL</a></div><section id="route-lab" aria-label="ECRL Manual Simulation"></section></main>
 <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js"></script>
@@ -43,4 +45,8 @@
 <script src="./assets/unified-ecrl/kerteh-freight-reference.js"></script>
 <script src="./assets/unified-ecrl/route-lab-freight-area-map.js"></script>
 <script src="./assets/unified-ecrl/route-lab-ch-trail.js"></script>
+<script src="./assets/unified-ecrl/alignment-evidence-r2.js"></script>
+<script src="./assets/unified-ecrl/route-lab-d102-preflight.js"></script>
+<script src="./assets/unified-ecrl/route-lab-d102-observations.js"></script>
+<script src="./assets/unified-ecrl/route-lab-d102-preflight-ui.js"></script>
 <script src="./assets/unified-ecrl/route-lab-ui.js"></script></body></html>
