@@ -23,6 +23,8 @@ function validateCmd(c,i){
  ensure(/^[A-Za-z0-9_:-]{3,90}$/.test(id),'COMMAND_'+i+'_ID_REQUIRED');
  const x=c.payload;
  ensure(isObj(x),'COMMAND_'+i+'_PAYLOAD_REQUIRED');
+ const forbidden=['script','javascript','eval','shell','sql','command','production','deployment','github','vercel','supabase','forceMerge','forcePush','secrets','env','authorization'];
+ ensure(!forbidden.some(k=>Object.prototype.hasOwnProperty.call(x,k)), 'COMMAND_'+i+'_EXECUTABLE_OR_PRIVILEGED_PAYLOAD_REJECTED');
  const asset=safeString(x.assetCode||x.code,18).toUpperCase();
  const codeRequired=!['ASSISTANT_ASSIGNMENT'].includes(op);
  if(codeRequired)ensure(VALID_ASSETS.has(asset),'COMMAND_'+i+'_INVALID_ASSET_CODE');
@@ -69,6 +71,8 @@ function validateCmd(c,i){
 function validate(data){
  ensure(isObj(data),'DIRECTIVE_ROOT_NOT_OBJECT');
  ensure(data.schema===FORMAT,'DIRECTIVE_SCHEMA_MISMATCH');
+ ensure(!['script','javascript','eval','shell','sql','productionTarget','executeImmediately','autoApprove','githubActions'].some(k=>Object.prototype.hasOwnProperty.call(data,k)),
+ 'DIRECTIVE_PRIVILEGED_ACTIONS_REJECTED');
  ensure(data.scope==='MR_S10_P01_D102_LAB','DIRECTIVE_SCOPE_NOT_LAB');
  const assignmentId=safeString(data.assignmentId,100);
  ensure(/^[A-Za-z0-9_:-]{6,100}$/.test(assignmentId),'ASSIGNMENT_ID_INVALID');
