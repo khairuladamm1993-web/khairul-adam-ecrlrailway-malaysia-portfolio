@@ -5,6 +5,7 @@ on:
       - test/mrs10-p01-v81-ecrl-ci-recovery-20261029
     paths:
       - '.github/workflows/mrs10-p01-v81-ecrl-recovery-qa.yml'
+      - 'tests/unified-ecrl-browser.test.mjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -40,8 +41,10 @@ jobs:
       - name: ECRL candidate browser canvas tests (Chromium/WebKit)
         run: node tests/unified-ecrl-browser.test.mjs
       - name: Legacy V8.1 map focus regression (Chromium/WebKit)
+        if: success() || failure()
         run: node tests/unified-v81-browser.test.mjs
       - name: V8 full map regression
+        if: success() || failure()
         run: node tests/unified-v8-browser.test.mjs
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
