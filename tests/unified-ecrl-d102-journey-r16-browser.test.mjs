@@ -62,6 +62,16 @@ for(const [engineName,engine] of [['chromium',chromium],['webkit',webkit]]){
   assert.equal(snap.mapPinAvailability,false);
   assert.equal(snap.journeyR16.journey.liveGPS,false);
   checks.push('restore CH, confirmed events, layout after refresh; no invented physical train GPS');
+  const oldBackup={schema:1,session:{schema:1,mode:'SIMULATION',trainId:'D102-SIM',
+   origin:'STN01',destination:'STN17',currentCH:88220,events:[],reviews:[],verifiedAsBuilt:false,gpsUsed:false}};
+  page.once('dialog',dialog=>dialog.accept());
+  await page.locator('#lab-r16-backup-file').setInputFiles({
+   name:'qa-old-private-session.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(oldBackup))});
+  await page.waitForFunction(()=>window.MRS10ECRLRouteLab.snapshot().session.currentCH===88220);
+  const restored=await page.evaluate(()=>window.MRS10ECRLRouteLab.snapshot());
+  assert.equal(restored.journeyR16.journey.ledgerCount>=10,true);
+  assert.equal(restored.mapPinAvailability,false);
+  checks.push('safe private R1.5 backup import resumes CH across Preview origin without invented geometry');
   const errors=pageErrors.filter(e=>!(/openrailwaymap|tiles.maps.eox.at/i.test(e)&&/access control|network error|failed to load/i.test(e)));
   assert.equal(errors.length,0,errors.join('; '));
   results.push({engine:engineName,viewport:v.name,status:'PASS',checks});
