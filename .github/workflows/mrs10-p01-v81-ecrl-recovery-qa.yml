@@ -1,0 +1,54 @@
+name: P01 V8.1 ECRL full candidate recovery QA
+on:
+  push:
+    branches:
+      - test/mrs10-p01-v81-ecrl-ci-recovery-20261029
+    paths:
+      - '.github/workflows/mrs10-p01-v81-ecrl-recovery-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  full-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22.16.0'
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Full legacy & ECRL consumer unit regression
+        run: |
+          npm test
+          node --test tests/unified-v6-regression.test.cjs tests/unified-v7-regression.test.cjs tests/unified-v8-regression.test.cjs tests/unified-v81-focus.test.cjs tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-consumer-popup.test.cjs
+          node scripts/audit-unified-v8-networks.cjs
+      - name: Build same isolated candidate
+        run: node scripts/build-unified-v8.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Local map server for browser QA (no Vercel/Production deploy)
+        run: |
+          python3 -m http.server 8765 --directory dist-unified-v8 > /tmp/p01-v81-qa-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:8765/unified-map-v8.html >/dev/null && exit 0
+            sleep 1
+          done
+          exit 1
+      - name: ECRL candidate browser canvas tests (Chromium/WebKit)
+        run: node tests/unified-ecrl-browser.test.mjs
+      - name: Legacy V8.1 map focus regression (Chromium/WebKit)
+        run: node tests/unified-v81-browser.test.mjs
+      - name: V8 full map regression
+        run: node tests/unified-v8-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: p01-v81-full-recovery-qa-evidence
+          path: |
+            artifacts/unified-ecrl-browser/
+            artifacts/unified-v81-browser/
+            artifacts/unified-v8-browser/
+          retention-days: 14
