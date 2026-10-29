@@ -43,12 +43,12 @@ function fromGeoJSON(geo){
   if(items.length>24)throw Error('TOO_MANY_TRACKS_PER_ASSET');
   const lat0=items.reduce((s,t)=>s+t.coords.reduce((n,c)=>n+c[1],0),0)/items.reduce((s,t)=>s+t.coords.length,0);
   const cos=Math.cos(lat0*Math.PI/180),xs=items.flatMap(t=>t.coords.map(c=>c[0]*cos)),ys=items.flatMap(t=>t.coords.map(c=>c[1]));
-  const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+  const minX=xs.reduce((a,b)=>Math.min(a,b),Infinity),maxX=xs.reduce((a,b)=>Math.max(a,b),-Infinity),minY=ys.reduce((a,b)=>Math.min(a,b),Infinity),maxY=ys.reduce((a,b)=>Math.max(a,b),-Infinity);
   const dx=Math.max(1e-10,maxX-minX),dy=Math.max(1e-10,maxY-minY),scale=Math.min(88/dx,78/dy);
   const tx=(100-dx*scale)/2,ty=(100-dy*scale)/2;
   layouts.push({code,title:code+' · Imported GeoJSON schematic',source:'GeoJSON source(s): '+items.map(x=>x.source).join('; ').slice(0,260),
     tracks:items.map(item=>({id:item.id,role:item.role,
-      points:item.coords.filter((_,i)=>i===0||i===item.coords.length-1||i%Math.max(1,Math.ceil(item.coords.length/80))===0).slice(0,80)
+      points:Array.from({length:Math.min(80,item.coords.length)},(_,i)=>item.coords[Math.round(i*(item.coords.length-1)/(Math.min(80,item.coords.length)-1))])
         .map(c=>[Math.max(0,Math.min(100,tx+(c[0]*cos-minX)*scale)),Math.max(0,Math.min(100,ty+(maxY-c[1])*scale))])}))});
  }
  return layouts;
