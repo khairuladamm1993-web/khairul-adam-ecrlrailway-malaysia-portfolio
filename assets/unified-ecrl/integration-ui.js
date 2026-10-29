@@ -85,7 +85,13 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
    // it while collapsed. Inline display avoids responsive CSS leakage.
    engineeringBody.style.setProperty('display','none','important');
    engineeringBody.style.setProperty('visibility','hidden','important');
-   tech.querySelector('summary').addEventListener('click',()=>{
+   const popupCreatedAt=Date.now();
+   tech.querySelector('summary').addEventListener('click',event=>{
+    // iPad touch hit-testing can dispatch the map-opening tap onto a newly
+    // inserted summary. Suppress that initial ghost tap, not intentional later taps.
+    if((root.navigator?.maxTouchPoints||0)>0&&Date.now()-popupCreatedAt<300){
+     event.preventDefault();event.stopPropagation();return;
+    }
     engineeringBody.style.setProperty('display',tech.open?'none':'block','important');
     engineeringBody.style.setProperty('visibility',tech.open?'hidden':'visible','important');
    });
