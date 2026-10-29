@@ -78,8 +78,17 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
   host.append(key);
   const tech=el('details',null,'ecrl-engineering');summary(tech,ui('technical'));
    // Keep raw provenance inside explicit disclosure across responsive CSS.
-   const engineeringBody=el('div',null,'ecrl-engineering-body');engineeringBody.hidden=true;
-   tech.addEventListener('toggle',()=>{engineeringBody.hidden=!tech.open});
+   const engineeringBody=el('div',null,'ecrl-engineering-body');
+   // Lazy mount: closed Consumer popup has no raw technical provenance in its DOM.
+   // A summary click mounts before native opening; closing removes it synchronously.
+   tech.querySelector('summary').addEventListener('click',()=>{
+    if(tech.open)engineeringBody.remove();
+    else tech.append(engineeringBody);
+   });
+   tech.addEventListener('toggle',()=>{
+    if(tech.open&&!engineeringBody.isConnected)tech.append(engineeringBody);
+    if(!tech.open&&engineeringBody.isConnected)engineeringBody.remove();
+   });
   for(const [label,value] of [['status',a.assetStatus],['verification',a.verificationStatus],['service',a.serviceType],['geometry',a.geometryProvenance||a.geometryType],['chainage',a.chainageStartKm==null&&a.chainageEndKm==null?null:[a.chainageStartKm??'UNKNOWN',a.chainageEndKm??'UNKNOWN'].join(' – ')],['trackCount',a.trackCount]]){
    engineeringBody.append(el('p',t(label)+': '+(value??(t('unknown')+' · UNKNOWN'))));
   }
@@ -101,8 +110,7 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
   for(const conflict of a.conflicts||[])engineeringBody.append(el('p',t('conflict')+' · SOURCE_CONFLICT · '+conflict.field+' · '+conflict.sourceIds.join(' / ')+' · '+conflict.reason));
   if(isKerteh){engineeringBody.append(el('p',ui('type')+': '+a.assetType));engineeringBody.append(el('p',ui('portOperator')+': '+a.operatorName));engineeringBody.append(el('p',ui('yardEndUnknown')));engineeringBody.append(el('p','NO_SIDING_GEOMETRY · NO_END_LANE_COORDINATE · NO_ROAD_RESIDENTIAL_CADASTRE_AUDIT'));engineeringBody.append(el('p','Source: OSM landuse=railway area only; not an ECRL as-built loading or storage lane.'));}
   if(a.notes)engineeringBody.append(el('p',a.notes));
-     tech.append(engineeringBody);
-   host.append(tech);
+     host.append(tech);
   const sources=el('details',null,'ecrl-sources');summary(sources,ui('references'));
   const ids=[...new Set([...(a.sourceIds||[]),...(ref?[ref.sourceId]:[])])];
   for(const sid of ids){const source=adapter.registry.sources[sid];if(!source)continue;const p=el('p'),link=el('a',sid+' · '+source.kind);link.href=source.url;link.target='_blank';link.rel='noopener noreferrer';p.append(link,el('span',' · '+source.revision));sources.append(p)}host.append(sources);
