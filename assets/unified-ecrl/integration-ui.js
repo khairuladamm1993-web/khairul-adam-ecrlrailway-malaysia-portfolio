@@ -83,12 +83,12 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
    const engineeringBody=el('div',null,'ecrl-engineering-body');
    // Keep provenance in the engineering DOM for source audit, but never render
    // it while collapsed. Inline display avoids responsive CSS leakage.
-   engineeringBody.style.display='none';
+   engineeringBody.style.setProperty('display','none','important');
    tech.querySelector('summary').addEventListener('click',()=>{
-    engineeringBody.style.display=tech.open?'none':'block';
+    engineeringBody.style.setProperty('display',tech.open?'none':'block','important');
    });
    tech.addEventListener('toggle',()=>{
-    engineeringBody.style.display=tech.open?'block':'none';
+    engineeringBody.style.setProperty('display',tech.open?'block':'none','important');
    });
    for(const [label,value] of [['status',a.assetStatus],['verification',a.verificationStatus],['service',a.serviceType],['geometry',a.geometryProvenance||a.geometryType],['chainage',a.chainageStartKm==null&&a.chainageEndKm==null?null:[a.chainageStartKm??'UNKNOWN',a.chainageEndKm??'UNKNOWN'].join(' – ')],['trackCount',a.trackCount]]){
    engineeringBody.append(el('p',t(label)+': '+(value??(t('unknown')+' · UNKNOWN'))));
