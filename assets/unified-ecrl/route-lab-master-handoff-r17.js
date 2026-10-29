@@ -5,6 +5,7 @@
 const SCHEMA='mrs10-ecrl-d102-master-handoff-v1';
 const MAX_RAW_MEDIA=22*1024*1024;
 const rows=root.MRS10ECRLChainage?.records||[];
+const canonicalCH=n=>'CH'+String(Math.floor(n/1000)).padStart(3,'0')+'+'+String(n%1000).padStart(3,'0');
 if(rows.length!==23)throw Error('MASTER_EXPORT_23_MANIFEST_MISSING');
 function mediaB64(raw,mime){
  return new Promise((resolve,reject)=>{
@@ -51,7 +52,7 @@ async function create(deps,{includeMedia=true,allowIncomplete=false}={}){
   return {
     assetCode:r.code,assetId:r.assetId,sequence:r.sequence,kind:r.code.startsWith('PL')?'PASSING_LOOP':'STATION',
     name:station?.displayName||passing?.name||r.code,chainageM:r.metres,
-    CHLabel:r.label,CHDatum:r.datum,CHStatus:r.status,
+    CHLabel:canonicalCH(r.metres),CHDatum:r.datum,CHStatus:r.status,
     previousAsset:i?rows[i-1].code:null,deltaPreviousMetres:deltaPreviousM,
     nextAsset:rows[i+1]?.code||null,deltaNextMetres:rows[i+1]?rows[i+1].metres-r.metres:null,
     coordinateSource:'OWNER_MODEL_CANDIDATE_OR_PUBLIC_REFERENCE_NOT_SURVEYED',
