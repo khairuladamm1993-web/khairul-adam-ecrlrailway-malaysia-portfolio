@@ -177,13 +177,15 @@ function importPayload(data){
  return null;
 }
 function cancelPending(){journey.clearPending();popup();refresh()}
+function movementApplied(fromCH,toCH){journey.movementApplied(fromCH,toCH);refresh()}
+function newRun(origin,destination){journey.newRun(origin,destination);refresh()}
 function connect(options){
  fn=options;map=options.map;const retry=()=>linkMap();
  if(map){map.on('load',retry);map.on('style.load',retry)}
  journey.syncSession(current());refresh();
  if(journey.pending())popup();
 }
-const api=Object.freeze({connect,request,refresh,showLayout,importPayload,cancelPending,pending:()=>journey.pending(),snapshot:()=>({journey:journey.snapshot(),layouts:layouts.snapshot()})});
+const api=Object.freeze({connect,request,refresh,showLayout,importPayload,cancelPending,movementApplied,newRun,pending:()=>journey.pending(),snapshot:()=>({journey:journey.snapshot(),layouts:layouts.snapshot()})});
 root.MRS10D102JourneyUI=api;
 if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:null);
