@@ -157,6 +157,18 @@ function refresh(){
    const blob=new Blob([JSON.stringify(journey.exportData(),null,2)],{type:'application/json'});
    const url=URL.createObjectURL(blob),a=$('a');a.href=url;a.download='private-d102-r16-journey-history.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
   };host.append(ex);
+  const backupLabel=$('label','Import sandaran sesi lama R1.5/R1.6 · sambung CH tanpa mula semula');
+  const backup=$('input');backup.type='file';backup.accept='.json,application/json';backup.id='lab-r16-backup-file';
+  backup.onchange=async()=>{try{
+    const file=backup.files?.[0];if(!file||file.size>1800000)throw Error('BACKUP_MAX_1_8MB');
+    const input=JSON.parse(await file.text());
+    if(!input||input.schema!==1||!input.session)throw Error('EXPECTED_R15_SESSION_BACKUP_SCHEMA_1');
+    if(!root.confirm('Import sandaran akan menggantikan CH sesi yang sedang dipaparkan. Jurnal R1.6 kekal. Teruskan?'))return;
+    const restored=fn.restoreSession(input.session);
+    sourceStatus='Sesi dipulihkan pada '+ch(restored.currentCH)+' · geometri dan data sensitif tidak diimport automatik';
+    refresh();
+  }catch(e){sourceStatus='IMPORT BACKUP ERROR: '+String(e.message||e);refresh()}};
+  backupLabel.append(backup);host.append(backupLabel,$('p',sourceStatus,'lab-r16-note'));
   const history=$('details');history.append($('summary','Sejarah perjalanan dan confirmation · '+s.ledgerCount));
   const list=$('ol');for(const ev of s.ledger.slice(-80))list.append($('li',ev.type+' · '+ch(ev.CH??0)+' · '+(ev.code||ev.id||'')+' · '+ev.time));
   history.append(list);host.append(history);
