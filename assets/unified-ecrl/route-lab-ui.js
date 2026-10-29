@@ -123,7 +123,7 @@ h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
  const events=el('details');events.append(el('summary','Autosave events: '+session.events.length));const ul2=el('ol');for(const e of session.events.slice(-30))ul2.append(el('li',e.type+' · '+(e.code||e.to)+' · '+(e.time||'')));events.append(ul2);h.append(events);
  updateMap();
 }
-store();getMap();render();
+store();getMap();render();root.MRS10D102AssistantInbox?.connect();
 root.MRS10D102JourneyUI?.connect({
  map,
  getSession:()=>session,
@@ -141,5 +141,5 @@ root.MRS10D102JourneyUI?.connect({
  },
 });
 
-root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),geometryLineage:root.MRS10ECRLGeometryLineage?.inspect(geo||{features:[]})||null,alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,satellite:root.MRS10ECRLSatelliteBasemap?.snapshot()||null,hdImagery:root.MRS10ECRLHDImagery?.snapshot()||null,stationMap:root.MRS10ECRLStationMap?.snapshot()||null,freightReferences:root.MRS10ECRLFreightAreaMap?.snapshot()||null,d102Preflight:root.MRS10ECRLD102PreflightUI?.snapshot()||null,journeyR16:root.MRS10D102JourneyUI?.snapshot()||null,camera:root.MRS10D102Camera?.snapshot()||null,chTrail:root.MRS10ECRLCHTrail?.create(session,{intervalM:100})||null,trackSpecification:root.MRS10ECRLRailEngineering?.ecrl||null,mapPinAvailability:!!(root.MRS10ECRLRailEngineering?.movementEligibility({assembly:assembled,matched:anchors,sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})})?.trainingTrainPinAllowed&&E.positionAt(session.currentCH,assembled,anchors)),storage:memoryStatus})});
+root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),geometryLineage:root.MRS10ECRLGeometryLineage?.inspect(geo||{features:[]})||null,alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,satellite:root.MRS10ECRLSatelliteBasemap?.snapshot()||null,hdImagery:root.MRS10ECRLHDImagery?.snapshot()||null,stationMap:root.MRS10ECRLStationMap?.snapshot()||null,freightReferences:root.MRS10ECRLFreightAreaMap?.snapshot()||null,d102Preflight:root.MRS10ECRLD102PreflightUI?.snapshot()||null,journeyR16:root.MRS10D102JourneyUI?.snapshot()||null,assistantR17:root.MRS10D102AssistantInbox?.snapshot()||null,camera:root.MRS10D102Camera?.snapshot()||null,chTrail:root.MRS10ECRLCHTrail?.create(session,{intervalM:100})||null,trackSpecification:root.MRS10ECRLRailEngineering?.ecrl||null,mapPinAvailability:!!(root.MRS10ECRLRailEngineering?.movementEligibility({assembly:assembled,matched:anchors,sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})})?.trainingTrainPinAllowed&&E.positionAt(session.currentCH,assembled,anchors)),storage:memoryStatus})});
 })(window);
