@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "1.0.0",
+  "assignmentId": "D102-STN01-SAFE-DEMO",
+  "revision": 1,
+  "source": {
+    "name": "MR-S10 safe demonstration",
+    "kind": "CHATGPT_MRS10",
+    "references": [
+      {
+        "id": "owner-ch",
+        "note": "Existing Owner CH manifest; simulation reference only, not surveyed geometry",
+        "licence": "PRIVATE_OWNER_REFERENCE"
+      }
+    ]
+  },
+  "project": "MR-S10-P01",
+  "trainId": "D102",
+  "scope": [
+    "STN01",
+    "STN02"
+  ],
+  "currentCheckpoint": {
+    "code": "STN01",
+    "CH": 670
+  },
+  "targetCH": 33700,
+  "instructions": "Review STN01, use existing Owner-confirmed CH simulation to STN02. No GPS, live operations or physical geometry is asserted.",
+  "requirements": [],
+  "ownerCheckpoints": [
+    "STN01 departure",
+    "All R1.6 journey confirmations",
+    "STN02 arrival"
+  ],
+  "expectedOutcome": "A private, recoverable Owner-confirmed CH simulation record.",
+  "qa": [
+    "Owner start required",
+    "Refresh must not replay completed commands",
+    "No geographic position invented"
+  ],
+  "acceptanceCriteria": [
+    "STN02 CH33700 reached only through existing journey confirmations",
+    "Geometry remains unresolved"
+  ],
+  "commands": [
+    {
+      "id": "review-stn01",
+      "type": "REVIEW_CHECKPOINT",
+      "params": {
+        "code": "STN01",
+        "CH": 670,
+        "sourceIds": [
+          "owner-ch"
+        ]
+      }
+    },
+    {
+      "id": "move-stn02",
+      "type": "MOVE_CH",
+      "params": {
+        "targetCH": 33700
+      }
+    },
+    {
+      "id": "review-stn02",
+      "type": "REVIEW_CHECKPOINT",
+      "params": {
+        "code": "STN02",
+        "CH": 33700,
+        "sourceIds": [
+          "owner-ch"
+        ]
+      }
+    },
+    {
+      "id": "report",
+      "type": "EXPORT_REPORT",
+      "params": {
+        "report": "EXECUTION"
+      }
+    }
+  ]
+}

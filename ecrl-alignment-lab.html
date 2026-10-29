@@ -16,7 +16,7 @@
 .lab-hd-setup p{font-size:.78rem;color:#435865;margin:7px 0}.lab-hd-setup a{color:#0b7377}
 #lab-hd-status[data-status="ERROR"],#lab-hd-status[data-status="KEY_REQUIRED"]{color:#9a4b20;font-weight:600}
 .lab-r16-dialog{max-width:min(92vw,630px);max-height:85dvh;overflow-y:auto;border:1px solid #afc5ca;border-radius:17px;background:#fff;color:#173746;padding:18px 20px;box-shadow:0 12px 70px #15333b66}.lab-r16-dialog::backdrop{background:#10262cb5}.lab-r16-dialog h2{font-size:1.2rem;margin:0 0 12px}.lab-r16-heading{font-weight:750}.lab-r16-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}.lab-r16-fields label{font-size:.84rem}.lab-r16-fields input,.lab-r16-fields textarea{width:100%;min-width:0;margin:5px 0;padding:10px;border:1px solid #adbec4;border-radius:8px;font:inherit}.lab-r16-fields label:nth-child(4),.lab-r16-fields label:nth-child(5){grid-column:1/-1}.lab-r16-note{font-size:.82rem;color:#586b76}.lab-r16-unknown{font-size:.84rem;padding-left:20px;max-height:115px;overflow-y:auto}.lab-r16-dialog .lab-row button{flex:1 1 170px}.lab-r16-alert{color:#a24d24;font-size:.85rem}#lab-r16-layout-panel select,#lab-r16-infrastructure select,#lab-r16-infrastructure input{width:100%;padding:10px;min-width:0;margin:5px 0 9px;border:1px solid #b7cbd1;border-radius:8px;font:inherit}#lab-r16-layout-panel input[type=file],#lab-r16-infrastructure input[type=file]{width:100%}@media(max-width:500px){.lab-r16-dialog{padding:12px}.lab-r16-fields{grid-template-columns:1fr}}.lab-r161-source-documents{border-top:1px solid #c9d9dc;margin:13px 0 0;padding:12px 0 2px}.lab-r161-source-documents h3{font-size:.96rem;margin:5px 0}.lab-r161-item{margin:8px 0;padding:9px;border:1px solid #c8dadd;border-radius:9px;background:#fafdfc}.lab-r161-item summary{font-size:.85rem;overflow-wrap:anywhere;cursor:pointer}.lab-r161-layout-img{max-width:100%;height:auto;display:block;margin:9px auto;object-fit:contain;max-height:65vh}.lab-r161-open{display:inline-block;margin:8px 0;color:#086f84;text-decoration:underline;font-weight:650}#lab-r161-source-ref{width:100%;min-width:0;padding:8px;margin:5px 0;border-radius:7px;border:1px solid #bed1d5}</style>
-</head><body><header><a href="./unified-map-v8.html">← MR-S10 Unified Map V8.1</a><strong>ECRL · Single Train Alignment Laboratory</strong></header>
+<style>#lab-r17-command-center pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:22rem;overflow:auto}#lab-r17-command-center label{display:block;margin:.6rem 0}#lab-r17-command-center button{min-height:44px;margin:.25rem}#lab-r17-command-center input:not([type=checkbox]){max-width:100%;display:block}#lab-r17-error{color:#b42318}</style></head><body><header><a href="./unified-map-v8.html">← MR-S10 Unified Map V8.1</a><strong>ECRL · Single Train Alignment Laboratory</strong></header>
 <main>
 <details class="lab-rail-caution"><summary>SIMULASI · Rujukan peta bukan as-built / GPS</summary><p><strong>EXPERIMENTAL / SIMULASI</strong> · This private-use learning workflow is not a secured Owner portal. No real train telemetry, tickets, georeferenced as-built railway or site safety suitability is asserted. Do not import restricted railway engineering drawings.</p></details>
 <div id="lab-rail-overlay-controls" class="lab-rail-tools">
@@ -51,6 +51,7 @@
 <section id="lab-d102-observations" class="lab-station-card" aria-label="D102 simulation observation collection"></section>
 <p id="lab-orm-note" class="lab-orm-note">Jalur berwarna ialah rujukan OSM/OpenRailwayMap, BUKAN geometri ECRL yang disahkan. Zoom ≥9 untuk melihat rel dalam pembinaan.</p>
 <div id="lab-track-metadata" class="lab-track-meta" aria-live="polite"><strong>Spesifikasi projek ECRL (MRL): 1,435 mm · 25 kV AC</strong><p>Garisan oren bukan penanda ukuran gauge. Model tren di peta memerlukan geometri vektor dan anchor CH yang sepadan.</p><a href="https://www.mida.gov.my/wp-content/uploads/2024/06/Slides-MRL.pdf" target="_blank" rel="noopener noreferrer">Sumber teknikal MRL</a></div><section id="lab-r16-status" class="lab-station-card" aria-label="D102 Journey status"></section>
+<section id="lab-r17-command-center" class="lab-station-card" aria-label="Assistant Command Center"></section>
 <section id="lab-r16-layout-panel" class="lab-station-card" aria-label="Station PL track layout import and preview"></section>
 <section id="lab-r16-infrastructure" class="lab-station-card" aria-label="Bridge tunnel QZ CH event records"></section>
 <section id="route-lab" aria-label="ECRL Manual Simulation"></section></main>
@@ -77,4 +78,9 @@
 <script src="./assets/unified-ecrl/route-lab-imported-layouts.js"></script>
 <script src="./assets/unified-ecrl/route-lab-source-documents-r161.js"></script>
 <script src="./assets/unified-ecrl/route-lab-d102-journey-ui.js"></script>
+<script src="./assets/unified-ecrl/route-lab-assistant-store-r17.js"></script>
+<script src="./assets/unified-ecrl/route-lab-assistant-schema-r17.js"></script>
+<script src="./assets/unified-ecrl/route-lab-assistant-engine-r17.js"></script>
+<script src="./assets/unified-ecrl/route-lab-geometry-intelligence-r17.js"></script>
+<script src="./assets/unified-ecrl/route-lab-assistant-ui-r17.js"></script>
 <script src="./assets/unified-ecrl/route-lab-ui.js"></script></body></html>

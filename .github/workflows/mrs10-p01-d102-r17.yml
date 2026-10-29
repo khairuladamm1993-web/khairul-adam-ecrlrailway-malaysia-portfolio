@@ -24,7 +24,7 @@ jobs:
           node --check assets/unified-ecrl/route-lab-d102-journey-ui.js
           node --check assets/unified-ecrl/route-lab-ui.js
           node --check assets/unified-ecrl/route-lab-station-map.js
-          node --test tests/unified-ecrl-d102-journey-r16.test.cjs tests/unified-ecrl-d102-preflight.test.cjs
+          node --test tests/unified-ecrl-*.test.cjs
       - run: node scripts/build-unified-v8.cjs
   browser:
     runs-on: ubuntu-latest
@@ -43,6 +43,7 @@ jobs:
       - name: Six browser STN01 PNG PDF original and IndexedDB restore QA
         run: |
           python3 -m http.server 8765 --directory dist-unified-v8 >/tmp/p01-media-r161.log 2>&1 &
+          node tests/unified-ecrl-assistant-r17-browser.test.mjs
           node tests/unified-ecrl-d102-media-r161-browser.test.mjs
           node tests/unified-ecrl-d102-journey-r16-browser.test.mjs
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -50,6 +51,7 @@ jobs:
         with:
           name: d102-stn01-image-pdf-original-qa
           path: |
+            artifacts/d102-r17/
             artifacts/d102-r161-media/
             artifacts/d102-r16/
           retention-days: 14

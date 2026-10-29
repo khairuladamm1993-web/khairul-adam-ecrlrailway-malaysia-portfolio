@@ -27,7 +27,7 @@ function updateMap(){if(!map||!map.isStyleLoaded())return;
  if(map.getSource(routeID))map.getSource(routeID).setData(data);else map.addSource(routeID,{type:'geojson',data});
  if(!map.getLayer(routeID))map.addLayer({id:routeID,type:'line',source:routeID,paint:{'line-color':'#7c3aed','line-width':4,'line-opacity':0.82}});
  }else if(map.getSource(routeID))map.getSource(routeID).setData({type:'FeatureCollection',features:[]});
- const pos=good&&eligibility?.trainingTrainPinAllowed?E.positionAt(session.currentCH,assembled,anchors):null;
+ const pos=good&&eligibility?.trainingTrainPinAllowed&&root.MRS10GeometryIntelligenceR17.inspect(rows,geo).geographicMovementAllowed?E.positionAt(session.currentCH,assembled,anchors):null;
  const feature={type:'FeatureCollection',features:pos?[{type:'Feature',properties:{status:'SIMULATION_INFERRED'},geometry:{type:'Point',coordinates:pos.coordinates}}]:[]};
  if(map.getSource(trainID))map.getSource(trainID).setData(feature);else map.addSource(trainID,{type:'geojson',data:feature});
  if(!map.getLayer(trainID))map.addLayer({id:trainID,type:'circle',source:trainID,paint:{'circle-color':'#d92942','circle-radius':10,'circle-stroke-width':3,'circle-stroke-color':'white'}});
@@ -40,10 +40,11 @@ function status(){const t=d[locale],p=E.progress(session,rows);let text=t.none;
    sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})
  });
  text=assembled.status+' · '+assembled.paths.length+' path(s) · '+Math.round(assembled.paths.reduce((n,x)=>n+x.metres,0)/1000*100)/100+' km OSM · '+(anchors?.status||'UNMATCHED_ANCHORS')+
-   ' · '+(gate?.trainingTrainPinAllowed?'VECTOR MODEL ONLY':'TRAIN MAP LOCKED: '+(gate?.reasons||['NO_SOURCE']).join(', '));
+   ' · '+(gate?.trainingTrainPinAllowed&&root.MRS10GeometryIntelligenceR17.inspect(rows,geo).geographicMovementAllowed?'VECTOR MODEL ONLY':'TRAIN MAP LOCKED: '+(gate?.reasons||['NO_SOURCE']).join(', '));
  }
  return {t,p,text};}
-function render(){const {t,p,text}=status();h.replaceChildren();root.MRS10ECRLRailOverlay?.setLocale(locale);root.MRS10ECRLStationMap?.setLocale(locale);root.MRS10ECRLFreightAreaMap?.setLocale(locale);document.documentElement.lang=locale;root.MRS10ECRLD102PreflightUI?.render();
+function render(){
+ root.MRS10AssistantUI?.setLocale(locale);const {t,p,text}=status();h.replaceChildren();root.MRS10ECRLRailOverlay?.setLocale(locale);root.MRS10ECRLStationMap?.setLocale(locale);root.MRS10ECRLFreightAreaMap?.setLocale(locale);document.documentElement.lang=locale;root.MRS10ECRLD102PreflightUI?.render();
  const spec=root.MRS10ECRLRailEngineering;
  const box=document.getElementById('lab-track-metadata');
  if(box&&spec){
@@ -144,5 +145,16 @@ root.MRS10D102JourneyUI?.connect({
  },
 });
 
-root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),geometryLineage:root.MRS10ECRLGeometryLineage?.inspect(geo||{features:[]})||null,alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,satellite:root.MRS10ECRLSatelliteBasemap?.snapshot()||null,hdImagery:root.MRS10ECRLHDImagery?.snapshot()||null,stationMap:root.MRS10ECRLStationMap?.snapshot()||null,freightReferences:root.MRS10ECRLFreightAreaMap?.snapshot()||null,d102Preflight:root.MRS10ECRLD102PreflightUI?.snapshot()||null,journeyR16:root.MRS10D102JourneyUI?.snapshot()||null,camera:root.MRS10D102Camera?.snapshot()||null,chTrail:root.MRS10ECRLCHTrail?.create(session,{intervalM:100})||null,trackSpecification:root.MRS10ECRLRailEngineering?.ecrl||null,mapPinAvailability:!!(root.MRS10ECRLRailEngineering?.movementEligibility({assembly:assembled,matched:anchors,sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})})?.trainingTrainPinAllowed&&E.positionAt(session.currentCH,assembled,anchors)),storage:memoryStatus})});
+root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),geometryLineage:root.MRS10ECRLGeometryLineage?.inspect(geo||{features:[]})||null,alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,satellite:root.MRS10ECRLSatelliteBasemap?.snapshot()||null,hdImagery:root.MRS10ECRLHDImagery?.snapshot()||null,stationMap:root.MRS10ECRLStationMap?.snapshot()||null,freightReferences:root.MRS10ECRLFreightAreaMap?.snapshot()||null,d102Preflight:root.MRS10ECRLD102PreflightUI?.snapshot()||null,journeyR16:root.MRS10D102JourneyUI?.snapshot()||null,camera:root.MRS10D102Camera?.snapshot()||null,chTrail:root.MRS10ECRLCHTrail?.create(session,{intervalM:100})||null,trackSpecification:root.MRS10ECRLRailEngineering?.ecrl||null,mapPinAvailability:!!(root.MRS10ECRLRailEngineering?.movementEligibility({assembly:assembled,matched:anchors,sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})})?.trainingTrainPinAllowed&&root.MRS10GeometryIntelligenceR17.inspect(rows,geo).geographicMovementAllowed&&E.positionAt(session.currentCH,assembled,anchors)),storage:memoryStatus})});
+
+root.MRS10AssistantUI?.connect({rows,session:()=>session,
+ journey:()=>root.MRS10D102JourneyUI.snapshot().journey,
+ hasImport:async(kind,code)=>kind==='SOURCE_MEDIA'?(await root.MRS10D102SourceDocuments?.list?.(code)||[]).length>0:kind==='TRACK_LAYOUT'?!!root.MRS10D102JourneyUI.getLayout(code):false,
+ openLayout:code=>root.MRS10D102JourneyUI.showLayout(code),
+ requestMove:target=>root.MRS10D102JourneyUI.request(target),
+ showJourneyPending:()=>root.MRS10D102JourneyUI.showPending(),
+ registerInfrastructure:data=>root.MRS10D102JourneyUI.registerInfrastructure(data),
+ reviewGeometry:async()=>{throw Error('GEOMETRY_EVIDENCE_GATE_NOT_READY')},
+ geometryQA:()=>root.MRS10GeometryIntelligenceR17.inspect(rows,geo)
+});
 })(window);

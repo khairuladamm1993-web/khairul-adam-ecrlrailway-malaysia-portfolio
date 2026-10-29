@@ -197,6 +197,7 @@ function refresh(){
   history.append(list);host.append(history);
  }
  renderLayout();renderEvents();linkMap();
+ root.MRS10AssistantUI?.observe();
 }
 function importPayload(data){
  if(data?.type==='FeatureCollection'&&data.features?.length&&data.features.every(x=>x.properties?.assetCode||x.properties?.stationCode||x.properties?.loopCode)){
@@ -224,7 +225,7 @@ function connect(options){
  journey.syncSession(current());refresh();
  if(journey.pending())popup();
 }
-const api=Object.freeze({connect,request,refresh,showLayout,importPayload,importMediaFile,cancelPending,movementApplied,newRun,pending:()=>journey.pending(),snapshot:()=>({journey:journey.snapshot(),layouts:layouts.snapshot(),sourceDocuments:sourceDocs.snapshot()})});
+const api=Object.freeze({showPending:popup,getLayout:code=>layouts.get(code),registerInfrastructure:data=>{const result=journey.registerInfrastructure(data);refresh();return result},connect,request,refresh,showLayout,importPayload,importMediaFile,cancelPending,movementApplied,newRun,pending:()=>journey.pending(),snapshot:()=>({journey:journey.snapshot(),layouts:layouts.snapshot(),sourceDocuments:sourceDocs.snapshot()})});
 root.MRS10D102JourneyUI=api;
 if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:null);

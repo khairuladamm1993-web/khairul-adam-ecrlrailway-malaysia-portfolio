@@ -2,7 +2,7 @@
    Never generates train GPS or asserts geometry from owner confirmations. */
 (function(root){'use strict';
 const KEY='mrs10-p01-d102-journey-control-r16',VERSION=1;
-const EVENT_TYPES=['BRIDGE','TUNNEL','QZ_CURVE','CURVE','TURNOUT','SIGNAL','CROSSING','OTHER'];
+const EVENT_TYPES=['BRIDGE','TUNNEL','QZ_CURVE','CURVE','TURNOUT','SIGNAL','CROSSING','JUNCTION','SPURLINE','OTHER'];
 const validPoint=(lat,lon)=>Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=1&&lat<=7&&lon>=99&&lon<=105;
 const chLabel=ch=>'CH'+String(Math.floor(ch/1000)).padStart(3,'0')+'+'+String(ch%1000).padStart(3,'0');
 function create(storage,rows){
