@@ -7,7 +7,7 @@ const refs=root.MRS10ECRLStationIntelligence,checks=root.MRS10ECRLChainage?.reco
 let map=null,view='2d',follow=true,mode='WAITING_FOR_MAP',lastCH=null,lastModelPosition=null;
 const label={ms:{top:'2D · Pandangan Atas',oblique:'3D · Perspektif',follow:'Ikut D102',reference:'Kamera di stesen rujukan · bukan lokasi tren sebenar',locked:'Jejak geografi D102 terkunci · menunggu geometri rel vektor',vector:'Mengikuti kedudukan D102 pada model rel (bukan GPS sebenar)'},
 en:{top:'2D · Top Down',oblique:'3D · Perspective',follow:'Follow D102',reference:'Camera at locality reference, not actual train position',locked:'D102 geographic follow locked pending rail vectors',vector:'Following D102 on rail model (not real GPS)'}};
-function t(){return label[root.document.documentElement.lang==='en'?'en':'ms'}
+function t(){return label[root.document.documentElement.lang==='en'?'en':'ms']}
 function render(){const x=t();
  for(const [id,active,text] of [['lab-camera-2d',view==='2d',x.top],['lab-camera-3d',view==='3d',x.oblique],['lab-camera-follow',follow,x.follow]]){const b=document.getElementById(id);if(b){b.textContent=text;b.setAttribute('aria-pressed',String(active))}}
  const status=document.getElementById('lab-camera-status');if(status){status.textContent=mode==='VECTOR_FOLLOW'?x.vector:mode==='STATION_REFERENCE'?x.reference:x.locked;status.dataset.mode=mode}}
