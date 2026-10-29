@@ -127,6 +127,7 @@ store();getMap();render();
 root.MRS10D102JourneyUI?.connect({
  map,
  getSession:()=>session,
+ getImportedGeometry:()=>geo,
  advanceSession:(target)=>{const prev=session.currentCH;session=E.advance(session,rows,target);store();root.MRS10D102JourneyUI?.movementApplied(prev,session.currentCH);render()},
  restoreSession:(imported)=>{if(!imported||imported.schema!==1||imported.mode!=='SIMULATION'||imported.trainId!=='D102-SIM')throw Error('NOT_A_D102_SIMULATION_BACKUP');
   const a=rows.find(x=>x.code===imported.origin),b=rows.find(x=>x.code===imported.destination);
