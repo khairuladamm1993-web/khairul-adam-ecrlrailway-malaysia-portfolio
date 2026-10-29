@@ -192,7 +192,7 @@ function refresh(){
   const list=$('ol');for(const ev of s.ledger.slice(-80))list.append($('li',ev.type+' · '+ch(ev.CH??0)+' · '+(ev.code||ev.id||'')+' · '+ev.time));
   history.append(list);host.append(history);
  }
- renderLayout();renderEvents();linkMap();
+ renderLayout();renderEvents();linkMap();root.MRS10D102InstructionUI?.refresh?.();
 }
 function importPayload(data){
  if(data?.type==='FeatureCollection'&&data.features?.length&&data.features.every(x=>x.properties?.assetCode||x.properties?.stationCode||x.properties?.loopCode)){
@@ -217,10 +217,21 @@ function newRun(origin,destination){journey.newRun(origin,destination);refresh()
 function connect(options){
  fn=options;map=options.map;const retry=()=>linkMap();
  if(map){map.on('load',retry);map.on('style.load',retry)}
- journey.syncSession(current());refresh();
+ journey.syncSession(current());
+ root.MRS10D102InstructionUI?.connect({
+  getSession:()=>current(),getJourney:()=>journey,getLayouts:()=>layouts,
+  showAsset:(code)=>{showLayout(code,true);root.MRS10ECRLStationMap?.select?.(code,true)},
+  queueCH:(target)=>request(target),
+  registerInfrastructure:(item)=>{const x=journey.registerInfrastructure(item);refresh();return x},
+  importLayout:(item)=>{const x=layouts.ingest(item);shownCode=x[0].code;refresh();return x},
+  addObservation:(item,CH)=>root.MRS10ECRLD102PreflightUI?.getObservations?.().log({
+   type:item.type,title:item.title,notes:item.notes,source:item.source,evidenceClass:'SIMULATED'},CH),
+  setCameraView:(view)=>root.MRS10D102Camera?.setView(view)
+ });
+ refresh();
  if(journey.pending())popup();
 }
-const api=Object.freeze({connect,request,refresh,showLayout,importPayload,importMediaFile,cancelPending,movementApplied,newRun,pending:()=>journey.pending(),snapshot:()=>({journey:journey.snapshot(),layouts:layouts.snapshot(),sourceDocuments:sourceDocs.snapshot()})});
+const api=Object.freeze({connect,request,refresh,showLayout,importPayload,importMediaFile,cancelPending,movementApplied,newRun,pending:()=>journey.pending(),snapshot:()=>({journey:journey.snapshot(),layouts:layouts.snapshot(),sourceDocuments:sourceDocs.snapshot(),instructionRunner:root.MRS10D102InstructionUI?.snapshot()||null})});
 root.MRS10D102JourneyUI=api;
 if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:null);
