@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/mrs10-p01-v81-ecrl-consumer-popup-ux-20261029
+      - fix/mrs10-p01-v81-popup-dismiss-qa-20261029
   workflow_dispatch:
 permissions:
   contents: read
