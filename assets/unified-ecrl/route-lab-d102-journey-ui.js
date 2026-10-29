@@ -220,6 +220,7 @@ function connect(options){
  journey.syncSession(current());
  root.MRS10D102InstructionUI?.connect({
   getSession:()=>current(),getJourney:()=>journey,getLayouts:()=>layouts,
+  getImportedGeometry:()=>fn.getImportedGeometry?.()||null,
   showAsset:(code)=>{showLayout(code,true);root.MRS10ECRLStationMap?.select?.(code,true)},
   queueCH:(target)=>request(target),
   registerInfrastructure:(item)=>{const x=journey.registerInfrastructure(item);refresh();return x},
