@@ -4,10 +4,11 @@ const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42
 const pdf=Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\n%%EOF\n');
 const media=JSON.parse(await fs.readFile('tests/fixtures/d102-media-formats.json','utf8'));
 await fs.mkdir(out,{recursive:true});
-for(const [name,driver] of [['chromium',chromium],['webkit',webkit]]){
+for(const [name,driver] of [['chromium',chromium],['webkit',webkit]].filter(([name])=>!process.env.MEDIA_ENGINE||process.env.MEDIA_ENGINE===name)){
  const browser=await driver.launch(name==='chromium'?{headless:true,executablePath:'/usr/bin/google-chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']}:{headless:true});
- for(const screen of [{name:'desktop',width:1180,height:820},{name:'ipad',width:820,height:1100},{name:'iphone',width:390,height:844}]){
-  const page=await browser.newPage({viewport:screen,hasTouch:screen.name!=='desktop'}),checks=[],errors=[];page.on('pageerror',x=>errors.push(x.message));
+ for(const screen of [{name:'desktop',width:1180,height:820},{name:'ipad',width:820,height:1100},{name:'iphone',width:390,height:844}].filter(s=>!process.env.MEDIA_SCREEN||s.name===process.env.MEDIA_SCREEN)){
+  const page=await browser.newPage({viewport:screen,hasTouch:screen.name!=='desktop'}),checks=[],errors=[];page.on('pageerror',x=>errors.push(x.stack||x.message));
+  await page.addInitScript(()=>{window.__qaBlobs=[];const original=URL.createObjectURL;URL.createObjectURL=function(blob){const url=original.call(URL,blob);window.__qaBlobs.push({url,type:blob.type,size:blob.size,stack:new Error().stack});return url}});
   try{
    assert.equal((await page.goto(base,{waitUntil:'domcontentloaded'})).status(),200);
    await page.waitForFunction(()=>window.MRS10ECRLRouteLab?.snapshot()?.stationMap?.installed&&window.MRS10D102SourceDocuments?.snapshot(),null,{timeout:60000});
@@ -50,7 +51,7 @@ for(const [name,driver] of [['chromium',chromium],['webkit',webkit]]){
    assert.equal(unexpected.length,0,unexpected.join('; '));
    results.push({engine:name,viewport:screen.name,status:'PASS',checks});
    await page.screenshot({path:`${out}/${name}-${screen.name}.png`,fullPage:true});
-  }catch(e){results.push({engine:name,viewport:screen.name,status:'FAIL',checks,error:String(e.stack||e),errors});await page.screenshot({path:`${out}/${name}-${screen.name}-fail.png`,fullPage:true}).catch(()=>{})}
+  }catch(e){results.push({engine:name,viewport:screen.name,status:'FAIL',checks,error:String(e.stack||e),errors,blobDiagnostics:await page.evaluate(()=>window.__qaBlobs)});await page.screenshot({path:`${out}/${name}-${screen.name}-fail.png`,fullPage:true}).catch(()=>{})}
   await fs.writeFile(out+'/report.json',JSON.stringify(results,null,2));await page.close();
  }await browser.close();
 }
