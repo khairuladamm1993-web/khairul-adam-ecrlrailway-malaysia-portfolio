@@ -3,7 +3,7 @@
 (function(root){'use strict';
 const Engine=root.MRS10D102InstructionRunner,Auditor=root.MRS10D102EngineeringAssistant;
 if(!Engine||!Auditor)throw Error('MR_S10_R17_SCRIPT_DEPENDENCIES_MISSING');
-let engine=null,deps=null,notice='',media=[],audit=null;
+let engine=null,deps=null,notice='',media=[],audit=null,masterLink=null;
 const $=(tag,label,css)=>{const n=document.createElement(tag);if(label!==undefined&&label!==null)n.textContent=String(label);if(css)n.className=css;return n};
 function saveFile(name,data){
  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=$('a');
@@ -111,12 +111,22 @@ function show(){
     getAudit:()=>Auditor.report({...deps,getAttachments:()=>media}),
     getImportedGeometry:deps.getImportedGeometry
    },{includeMedia:true});
-   saveFile('MR-S10-ECRL-D102-MASTER-CH-STN-PL-TRACK-HANDOFF-v1.json',payload);
+   if(masterLink?.url)URL.revokeObjectURL(masterLink.url);
+   const fileName='MR-S10-ECRL-D102-MASTER-CH-STN-PL-TRACK-HANDOFF-v1.json';
+   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+   masterLink={url:URL.createObjectURL(blob),fileName,bytes:blob.size};
+   // Explicit second tap reliably downloads on iOS Safari even after async IndexedDB reads.
+   // Do not auto-download via a suspended user gesture after asynchronous attachment loading.
    notice='FAIL INDUK DICIPTA: '+payload.assetRegistry.length+' checkpoints · '+payload.trackLayoutMedia.length+' dokumen · GEOFIZIKAL BELUM DISAHKAN';
   }catch(e){notice='EKSPORT DITAHAN: '+String(e.message||e).slice(0,170)}
   show();
  };
  host.append(archive,$('p','Selepas semua arahan Owner selesai, satu JSON induk mengandungi 23 CH, layout STN/PL yang tersedia, data trek, imej/PDF sumber (maksimum 22 MB), checkpoint D102 dan audit provenance. Geometri yang belum sah tetap UNKNOWN.','lab-r16-note'));
+ if(masterLink){
+  const link=$('a','Muat turun fail induk ECRL · '+(masterLink.bytes/1024/1024).toFixed(2)+' MB');
+  link.id='lab-r17-master-download';link.href=masterLink.url;link.download=masterLink.fileName;
+  link.className='lab-r161-open';host.append(link);
+ }
  const exportButton=$('button','Eksport sejarah arahan & audit'),foot=$('p','Disimpan pada browser Preview ini sahaja. Setiap domain Vercel berbeza memerlukan eksport/import rekod.','lab-r16-note');
  exportButton.onclick=()=>saveFile('private-mrs10-chatgpt-adam-instruction-runner-audit.json',engine.exportData());
  host.append(exportButton,foot);
