@@ -121,6 +121,17 @@ function create(storage,rows){
   }
   return pending();
  }
+ function movementApplied(previousCH,currentCH){
+  if(!Number.isInteger(previousCH)||!Number.isInteger(currentCH)||previousCH===currentCH)throw Error('INVALID_CH_MOVEMENT_EVENT');
+  record('CH_MOVEMENT_COMMITTED',{fromCH:previousCH,CH:currentCH,
+   deltaM:currentCH-previousCH,realPositionAvailable:false,mode:'D102_CH_ONLY'});
+ }
+ function newRun(origin,destination){
+  state.confirmedDepartures=[];state.confirmedArrivals=[];state.confirmedEvents=[];
+  state.pending=null;state.resumeTarget=null;
+  record('NEW_CH_RUN_EXPLICIT_OWNER_REQUEST',{origin,destination,note:'Prior journey ledger retained; no automatic restart'});
+  save();
+ }
  function clearPending(){
   if(state.pending){record('PENDING_CANCELLED',{phase:state.pending.phase,CH:state.pending.CH});state.pending=null;state.resumeTarget=null;save()}
  }
@@ -131,7 +142,7 @@ function create(storage,rows){
   modelMode:'MANUAL_CH_ONLY',liveGPS:false,asBuilt:false,cloudSynced:false,journeyId:state.journeyId
  }}
  function exportData(){return {schema:'mrs10-d102-journey-ledger-r16',exportedAt:new Date().toISOString(),...snapshot(),publicDistribution:false}}
- return Object.freeze({request,confirm,pending,syncSession,registerInfrastructure,infrastructure,clearPending,snapshot,exportData});
+ return Object.freeze({request,confirm,pending,syncSession,registerInfrastructure,infrastructure,movementApplied,newRun,clearPending,snapshot,exportData});
 }
 const api=Object.freeze({create,EVENT_TYPES,KEY,chLabel});
 if(typeof module==='object'&&module.exports)module.exports=api;
