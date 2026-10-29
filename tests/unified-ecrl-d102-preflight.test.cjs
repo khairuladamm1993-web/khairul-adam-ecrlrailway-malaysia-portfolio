@@ -1,7 +1,16 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
-const D=require('../assets/unified-ecrl/route-lab-d102-preflight.js');
-const T=require('../assets/unified-ecrl/route-lab-d102-observations.js');
+const vm=require('node:vm'),{JSDOM}=require('jsdom');
+const dom=new JSDOM('<!doctype html>',{url:'https://preview.example.test'});
+const browser={window:dom.window,document:dom.window.document};
+for(const path of [
+ 'assets/unified-ecrl/chainage-manifest.js',
+ 'assets/unified-ecrl/source/data.js',
+ 'assets/unified-ecrl/alignment-evidence-r2.js',
+ 'assets/unified-ecrl/route-lab-d102-preflight.js',
+ 'assets/unified-ecrl/route-lab-d102-observations.js'
+])vm.runInNewContext(fs.readFileSync(path,'utf8'),browser,{filename:path});
+const D=dom.window.MRS10ECRLD102Preflight,T=dom.window.MRS10ECRLD102Observations;
 function storage(){const o=new Map();return {getItem:k=>o.get(k)||null,setItem:(k,v)=>o.set(k,v)}}
 test('pre-run 23 checkpoint model has 16 STN, 7 PL and zero fabricated PL coordinates',()=>{
  assert.equal(D.controls.length,23);
