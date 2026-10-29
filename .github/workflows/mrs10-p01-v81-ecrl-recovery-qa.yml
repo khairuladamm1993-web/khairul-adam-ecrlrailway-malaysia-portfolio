@@ -39,14 +39,16 @@ jobs:
             sleep 1
           done
           exit 1
-      - name: ECRL candidate browser canvas tests (Chromium/WebKit)
-        run: node tests/unified-ecrl-browser.test.mjs
+      # Run the original map suite on a fresh WebGL/browser context first.
+      # This preserves all assertions and avoids cumulative graphics pressure.
+      - name: V8 full map regression
+        run: node tests/unified-v8-browser.test.mjs
       - name: Legacy V8.1 map focus regression (Chromium/WebKit)
         if: success() || failure()
         run: node tests/unified-v81-browser.test.mjs
-      - name: V8 full map regression
+      - name: ECRL candidate browser canvas tests (Chromium/WebKit)
         if: success() || failure()
-        run: node tests/unified-v8-browser.test.mjs
+        run: node tests/unified-ecrl-browser.test.mjs
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
