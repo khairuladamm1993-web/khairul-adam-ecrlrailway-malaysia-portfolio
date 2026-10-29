@@ -68,12 +68,12 @@ const focus=window.MRS10V81Focus.create({
  },
  restore:saved=>{state.category=saved.category;state.selected=saved.selected;restoreLayers(saved.layers);buildFilters();buildLegend();buildRoutes();buildLineup()}
 });
-function closeFocus(){$('ecrl-no-point').hidden=true;if(state.popup){const old=state.popup;state.popup=null;old.remove()}focus.exit()}
+function closeFocus(){$('ecrl-no-point').hidden=true;$('ecrl-focus-dismiss').hidden=true;if(state.popup){const old=state.popup;state.popup=null;old.remove()}focus.exit()}
 function mountPopup(host,position){
  $('ecrl-no-point').hidden=true;
  const old=state.popup;state.popup=null;old?.remove();
  const popup=new maplibregl.Popup({offset:15,maxWidth:'330px',closeOnClick:false,focusAfterOpen:false}).setLngLat(position).setDOMContent(host);
- state.popup=popup;popup.on('close',()=>{if(state.popup===popup){state.popup=null;focus.exit()}});popup.addTo(state.map);if(host.classList?.contains('ecrl-intelligence'))popup.getElement().classList.add('ecrl-popup');popup.getElement().querySelector('.maplibregl-popup-close-button')?.focus({preventScroll:true});
+ state.popup=popup;popup.on('close',()=>{if(state.popup===popup){state.popup=null;$('ecrl-focus-dismiss').hidden=true;focus.exit()}});popup.addTo(state.map);if(host.classList?.contains('ecrl-intelligence')){popup.getElement().classList.add('ecrl-popup');const dismiss=$('ecrl-focus-dismiss');dismiss.textContent='× '+ecrl.t(state.locale,'close');dismiss.hidden=false}else $('ecrl-focus-dismiss').hidden=true;popup.getElement().querySelector('.maplibregl-popup-close-button')?.focus({preventScroll:true});
 }
 function appendFocusLineup(host,routeIds){
  for(const id of routeIds){const r=state.manifest.find(r=>r.id===id);if(!r)continue;
@@ -402,6 +402,7 @@ async function init(){
  $('approximate').addEventListener('change',()=>{closeFocus();installGeometry();applyVisibility();geometryStatus()});
  $('search').addEventListener('input',updateSearch);
  $('reset').addEventListener('click',reset);
+ $('ecrl-focus-dismiss').addEventListener('click',closeFocus);
  $('language').addEventListener('click',()=>{state.locale=locales[(locales.indexOf(state.locale)+1)%4];applyLanguage();if(focus.current.mode==='INFRASTRUCTURE_FOCUS'){showInfrastructure(focus.current.assetId)}else if(state.popup){closeFocus()}});
  $('theme').addEventListener('click',()=>{
   state.theme=state.theme==='dark'?'light':'dark';
