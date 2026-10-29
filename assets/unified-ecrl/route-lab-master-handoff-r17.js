@@ -6,7 +6,6 @@ const SCHEMA='mrs10-ecrl-d102-master-handoff-v1';
 const MAX_RAW_MEDIA=22*1024*1024;
 const rows=root.MRS10ECRLChainage?.records||[];
 if(rows.length!==23)throw Error('MASTER_EXPORT_23_MANIFEST_MISSING');
-const cl=metres=>'CH'+String(Math.floor(metres/1000)).padStart(3,'0')+'+'String(metres%1000).padStart(3,'0');
 function mediaB64(raw,mime){
  return new Promise((resolve,reject)=>{
   const reader=new FileReader();
@@ -54,7 +53,7 @@ async function create(deps,{includeMedia=true,allowIncomplete=false}={}){
     name:station?.displayName||passing?.name||r.code,chainageM:r.metres,
     CHLabel:r.label,CHDatum:r.datum,CHStatus:r.status,
     previousAsset:i?rows[i-1].code:null,deltaPreviousMetres:deltaPreviousM,
-    nextAsset:rows[i+1]?.code||null,deltaNextMetres:rows[i+1]?.metres-r.metres??null,
+    nextAsset:rows[i+1]?.code||null,deltaNextMetres:rows[i+1]?rows[i+1].metres-r.metres:null,
     coordinateSource:'OWNER_MODEL_CANDIDATE_OR_PUBLIC_REFERENCE_NOT_SURVEYED',
     ownerCoordinateCandidate:cand?{latitude:cand.latitude,longitude:cand.longitude,source:cand.source,
       note:cand.note,reviewedAt:cand.confirmedAt,certifiedSurvey:false}:null,
@@ -74,9 +73,7 @@ async function create(deps,{includeMedia=true,allowIncomplete=false}={}){
  });
  const allMedia=[];
  if(includeMedia&&mediaProvider?.list){
-  const summaries=await mediaProvider.allSummaries();
-  const total=summaries.reduce((n,x)=>n+(Number(x.bytes)||0),0);
-  let counted=0;
+   let counted=0;
   for(const r of rows){
    const entries=await mediaProvider.list(r.code);
    for(const e of entries){
