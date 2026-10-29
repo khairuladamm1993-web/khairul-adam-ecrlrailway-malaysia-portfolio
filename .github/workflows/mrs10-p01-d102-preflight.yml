@@ -22,7 +22,7 @@ jobs:
           node --check assets/unified-ecrl/route-lab-d102-preflight.js
           node --check assets/unified-ecrl/route-lab-d102-preflight-ui.js
           node --check assets/unified-ecrl/route-lab-d102-observations.js
-          node --test tests/unified-ecrl-d102-preflight.test.cjs tests/unified-ecrl-route-lab-satellite-stations.test.cjs tests/unified-ecrl-manual-route-lab.test.cjs
+          node --test tests/unified-ecrl-d102-preflight.test.cjs tests/unified-ecrl-d102-camera.test.cjs tests/unified-ecrl-route-lab-satellite-stations.test.cjs tests/unified-ecrl-manual-route-lab.test.cjs
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 24
