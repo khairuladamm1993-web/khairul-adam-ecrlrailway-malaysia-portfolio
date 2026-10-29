@@ -78,6 +78,23 @@ test('schematic layouts are source-based; no arbitrary station geometry or unsaf
  assert.throws(()=>layouts.ingest({code:'STN02',tracks:[{id:'TEST',points:[[1,1],[2,2]]}]}),/PROVENANCE_REQUIRED/);
  dom.window.close();
 });
+test('source-coded station GeoJSON line features auto-generate a drawing without fabricating turnout connectivity',()=>{
+ const dom=new JSDOM('<!doctype html><html><body></body></html>',{url:'https://preview.example'}),w=dom.window,ctx={window:w,document:w.document};
+ for(const file of ['assets/unified-ecrl/chainage-manifest.js','assets/unified-ecrl/route-lab-imported-layouts.js'])
+  vm.runInNewContext(fs.readFileSync(file,'utf8'),ctx,{filename:file});
+ const x=w.MRS10AssetLayoutRegistry.create(store());
+ const geo={type:'FeatureCollection',source:'OSM/owner licensed visual fixture',features:[
+ {type:'Feature',properties:{assetCode:'STN01',trackId:'MAIN',role:'mainline',sourceRef:'QA PUBLIC SCHEMATIC 1'},geometry:{type:'LineString',coordinates:[[102.2301,6.0511],[102.231,6.0523],[102.2316,6.053]]}},
+ {type:'Feature',properties:{assetCode:'STN01',trackId:'LOOP',role:'loop',sourceRef:'QA PUBLIC SCHEMATIC 1'},geometry:{type:'LineString',coordinates:[[102.2302,6.0512],[102.231,6.0518],[102.2315,6.0527]]}}
+ ]};
+ const loaded=x.ingestGeoJSON(geo);
+ assert.equal(loaded[0].tracks,2);assert.equal(x.get('STN01').CH,670);
+ assert.equal(x.get('STN01').asBuiltVerified,false);
+ assert.equal(x.get('STN01').physicalLineString,null);
+ assert.equal(x.renderSVG('STN01').querySelectorAll('polyline').length,2);
+ assert.equal(x.snapshot().publicPublished,false);
+ dom.window.close();
+});
 test('route UI cannot bypass owner confirmation via slider, Set CH or Next',()=>{
  const s=fs.readFileSync('assets/unified-ecrl/route-lab-ui.js','utf8');
  assert(s.includes('root.MRS10D102JourneyUI.request(Number(slider.value))'));
