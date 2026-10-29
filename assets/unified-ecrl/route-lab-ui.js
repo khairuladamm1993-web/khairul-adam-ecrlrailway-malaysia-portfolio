@@ -83,7 +83,7 @@ h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
  trailPanel.append(trailExport);h.append(trailPanel);
   const align=el('section',null,'lab-panel');align.append(el('h2',t.align),el('p',text));
  if(assembled?.status==='CONTINUOUS_CANDIDATE')align.append(el('p',t.unverified,'lab-warning'));
- const upload=el('label',t.upload),file=el('input');file.type='file';file.accept='.json,.geojson,application/json';file.onchange=async()=>{try{if(!file.files?.[0]||file.files[0].size>1800000)throw Error('FILE_LIMIT_1_8MB');const g=JSON.parse(await file.files[0].text()),a=E.assemble(g);geo=g;assembled=a;anchors=E.fit(rows,a,g.anchors||[]);store();message=t.imported;render();updateMap()}catch(e){message=t.badFile+' · '+e.message;render()}};upload.append(file);align.append(upload);
+ const upload=el('label',t.upload+' · Layout STN/PL JSON · Infra CH JSON'),file=el('input');file.type='file';file.accept='.json,.geojson,application/json';file.onchange=async()=>{try{if(!file.files?.[0]||file.files[0].size>1800000)throw Error('FILE_LIMIT_1_8MB');const g=JSON.parse(await file.files[0].text()),extension=root.MRS10D102JourneyUI?.importPayload(g);if(extension){message='D102 · '+extension.category+' IMPORTED_LOCAL_ONLY';render()}else{const a=E.assemble(g);geo=g;assembled=a;anchors=E.fit(rows,a,g.anchors||[]);store();message=t.imported;render();updateMap()}}catch(e){message=t.badFile+' · '+e.message;render()}};upload.append(file);align.append(upload);
  align.append(el('p',t.noPoint,'lab-note'),el('p','© OpenStreetMap contributors · ODbL 1.0 · OpenRailwayMap visual context', 'lab-note'));h.append(align);
  const lineage=root.MRS10ECRLGeometryLineage;
  const lineReport=geo?lineage?.inspect(geo,{ownerReviewed:session.reviews.length>0,simulationQAPassed:false}):null;
