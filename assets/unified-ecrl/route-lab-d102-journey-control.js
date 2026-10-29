@@ -39,7 +39,7 @@ function create(storage,rows){
   const data={id,type,CH:ch,name,source:source.slice(0,280),latitude:lat,longitude:lon,
     sourceClass:'OWNER_IMPORTED_UNVERIFIED',surveyVerified:false,
     geometryVerified:false,notes:String(item.notes||'').slice(0,1000)};
-  state.infrastructure.push(data);record('INFRASTRUCTURE_REFERENCE_IMPORTED',{id,type,CH:ch,source:source.slice(0,160)});
+  state.infrastructure.push(data);record('INFRASTRUCTURE_REFERENCE_IMPORTED',{id,infraType:type,CH:ch,source:source.slice(0,160)});
   save();return {...data};
  }
  function nextStop(current,target){
