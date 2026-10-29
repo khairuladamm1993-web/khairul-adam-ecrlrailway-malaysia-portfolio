@@ -68,6 +68,8 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
   field(key,ui('type'),isKerteh?(a.assetType==='HISTORICAL_RAIL_YARD_AREA'?ui('yardType'):ui('yardInterfaceType')):a.assetType);
   if(a.section)field(key,ui('section'),a.section);
   if(a.chainageLabel)field(key,ui('chReference'),a.chainageLabel);
+   // Historical PL chainage is not a surveyed track position.
+   if(a.plCode&&!ref)field(key,t('geometry'),ui('unknown')+' · UNKNOWN');
   if(a.assetType==='STATION')field(key,ui('service'),serviceLabel(a.serviceType));
   if(a.portTerminals){field(key,ui('portSpur'),ui('portRailStatus'));field(key,ui('portOperator'),a.operatorName);field(key,ui('terminalUnits'),a.portTerminals.map(p=>p.code).join(' · '));}
   if(isKerteh){field(key,ui('portOperator'),'PETRONAS · OSM');field(key,ui('yardEnd'),ui('unknown'))}
@@ -75,28 +77,32 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
   field(key,t('verification'),validation+(a.verificationStatus==='CONFIRMED'?' · '+t('confirmed'):''));
   host.append(key);
   const tech=el('details',null,'ecrl-engineering');summary(tech,ui('technical'));
+   // Keep raw provenance inside explicit disclosure across responsive CSS.
+   const engineeringBody=el('div',null,'ecrl-engineering-body');engineeringBody.hidden=true;
+   tech.addEventListener('toggle',()=>{engineeringBody.hidden=!tech.open});
   for(const [label,value] of [['status',a.assetStatus],['verification',a.verificationStatus],['service',a.serviceType],['geometry',a.geometryProvenance||a.geometryType],['chainage',a.chainageStartKm==null&&a.chainageEndKm==null?null:[a.chainageStartKm??'UNKNOWN',a.chainageEndKm??'UNKNOWN'].join(' – ')],['trackCount',a.trackCount]]){
-   tech.append(el('p',t(label)+': '+(value??(t('unknown')+' · UNKNOWN'))));
+   engineeringBody.append(el('p',t(label)+': '+(value??(t('unknown')+' · UNKNOWN'))));
   }
-  if(a.chainageLabel)tech.append(el('p',ui('chReference')+': '+a.chainageLabel+' · '+a.chainageStatus+' · '+a.chainageProvenance+' · '+ui('chSafety')));
-  tech.append(el('p',ui('internal')+': '+a.assetId),el('p',t('noTrack')));
-  if(ref)tech.append(el('p','REFERENCE_ONLY · '+ref.kind+' · '+ref.sourceId));
+  if(a.chainageLabel)engineeringBody.append(el('p',ui('chReference')+': '+a.chainageLabel+' · '+a.chainageStatus+' · '+a.chainageProvenance+' · '+ui('chSafety')));
+  engineeringBody.append(el('p',ui('internal')+': '+a.assetId),el('p',t('noTrack')));
+  if(ref)engineeringBody.append(el('p','REFERENCE_ONLY · '+ref.kind+' · '+ref.sourceId));
   if(a.portTerminals){
-   tech.append(el('p',ui('terminalPending')+' · PENDING_GEOMETRY'));
+   engineeringBody.append(el('p',ui('terminalPending')+' · PENDING_GEOMETRY'));
    for(const port of a.portTerminals){
     const summary=port.code+' · '+port.name+' · '+port.connectionStatus;
-    tech.append(el('p',summary+(port.plannedSpurLengthKm==null?'':' · '+ui('portLength')+': '+port.plannedSpurLengthKm.toFixed(1)+' km')+
+    engineeringBody.append(el('p',summary+(port.plannedSpurLengthKm==null?'':' · '+ui('portLength')+': '+port.plannedSpurLengthKm.toFixed(1)+' km')+
     ' · railEnd: UNKNOWN · loadingBay: UNKNOWN · transitLane: UNKNOWN'));
    }
    const link=adapter.portCatalogue.logicalInterfaces.find(x=>x.assetId===id);
-   if(link)tech.append(el('p',link.interface+' · '+link.status+' · '+link.corridorContext+' · physicalLineString: NULL'));
+   if(link)engineeringBody.append(el('p',link.interface+' · '+link.status+' · '+link.corridorContext+' · physicalLineString: NULL'));
   }
-  if(id==='ecrl-stn-16')tech.append(el('p','PLANNED_CONNECTION · LRT KJ1 Gombak · '+t('notOperational')));
-  for(const rel of adapter.registry.topology.filter(r=>r.from===id||r.to===id))tech.append(el('p',rel.relation+' · '+rel.status+' · '+(rel.from===id?rel.to:rel.from)));
-  for(const conflict of a.conflicts||[])tech.append(el('p',t('conflict')+' · SOURCE_CONFLICT · '+conflict.field+' · '+conflict.sourceIds.join(' / ')+' · '+conflict.reason));
-  if(isKerteh){tech.append(el('p',ui('type')+': '+a.assetType));tech.append(el('p',ui('portOperator')+': '+a.operatorName));tech.append(el('p',ui('yardEndUnknown')));tech.append(el('p','NO_SIDING_GEOMETRY · NO_END_LANE_COORDINATE · NO_ROAD_RESIDENTIAL_CADASTRE_AUDIT'));tech.append(el('p','Source: OSM landuse=railway area only; not an ECRL as-built loading or storage lane.'));}
-  if(a.notes)tech.append(el('p',a.notes));
-  host.append(tech);
+  if(id==='ecrl-stn-16')engineeringBody.append(el('p','PLANNED_CONNECTION · LRT KJ1 Gombak · '+t('notOperational')));
+  for(const rel of adapter.registry.topology.filter(r=>r.from===id||r.to===id))engineeringBody.append(el('p',rel.relation+' · '+rel.status+' · '+(rel.from===id?rel.to:rel.from)));
+  for(const conflict of a.conflicts||[])engineeringBody.append(el('p',t('conflict')+' · SOURCE_CONFLICT · '+conflict.field+' · '+conflict.sourceIds.join(' / ')+' · '+conflict.reason));
+  if(isKerteh){engineeringBody.append(el('p',ui('type')+': '+a.assetType));engineeringBody.append(el('p',ui('portOperator')+': '+a.operatorName));engineeringBody.append(el('p',ui('yardEndUnknown')));engineeringBody.append(el('p','NO_SIDING_GEOMETRY · NO_END_LANE_COORDINATE · NO_ROAD_RESIDENTIAL_CADASTRE_AUDIT'));engineeringBody.append(el('p','Source: OSM landuse=railway area only; not an ECRL as-built loading or storage lane.'));}
+  if(a.notes)engineeringBody.append(el('p',a.notes));
+     tech.append(engineeringBody);
+   host.append(tech);
   const sources=el('details',null,'ecrl-sources');summary(sources,ui('references'));
   const ids=[...new Set([...(a.sourceIds||[]),...(ref?[ref.sourceId]:[])])];
   for(const sid of ids){const source=adapter.registry.sources[sid];if(!source)continue;const p=el('p'),link=el('a',sid+' · '+source.kind);link.href=source.url;link.target='_blank';link.rel='noopener noreferrer';p.append(link,el('span',' · '+source.revision));sources.append(p)}host.append(sources);
