@@ -1,0 +1,52 @@
+name: P01 D102 R1.6.1 STN/PL Image and PDF Import
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-d102-r161-image-pdf-layout-import-20261030
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Source media JavaScript checks and D102 regression
+        run: |
+          node --check assets/unified-ecrl/route-lab-source-documents-r161.js
+          node --check assets/unified-ecrl/route-lab-d102-journey-ui.js
+          node --check assets/unified-ecrl/route-lab-ui.js
+          node --check assets/unified-ecrl/route-lab-station-map.js
+          node --test tests/unified-ecrl-d102-journey-r16.test.cjs tests/unified-ecrl-d102-preflight.test.cjs
+      - run: node scripts/build-unified-v8.cjs
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node scripts/build-unified-v8.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Six browser STN01 PNG PDF original and IndexedDB restore QA
+        run: |
+          python3 -m http.server 8765 --directory dist-unified-v8 >/tmp/p01-media-r161.log 2>&1 &
+          node tests/unified-ecrl-d102-media-r161-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: d102-stn01-image-pdf-original-qa
+          path: artifacts/d102-r161-media/
+          retention-days: 14
