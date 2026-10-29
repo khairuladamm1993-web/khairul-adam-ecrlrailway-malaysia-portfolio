@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/mrs10-p01-v81-ecrl-recovery-qa.yml'
       - 'tests/unified-ecrl-browser.test.mjs'
+      - 'assets/unified-ecrl/integration-ui.js'
   workflow_dispatch:
 permissions:
   contents: read
