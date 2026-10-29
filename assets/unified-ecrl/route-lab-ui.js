@@ -13,7 +13,7 @@ session=load();const recovered=restore();if(recovered){geo=recovered.geo;assembl
 const formatCH=metres=>'CH'+String(Math.floor(metres/1000)).padStart(3,'0')+'+'+String(metres%1000).padStart(3,'0');
 const h=document.getElementById('route-lab'),el=(tag,txt,cl)=>{const n=document.createElement(tag);if(txt!==undefined&&txt!==null)n.textContent=txt;if(cl)n.className=cl;return n};
 function store(){try{localStorage.setItem(KEY,JSON.stringify(session));if(geo){const s=JSON.stringify(geo);if(s.length>1500000)throw Error('GEOMETRY_TOO_LARGE_FOR_LOCAL_AUTOSAVE');localStorage.setItem(GEO,s)}memoryStatus='SAVED_ON_THIS_BROWSER'}catch(e){memoryStatus='SAVE_ERROR_'+e.message}}
-function getMap(){if(map||!root.maplibregl)return map;try{map=new root.maplibregl.Map({container:'lab-map',style:'https://tiles.openfreemap.org/styles/positron',center:[103.435,4.56],zoom:10.3});map.addControl(new root.maplibregl.NavigationControl({showCompass:false}),'top-right');root.MRS10ECRLRailOverlay?.connect(map);map.on('style.load',updateMap)}catch(e){message=String(e.message)}return map}
+function getMap(){if(map||!root.maplibregl)return map;try{map=new root.maplibregl.Map({container:'lab-map',style:'https://tiles.openfreemap.org/styles/positron',center:root.MRS10ECRLStationIntelligence?.initial()?.referencePoint||[102.23264,6.05136],zoom:9.8});map.addControl(new root.maplibregl.NavigationControl({showCompass:false}),'top-right');root.MRS10ECRLSatelliteBasemap?.connect(map);root.MRS10ECRLRailOverlay?.connect(map);root.MRS10ECRLStationMap?.connect(map);map.on('style.load',updateMap)}catch(e){message=String(e.message)}return map}
 const routeID='ecrl-lab-rail-candidate',trainID='ecrl-lab-train-position';
 function updateMap(){if(!map||!map.isStyleLoaded())return;
  const good=assembled?.status==='CONTINUOUS_CANDIDATE';
@@ -42,7 +42,7 @@ function status(){const t=d[locale],p=E.progress(session,rows);let text=t.none;
    ' · '+(gate?.trainingTrainPinAllowed?'VECTOR MODEL ONLY':'TRAIN MAP LOCKED: '+(gate?.reasons||['NO_SOURCE']).join(', '));
  }
  return {t,p,text};}
-function render(){const {t,p,text}=status();h.replaceChildren();root.MRS10ECRLRailOverlay?.setLocale(locale);
+function render(){const {t,p,text}=status();h.replaceChildren();root.MRS10ECRLRailOverlay?.setLocale(locale);root.MRS10ECRLStationMap?.setLocale(locale);
  const spec=root.MRS10ECRLRailEngineering;
  const box=document.getElementById('lab-track-metadata');
  if(box&&spec){
@@ -68,7 +68,18 @@ h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
  const next=el('button',t.next);next.disabled=!p.next;next.onclick=()=>{session=E.advance(session,rows,p.next.metres);store();render()};manual.append(next);section.append(manual);
  const note=el('textarea');note.placeholder=t.note;note.maxLength=500;note.rows=2;section.append(note);
  const owner=el('button',t.review);owner.onclick=()=>{try{const on=rows.find(x=>Math.abs(x.metres-session.currentCH)<=100);session=E.review(session,rows,on?.code,note.value);store();message=t.reviewed;render()}catch(e){message=e.message;render()}};section.append(owner);h.append(section);
- const align=el('section',null,'lab-panel');align.append(el('h2',t.align),el('p',text));
+ const trail=root.MRS10ECRLCHTrail?.create(session,{intervalM:100});
+ const trailPanel=el('details');trailPanel.className='lab-panel';
+ trailPanel.append(el('summary',({ms:'Jejak D102 · rekod CH',en:'D102 trail · CH log',zh:'D102 轨迹 · CH 记录',th:'รอยทาง D102 · บันทึก CH'})[locale]+': '+(trail?.pointCount||0)+' samples'));
+ const tip=el('p',({ms:'Jejak CH daripada simulasi sahaja. Tiada GPS atau koordinat rel fizikal yang dijana.',en:'Simulated CH trail only. No GPS or physical railway coordinates are generated.',zh:'仅记录模拟 CH，无 GPS 或实际铁路坐标。',th:'บันทึก CH จำลองเท่านั้น ไม่มี GPS หรือพิกัดรางจริง'})[locale],'lab-trail-note');
+ trailPanel.append(tip);
+ const trailList=el('ol',null,'lab-trail-list');
+ for(const entry of (trail?.sampledCH||[]).slice(-30))trailList.append(el('li',formatCH(entry.CH)+' · '+entry.pointType));
+ trailPanel.append(trailList);
+ const trailExport=el('button',({ms:'Eksport jejak CH JSON',en:'Export CH trail JSON',zh:'导出 CH 记录 JSON',th:'ส่งออกบันทึก CH JSON'})[locale]);
+ trailExport.onclick=()=>{const blob=new Blob([JSON.stringify(trail,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='mrs10-d102-ch-trail.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000)};
+ trailPanel.append(trailExport);h.append(trailPanel);
+  const align=el('section',null,'lab-panel');align.append(el('h2',t.align),el('p',text));
  if(assembled?.status==='CONTINUOUS_CANDIDATE')align.append(el('p',t.unverified,'lab-warning'));
  const upload=el('label',t.upload),file=el('input');file.type='file';file.accept='.json,.geojson,application/json';file.onchange=async()=>{try{if(!file.files?.[0]||file.files[0].size>1800000)throw Error('FILE_LIMIT_1_8MB');const g=JSON.parse(await file.files[0].text()),a=E.assemble(g);geo=g;assembled=a;anchors=E.fit(rows,a,g.anchors||[]);store();message=t.imported;render();updateMap()}catch(e){message=t.badFile+' · '+e.message;render()}};upload.append(file);align.append(upload);
  align.append(el('p',t.noPoint,'lab-note'),el('p','© OpenStreetMap contributors · ODbL 1.0 · OpenRailwayMap visual context', 'lab-note'));h.append(align);
@@ -102,5 +113,5 @@ h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
  updateMap();
 }
 store();getMap();render();
-root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),geometryLineage:root.MRS10ECRLGeometryLineage?.inspect(geo||{features:[]})||null,alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,trackSpecification:root.MRS10ECRLRailEngineering?.ecrl||null,mapPinAvailability:!!(root.MRS10ECRLRailEngineering?.movementEligibility({assembly:assembled,matched:anchors,sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})})?.trainingTrainPinAllowed&&E.positionAt(session.currentCH,assembled,anchors)),storage:memoryStatus})});
+root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),geometryLineage:root.MRS10ECRLGeometryLineage?.inspect(geo||{features:[]})||null,alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,satellite:root.MRS10ECRLSatelliteBasemap?.snapshot()||null,stationMap:root.MRS10ECRLStationMap?.snapshot()||null,chTrail:root.MRS10ECRLCHTrail?.create(session,{intervalM:100})||null,trackSpecification:root.MRS10ECRLRailEngineering?.ecrl||null,mapPinAvailability:!!(root.MRS10ECRLRailEngineering?.movementEligibility({assembly:assembled,matched:anchors,sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})})?.trainingTrainPinAllowed&&E.positionAt(session.currentCH,assembled,anchors)),storage:memoryStatus})});
 })(window);
