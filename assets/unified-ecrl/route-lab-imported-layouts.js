@@ -23,6 +23,36 @@ function validate(raw){
    revisedAt:new Date().toISOString(),status,asBuiltVerified:false,ownerApprovedForPublic:false,
    originalCoordinateSystem:'SCHEMATIC_0_TO_100',physicalLineString:null};
 }
+function fromGeoJSON(geo){
+ if(geo?.type!=='FeatureCollection'||!Array.isArray(geo.features)||!geo.features.length||geo.features.length>500)throw Error('GEOJSON_LAYOUT_FEATURE_COLLECTION_REQUIRED');
+ const grouped=new Map();
+ for(const feature of geo.features){
+  const code=String(feature.properties?.assetCode||feature.properties?.stationCode||feature.properties?.loopCode||'').toUpperCase();
+  if(!C.records.some(x=>x.code===code))throw Error('GEOJSON_LAYOUT_ASSET_CODE_REQUIRED');
+  const coords=feature.geometry?.coordinates;
+  if(feature.geometry?.type!=='LineString'||!Array.isArray(coords)||coords.length<2||coords.length>5000||
+     coords.some(v=>!Array.isArray(v)||v.length<2||!Number.isFinite(v[0])||!Number.isFinite(v[1])||v[0]<99||v[0]>105||v[1]<1||v[1]>7))throw Error('GEOJSON_LAYOUT_SOURCE_LINE_REQUIRED');
+  const source=String(feature.properties?.sourceRef||feature.properties?.source||geo.source||'').trim();
+  if(source.length<8)throw Error('GEOJSON_LAYOUT_PROVENANCE_REQUIRED');
+  if(!grouped.has(code))grouped.set(code,[]);
+  grouped.get(code).push({id:String(feature.properties?.trackId||feature.properties?.id||'T'+(grouped.get(code).length+1)),role:String(feature.properties?.role||feature.properties?.railway||'unknown'),source,coords});
+ }
+ if(grouped.size>LIMIT)throw Error('TOO_MANY_ASSETS');
+ const layouts=[];
+ for(const [code,items] of grouped){
+  if(items.length>24)throw Error('TOO_MANY_TRACKS_PER_ASSET');
+  const lat0=items.reduce((s,t)=>s+t.coords.reduce((n,c)=>n+c[1],0),0)/items.reduce((s,t)=>s+t.coords.length,0);
+  const cos=Math.cos(lat0*Math.PI/180),xs=items.flatMap(t=>t.coords.map(c=>c[0]*cos)),ys=items.flatMap(t=>t.coords.map(c=>c[1]));
+  const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+  const dx=Math.max(1e-10,maxX-minX),dy=Math.max(1e-10,maxY-minY),scale=Math.min(88/dx,78/dy);
+  const tx=(100-dx*scale)/2,ty=(100-dy*scale)/2;
+  layouts.push({code,title:code+' · Imported GeoJSON schematic',source:'GeoJSON source(s): '+items.map(x=>x.source).join('; ').slice(0,260),
+    tracks:items.map(item=>({id:item.id,role:item.role,
+      points:item.coords.filter((_,i)=>i===0||i===item.coords.length-1||i%Math.max(1,Math.ceil(item.coords.length/80))===0).slice(0,80)
+        .map(c=>[Math.max(0,Math.min(100,tx+(c[0]*cos-minX)*scale)),Math.max(0,Math.min(100,ty+(maxY-c[1])*scale))])}))});
+ }
+ return layouts;
+}
 function create(storage){
  let saved={};
  try{const v=JSON.parse(storage.getItem(KEY)||'null');if(v?.version===1&&Array.isArray(v.items))for(const x of v.items)try{const y=validate(x);saved[y.code]=y}catch(_){}}catch(_){}
@@ -34,6 +64,7 @@ function create(storage){
   for(const a of approved)saved[a.code]=a;
   save();return approved.map(x=>({code:x.code,tracks:x.tracks.length,status:x.status}));
  }
+ function ingestGeoJSON(raw){return ingest({layouts:fromGeoJSON(raw)})}
  function get(code){return saved[code]?JSON.parse(JSON.stringify(saved[code])):null}
  function all(){return Object.values(saved).map(x=>({code:x.code,tracks:x.tracks.length,source:x.source,status:x.status}))}
  function renderSVG(code){
@@ -54,7 +85,7 @@ function create(storage){
   return svg;
  }
  function snapshot(){return {count:Object.keys(saved).length,layouts:all(),storage:status,publicPublished:false,sourceGeometryVerified:false}}
- return Object.freeze({ingest,get,all,renderSVG,snapshot});
+ return Object.freeze({ingest,ingestGeoJSON,get,all,renderSVG,snapshot});
 }
 const api=Object.freeze({create,validate,KEY});
 if(typeof module==='object'&&module.exports)module.exports=api;
