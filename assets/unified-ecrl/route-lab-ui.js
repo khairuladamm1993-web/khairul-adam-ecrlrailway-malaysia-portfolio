@@ -59,7 +59,7 @@ h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
  const lang=el('div',null,'lab-row');for(const code of ['ms','en','zh','th']){const b=el('button',code.toUpperCase());b.type='button';b.setAttribute('aria-pressed',String(locale===code));b.onclick=()=>{locale=code;render()};lang.append(b)}h.append(lang);
  const config=el('div',null,'lab-grid');for(const [key,label] of [['origin',t.origin],['destination',t.destination]]){const wrap=el('label',label),sel=el('select');sel.id='lab-'+key;for(const p of rows){const opt=el('option',p.code+' · '+formatCH(p.metres));opt.value=p.code;sel.append(opt)}sel.value=session[key];wrap.append(sel);config.append(wrap)}h.append(config);
  const rebuild=el('button',t.start+' · perlu pengesahan');rebuild.onclick=()=>{if(!root.confirm('Ini memulakan sesi CH baharu dan menetapkan semula kemajuan D102 yang dipaparkan. Rekod R1.6 terdahulu kekal dalam jurnal setempat. Teruskan?'))return;
- try{root.MRS10D102JourneyUI?.pending()&&root.MRS10D102JourneyUI?.cancelPending?.();session=E.start(rows,document.getElementById('lab-origin').value,document.getElementById('lab-destination').value);message='SESI_BAHARU_DENGAN_KELULUSAN_OWNER';store();render()}catch(e){message=e.message;render()}};h.append(rebuild);
+ try{root.MRS10D102JourneyUI?.newRun(document.getElementById('lab-origin').value,document.getElementById('lab-destination').value);session=E.start(rows,document.getElementById('lab-origin').value,document.getElementById('lab-destination').value);message='SESI_BAHARU_DENGAN_KELULUSAN_OWNER';store();render()}catch(e){message=e.message;render()}};h.append(rebuild);
  const section=el('section',null,'lab-panel');section.append(el('h2',t.train+' · '+session.trainId),el('p','CH'+String(Math.floor(session.currentCH/1000)).padStart(3,'0')+'+'+String(session.currentCH%1000).padStart(3,'0')));
  section.append(el('strong',t.remain+': '+p.remainingKm.toFixed(3)+' km'));
  const meter=el('progress');meter.max=100;meter.value=p.pct;section.append(meter);
@@ -118,7 +118,7 @@ store();getMap();render();
 root.MRS10D102JourneyUI?.connect({
  map,
  getSession:()=>session,
- advanceSession:(target)=>{session=E.advance(session,rows,target);store();render()},
+ advanceSession:(target)=>{const prev=session.currentCH;session=E.advance(session,rows,target);store();root.MRS10D102JourneyUI?.movementApplied(prev,session.currentCH);render()},
 });
 
 root.MRS10ECRLRouteLab=Object.freeze({snapshot:()=>({session,progress:E.progress(session,rows),geometryLineage:root.MRS10ECRLGeometryLineage?.inspect(geo||{features:[]})||null,alignmentStatus:assembled?.status||'NO_GEOMETRY',railVisual:root.MRS10ECRLRailOverlay?.snapshot()||null,satellite:root.MRS10ECRLSatelliteBasemap?.snapshot()||null,hdImagery:root.MRS10ECRLHDImagery?.snapshot()||null,stationMap:root.MRS10ECRLStationMap?.snapshot()||null,freightReferences:root.MRS10ECRLFreightAreaMap?.snapshot()||null,d102Preflight:root.MRS10ECRLD102PreflightUI?.snapshot()||null,journeyR16:root.MRS10D102JourneyUI?.snapshot()||null,camera:root.MRS10D102Camera?.snapshot()||null,chTrail:root.MRS10ECRLCHTrail?.create(session,{intervalM:100})||null,trackSpecification:root.MRS10ECRLRailEngineering?.ecrl||null,mapPinAvailability:!!(root.MRS10ECRLRailEngineering?.movementEligibility({assembly:assembled,matched:anchors,sourceTags:(geo?.features||[]).filter(f=>f.geometry?.type==='LineString').map(f=>f.properties||{})})?.trainingTrainPinAllowed&&E.positionAt(session.currentCH,assembled,anchors)),storage:memoryStatus})});
