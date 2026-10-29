@@ -67,6 +67,8 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
   const isKerteh=a.assetId==='ecrl-yard-kerteh-petronas'||a.assetId==='ecrl-kerteh-petronas-loading-interface';
   field(key,ui('type'),isKerteh?(a.assetType==='HISTORICAL_RAIL_YARD_AREA'?ui('yardType'):ui('yardInterfaceType')):a.assetType);
   if(a.section)field(key,ui('section'),a.section);
+   // Proposed freight yard is a scheme reference, never an operational facility.
+   if(a.assetType==='FREIGHT_YARD'&&a.assetStatus==='PROPOSED_OFFICIAL')field(key,t('status'),a.assetStatus);
   if(a.chainageLabel)field(key,ui('chReference'),a.chainageLabel);
    // Historical PL chainage is not a surveyed track position.
    if(a.plCode&&!ref)field(key,t('geometry'),ui('unknown')+' · UNKNOWN');
