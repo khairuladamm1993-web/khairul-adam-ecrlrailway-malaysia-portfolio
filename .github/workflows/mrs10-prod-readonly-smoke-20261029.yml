@@ -1,0 +1,62 @@
+name: MR-S10 P01 Production GitHub Pages read-only smoke
+on:
+  push:
+    branches:
+      - audit/mrs10-main-production-readonly-20261029
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  production-read-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Verify published Production HTTP pages and public assets, GET-only
+        shell: bash
+        run: |
+          node <<'NODE'
+          const assert=require('node:assert/strict');
+          const base='https://khairuladamm1993-web.github.io/khairul-adam-ecrlrailway-malaysia-portfolio/';
+          const pages=['index.html','gateway.html','portfolio.html','references.html','robots.txt','sitemap.xml'];
+          const root=new URL(base);
+          const results=[];
+          async function read(path) {
+            const url=new URL(path,base);
+            assert.equal(url.origin,root.origin,'No external domain in production smoke');
+            assert(url.pathname.startsWith(root.pathname),'No parent traversal');
+            const signal=AbortSignal.timeout(25000);
+            const response=await fetch(url,{method:'GET',redirect:'follow',signal,headers:{'User-Agent':'MR-S10-Production-ReadOnly-Smoke/1.0'}});
+            assert.equal(response.status,200,path+' HTTP '+response.status);
+            const body=await response.text();
+            assert(body.length>0,path+' empty');
+            results.push({path,status:response.status,bytes:body.length,contentType:response.headers.get('content-type')||'UNKNOWN'});
+            return body;
+          }
+          (async()=>{
+            const docs={};
+            for(const p of pages)docs[p]=await read(p);
+            assert.match(docs['index.html'],/Khairul Adam/i);
+            assert.match(docs['gateway.html'],/Railway/i);
+            assert.match(docs['portfolio.html'],/Portfolio/i);
+            assert.match(docs['references.html'],/References/i);
+            assert.match(docs['robots.txt'],/Sitemap:/i);
+            assert.match(docs['sitemap.xml'],/khairuladamm1993-web\.github\.io/i);
+            const referenced=new Set();
+            for(const page of pages.filter(x=>x.endsWith('.html'))){
+              const source=docs[page];
+              for(const match of source.matchAll(/(?:src|href)=["']([^"']+)["']/g)){
+                const link=match[1];if(/^(?:https?:|mailto:|tel:|data:|#)/i.test(link))continue;
+                const dest=new URL(link,new URL(page,base));
+                if(dest.origin===root.origin&&dest.pathname.startsWith(root.pathname))referenced.add(dest.pathname.slice(root.pathname.length));
+              }
+            }
+            for(const path of referenced)await read(path);
+            console.log('PRODUCTION_PUBLIC_GET_SMOKE_PASS',JSON.stringify({pages:pages.length,internalAssets:referenced.size,checked:results.length,results}));
+          })().catch(e=>{console.error('PRODUCTION_PUBLIC_GET_SMOKE_FAIL',e.stack||String(e));process.exitCode=1;});
+          NODE
