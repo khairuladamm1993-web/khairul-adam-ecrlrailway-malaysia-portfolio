@@ -1,0 +1,54 @@
+name: P01 ECRL R1.7 Owner Instruction Runner and Portable Handoff
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-d102-r17-instruction-runner-isolated-20261030
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Declarative commands, master export and D102 regression
+        run: |
+          node --check assets/unified-ecrl/route-lab-instruction-runner-r17.js
+          node --check assets/unified-ecrl/route-lab-engineering-assistant-r17.js
+          node --check assets/unified-ecrl/route-lab-instruction-ui-r17.js
+          node --check assets/unified-ecrl/route-lab-master-handoff-r17.js
+          node --check assets/unified-ecrl/route-lab-d102-journey-ui.js
+          node --test tests/unified-ecrl-d102-instruction-runner-r17.test.cjs tests/unified-ecrl-d102-master-handoff-r17.test.cjs tests/unified-ecrl-d102-journey-r16.test.cjs
+      - run: node scripts/build-unified-v8.cjs
+      - run: test -f dist-unified-v8/ecrl-alignment-lab.html
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node scripts/build-unified-v8.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Chrome/WebKit six viewport Owner bundle and export
+        run: |
+          python3 -m http.server 8765 --directory dist-unified-v8 >/tmp/mrs10-p01-r17.log 2>&1 &
+          node tests/unified-ecrl-d102-instruction-r17-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: mr-s10-d102-r17-browser-qa
+          path: artifacts/d102-instruction-r17/
+          retention-days: 14
