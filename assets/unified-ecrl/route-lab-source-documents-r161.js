@@ -72,6 +72,13 @@ async function allSummaries(){
 }
 function revoke(container){const old=activeURLs.get(container);if(old){for(const u of old)URL.revokeObjectURL(u)}activeURLs.set(container,[])}
 function url(container,blob){const u=URL.createObjectURL(blob);activeURLs.get(container)?.push(u);return u}
+function imageDataURL(e){
+ return new Promise((resolve,reject)=>{
+  const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));
+  reader.onerror=()=>reject(new Error('SAFARI_IMAGE_PREVIEW_DECODE_FAILED'));
+  reader.readAsDataURL(new Blob([e.bytesData],{type:e.media}));
+ });
+}
 function make(tag,value,cls){const e=root.document.createElement(tag);if(value!==null&&value!==undefined)e.textContent=String(value);if(cls)e.className=cls;return e}
 async function render(code,host,{compact=false}={}){
  if(!host||!VALID_CODES.has(code))return;
@@ -88,14 +95,17 @@ async function render(code,host,{compact=false}={}){
   for(const e of entries){
    const d=make('details',null,'lab-r161-item'),h=make('summary',e.fileName+' · '+(e.bytes/1024).toFixed(0)+' KB · '+e.importedAt.slice(0,10));
    d.append(h,make('p','Sumber: '+e.source+' · OWNER SOURCE VISUAL / UNVERIFIED','lab-r16-note'));
-   const u=url(target,new Blob([e.bytesData],{type:e.media}));
    if(e.view==='IMAGE'){
-    const img=make('img');img.src=u;img.alt=e.assetCode+' imported station/PL layout reference';img.loading='lazy';
+    // WebKit rejects some blob: origins on local/private Preview; use FileReader data URL for images.
+    const src=await imageDataURL(e);if(host.dataset.r161Code!==code||!target.isConnected)return;
+    const img=make('img');img.src=src;img.alt=e.assetCode+' imported station/PL layout reference';
     img.className='lab-r161-layout-img';d.append(img);
+    const a=make('a','Simpan / lihat gambar asal');a.href=src;a.download=e.fileName;a.className='lab-r161-open';d.append(a);
    }else{
     d.append(make('p','PDF sumber. Buka fail asal menggunakan pautan berikut. Tiada pengekstrakan landasan automatik.','lab-r16-note'));
+    const u=url(target,new Blob([e.bytesData],{type:e.media}));
+    const a=make('a','Buka PDF asal');a.href=u;a.target='_blank';a.rel='noopener noreferrer';a.className='lab-r161-open';d.append(a);
    }
-   const a=make('a','Buka gambar / PDF asal');a.href=u;a.target='_blank';a.rel='noopener noreferrer';a.className='lab-r161-open';d.append(a);
    target.append(d);
   }
  }catch(e){target.append(make('p','Tidak boleh membaca storan setempat: '+e.message,'lab-r16-alert'))}
