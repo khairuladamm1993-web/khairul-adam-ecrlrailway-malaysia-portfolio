@@ -52,6 +52,7 @@ function render(){
  host.append(src);
  const controls=el('div',null,'lab-row'),button=el('button',t.focus+' '+s.code);
  button.type='button';button.onclick=()=>focus(s.code);controls.append(button);host.append(controls);
+ root.MRS10D102SourceDocuments?.render(s.code,host,{compact:true}).catch(()=>{});
 }
 function connect(m){map=m;const retry=()=>install(m);m.on('style.load',retry);m.on('load',retry);m.on('styledata',retry);retry();render()}
 const api=Object.freeze({connect,select,focus,setLocale,snapshot:()=>({selected,stationCount:stations.length,plCount:root.MRS10ECRLChainage?.records?.filter(x=>x.code.startsWith('PL')).length||0,installed,geometryVerified:false,referenceOnly:true,stn01:intel?.getStation('STN01')})});
