@@ -1,8 +1,8 @@
 /* D102 R1.6 user-interface: evidence-first modal UAT & track layout viewer.
  * Autosave is local; it cannot certify rail positioning or create surveyed geometry. */
 (function(root){'use strict';
-const Journey=root.MRS10D102JourneyControl,Layouts=root.MRS10AssetLayoutRegistry;
-if(!Journey||!Layouts)throw Error('R16_DEPENDENCIES_MISSING');
+const Journey=root.MRS10D102JourneyControl,Layouts=root.MRS10AssetLayoutRegistry,sourceDocs=root.MRS10D102SourceDocuments;
+if(!Journey||!Layouts||!sourceDocs)throw Error('R161_DEPENDENCIES_MISSING');
 const journey=Journey.create(root.localStorage,root.MRS10ECRLChainage.records);
 const layouts=Layouts.create(root.localStorage);
 let map=null,fn=null,shownCode='STN01',error='',layoutError='',sourceStatus='',viewStarted=false;
@@ -73,14 +73,18 @@ function request(target){
  const s=current();if(!s)throw Error('NO_D102_SESSION');
  const p=journey.request(s,Number(target));refresh();popup();return p;
 }
-function linkMap(){
+async function linkMap(){
  if(!map||!map.getStyle?.()||!map.isStyleLoaded?.())return;
  const source='mrs10-r16-layout-markers',layer='mrs10-r16-layout-icons',items=[];
- for(const entry of layouts.all()){
+ const attached=await sourceDocs.allSummaries().catch(()=>[]);
+ const keyed=new Set([...layouts.all().map(x=>x.code),...attached.map(x=>x.assetCode)]);
+ if(!map?.isStyleLoaded?.())return;
+ for(const code of keyed){
+  const entry={code};
   const station=root.MRS10ECRLStationIntelligence?.getStation(entry.code);
   const owner=root.MRS10ECRLD102PreflightUI?.getStore?.().candidate(entry.code);
   const loc=owner?[owner.longitude,owner.latitude]:station?.referencePoint;
-  if(loc?.length===2)items.push({type:'Feature',geometry:{type:'Point',coordinates:loc},properties:{code:entry.code,provenance:owner?'OWNER_MODEL':'STATION_LOCALITY_REFERENCE'}});
+  if(loc?.length===2)items.push({type:'Feature',geometry:{type:'Point',coordinates:loc},properties:{code:entry.code,provenance:owner?'OWNER_MODEL':'STATION_LOCALITY_REFERENCE',attachmentOnly:!layouts.get(entry.code)}});
  }
  const data={type:'FeatureCollection',features:items};
  if(map.getSource(source))map.getSource(source).setData(data);
@@ -98,19 +102,24 @@ function showLayout(code,scroll=false){
 function renderLayout(){
  const host=document.getElementById('lab-r16-layout-panel');if(!host)return;
  host.replaceChildren();host.append($('h2','Station / PL Intelligence · Import Layout'));
- host.append($('p','Import JSON berstruktur sahaja. PDF, imej dan drawing mentah belum boleh dijana automatik menjadi trek sah. Semua layout ialah calon UAT pada peranti ini, bukan penerbitan kepada pengunjung.','lab-trail-note'));
+ host.append($('p','Terima gambar PNG/JPG/WEBP, PDF, layout JSON atau GeoJSON. Gambar/PDF dipaparkan sebagai dokumen asal sahaja; tidak ditukar automatik kepada landasan. Simpanan hanya pada browser ini.','lab-trail-note'));
  const sel=$('select');sel.id='lab-r16-layout-select';
  for(const r of root.MRS10ECRLChainage.records){const op=$('option',r.code+' · '+ch(r.metres));op.value=r.code;sel.append(op)}
  sel.value=shownCode;sel.onchange=()=>showLayout(sel.value);host.append(sel);
- const file=$('input');file.type='file';file.accept='.json,application/json';file.id='lab-r16-layout-file';
- file.onchange=async()=>{try{const f=file.files?.[0];if(!f||f.size>1300000)throw Error('LAYOUT_FILE_MAX_1_3_MB');
+ const file=$('input');file.type='file';file.accept='.json,.geojson,application/json,'+sourceDocs.ACCEPT;file.id='lab-r16-layout-file';
+ file.onchange=async()=>{try{const f=file.files?.[0];if(!f)throw Error('NO_FILE_SELECTED');
+  if(!/\.(json|geojson)$/i.test(f.name)&&!(f.type==='application/json')){
+   await importMediaFile(f,shownCode,host.querySelector('#lab-r161-source-ref')?.value||'OWNER_IMPORTED_LOCAL_VISUAL_REFERENCE_UNVERIFIED');return;
+  }
+  if(f.size>1300000)throw Error('LAYOUT_JSON_MAX_1_3_MB');
   const v=JSON.parse(await f.text());
   const candidates=Array.isArray(v.layouts)?v.layouts:[v];
   if(candidates.some(x=>!x.code&&!x.assetCode)&&v?.type!=='FeatureCollection')throw Error('LAYOUT_MUST_SPECIFY_STATION_OR_PL_CODE');
   const result=v?.type==='FeatureCollection'?layouts.ingestGeoJSON(v):layouts.ingest(v);shownCode=result[0].code;layoutError='Layout source imported: '+result.map(x=>x.code+' ('+x.tracks+' track)').join(', ');
   renderLayout();linkMap();
  }catch(e){layoutError='IMPORT ERROR: '+e.message;renderLayout()}};
- const fileLabel=$('label','Import layout JSON STN / PL');fileLabel.append(file);host.append(fileLabel);
+ const sourceLabel=$('label','Sumber gambar / PDF (nota rujukan, belum disahkan)'),reference=$('input');reference.id='lab-r161-source-ref';reference.value='OWNER_IMPORTED_LOCAL_VISUAL_REFERENCE_UNVERIFIED';reference.maxLength=350;sourceLabel.append(reference);host.append(sourceLabel);
+ const fileLabel=$('label','Import layout STN/PL · PNG/JPG/PDF/GeoJSON/JSON');fileLabel.append(file);host.append(fileLabel);
  const doc=layouts.get(shownCode);
  if(doc){
   host.append($('strong',doc.title+' · '+doc.code+' · '+ch(doc.CH)));
@@ -120,6 +129,16 @@ function renderLayout(){
  const list=$('details');list.append($('summary','Lay out yang telah diimport: '+layouts.all().length));
  for(const l of layouts.all()){const b=$('button',l.code+' · '+l.tracks+' tracks');b.type='button';b.onclick=()=>showLayout(l.code);list.append(b)}
  host.append(list,$('p',layoutError,'lab-r16-alert'));
+ sourceDocs.render(shownCode,host).catch(e=>{layoutError='Dokumen sumber: '+e.message});
+}
+async function importMediaFile(file,assetCode,source){
+ const code=String(assetCode||shownCode).toUpperCase();
+ const entry=await sourceDocs.save(file,code,source);
+ shownCode=code;
+ layoutError='Gambar/PDF sumber disimpan untuk '+code+': '+entry.fileName+' · belum disahkan sebagai geometri.';
+ renderLayout();linkMap();
+ if(code.startsWith('STN'))root.MRS10ECRLStationMap?.select?.(code,false);
+ return {category:'STATION_PL_SOURCE_MEDIA',code,fileName:entry.fileName,view:entry.view,publicPublished:false};
 }
 function renderEvents(){
  const host=document.getElementById('lab-r16-infrastructure');if(!host)return;host.replaceChildren();
@@ -201,7 +220,7 @@ function connect(options){
  journey.syncSession(current());refresh();
  if(journey.pending())popup();
 }
-const api=Object.freeze({connect,request,refresh,showLayout,importPayload,cancelPending,movementApplied,newRun,pending:()=>journey.pending(),snapshot:()=>({journey:journey.snapshot(),layouts:layouts.snapshot()})});
+const api=Object.freeze({connect,request,refresh,showLayout,importPayload,importMediaFile,cancelPending,movementApplied,newRun,pending:()=>journey.pending(),snapshot:()=>({journey:journey.snapshot(),layouts:layouts.snapshot(),sourceDocuments:sourceDocs.snapshot()})});
 root.MRS10D102JourneyUI=api;
 if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:null);
