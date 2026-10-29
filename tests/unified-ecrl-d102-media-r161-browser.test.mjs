@@ -20,7 +20,11 @@ for(const [name,driver] of [['chromium',chromium],['webkit',webkit]]){
    await page.waitForFunction(()=>document.querySelector('#lab-r16-layout-panel img.lab-r161-layout-img')&&window.MRS10D102SourceDocuments.snapshot().importsThisPage>=1);
    assert.match(await page.locator('#lab-r16-layout-panel').innerText(),/STN01 Kota Bharu.png/);
    const html=await page.locator('#lab-r16-layout-panel img.lab-r161-layout-img').getAttribute('src');
-   assert(html.startsWith('blob:'));
+   assert(html.startsWith('data:image/png;base64,'),'Safari must receive embedded image preview, not blob URL');
+   await page.waitForFunction(()=>{
+    const img=document.querySelector('#lab-r16-layout-panel img.lab-r161-layout-img');
+    return img?.complete&&img.naturalWidth>0;
+   },null,{timeout:12000});
    assert.match(await page.locator('#lab-station-intelligence').innerText(),/STN01 Kota Bharu.png/);
    checks.push('image displays within layout panel and STN01 Intelligence without inventing track');
    await page.locator('#lab-r16-layout-file').setInputFiles({name:'STN01 source.pdf',mimeType:'application/pdf',buffer:pdf});
