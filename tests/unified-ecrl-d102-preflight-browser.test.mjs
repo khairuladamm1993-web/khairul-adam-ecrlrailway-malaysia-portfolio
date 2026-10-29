@@ -16,6 +16,16 @@ for(const [name,driver] of [['chromium',chromium],['webkit',webkit]]){
    assert.equal(initial.mapPinAvailability,false);
    assert.equal(await page.locator('#lab-preflight-asset option').count(),23);
    checks.push('23 Owner preflight assets and blocked physical movement');
+   const camera=initial.camera;
+   assert.equal(camera.view,'2d');
+   assert.equal(camera.follow,true);
+   assert.equal(camera.hasVerifiedGeographicSimulationPosition,false);
+   await page.locator('#lab-camera-3d').click();
+   assert.equal((await page.evaluate(()=>window.MRS10ECRLRouteLab.snapshot().camera)).view,'3d');
+   await page.locator('#lab-camera-2d').click();
+   assert.equal((await page.evaluate(()=>window.MRS10ECRLRouteLab.snapshot().camera)).view,'2d');
+   checks.push('2D top-down and tilted-3D follow controls without fake GPS');
+
    assert.equal(await page.locator('#lab-preflight-asset').inputValue(),'STN01');
    assert(await page.locator('#lab-preflight-lat').inputValue());
    assert(await page.locator('#lab-preflight-lon').inputValue());
@@ -35,6 +45,7 @@ for(const [name,driver] of [['chromium',chromium],['webkit',webkit]]){
    checks.push('explicit model-only owner WGS84 confirmation');
    await page.getByRole('button',{name:'Ke checkpoint seterusnya'}).click();
    assert.equal((await page.evaluate(()=>window.MRS10ECRLRouteLab.snapshot())).session.currentCH,33700);
+   assert.equal((await page.evaluate(()=>window.MRS10ECRLRouteLab.snapshot().camera)).hasVerifiedGeographicSimulationPosition,false);
    await page.locator('#lab-obs-type').selectOption('TUNNEL_ENTRY');
    await page.locator('#lab-obs-title').fill('Tunnel geometry candidate');
    await page.locator('#lab-obs-notes').fill('This is a model-only D102 observation; entrance not surveyed');
