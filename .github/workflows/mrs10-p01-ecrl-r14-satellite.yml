@@ -1,0 +1,53 @@
+name: P01 ECRL R1.4 Satellite STN and Freight Laboratory
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-satellite-stn01-ch-trail-r14-20261029
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - name: R1.4 registry and source QA
+        run: |
+          node --check assets/unified-ecrl/route-lab-ui.js
+          node --check assets/unified-ecrl/route-lab-satellite.js
+          node --check assets/unified-ecrl/route-lab-station-map.js
+          node --check assets/unified-ecrl/route-lab-freight-area-map.js
+          node --test tests/unified-ecrl-route-lab-satellite-stations.test.cjs tests/unified-ecrl-manual-route-lab.test.cjs tests/unified-ecrl-route-lab-orm-overlay.test.cjs tests/unified-ecrl-route-lab-track-metadata.test.cjs tests/unified-ecrl-route-lab-lineage.test.cjs
+      - run: node scripts/build-unified-v8.cjs
+      - run: test -f dist-unified-v8/ecrl-alignment-lab.html
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node scripts/build-unified-v8.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Real browser six-viewport satellite, station, freight, and D102 CH UAT
+        run: |
+          python3 -m http.server 8765 --directory dist-unified-v8 >/tmp/ecrl-r14.log 2>&1 &
+          node tests/unified-ecrl-route-lab-r14-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: ecrl-r14-browser-uat-evidence
+          path: artifacts/ecrl-lab-r14/
+          retention-days: 14
