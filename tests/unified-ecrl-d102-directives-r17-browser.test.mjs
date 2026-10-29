@@ -33,6 +33,7 @@ for(const [engineName,engine] of [['chromium',chromium],['webkit',webkit]]){
    checks.push('D102 STN01 and explicit .json/.txt ChatGPT owner instruction picker');
    const unsafe={...pack,commands:[{id:'BAD001',op:'EXECUTE_JS',payload:{assetCode:'STN01',script:'alert(1)'}}]};
    await page.locator('#lab-r17-directive-file').setInputFiles({name:'unsafe.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(unsafe))});
+   await page.waitForFunction(()=>document.querySelector('#lab-r17-assistant')?.textContent?.includes('FILE REJECTED'),null,{timeout:10000});
    assert.match(await page.locator('#lab-r17-assistant').innerText(),/FILE REJECTED/);
    checks.push('untrusted arbitrary command rejected');
    await page.locator('#lab-r17-directive-file').setInputFiles({name:'chatgpt-adam-d102.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(pack))});
