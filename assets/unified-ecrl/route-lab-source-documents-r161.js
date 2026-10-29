@@ -41,7 +41,7 @@ async function save(file,assetCode,source){
  const entry={
   id:code+'-'+Date.now()+'-'+Math.floor(Math.random()*1000000),
   assetCode:code,fileName:String(file.name||'imported-layout').slice(0,160),
-  media:format.media,view:format.view,blob:file,bytes:file.size,
+  media:format.media,view:format.view,bytesData:new Uint8Array(await file.arrayBuffer()),bytes:file.size,
   source:src.slice(0,350),importedAt:new Date().toISOString(),
   evidenceClass:'OWNER_IMPORTED_SOURCE_VISUAL_UNVERIFIED',
   physicalCoordinateVerified:false,trackConnectionsVerified:false,publicPublished:false,
@@ -51,7 +51,7 @@ async function save(file,assetCode,source){
  await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(entry);
   tx.oncomplete=()=>resolve();tx.onerror=()=>reject(new Error('INDEXEDDB_SAVE_FAILED'))});
  notice=code+' · '+file.name+' disimpan pada browser ini';inMemoryCount+=1;
- return {...entry,blob:undefined};
+ return {...entry,bytesData:undefined};
 }
 async function list(code,withBlob=true){
  if(!VALID_CODES.has(code))return [];
@@ -59,7 +59,7 @@ async function list(code,withBlob=true){
  return new Promise((resolve,reject)=>{
   const tx=db.transaction(STORE,'readonly'),req=tx.objectStore(STORE).index('assetCode').getAll(code);
   req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.importedAt.localeCompare(a.importedAt)).map(x=>
-   withBlob?x:{...x,blob:undefined}));
+   withBlob?x:{...x,bytesData:undefined}));
   req.onerror=()=>reject(new Error('INDEXEDDB_READ_FAILED'));
  });
 }
@@ -88,7 +88,7 @@ async function render(code,host,{compact=false}={}){
   for(const e of entries){
    const d=make('details',null,'lab-r161-item'),h=make('summary',e.fileName+' · '+(e.bytes/1024).toFixed(0)+' KB · '+e.importedAt.slice(0,10));
    d.append(h,make('p','Sumber: '+e.source+' · OWNER SOURCE VISUAL / UNVERIFIED','lab-r16-note'));
-   const u=url(target,e.blob);
+   const u=url(target,new Blob([e.bytesData],{type:e.media}));
    if(e.view==='IMAGE'){
     const img=make('img');img.src=u;img.alt=e.assetCode+' imported station/PL layout reference';img.loading='lazy';
     img.className='lab-r161-layout-img';d.append(img);
