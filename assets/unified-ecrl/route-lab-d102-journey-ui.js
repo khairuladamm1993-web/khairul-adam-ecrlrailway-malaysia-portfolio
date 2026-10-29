@@ -74,7 +74,7 @@ function request(target){
  const p=journey.request(s,Number(target));refresh();popup();return p;
 }
 function linkMap(){
- if(!map||!map.getStyle?.())return;
+ if(!map||!map.getStyle?.()||!map.isStyleLoaded?.())return;
  const source='mrs10-r16-layout-markers',layer='mrs10-r16-layout-icons',items=[];
  for(const entry of layouts.all()){
   const station=root.MRS10ECRLStationIntelligence?.getStation(entry.code);
