@@ -99,6 +99,24 @@ function show(){
  }
  details.append(list,$('p','Pembantu ini ialah audit peraturan/deterministik, BUKAN model AI autonomi atau pengukuran rel fizikal.','lab-trail-note'));
  host.append(details);
+ const complete=root.MRS10D102MasterHandoff.readiness(engine.snapshot());
+ const archive=$('button',complete.readyForPortableArchive?'Eksport 1 fail induk ECRL untuk PWA':'Fail induk: tunggu semua arahan selesai');
+ archive.type='button';archive.id='lab-r17-master-export';archive.disabled=!complete.readyForPortableArchive;
+ archive.onclick=async()=>{
+  archive.disabled=true;archive.textContent='Menyediakan satu fail lengkap...';
+  try{
+   const payload=await root.MRS10D102MasterHandoff.create({
+    getInstructions:()=>engine.exportData(),
+    getLayouts:deps.getLayouts,getJourney:deps.getJourney,getSession:deps.getSession,
+    getAudit:()=>Auditor.report({...deps,getAttachments:()=>media}),
+    getImportedGeometry:deps.getImportedGeometry
+   },{includeMedia:true});
+   saveFile('MR-S10-ECRL-D102-MASTER-CH-STN-PL-TRACK-HANDOFF-v1.json',payload);
+   notice='FAIL INDUK DICIPTA: '+payload.assetRegistry.length+' checkpoints · '+payload.trackLayoutMedia.length+' dokumen · GEOFIZIKAL BELUM DISAHKAN';
+  }catch(e){notice='EKSPORT DITAHAN: '+String(e.message||e).slice(0,170)}
+  show();
+ };
+ host.append(archive,$('p','Selepas semua arahan Owner selesai, satu JSON induk mengandungi 23 CH, layout STN/PL yang tersedia, data trek, imej/PDF sumber (maksimum 22 MB), checkpoint D102 dan audit provenance. Geometri yang belum sah tetap UNKNOWN.','lab-r16-note'));
  const exportButton=$('button','Eksport sejarah arahan & audit'),foot=$('p','Disimpan pada browser Preview ini sahaja. Setiap domain Vercel berbeza memerlukan eksport/import rekod.','lab-r16-note');
  exportButton.onclick=()=>saveFile('private-mrs10-chatgpt-adam-instruction-runner-audit.json',engine.exportData());
  host.append(exportButton,foot);
