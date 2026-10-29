@@ -106,8 +106,8 @@ function renderLayout(){
  file.onchange=async()=>{try{const f=file.files?.[0];if(!f||f.size>1300000)throw Error('LAYOUT_FILE_MAX_1_3_MB');
   const v=JSON.parse(await f.text());
   const candidates=Array.isArray(v.layouts)?v.layouts:[v];
-  if(candidates.some(x=>!x.code&&!x.assetCode))throw Error('LAYOUT_MUST_SPECIFY_STATION_OR_PL_CODE');
-  const result=layouts.ingest(v);shownCode=result[0].code;layoutError='Layout source imported: '+result.map(x=>x.code+' ('+x.tracks+' track)').join(', ');
+  if(candidates.some(x=>!x.code&&!x.assetCode)&&v?.type!=='FeatureCollection')throw Error('LAYOUT_MUST_SPECIFY_STATION_OR_PL_CODE');
+  const result=v?.type==='FeatureCollection'?layouts.ingestGeoJSON(v):layouts.ingest(v);shownCode=result[0].code;layoutError='Layout source imported: '+result.map(x=>x.code+' ('+x.tracks+' track)').join(', ');
   renderLayout();linkMap();
  }catch(e){layoutError='IMPORT ERROR: '+e.message;renderLayout()}};
  const fileLabel=$('label','Import layout JSON STN / PL');fileLabel.append(file);host.append(fileLabel);
@@ -176,6 +176,10 @@ function refresh(){
  renderLayout();renderEvents();linkMap();
 }
 function importPayload(data){
+ if(data?.type==='FeatureCollection'&&data.features?.length&&data.features.every(x=>x.properties?.assetCode||x.properties?.stationCode||x.properties?.loopCode)){
+  const loaded=layouts.ingestGeoJSON(data);shownCode=loaded[0].code;layoutError='Source GeoJSON schematic: '+loaded.map(x=>x.code).join(', ');refresh();
+  return {category:'TRACK_LAYOUT_GEOJSON',assets:loaded};
+ }
  if(Array.isArray(data?.layouts)||(data?.tracks&&Array.isArray(data?.tracks))){
   const loaded=layouts.ingest(data);shownCode=loaded[0].code;layoutError='Imported '+loaded.map(x=>x.code).join(', ');refresh();
   return {category:'TRACK_LAYOUT',assets:loaded};
