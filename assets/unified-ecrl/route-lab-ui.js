@@ -133,6 +133,9 @@ root.MRS10D102JourneyUI?.connect({
   if(!a||!b||a===b||!Number.isInteger(imported.currentCH)||imported.currentCH<Math.min(a.metres,b.metres)||imported.currentCH>Math.max(a.metres,b.metres))throw Error('BACKUP_CH_OUTSIDE_REFERENCED_ROUTE');
   if(!Array.isArray(imported.events)||imported.events.length>500||!Array.isArray(imported.reviews)||imported.reviews.length>100)throw Error('BACKUP_EVENT_LIMIT_OR_FORMAT');
   if(imported.verifiedAsBuilt===true||imported.gpsUsed===true)throw Error('BACKUP_HAS_UNSUPPORTED_LIVE_OR_SURVEY_CLAIMS');
+  const archiveKey=KEY+'-recovery-archives',archive=JSON.parse(localStorage.getItem(archiveKey)||'[]');
+  archive.push({savedAt:new Date().toISOString(),reason:'OWNER_BACKUP_IMPORT',previousSession:session,importedSession:imported});
+  try{localStorage.setItem(archiveKey,JSON.stringify(archive))}catch{throw Error('BACKUP_RECOVERY_ARCHIVE_FAILED_EXPORT_FIRST')}
   root.MRS10D102JourneyUI?.cancelPending();
   session={schema:1,mode:'SIMULATION',trainId:'D102-SIM',origin:imported.origin,destination:imported.destination,
    currentCH:imported.currentCH,events:imported.events.map(e=>({type:String(e.type||'SIM_EVENT'),from:e.from,to:e.to,code:e.code,CH:e.CH,time:e.time})),

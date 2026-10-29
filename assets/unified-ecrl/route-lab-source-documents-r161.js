@@ -5,7 +5,7 @@
 const DB='mrs10-p01-d102-layout-source-images-r161',STORE='attachments',LIMIT=12*1024*1024;
 const ACCEPT='.png,.jpg,.jpeg,.webp,.pdf,image/png,image/jpeg,image/webp,application/pdf';
 const VALID_CODES=new Set(root.MRS10ECRLChainage?.records?.map(x=>x.code)||[]);
-let dbPromise=null,notice='',inMemoryCount=0,readiness='NOT_OPENED',activeURLs=new Map();
+let dbPromise=null,notice='',inMemoryCount=0,readiness='NOT_OPENED';
 function open(){
  if(dbPromise)return dbPromise;
  if(!root.indexedDB)return Promise.reject(new Error('INDEXEDDB_UNAVAILABLE_SAFARI_STORAGE'));
@@ -70,13 +70,13 @@ async function allSummaries(){
   req.onerror=()=>reject(new Error('INDEXEDDB_INDEX_FAILED'));
  });
 }
-function revoke(container){const old=activeURLs.get(container);if(old){for(const u of old)URL.revokeObjectURL(u)}activeURLs.set(container,[])}
-function url(container,blob){const u=URL.createObjectURL(blob);activeURLs.get(container)?.push(u);return u}
-function imageDataURL(e){
+function sourceDataURL(e){
  return new Promise((resolve,reject)=>{
   const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));
   reader.onerror=()=>reject(new Error('SAFARI_IMAGE_PREVIEW_DECODE_FAILED'));
-  reader.readAsDataURL(new Blob([e.bytesData],{type:e.media}));
+  const body=e.bytesData||(e.blob instanceof Blob?e.blob:null);
+  if(!body){reject(new Error('LEGACY_ATTACHMENT_REQUIRES_REIMPORT'));return}
+  reader.readAsDataURL(body instanceof Blob?body:new Blob([body],{type:e.media}));
  });
 }
 function make(tag,value,cls){const e=root.document.createElement(tag);if(value!==null&&value!==undefined)e.textContent=String(value);if(cls)e.className=cls;return e}
@@ -85,7 +85,7 @@ async function render(code,host,{compact=false}={}){
  host.dataset.r161Code=code;
  let box=host.querySelector('.lab-r161-source-documents');
  if(!box){box=make('div',null,'lab-r161-source-documents');host.append(box)}
- const target=box;revoke(target);target.replaceChildren();
+ const target=box;target.replaceChildren();
  target.append(make('h3','Layout dokumen · '+code+(compact?'':' · STN/PL Intelligence')));
  target.append(make('p','Pratonton fail asal sahaja · bukan geometri trek / as-built yang disahkan.','lab-r16-note'));
  try{
@@ -97,20 +97,20 @@ async function render(code,host,{compact=false}={}){
    d.append(h,make('p','Sumber: '+e.source+' · OWNER SOURCE VISUAL / UNVERIFIED','lab-r16-note'));
    if(e.view==='IMAGE'){
     // WebKit rejects some blob: origins on local/private Preview; use FileReader data URL for images.
-    const src=await imageDataURL(e);if(host.dataset.r161Code!==code||!target.isConnected)return;
+    const src=await sourceDataURL(e);if(host.dataset.r161Code!==code||!target.isConnected)return;
     const img=make('img');img.src=src;img.alt=e.assetCode+' imported station/PL layout reference';
     img.className='lab-r161-layout-img';d.append(img);
     const a=make('a','Simpan / lihat gambar asal');a.href=src;a.download=e.fileName;a.className='lab-r161-open';d.append(a);
    }else{
     d.append(make('p','PDF sumber. Buka fail asal menggunakan pautan berikut. Tiada pengekstrakan landasan automatik.','lab-r16-note'));
-    const u=url(target,new Blob([e.bytesData],{type:e.media}));
-    const a=make('a','Buka PDF asal');a.href=u;a.target='_blank';a.rel='noopener noreferrer';a.className='lab-r161-open';d.append(a);
+    const u=await sourceDataURL(e);if(host.dataset.r161Code!==code||!target.isConnected)return;
+    const a=make('a','Buka PDF asal');a.href=u;a.download=e.fileName;a.target='_blank';a.rel='noopener noreferrer';a.className='lab-r161-open';d.append(a);
    }
    target.append(d);
   }
  }catch(e){target.append(make('p','Tidak boleh membaca storan setempat: '+e.message,'lab-r16-alert'))}
 }
-const api=Object.freeze({save,list,allSummaries,render,ACCEPT,MAX_BYTES:LIMIT,
+const api=Object.freeze({save,list,allSummaries,render,inspectFile,ACCEPT,MAX_BYTES:LIMIT,
  snapshot:()=>({provider:'BROWSER_INDEXEDDB_ONLY',readiness,importsThisPage:inMemoryCount,lastMessage:notice,
   vectorGeometryGenerated:false,physicalTrackVerified:false,publicPublished:false,crossPreviewSync:false})});
 root.MRS10D102SourceDocuments=api;

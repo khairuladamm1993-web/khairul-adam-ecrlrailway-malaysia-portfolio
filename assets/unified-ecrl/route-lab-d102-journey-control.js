@@ -136,6 +136,25 @@ function create(storage,rows){
   record('NEW_CH_RUN_EXPLICIT_OWNER_REQUEST',{origin,destination,note:'Prior journey ledger retained; no automatic restart'});
   save();
  }
+ function importHistory(input){
+  if(input?.schema!=='mrs10-d102-journey-ledger-r16'||!Array.isArray(input.ledger)||input.ledger.length>20000||!Array.isArray(input.infrastructure)||input.infrastructure.length>100)throw Error('INVALID_R16_HISTORY_BACKUP');
+  if(input.asBuilt===true||input.liveGPS===true||input.cloudSynced===true)throw Error('UNSUPPORTED_BACKUP_VERIFICATION_CLAIM');
+  const clean=input.ledger.map(e=>{
+   if(!e||typeof e.type!=='string'||e.type.length>100)throw Error('INVALID_HISTORY_ENTRY');
+   for(const key of ['CH','observedCH','fromCH'])if(e[key]!=null&&(!Number.isInteger(e[key])||e[key]<0||e[key]>600000))throw Error('INVALID_HISTORY_CH');
+   if((e.latitude!=null||e.longitude!=null)&&!validPoint(e.latitude,e.longitude))throw Error('INVALID_HISTORY_COORDINATE');
+   const item={originalType:e.type,originalTime:String(e.time||'').slice(0,80),CH:e.CH??null,observedCH:e.observedCH??null,residualM:e.residualM??null,code:e.code?String(e.code).slice(0,40):null,id:e.id?String(e.id).slice(0,100):null,source:String(e.source||'IMPORTED_R16_BACKUP').slice(0,300),latitude:e.latitude??null,longitude:e.longitude??null,verifiedPhysicalPosition:false};
+   item.importKey=JSON.stringify(item);return item;
+  });
+  const current=new Set(state.ledger.filter(e=>e.importKey).map(e=>e.importKey)),items=clean.filter(e=>!current.has(e.importKey)&&current.add(e.importKey));
+  if(!items.length)return {added:0,retained:state.ledger.length};
+  // Immutable pre-import recovery copy; fail closed if local quota is exhausted.
+  const key=KEY+'-backup-recovery',archives=JSON.parse(storage.getItem(key)||'[]');
+  archives.push({at:new Date().toISOString(),previous:JSON.parse(JSON.stringify(state)),imported:input});
+  try{storage.setItem(key,JSON.stringify(archives))}catch{throw Error('RECOVERY_ARCHIVE_SAVE_FAILED_EXPORT_FIRST')}
+  for(const item of items)record('IMPORTED_R16_HISTORY',item);
+  return {added:items.length,retained:state.ledger.length};
+ }
  function clearPending(){
   if(state.pending){record('PENDING_CANCELLED',{phase:state.pending.phase,CH:state.pending.CH});state.pending=null;state.resumeTarget=null;save()}
  }
@@ -146,7 +165,7 @@ function create(storage,rows){
   modelMode:'MANUAL_CH_ONLY',liveGPS:false,asBuilt:false,cloudSynced:false,journeyId:state.journeyId
  }}
  function exportData(){return {schema:'mrs10-d102-journey-ledger-r16',exportedAt:new Date().toISOString(),...snapshot(),publicDistribution:false}}
- return Object.freeze({request,confirm,pending,syncSession,registerInfrastructure,infrastructure,movementApplied,newRun,clearPending,snapshot,exportData});
+ return Object.freeze({request,confirm,pending,syncSession,importHistory,registerInfrastructure,infrastructure,movementApplied,newRun,clearPending,snapshot,exportData});
 }
 const api=Object.freeze({create,EVENT_TYPES,KEY,chLabel});
 if(typeof module==='object'&&module.exports)module.exports=api;

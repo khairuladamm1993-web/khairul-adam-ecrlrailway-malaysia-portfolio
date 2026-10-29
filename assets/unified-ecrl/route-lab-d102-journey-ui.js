@@ -181,6 +181,10 @@ function refresh(){
   backup.onchange=async()=>{try{
     const file=backup.files?.[0];if(!file||file.size>1800000)throw Error('BACKUP_MAX_1_8MB');
     const input=JSON.parse(await file.text());
+    if(input?.schema==='mrs10-d102-journey-ledger-r16'){
+     if(!root.confirm('Import sejarah R1.6 secara tambahan; CH sesi semasa tidak diubah. Teruskan?'))return;
+     const result=journey.importHistory(input);sourceStatus='R1.6 history restored: '+result.added+' entries · existing history retained';refresh();return;
+    }
     if(!input||input.schema!==1||!input.session)throw Error('EXPECTED_R15_SESSION_BACKUP_SCHEMA_1');
     if(!root.confirm('Import sandaran akan menggantikan CH sesi yang sedang dipaparkan. Jurnal R1.6 kekal. Teruskan?'))return;
     const restored=fn.restoreSession(input.session);
