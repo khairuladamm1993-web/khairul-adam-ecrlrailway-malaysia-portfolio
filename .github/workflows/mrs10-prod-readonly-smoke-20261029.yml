@@ -60,3 +60,56 @@ jobs:
             console.log('PRODUCTION_PUBLIC_GET_SMOKE_PASS',JSON.stringify({pages:pages.length,internalAssets:referenced.size,checked:results.length,results}));
           })().catch(e=>{console.error('PRODUCTION_PUBLIC_GET_SMOKE_FAIL',e.stack||String(e));process.exitCode=1;});
           NODE
+
+  public-browser-read-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm install --no-save --ignore-scripts --no-audit playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Exercise published public pages in Chromium and WebKit without logging in
+        run: |
+          node <<'NODE'
+          const { chromium,webkit }=require('playwright');
+          const assert=require('node:assert/strict');
+          const fs=require('node:fs');
+          const base='https://khairuladamm1993-web.github.io/khairul-adam-ecrlrailway-malaysia-portfolio/';
+          const routes=['index.html','gateway.html','portfolio.html','references.html'];
+          const results=[];
+          fs.mkdirSync('artifacts/prod-public',{recursive:true});
+          (async()=>{
+            for(const [engine,browserType,config] of [['chromium',chromium,{viewport:{width:1280,height:800},executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox']}],['webkit',webkit,{viewport:{width:390,height:844},isMobile:true,hasTouch:true,headless:true}]]){
+              const browser=await browserType.launch(config);
+              const page=await browser.newPage({viewport:config.viewport,hasTouch:engine==='webkit'});
+              // Prevent analytics and other third-party writes: load only files on the public Github Pages host.
+              await page.route('**/*',route=>{const url=route.request().url();if(url.startsWith(base))route.continue();else route.abort()});
+              for(const route of routes){
+                const errors=[];const onError=e=>errors.push(e.message);
+                page.on('pageerror',onError);
+                const response=await page.goto(base+route,{waitUntil:'domcontentloaded',timeout:45000});
+                assert.equal(response.status(),200,engine+' '+route+' bad HTTP');
+                await page.locator('body').waitFor({state:'visible'});
+                assert((await page.title()).length>8,engine+' '+route+' title missing');
+                assert((await page.locator('body').innerText()).length>60,engine+' '+route+' body missing');
+                await page.screenshot({path:'artifacts/prod-public/'+engine+'-'+route+'.png',fullPage:false});
+                results.push({engine,route,http:response.status(),title:await page.title(),pageErrors:errors});
+                page.off('pageerror',onError);
+              }
+              await browser.close();
+            }
+            fs.writeFileSync('artifacts/prod-public/report.json',JSON.stringify(results,null,2));
+            console.log('PROD_BROWSER_READONLY_PASS',JSON.stringify({pages:results.length,results}));
+          })().catch(e=>{console.error('PROD_BROWSER_READONLY_FAIL',e.stack||String(e));process.exitCode=1;});
+          NODE
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: mrs10-main-public-browser-smoke
+          path: artifacts/prod-public/
+          retention-days: 7
