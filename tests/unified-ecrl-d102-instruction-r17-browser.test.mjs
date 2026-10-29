@@ -36,7 +36,9 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    assert.equal((await page.evaluate(()=>window.MRS10ECRLRouteLab.snapshot().session.currentCH)),670);
    checks.push('three approved actions complete, gap recorded, camera 3D only, CH unaffected');
    await page.waitForFunction(()=>!document.getElementById('lab-r17-master-export').disabled);
-   const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#lab-r17-master-export').click()]);
+   await page.locator('#lab-r17-master-export').click();
+   await page.locator('#lab-r17-master-download').waitFor({state:'visible',timeout:30000});
+   const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#lab-r17-master-download').click()]);
    const filepath=await download.path(),master=JSON.parse(await fs.readFile(filepath,'utf8'));
    assert.equal(master.schema,'mrs10-ecrl-d102-master-handoff-v1');
    assert.equal(master.assetRegistry.length,23);
