@@ -11,7 +11,11 @@
 .lab-orm-note{font-size:.77rem;color:#745419;border-left:3px solid #bf7929;margin:7px 0 14px;padding:7px 9px;background:#fff8e9}
 @media(max-width:650px){.lab-rail-tools{gap:7px;padding:9px}.lab-rail-buttons{width:100%}.lab-rail-buttons button{flex:1 1 auto}.lab-rail-caution summary{padding:10px}.lab-orm-note{font-size:.74rem}}
 .lab-track-meta{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:9px;font-size:.84rem}.lab-track-meta strong{display:block}.lab-track-meta p{margin:5px 0;color:#526773}.lab-track-meta a{color:#0b7377;font-weight:650}.lab-basemap-selector{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}.lab-basemap-selector button{min-height:36px;font-size:.85rem;padding:6px 12px}.lab-basemap-selector button[aria-pressed=true]{background:#dceced;border-color:#0b7377}.lab-basemap-selector span{font-size:.74rem;color:#536975}.lab-station-panel-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:9px 0;color:#38576a;font-size:.84rem}.lab-station-card{background:#fff;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin:10px 0}.lab-station-card h2{margin:0 0 4px}.lab-station-card h3{margin:4px 0 7px;font-size:1rem}.lab-station-card .lab-warning{margin:6px 0 10px;padding:7px;font-size:.82rem}.lab-station-grid{display:grid;grid-template-columns:minmax(110px,42%) 1fr;gap:5px 9px;font-size:.85rem;margin:5px 0}.lab-station-grid dt{color:#526773}.lab-station-grid dd{margin:0;font-weight:600;overflow-wrap:anywhere}.lab-station-card details a{display:block;font-size:.74rem;overflow-wrap:anywhere;padding:4px}.lab-trail-list{max-height:230px;overflow:auto}.lab-trail-list li{font-variant-numeric:tabular-nums}.lab-trail-note{font-size:.82rem;color:#76501a;background:#fff8e7;padding:8px;border-left:3px solid #b6802d}@media(max-width:650px){.lab-station-card{padding:9px}.lab-basemap-selector span{flex-basis:100%}}
-.lab-owner-counter{padding:7px 10px;background:#e8f4f2;border-radius:8px;font-weight:650}.lab-owner-checkbox{display:flex;gap:10px;align-items:flex-start;margin:10px 0;padding:10px;background:#fff4df;border-radius:7px}.lab-owner-checkbox input{width:20px;height:20px;flex:0 0 20px;accent-color:#b97b1d}#lab-d102-preflight progress{width:100%;height:12px;margin-bottom:10px;accent-color:#097d80}#lab-d102-preflight input,#lab-d102-observations input,#lab-d102-preflight textarea,#lab-d102-observations textarea{margin:5px 0 12px}.lab-station-card>label{margin:8px 0}.lab-camera-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#f0f7fa;border:1px solid var(--line);padding:8px;border-radius:10px;margin:8px 0}.lab-camera-controls button{min-height:38px;font-size:.84rem;padding:6px 10px}.lab-camera-controls button[aria-pressed=true]{background:#c9e9e9;border-color:#078080}.lab-camera-controls span{flex:1 1 220px;font-size:.77rem;color:#496474}@media(max-width:650px){.lab-camera-controls span{flex-basis:100%}}</style>
+.lab-owner-counter{padding:7px 10px;background:#e8f4f2;border-radius:8px;font-weight:650}.lab-owner-checkbox{display:flex;gap:10px;align-items:flex-start;margin:10px 0;padding:10px;background:#fff4df;border-radius:7px}.lab-owner-checkbox input{width:20px;height:20px;flex:0 0 20px;accent-color:#b97b1d}#lab-d102-preflight progress{width:100%;height:12px;margin-bottom:10px;accent-color:#097d80}#lab-d102-preflight input,#lab-d102-observations input,#lab-d102-preflight textarea,#lab-d102-observations textarea{margin:5px 0 12px}.lab-station-card>label{margin:8px 0}.lab-camera-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#f0f7fa;border:1px solid var(--line);padding:8px;border-radius:10px;margin:8px 0}.lab-camera-controls button{min-height:38px;font-size:.84rem;padding:6px 10px}.lab-camera-controls button[aria-pressed=true]{background:#c9e9e9;border-color:#078080}.lab-camera-controls span{flex:1 1 220px;font-size:.77rem;color:#496474}@media(max-width:650px){.lab-camera-controls span{flex-basis:100%}}.lab-hd-setup{padding:8px 11px;margin:5px 0 10px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.lab-hd-setup summary{background:#edf6f9;color:#163c46}.lab-hd-setup label{margin:8px 0 4px}.lab-hd-setup input{width:100%;font:inherit;padding:9px;border:1px solid var(--line);border-radius:8px}
+.lab-hd-setup p{font-size:.78rem;color:#435865;margin:7px 0}.lab-hd-setup a{color:#0b7377}
+#lab-hd-status[data-status="ERROR"],#lab-hd-status[data-status="KEY_REQUIRED"]{color:#9a4b20;font-weight:600}
+</style>
 </head><body><header><a href="./unified-map-v8.html">← MR-S10 Unified Map V8.1</a><strong>ECRL · Single Train Alignment Laboratory</strong></header>
 <main>
 <details class="lab-rail-caution"><summary>SIMULASI · Rujukan peta bukan as-built / GPS</summary><p><strong>EXPERIMENTAL / SIMULASI</strong> · This private-use learning workflow is not a secured Owner portal. No real train telemetry, tickets, georeferenced as-built railway or site safety suitability is asserted. Do not import restricted railway engineering drawings.</p></details>
@@ -29,7 +33,16 @@
 <div class="lab-basemap-selector" aria-label="Basemap mode">
 <button type="button" id="lab-basemap-satellite" aria-pressed="true">Satelit</button>
 <button type="button" id="lab-basemap-street" aria-pressed="false">Peta Jalan</button>
+<button type="button" id="lab-basemap-hd" aria-pressed="false">Satelit HD (pilihan)</button>
 <span id="lab-basemap-status">Satelit Sentinel-2 2016 · berlesen CC BY 4.0</span></div>
+<details id="lab-hd-source-controls" class="lab-hd-setup">
+ <summary>Satelit HD · akses imej beresolusi tinggi</summary>
+ <label for="lab-hd-key">MapTiler API key (milik sendiri, dibatasi kepada domain Preview)</label>
+ <input type="password" autocomplete="off" spellcheck="false" id="lab-hd-key" placeholder="Masukkan API key MapTiler" aria-describedby="lab-hd-license"/>
+ <p id="lab-hd-license">MapTiler Satellite v4 menggunakan penyedia imej berlesen. Tiada kunci disimpan di GitHub, Supabase atau localStorage. Penggunaan dan permintaan imej memerlukan kebenaran akaun pemilik.</p>
+ <p><a href="https://docs.maptiler.com/guides/developer/credentials/api-key/" target="_blank" rel="noopener noreferrer">Cara dapat dan hadkan API key</a></p>
+ <p id="lab-hd-status" role="status">Satelit HD pilihan · perlu kunci MapTiler milik pengguna</p>
+</details>
 <div id="lab-map" aria-label="Satellite or street map with OpenRailwayMap railway reference and locality station markers, not surveyed ECRL geometry"></div>
 <div class="lab-station-panel-head"><strong>16 STN · 7 PL (rekod CH)</strong><span>Tap penanda stesen pada peta untuk Station Intelligence. PL belum dipetakan secara tepat.</span></div>
 <div id="lab-station-intelligence" class="lab-station-card" aria-label="ECRL station intelligence"></div>
@@ -45,6 +58,7 @@
 <script src="./assets/unified-ecrl/route-lab-geometry-lineage.js"></script>
 <script src="./assets/unified-ecrl/source/data.js"></script>
 <script src="./assets/unified-ecrl/route-lab-satellite.js"></script>
+<script src="./assets/unified-ecrl/route-lab-hd-imagery.js"></script>
 <script src="./assets/unified-ecrl/route-lab-station-intelligence.js"></script>
 <script src="./assets/unified-ecrl/route-lab-station-map.js"></script>
 <script src="./assets/unified-ecrl/port-references.js"></script>
