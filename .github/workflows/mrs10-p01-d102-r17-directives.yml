@@ -1,0 +1,52 @@
+name: P01 D102 R1.7 ChatGPT Adam approved directive inbox
+on:
+  push:
+    branches:
+      - feature/mrs10-p01-d102-r17-owner-directive-executor-20261030
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Command sandbox and D102 existing regression
+        run: |
+          node --check assets/unified-ecrl/route-lab-d102-directive-executor-r17.js
+          node --check assets/unified-ecrl/route-lab-d102-assistant-r17.js
+          node --check assets/unified-ecrl/route-lab-ui.js
+          node --test tests/unified-ecrl-d102-directives-r17.test.cjs tests/unified-ecrl-d102-journey-r16.test.cjs tests/unified-ecrl-d102-preflight.test.cjs
+      - run: node scripts/build-unified-v8.cjs
+      - run: test -f dist-unified-v8/ecrl-alignment-lab.html
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node scripts/build-unified-v8.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Chromium and Safari Owner approval plus resume on six viewports
+        run: |
+          python3 -m http.server 8765 --directory dist-unified-v8 >/tmp/p01-d102-r17.log 2>&1 &
+          node tests/unified-ecrl-d102-directives-r17-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: d102-r17-instructions-uat
+          path: artifacts/d102-r17-directives/
+          retention-days: 14
