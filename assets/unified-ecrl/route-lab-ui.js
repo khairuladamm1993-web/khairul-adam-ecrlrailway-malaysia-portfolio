@@ -83,7 +83,16 @@ h.append(el('h1',t.title),el('p',t.notice,'lab-note'));
  trailPanel.append(trailExport);h.append(trailPanel);
   const align=el('section',null,'lab-panel');align.append(el('h2',t.align),el('p',text));
  if(assembled?.status==='CONTINUOUS_CANDIDATE')align.append(el('p',t.unverified,'lab-warning'));
- const upload=el('label',t.upload+' · Layout STN/PL JSON · Infra CH JSON'),file=el('input');file.type='file';file.accept='.json,.geojson,application/json';file.onchange=async()=>{try{if(!file.files?.[0]||file.files[0].size>1800000)throw Error('FILE_LIMIT_1_8MB');const g=JSON.parse(await file.files[0].text()),extension=root.MRS10D102JourneyUI?.importPayload(g);if(extension){message='D102 · '+extension.category+' IMPORTED_LOCAL_ONLY';render()}else{const a=E.assemble(g);geo=g;assembled=a;anchors=E.fit(rows,a,g.anchors||[]);store();message=t.imported;render();updateMap()}}catch(e){message=t.badFile+' · '+e.message;render()}};upload.append(file);align.append(upload);
+ const upload=el('label',t.upload+' · PNG/JPG/PDF · STN/PL JSON · Infra CH JSON'),file=el('input');file.type='file';file.accept='.json,.geojson,application/json,.png,.jpg,.jpeg,.webp,.pdf,image/png,image/jpeg,image/webp,application/pdf';file.onchange=async()=>{try{
+ const f=file.files?.[0];if(!f)throw Error('NO_FILE_SELECTED');
+ if(!/\.(json|geojson)$/i.test(f.name)&&f.type!=='application/json'){
+   const selected=document.getElementById('lab-r16-layout-select')?.value||'STN01';
+   const source=document.getElementById('lab-r161-source-ref')?.value||'OWNER_IMPORTED_LOCAL_VISUAL_REFERENCE_UNVERIFIED';
+   const result=await root.MRS10D102JourneyUI?.importMediaFile(f,selected,source);
+   message=(result?.code||selected)+' · IMAGE_OR_PDF_SAVED_LOCALLY';render();return;
+ }
+ if(f.size>1800000)throw Error('GEOJSON_FILE_MAX_1_8MB');
+ const g=JSON.parse(await f.text()),extension=root.MRS10D102JourneyUI?.importPayload(g);if(extension){message='D102 · '+extension.category+' IMPORTED_LOCAL_ONLY';render()}else{const a=E.assemble(g);geo=g;assembled=a;anchors=E.fit(rows,a,g.anchors||[]);store();message=t.imported;render();updateMap()}}catch(e){message=t.badFile+' · '+e.message;render()}};upload.append(file);align.append(upload);
  align.append(el('p',t.noPoint,'lab-note'),el('p','© OpenStreetMap contributors · ODbL 1.0 · OpenRailwayMap visual context', 'lab-note'));h.append(align);
  const lineage=root.MRS10ECRLGeometryLineage;
  const lineReport=geo?lineage?.inspect(geo,{ownerReviewed:session.reviews.length>0,simulationQAPassed:false}):null;
