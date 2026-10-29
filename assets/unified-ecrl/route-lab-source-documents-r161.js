@@ -63,6 +63,13 @@ async function list(code,withBlob=true){
   req.onerror=()=>reject(new Error('INDEXEDDB_READ_FAILED'));
  });
 }
+async function allSummaries(){
+ const db=await open();return new Promise((resolve,reject)=>{
+  const req=db.transaction(STORE,'readonly').objectStore(STORE).getAll();
+  req.onsuccess=()=>resolve(req.result.map(x=>({assetCode:x.assetCode,fileName:x.fileName,importedAt:x.importedAt,source:x.source,view:x.view})));
+  req.onerror=()=>reject(new Error('INDEXEDDB_INDEX_FAILED'));
+ });
+}
 function revoke(container){const old=activeURLs.get(container);if(old){for(const u of old)URL.revokeObjectURL(u)}activeURLs.set(container,[])}
 function url(container,blob){const u=URL.createObjectURL(blob);activeURLs.get(container)?.push(u);return u}
 function make(tag,value,cls){const e=root.document.createElement(tag);if(value!==null&&value!==undefined)e.textContent=String(value);if(cls)e.className=cls;return e}
@@ -93,7 +100,7 @@ async function render(code,host,{compact=false}={}){
   }
  }catch(e){target.append(make('p','Tidak boleh membaca storan setempat: '+e.message,'lab-r16-alert'))}
 }
-const api=Object.freeze({save,list,render,ACCEPT,MAX_BYTES:LIMIT,
+const api=Object.freeze({save,list,allSummaries,render,ACCEPT,MAX_BYTES:LIMIT,
  snapshot:()=>({provider:'BROWSER_INDEXEDDB_ONLY',readiness,importsThisPage:inMemoryCount,lastMessage:notice,
   vectorGeometryGenerated:false,physicalTrackVerified:false,publicPublished:false,crossPreviewSync:false})});
 root.MRS10D102SourceDocuments=api;
