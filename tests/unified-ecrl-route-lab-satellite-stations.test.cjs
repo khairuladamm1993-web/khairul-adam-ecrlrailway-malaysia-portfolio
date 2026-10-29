@@ -45,7 +45,7 @@ test('purple port markers include Klang Northport/Westports and Kemaman/Kuantan;
  assert.equal(src.data.features.length,5);
  assert.equal(h.layers.get('mrs10-lab-port-purple').paint['circle-stroke-color'],'#7c3aed');
  assert.equal(h.layers.get('mrs10-lab-kerteh-amber').paint['text-color'],'#d38b21');
- const ids=h.w.MRS10ECRLFreightAreaMap.assets.map(x=>x.id).sort();
+ const ids=Array.from(h.w.MRS10ECRLFreightAreaMap.assets,x=>x.id).sort();
  assert.deepEqual(ids,['ecrl-port-kemaman','ecrl-port-kuantan','ecrl-port-northport','ecrl-port-westports','ecrl-yard-kerteh-petronas']);
  assert(h.w.MRS10ECRLFreightAreaMap.assets.every(x=>x.terminalPointVerified===false&&x.loadingBayVerified===false&&x.railLinkVerified===false));
  assert(h.w.MRS10ECRLFreightAreaMap.select('ecrl-port-kemaman'));
