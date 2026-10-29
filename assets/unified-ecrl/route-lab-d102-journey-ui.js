@@ -163,13 +163,27 @@ function refresh(){
  }
  renderLayout();renderEvents();linkMap();
 }
+function importPayload(data){
+ if(Array.isArray(data?.layouts)||(data?.tracks&&Array.isArray(data?.tracks))){
+  const loaded=layouts.ingest(data);shownCode=loaded[0].code;layoutError='Imported '+loaded.map(x=>x.code).join(', ');refresh();
+  return {category:'TRACK_LAYOUT',assets:loaded};
+ }
+ const entries=data?.infrastructure||data?.events;
+ if(Array.isArray(entries)){
+  if(entries.length>100)throw Error('MAX_100_INFRA_EVENTS_PER_FILE');
+  const accepted=entries.map(journey.registerInfrastructure);error=accepted.length+' CH infrastructure imported';refresh();
+  return {category:'INFRASTRUCTURE_EVENTS',events:accepted};
+ }
+ return null;
+}
+function cancelPending(){journey.clearPending();popup();refresh()}
 function connect(options){
  fn=options;map=options.map;const retry=()=>linkMap();
  if(map){map.on('load',retry);map.on('style.load',retry)}
  journey.syncSession(current());refresh();
  if(journey.pending())popup();
 }
-const api=Object.freeze({connect,request,refresh,showLayout,pending:()=>journey.pending(),snapshot:()=>({journey:journey.snapshot(),layouts:layouts.snapshot()})});
+const api=Object.freeze({connect,request,refresh,showLayout,importPayload,cancelPending,pending:()=>journey.pending(),snapshot:()=>({journey:journey.snapshot(),layouts:layouts.snapshot()})});
 root.MRS10D102JourneyUI=api;
 if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:null);
