@@ -1,0 +1,28 @@
+name: MR-S10 branding and locale review
+on:
+  push:
+    branches: [review/mrs10-p01-brand-locale-r1-20261101]
+    paths: ['brand-review/**', 'tests/brand-locale-review*', 'artifacts/brand-locale/dictionary-audit.json', '.github/workflows/mrs10-brand-locale-review.yml']
+permissions:
+  contents: read
+concurrency:
+  group: mrs10-brand-locale-review
+  cancel-in-progress: false
+jobs:
+  proposal-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: node --test tests/brand-locale-review.test.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Four languages, two themes, three viewports, two engines
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/brand-http.log 2>&1 &
+          node tests/brand-locale-review-browser.mjs
