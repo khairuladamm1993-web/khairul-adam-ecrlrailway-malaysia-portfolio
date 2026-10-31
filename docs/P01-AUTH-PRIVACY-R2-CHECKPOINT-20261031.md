@@ -23,7 +23,11 @@ The old R1.7 IndexedDB store is origin-scoped, not account-scoped. Its Owner con
 
 ## Verification boundaries
 
-Local baseline 367/367 and map/D102 119/119 PASS. New security/artifact suite 18/18 PASS. Browser matrix is recorded in the candidate GitHub Actions run and must be read before claiming a result.
+Local baseline 367/367 and map/D102 119/119 PASS. New security/artifact suite 19/19 PASS (16 security + 3 artifact), giving 505/505 unit/regression/artifact tests. Final Chromium/WebKit Desktop/iPad/iPhone matrix 6/6 PASS with MOCK_PROVIDER_AND_TEST_STORE, including Public laboratory gate, MFA-only Owner access, verified archive before legacy purge, refresh recovery, cross-tab logout, Member account switching and AA text contrast.
+
+Tested code SHA: `63709c9f062a93cde7f0a9a82436963fe6229cd3`. CI SUCCESS: https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/41187652145 . Screenshots and JSON report are in its `p01-auth-private-r2-evidence-mock-backend` artifact.
+
+Preview deployment `dpl_DUMHeijSQfdVdFKf9J3LZRs3cmqy` is READY, target `staging`, at the tested SHA. URL: https://mrs10-p01-unified-v8-sg-geometry-2jcro5im7-1993khairuladam-3016.vercel.app/auth-private-r2.html . This is a UI/fail-closed Preview; live login is intentionally not configured. This receipt is documentation only and does not activate any backend or constitute Owner acceptance.
 
 Mock browser QA is not live Supabase QA. Real email delivery, actual account mapping, SMTP template, OTP expiration/rate configuration, deployed SQL, real MFA enrollment and physical Safari Owner UAT are NOT RUN.
 
