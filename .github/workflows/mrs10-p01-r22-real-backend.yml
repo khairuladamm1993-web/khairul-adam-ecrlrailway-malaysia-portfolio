@@ -25,7 +25,7 @@ jobs:
         run: docker info --format '{{.ServerVersion}}'
       - name: Isolated pinned CLI and local configuration
         run: |
-          npm install --prefix "$RUNNER_TEMP/r22-tools" --no-package-lock supabase@2.122.0 >/dev/null 2>&1
+          npm install --prefix "$RUNNER_TEMP/r22-tools" --no-package-lock supabase@2.122.0 playwright@1.56.1 >/dev/null 2>&1
           echo "SUPABASE_BINARY=$RUNNER_TEMP/r22-tools/node_modules/.bin/supabase" >> "$GITHUB_ENV"
           echo "R22_STACK_DIR=$RUNNER_TEMP/r22-stack" >> "$GITHUB_ENV"
           mkdir -p "$RUNNER_TEMP/r22-stack"
@@ -36,6 +36,12 @@ jobs:
         run: |
           cd "$R22_STACK_DIR"
           "$SUPABASE_BINARY" start --exclude realtime,storage-api,imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor > "$RUNNER_TEMP/r22-start.log" 2>&1
+      - name: Real browser prerequisites and HTTPS fixture
+        run: |
+          "$RUNNER_TEMP/r22-tools/node_modules/.bin/playwright" install --with-deps webkit > "$RUNNER_TEMP/r22-browser-install.log" 2>&1
+          echo "R22_PLAYWRIGHT_MODULE=$RUNNER_TEMP/r22-tools/node_modules/playwright" >> "$GITHUB_ENV"
+          node scripts/build-auth-private-r2.cjs > /dev/null
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/r22-https-key.pem -out /tmp/r22-https-cert.pem -days 1 -subj /CN=localhost > /dev/null 2>&1
       - name: Real Auth OTP MFA RLS and six Owner isolation tests
         run: node tests/r22/backend.cjs
       - name: Sanitized startup diagnostic only on failure
