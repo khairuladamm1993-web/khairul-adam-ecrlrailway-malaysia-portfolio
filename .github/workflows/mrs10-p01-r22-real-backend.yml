@@ -1,7 +1,7 @@
-name: P01 R2.2 REAL Supabase Docker backend QA
+name: P01 R2.3 REAL Owner login form E2E
 on:
   push:
-    branches: [test/mrs10-p01-r22-real-backend-ci-20261031]
+    branches: [test/mrs10-p01-r23-owner-login-e2e-20261101]
     paths-ignore: ['docs/**']
   workflow_dispatch:
 permissions:

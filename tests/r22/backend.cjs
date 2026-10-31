@@ -1,6 +1,6 @@
 'use strict';
 const fs=require('node:fs'),cp=require('node:child_process'),crypto=require('node:crypto'),assert=require('node:assert/strict'),https=require('node:https');
-const {createHandler,pack,COOKIE}=require('../../server/auth-r2/core.cjs');
+const {createHandler,providerFromEnv,pack,COOKIE}=require('../../server/auth-r2/core.cjs');
 const status=JSON.parse(cp.execFileSync(process.env.SUPABASE_BINARY,['status','--output','json'],{cwd:process.env.R22_STACK_DIR,encoding:'utf8',stdio:['ignore','pipe','pipe']}));
 const api=status.API_URL,anon=status.ANON_KEY,service=status.SERVICE_ROLE_KEY,db=status.DB_URL,mail=status.INBUCKET_URL||status.MAILPIT_URL||'http://127.0.0.1:54324';
 assert(api?.startsWith('http://127.0.0.1:')&&db?.includes('127.0.0.1'),'LOCAL_ONLY');assert(anon&&service,'LOCAL_KEYS_NOT_AVAILABLE');
@@ -10,11 +10,14 @@ async function call(path,token,body,key=anon){const r=await fetch(api+path,{meth
 const must=r=>{if(r.status<200||r.status>=300)throw Object.assign(Error('REAL_PROVIDER_REQUEST_REJECTED'),{status:r.status,code:'REAL_PROVIDER_REQUEST_REJECTED'});return r.data};
 const sql=text=>{try{return cp.execFileSync('psql',[db,'-v','ON_ERROR_STOP=1','-q','-c',text],{stdio:['ignore','pipe','pipe']})}catch(e){throw Error('LOCAL_SQL_FAILED: '+String(e.stderr||'').slice(0,350))}};
 function totp(secret){const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';let bits='';for(const c of secret.replace(/=/g,''))bits+=alphabet.indexOf(c.toUpperCase()).toString(2).padStart(5,'0');const bytes=Buffer.from((bits.match(/.{8}/g)||[]).map(b=>parseInt(b,2))),counter=Buffer.alloc(8);counter.writeBigUInt64BE(BigInt(Math.floor(Date.now()/30000)));const h=crypto.createHmac('sha1',bytes).update(counter).digest(),o=h.at(-1)&15;return String((h.readUInt32BE(o)&0x7fffffff)%1000000).padStart(6,'0')}
-async function otp(email){must(await call('/auth/v1/otp',null,{email,create_user:false}));for(let n=0;n<40;n++){const list=await (await fetch(mail+'/api/v1/messages')).json();for(const m of list.messages||[]){if(!(m.To||[]).some(t=>t.Address===email))continue;const item=await (await fetch(mail+'/api/v1/message/'+m.ID)).json();const code=(item.Text||item.HTML||'').match(/MR-S10-OTP:\s*(\d{6})/);if(code)return code[1]}await wait(250)}throw Error('LOCAL_MAIL_OTP_NOT_FOUND')}
+async function otp(email){must(await call('/auth/v1/otp',null,{email,create_user:false}));return readOtp(email)}
+async function readOtp(email){for(let n=0;n<40;n++){const list=await (await fetch(mail+'/api/v1/messages')).json();for(const m of list.messages||[]){if(!(m.To||[]).some(t=>t.Address===email))continue;const item=await (await fetch(mail+'/api/v1/message/'+m.ID)).json();const code=(item.Text||item.HTML||'').match(/MR-S10-OTP:\s*(\d{6})/);if(code)return code[1]}await wait(250)}throw Error('LOCAL_MAIL_OTP_NOT_FOUND')}
 const verify=(email,code)=>call('/auth/v1/verify',null,{email,token:code,type:'email'});
 async function mfa(session){const factor=must(await call('/auth/v1/factors',session.access_token,{factor_type:'totp',friendly_name:'R22 synthetic'})),c=must(await call('/auth/v1/factors/'+factor.id+'/challenge',session.access_token,{}));return must(await call('/auth/v1/factors/'+factor.id+'/verify',session.access_token,{challenge_id:c.id,code:totp(factor.totp.secret)}))}
 const provider={user:async t=>must(await call('/auth/v1/user',t)),role:async t=>must(await call('/rest/v1/rpc/account_role',t,{})),ownerContext:async t=>must(await call('/rest/v1/rpc/owner_private_context_r2',t,{})),privateOp:async(t,b)=>must(await call('/rest/v1/rpc/owner_private_operation_r2',t,{request:b})),refresh:async refresh_token=>must(await call('/auth/v1/token?grant_type=refresh_token',null,{refresh_token})),logout:async t=>must(await call('/auth/v1/logout?scope=local',t,{}))};
-const key=crypto.randomBytes(32),origin='https://127.0.0.1:8767',handler=createHandler({provider,key,origin,enabled:true});
+// Exercise the production provider adapter; only its network destination is mapped to the real loopback stack.
+const formProvider=providerFromEnv({P01_R2_SUPABASE_URL:'https://r23-ci.supabase.co',P01_R2_PUBLISHABLE_KEY:anon},(url,options)=>{const u=new URL(url);assert.equal(u.origin,'https://r23-ci.supabase.co');return fetch(api+u.pathname+u.search,options)});
+const key=crypto.randomBytes(32),origin='https://127.0.0.1:8767',handler=createHandler({provider:formProvider,key,origin,enabled:true});
 const req=(s,op)=>({url:'/api/auth-r2?action=private',method:'POST',headers:{origin,'content-type':'application/json',cookie:s?COOKIE+'='+pack(s,key):''},body:op});
 async function browserQA(member){
  const {chromium,webkit}=require(process.env.R22_PLAYWRIGHT_MODULE);
@@ -27,18 +30,30 @@ async function browserQA(member){
   const browser=await driver.launch(name==='chromium'?{executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox']}:{headless:true});
   try{for(const [device,width,height] of [['desktop',1180,820],['ipad',820,1100],['iphone',390,844]]){
    const email='owner-browser-'+(++n)+'@r22.example.test',u=must(await call('/auth/v1/admin/users',service,{email,email_confirm:true,password:crypto.randomBytes(24).toString('base64url')},service));assert(/^[0-9a-f-]{36}$/.test(u.id));sql("insert into app_private.r22_roles values('"+u.id+"','admin')");
-   const session=await mfa(must(await verify(email,await otp(email))));
+   // R2.3 UI creates its own session below.
    const ctx=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width,height},hasTouch:device!=='desktop'});
-   const seed=s=>ctx.addCookies([{name:COOKIE,value:pack(s,key),url:origin,httpOnly:true,secure:true,sameSite:'Lax'}]);
-   try{await seed(session);const page=await ctx.newPage();await page.goto(origin+'/auth-private-r2.html');await page.locator('#room').waitFor({state:'visible'});
+   try{const page=await ctx.newPage();await page.goto(origin+'/auth-private-r2.html');
+    async function loginForm(email){
+     await page.locator('#email').fill(email);const sent=page.waitForResponse(r=>r.url().includes('action=otp-request'));await page.locator('#request').click();assert.equal((await sent).status(),200);
+     const code=await readOtp(email);await page.locator('#code').fill(code);const verified=page.waitForResponse(r=>r.url().includes('action=otp-verify'));await page.locator('#verify').click();assert.equal((await verified).status(),200);
+     await page.waitForFunction(()=>window.MRS10AuthR2.snapshot()?.authenticated);
+    }
+    // Separate fresh identities for UI enrollment; never inject session cookies.
+    const uiEmail='form-'+n+'@r23.example.test',uiUser=must(await call('/auth/v1/admin/users',service,{email:uiEmail,email_confirm:true},service));assert(/^[0-9a-f-]{36}$/.test(uiUser.id));sql("insert into app_private.r22_roles values('"+uiUser.id+"','admin')");
+    await loginForm(uiEmail);await page.locator('#mfa').waitFor({state:'visible'});assert.equal(await page.locator('#room').isVisible(),false);
+    const enrolled=page.waitForResponse(r=>r.url().includes('action=mfa-enroll'));await page.locator('#enroll').click();const factor=await (await enrolled).json();assert(factor.totp?.secret);
+    await page.locator('#mfa-code').fill(totp(factor.totp.secret));const upgraded=page.waitForResponse(r=>r.url().includes('action=mfa-verify'));await page.locator('#mfa-verify').click();assert.equal((await upgraded).status(),200);await page.locator('#room').waitFor({state:'visible'});
+    assert.equal(await page.locator('#code').inputValue(),'');assert.equal(await page.locator('#mfa-code').inputValue(),'');
+    const refreshed=page.waitForResponse(r=>r.url().includes('action=refresh'));await page.locator('#refresh').click();assert.equal((await refreshed).status(),200);
+
     const rpc=b=>page.evaluate(async b=>{const r=await fetch('/api/auth-r2?action=private',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});return {status:r.status,data:await r.json(),cache:r.headers.get('Cache-Control')}},b);
     assert.equal((await rpc({op:'put',store:'settings',key:'browser-canary',value:{note:'SYNTHETIC_BROWSER_OWNER'}})).status,200);
     await page.reload();await page.locator('#room').waitFor({state:'visible'});assert.equal((await rpc({op:'get',store:'settings',key:'browser-canary'})).data.value.note,'SYNTHETIC_BROWSER_OWNER');
     assert.deepEqual(await page.evaluate(async()=>({db:(await indexedDB.databases()).length,local:Object.keys(localStorage).filter(k=>k!=='railway-theme'),cache:await caches.keys()})),{db:0,local:[],cache:[]});
     const otherTab=await ctx.newPage();await otherTab.goto(origin+'/auth-private-r2.html');await otherTab.locator('#room').waitFor({state:'visible'});await page.locator('#logout').click();await page.waitForFunction(()=>document.getElementById('status').textContent.includes('Sesi ditutup'));await otherTab.locator('#room').waitFor({state:'hidden'});
     assert.equal((await rpc({op:'get',store:'settings',key:'browser-canary'})).status,401);
-    await seed(member);await page.reload();await page.waitForFunction(()=>window.MRS10AuthR2.snapshot()?.role==='member');assert.equal(await page.locator('#room').isVisible(),false);const denied=await rpc({op:'get',store:'settings',key:'browser-canary'});assert.equal(denied.status,403);assert(!JSON.stringify(denied.data).includes('SYNTHETIC_BROWSER_OWNER'));assert.match(denied.cache,/no-store/);
-    results.push({name:'REAL_BROWSER_PRIVACY_'+name+'_'+device,status:'PASS',credentialSetup:'Real email OTP and GoTrue MFA; validated session inserted as encrypted HttpOnly test cookie; login form submission not covered'});console.log('PASS REAL_BROWSER_PRIVACY_'+name+'_'+device);
+    const memberEmail='form-member-'+n+'@r23.example.test',memberUser=must(await call('/auth/v1/admin/users',service,{email:memberEmail,email_confirm:true},service));assert(/^[0-9a-f-]{36}$/.test(memberUser.id));sql("insert into app_private.r22_roles values('"+memberUser.id+"','member')");await loginForm(memberEmail);await page.waitForFunction(()=>window.MRS10AuthR2.snapshot()?.role==='member');assert.equal(await page.locator('#room').isVisible(),false);const denied=await rpc({op:'get',store:'settings',key:'browser-canary'});assert.equal(denied.status,403);assert(!JSON.stringify(denied.data).includes('SYNTHETIC_BROWSER_OWNER'));assert.match(denied.cache,/no-store/);
+    results.push({name:'REAL_BROWSER_PRIVACY_'+name+'_'+device,status:'PASS',credentialSetup:'UI OTP request/verify, UI MFA enrollment/challenge, refresh/logout and Member UI login; production provider adapter against real GoTrue; no injected cookie'});console.log('PASS REAL_BROWSER_PRIVACY_'+name+'_'+device);
    }finally{await ctx.close()}
   }}finally{await browser.close()}
  }}finally{await new Promise(resolve=>server.close(resolve))}
