@@ -4,7 +4,15 @@
  const PROJECT_URL='https://kfudisbzdgsefdjoopzu.supabase.co';
  const PUBLISHABLE_KEY='sb_publishable_1Diyg-QnCNMJXIY2g0RdCg_ToWFuq0V';
  let client=null,authSubscription=null,consent=false,dataCache=null,userId=null,magicLinkInFlight=null,hydrationPromise=null;
- let authRevision=0;
+ let authRevision=0,initialization=null;
+ const ATTEMPT_KEY='mrs10-auth-pending-v1',ATTEMPT_LOCK='mrs10-auth-request-v1';
+ const readAttempt=()=>{try{return JSON.parse(localStorage.getItem(ATTEMPT_KEY)||'null')}catch{return null}};
+ const pendingAttempt=()=>{const p=readAttempt();return p&&Number.isFinite(p.until)&&p.until>Date.now()?p:null};
+ function durableStorage(){
+  try{const k=ATTEMPT_KEY+'-probe';localStorage.setItem(k,'1');const ok=localStorage.getItem(k)==='1';localStorage.removeItem(k);return ok}catch{return false}
+ }
+ const clearAttempt=()=>{try{localStorage.removeItem(ATTEMPT_KEY)}catch{}};
+ const withAttemptLock=fn=>window.navigator?.locks?.request?window.navigator.locks.request(ATTEMPT_LOCK,fn):fn();
  let state={level:'public',status:'initializing',canReadMemberContent:false,canAdmin:false,email:null,error:null,retryAfterSeconds:null};
  const emit=()=>window.dispatchEvent(new CustomEvent('railway-access-change',{detail:snapshot()}));
  const snapshot=()=>Object.freeze({...state,canReadMemberContent:state.level==='member'||state.level==='admin',canAdmin:state.level==='admin'});
@@ -17,6 +25,8 @@
   'role-denied':'The backend has not granted an enabled Member or Admin profile.',
   'profile-error':'The Member profile could not be read securely.',
   'client-error':'The authentication client could not complete the request.',
+  'callback-origin-mismatch':'Open the canonical Preview login. This origin is not configured for email callbacks.',
+  'storage-unavailable':'Safari storage is unavailable. Sign-in cannot safely retain its PKCE verifier.',
   'auth-network-error':'Authentication backend could not be reached. Check the connection and try again.'
  }[status]||'Protected data could not be loaded securely. Check the existing session again.');
  const failClosed=(status='public',error=null)=>{consent=false;dataCache=null;userId=null;return set({level:'public',status,canReadMemberContent:false,canAdmin:false,email:null,error:error?(['pkce-exchange-failed','verification-failed'].includes(status)?String(error):safeError(status)):null,retryAfterSeconds:null});};
@@ -117,10 +127,11 @@
    return failClosed(failure.status,failure.message);
   }
   if(!data?.session)return failClosed('session-restore-failed','Verification succeeded but no session was restored. Request a new verification link.');
+  clearAttempt();
   return data.session;
  }
  function handleAuthEvent(event,session){
-  if(event==='SIGNED_OUT'){authRevision++;failClosed('signed-out');return;}
+  if(event==='SIGNED_OUT'){authRevision++;clearAttempt();failClosed('signed-out');return;}
   if(!['SIGNED_IN','INITIAL_SESSION','TOKEN_REFRESHED'].includes(event))return;
   if(!session&&event!=='INITIAL_SESSION')return;
   if(state.status!=='authenticated')set({status:'restoring-session',error:null,retryAfterSeconds:null});
@@ -131,7 +142,11 @@
    if(revision===authRevision)validateSession({expectSession:Boolean(session)});
   },0);
  }
- async function init(){
+ function init(){
+  if(initialization)return initialization;
+  initialization=initialize();return initialization;
+ }
+ async function initialize(){
   try{
    const c=requireClient();
    const urlError=verificationUrlError();
@@ -164,13 +179,19 @@
   if(!normalized||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)){set({status:'auth-error',error:'Enter a valid email address.'});throw new Error('Enter a valid email address.');}
   if(magicLinkInFlight)return magicLinkInFlight;
   if(state.status==='rate-limited')throw new Error(state.error);
-  if(state.status==='verification-sent')return snapshot();
-  magicLinkInFlight=(async()=>{
+  if(pendingAttempt()){set({status:'verification-sent',error:null});return snapshot();}
+  const configuredOrigin=document.querySelector?.('meta[name="mrs10-auth-origin"]')?.content;
+  if(configuredOrigin&&configuredOrigin!==location.origin){failClosed('callback-origin-mismatch',true);throw new Error(state.error);}
+  if(!durableStorage()){failClosed('storage-unavailable',true);throw new Error(state.error);}
+  magicLinkInFlight=withAttemptLock(async()=>{
+   // The lock covers the SDK verifier write AND send, across tabs on this origin.
+   if(pendingAttempt()){set({status:'verification-sent',error:null});return snapshot();}
+   localStorage.setItem(ATTEMPT_KEY,JSON.stringify({until:Date.now()+60000}));
    const restored=await validateSession();
    if(restored.canReadMemberContent)return restored;
    const c=requireClient();
    set({status:'sending',error:null,email:normalized});
-   const redirectTo=location.origin+location.pathname;
+   const redirectTo=location.origin+'/gateway.html';
    let response;
    try{response=await c.auth.signInWithOtp({email:normalized,options:{emailRedirectTo:redirectTo,shouldCreateUser:true}});}
    catch(error){
@@ -186,7 +207,7 @@
     set({level:'public',status:'auth-error',canReadMemberContent:false,canAdmin:false,email:normalized,error:message,retryAfterSeconds:null});throw new Error(message);
    }
    return set({level:'public',status:'verification-sent',canReadMemberContent:false,canAdmin:false,email:normalized,error:null,retryAfterSeconds:null});
-  })();
+  });
   try{return await magicLinkInFlight;}finally{magicLinkInFlight=null;}
  }
  async function refresh(){
@@ -199,7 +220,7 @@
   return set({level:'public',status:previous.status,canReadMemberContent:false,canAdmin:false,email:previous.email,error:previous.error,retryAfterSeconds:previous.retryAfterSeconds??null});
  }
  async function logout(){
-  authRevision++;failClosed('signed-out');
+  authRevision++;clearAttempt();failClosed('signed-out');
   try{if(client)await client.auth.signOut({scope:'local'});}finally{failClosed('signed-out');}
  }
  async function fetchMemberBundle(){

@@ -41,7 +41,8 @@ async function load(options={}){
  const document={readyState:'complete',addEventListener(){}};
  const location={origin:options.origin||'https://preview.example',pathname:options.pathname||'/gateway.html',search:options.locationSearch||'',hash:options.locationHash||''};
  const history={replaceState(){location.search='';location.hash='';}};
- const context={window,document,location,history,URLSearchParams,CustomEvent:class{constructor(type,init){this.type=type;this.detail=init?.detail}},setTimeout,clearTimeout,console};
+ const storage=options.storage||new Map();const localStorage=options.localStorage||{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)};
+ const context={window,document,location,history,localStorage,URLSearchParams,CustomEvent:class{constructor(type,init){this.type=type;this.detail=init?.detail}},setTimeout,clearTimeout,console};
  vm.createContext(context);vm.runInContext(source,context);
  await new Promise(r=>setTimeout(r,5));
  return {A:window.RailwayAccess,client,events,location};
@@ -240,7 +241,7 @@ test('auth state events hydrate signed-in sessions and SIGNED_OUT removes Admin'
 test('Verified Member login copy is secure and contains no IC/passport wording',()=>{
  const member=fs.readFileSync(path.join(root,'assets/member-gateway.js'),'utf8');
  assert(member.includes('Secure email verification'));
- assert(member.includes('Enter your email to receive a secure verification link.'));
+ assert(member.includes('Enter your existing account email to receive a secure verification link.'));
  assert(member.includes('SEND VERIFICATION LINK'));
  assert(member.includes('Access is granted after successful email verification.'));
  assert(!/IC or passport|passport is required/i.test(member));
@@ -453,4 +454,28 @@ test('a queued auth event cannot rehydrate after a newer sign-out',async()=>{
  const pending=A.refresh();await entered.promise;client.auth.emit('TOKEN_REFRESHED',{access_token:'stale'});
  await new Promise(r=>setTimeout(r,5));client.auth.emit('SIGNED_OUT',null);gate.resolve();await pending;
  await new Promise(r=>setTimeout(r,10));assert.equal(reads,1);assert.equal(A.level,'public');assert.equal(A.status,'signed-out');
+});
+
+// Mock SDK regressions. Real GoTrue/SDK callback coverage runs separately in CI.
+test('pending verifier request survives reload and blocks a duplicate send in another tab',async()=>{
+ const storage=new Map();const first=await load({session:null,storage});await first.A.sendMagicLink('owner@example.com');
+ const second=await load({session:null,storage});await second.A.sendMagicLink('owner@example.com');
+ assert.equal(first.client.calls.filter(x=>x[0]==='signInWithOtp').length,1);
+ assert.equal(second.client.calls.filter(x=>x[0]==='signInWithOtp').length,0);
+ assert.equal(second.A.status,'verification-sent');
+ assert(!JSON.stringify([...storage]).includes('owner@example.com'));
+});
+test('blocked durable storage sends zero email requests',async()=>{
+ const {A,client}=await load({session:null,localStorage:{getItem(){throw Error('blocked')},setItem(){throw Error('blocked')},removeItem(){}}});
+ await assert.rejects(()=>A.sendMagicLink('owner@example.com'));
+ assert.equal(A.status,'storage-unavailable');assert.equal(client.calls.filter(x=>x[0]==='signInWithOtp').length,0);
+});
+test('concurrent init callers exchange a callback exactly once',async()=>{
+ const {A,client}=await load({session:null,role:'admin',locationSearch:'?code=synthetic'});
+ await Promise.all([A.init(),A.init(),A.init()]);assert.equal(client.calls.filter(x=>x[0]==='exchangeCodeForSession').length,1);
+ assert.equal(A.canAdmin,true);
+});
+test('callback always targets gateway even when requested from another page',async()=>{
+ const {A,client}=await load({session:null,pathname:'/portfolio.html'});await A.sendMagicLink('owner@example.com');
+ assert.equal(client.calls.find(x=>x[0]==='signInWithOtp')[1].options.emailRedirectTo,'https://preview.example/gateway.html');
 });

@@ -79,6 +79,7 @@ async function browserQA(member){
  await check('REAL_REFRESH_RECOVERS_SAME_OWNER_DATA',async()=>{owner=await provider.refresh(owner.refresh_token);const r=await handler(req(owner,read));assert.equal(r.body.value.note,'SYNTHETIC_R22_CANARY');assert.match(r.headers['Cache-Control'],/no-store/)});
  await check('ISOLATION_6_LOGOUT_AND_MEMBER_SWITCH_DENIED',async()=>{await provider.logout(owner.access_token);const r=await handler(req(owner,read));assert([401,403].includes(r.status));assert.equal((await handler(req(member,read))).status,403)});
  await browserQA(member);
+ if(process.env.P01_RECOVERY_REAL_QA==='1')await require('./gateway-recovery.cjs')({api,anon,service,call,must,sql,mail,results});
  const report={backend:'REAL_LOCAL_SUPABASE_DOCKER',mock:false,results,physicalSafari:'NOT_RUN',browser:'REAL_BACKEND_6_SCENARIOS',release:'NO-GO_PHYSICAL_OWNER_UAT_PENDING'};
  fs.writeFileSync('/tmp/r22-real-report.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report));if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,'## P01 R2.2 real backend\n'+results.map(x=>'- PASS '+x.name).join('\n')+'\nNo mock provider. Physical Safari NOT RUN.\n');
  }catch(e){console.error('REAL_BACKEND_QA_FAIL: '+(e.code||e.message||e.name).replace(/eyJ[\w.-]+/g,'[REDACTED]').slice(0,200));process.exitCode=1}})();

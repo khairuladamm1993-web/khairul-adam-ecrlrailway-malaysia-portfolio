@@ -1,7 +1,7 @@
 name: P01 R2.3 REAL Owner login form E2E
 on:
   push:
-    branches: [test/mrs10-p01-r23-owner-login-e2e-20261101]
+    branches: [test/mrs10-p01-r23-owner-login-e2e-20261101, fix/mrs10-p01-owner-auth-uat-recovery-20261101]
     paths-ignore: ['docs/**']
   workflow_dispatch:
 permissions:
@@ -14,6 +14,7 @@ jobs:
     env:
       SUPABASE_EXPERIMENTAL_STACK: '0'
       SUPABASE_TELEMETRY_DISABLED: '1'
+      P01_RECOVERY_REAL_QA: '1'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -25,7 +26,7 @@ jobs:
         run: docker info --format '{{.ServerVersion}}'
       - name: Isolated pinned CLI and local configuration
         run: |
-          npm install --prefix "$RUNNER_TEMP/r22-tools" --no-package-lock supabase@2.122.0 playwright@1.56.1 >/dev/null 2>&1
+          npm install --prefix "$RUNNER_TEMP/r22-tools" --no-package-lock supabase@2.122.0 playwright@1.56.1 @supabase/supabase-js@2.117.2 >/dev/null 2>&1
           echo "SUPABASE_BINARY=$RUNNER_TEMP/r22-tools/node_modules/.bin/supabase" >> "$GITHUB_ENV"
           echo "R22_STACK_DIR=$RUNNER_TEMP/r22-stack" >> "$GITHUB_ENV"
           mkdir -p "$RUNNER_TEMP/r22-stack"
@@ -42,6 +43,11 @@ jobs:
           echo "R22_PLAYWRIGHT_MODULE=$RUNNER_TEMP/r22-tools/node_modules/playwright" >> "$GITHUB_ENV"
           node scripts/build-auth-private-r2.cjs > /dev/null
           openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/r22-https-key.pem -out /tmp/r22-https-cert.pem -days 1 -subj /CN=localhost > /dev/null 2>&1
+      - name: Gateway mock regressions (labelled separately)
+        run: |
+          npm ci --ignore-scripts --no-audit
+          npm test
+          node --test tests/auth-private-r2.test.cjs
       - name: Real Auth OTP MFA RLS and six Owner isolation tests
         run: node tests/r22/backend.cjs
       - name: Sanitized startup diagnostic only on failure

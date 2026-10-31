@@ -15,4 +15,4 @@ setting('auth.email','otp_length','6');setting('auth.email','otp_expiry','5');se
 setting('auth.email.template.magic_link','content_path','"./supabase/otp.html"')
 setting('auth.mfa.totp','enroll_enabled','true');setting('auth.mfa.totp','verify_enabled','true')
 setting('auth.rate_limit','email_sent','1000');setting('auth.rate_limit','token_verifications','1000')
-p.write_text(s);Path('supabase/otp.html').write_text('<p>MR-S10-OTP: {{ .Token }}</p>')
+p.write_text(s);Path('supabase/otp.html').write_text('<p>MR-S10-OTP: {{ .Token }}</p><a href="{{ .ConfirmationURL }}">Sign in</a>')
