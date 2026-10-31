@@ -11,13 +11,22 @@ const jwt=token=>{try{return JSON.parse(Buffer.from(token.split('.')[1],'base64u
 function createHandler({provider,key,origin,enabled=false,now=()=>Date.now()}){
  const seal=value=>cookie(COOKIE,pack(value,key)),clear=()=>[cookie(COOKIE,'',true),cookie(PKCE,'',true)];
  const session=req=>unpack(cookies(req)[COOKIE]||'',key);
- async function identity(req){
+ async function identityRaw(req){
   const s=session(req);if(!s?.access_token)throw error(401,'AUTH_REQUIRED');
   // Never authorize decoded claims until the same token has been verified by Auth.
   const user=await provider.user(s.access_token);if(!user?.id||!user.email_confirmed_at)throw error(401,'SESSION_REJECTED');
   const claims=jwt(s.access_token);if(claims.sub!==user.id||claims.exp*1000<=now())throw error(401,'SESSION_EXPIRED');
   const role=await provider.role(s.access_token);if(!['admin','member'].includes(role))throw error(403,'ACCOUNT_NOT_APPROVED');
   return {s,user,role,aal:claims.aal==='aal2'?'aal2':'aal1'};
+ }
+ async function identity(req){
+  try{return await identityRaw(req)}catch(e){
+   const old=session(req);if(e.status!==401||!old?.refresh_token)throw e;
+   const next=await provider.refresh(old.refresh_token);if(!next?.access_token||!next.refresh_token)throw error(401,'SESSION_REJECTED');
+   const renewed={access_token:next.access_token,refresh_token:next.refresh_token};
+   const verified=await identityRaw({...req,headers:{...req.headers,cookie:COOKIE+'='+pack(renewed,key)}});
+   req.rotationCookie=seal(renewed);return verified;
+  }
  }
  const view=i=>({authenticated:true,role:i.role,ownerPrivate:i.role==='admin'&&i.aal==='aal2',mfaRequired:i.role==='admin'&&i.aal!=='aal2',email:i.user.email||null});
  async function execute(req){
@@ -88,7 +97,7 @@ function createHandler({provider,key,origin,enabled=false,now=()=>Date.now()}){
  }
  return async function handle(req){
   const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'private, no-store, max-age=0','Pragma':'no-cache','Vary':'Cookie','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};
-  try{return {...await execute(req),headers}}
+  try{const result=await execute(req);if(req.rotationCookie)result.cookies=[...(result.cookies||[]),req.rotationCookie];return {...result,headers}}
   catch(e){const code=e.code||'UPSTREAM_UNAVAILABLE',status=e.status||503;return {status,headers,body:{status:code},cookies:[401].includes(status)?clear():[]}}
  };
 }
