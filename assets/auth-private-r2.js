@@ -9,6 +9,7 @@ function status(s){const n=document.getElementById('status');if(n)n.textContent=
 async function session(){identity=await api('session');render();status(identity.ownerPrivate?'Owner · MFA disahkan':identity.mfaRequired?'Owner · MFA diperlukan':'Member · sesi disahkan');if(identity.mfaRequired){const data=await api('mfa-factors');factorId=data.factors?.find(x=>x.status==='verified')?.id||null}return identity}
 async function act(fn){if(busy)return;busy=true;try{await fn()}catch(e){status(e.message)}finally{busy=false}}
 const button=(id,fn)=>{const n=document.getElementById(id);if(n)n.onclick=()=>act(fn)};
+button('theme',()=>{root.RailwayTheme.toggle()});
 button('request',async()=>{await api('otp-request',{email:document.getElementById('email').value});document.getElementById('code').value='';status('Semak e-mel. Kod, expiry dan rate limit dikawal penyedia sandbox.')});
 button('magic',async()=>{await api('magic-request',{email:document.getElementById('email').value});status('Semak Magic Link. Gunakan browser dan origin yang sama.')});
 button('verify',async()=>{await api('otp-verify',{email:document.getElementById('email').value,code:document.getElementById('code').value});document.getElementById('code').value='';await session()});
