@@ -16,7 +16,7 @@ function create(adapter){
  const endpoints=spurs.map(s=>Object.freeze({assetId:s.end,officialName:s.name+' · End of Spurline',assetType:'FREIGHT_ENDPOINT',geometry:null,point:null,verificationStatus:'UNKNOWN',sourceIds:s.sources,parentTerminal:s.terminal}));
  function get(id){
   const endpoint=endpoints.find(e=>e.assetId===id),a=adapter.get(id)||endpoint;if(!a)return null;
-  return {assetId:id,kind:a.assetType,chainage:adapter.chainage.get(id)||null,
+  return {assetId:id,kind:a.assetType,chainage:adapter.chainage.get(id)||(id==='ecrl-depot-gombak-north'?{metres:519750,label:'CH519+750',status:'OWNER_ACCEPTED_PROJECT_REFERENCE_NOT_SURVEYED',source:'MR_S10_OWNER_ACCEPTED_CORRIDOR_MANIFEST'}:null),
    locationStatus:adapter.reference(id)?'AREA_REFERENCE':'UNKNOWN',layout:layouts[id]||{status:'UNKNOWN',tracks:[],source:null},
    spurs:spurs.filter(s=>[s.from,s.terminal,s.end].includes(id)),physicalTrackGeometry:null,
    endpoint:endpoint||null,sourceIds:a.sourceIds||[],permittedSpeed:null,turnouts:null,signals:null};
