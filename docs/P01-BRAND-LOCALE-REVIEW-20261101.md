@@ -91,3 +91,21 @@ Existing full-site language/fallback quality: FAIL/PARTIAL due observed defects.
 Preview has only proposed minimum descriptions and UI sample text. No actual product login links, Owner assignments, backend credentials, imports or private data are shipped. Protection must remain enabled. Release remains NO-GO for main P01 until persistent backend/deployed login, Owner account and physical Safari acceptance pass.
 
 Deployment: dpl_fHjaiu7FRyihpDyz2obhsXko9RUm, staging READY. URL: https://mrs10-p01-unified-v8-sg-geometry-dfedwdhzl-1993khairuladam-3016.vercel.app/ . Native Vercel authenticated fetch returned application HTML HTTP 200 (not login redirect), no-store, CSP connect-src none, X-Robots-Tag noindex/nofollow. Existing Vercel Preview authentication is preserved. This is a proposal-only static deployment; no existing gateway/login/Owner runtime is included.
+
+## Additional source audit
+
+Infrastructure Intelligence source assets/unified-ecrl/source/i18n.js was evaluated in a VM: 83 English keys, 83 each in ms/zh/th, no missing key relative to English. This is completeness only, not linguistic verification. BM still uses “Chainage”, “Crossing loop”, “Station Intelligence”, “Crossing Loop Intelligence”, “Infrastructure Intelligence” and “Freight & Connectivity Intelligence”; proposed BM “Rantaian (CH)”, “Gelung persilangan”, “Maklumat stesen”, “Maklumat gelung persilangan”, “Maklumat infrastruktur”, “Maklumat kargo dan sambungan”. Match source-specific railway meanings before adopting.
+
+assets/unified-ecrl/route-lab-assistant-ui-r17.js has four language arrays but still renders raw status/reason and errors; hardcoded English “Import preview” and “Assignment revisions” remain. Its storage sentence says private device only / no cloud sync; this needs build-aware wording review after R2 backend integration, since the selected store can differ. Do not describe device storage as secure account isolation. Suggested BM: “Kaedah storan dipaparkan mengikut konfigurasi sesi yang telah disahkan.” Prefer a precise runtime-confirmed local/backend label over generic assurances. No changes to this module were made.
+
+Deployed data.js, app.js and style.css each returned HTTP 200 through the supported Vercel fetch; content matched the proposal artifact byte-for-byte. Cloud-browser desktop screenshot: artifacts/brand-locale/desktop-proposal.jpg. New proposal contains only public-safe draft material in a protected staging preview; public copy approval is still pending.
+
+## Final QA receipt
+
+- Tested source SHA: 1c1b0824815176bf2d1aaae7fb275c20e2c3a83e.
+- CI: https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/41238743578 . Job 124648178344 SUCCESS; 6/6 contract tests and 24/24 Chromium/WebKit browser cases PASS. Browser includes actual unsupported-language fallback to English, four locale switches, both themes, text/page overflow at 390×844 / 820×1180 / 1440×900, four internal section links and zero login controls/page errors. Not a test of actual RailSim product navigation.
+- Physical Safari iPad/iPhone: NOT RUN. Actual deployed Owner/Member login: NOT RUN by this audit. Main website complete multilingual quality: PARTIAL; findings above remain open.
+- Static deployment source artifact SHA: 904295f7e4352f47d2b17c56e8581f9dc6e5666c; later commit changes tests/report only, deployed assets match final source contents.
+- GO for Owner review of proposal only. NO-GO for official branding/release. All four product names pending final approval and all four publication states IN DEVELOPMENT.
+- Production, R2.3 code, P02/P03/P04 source, repository/API/database identifiers and billing unchanged. GitHub diff against 0756ef2 contains added review files/workflow/tests/report only.
+- Rollback: stop using isolated review URL/branch. No baseline rollback or database action needed.
