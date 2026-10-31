@@ -1,0 +1,49 @@
+name: P01 authentication privacy R2 isolated QA
+on:
+  push:
+    branches: [feature/mrs10-p01-auth-privacy-recovery-r2-20261031]
+    paths-ignore: ['docs/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit-artifact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: npm test
+      - run: node --test tests/unified-ecrl-*.test.cjs tests/unified-v*-*.test.cjs
+      - run: node scripts/build-auth-private-r2.cjs
+      - run: node --test tests/auth-private-r2.test.cjs tests/p01-release-artifact.test.cjs
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node scripts/build-auth-private-r2.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Local HTTPS synthetic provider only
+        run: |
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/p01-r2-test-key.pem -out /tmp/p01-r2-test-cert.pem -days 1 -subj /CN=localhost >/dev/null 2>&1
+          node tests/auth-private-r2-server.cjs >/tmp/p01-r2-test-http.log 2>&1 &
+      - run: node tests/auth-private-r2-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: p01-auth-private-r2-evidence-mock-backend
+          path: artifacts/auth-private-r2/
+          retention-days: 14
