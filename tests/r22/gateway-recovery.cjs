@@ -6,7 +6,7 @@ module.exports=async function({api,anon,service,call,must,sql,mail,results}){
  assert(fs.existsSync(sdk),'PINNED_REAL_SDK_REQUIRED');
  sql("create table if not exists public.member_profiles (user_id uuid primary key, email text, role text, enabled boolean, activity_consent_at timestamptz, privacy_version text); alter table public.member_profiles enable row level security; create policy recovery_own_profile on public.member_profiles for select to authenticated using (user_id = auth.uid()); grant select on public.member_profiles to authenticated; notify pgrst,'reload schema'");
  await new Promise(r=>setTimeout(r,1000));
- const app=fs.readFileSync('assets/access.js','utf8').replace("const PROJECT_URL='https://kfudisbzdgsefdjoopzu.supabase.co';",'const PROJECT_URL='+JSON.stringify(api)+';').replace(/const PUBLISHABLE_KEY='[^']+';/,'const PUBLISHABLE_KEY='+JSON.stringify(anon)+';');
+ const app=fs.readFileSync('dist-auth-recovery/assets/access.js','utf8').replace("const PROJECT_URL='https://kfudisbzdgsefdjoopzu.supabase.co';",'const PROJECT_URL='+JSON.stringify(api)+';').replace(/const PUBLISHABLE_KEY='[^']+';/,'const PUBLISHABLE_KEY='+JSON.stringify(anon)+';');
  const server=https.createServer({key:fs.readFileSync('/tmp/r22-https-key.pem'),cert:fs.readFileSync('/tmp/r22-https-cert.pem')},(q,r)=>{
   r.setHeader('Cache-Control','no-store');
   if(q.url==='/sdk.js'){r.setHeader('Content-Type','text/javascript');r.end(fs.readFileSync(sdk));return}
