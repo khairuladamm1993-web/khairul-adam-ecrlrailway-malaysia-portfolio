@@ -1,0 +1,57 @@
+name: P01 R2.2 REAL Supabase Docker backend QA
+on:
+  push:
+    branches: [test/mrs10-p01-r22-real-backend-ci-20261031]
+    paths-ignore: ['docs/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-backend:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      SUPABASE_EXPERIMENTAL_STACK: '0'
+      SUPABASE_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Standard public runner Docker readiness
+        run: docker info --format '{{.ServerVersion}}'
+      - name: Isolated pinned CLI and local configuration
+        run: |
+          npm install --prefix "$RUNNER_TEMP/r22-tools" --no-package-lock supabase@2.122.0 >/dev/null 2>&1
+          echo "SUPABASE_BINARY=$RUNNER_TEMP/r22-tools/node_modules/.bin/supabase" >> "$GITHUB_ENV"
+          echo "R22_STACK_DIR=$RUNNER_TEMP/r22-stack" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/r22-stack"
+          cd "$RUNNER_TEMP/r22-stack"
+          "$RUNNER_TEMP/r22-tools/node_modules/.bin/supabase" init
+          python3 "$GITHUB_WORKSPACE/tests/r22/configure.py"
+      - name: Start REAL local Supabase Docker without cloud credentials
+        run: |
+          cd "$R22_STACK_DIR"
+          "$SUPABASE_BINARY" start --exclude realtime,storage-api,imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor > "$RUNNER_TEMP/r22-start.log" 2>&1
+      - name: Real Auth OTP MFA RLS and six Owner isolation tests
+        run: node tests/r22/backend.cjs
+      - name: Sanitized startup diagnostic only on failure
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          import os,pathlib,re
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'r22-start.log'
+          s=p.read_text() if p.exists() else 'Startup log not created; inspect failing prerequisite step.'
+          s=re.sub(r'eyJ[A-Za-z0-9_.-]+|sb_(?:secret|publishable)_[A-Za-z0-9_-]+','[REDACTED]',s)
+          print(s[-2500:])
+          PY
+      - name: Stop only the isolated local test stack
+        if: always()
+        run: |
+          if [ -n "$SUPABASE_BINARY" ] && [ -d "$R22_STACK_DIR" ]; then
+            cd "$R22_STACK_DIR"
+            "$SUPABASE_BINARY" stop --no-backup > /dev/null 2>&1 || true
+          fi
