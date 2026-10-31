@@ -83,6 +83,7 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
   field(key,t('verification'),validation+(a.verificationStatus==='CONFIRMED'?' · '+t('confirmed'):''));
   const intelligence=master?.get(id);
   if(intelligence){
+   if(!a.chainageLabel&&intelligence.chainage)field(key,ui('chReference'),intelligence.chainage.label+' · '+ui('chSafety'));
    if(intelligence.layout.tracks.length){
     const layout=el('details',null,'ecrl-layout');summary(layout,ui('technical')+' · SCHEMATIC');
     for(const track of intelligence.layout.tracks)layout.append(el('p',track));
