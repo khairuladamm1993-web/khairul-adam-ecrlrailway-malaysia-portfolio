@@ -8,6 +8,11 @@ files=['index.html','gateway.html','portfolio.html','references.html','map-langu
 for name in files:
     data=(root/name).read_bytes()
     if name.endswith('.html'):
+        # Omitted Owner/member controllers must not leave broken script requests.
+        for asset in excluded:
+            if asset.endswith('.js'):
+                pattern=rb'<script\b[^>]*src="assets/'+re.escape(asset.encode())+rb'"[^>]*>\s*</script>'
+                data=re.sub(pattern,b'',data)
         data=re.sub(rb'<script\b[^>]*src="assets/analytics\.js"[^>]*>\s*</script>',b'',data)
         data=re.sub(rb'<script\b[^>]*src="https://cdn\.jsdelivr\.net/npm/@supabase/supabase-js@2\.117\.2"[^>]*>\s*</script>',b'',data)
         data=re.sub(rb'<script\b[^>]*src="assets/member-gateway\.js"[^>]*>\s*</script>',b'',data)

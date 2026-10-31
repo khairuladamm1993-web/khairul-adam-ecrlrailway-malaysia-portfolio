@@ -1,0 +1,68 @@
+name: P01 isolated automated QA and release gate
+on:
+  push:
+    branches: [test/mrs10-p01-release-readiness-20261031]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit-artifact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: npm test
+      - run: node --test tests/unified-ecrl-*.test.cjs tests/unified-v*-*.test.cjs
+      - run: node scripts/build-unified-v8.cjs
+      - run: node --test tests/p01-release-artifact.test.cjs
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - run: node scripts/build-unified-v8.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Start isolated artifact only
+        run: python3 -m http.server 8765 --directory dist-unified-v8 >/tmp/p01-release-http.log 2>&1 &
+      - name: Gateway responsive themes and synthetic private storage boundary
+        run: node tests/p01-release-browser.test.mjs
+      - name: D102 command safety and refresh recovery
+        if: always()
+        run: node tests/unified-ecrl-assistant-r17-browser.test.mjs
+      - name: Unified map native canvas focus restoration
+        if: always()
+        run: node tests/unified-v81-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: p01-release-readiness-evidence
+          path: |
+            artifacts/release-readiness/
+            artifacts/d102-r17/
+            artifacts/unified-v81-browser/
+          retention-days: 14
+      - name: Release gate - privacy and real Safari acceptance
+        if: always()
+        run: |
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs';
+          const p='artifacts/release-readiness/browser-report.json';
+          const r=fs.existsSync(p)?JSON.parse(fs.readFileSync(p)):null;
+          if(!r || r.results.some(x=>x.status==='FAIL') || r.safariPhysical!=='PASS' || r.backendRoleAPI!=='PASS') {
+            console.error('NO-GO: privacy/account authorization, backend access evidence and physical Safari Owner UAT are mandatory. See diagnostic report.');
+            process.exitCode=1;
+          }
+          JS
