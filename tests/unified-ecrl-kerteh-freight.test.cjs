@@ -53,6 +53,7 @@ test('localized Kerteh yard reference is a square icon with source and no fake e
   assert(yard.querySelector('.ecrl-accuracy').textContent.length>10);
   assert(yard.querySelector('.ecrl-key-facts').textContent.includes(({ms:'Belum disahkan',en:'Not verified',zh:'尚未核实',th:'ยังไม่ยืนยัน'})[lang]));
   assert.match(yard.querySelector('.ecrl-sources').textContent,/OSM_KERTEH_RAILWAY_AREA/);
+  yard.querySelector('.ecrl-engineering>summary').click();
   assert.match(yard.querySelector('.ecrl-engineering').textContent,/NO_END_LANE_COORDINATE/);
   assert.match(yard.querySelector('.ecrl-engineering').textContent,/HISTORICAL_RAIL_YARD_AREA/);
   assert.equal(yard.querySelector('.ecrl-key-facts').textContent.includes('HISTORICAL_RAIL_YARD_AREA'),false);

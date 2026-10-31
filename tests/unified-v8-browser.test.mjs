@@ -15,7 +15,7 @@ for(const engine of ['chromium','webkit'].filter(e=>!process.env.V8_QA_ENGINES||
    const s=await snap();assert.equal(s.mapInstances,1);assert.equal(s.singaporeSourceRecords,273);assert.equal(s.borderRecords,4);
    const baseline={'mrt-kajang':29,'lrt-kelana-jaya':37,'lrt-ampang':18,'mrt-putrajaya':36,'lrt-sri-petaling':29,'kl-monorail':11,'erl-klia-ekspres':3,'erl-klia-transit':6,'ktmb-ets-v1':38,'ktmb-ert':23};
    for(const [id,n] of Object.entries(baseline))assert.equal(s.perRoute[id].matched,n,id);
-   assert(s.sourceMatched>=596);assert.equal(s.perRoute['sg-RTS'].matched,2);assert.equal(s.perRoute['sg-SHUTTLE_TEBRAU'].matched,2);assert.equal(s.geometry.osm,75);assert(s.geometry.sourcePresent);
+   assert(s.sourceMatched>=596);assert.equal(s.perRoute['sg-RTS'].matched,2);assert.equal(s.perRoute['sg-SHUTTLE_TEBRAU'].matched,2);assert.equal(s.geometry.osm,154);assert(s.geometry.sourcePresent);
    await page.locator('#filters button').getByText('Singapore',{exact:true}).click();assert.equal((await snap()).perRoute['mrt-kajang'].visible,false);
    await page.locator('#route-buttons button').getByText('East–West Line',{exact:true}).click();assert.equal(await page.locator('#path-select option').count(),4);
    await page.locator('#path-select').selectOption({index:2});assert.equal(await page.locator('#lineup li').count(),3);

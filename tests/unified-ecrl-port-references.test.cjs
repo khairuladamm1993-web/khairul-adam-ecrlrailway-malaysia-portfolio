@@ -55,13 +55,17 @@ test('compact consumer intelligence keeps marine provenance and pending loading 
   const a=ui.content('ecrl-port-kuantan'),b=ui.content('ecrl-port-kemaman');
   assert(a.querySelector('.ecrl-accuracy').textContent.length>=7);
   assert.equal(a.querySelector('.ecrl-key-facts').textContent.includes('KP1 · KP2'),true);
+  assert(!a.querySelector('.ecrl-engineering').open);
+  for(const popup of [a,b])popup.querySelector('.ecrl-engineering>summary').click();
   assert.match(a.querySelector('.ecrl-engineering').textContent,/PENDING_GEOMETRY/);
   assert.match(a.querySelector('.ecrl-engineering').textContent,/2\.7 km/);
   assert.match(a.querySelector('.ecrl-engineering').textContent,/1\.0 km/);
   assert.match(b.querySelector('.ecrl-engineering').textContent,/loadingBay: UNKNOWN/);
   assert.match(a.querySelector('.ecrl-sources').textContent,/PORT_KUANTAN_LOC/);
   assert.match(b.querySelector('.ecrl-sources').textContent,/EPIC_2026/);
+  a.querySelector('.ecrl-engineering>summary').click();
   assert(!a.querySelector('.ecrl-engineering').open);
+  assert(!a.querySelector('.ecrl-engineering').textContent.includes('PENDING_GEOMETRY'));
  }
  assert.equal(browser.document.querySelectorAll('#ecrl-assets button').length,37);
  dom.window.close();
