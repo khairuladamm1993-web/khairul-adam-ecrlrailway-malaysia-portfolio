@@ -8,7 +8,7 @@ R2.3 source/worktree preserved. No existing UI, Auth, RLS, gateway, repository i
 
 | Locale | Observed issue and source | Proposed copy / correction | State |
 |---|---|---|---|
-| BM | 64/341 gateway dictionary keys have no ms value; Thai-only entries can render blank when neither ms nor en exists (assets/i18n.js text fallback) | Fill every required locale; English fallback must use the canonical key when no en value exists | OPEN in existing UI |
+| BM | 64/341 gateway dictionary keys have no ms value; these string keys fall back to English (assets/i18n.js) | Fill every required locale; preserve the existing canonical English key fallback | OPEN in existing UI |
 | BM | “Selamat datang ke perjalanan pembelajaran kereta api saya.” is literal (assets/ui-translations.js) | “Ikuti perjalanan pembelajaran rel saya.” | PROPOSED |
 | BM | “Layakkan diri untuk memandu.” implies a qualification from study content | “Kenali sistem. Fahami prosedur. Asah kemahiran.” | PROPOSED |
 | English | “E-BOOK TRAIN OPERATION” unnatural noun order; “PRACTICAL QUALIFICATION” sounds certified (assets/ui-translations.js) | “Train operations library”; “Practical learning” | PROPOSED |
@@ -75,7 +75,7 @@ Brand spelling MR-S10 and proposed product names remain unchanged in all locales
 
 ## QA scope and acceptance
 
-Executed locally: 5/5 contract tests PASS via node --test tests/brand-locale-review.test.cjs. Browser cloud: four locale buttons render correct headings and html lang; Light theme toggle PASS; desktop width 1363 / content width 1348, no page overflow; zero login controls. No iOS device implied.
+Executed locally: 6/6 contract tests PASS via node --test tests/brand-locale-review.test.cjs. Browser cloud: four locale buttons render correct headings and html lang; Light theme toggle PASS; desktop width 1363 / content width 1348, no page overflow; zero login controls. No iOS device implied.
 
 CI suite added: tests/brand-locale-review-browser.mjs (Chromium + WebKit × three viewports × four languages = 24 cases; each checks two themes, text/page overflow, four section navigation links, no login controls and page errors). Workflow uses standard public Ubuntu runner, no credentials, no cache, no artifact uploads, no paid features. CI result to be recorded after execution. Screenshots are created on runner only.
 
@@ -89,3 +89,5 @@ Existing full-site language/fallback quality: FAIL/PARTIAL due observed defects.
 4. Apply approved copy to gateway/auth/map only after R2.3 critical checkpoint is safe. Any later Production publication remains a separate approval.
 
 Preview has only proposed minimum descriptions and UI sample text. No actual product login links, Owner assignments, backend credentials, imports or private data are shipped. Protection must remain enabled. Release remains NO-GO for main P01 until persistent backend/deployed login, Owner account and physical Safari acceptance pass.
+
+Deployment: dpl_fHjaiu7FRyihpDyz2obhsXko9RUm, staging READY. URL: https://mrs10-p01-unified-v8-sg-geometry-dfedwdhzl-1993khairuladam-3016.vercel.app/ . Native Vercel authenticated fetch returned application HTML HTTP 200 (not login redirect), no-store, CSP connect-src none, X-Robots-Tag noindex/nofollow. Existing Vercel Preview authentication is preserved. This is a proposal-only static deployment; no existing gateway/login/Owner runtime is included.
