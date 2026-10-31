@@ -5,9 +5,9 @@ on:
 permissions:
   contents: read
 jobs:
-  acquire:
+  regression:
     runs-on: ubuntu-24.04
-    timeout-minutes: 7
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -15,9 +15,37 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
-      - run: node scripts/three-railways/acquire.mjs
+      - run: npm ci --ignore-scripts --no-audit
+      - run: npm test
+      - name: Source, privacy and full map/ECRL regression
+        run: |
+          node scripts/build-unified-v8.cjs
+          node --test tests/three-railways.test.cjs tests/unified-ecrl*.test.cjs tests/unified-v6-regression.test.cjs tests/unified-v7-regression.test.cjs tests/unified-v8-regression.test.cjs tests/unified-v81-focus.test.cjs
+          node scripts/audit-unified-v8-networks.cjs
+      - run: npm install --no-save --ignore-scripts playwright@1.56.1
+      - run: npx playwright install --with-deps webkit
+      - name: Serve same candidate
+        run: |
+          python3 -m http.server 8765 --directory dist-unified-v8 >/tmp/three-railways-server.log 2>&1 &
+          curl --retry 10 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:8765/unified-map-v8.html >/dev/null
+      - name: V8 full regression
+        run: node tests/unified-v8-browser.test.mjs
+      - name: V8.1 focus regression
+        if: success() || failure()
+        run: node tests/unified-v81-browser.test.mjs
+      - name: ECRL Consumer recovery
+        if: success() || failure()
+        run: node tests/unified-ecrl-browser.test.mjs
+      - name: Three railway native canvas integration
+        if: success() || failure()
+        run: node tests/three-railways-browser.test.mjs
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
         with:
-          name: three-railways-public-source
-          path: artifacts/three-railways-source/
+          name: three-railways-qa
+          path: |
+            artifacts/three-railways-browser/
+            artifacts/unified-ecrl-browser/
+            artifacts/unified-v81-browser/
+            artifacts/unified-v8-browser/
           retention-days: 1

@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const core=window.MRS10UnifiedV4Registry, kl=window.MRS10KLRegistry,
  ampang=window.MRS10AmpangR219, ampangGIS=window.MRS10AmpangGISR219,
  integration=window.MRS10UnifiedV6Adapter,ktm=window.MRS10UnifiedV7KTM;
-let singapore,physical,ecrl,ecrlUI,journeyView,ownerCalibration;
+let singapore,physical,ecrl,ecrlUI,journeyView,ownerCalibration,masterIntelligence,threeRailways;
 const paths=new Map();
 const locales=['ms','en','zh','th'];
 const i18n={
@@ -195,7 +195,7 @@ function updateSearch(){
   btn.type='button';btn.onclick=()=>{focusStation(r.id,s.id);host.hidden=true;$('search').value=''};
   host.append(btn);
  }
- const infrastructure=ecrl?.search(q)||[];
+ const infrastructure=[...(ecrl?.search(q)||[]),...(masterIntelligence?.endpoints.filter(e=>core.normalise(e.officialName+' '+e.assetId).includes(q))||[])];
  for(const asset of infrastructure.slice(0,35)){const btn=el('button',null,'ECRL · '+(asset.officialName||asset.historicalName)+' · '+asset.assetId);btn.type='button';btn.onclick=()=>{showInfrastructure(asset.assetId,true);host.hidden=true;$('search').value=''};host.append(btn)}
  if(!matches.length&&!infrastructure.length)host.append(el('p',null,tr('noResults')));
 }
@@ -270,6 +270,7 @@ function showPopup(point){
   'KTMB GTFS rasmi · koordinat hentian, bukan geometri trek':point.provenance?.startsWith('SECONDARY_ARCGIS_KTM')?
   'GIS awam sekunder · titik stesen, bukan pengukuran operasi':tr('source')));
  if(route.decoder==='SG'){container.append(el('p',null,point.status==='OPERATIONAL'?tr('operational'):tr('future')),el('p',null,tr('secondaryPoint')));appendSource(container,point.sourceUrl);appendSGTransfers(container,point);}
+ if(route.sgId==='CHANGI_APM'){const text=threeRailways.copy(state.locale);for(const k of ['areas','point','noJewel'])container.append(el('p',null,text[k]));appendSource(container,threeRailways.sources.guideway);}
  const transfers=integration.transfersFor(point,state.manifest,core.interchangeRegistry,core.normalise);
  if(transfers.length){
   const shared=el('div','shared-services');shared.append(el('strong',null,tr('transfer')));
@@ -287,7 +288,7 @@ function showPopup(point){
  mountPopup(container,point.coordinates);
 }
 function showInfrastructure(assetId,moveCamera=false){
- const asset=ecrl?.get(assetId);if(!asset)return;
+ const asset=ecrl?.get(assetId)||masterIntelligence?.endpoints.find(e=>e.assetId===assetId);if(!asset)return;
  const host=ecrlUI.content(assetId),officialRef=ecrl.reference(assetId),ownerRef=ownerCalibration?.reference(assetId)||null;
  const ref=officialRef||ownerRef,visible=Boolean(ref&&(ownerRef||ecrl.flags[ref.kind]));
  if(ownerRef){
@@ -406,8 +407,9 @@ async function loadGIS(){
  fitOnce();
 }
 async function init(){
- try{singapore=await window.MRS10V8Singapore.load();physical=await fetch('./data/unified-v8/physical-network.json').then(r=>{if(!r.ok)throw Error('GEOMETRY_HTTP_'+r.status);return r.json()});window.MRS10V8Geometry.validate(physical);state.manifest=[...core.loadManifest(kl,ampang),...integration.routes(),...ktm.routes(),...singapore.routes()]}catch(e){$('map-error').textContent='Registry: '+e.message;return}
+ try{singapore=await window.MRS10V8Singapore.load();physical=await fetch('./data/unified-v8/physical-network.json').then(r=>{if(!r.ok)throw Error('GEOMETRY_HTTP_'+r.status);return r.json()});window.MRS10V8Geometry.validate(physical);threeRailways=await window.MRS10ThreeRailways.load(window.MRS10V8Geometry);threeRailways.apply(singapore);physical={...physical,nodes:[...physical.nodes,...threeRailways.nodes],segments:[...physical.segments,...threeRailways.segments]};window.MRS10V8Geometry.validate(physical);state.manifest=[...core.loadManifest(kl,ampang),...integration.routes(),...ktm.routes(),...singapore.routes()]}catch(e){$('map-error').textContent='Registry: '+e.message;return}
  ecrl=window.MRS10UnifiedECRL.create(window.MRS10ECRLGISV1,window.MRS10ECRLI18N);
+ masterIntelligence=window.MRS10ECRLMasterIntelligence.create(ecrl);
  ecrlUI=window.MRS10ECRLIntegrationUI.create(ecrl,{getLocale:()=>state.locale,getCategory:()=>state.category,onSelect:id=>showInfrastructure(id,true),onFlags:(kind,enabled)=>{closeFocus();ecrl.flags[kind]=enabled;applyVisibility();ecrlUI.render()}});
  journeyView=window.MRS10JourneyView.create({host:$('journey-foundation'),stations:ecrl.stations,getLocale:()=>state.locale});
  // Preview remains public-only; a separately authenticated RailwayAccess session is
@@ -456,9 +458,9 @@ function diagnosticSnapshot(){
   geometry:geometrySnapshot(),singaporeSourceRecords:singapore?.sourceRecordCount,borderRecords:singapore?.borderRecordCount,ecrl:ecrl?.snapshot(map),mapInstances:state.map?1:0,stage:state.pending?'LOADING':'DONE',category:state.category});
 }
 // QA camera uses only existing OSM-backed geometry; it never derives service alignment.
-function focusTrackInspection(){
+function focusTrackInspection(routeId='sg-RTS'){
  const map=state.map;
- const segments=physical?.segments.filter(s=>s.routeIds.includes('sg-RTS')&&s.geometry?.type==='LineString')||[];
+ const segments=physical?.segments.filter(s=>s.routeIds.includes(routeId)&&s.geometry?.type==='LineString')||[];
  if(!map?.getLayer('mrs10-v8-geometry')||!segments.length)return false;
  map.resize(); // Reconcile WebGL/canvas viewport after iPad page scrolling.
  const coords=segments.flatMap(s=>s.geometry.coordinates);
@@ -468,12 +470,12 @@ function focusTrackInspection(){
 }
 // Return actual hit-testable track points, excluding station hit boxes. A screen
 // projection alone does not prove the painted/filtered MapLibre layer is clickable.
-function trackHitTargets(){
+function trackHitTargets(routeId='sg-RTS'){
  const map=state.map;if(!map?.isStyleLoaded()||!map.getLayer('mrs10-v8-geometry'))return [];
  const rect=map.getCanvas().getBoundingClientRect(),hits=[];
  const stationLayers=state.manifest.map(r=>layerId(r.id))
   .filter(id=>map.getLayer(id)&&map.getLayoutProperty(id,'visibility')!=='none');
- for(const s of physical.segments.filter(s=>s.routeIds.includes('sg-RTS')&&s.geometry?.type==='LineString')){
+ for(const s of physical.segments.filter(s=>s.routeIds.includes(routeId)&&s.geometry?.type==='LineString')){
   const coords=s.geometry.coordinates;
   for(let i=1;i<coords.length;i++){
    const mid=[(coords[i-1][0]+coords[i][0])/2,(coords[i-1][1]+coords[i][1])/2];
@@ -562,7 +564,10 @@ function showTrackAt(e){
  for(const [label,value] of [['railwayType',s.railwayType],['verification',s.geometryVerification],['confidence',s.confidence],['sourceDate',s.sourceDate]])host.append(el('p',null,tr(label)+': '+(value??'UNKNOWN')));
  for(const key of ['trackCount','gauge','electrification','bridge','tunnel','operationalStatus','topologyValidation'])host.append(el('p',null,key+': '+(s[key]==null?'UNKNOWN':typeof s[key]==='object'?JSON.stringify(s[key]):s[key])));
  host.append(el('p',null,tr('serviceRelation')+': '+(routeIds.join(' / ')||'UNKNOWN')),el('p',null,'Station–track anchors: UNKNOWN'));
+ if(s.routeIds.includes('sg-CHANGI_APM'))host.append(el('p',null,threeRailways.copy(state.locale).track));
  appendSource(host,s.sourceUrl);mountPopup(host,e.lngLat);
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+
+window.MRS10ThreeRailwaysQA=Object.freeze({snapshot:()=>({status:threeRailways?.status,points:threeRailways?.points.length,segments:threeRailways?.segments.length,corridor:masterIntelligence?.corridor.length,endpoints:masterIntelligence?.endpoints.map(e=>({id:e.assetId,point:e.point,status:e.verificationStatus}))}),inspect:(route,id)=>{const p=findGeo(route,id);if(!p)return false;state.map.jumpTo({center:p.coordinates,zoom:16});return true}});

@@ -15,6 +15,8 @@ test('consumer popup keeps only essential facts visible and engineering data beh
  assert.match(c.querySelector('.ecrl-key-facts').textContent,/Penumpang.*Kargo/i);
  const engineering=c.querySelector('details.ecrl-engineering'),sources=c.querySelector('details.ecrl-sources');
  assert(engineering&&!engineering.open&&sources&&!sources.open);
+ assert(!engineering.textContent.includes('LEGACY_PUBLIC_LOCALITY_REFERENCE'));
+ engineering.querySelector('summary').click();
  assert.match(engineering.textContent,/LEGACY_PUBLIC_LOCALITY_REFERENCE/);
  assert.match(engineering.textContent,/UNKNOWN/);
  assert.match(engineering.textContent,/ecrl-stn-10/);
@@ -25,9 +27,11 @@ test('historical and port reference warnings remain unambiguous',()=>{
  const historical=ui.content('ecrl-stn-18'),port=ui.content('ecrl-port-northport');
  assert.match(historical.querySelector('.ecrl-accuracy').textContent,/2017/);
  assert.match(historical.querySelector('.ecrl-key-facts').textContent,/Konflik sumber/);
+ historical.querySelector('.ecrl-engineering>summary').click();
  assert.match(historical.querySelector('.ecrl-engineering').textContent,/SOURCE_CONFLICT/);
  assert.match(port.querySelector('.ecrl-accuracy').textContent,/pelabuhan/);
  assert.match(port.querySelector('.ecrl-accuracy').textContent,/bukan terminal rel/i);
+ port.querySelector('.ecrl-engineering>summary').click();
  assert.match(port.querySelector('.ecrl-engineering').textContent,/MARITIME/);
  assert(port.querySelector('.ecrl-sources a[href]'));
 });

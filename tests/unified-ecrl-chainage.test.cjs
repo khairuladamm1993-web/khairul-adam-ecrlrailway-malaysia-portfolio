@@ -66,6 +66,7 @@ test('consumer popup and PL list present project CH in all four languages and ke
   locale=language;ui.render();
   const pop=ui.content('ecrl-stn-13');
   assert.match(pop.querySelector('.ecrl-key-facts').textContent,/CH396\+900/);
+  pop.querySelector('.ecrl-engineering>summary').click();
   assert.match(pop.querySelector('.ecrl-engineering').textContent,/MR_S10_OWNER_ACCEPTED_CORRIDOR_MANIFEST/);
   const loop=ui.content('ecrl-loop-historical-05');
   assert.match(loop.querySelector('.ecrl-name').textContent,/PL05/);

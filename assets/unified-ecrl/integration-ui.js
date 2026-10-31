@@ -7,6 +7,7 @@ const COPY={
  th:{station:'สถานี ECRL',facility:'สินทรัพย์โครงสร้างพื้นฐาน',location:'จุดอ้างอิงพื้นที่ · ไม่ใช่ตำแหน่งสถานีจริง',historic:'จุดอ้างอิงแผน EIA ปี 2017 · ไม่ใช่ที่ตั้งสถานีปัจจุบัน',maritime:'จุดอ้างอิงพื้นที่ท่าเรือ · ไม่ใช่สถานีรถไฟ',noPoint:'ยังไม่มีพิกัดสถานีที่ยืนยันแล้ว',type:'ประเภทสินทรัพย์',section:'ช่วง',service:'บริการ',verified:'ยืนยันตัวตนสถานี',partial:'ยืนยันบางส่วน',conflict:'แหล่งข้อมูลขัดแย้ง',pending:'ยังไม่ยืนยัน',technical:'รายละเอียดทางวิศวกรรม',internal:'รหัสเทคนิคภายใน',references:'แหล่งข้อมูลและเอกสารอ้างอิง',layers:'ความถูกต้องของข้อมูลและแผนที่',list:'สินทรัพย์ ECRL',passenger:'ผู้โดยสาร',freight:'สินค้า',future:'แผนในอนาคต',unknown:'ยังไม่ยืนยัน',chReference:'CH (อ้างอิงโครงการ)',chSafety:'CH ไม่ใช่ GPS หรือพิกัดรางที่ยืนยัน',loop:'ทางหลีก · อ้างอิงประวัติ',plList:'PL01–PL07 · CH',plNoPoint:'ตำแหน่ง PL ยังไม่ยืนยัน · อ้างอิง CH เท่านั้น',yardRef:'อ้างอิงลาน Kerteh (กรอบสี่เหลี่ยม)',yardAccuracy:'พื้นที่ทางรถไฟเดิมจาก OSM · ไม่ใช่รางปลายทาง ECRL ที่ยืนยันแล้ว',yardEndUnknown:'ปลายราง/จุดขนถ่าย/รางพัก: ยังไม่ยืนยัน',alignmentPanel:'แนวเส้นทางและทางแยก · หลักฐาน',alignmentNoLine:'ยังไม่มีข้อมูลสำรวจแนวรางจริงที่ผ่านการตรวจสอบ',alignmentPL:'ทางหลีกที่รอตรวจสอบตำแหน่ง',alignmentSpurs:'ทางเชื่อมต่อ (แผนผัง)',alignmentSource:'เอกสารรัฐ / ผู้ดำเนินการ',alignmentWarning:'ห้ามสร้างหมุดทางหลีกหรือปลายรางจาก CH แผนผัง หรือจุดอ้างอิงพื้นที่',yardEnd:'ปลายราง',yardType:'พื้นที่ลานรถไฟ (อ้างอิง)',yardInterfaceType:'จุดเชื่อมต่อขนส่งสินค้า',portArea:'จุดอ้างอิงพื้นที่ท่าเรือทางการ · ไม่ใช่ปลายทางรถไฟ',portSpur:'เส้นทางขนส่งสินค้า ECRL',terminalUnits:'ท่าเรือ',terminalPending:'จุดโหลดสินค้า/รางรอง/ปลายราง: ยังไม่ยืนยัน',portLength:'ระยะทางแยกตามแผน (อ้างอิง)',portRailStatus:'อยู่ระหว่างพัฒนา · ไม่ใช่บริการผู้โดยสาร',portOperator:'ผู้ดำเนินการ'}
 };
 function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
+ const master=root.MRS10ECRLMasterIntelligence?.create(adapter);
  const $=id=>document.getElementById(id);
  const el=(tag,value,cls)=>{const n=document.createElement(tag);if(value!=null)n.textContent=String(value);if(cls)n.className=cls;return n};
  const t=k=>adapter.t(getLocale(),k), ui=k=>(COPY[getLocale()]||COPY.en)[k]||COPY.en[k]||k;
@@ -54,9 +55,12 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
   const list=el('details',null,'ecrl-asset-list');summary(list,ui('list')+' ('+adapter.assets.length+')');
   for(const a of [...adapter.assets].sort((a,b)=>(a.chainageKm??Infinity)-(b.chainageKm??Infinity))){const btn=el('button',(a.stationCode||a.plCode?(a.stationCode||a.plCode)+' · ':'')+(a.officialName||a.historicalName)+(a.chainageLabel?' · '+a.chainageLabel:'')+' · '+a.assetType+' · '+a.verificationStatus);btn.type='button';btn.dataset.ecrlAsset=a.assetId;btn.onclick=()=>onSelect(a.assetId);list.append(btn)}
   assets.append(list);
+  if(master){const freight=el('details',null,'ecrl-freight-endpoints');summary(freight,ui('freight')+' · End of Spurline');
+   for(const end of master.endpoints){const b=el('button',end.officialName+' · UNKNOWN');b.type='button';b.dataset.ecrlEndpoint=end.assetId;b.onclick=()=>onSelect(end.assetId);freight.append(b)}assets.append(freight);
+  }
  }
  function content(id){
-  const a=adapter.get(id);if(!a)return null;
+  const a=adapter.get(id)||master?.endpoints.find(e=>e.assetId===id);if(!a)return null;
   const host=el('div',null,'ecrl-intelligence');host.dataset.ecrlAsset=id;
   const ref=adapter.reference(id);
   host.append(el('span',a.assetType==='STATION'?ui('station'):a.plCode?ui('loop'):ui('facility'),'ecrl-kicker'));
@@ -71,34 +75,45 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
    if(a.assetType==='FREIGHT_YARD'&&a.assetStatus==='PROPOSED_OFFICIAL')field(key,t('status'),a.assetStatus);
   if(a.chainageLabel)field(key,ui('chReference'),a.chainageLabel);
    // Historical PL chainage is not a surveyed track position.
-   if(a.plCode&&!ref)field(key,t('geometry'),ui('unknown')+' · UNKNOWN');
+   if((a.plCode||a.assetType==='FREIGHT_ENDPOINT')&&!ref)field(key,t('geometry'),ui('unknown')+' · UNKNOWN');
   if(a.assetType==='STATION')field(key,ui('service'),serviceLabel(a.serviceType));
   if(a.portTerminals){field(key,ui('portSpur'),ui('portRailStatus'));field(key,ui('portOperator'),a.operatorName);field(key,ui('terminalUnits'),a.portTerminals.map(p=>p.code).join(' · '));}
   if(isKerteh){field(key,ui('portOperator'),'PETRONAS · OSM');field(key,ui('yardEnd'),ui('unknown'))}
   const validation=a.verificationStatus==='CONFIRMED'?ui('verified'):a.verificationStatus==='SOURCE_CONFLICT'?ui('conflict'):a.verificationStatus==='PARTIAL'?ui('partial'):ui('pending');
   field(key,t('verification'),validation+(a.verificationStatus==='CONFIRMED'?' · '+t('confirmed'):''));
+  const intelligence=master?.get(id);
+  if(intelligence){
+   if(intelligence.layout.tracks.length){
+    const layout=el('details',null,'ecrl-layout');summary(layout,ui('technical')+' · SCHEMATIC');
+    for(const track of intelligence.layout.tracks)layout.append(el('p',track));
+    layout.append(el('p',intelligence.layout.source+' · SCHEMATIC'));key.append(layout);
+   }
+   for(const spur of intelligence.spurs){
+    const group=el('div',null,'ecrl-spur');group.append(el('p',(adapter.get(spur.from)?.stationCode||'?')+' → '+spur.name+' → End of Spurline · SCHEMATIC'));
+    for(const target of [spur.from,spur.terminal,spur.end]){const asset=adapter.get(target)||master.endpoints.find(e=>e.assetId===target);if(target!==id){const b=el('button',asset.officialName||asset.historicalName);b.type='button';b.dataset.spurTarget=target;b.onclick=()=>onSelect(target);group.append(b)}}
+    key.append(group);
+   }
+  }
   host.append(key);
   const tech=el('details',null,'ecrl-engineering');summary(tech,ui('technical'));
-   // Keep raw provenance inside explicit disclosure across responsive CSS.
+   // Raw provenance stays in an inert template until an intentional disclosure.
+   // A map touch may retarget its trailing click to the newly inserted summary.
    const engineeringBody=el('div',null,'ecrl-engineering-body');
-   // Keep provenance in the engineering DOM for source audit, but never render
-   // it while collapsed. Inline display avoids responsive CSS leakage.
-   engineeringBody.style.setProperty('display','none','important');
-   engineeringBody.style.setProperty('visibility','hidden','important');
-   const popupCreatedAt=Date.now();
-   tech.querySelector('summary').addEventListener('click',event=>{
-    // iPad touch hit-testing can dispatch the map-opening tap onto a newly
-    // inserted summary. Suppress that initial ghost tap, not intentional later taps.
-    if((root.navigator?.maxTouchPoints||0)>0&&Date.now()-popupCreatedAt<300){
-     event.preventDefault();event.stopPropagation();return;
-    }
-    engineeringBody.style.setProperty('display',tech.open?'none':'block','important');
-    engineeringBody.style.setProperty('visibility',tech.open?'hidden':'visible','important');
+   const engineeringTemplate=el('template');
+   let armed=false;
+   const trigger=tech.querySelector('summary');
+   trigger.addEventListener('pointerdown',()=>{armed=true});
+   trigger.addEventListener('keydown',()=>{armed=true});
+   function syncEngineering(){
+    if(tech.open){if(!engineeringBody.isConnected)tech.append(engineeringBody)}
+    else engineeringTemplate.content.append(engineeringBody);
+   }
+   trigger.addEventListener('click',event=>{
+    event.preventDefault();event.stopPropagation();
+    if(event.detail>0&&!armed)return;
+    armed=false;tech.open=!tech.open;syncEngineering();
    });
-   tech.addEventListener('toggle',()=>{
-    engineeringBody.style.setProperty('display',tech.open?'block':'none','important');
-    engineeringBody.style.setProperty('visibility',tech.open?'visible':'hidden','important');
-   });
+   tech.addEventListener('toggle',syncEngineering);
    for(const [label,value] of [['status',a.assetStatus],['verification',a.verificationStatus],['service',a.serviceType],['geometry',a.geometryProvenance||a.geometryType],['chainage',a.chainageStartKm==null&&a.chainageEndKm==null?null:[a.chainageStartKm??'UNKNOWN',a.chainageEndKm??'UNKNOWN'].join(' – ')],['trackCount',a.trackCount]]){
    engineeringBody.append(el('p',t(label)+': '+(value??(t('unknown')+' · UNKNOWN'))));
   }
@@ -120,7 +135,7 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
   for(const conflict of a.conflicts||[])engineeringBody.append(el('p',t('conflict')+' · SOURCE_CONFLICT · '+conflict.field+' · '+conflict.sourceIds.join(' / ')+' · '+conflict.reason));
   if(isKerteh){engineeringBody.append(el('p',ui('type')+': '+a.assetType));engineeringBody.append(el('p',ui('portOperator')+': '+a.operatorName));engineeringBody.append(el('p',ui('yardEndUnknown')));engineeringBody.append(el('p','NO_SIDING_GEOMETRY · NO_END_LANE_COORDINATE · NO_ROAD_RESIDENTIAL_CADASTRE_AUDIT'));engineeringBody.append(el('p','Source: OSM landuse=railway area only; not an ECRL as-built loading or storage lane.'));}
   if(a.notes)engineeringBody.append(el('p',a.notes));
-     tech.append(engineeringBody);
+     engineeringTemplate.content.append(engineeringBody);tech.append(engineeringTemplate);
    host.append(tech);
   const sources=el('details',null,'ecrl-sources');summary(sources,ui('references'));
   const ids=[...new Set([...(a.sourceIds||[]),...(ref?[ref.sourceId]:[])])];
