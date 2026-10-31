@@ -18,5 +18,5 @@ test('R2 private lab keeps fresh server role/MFA bootstrap while gateway auth is
  const lab=read('ecrl-alignment-lab.html');assert(lab.includes('private-bootstrap-r2.js'));assert(lab.includes('id="private-lab-shell" hidden'));
  assert(lab.includes('type="application/x-mrs10-owner-module"'));
  assert(read('assets/unified-ecrl/route-lab-assistant-store-r17.js').includes('OWNER_PRIVATE_BACKEND_REQUIRED'));
- const headers=JSON.parse(read('vercel.json')).headers;assert(headers.some(x=>x.source==='/gateway.html'&&x.headers.some(h=>h.key==='Cache-Control'&&h.value.includes('no-store'))));
+ const headers=JSON.parse(fs.readFileSync('vercel.json','utf8')).headers;assert(headers.some(x=>x.source==='/auth-private-r2.html')); assert(headers.some(x=>x.source==='/gateway.html'&&x.headers.some(h=>h.key==='Cache-Control'&&h.value.includes('no-store'))));
 });

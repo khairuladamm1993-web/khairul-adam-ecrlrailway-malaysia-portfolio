@@ -6,8 +6,12 @@ module.exports=async function({api,anon,service,call,must,sql,mail,results}){
  assert(fs.existsSync(sdk),'PINNED_REAL_SDK_REQUIRED');
  sql("create table if not exists public.member_profiles (user_id uuid primary key, email text, role text, enabled boolean, activity_consent_at timestamptz, privacy_version text); alter table public.member_profiles enable row level security; create policy recovery_own_profile on public.member_profiles for select to authenticated using (user_id = auth.uid()); grant select on public.member_profiles to authenticated; notify pgrst,'reload schema'");
  await new Promise(r=>setTimeout(r,1000));
- const app=fs.readFileSync('dist-auth-recovery/assets/access.js','utf8').replace("const PROJECT_URL='https://kfudisbzdgsefdjoopzu.supabase.co';",'const PROJECT_URL='+JSON.stringify(api)+';').replace(/const PUBLISHABLE_KEY='[^']+';/,'const PUBLISHABLE_KEY='+JSON.stringify(anon)+';');
- const server=https.createServer({key:fs.readFileSync('/tmp/r22-https-key.pem'),cert:fs.readFileSync('/tmp/r22-https-cert.pem')},(q,r)=>{
+ const app=fs.readFileSync('dist-auth-recovery/assets/access.js','utf8').replace("const PROJECT_URL='https://kfudisbzdgsefdjoopzu.supabase.co';",'const PROJECT_URL='+JSON.stringify(origin+'/sb')+';').replace(/const PUBLISHABLE_KEY='[^']+';/,'const PUBLISHABLE_KEY='+JSON.stringify(anon)+';');
+ const server=https.createServer({key:fs.readFileSync('/tmp/r22-https-key.pem'),cert:fs.readFileSync('/tmp/r22-https-cert.pem')},async(q,r)=>{
+  if(q.url.startsWith('/sb/')){
+   // HTTPS browser transport to the REAL local GoTrue/PostgREST, never a mocked response.
+   try{let raw='';for await(const chunk of q)raw+=chunk;const upstream=await fetch(api+q.url.slice(3),{method:q.method,headers:{apikey:q.headers.apikey||anon,...(q.headers.authorization?{Authorization:q.headers.authorization}:{}),'Content-Type':q.headers['content-type']||'application/json'},...(raw?{body:raw}:{}),redirect:'manual'});r.writeHead(upstream.status,{'Content-Type':upstream.headers.get('content-type')||'application/json','Cache-Control':'no-store',...(upstream.headers.get('location')?{Location:upstream.headers.get('location')}:{})});r.end(await upstream.text())}catch{r.writeHead(502);r.end('TEST_TRANSPORT_FAILED')}return;
+  }
   r.setHeader('Cache-Control','no-store');
   if(q.url==='/sdk.js'){r.setHeader('Content-Type','text/javascript');r.end(fs.readFileSync(sdk));return}
   if(q.url==='/access.js'){r.setHeader('Content-Type','text/javascript');r.end(app);return}
@@ -36,7 +40,7 @@ module.exports=async function({api,anon,service,call,must,sql,mail,results}){
     let duplicateSends=0;tab.on('request',r=>{if(r.url().includes('/auth/v1/otp'))duplicateSends++});
     await tab.evaluate(e=>RailwayAccess.sendMagicLink(e),email);assert.equal(duplicateSends,0);
     // Follow the actual one-time GoTrue verification in the ORIGINAL browser context.
-    await p.goto(await latestLink(email));await p.waitForFunction(()=>window.RailwayAccess?.canAdmin===true);
+    const mailLink=await latestLink(email);assert(mailLink.startsWith(api+'/'));await p.goto(origin+'/sb'+mailLink.slice(api.length));await p.waitForFunction(()=>window.RailwayAccess?.canAdmin===true);
     assert.equal(new URL(p.url()).origin,origin);assert.equal(new URL(p.url()).search,'');
     await p.evaluate(()=>Promise.all([RailwayAccess.init(),RailwayAccess.init()]));
     await p.reload();await p.waitForFunction(()=>window.RailwayAccess?.canAdmin===true);
