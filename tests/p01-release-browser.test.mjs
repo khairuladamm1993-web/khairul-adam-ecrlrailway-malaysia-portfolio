@@ -16,7 +16,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    assert.equal(await page.locator('#owner-center-shortcut').isVisible(),false);
    for(const lang of ['ms','en','zh','th']){
     await page.locator(`[data-lang="${lang}"]`).click();
-    assert.equal(await page.locator('html').getAttribute('lang'),lang);
+    assert.equal(await page.locator('html').getAttribute('lang'),lang==='zh'?'zh-Hans':lang);
    }
    const destinations=await page.locator('#destinations button').allTextContents();assert.equal(destinations.length,4);
    for(let i=0;i<4;i++)await page.locator('#destinations button').nth(i).click();
