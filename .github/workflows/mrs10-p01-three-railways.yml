@@ -1,7 +1,7 @@
 name: P01 Three Railway Integrations
 on:
   push:
-    branches: [feature/mrs10-p01-v81-three-railways-20261101]
+    branches: [integration/mrs10-p01-v81-rc-20261101, feature/mrs10-p01-v81-three-railways-20261101]
     paths-ignore: ['docs/**']
 permissions:
   contents: read
