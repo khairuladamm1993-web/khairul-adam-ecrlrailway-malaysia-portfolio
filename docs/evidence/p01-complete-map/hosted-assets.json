@@ -1,0 +1,238 @@
+{
+  "entryStatus": 200,
+  "entryIsUnifiedMap": true,
+  "buildInfo": "window.MRS10BuildInfo=Object.freeze({\"application\":\"MR-S10\",\"version\":\"Owner Auth Recovery R2.6\",\"environment\":\"preview\",\"gitSha\":\"67dd39f4e05e0817084bd71692ca9962ed0fa787\",\"deploymentId\":\"dpl_DMmsDLvEM2eq5hkKAx5KPEkb5DAA\",\"deploymentUrl\":\"mrs10-p01-unified-v8-sg-geometry-okj1dbmqe-1993khairuladam-3016.vercel.app\",\"buildTimestamp\":\"2026-11-01T12:11:56.467Z\",\"canonicalHost\":\"khairul-adam-portfolio-preview-safe.vercel.app\"});\n",
+  "assets": [
+    {
+      "path": "./assets/railway-track-registry-kl.js",
+      "status": 200,
+      "sha256": "32938fda8c66fc533169a1f385183f501fb45bd9ba4c0b965752a11478d28bc0",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/mrs10-r219-ampang-service.js",
+      "status": 200,
+      "sha256": "b09a847d19cbc67ca3a981ae8bba05e18c01ca5a7338ed21df56a9498045ba06",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/mrs10-r219-ampang-gis.js",
+      "status": 200,
+      "sha256": "be8ebf8fd7a8fa3fc24114e1d696164ceb3338867a979d26e3ecb6edea054939",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v4-registry.js",
+      "status": 200,
+      "sha256": "4bb5b136bc0ad6b660227112285ffd289de2372407c483616188b16092585acb",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v6/sri-catalogue.js",
+      "status": 200,
+      "sha256": "bf1e69aa65ea4cfa976ad41411551e57335fb760eb7f2d935fd5d51e1bcdd164",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v6/sri-gis.js",
+      "status": 200,
+      "sha256": "2f7fab312be85d8f9a39edca4cb67f7238e1dc5855dbe3cd5dbca8892a5affc1",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v6/monorail-registry.js",
+      "status": 200,
+      "sha256": "326b7480f397eba607d7006f6ad610048098c36ac23d97bba5657b253f94c3eb",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v6/erl-model.js",
+      "status": 200,
+      "sha256": "2eb0a0773eda8bdf25da164d2dd6fa2735a472160941ee5ba73bb9d13468113f",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v6/erl-gis.js",
+      "status": 200,
+      "sha256": "3052e50c9870df86a5b3096bc6bed5e24750b1242d67daa75c67ac72a6259bdc",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v6/adapter.js",
+      "status": 200,
+      "sha256": "e743d52a126db2fc8621a004091689f2d42715678b5caac283f293ee99c421a3",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v7/ktm-dataset.js",
+      "status": 200,
+      "sha256": "f418c6dcafec2a2fd814c0ddf2239d937e431db2f07a772ba3f59f70b6bcca5a",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v7/ktm-adapter.js",
+      "status": 200,
+      "sha256": "7c9706632907549941271ac884218c925c244ed9492e3f8bf3d042c9a05da202",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v8/singapore-adapter.js",
+      "status": 200,
+      "sha256": "f372286afaa0dd3ca92d895af9882c8165f36717de272270bb8cbd0f6f4b763b",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v8/geometry-engine.js",
+      "status": 200,
+      "sha256": "88a5fdba1d6b8fcb445c0b3c7737ac4b164fbe4a493dd8b78a09dff4e1d787c2",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v81/three-railways.js",
+      "status": 200,
+      "sha256": "3728d147f47c358cb2e2da2c3f0c30f10c6671082ccef8c3e0edad902f9f6ce5",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v81/focus-controller.js",
+      "status": 200,
+      "sha256": "b8290d77261a03806daffdca35779b2a238481a51c6b1ec3b19d8ed89ebdd55f",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v81/relationships.js",
+      "status": 200,
+      "sha256": "7d0111560dfa189f9d991799857e951147fb3f3d89211b1f75a8fd58391084bf",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-ecrl/source/data.js",
+      "status": 200,
+      "sha256": "00e5ca2148d266703e170e40aa8ed7e5b5cbf84308b11fd8172674f6c82c9f6e",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-ecrl/source/i18n.js",
+      "status": 200,
+      "sha256": "2c8729f223ff3781c93d8b5b2e82c3d4da646dca7fdd2289a94bad421c96258e",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-ecrl/chainage-manifest.js",
+      "status": 200,
+      "sha256": "8ccfcb035fe769c3f4ebe3c4f4273bb9cfbc9f4a423959e85bf2defcd9962d68",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-ecrl/port-references.js",
+      "status": 200,
+      "sha256": "6ece17e2bcb0929bf6753992486c53d45c2a9d2f8d282d5af716b03f85bac120",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-ecrl/kerteh-freight-reference.js",
+      "status": 200,
+      "sha256": "6baa0bb23f4a863d1fdce4baed1885c984880c0a9b72737f5018c4966cf2042a",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-ecrl/alignment-evidence-r2.js",
+      "status": 200,
+      "sha256": "456995ca0c91f5f337514cb31cd81a3b212873b223320a89d5d7e1df72d48378",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-ecrl/adapter.js",
+      "status": 200,
+      "sha256": "f37eb49d4d4148c32d5a41f2dbcc8bb156cbbb67040a9404d037d4fd47df9fdb",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-ecrl/master-intelligence.js",
+      "status": 200,
+      "sha256": "19b72d5a6cbf6aa8fb333d45400fc91eefca23373a287f64a57c6ef1bccda01a",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-ecrl/integration-ui.js",
+      "status": 200,
+      "sha256": "c797795ed4d4cb61a1ae3bef6e3c9ffeb6e3716ba973f20e328afdbeda1f4383",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-ecrl/owner-calibration.js",
+      "status": 200,
+      "sha256": "c28146abacd0615f764bc9d1e6cc30e5426ee877dd25c0bbea144aac18c4fea3",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/consumer-foundation/journey-engine.js",
+      "status": 200,
+      "sha256": "7ab350acac1469383be8540d57c2440a2148094d8672e78553b6697c658d0caa",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/consumer-foundation/view.js",
+      "status": 200,
+      "sha256": "372736df93fb245dcda5aed57f69282856e1732eff2f0899755f79b4a1957055",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-complete/thailand-model.js",
+      "status": 200,
+      "sha256": "0e784987cb13941a4e3ef73c53f7f7ccd67423338037036503f20ebca3c51137",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-complete/ktm-recovery.js",
+      "status": 200,
+      "sha256": "37778da6c9b90dc4c18c827f04eda9a0b0debbba706b5e1009b34d980e893dd8",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-complete/adapter.js",
+      "status": 200,
+      "sha256": "11e632f52c9b26616903af60fea07389f0ba09e344a82c4608904e8f9eef1b75",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "./assets/unified-v8-map.js",
+      "status": 200,
+      "sha256": "995f6a49406fbc7c56acb9a5276f2015e07f1a8ffff0960f1ff218397761da6f",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "data/unified-complete/borneo-registry.json",
+      "status": 200,
+      "sha256": "45aee719730c50f357154fc9ef8a45bc9e7479146cfa3f0ae73b9c947dbf0311",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "data/unified-complete/china-references.json",
+      "status": 200,
+      "sha256": "5011616070310a01bf73db434448b6451a493f7fa6ae9eb1b684d7105552403b",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "data/unified-complete/shuttle-audit.json",
+      "status": 200,
+      "sha256": "c4d7ae094b888d03649854ffff1f7d2ea89128df7978e65e026ba33fc2555680",
+      "exactLocalBuild": true
+    },
+    {
+      "path": "assets/build-info.js",
+      "status": 200,
+      "sha256": "82879f53b9cee83c92d4bc1432f9954e7eb836bfc7f590a7ed79ac95e8998a2b",
+      "exactLocalBuild": null,
+      "verification": "deployment-specific build receipt: exact deployed SHA and ID verified"
+    },
+    {
+      "path": "gateway.html",
+      "status": 200,
+      "sha256": "131cc81bb8e150deea03d6bafd09b8764f2f34df36da0ff58ccf67ac4b83b7ea",
+      "exactLocalBuild": true
+    }
+  ],
+  "deploymentId": "dpl_DMmsDLvEM2eq5hkKAx5KPEkb5DAA",
+  "gitSha": "67dd39f4e05e0817084bd71692ca9962ed0fa787"
+}

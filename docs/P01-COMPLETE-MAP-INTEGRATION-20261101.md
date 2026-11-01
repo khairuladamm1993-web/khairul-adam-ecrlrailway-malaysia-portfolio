@@ -42,3 +42,43 @@ Fullscreen/native-touch correction run https://github.com/khairuladamm1993-web/k
 Local affected checks: 11 new unit assertions PASS; existing affected source suites PASS; local Chromium iPhone sample includes source-line taps, multilingual search, explicit MY/TH interchange, ECRL default/reload, fullscreen and pan. These are distinguished from CI, hosted checks and physical Owner UAT. No PASS is inferred from deployment READY.
 
 Known source limits are data availability, not coordinates to guess: no surveyed railway geometry/anchors, incomplete Thailand points, partial ART roster/GPS, ten excluded Shuttle pins, China route order/colors/geometry, and absent R2 private backend. Physical Owner iPhone/iPad Safari acceptance remains pending.
+
+
+## Final controlled Preview receipt
+
+**GO for protected Preview map UAT; not a Production release or a surveyed-geometry certification.**
+
+- Entry: https://mrs10-p01-unified-v8-sg-geometry-okj1dbmqe-1993khairuladam-3016.vercel.app/
+- Deployed code: `67dd39f4e05e0817084bd71692ca9962ed0fa787`.
+- Branch: `integration/mrs10-p01-complete-map-20261101`.
+- Deployment: `dpl_DMmsDLvEM2eq5hkKAx5KPEkb5DAA`, target staging, READY, existing project `prj_lCXBrXOHCNYABx8TLx2FhCEAIYus`.
+- Exact deployment metadata and served `assets/build-info.js` agree on SHA and deployment ID. Root serves the integrated map, not a disconnected demo. Thirty-three local entry scripts, three public JSON datasets and the gateway redirect are HTTP 200 and byte-identical to the local candidate artifact. Build-info is deployment-specific and was verified by its embedded SHA/ID rather than byte equality to a local timestamp.
+- Unauthenticated entry returns HTTP 302 to Vercel protection. A deployment-scoped 30-minute share grant allowed automated hosted checks; it was revoked after tests, with zero remaining grants. Protection was never disabled. Owner uses normal authorized Vercel access at the entry above.
+- Canonical Auth still resolves to `dpl_91iA6hiYcjG2JvUGUMiWGnyPSp32`, runtime `4681dc3732e83691eaf9323f5bc872f70adff1be`. The latest R2.6 branch was fetched again at final verification; locked Auth/private/MFA files remain byte-identical. No Supabase settings/schema/RLS, Production/main, canonical Auth alias, or P02/P03/P04 changes were made.
+
+### Proven failures and actual fixes
+
+1. Protected hosted JSON fetches previously used `credentials: omit`: the entry and JS returned 200 but the registry loader failed because Vercel's share-access cookie was omitted for same-origin datasets. Changing only the three bundled public JSON requests to `same-origin` restored 44 layers and 676 point associations on the actual protected host. External GIS fetches retain their accepted credentials policy. A synthetic HttpOnly protection-cookie fixture in CI reproduces this transport requirement; it is not a Supabase or role mock.
+2. A deferred Tumpat `idle` callback could override a later China campus camera focus. Camera intent revisions now cancel stale callbacks; rapid Tumpat → campus regression passes.
+3. Fullscreen/pan assertions initially failed on touch viewports. Serialized transitions, viewport fallback and real touchscreen actions now pass on both browser engines.
+4. China category retained a Malaysian station lineup and single-point source references were not centered. China now displays unassigned station-code references without inventing a line order; source-reference selection clears unrelated route content and centers its one approved reference point.
+5. ECRL initialization ignores stale OFF preferences, starts all four accepted reference kinds ON, and includes approved Malaysian source points in initial bounds. Captured layer/filter state is restored on popup close. No missing GPS or physical railway segment was fabricated.
+
+### Actual final QA
+
+| Evidence type | Actual result |
+|---|---|
+| Retained accepted baseline | 376 assertions PASS in run 41300270005; not repeated without a related change |
+| Full integrated route browser matrix | Run [41302609307](https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/41302609307): 44 routes × 6 Chromium/WebKit desktop/iPad/iPhone scenarios PASS |
+| Final affected source/artifact checks | Run [41305238353](https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/41305238353): 147 tests, 147 PASS, zero failures; exact final code |
+| Final affected browser checks | Same run: all six browser jobs PASS, four representative affected route rows per job plus global default/reload ECRL, actual supported track taps, China filter/search, interchange, popup restore, four languages, both themes, fullscreen, pan/zoom and public privacy checks |
+| Real protected hosted browser | Final exact deployment: Chromium iPad/iPhone and WebKit iPad/iPhone, all four PASS; five representative routes per case plus the same global interactions. No mocked network responses or injected Supabase sessions |
+| Real hosted map initialization | HTTP 200; WebGL/style/tiles ready; one map, 44 layers, 676 matched route-point associations, ECRL visible, zero JavaScript page errors |
+| Auth/access regression | Locked accepted R2.6 implementation preserved. Accepted Auth CI [41287593378](https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/41287593378) retained: 395 assertions + 28 browser/backend scenarios. Those synthetic backend scenarios are not a new real Supabase Owner login. This map run makes zero Supabase requests and reads no private session/data |
+| Physical Owner Safari | NOT RUN. Remains iPhone/iPad acceptance after these automated checks |
+
+[Route-by-route matrix](P01-COMPLETE-MAP-ROUTE-MATRIX-20261101.md) documents all 44 routes plus ECRL and China references. [Machine-readable evidence](evidence/p01-complete-map/) includes retained full route rows, final CI delta, four hosted reports, served asset hashes and initial desktop/iPhone screenshots after tile loading. Counts 742 listed / 676 mapped are route–station associations, not unique stations. The automated end-of-test reset screenshots may capture a tile transition; the supplied hosted-initial screenshots were separately inspected after the map settled.
+
+### Remaining source and access limits
+
+All technically available accepted modules are in the shared map/catalogue/search system. China has verified code references, not a fabricated fully mapped network. Most routes lack approved service-matched physical track geometry; 154 reused OSM-source segments are source topology, not a survey, and 13 optional secondary approximate segments remain distinctly classified. Thailand has 41 unique missing station locations; ART has partial station rosters and no approved station GPS; ten Shuttle pins remain excluded. ECRL reference/schematic positions are not verified station, PL, depot or spur GPS; private Owner calibration is not published. Existing R2 private backend remains unavailable/fail-closed and must not be mistaken for an activated calibration service. Owner physical Safari UAT and source geospatial confirmation remain separate from automated technical PASS.

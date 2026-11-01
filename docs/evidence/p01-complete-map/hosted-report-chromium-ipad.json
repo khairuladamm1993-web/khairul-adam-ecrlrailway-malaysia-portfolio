@@ -1,0 +1,131 @@
+{
+  "engine": "chromium",
+  "viewport": "ipad",
+  "status": "PASS",
+  "routes": [
+    {
+      "id": "mrt-kajang",
+      "search": "PASS",
+      "expected": 29,
+      "matched": 29,
+      "color": "#087D43",
+      "sourceOrder": "PASS",
+      "colors": "PASS",
+      "lineupAndMarkerOrExplicitGap": "PASS",
+      "closeRestore": "PASS",
+      "missing": [],
+      "physicalGeometry": "DATA_GAP"
+    },
+    {
+      "id": "th-v3-border",
+      "search": "PASS",
+      "expected": 4,
+      "matched": 3,
+      "color": "#f4b942",
+      "sourceOrder": "PASS",
+      "colors": "PASS",
+      "lineupAndMarkerOrExplicitGap": "PASS",
+      "closeRestore": "PASS",
+      "missing": [
+        {
+          "id": "th-khlong-ngae",
+          "name": "Khlong Ngae"
+        }
+      ],
+      "physicalGeometry": "DATA_GAP"
+    },
+    {
+      "id": "sabah-jkns",
+      "search": "PASS",
+      "expected": 15,
+      "matched": 15,
+      "color": "#008C95",
+      "sourceOrder": "PASS",
+      "colors": "PASS",
+      "lineupAndMarkerOrExplicitGap": "PASS",
+      "closeRestore": "PASS",
+      "missing": [],
+      "physicalGeometry": "DATA_GAP"
+    },
+    {
+      "id": "kuts-green",
+      "search": "PASS",
+      "expected": 0,
+      "matched": 0,
+      "color": "#1A9D70",
+      "sourceOrder": "PASS",
+      "colors": "PASS",
+      "lineupAndMarkerOrExplicitGap": "PASS",
+      "closeRestore": "PASS",
+      "missing": [],
+      "physicalGeometry": "DATA_GAP"
+    },
+    {
+      "id": "ktmb-shuttle-timuran",
+      "search": "PASS",
+      "expected": 40,
+      "matched": 30,
+      "color": "#A8772F",
+      "sourceOrder": "PASS",
+      "colors": "PASS",
+      "lineupAndMarkerOrExplicitGap": "PASS",
+      "closeRestore": "PASS",
+      "missing": [
+        {
+          "id": "ktmb-shuttle-timuran:82100",
+          "name": "KRAI"
+        },
+        {
+          "id": "ktmb-shuttle-timuran:80700",
+          "name": "SG MENGKUANG BARU"
+        },
+        {
+          "id": "ktmb-shuttle-timuran:77200",
+          "name": "SUNGAI SIRIAN"
+        },
+        {
+          "id": "ktmb-shuttle-timuran:77000",
+          "name": "KG. SIRIAN"
+        },
+        {
+          "id": "ktmb-shuttle-timuran:76600",
+          "name": "PAN MALAYAN"
+        },
+        {
+          "id": "ktmb-shuttle-timuran:75000",
+          "name": "MENTARA BARU"
+        },
+        {
+          "id": "ktmb-shuttle-timuran:74500",
+          "name": "TELUK GUNUNG"
+        },
+        {
+          "id": "ktmb-shuttle-timuran:73500",
+          "name": "SUNGAI TEMAU"
+        },
+        {
+          "id": "ktmb-shuttle-timuran:73100",
+          "name": "CHEGAR PERAH"
+        },
+        {
+          "id": "ktmb-shuttle-timuran:71800",
+          "name": "PADANG TUNGKU"
+        }
+      ],
+      "physicalGeometry": "DATA_GAP"
+    }
+  ],
+  "checks": [
+    "fresh-Malaysia-all-visible-bounds-ECRL-default-on",
+    "reload-and-stale-off-preferences-cannot-hide-ECRL",
+    "all-three-supported-source-track-taps",
+    "China-filter-catalogue-without-unrelated-Malaysia-lineup",
+    "China-English-Hanzi-pinyin-code-search",
+    "multilingual-search-and-explicit-MY-TH-interchange",
+    "ECRL-PL05-unknown-no-fake-pin",
+    "GNU-depot-chainage-and-schematic-preserved",
+    "four-languages-and-dark-light-style-recovery",
+    "fullscreen-and-native-pan-zoom",
+    "public-no-auth-or-private-requests-or-session-data"
+  ]
+}

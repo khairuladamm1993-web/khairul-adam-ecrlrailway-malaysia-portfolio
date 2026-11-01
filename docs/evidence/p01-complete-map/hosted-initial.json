@@ -1,0 +1,415 @@
+{
+  "http": 200,
+  "location": "https://mrs10-p01-unified-v8-sg-geometry-okj1dbmqe-1993khairuladam-3016.vercel.app/",
+  "state": {
+    "title": "MR-S10 P01 \u00b7 Unified Railway Map V8.1 \u00b7 MY SG TH CN",
+    "error": "GIS tidak lengkap: hanya penanda yang dipadankan dipaparkan.",
+    "hasQA": true,
+    "snapshot": {
+      "mapReady": true,
+      "styleLoaded": true,
+      "tilesLoaded": true,
+      "webglReady": true,
+      "rect": {
+        "width": 1070,
+        "height": 468,
+        "backingWidth": 1070,
+        "backingHeight": 468
+      },
+      "perRoute": {
+        "mrt-kajang": {
+          "source": "mrs10-v8-source-mrt-kajang",
+          "layer": "mrs10-v8-mrt-kajang",
+          "present": true,
+          "visible": true,
+          "rendered": 29,
+          "matched": 29
+        },
+        "lrt-kelana-jaya": {
+          "source": "mrs10-v8-source-lrt-kelana-jaya",
+          "layer": "mrs10-v8-lrt-kelana-jaya",
+          "present": true,
+          "visible": true,
+          "rendered": 37,
+          "matched": 37
+        },
+        "lrt-ampang": {
+          "source": "mrs10-v8-source-lrt-ampang",
+          "layer": "mrs10-v8-lrt-ampang",
+          "present": true,
+          "visible": true,
+          "rendered": 18,
+          "matched": 18
+        },
+        "mrt-putrajaya": {
+          "source": "mrs10-v8-source-mrt-putrajaya",
+          "layer": "mrs10-v8-mrt-putrajaya",
+          "present": true,
+          "visible": true,
+          "rendered": 36,
+          "matched": 36
+        },
+        "lrt-sri-petaling": {
+          "source": "mrs10-v8-source-lrt-sri-petaling",
+          "layer": "mrs10-v8-lrt-sri-petaling",
+          "present": true,
+          "visible": true,
+          "rendered": 29,
+          "matched": 29
+        },
+        "kl-monorail": {
+          "source": "mrs10-v8-source-kl-monorail",
+          "layer": "mrs10-v8-kl-monorail",
+          "present": true,
+          "visible": true,
+          "rendered": 11,
+          "matched": 11
+        },
+        "erl-klia-ekspres": {
+          "source": "mrs10-v8-source-erl-klia-ekspres",
+          "layer": "mrs10-v8-erl-klia-ekspres",
+          "present": true,
+          "visible": true,
+          "rendered": 3,
+          "matched": 3
+        },
+        "erl-klia-transit": {
+          "source": "mrs10-v8-source-erl-klia-transit",
+          "layer": "mrs10-v8-erl-klia-transit",
+          "present": true,
+          "visible": true,
+          "rendered": 6,
+          "matched": 6
+        },
+        "ktm-seremban": {
+          "source": "mrs10-v8-source-ktm-seremban",
+          "layer": "mrs10-v8-ktm-seremban",
+          "present": true,
+          "visible": true,
+          "rendered": 27,
+          "matched": 27
+        },
+        "ktm-port-klang": {
+          "source": "mrs10-v8-source-ktm-port-klang",
+          "layer": "mrs10-v8-ktm-port-klang",
+          "present": true,
+          "visible": true,
+          "rendered": 34,
+          "matched": 34
+        },
+        "ktm-padang-besar": {
+          "source": "mrs10-v8-source-ktm-padang-besar",
+          "layer": "mrs10-v8-ktm-padang-besar",
+          "present": true,
+          "visible": true,
+          "rendered": 13,
+          "matched": 13
+        },
+        "ktm-ipoh": {
+          "source": "mrs10-v8-source-ktm-ipoh",
+          "layer": "mrs10-v8-ktm-ipoh",
+          "present": true,
+          "visible": true,
+          "rendered": 13,
+          "matched": 13
+        },
+        "ktm-shuttle-selatan-paloh": {
+          "source": "mrs10-v8-source-ktm-shuttle-selatan-paloh",
+          "layer": "mrs10-v8-ktm-shuttle-selatan-paloh",
+          "present": true,
+          "visible": true,
+          "rendered": 7,
+          "matched": 7
+        },
+        "ktm-shuttle-selatan-pasirgudang": {
+          "source": "mrs10-v8-source-ktm-shuttle-selatan-pasirgudang",
+          "layer": "mrs10-v8-ktm-shuttle-selatan-pasirgudang",
+          "present": true,
+          "visible": true,
+          "rendered": 2,
+          "matched": 2
+        },
+        "ktmb-ets-v1": {
+          "source": "mrs10-v8-source-ktmb-ets-v1",
+          "layer": "mrs10-v8-ktmb-ets-v1",
+          "present": true,
+          "visible": true,
+          "rendered": 38,
+          "matched": 38
+        },
+        "ktmb-ert": {
+          "source": "mrs10-v8-source-ktmb-ert",
+          "layer": "mrs10-v8-ktmb-ert",
+          "present": true,
+          "visible": true,
+          "rendered": 23,
+          "matched": 23
+        },
+        "sg-NSL": {
+          "source": "mrs10-v8-source-sg-NSL",
+          "layer": "mrs10-v8-sg-NSL",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 29
+        },
+        "sg-EWL": {
+          "source": "mrs10-v8-source-sg-EWL",
+          "layer": "mrs10-v8-sg-EWL",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 35
+        },
+        "sg-NEL": {
+          "source": "mrs10-v8-source-sg-NEL",
+          "layer": "mrs10-v8-sg-NEL",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 17
+        },
+        "sg-CCL": {
+          "source": "mrs10-v8-source-sg-CCL",
+          "layer": "mrs10-v8-sg-CCL",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 34
+        },
+        "sg-DTL": {
+          "source": "mrs10-v8-source-sg-DTL",
+          "layer": "mrs10-v8-sg-DTL",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 37
+        },
+        "sg-TEL": {
+          "source": "mrs10-v8-source-sg-TEL",
+          "layer": "mrs10-v8-sg-TEL",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 33
+        },
+        "sg-BPLRT": {
+          "source": "mrs10-v8-source-sg-BPLRT",
+          "layer": "mrs10-v8-sg-BPLRT",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 13
+        },
+        "sg-SK_E": {
+          "source": "mrs10-v8-source-sg-SK_E",
+          "layer": "mrs10-v8-sg-SK_E",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 6
+        },
+        "sg-SK_W": {
+          "source": "mrs10-v8-source-sg-SK_W",
+          "layer": "mrs10-v8-sg-SK_W",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 9
+        },
+        "sg-PG_E": {
+          "source": "mrs10-v8-source-sg-PG_E",
+          "layer": "mrs10-v8-sg-PG_E",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 8
+        },
+        "sg-PG_W": {
+          "source": "mrs10-v8-source-sg-PG_W",
+          "layer": "mrs10-v8-sg-PG_W",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 8
+        },
+        "sg-JRL": {
+          "source": "mrs10-v8-source-sg-JRL",
+          "layer": "mrs10-v8-sg-JRL",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 25
+        },
+        "sg-CRL": {
+          "source": "mrs10-v8-source-sg-CRL",
+          "layer": "mrs10-v8-sg-CRL",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 23
+        },
+        "sg-SHUTTLE_TEBRAU": {
+          "source": "mrs10-v8-source-sg-SHUTTLE_TEBRAU",
+          "layer": "mrs10-v8-sg-SHUTTLE_TEBRAU",
+          "present": true,
+          "visible": true,
+          "rendered": 2,
+          "matched": 2
+        },
+        "sg-RTS": {
+          "source": "mrs10-v8-source-sg-RTS",
+          "layer": "mrs10-v8-sg-RTS",
+          "present": true,
+          "visible": true,
+          "rendered": 2,
+          "matched": 2
+        },
+        "sg-SENTOSA": {
+          "source": "mrs10-v8-source-sg-SENTOSA",
+          "layer": "mrs10-v8-sg-SENTOSA",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 4
+        },
+        "sg-CHANGI_APM": {
+          "source": "mrs10-v8-source-sg-CHANGI_APM",
+          "layer": "mrs10-v8-sg-CHANGI_APM",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 3
+        },
+        "th-v3-border": {
+          "source": "mrs10-v8-source-th-v3-border",
+          "layer": "mrs10-v8-th-v3-border",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 3
+        },
+        "th-v3-main": {
+          "source": "mrs10-v8-source-th-v3-main",
+          "layer": "mrs10-v8-th-v3-main",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 8
+        },
+        "th-v3-east": {
+          "source": "mrs10-v8-source-th-v3-east",
+          "layer": "mrs10-v8-th-v3-east",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 3
+        },
+        "th-v3-nakhon": {
+          "source": "mrs10-v8-source-th-v3-nakhon",
+          "layer": "mrs10-v8-th-v3-nakhon",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 1
+        },
+        "th-v3-trang": {
+          "source": "mrs10-v8-source-th-v3-trang",
+          "layer": "mrs10-v8-th-v3-trang",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 1
+        },
+        "th-v3-surat": {
+          "source": "mrs10-v8-source-th-v3-surat",
+          "layer": "mrs10-v8-th-v3-surat",
+          "present": true,
+          "visible": false,
+          "rendered": 0,
+          "matched": 1
+        },
+        "sabah-jkns": {
+          "source": "mrs10-v8-source-sabah-jkns",
+          "layer": "mrs10-v8-sabah-jkns",
+          "present": true,
+          "visible": true,
+          "rendered": 15,
+          "matched": 15
+        },
+        "kuts-blue": {
+          "source": "mrs10-v8-source-kuts-blue",
+          "layer": "mrs10-v8-kuts-blue",
+          "present": true,
+          "visible": true,
+          "rendered": 0,
+          "matched": 0
+        },
+        "kuts-red": {
+          "source": "mrs10-v8-source-kuts-red",
+          "layer": "mrs10-v8-kuts-red",
+          "present": true,
+          "visible": true,
+          "rendered": 0,
+          "matched": 0
+        },
+        "kuts-green": {
+          "source": "mrs10-v8-source-kuts-green",
+          "layer": "mrs10-v8-kuts-green",
+          "present": true,
+          "visible": true,
+          "rendered": 0,
+          "matched": 0
+        },
+        "ktmb-shuttle-timuran": {
+          "source": "mrs10-v8-source-ktmb-shuttle-timuran",
+          "layer": "mrs10-v8-ktmb-shuttle-timuran",
+          "present": true,
+          "visible": true,
+          "rendered": 30,
+          "matched": 30
+        }
+      },
+      "renderedFeatureCount": 375,
+      "lastTap": null,
+      "layerCount": 44,
+      "sourceMatched": 676,
+      "geometry": {
+        "official": 0,
+        "osm": 154,
+        "approximate": 13,
+        "rendered": 2,
+        "sourcePresent": true
+      },
+      "singaporeSourceRecords": 273,
+      "borderRecords": 4,
+      "ecrl": {
+        "assetCount": 37,
+        "stationCount": 20,
+        "referenceCount": 25,
+        "referenceKinds": {
+          "LOCALITY": 16,
+          "HISTORICAL": 4,
+          "MARITIME": 4,
+          "YARD": 1
+        },
+        "flags": {
+          "LOCALITY": true,
+          "HISTORICAL": true,
+          "MARITIME": true,
+          "YARD": true
+        },
+        "verifiedStationPoints": 0,
+        "verifiedLoopPoints": 0,
+        "physicalSegments": 0,
+        "sourcePresent": true,
+        "layersPresent": true,
+        "visible": true
+      },
+      "mapInstances": 1,
+      "stage": "DONE",
+      "category": "Malaysia"
+    }
+  },
+  "errors": []
+}
