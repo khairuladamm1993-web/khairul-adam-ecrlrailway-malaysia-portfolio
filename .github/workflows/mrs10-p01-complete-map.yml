@@ -40,7 +40,7 @@ jobs:
       P01_VIEWPORT: ${{ matrix.viewport }}
       CHROME_PATH: /usr/bin/google-chrome
       # Transport-only delta; full 44-route x 6 matrix retained from run 41302609307.
-      P01_ROUTES: th-v3-border,sabah-jkns,ktmb-shuttle-timuran
+      P01_ROUTES: th-v3-border,sabah-jkns,kuts-green,ktmb-shuttle-timuran
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:

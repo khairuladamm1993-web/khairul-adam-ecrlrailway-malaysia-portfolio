@@ -46,10 +46,10 @@ const i18n={
 };
 
 const completeCopy={
- ms:{title:'Peta Rel Bersepadu V8.1',desc:'Malaysia dipaparkan dahulu termasuk ECRL. Malaysia · Singapura · Thailand · China. Lineup sumber, titik rujukan, trek fizikal dan skematik dibezakan.',physical:'Geometri trek bersumber'},
- en:{title:'Unified Railway Map V8.1',desc:'Malaysia opens first, including ECRL. Malaysia · Singapore · Thailand · China. Source lineups, reference points, physical tracks and schematics remain distinct.',physical:'Sourced physical track geometry'},
- zh:{title:'综合铁路地图 V8.1',desc:'默认显示马来西亚及 ECRL。马来西亚 · 新加坡 · 泰国 · 中国。来源站序、参考点、实际轨道及示意图分别标注。',physical:'来源轨道几何'},
- th:{title:'แผนที่รถไฟรวม V8.1',desc:'เริ่มที่มาเลเซียรวม ECRL มาเลเซีย · สิงคโปร์ · ไทย · จีน แยกรายชื่อสถานี จุดอ้างอิง รางจริง และแผนผัง',physical:'แนวรางจากแหล่งข้อมูล'}
+ ms:{title:'Peta Rel Bersepadu V8.1',desc:'Malaysia dipaparkan dahulu termasuk ECRL. Malaysia · Singapura · Thailand · China. Lineup sumber, titik rujukan, trek fizikal dan skematik dibezakan.',physical:'Geometri trek bersumber',referenceCatalogue:'Katalog kod sumber',referenceNoOrder:'UNKNOWN · Rekod ini bukan turutan perkhidmatan atau geometri rel disahkan'},
+ en:{title:'Unified Railway Map V8.1',desc:'Malaysia opens first, including ECRL. Malaysia · Singapore · Thailand · China. Source lineups, reference points, physical tracks and schematics remain distinct.',physical:'Sourced physical track geometry',referenceCatalogue:'Source code catalogue',referenceNoOrder:'UNKNOWN · Reference records are not a verified service order or railway geometry'},
+ zh:{title:'综合铁路地图 V8.1',desc:'默认显示马来西亚及 ECRL。马来西亚 · 新加坡 · 泰国 · 中国。来源站序、参考点、实际轨道及示意图分别标注。',physical:'来源轨道几何',referenceCatalogue:'来源代码目录',referenceNoOrder:'UNKNOWN · 来源记录不代表已核实的运营站序或铁路几何'},
+ th:{title:'แผนที่รถไฟรวม V8.1',desc:'เริ่มที่มาเลเซียรวม ECRL มาเลเซีย · สิงคโปร์ · ไทย · จีน แยกรายชื่อสถานี จุดอ้างอิง รางจริง และแผนผัง',physical:'แนวรางจากแหล่งข้อมูล',referenceCatalogue:'รายการรหัสจากแหล่งข้อมูล',referenceNoOrder:'UNKNOWN · รายการอ้างอิงไม่ใช่ลำดับบริการหรือแนวรางที่ยืนยันแล้ว'}
 };
 
 const state={locale:'ms',category:'Malaysia',selected:'mrt-kajang',theme:'light',map:null,mapReady:false,zoomDone:false,
@@ -143,7 +143,7 @@ function buildRoutes(){
   btn.onclick=()=>{closeFocus();state.selected=r.id;buildRoutes();buildLineup();focusRoute(r.id)};
   btn.dataset.routeId=r.id;btn.style.borderLeft='4px solid '+r.color;host.append(btn);
  }
- if(['All','China','Malaysia','Sarawak ART'].includes(state.category))for(const ref of completeSources.references.filter(referenceVisible)){const btn=el('button',null,(ref.code?ref.code+' · ':'')+ref.name);btn.type='button';btn.dataset.referenceId=ref.id;btn.onclick=()=>showReference(ref);host.append(btn);}
+ if(['All','China','Malaysia','Sarawak ART'].includes(state.category))for(const ref of completeSources.references.filter(r=>referenceVisible(r)&&(state.category!=='China'||r.kind!=='station'))){const btn=el('button',null,(ref.code?ref.code+' · ':'')+ref.name);btn.type='button';btn.dataset.referenceId=ref.id;btn.setAttribute('aria-pressed',String(state.selected==='reference:'+ref.id));btn.onclick=()=>showReference(ref);host.append(btn);}
 }
 function focusRoute(routeId){
  cameraIntent++;
@@ -174,6 +174,13 @@ function focusStation(routeId,id){
 }
 function buildLineup(){
  const host=$('lineup');host.replaceChildren();
+ $('lineup-title').textContent=tr('lineup');
+ if(state.category==='China'||state.selected.startsWith('reference:')){
+  $('path-select').hidden=true;$('path-select').replaceChildren();$('path-label').textContent='';$('lineup-title').textContent='China · '+tr('referenceCatalogue');$('path-status').textContent=tr('referenceNoOrder');
+  const selected=completeSources.references.find(r=>'reference:'+r.id===state.selected),refs=state.category==='China'||selected?.country==='CN'?completeSources.references.filter(r=>r.country==='CN'&&r.kind==='station'):[selected].filter(Boolean);
+  if(selected?.country!=='CN'&&state.category!=='China')$('lineup-title').textContent=selected?.name||tr('lineup');
+  for(const ref of refs){const li=el('li'),button=el('button',null,(ref.code?ref.code+' · ':'')+ref.name+(ref.hanzi?' · '+ref.hanzi:'')+(ref.pinyin?' · '+ref.pinyin:''));button.type='button';button.dataset.referenceId=ref.id;button.onclick=()=>showReference(ref);li.append(button);host.append(li);}return;
+ }
  const route=state.manifest.find(r=>r.id===state.selected);
  if(!route){$('lineup').append(el('li',null,tr('unlocated')));return;}
  const selector=$('path-select');selector.replaceChildren();selector.hidden=!route.paths?.length;
@@ -323,7 +330,7 @@ function syncReferenceMarkers(selection=focus.current){
  }
 }
 function noPointPanel(host){const old=state.popup;state.popup=null;old?.remove();const panel=$('ecrl-no-point');panel.replaceChildren();const close=el('button',null,'×');close.type='button';close.setAttribute('aria-label','Close');close.onclick=closeFocus;panel.append(close,host);panel.hidden=false;close.focus({preventScroll:true});}
-function showReference(ref){if(!ref)return;cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;focus.enter({mode:'REFERENCE_FOCUS',routeIds:[],referenceId:ref.id});const host=el('div','source-reference');host.dataset.referenceId=ref.id;host.append(el('h3',null,(ref.code?ref.code+' · ':'')+ref.name));for(const value of [ref.hanzi,ref.pinyin,ref.status,ref.geometryStatus])if(value)host.append(el('p',null,value));appendSource(host,ref.sourceUrl);if(ref.coordinates){mountPopup(host,ref.coordinates);state.map.easeTo({center:ref.coordinates,zoom:12,duration:250});}else{host.append(el('p',null,tr('unlocated')));noPointPanel(host);}}
+function showReference(ref){if(!ref)return;cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;focus.enter({mode:'REFERENCE_FOCUS',routeIds:[],referenceId:ref.id});state.selected='reference:'+ref.id;buildRoutes();buildLineup();const host=el('div','source-reference');host.dataset.referenceId=ref.id;host.append(el('h3',null,(ref.code?ref.code+' · ':'')+ref.name));for(const value of [ref.hanzi,ref.pinyin,ref.status,ref.geometryStatus])if(value)host.append(el('p',null,value));appendSource(host,ref.sourceUrl);if(ref.coordinates){mountPopup(host,ref.coordinates);state.map.easeTo({center:ref.coordinates,zoom:12,duration:250});}else{host.append(el('p',null,tr('unlocated')));noPointPanel(host);}}
 function showUnlocatedStation(route,stop){if(!stop)return;focus.enter({mode:'STATION_FOCUS',routeIds:[route.id],stationId:stop.id});const host=el('div');host.dataset.unlocatedStation=stop.id;host.append(el('h3',null,stop.name),el('p',null,route.label),el('p',null,tr('unlocated')),el('p',null,stop.locationStatus||route.geometryStatus||'UNKNOWN'));appendSource(host,stop.sourceUrl||route.source);noPointPanel(host);}
 
 function showInfrastructure(assetId,moveCamera=false){
@@ -350,6 +357,7 @@ function fitOnce(){
  const coords=[...state.points.values()].filter(p=>routeVisible(state.manifest.find(r=>r.id===p.routeId))).map(p=>p.coordinates);
  if(['Malaysia','All','ECRL'].includes(state.category))coords.push(...ecrl.refs.filter(r=>ecrl.flags[r.kind]).map(r=>r.coordinates));
  coords.push(...completeSources.references.filter(r=>referenceVisible(r)&&r.coordinates).map(r=>r.coordinates));
+ if(coords.length===1){state.map.easeTo({center:coords[0],zoom:11,duration:300});state.zoomDone=true;return;}
  if(coords.length<2)return;
  const minX=Math.min(...coords.map(p=>p[0])),maxX=Math.max(...coords.map(p=>p[0])),
  minY=Math.min(...coords.map(p=>p[1])),maxY=Math.max(...coords.map(p=>p[1]));
