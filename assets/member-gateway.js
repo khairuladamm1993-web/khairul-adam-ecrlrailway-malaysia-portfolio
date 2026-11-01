@@ -32,7 +32,7 @@
   }else if(pendingAccess()){
    inner='<h2 id="member-dialog-title">Checking verified session</h2><p class="access-label">Session and role validation</p><p>Please wait while the verified Supabase session and backend access role are resolved. A new verification email is not required unless this session is definitively unavailable.</p>';
   }else if(A.status==='verification-sent'){
-   inner='<h2 id="member-dialog-title">Check your email</h2><p class="access-label">Verification link sent</p><p>Open only the newest Supabase email link for '+escape(A.email||'your address')+'. Keep this page open. Open the link in the same Safari browser, device and site where you requested it. A link opened on another device cannot complete PKCE. Duplicate sends are blocked across tabs for 60 seconds. Access remains Public until the backend verifies the session and role.</p><button class="secondary" data-auth-refresh>CHECK SESSION</button>';
+   inner='<h2 id="member-dialog-title">Check your email</h2><p class="access-label">Verification link sent</p><p>E-mel terbaru telah dihantar ke '+escape(A.email||'your address')+'. Kekalkan halaman ini. Masukkan kod e-mel di bawah jika ada. Jika e-mel hanya ada butang pautan, tekan lama butang itu, pilih Copy Link dan tampal pautan di bawah tanpa membukanya. Selepas pengesahan, akses ditentukan oleh backend.</p><button class="secondary" data-auth-refresh>CHECK SESSION</button>';
   }else{
    const rateLimited=A.status==='rate-limited',expired=A.status==='session-expired',verificationFailed=A.status==='verification-failed',pkceFailed=A.status==='pkce-exchange-failed',restoreFailed=A.status==='session-restore-failed',roleFailed=A.status==='role-error',networkFailed=A.status==='auth-network-error',sending=A.status==='sending'||authSubmitting;
    const label=rateLimited?'Too many verification requests':expired?'Session expired':verificationFailed?'Verification link unavailable':pkceFailed?'Secure callback failed':restoreFailed?'Session restore failed':roleFailed?'Access role could not be resolved':networkFailed?'Authentication backend unavailable':'Secure email verification';
@@ -48,7 +48,7 @@
    const label=document.createElement('label');label.textContent='Confirm email';
    const confirm=document.createElement('input');confirm.name='email_confirm';confirm.type='email';confirm.required=true;confirm.autocomplete='off';confirm.value=authConfirmEmail;confirm.disabled=input.disabled;
    label.append(document.createElement('br'),confirm);input.closest('label').after(label);
-   const note=document.createElement('p');note.textContent='Review both email entries before sending. A new address starts registration after email verification. Open the link in the same browser and site that requested it.';
+   const note=document.createElement('p');note.textContent='Review both email entries before sending. A new address starts registration after email verification. For recovery, copy the newest email link into the verification field below without opening it.';
    form.prepend(note);
    if(authInputError){const error=document.createElement('p');error.className='auth-error';error.setAttribute('role','alert');error.textContent=authInputError;form.append(error);}
   }
@@ -167,7 +167,7 @@
   const ans=e.target.closest('[data-quiz-answer]');if(ans&&quiz&&!quiz.busy){quiz.answers.push({module:quiz.questions[quiz.index].module,question:quiz.questions[quiz.index].id,answer:Number(ans.dataset.quizAnswer)});quiz.index++;quiz.index>=16?finishQuiz():renderQuiz();return;}
   if(e.target.closest('[data-quiz-done]')){quiz=null;dialog.close();enhance();return;}
   if(e.target.closest('[data-member-close]')){dialog.close();return;}
-  if(e.target.closest('[data-logout]')){await stopTracker(true);await A.logout();bundle=null;selected.clear();renderStatus();renderAuth();return;}
+  if(e.target.closest('[data-logout]')){authEmail='';authConfirmEmail='';authInputError='';await stopTracker(true);await A.logout();bundle=null;selected.clear();renderStatus();renderAuth();return;}
   if(e.target.closest('[data-auth-refresh]')){await A.refresh();renderAuth();return;}
   if(e.target.closest('[data-refresh-member]')){await loadBundle();renderAuth();return;}
   const consent=e.target.closest('[data-consent]');if(consent){await A.setActivityConsent(consent.dataset.consent==='true');await loadBundle();renderAuth();return;}
