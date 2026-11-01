@@ -2,7 +2,8 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const root=path.resolve('dist-auth-recovery'),read=f=>fs.readFileSync(path.join(root,f),'utf8');
 test('recovery artifact keeps one allowlisted callback origin and existing-account login',()=>{
- assert(read('gateway.html').includes('name="mrs10-auth-origin" content="https://khairul-adam-portfolio-preview-safe.vercel.app"'));
+ const origin=process.env.P01_AUTH_CALLBACK_ORIGIN||'https://khairul-adam-portfolio-preview-safe.vercel.app';
+ assert(read('gateway.html').includes('name="mrs10-auth-origin" content="'+origin+'"'));
  assert(read('assets/access.js').includes('shouldCreateUser:false'));assert(read('assets/access.js').includes("const redirectTo=location.origin+'/gateway.html'"));
  assert(!read('assets/member-gateway.js').includes('A new address starts registration'));assert(read('assets/member-gateway.js').includes('existing accounts only'));
 });
