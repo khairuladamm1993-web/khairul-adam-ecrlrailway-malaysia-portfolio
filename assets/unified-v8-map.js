@@ -455,9 +455,15 @@ async function init(){
  $('approximate').addEventListener('change',()=>{closeFocus();installGeometry();applyVisibility();geometryStatus()});
  $('search').addEventListener('input',updateSearch);
  $('reset').addEventListener('click',reset);
- const fullscreenBox=document.querySelector('.mapbox'),fullscreenButton=$('map-fullscreen');let nativeFullscreen=false;
+ const fullscreenBox=document.querySelector('.mapbox'),fullscreenButton=$('map-fullscreen');let nativeFullscreen=false,fullscreenBusy=false;
  const fullState=on=>{fullscreenBox.classList.toggle('is-fullscreen',on);fullscreenButton.setAttribute('aria-pressed',String(on));requestAnimationFrame(()=>state.map?.resize());};
- fullscreenButton.onclick=async()=>{const on=fullscreenBox.classList.contains('is-fullscreen');if(on){if(document.fullscreenElement)await document.exitFullscreen?.();nativeFullscreen=false;fullState(false);}else{fullState(true);if(fullscreenBox.requestFullscreen)try{await fullscreenBox.requestFullscreen();nativeFullscreen=true;}catch{nativeFullscreen=false;}}};
+ fullscreenButton.onclick=async()=>{
+  if(fullscreenBusy)return;fullscreenBusy=true;fullscreenButton.disabled=true;
+  const on=fullscreenBox.classList.contains('is-fullscreen');
+  try{if(on){fullState(false);nativeFullscreen=false;if(document.fullscreenElement)try{await document.exitFullscreen?.();}catch{fullState(Boolean(document.fullscreenElement));}}
+  else{fullState(true);if(fullscreenBox.requestFullscreen)try{await fullscreenBox.requestFullscreen();nativeFullscreen=Boolean(document.fullscreenElement);}catch{nativeFullscreen=false;}}}
+  finally{fullscreenBusy=false;fullscreenButton.disabled=false;requestAnimationFrame(()=>state.map?.resize());}
+ };
  document.addEventListener('fullscreenchange',()=>{if(nativeFullscreen&&!document.fullscreenElement){nativeFullscreen=false;fullState(false);}state.map?.resize();});
  $('language').addEventListener('click',()=>{state.locale=locales[(locales.indexOf(state.locale)+1)%4];applyLanguage();if(focus.current.mode==='INFRASTRUCTURE_FOCUS'){showInfrastructure(focus.current.assetId)}else if(state.popup){closeFocus()}});
  $('theme').addEventListener('click',()=>{

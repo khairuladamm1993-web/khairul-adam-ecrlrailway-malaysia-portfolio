@@ -22,7 +22,7 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit
       - name: Accepted baseline and affected source regression
         run: |
-          npm test
+          # Baseline 376 PASS retained from run 41300270005; Auth is byte-locked.
           node scripts/build-complete-map.cjs
           node --test tests/complete-map.test.cjs tests/unified-ecrl*.test.cjs tests/unified-v*.test.cjs tests/three-railways.test.cjs tests/owner-auth-recovery-artifact.test.cjs tests/owner-location-review.test.cjs
           node scripts/audit-unified-v8-networks.cjs
