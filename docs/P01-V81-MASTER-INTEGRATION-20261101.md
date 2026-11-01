@@ -49,3 +49,9 @@ https://mrs10-p01-unified-v8-sg-geometry-75hmilgxp-1993khairuladam-3016.vercel.a
 Use the approved branch alias `/gateway.html` for future login verification once allowlisted; immutable host is not the callback origin.
 
 Release remains NO-GO pending final CI, authenticated staging HTTP/browser smoke, exact callback allowlist verification, live Owner/Admin session/access verification, private-room backend decision and STN10 registry resolution. Physical Safari UAT is not requested while automated/access gates remain open.
+
+## Preserved, not selected into this RC
+
+The remote branch inventory is preserved. KTM V3 Safari/GTFS (`3ecb3f2`), Shuttle Timur V2 (`d6e9a59`), Thailand V3 (`dae5460`) and brand/locale proposal (`c41f2fd`) remain separate. Their latest commit subjects were inspected, but their complete source/QA lineage was not re-certified in this recovery. They are not silently treated as accepted or merged wholesale. This RC retains the baseline Malaysia/Singapore scope and its explicit Eastern Shuttle exclusion. Any broader acceptance requirement remains open rather than overriding the tested map baseline.
+
+Read-only hosted recheck in this session also confirmed zero anon table SELECT grants and absence of `public.owner_private_context_r2()`. Final-head map regression logs independently confirm 371/371 baseline and 116/116 map/source tests PASS. Three-railways browser job `124707475586` completed SUCCESS; remaining suites and real-backend job were still running at this update.
