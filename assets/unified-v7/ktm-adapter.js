@@ -69,7 +69,7 @@ async function fetchRoute(route,d=data){
   if(!service)throw Error('UNKNOWN_TRIP');
   const points=service.stops.map(s=>({id:route.id+':'+s.id,name:s.name,
    code:'',routeId:route.id,coordinates:[s.lon,s.lat],sourceId:s.id,
-   provenance:'OFFICIAL_KTMB_GTFS_REPRESENTATIVE_TRIP',tripId:service.tripId}));
+   provenance:'OFFICIAL_KTMB_GTFS_REPRESENTATIVE_TRIP',sourceUrl:source,tripId:service.tripId}));
   return {ok:true,matched:points.length,expected:route.expected,points,reason:'OFFICIAL_GTFS_REPRESENTATIVE_TRIP'};
  }
  if(route.decoder!=='KTM_KOMUTER_OFFICIAL')throw Error('V7_BAD_KTM_DECODER');
@@ -81,8 +81,16 @@ async function fetchRoute(route,d=data){
   const hit=official.get(canonical(s.name));
   if(hit&&hit.serviceIds.includes(route.id)&&validLatLon(hit.lon,hit.lat)&&(!recoveredByName||recoveredByName.get(canonical(s.name))?.properties.serviceIds.split('|').includes(route.id))){
    points.push({id:s.id,name:s.name,code:'',routeId:route.id,coordinates:[hit.lon,hit.lat],
-    sourceId:hit.gtfsStopId,provenance:'OFFICIAL_KTMB_GTFS_STATION_STOP'});
+    sourceId:hit.gtfsStopId,sourceUrl:source,provenance:'OFFICIAL_KTMB_GTFS_STATION_STOP'});
   }else missing.push(s);
+ }
+ // Explicit shared-facility crosswalk: the accepted Komuter catalogue says Pulau
+ // Sebang; the already-pinned official ETS stop 25100 says PULAU SEBANG/TAMPIN.
+ // Reuse that exact public stop point, not an inferred Komuter trip membership.
+ if(route.id==='ktm-seremban'){
+  const index=missing.findIndex(s=>s.id==='ktm-seremban-27'&&s.name==='Pulau Sebang');
+  const shared=d.tripServices.find(t=>t.id==='ktmb-ets-v1')?.stops.find(s=>s.id==='25100'&&s.name==='PULAU SEBANG/TAMPIN');
+  if(index>=0&&shared&&validLatLon(shared.lon,shared.lat)){const stop=missing.splice(index,1)[0];points.push({id:stop.id,name:stop.name,code:'',routeId:route.id,coordinates:[shared.lon,shared.lat],sourceId:shared.id,sourceUrl:source,provenance:'OFFICIAL_KTMB_GTFS_SHARED_STOP_EXPLICIT_CATALOGUE_CROSSWALK'});}
  }
  if(route.sector==='central'&&missing.length){
   const secondaryByName=decodeSecondary(await getSecondary());
@@ -90,7 +98,7 @@ async function fetchRoute(route,d=data){
    const hit=secondaryByName.get(canonical(s.name));
    if(hit)points.push({id:s.id,name:s.name,code:'',routeId:route.id,
     coordinates:hit.coordinates,sourceId:hit.sourceId,
-    provenance:'SECONDARY_ARCGIS_KTM_STATION_POI_NOT_SURVEYED'});
+    sourceUrl:secondary,provenance:'SECONDARY_ARCGIS_KTM_STATION_POI_NOT_SURVEYED'});
   }
  }
  const indexed=new Map(points.map(p=>[p.id,p]));

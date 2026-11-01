@@ -22,16 +22,16 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
  function field(host,label,value){const row=el('p',null,'ecrl-fact');row.append(el('span',label),el('b',value));host.append(row)}
  function referenceLabel(ref){return ref?.kind==='HISTORICAL'?ui('historic'):ref?.kind==='MARITIME'?ui('maritime'):ref?.kind==='YARD'?ui('yardAccuracy'):ref?ui('location'):ui('noPoint')}
  function render(){
-  const host=$('ecrl-controls');host.hidden=!['ECRL','Malaysia','All'].includes(getCategory());host.replaceChildren(el('strong','ECRL · '+t('title')));
+  const host=$('ecrl-controls');host.hidden=!['ECRL','Malaysia','All'].includes(getCategory());host.replaceChildren();const heading=el('div',null,'ecrl-compact-heading');heading.append(el('strong',t('title')));const options=el('details',null,'ecrl-map-options');summary(options,ui('layers'));
   const labels={LOCALITY:t('reference'),HISTORICAL:t('legendHistoric'),MARITIME:t('legendPort'),YARD:ui('yardRef')};
   const switches=el('div',null,'ecrl-switches');
-  const masterLabel=el('label'),masterBox=el('input');masterBox.type='checkbox';masterBox.id='ecrl-enabled';masterBox.checked=Object.values(adapter.flags).some(Boolean);masterBox.onchange=()=>onFlags('ALL',masterBox.checked);masterLabel.append(masterBox,document.createTextNode('ECRL'));switches.append(masterLabel);
+  const masterLabel=el('label'),masterBox=el('input');masterBox.type='checkbox';masterBox.id='ecrl-enabled';masterBox.checked=Object.values(adapter.flags).some(Boolean);masterBox.onchange=()=>onFlags('ALL',masterBox.checked);masterLabel.append(masterBox,document.createTextNode('ECRL'));heading.append(masterLabel);
   for(const kind of Object.keys(adapter.flags)){const label=el('label'),box=el('input');box.type='checkbox';box.id='ecrl-reference-'+kind.toLowerCase();box.checked=adapter.flags[kind];box.onchange=()=>onFlags(kind,box.checked);label.append(box,document.createTextNode(labels[kind]));switches.append(label)}
-  host.append(switches);
+  options.append(switches);host.append(heading,options);
   const plGuide=el('details',null,'ecrl-chainage-guide');summary(plGuide,ui('plList'));
   plGuide.append(el('p',ui('chSafety'),'ecrl-ch-warning'));
   for(const a of adapter.loops){const btn=el('button',(a.plCode||'PL?')+' · '+(a.historicalName||'')+' · '+(a.chainageLabel||ui('unknown')),'ecrl-pl-guide-item');btn.type='button';btn.dataset.ecrlAsset=a.assetId;btn.onclick=()=>onSelect(a.assetId);plGuide.append(btn)}
-  host.append(plGuide);
+  options.append(plGuide);
   const evidence=adapter.alignmentEvidence;
   const audit=el('details',null,'ecrl-alignment-readiness');summary(audit,ui('alignmentPanel'));
   audit.append(el('p',ui('alignmentNoLine'),'ecrl-audit-warning'));
@@ -51,7 +51,7 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
   for(const [id,src] of Object.entries(evidence.sources)){const p=el('p'),link=el('a',id);
     link.href=src.url;link.target='_blank';link.rel='noopener noreferrer';
     p.append(link,document.createTextNode(' · '+src.kind));citations.append(p)}
-  audit.append(citations);host.append(audit);
+  audit.append(citations);options.append(audit);
   const assets=$('ecrl-assets');assets.replaceChildren();
   const list=el('details',null,'ecrl-asset-list');summary(list,ui('list')+' ('+adapter.assets.length+')');
   for(const a of [...adapter.assets].sort((a,b)=>(a.chainageKm??Infinity)-(b.chainageKm??Infinity))){const btn=el('button',(a.stationCode||a.plCode?(a.stationCode||a.plCode)+' · ':'')+(a.officialName||a.historicalName)+(a.chainageLabel?' · '+a.chainageLabel:'')+' · '+a.assetType+' · '+a.verificationStatus);btn.type='button';btn.dataset.ecrlAsset=a.assetId;btn.onclick=()=>onSelect(a.assetId);list.append(btn)}

@@ -198,23 +198,24 @@ function buildLineup(){
  }
 }
 function updateSearch(){
- const q=core.normalise($('search').value),host=$('search-results');host.replaceChildren();
+ const normal=window.MRS10CompleteSources.searchKey;
+ const q=normal($('search').value),host=$('search-results');host.replaceChildren();
  if(!q){host.hidden=true;return}
  host.hidden=false;
  const matches=[];
  for(const r of state.manifest){
-  for(const s of r.stops){if(core.normalise(s.name+' '+(s.nameTh||'')).includes(q)||core.normalise(s.code).includes(q)||core.normalise(r.label).includes(q))matches.push({r,s});}
+  for(const s of r.stops){if(normal(s.name+' '+(s.nameTh||'')).includes(q)||normal(s.code).includes(q)||normal(r.label).includes(q))matches.push({r,s});}
  }
  for(const {r,s} of matches.slice(0,35)){
   const btn=el('button',null,r.label+' · '+s.name+(s.code?' ('+s.code+')':''));
   btn.type='button';btn.dataset.routeId=r.id;btn.dataset.stopId=s.id;btn.onclick=()=>{focusStation(r.id,s.id);host.hidden=true;$('search').value=''};
   host.append(btn);
  }
- const emptyRoutes=state.manifest.filter(r=>!r.stops.length&&core.normalise(r.label).includes(q));
+ const emptyRoutes=state.manifest.filter(r=>!r.stops.length&&normal(r.label).includes(q));
  for(const r of emptyRoutes){const btn=el('button',null,r.label+' · '+tr('unlocated'));btn.type='button';btn.dataset.routeId=r.id;btn.onclick=()=>{closeFocus();state.selected=r.id;buildLineup();focusRoute(r.id);host.hidden=true;$('search').value=''};host.append(btn);}
- const references=completeSources.references.filter(r=>core.normalise([r.name,r.code,r.hanzi,r.pinyin].filter(Boolean).join(' ')).includes(q));
+ const references=completeSources.references.filter(r=>normal([r.name,r.code,r.hanzi,r.pinyin].filter(Boolean).join(' ')).includes(q));
  for(const ref of references){const btn=el('button',null,(ref.code?ref.code+' · ':'')+ref.name);btn.type='button';btn.dataset.referenceId=ref.id;btn.onclick=()=>{showReference(ref);host.hidden=true;$('search').value=''};host.append(btn);}
- const infrastructure=[...(ecrl?.search(q)||[]),...(masterIntelligence?.endpoints.filter(e=>core.normalise(e.officialName+' '+e.assetId).includes(q))||[])];
+ const infrastructure=[...(ecrl?.search(q)||[]),...(masterIntelligence?.endpoints.filter(e=>normal(e.officialName+' '+e.assetId).includes(q))||[])];
  for(const asset of infrastructure.slice(0,35)){const btn=el('button',null,'ECRL · '+(asset.officialName||asset.historicalName)+' · '+asset.assetId);btn.type='button';btn.onclick=()=>{showInfrastructure(asset.assetId,true);host.hidden=true;$('search').value=''};host.append(btn)}
  if(!matches.length&&!infrastructure.length&&!references.length&&!emptyRoutes.length)host.append(el('p',null,tr('noResults')));
 }
@@ -289,6 +290,7 @@ function showPopup(point){
   el('p',null,point.provenance?.startsWith('OFFICIAL_KTMB_GTFS')?
   'KTMB GTFS rasmi · koordinat hentian, bukan geometri trek':point.provenance?.startsWith('SECONDARY_ARCGIS_KTM')?
   'GIS awam sekunder · titik stesen, bukan pengukuran operasi':point.provenance||tr('source')));
+ if(route.decoder?.startsWith('KTM_'))appendSource(container,point.sourceUrl||route.source);
  if(route.decoder==='COMPLETE_SOURCE'){appendSource(container,point.sourceUrl||route.source);container.append(el('p',null,(point.gisDecision||point.status||'SOURCE_REFERENCE')+' · '+route.geometryStatus));for(const link of completeSources.thailand.links.filter(l=>l.from===point.id||l.to===point.id)){container.append(el('p',null,link.type+' · '+link.status+' · '+link.note));for(const url of link.sourceUrls||[])appendSource(container,url);}}
  if(route.decoder==='SG'){container.append(el('p',null,point.status==='OPERATIONAL'?tr('operational'):tr('future')),el('p',null,tr('secondaryPoint')));appendSource(container,point.sourceUrl);appendSGTransfers(container,point);}
  if(route.sgId==='CHANGI_APM'){const text=threeRailways.copy(state.locale);for(const k of ['areas','point','noJewel'])container.append(el('p',null,text[k]));appendSource(container,threeRailways.sources.guideway);}
