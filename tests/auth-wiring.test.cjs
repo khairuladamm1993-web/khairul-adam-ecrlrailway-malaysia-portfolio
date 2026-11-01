@@ -390,31 +390,41 @@ test('Gateway removes protected DOM and quiz controls immediately on session los
   assert.match(w.document.querySelector('#gateway-status').textContent,/Public/);
  }finally{w.close()}
 });
-test('mismatched email confirmation sends no OTP and preserves entered address',async()=>{
- const {dom,w,client}=await gateway({session:null});
- try{
-  w.document.querySelector('[data-member]').click();
-  const form=w.document.querySelector('#member-auth-form');
-  form.elements.email.value='member@example.com';
-  assert(form.elements.email_confirm,'Confirmation field required before sending');
-  form.elements.email_confirm.value='typo@example.com';
-  form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));
-  await new Promise(r=>setTimeout(r,10));
-  assert.equal(client.calls.filter(c=>c[0]==='signInWithOtp').length,0);
-  assert.match(w.document.querySelector('#member-dialog').textContent,/addresses do not match/i);
-  assert.equal(w.document.querySelector('[name=email]').value,'member@example.com');
- }finally{w.close()}
-});
-test('confirmed email retains automatic registration policy and sends once via Gateway',async()=>{
+test('single email login rejects an invalid address without sending OTP',async()=>{
  const {w,client}=await gateway({session:null});
  try{
   w.document.querySelector('[data-member]').click();const form=w.document.querySelector('#member-auth-form');
-  form.elements.email.value=' New@Example.com ';assert(form.elements.email_confirm);
-  form.elements.email_confirm.value='new@example.com';
-  form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));
+  assert.equal(form.elements.email_confirm,undefined);form.elements.email.value='bad-address';
+  form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));await new Promise(r=>setTimeout(r,10));
+  assert.equal(client.calls.filter(c=>c[0]==='signInWithOtp').length,0);
+  assert.match(w.document.querySelector('#member-dialog').textContent,/valid email/i);
+ }finally{w.close()}
+});
+test('one email sends once and prefills verification without asking for confirmation',async()=>{
+ const {w,client}=await gateway({session:null});
+ try{
+  w.document.querySelector('[data-member]').click();const form=w.document.querySelector('#member-auth-form');
+  assert.equal(w.document.querySelector('#member-email-proof-form'),null);
+  form.elements.email.value='New@Example.com';form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));
   await new Promise(r=>setTimeout(r,10));
   assert.equal(client.calls.filter(c=>c[0]==='signInWithOtp').length,1);
-  assert.match(w.document.querySelector('#member-dialog').textContent,/Check your email/);
+  assert.match(w.document.querySelector('#member-dialog').textContent,/Step 2 of 2/);
+  assert.equal(w.document.querySelector('[name=proof_email]').value,'new@example.com');
+  assert.equal(w.document.querySelector('#member-auth-form'),null);
+ }finally{w.close()}
+});
+test('closing login preserves the email draft but never saves the proof',async()=>{
+ const {w}=await gateway({session:null});
+ try{
+  w.HTMLDialogElement.prototype.close=function(){this.open=false};
+  w.document.querySelector('[data-member]').click();const email=w.document.querySelector('[name=email]');
+  email.value='member@example.com';email.dispatchEvent(new w.Event('input',{bubbles:true}));
+  w.document.querySelector('[data-member-close]').click();w.document.querySelector('[data-member]').click();
+  assert.equal(w.document.querySelector('[name=email]').value,'member@example.com');
+  w.document.querySelector('[data-auth-proof]').click();w.document.querySelector('[name=email_proof]').value='123456';
+  w.document.querySelector('[data-member-close]').click();w.document.querySelector('[data-member]').click();
+  assert.equal(w.document.querySelector('[name=email_proof]').value,'');
+  assert.equal(w.localStorage.getItem('email_proof'),null);
  }finally{w.close()}
 });
 test('protected table rejection fails closed and never caches raw error or data',async()=>{

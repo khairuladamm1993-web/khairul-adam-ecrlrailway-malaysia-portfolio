@@ -65,13 +65,13 @@ module.exports=async function({api,anon,service,call,must,sql,mail,results}){
     const role=mode==='link'?'admin':'member';sql("insert into app_private.r22_roles values('"+proofUser.id+"','"+role+"'); insert into public.member_profiles(user_id,email,role,enabled)values('"+proofUser.id+"','"+proofEmail+"','"+role+"',true)");
     const requestContext=await b.newContext({ignoreHTTPSErrors:true});const recoveryContext=await b.newContext({ignoreHTTPSErrors:true,viewport:{width,height},hasTouch:true});
     try{
-     const originPage=await requestContext.newPage();await originPage.goto(origin+'/gateway.html');await originPage.waitForFunction(()=>window.RailwayAccess?.status==='public');await originPage.evaluate(e=>RailwayAccess.sendMagicLink(e),proofEmail);
+     const originPage=await requestContext.newPage();await originPage.goto(origin+'/recovery-ui.html');await originPage.waitForFunction(()=>window.RailwayAccess?.status==='public');await originPage.locator('[data-member]').click();assert.equal(await originPage.locator('[name=email_confirm]').count(),0);await originPage.locator('#member-auth-form [name=email]').fill(proofEmail);const beforeUIRequest=otpRequests;await originPage.locator('#member-auth-form button').click();await originPage.locator('#member-email-proof-form').waitFor({state:'visible'});assert.equal(otpRequests-beforeUIRequest,1,'ONE_REAL_UI_EMAIL_REQUEST');assert.equal(await originPage.locator('[name=proof_email]').inputValue(),proofEmail,'EMAIL_PREFILLED');
      const link=await latestLink(proofEmail);let proof=link.replace(api,origin+'/sb');
      if(mode==='otp'){
       const list=await(await fetch(mail+'/api/v1/messages')).json();const message=list.messages.find(m=>(m.To||[]).some(t=>t.Address===proofEmail));const content=await(await fetch(mail+'/api/v1/message/'+message.ID)).json();proof=(content.Text||content.HTML).match(/MR-S10-OTP:\s*(\d{6})/)[1];
      }
      const recovery=await recoveryContext.newPage();await recovery.goto(origin+'/recovery-ui.html');await recovery.waitForFunction(()=>window.RailwayAccess?.status==='public');
-     await recovery.locator('[data-member]').click();await recovery.locator('#member-email-proof-form').waitFor({state:'visible'});
+     await recovery.locator('[data-member]').click();await recovery.locator('[data-auth-proof]').click();await recovery.locator('#member-email-proof-form').waitFor({state:'visible'});
      const before=proofRequests;await recovery.locator('[name=proof_email]').fill(proofEmail);await recovery.locator('[name=email_proof]').fill(proof);await recovery.locator('#member-email-proof-form button').click();
      await recovery.waitForFunction(()=>window.RailwayAccess?.status==='authenticated');assert.equal(proofRequests-before,1,'ONE_REAL_EMAIL_PROOF_VERIFY');
      assert.equal(await recovery.evaluate(()=>RailwayAccess.level),role);assert.equal(await recovery.evaluate(()=>RailwayAccess.canAdmin),role==='admin');
