@@ -34,11 +34,14 @@ for(const engine of ['chromium','webkit'].filter(e=>!process.env.V8_QA_ENGINES||
    // responsive canvas resize and invalidate projected targets on iPad.
    await page.locator('#map').scrollIntoViewIfNeeded();
    await page.evaluate(()=>{if(!window.MRS10V8Diagnostics.focusTrackInspection())throw Error('RTS_TRACK_CAMERA_UNAVAILABLE')});
-   await page.waitForFunction(()=>{
-    const d=window.MRS10V8Diagnostics;
-    return d.snapshot().geometry.rendered>0&&d.trackHitTargets().length>0;
-   },null,{timeout:30000});
-   const targets=await page.evaluate(()=>window.MRS10V8Diagnostics.trackHitTargets());
+   // Capture usable targets in the same browser evaluation that validates
+   // the loaded style. A second evaluation raced responsive style/canvas work.
+   const targetHandle=await page.waitForFunction(()=>{
+    const d=window.MRS10V8Diagnostics,s=d.snapshot();
+    if(!s.styleLoaded||!s.tilesLoaded||s.geometry.rendered<=0)return false;
+    const targets=d.trackHitTargets();return targets.length?targets:false;
+   },null,{timeout:60000});
+   const targets=await targetHandle.jsonValue();await targetHandle.dispose();
    const box=await page.locator('#map').boundingBox();
    let trackClicked=false;
    for(const target of targets.slice(0,40)){
