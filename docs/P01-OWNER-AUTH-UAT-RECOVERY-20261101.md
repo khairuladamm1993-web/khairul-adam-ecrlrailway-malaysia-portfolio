@@ -1,5 +1,7 @@
 # P01 Owner Auth UAT emergency recovery — 1 November 2026
 
+> **Correction — 1 November 2026, R2.5:** HTTP method inspection shows OPTIONS + POST pairs, not proof of duplicate verification-email requests. The duplicate-request causal inference below is withdrawn. The latest iPhone failure is a confirmed PKCE challenge/verifier mismatch. See [R2.5 recovery and corrected evidence](P01-R25-EMAIL-PROOF-RECOVERY-20261101.md). Historical CI results remain valid within their stated synthetic scope.
+
 Scope: Owner-authorized isolated recovery, existing accounts/infrastructure, zero additional paid services. No Production deployment, database write/schema/Auth configuration change, account deletion, billing, merge, or P02/P03/P04 source changes.
 
 ## Deployment/source mismatch
