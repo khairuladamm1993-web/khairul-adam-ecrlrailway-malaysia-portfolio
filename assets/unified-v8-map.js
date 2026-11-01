@@ -7,7 +7,7 @@ const core=window.MRS10UnifiedV4Registry, kl=window.MRS10KLRegistry,
  integration=window.MRS10UnifiedV6Adapter,ktm=window.MRS10UnifiedV7KTM;
 let singapore,physical,ecrl,ecrlUI,journeyView,ownerCalibration,masterIntelligence,threeRailways,completeSources;
 const referenceMarkers=new Map();
-let pendingRouteFocus=null;
+let pendingRouteFocus=null,cameraIntent=0;
 const paths=new Map();
 const locales=['ms','en','zh','th'];
 const i18n={
@@ -80,12 +80,12 @@ const focus=window.MRS10V81Focus.create({
  },
  restore:saved=>{state.category=saved.category;state.selected=saved.selected;restoreLayers(saved.layers);buildFilters();buildLegend();buildRoutes();buildLineup();syncReferenceMarkers()}
 });
-function closeFocus(){$('ecrl-no-point').hidden=true;if(state.popup){const old=state.popup;state.popup=null;old.remove()}focus.exit()}
+function closeFocus(){cameraIntent++;pendingRouteFocus=null;$('ecrl-no-point').hidden=true;if(state.popup){const old=state.popup;state.popup=null;old.remove()}focus.exit()}
 function mountPopup(host,position){
  $('ecrl-no-point').hidden=true;
  const old=state.popup;state.popup=null;old?.remove();
  const popup=new maplibregl.Popup({offset:15,maxWidth:'330px',closeOnClick:false,focusAfterOpen:false}).setLngLat(position).setDOMContent(host);
- state.popup=popup;popup.on('close',()=>{if(state.popup===popup){state.popup=null;focus.exit()}});popup.addTo(state.map);if(host.classList?.contains('ecrl-intelligence'))popup.getElement().classList.add('ecrl-popup');popup.getElement().querySelector('.maplibregl-popup-close-button')?.focus({preventScroll:true});
+ state.popup=popup;popup.on('close',()=>{if(state.popup===popup){cameraIntent++;pendingRouteFocus=null;state.popup=null;focus.exit()}});popup.addTo(state.map);if(host.classList?.contains('ecrl-intelligence'))popup.getElement().classList.add('ecrl-popup');popup.getElement().querySelector('.maplibregl-popup-close-button')?.focus({preventScroll:true});
 }
 function appendFocusLineup(host,routeIds){
  for(const id of routeIds){const r=state.manifest.find(r=>r.id===id);if(!r)continue;
@@ -146,6 +146,7 @@ function buildRoutes(){
  if(['All','China','Malaysia','Sarawak ART'].includes(state.category))for(const ref of completeSources.references.filter(referenceVisible)){const btn=el('button',null,(ref.code?ref.code+' · ':'')+ref.name);btn.type='button';btn.dataset.referenceId=ref.id;btn.onclick=()=>showReference(ref);host.append(btn);}
 }
 function focusRoute(routeId){
+ cameraIntent++;
  const points=state.results.get(routeId)?.points||[];
  if(!state.mapReady||(!state.results.has(routeId)&&points.length===0)){pendingRouteFocus=routeId;return;}
  pendingRouteFocus=null;state.zoomDone=true;
@@ -157,6 +158,7 @@ function focusRoute(routeId){
 }
 function focusStation(routeId,id){
  const route=state.manifest.find(x=>x.id===routeId);if(!route)return;
+ cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;
  state.selected=routeId;
  buildRoutes();buildLineup();
  const point=findGeo(routeId,id);
@@ -164,7 +166,8 @@ function focusStation(routeId,id){
  say(point.name+' · '+tr('located'));
  if(state.map){
   showPopup(point);
-  const open=()=>{state.map.easeTo({center:point.coordinates,zoom:Math.max(state.map.getZoom(),12.3),duration:360})};
+  const intent=cameraIntent;
+  const open=()=>{if(intent!==cameraIntent)return;state.map.easeTo({center:point.coordinates,zoom:Math.max(state.map.getZoom(),12.3),duration:360})};
   if(state.map.isStyleLoaded())open();
   else state.map.once('idle',()=>{if(state.map?.isStyleLoaded())open()});
  }
@@ -279,7 +282,7 @@ function applyVisibility(){
  applyGeometryVisibility();ecrl?.setVisibility(state.map,state.category);ownerCalibration?.visibility();syncReferenceMarkers();
 }
 function showPopup(point){
- if(!state.map)return;
+ if(!state.map)return;cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;
  const relationship=relationsFor(point);
  focus.enter({mode:relationship.isInterchange?'INTERCHANGE_FOCUS':'STATION_FOCUS',routeIds:relationship.routeIds,stationId:point.id});
  state.selected=point.routeId;buildRoutes();buildLineup();
@@ -320,11 +323,11 @@ function syncReferenceMarkers(selection=focus.current){
  }
 }
 function noPointPanel(host){const old=state.popup;state.popup=null;old?.remove();const panel=$('ecrl-no-point');panel.replaceChildren();const close=el('button',null,'×');close.type='button';close.setAttribute('aria-label','Close');close.onclick=closeFocus;panel.append(close,host);panel.hidden=false;close.focus({preventScroll:true});}
-function showReference(ref){if(!ref)return;focus.enter({mode:'REFERENCE_FOCUS',routeIds:[],referenceId:ref.id});const host=el('div','source-reference');host.dataset.referenceId=ref.id;host.append(el('h3',null,(ref.code?ref.code+' · ':'')+ref.name));for(const value of [ref.hanzi,ref.pinyin,ref.status,ref.geometryStatus])if(value)host.append(el('p',null,value));appendSource(host,ref.sourceUrl);if(ref.coordinates){mountPopup(host,ref.coordinates);state.map.easeTo({center:ref.coordinates,zoom:12,duration:250});}else{host.append(el('p',null,tr('unlocated')));noPointPanel(host);}}
+function showReference(ref){if(!ref)return;cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;focus.enter({mode:'REFERENCE_FOCUS',routeIds:[],referenceId:ref.id});const host=el('div','source-reference');host.dataset.referenceId=ref.id;host.append(el('h3',null,(ref.code?ref.code+' · ':'')+ref.name));for(const value of [ref.hanzi,ref.pinyin,ref.status,ref.geometryStatus])if(value)host.append(el('p',null,value));appendSource(host,ref.sourceUrl);if(ref.coordinates){mountPopup(host,ref.coordinates);state.map.easeTo({center:ref.coordinates,zoom:12,duration:250});}else{host.append(el('p',null,tr('unlocated')));noPointPanel(host);}}
 function showUnlocatedStation(route,stop){if(!stop)return;focus.enter({mode:'STATION_FOCUS',routeIds:[route.id],stationId:stop.id});const host=el('div');host.dataset.unlocatedStation=stop.id;host.append(el('h3',null,stop.name),el('p',null,route.label),el('p',null,tr('unlocated')),el('p',null,stop.locationStatus||route.geometryStatus||'UNKNOWN'));appendSource(host,stop.sourceUrl||route.source);noPointPanel(host);}
 
 function showInfrastructure(assetId,moveCamera=false){
- const asset=ecrl?.get(assetId)||masterIntelligence?.endpoints.find(e=>e.assetId===assetId);if(!asset)return;
+ const asset=ecrl?.get(assetId)||masterIntelligence?.endpoints.find(e=>e.assetId===assetId);if(!asset)return;cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;
  const host=ecrlUI.content(assetId),officialRef=ecrl.reference(assetId),ownerRef=ownerCalibration?.reference(assetId)||null;
  const ref=officialRef||ownerRef,visible=Boolean(ref&&(ownerRef||ecrl.flags[ref.kind]));
  if(ownerRef){
@@ -358,6 +361,7 @@ function startMap(){
   state.map=new maplibregl.Map({container:'map',style:styleURL(),center:[101.69,3.13],zoom:10.1,
    attributionControl:true});
   state.map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
+  state.map.on('dragstart',()=>{cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;});
   state.map.on('style.load',()=>{
    state.mapReady=true;state.networkError=false;
    // style.load is earlier than isStyleLoaded() on some MapLibre builds.
@@ -604,7 +608,7 @@ function showTrackAt(e){
   const lines=candidate.geometry?.type==='LineString'?[candidate.geometry.coordinates]:candidate.geometry?.type==='MultiLineString'?candidate.geometry.coordinates:[];
   for(const line of lines)for(let i=1;i<line.length;i++){const d=distance(e.point,state.map.project(line[i-1]),state.map.project(line[i]));if(d<best){best=d;s=candidate}}
  }
- if(!s)return;
+ if(!s)return;cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;
  if(state.lastTap)state.lastTap.segmentId=s.segmentId;
  const segmentIds=window.MRS10V81Focus.component(physical,s.segmentId);
  const routeIds=[...new Set(physical.segments.filter(x=>segmentIds.includes(x.segmentId)).flatMap(x=>x.routeIds))];
