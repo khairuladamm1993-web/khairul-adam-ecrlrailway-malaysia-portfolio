@@ -3,7 +3,7 @@
 const fs=require('node:fs'),cp=require('node:child_process'),path=require('node:path');
 cp.execFileSync(process.execPath,['scripts/build-auth-private-r2.cjs'],{stdio:'inherit'});
 const out='dist-auth-recovery';fs.rmSync(out,{recursive:true,force:true});fs.cpSync('dist-auth-r2',out,{recursive:true});
-for(const f of ['gateway.html','owner-command-center.html','assets/access.js','assets/member-gateway.js','assets/public-gateway.js','assets/owner-center-shortcut.js','assets/owner-command-center.js','assets/owner-command-center.css','assets/owner-checkpoint-policy.js','assets/owner-two-way-workflow.js','assets/owner-issue-handoff.js','data/owner-project-registry.json']){
+for(const f of ['owner-location-review.html','assets/owner-location-review.js','gateway.html','owner-command-center.html','assets/access.js','assets/member-gateway.js','assets/public-gateway.js','assets/owner-center-shortcut.js','assets/owner-command-center.js','assets/owner-command-center.css','assets/owner-checkpoint-policy.js','assets/owner-two-way-workflow.js','assets/owner-issue-handoff.js','data/owner-project-registry.json']){
  if(fs.existsSync(f)){fs.mkdirSync(path.dirname(path.join(out,f)),{recursive:true});fs.copyFileSync(f,path.join(out,f));}
 }
 // This recovery Preview uses existing identities; registration policy elsewhere is preserved.
@@ -13,6 +13,7 @@ const callbackOrigin=process.env.P01_AUTH_CALLBACK_ORIGIN||'https://khairul-adam
 const allowedOrigins=['https://khairul-adam-portfolio-preview-safe.vercel.app','https://mrs10-p01-unified-v8-sg-geometr-git-6f80d2-1993khairuladam-3016.vercel.app'];
 if(!allowedOrigins.includes(callbackOrigin))throw Error('UNAPPROVED_CALLBACK_ORIGIN');
 let gateway=fs.readFileSync(out+'/gateway.html','utf8');
+gateway=gateway.replace('</main>','<p><a href="owner-location-review.html">Semakan lokasi tersimpan · Owner</a> · <a href="unified-map-v8.html">Unified Map V8.1</a></p></main>');
 gateway=gateway.replace('<head>','<head><meta name="mrs10-auth-origin" content="'+callbackOrigin+'"><meta name="referrer" content="no-referrer">');
 fs.writeFileSync(out+'/gateway.html',gateway);
 const info={application:'MR-S10',version:'Owner Auth Recovery R2.4',environment:process.env.VERCEL_ENV||'LOCAL',gitSha:process.env.VERCEL_GIT_COMMIT_SHA||cp.execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),deploymentId:process.env.VERCEL_DEPLOYMENT_ID||null,deploymentUrl:process.env.VERCEL_URL||null,buildTimestamp:new Date().toISOString(),canonicalHost:new URL(callbackOrigin).host};

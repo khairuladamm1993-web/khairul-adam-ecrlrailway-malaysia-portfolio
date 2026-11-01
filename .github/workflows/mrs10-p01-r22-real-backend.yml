@@ -48,7 +48,7 @@ jobs:
           npm ci --ignore-scripts --no-audit
           npm test
           node scripts/build-owner-auth-recovery.cjs
-          node --test tests/owner-auth-recovery-artifact.test.cjs
+          node --test tests/owner-auth-recovery-artifact.test.cjs tests/owner-location-review.test.cjs
           node --test tests/auth-private-r2.test.cjs
       - name: Real Auth OTP MFA RLS and six Owner isolation tests
         run: node tests/r22/backend.cjs
