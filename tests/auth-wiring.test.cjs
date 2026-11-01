@@ -421,7 +421,7 @@ test('closing login preserves the email draft but never saves the proof',async()
   email.value='member@example.com';email.dispatchEvent(new w.Event('input',{bubbles:true}));
   w.document.querySelector('[data-member-close]').click();w.document.querySelector('[data-member]').click();
   assert.equal(w.document.querySelector('[name=email]').value,'member@example.com');
-  w.document.querySelector('[data-auth-proof]').click();w.document.querySelector('[name=email_proof]').value='123456';
+  w.document.querySelector('[data-auth-proof]').click();assert.equal(w.document.querySelector('#member-auth-form'),null);w.document.querySelector('[name=email_proof]').value='123456';
   w.document.querySelector('[data-member-close]').click();w.document.querySelector('[data-member]').click();
   assert.equal(w.document.querySelector('[name=email_proof]').value,'');
   assert.equal(w.localStorage.getItem('email_proof'),null);
