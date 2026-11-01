@@ -73,11 +73,13 @@ async function fetchRoute(route,d=data){
   return {ok:true,matched:points.length,expected:route.expected,points,reason:'OFFICIAL_GTFS_REPRESENTATIVE_TRIP'};
  }
  if(route.decoder!=='KTM_KOMUTER_OFFICIAL')throw Error('V7_BAD_KTM_DECODER');
+ const recovered=root?.MRS10KTMV2?.decodeOfficialGis({schemaVersion:1,source:'KTMB_GTFS_STATIC_STOP_COORDINATES',sourceUrl:source,stops:d.komuterStations},d.komuterRegistry);
+ const recoveredByName=recovered?.ok?new Map(recovered.features.map(f=>[canonical(f.properties.name),f])):null;
  const official=new Map(d.komuterStations.map(s=>[canonical(s.name),s]));
  const points=[],missing=[];
  for(const s of route.stops){
   const hit=official.get(canonical(s.name));
-  if(hit&&hit.serviceIds.includes(route.id)&&validLatLon(hit.lon,hit.lat)){
+  if(hit&&hit.serviceIds.includes(route.id)&&validLatLon(hit.lon,hit.lat)&&(!recoveredByName||recoveredByName.get(canonical(s.name))?.properties.serviceIds.split('|').includes(route.id))){
    points.push({id:s.id,name:s.name,code:'',routeId:route.id,coordinates:[hit.lon,hit.lat],
     sourceId:hit.gtfsStopId,provenance:'OFFICIAL_KTMB_GTFS_STATION_STOP'});
   }else missing.push(s);

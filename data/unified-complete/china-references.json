@@ -1,0 +1,74 @@
+{
+  "sourceCommit": "126e979",
+  "status": "CODE_REFERENCE_ONLY_NO_ROUTE_ORDER_OR_GEOMETRY",
+  "records": [
+    {
+      "code": "44906",
+      "kind": "station",
+      "english": "Chengcun Railway Station",
+      "hanzi": "程村站",
+      "pinyin": "Chéngcūn Zhàn",
+      "source": "https://zh.wikipedia.org/wiki/程村站",
+      "point": null,
+      "color": null,
+      "stationOrder": null
+    },
+    {
+      "code": "44930",
+      "kind": "station",
+      "english": "Rong'an Railway Station",
+      "hanzi": "融安站",
+      "pinyin": "Róng'ān Zhàn",
+      "source": "https://zh.wikipedia.org/wiki/融安站",
+      "point": null,
+      "color": null,
+      "stationOrder": null
+    },
+    {
+      "code": "44957",
+      "kind": "station",
+      "english": "Rongshui Railway Station",
+      "hanzi": "融水站",
+      "pinyin": "Róngshuǐ Zhàn",
+      "source": "https://zh.wikipedia.org/wiki/融水站",
+      "point": null,
+      "color": null,
+      "stationOrder": null
+    },
+    {
+      "code": "0073",
+      "kind": "line",
+      "english": "Hengyang–Liuzhou Railway",
+      "hanzi": "衡柳铁路",
+      "pinyin": "Héngliǔ Tiělù",
+      "source": "https://wiki.openstreetmap.org/wiki/Zh-hans:OpenRailwayMap/China_Railway_Line_Number",
+      "point": null,
+      "color": null,
+      "stationOrder": null
+    },
+    {
+      "code": "0081",
+      "kind": "line",
+      "english": "Guizhou–Guangxi Railway",
+      "hanzi": "黔桂铁路",
+      "pinyin": "Qiánguì Tiělù",
+      "source": "https://wiki.openstreetmap.org/wiki/Zh-hans:OpenRailwayMap/China_Railway_Line_Number",
+      "point": null,
+      "color": null,
+      "stationOrder": null
+    }
+  ],
+  "campus": {
+    "id": "lrvtc-guantang-campus",
+    "name": "Liuzhou Railway Vocational Technical College",
+    "alternate": "柳州铁道职业技术学院",
+    "campus": "Guantang Campus",
+    "lngLat": [
+      109.52917,
+      24.39864
+    ],
+    "osmWay": "631232606",
+    "address": "No. 2 Wenyuan Road, Yufeng District, Liuzhou, Guangxi, China",
+    "positionClass": "OSM campus-area reference, not surveyed entrance"
+  }
+}

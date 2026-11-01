@@ -21,6 +21,7 @@ function makeClient({session={access_token:'x'},exchangeSession=null,exchangeErr
    onAuthStateChange(cb){authHandler=cb;calls.push(['onAuthStateChange']);return {data:{subscription:{unsubscribe(){}}}}},
    async exchangeCodeForSession(code){if(exchangeThrow)throw new Error(exchangeThrow);calls.push(['exchangeCodeForSession',code]);if(exchangeError)return {data:{session:null},error:exchangeError};activeSession=exchangeSession||{access_token:'callback',expires_at:Math.floor(Date.now()/1000)+3600};return {data:{session:activeSession},error:null}},
    async signInWithOtp(args){calls.push(['signInWithOtp',args]);return {error:otpError}},
+   async verifyOtp(args){calls.push(['verifyOtp',args]);activeSession={access_token:'proof-session'};authHandler?.('SIGNED_IN',activeSession);return {data:{session:activeSession},error:null}},
    async signOut(args){calls.push(['signOut',args]);activeSession=null;authHandler?.('SIGNED_OUT',null);return {error:null}},
    emit(event,nextSession=activeSession){authHandler?.(event,nextSession)}
   },
@@ -42,7 +43,7 @@ async function load(options={}){
  const location={origin:options.origin||'https://preview.example',pathname:options.pathname||'/gateway.html',search:options.locationSearch||'',hash:options.locationHash||''};
  const history={replaceState(){location.search='';location.hash='';}};
  const storage=options.storage||new Map();const localStorage=options.localStorage||{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)};
- const context={window,document,location,history,localStorage,URLSearchParams,CustomEvent:class{constructor(type,init){this.type=type;this.detail=init?.detail}},setTimeout,clearTimeout,console};
+ const context={window,document,location,history,localStorage,URL,URLSearchParams,CustomEvent:class{constructor(type,init){this.type=type;this.detail=init?.detail}},setTimeout,clearTimeout,console};
  vm.createContext(context);vm.runInContext(source,context);
  await new Promise(r=>setTimeout(r,5));
  return {A:window.RailwayAccess,client,events,location};
@@ -389,31 +390,41 @@ test('Gateway removes protected DOM and quiz controls immediately on session los
   assert.match(w.document.querySelector('#gateway-status').textContent,/Public/);
  }finally{w.close()}
 });
-test('mismatched email confirmation sends no OTP and preserves entered address',async()=>{
- const {dom,w,client}=await gateway({session:null});
- try{
-  w.document.querySelector('[data-member]').click();
-  const form=w.document.querySelector('#member-auth-form');
-  form.elements.email.value='member@example.com';
-  assert(form.elements.email_confirm,'Confirmation field required before sending');
-  form.elements.email_confirm.value='typo@example.com';
-  form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));
-  await new Promise(r=>setTimeout(r,10));
-  assert.equal(client.calls.filter(c=>c[0]==='signInWithOtp').length,0);
-  assert.match(w.document.querySelector('#member-dialog').textContent,/addresses do not match/i);
-  assert.equal(w.document.querySelector('[name=email]').value,'member@example.com');
- }finally{w.close()}
-});
-test('confirmed email retains automatic registration policy and sends once via Gateway',async()=>{
+test('single email login rejects an invalid address without sending OTP',async()=>{
  const {w,client}=await gateway({session:null});
  try{
   w.document.querySelector('[data-member]').click();const form=w.document.querySelector('#member-auth-form');
-  form.elements.email.value=' New@Example.com ';assert(form.elements.email_confirm);
-  form.elements.email_confirm.value='new@example.com';
-  form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));
+  assert.equal(form.elements.email_confirm,undefined);form.elements.email.value='bad-address';
+  form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));await new Promise(r=>setTimeout(r,10));
+  assert.equal(client.calls.filter(c=>c[0]==='signInWithOtp').length,0);
+  assert.match(w.document.querySelector('#member-dialog').textContent,/valid email/i);
+ }finally{w.close()}
+});
+test('one email sends once and prefills verification without asking for confirmation',async()=>{
+ const {w,client}=await gateway({session:null});
+ try{
+  w.document.querySelector('[data-member]').click();const form=w.document.querySelector('#member-auth-form');
+  assert.equal(w.document.querySelector('#member-email-proof-form'),null);
+  form.elements.email.value='New@Example.com';form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));
   await new Promise(r=>setTimeout(r,10));
   assert.equal(client.calls.filter(c=>c[0]==='signInWithOtp').length,1);
-  assert.match(w.document.querySelector('#member-dialog').textContent,/Check your email/);
+  assert.match(w.document.querySelector('#member-dialog').textContent,/Step 2 of 2/);
+  assert.equal(w.document.querySelector('[name=proof_email]').value,'new@example.com');
+  assert.equal(w.document.querySelector('#member-auth-form'),null);
+ }finally{w.close()}
+});
+test('closing login preserves the email draft but never saves the proof',async()=>{
+ const {w}=await gateway({session:null});
+ try{
+  w.HTMLDialogElement.prototype.close=function(){this.open=false};
+  w.document.querySelector('[data-member]').click();const email=w.document.querySelector('[name=email]');
+  email.value='member@example.com';email.dispatchEvent(new w.Event('input',{bubbles:true}));
+  w.document.querySelector('[data-member-close]').click();w.document.querySelector('[data-member]').click();
+  assert.equal(w.document.querySelector('[name=email]').value,'member@example.com');
+  w.document.querySelector('[data-auth-proof]').click();assert.equal(w.document.querySelector('#member-auth-form'),null);w.document.querySelector('[name=email_proof]').value='123456';
+  w.document.querySelector('[data-member-close]').click();w.document.querySelector('[data-member]').click();
+  assert.equal(w.document.querySelector('[name=email_proof]').value,'');
+  assert.equal(w.localStorage.getItem('email_proof'),null);
  }finally{w.close()}
 });
 test('protected table rejection fails closed and never caches raw error or data',async()=>{
@@ -478,4 +489,23 @@ test('concurrent init callers exchange a callback exactly once',async()=>{
 test('callback always targets gateway even when requested from another page',async()=>{
  const {A,client}=await load({session:null,pathname:'/portfolio.html'});await A.sendMagicLink('owner@example.com');
  assert.equal(client.calls.find(x=>x[0]==='signInWithOtp')[1].options.emailRedirectTo,'https://preview.example/gateway.html');
+});
+
+test('email proof rejects a foreign origin before calling Auth',async()=>{
+ const {A,client}=await load({session:null});await assert.rejects(()=>A.verifyEmailProof('member@example.com','https://evil.example/auth/v1/verify?type=magiclink&token='+ 'a'.repeat(64)));
+ assert.equal(client.calls.filter(x=>x[0]==='verifyOtp').length,0);assert.equal(A.level,'public');
+});
+test('email code uses real identity validation and backend role instead of submitted email privilege',async()=>{
+ const {A,client}=await load({session:null});await A.verifyEmailProof('member@example.com','123456');
+ assert.equal(A.level,'member');assert.equal(A.canAdmin,false);assert(client.calls.some(x=>x[0]==='rpc'&&x[1]==='account_role'));
+});
+test('token proof for another account is signed out before any role or protected reads',async()=>{
+ const {A,client}=await load({session:null,role:'admin'});await assert.rejects(()=>A.verifyEmailProof('owner@example.com','123456'));
+ assert.equal(A.level,'public');assert.equal(client.calls.filter(x=>x[0]==='rpc').length,0);
+ assert(client.calls.some(x=>x[0]==='signOut'));
+});
+test('original Supabase email link is verified as an email token hash without a code exchange',async()=>{
+ const {A,client}=await load({session:null});await A.verifyEmailProof('member@example.com','https://kfudisbzdgsefdjoopzu.supabase.co/auth/v1/verify?type=magiclink&token=pkce_'+ 'a'.repeat(64));
+ assert.equal(A.level,'member');assert.equal(client.calls.find(x=>x[0]==='verifyOtp')[1].type,'email');
+ assert.equal(client.calls.filter(x=>x[0]==='exchangeCodeForSession').length,0);
 });

@@ -1,0 +1,66 @@
+name: P01 complete unified map isolated QA
+on:
+  push:
+    branches: [integration/mrs10-p01-complete-map-20261101]
+    paths-ignore: ['docs/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-artifact:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Accepted baseline and affected source regression
+        run: |
+          npm test
+          node scripts/build-complete-map.cjs
+          node --test tests/complete-map.test.cjs tests/unified-ecrl*.test.cjs tests/unified-v*.test.cjs tests/three-railways.test.cjs tests/owner-auth-recovery-artifact.test.cjs tests/owner-location-review.test.cjs
+          node scripts/audit-unified-v8-networks.cjs
+  browser:
+    needs: source-artifact
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+        viewport: [desktop, ipad, iphone]
+    env:
+      P01_ENGINE: ${{ matrix.engine }}
+      P01_VIEWPORT: ${{ matrix.viewport }}
+      CHROME_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Build exact combined candidate
+        run: node scripts/build-complete-map.cjs
+      - name: Pinned browser tooling on free public runner
+        run: |
+          npm install --prefix "$RUNNER_TEMP/p01-tools" --no-package-lock --ignore-scripts playwright@1.56.1 > /dev/null
+          "$RUNNER_TEMP/p01-tools/node_modules/.bin/playwright" install --with-deps webkit > "$RUNNER_TEMP/p01-browser-install.log" 2>&1
+          echo "P01_PLAYWRIGHT_MODULE=$RUNNER_TEMP/p01-tools/node_modules/playwright" >> "$GITHUB_ENV"
+      - name: All route UI, source track taps, default ECRL and privacy on actual canvas
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory dist-complete-map > /tmp/p01-complete-http.log 2>&1 &
+          curl --retry 10 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:8765/unified-map-v8.html > /dev/null
+          node tests/complete-map-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: p01-complete-${{ matrix.engine }}-${{ matrix.viewport }}
+          path: artifacts/complete-map/
+          retention-days: 7

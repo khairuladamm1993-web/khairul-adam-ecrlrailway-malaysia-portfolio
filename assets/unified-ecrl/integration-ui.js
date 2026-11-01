@@ -22,9 +22,10 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
  function field(host,label,value){const row=el('p',null,'ecrl-fact');row.append(el('span',label),el('b',value));host.append(row)}
  function referenceLabel(ref){return ref?.kind==='HISTORICAL'?ui('historic'):ref?.kind==='MARITIME'?ui('maritime'):ref?.kind==='YARD'?ui('yardAccuracy'):ref?ui('location'):ui('noPoint')}
  function render(){
-  const host=$('ecrl-controls');host.hidden=getCategory()!=='ECRL';host.replaceChildren(el('strong','ECRL · '+t('title')));
+  const host=$('ecrl-controls');host.hidden=!['ECRL','Malaysia','All'].includes(getCategory());host.replaceChildren(el('strong','ECRL · '+t('title')));
   const labels={LOCALITY:t('reference'),HISTORICAL:t('legendHistoric'),MARITIME:t('legendPort'),YARD:ui('yardRef')};
   const switches=el('div',null,'ecrl-switches');
+  const masterLabel=el('label'),masterBox=el('input');masterBox.type='checkbox';masterBox.id='ecrl-enabled';masterBox.checked=Object.values(adapter.flags).some(Boolean);masterBox.onchange=()=>onFlags('ALL',masterBox.checked);masterLabel.append(masterBox,document.createTextNode('ECRL'));switches.append(masterLabel);
   for(const kind of Object.keys(adapter.flags)){const label=el('label'),box=el('input');box.type='checkbox';box.id='ecrl-reference-'+kind.toLowerCase();box.checked=adapter.flags[kind];box.onchange=()=>onFlags(kind,box.checked);label.append(box,document.createTextNode(labels[kind]));switches.append(label)}
   host.append(switches);
   const plGuide=el('details',null,'ecrl-chainage-guide');summary(plGuide,ui('plList'));

@@ -48,7 +48,7 @@ test('localized Kerteh yard reference is a square icon with source and no fake e
   locale=lang;ui.render();
   const yard=ui.content('ecrl-yard-kerteh-petronas');
   const loading=ui.content('ecrl-kerteh-petronas-loading-interface');
-  assert.equal(window.document.querySelectorAll('#ecrl-controls input[type=checkbox]').length,4);
+  assert.equal(window.document.querySelectorAll('#ecrl-controls input[type=checkbox]').length,5);
   assert.equal(window.document.querySelectorAll('#ecrl-assets button').length,37);
   assert(yard.querySelector('.ecrl-accuracy').textContent.length>10);
   assert(yard.querySelector('.ecrl-key-facts').textContent.includes(({ms:'Belum disahkan',en:'Not verified',zh:'尚未核实',th:'ยังไม่ยืนยัน'})[lang]));

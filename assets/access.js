@@ -4,7 +4,7 @@
  const PROJECT_URL='https://kfudisbzdgsefdjoopzu.supabase.co';
  const PUBLISHABLE_KEY='sb_publishable_1Diyg-QnCNMJXIY2g0RdCg_ToWFuq0V';
  let client=null,authSubscription=null,consent=false,dataCache=null,userId=null,magicLinkInFlight=null,hydrationPromise=null;
- let authRevision=0,initialization=null;
+ let authRevision=0,initialization=null,manualVerification=false;
  const ATTEMPT_KEY='mrs10-auth-pending-v1',ATTEMPT_LOCK='mrs10-auth-request-v1';
  const readAttempt=()=>{try{return JSON.parse(localStorage.getItem(ATTEMPT_KEY)||'null')}catch{return null}};
  const pendingAttempt=()=>{const p=readAttempt();return p&&Number.isFinite(p.until)&&p.until>Date.now()?p:null};
@@ -25,6 +25,9 @@
   'role-denied':'The backend has not granted an enabled Member or Admin profile.',
   'profile-error':'The Member profile could not be read securely.',
   'client-error':'The authentication client could not complete the request.',
+  'email-proof-rejected':'Kod atau pautan tidak sah, sudah digunakan atau tamat tempoh. Gunakan e-mel terbaru.',
+  'email-mismatch':'E-mel pengesahan tidak sepadan dengan akaun yang dimasukkan. Akses ditolak.',
+  'invalid-email-proof':'Masukkan kod enam digit atau pautan asal daripada e-mel Supabase MR-S10.',
   'callback-origin-mismatch':'Open the canonical Preview login. This origin is not configured for email callbacks.',
   'storage-unavailable':'Safari storage is unavailable. Sign-in cannot safely retain its PKCE verifier.',
   'auth-network-error':'Authentication backend could not be reached. Check the connection and try again.'
@@ -33,7 +36,10 @@
  const requireClient=()=>{
   if(client)return client;
   if(!window.supabase?.createClient)throw new Error('Supabase client library unavailable');
-  client=window.supabase.createClient(PROJECT_URL,PUBLISHABLE_KEY,{auth:{flowType:'pkce',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+  // Keep existing session storage; isolate ONLY PKCE slots from older gateway tabs.
+  const slot=k=>k.includes('code-verifier')?'mrs10-r25:'+k:k;
+  const storage={getItem:k=>localStorage.getItem(slot(k)),setItem:(k,v)=>localStorage.setItem(slot(k),v),removeItem:k=>localStorage.removeItem(slot(k))};
+  client=window.supabase.createClient(PROJECT_URL,PUBLISHABLE_KEY,{auth:{flowType:'pkce',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storage}});
   return client;
  };
  const validateSession=async(options={})=>{
@@ -61,6 +67,7 @@
     const {data:{user},error:userError}=await c.auth.getUser(liveSession.access_token);
     if(revision!==authRevision)return snapshot();
     if(userError||!user)return failClosed('get-user-failed',userError||'No valid user');
+    if(options.expectedEmail&&String(user.email||'').toLowerCase()!==options.expectedEmail){await c.auth.signOut({scope:'local'});return failClosed('email-mismatch',true);}
     userId=user.id;
     set({status:'role-pending',error:null,retryAfterSeconds:null});
     const {data:role,error:roleError}=await c.rpc('account_role');
@@ -116,7 +123,8 @@
    return failClosed('pkce-exchange-failed','Secure sign-in callback is unavailable in the current authentication client.');
   }
   let result;
-  try{result=await c.auth.exchangeCodeForSession(code);}
+  const flowId=new URLSearchParams(location.search||'').get('sb_flow_id');
+  try{result=await c.auth.exchangeCodeForSession(code,flowId?{flowId}:undefined);}
   catch(error){
    const failure=callbackFailure(error);
    return failClosed(failure.status,failure.message);
@@ -131,7 +139,8 @@
   return data.session;
  }
  function handleAuthEvent(event,session){
-  if(event==='SIGNED_OUT'){authRevision++;clearAttempt();failClosed('signed-out');return;}
+  if(event==='SIGNED_OUT'){authRevision++;failClosed('signed-out');return;}
+  if(manualVerification)return;
   if(!['SIGNED_IN','INITIAL_SESSION','TOKEN_REFRESHED'].includes(event))return;
   if(!session&&event!=='INITIAL_SESSION')return;
   if(state.status!=='authenticated')set({status:'restoring-session',error:null,retryAfterSeconds:null});
@@ -209,6 +218,45 @@
    return set({level:'public',status:'verification-sent',canReadMemberContent:false,canAdmin:false,email:normalized,error:null,retryAfterSeconds:null});
   });
   try{return await magicLinkInFlight;}finally{magicLinkInFlight=null;}
+ }
+ function emailProof(value){
+  const raw=String(value||'').trim();
+  if(/^\d{6}$/.test(raw))return {token:raw};
+  try{
+   const u=new URL(raw);
+   if(u.origin!==PROJECT_URL||u.pathname!=='/auth/v1/verify'||u.username||u.password)throw Error();
+   if(!['magiclink','email'].includes(u.searchParams.get('type')))throw Error();
+   const token=u.searchParams.get('token');
+   if(!token||!/^(?:pkce_)?[a-zA-Z0-9_-]{32,512}$/.test(token))throw Error();
+   return {token_hash:token};
+  }catch{throw new Error(safeError('invalid-email-proof'));}
+ }
+ async function verifyEmailProof(email,value){
+  const normalized=String(email||'').trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized))throw new Error('Masukkan alamat e-mel akaun yang betul.');
+  let proof;try{proof=emailProof(value)}catch{failClosed('invalid-email-proof',true);throw new Error(state.error)}
+  const c=requireClient();if(manualVerification)throw new Error('Pengesahan sedang berjalan.');manualVerification=true;
+  authRevision++;
+  if(hydrationPromise)await hydrationPromise;
+  const revision=authRevision;
+  failClosed('verifying-email');
+  try{
+   // Supabase validates expiry and one-time use. No verifier or credential is transferred between browsers.
+   const payload=proof.token?{email:normalized,token:proof.token,type:'email'}:{token_hash:proof.token_hash,type:'email'};
+   const result=await c.auth.verifyOtp(payload);
+   if(revision!==authRevision){await c.auth.signOut({scope:'local'});return snapshot();}
+   if(result.error||!result.data?.session){failClosed('email-proof-rejected',true);throw new Error(state.error);}
+   const verified=await c.auth.getUser(result.data.session.access_token);
+   if(revision!==authRevision){await c.auth.signOut({scope:'local'});return snapshot();}
+   if(verified.error||!verified.data?.user||String(verified.data.user.email||'').toLowerCase()!==normalized){await c.auth.signOut({scope:'local'});failClosed('email-mismatch',true);throw new Error(state.error);}
+   clearAttempt();
+   if(!authSubscription){const {data}=c.auth.onAuthStateChange(handleAuthEvent);authSubscription=data?.subscription||null;}
+   return await validateSession({expectSession:true,expectedEmail:normalized});
+  }catch(error){
+   if(['email-mismatch','email-proof-rejected'].includes(state.status)){const reason=state.status;try{await c.auth.signOut({scope:'local'})}catch{}failClosed(reason,true);throw new Error(state.error);}
+   if(revision!==authRevision)return snapshot();
+   failClosed('email-proof-rejected',true);throw new Error(state.error);
+  }finally{manualVerification=false;proof=null;value=null;}
  }
  async function refresh(){
   const revision=authRevision;
@@ -348,7 +396,7 @@
  window.RailwayAccess=Object.freeze({
   get level(){return state.level;},get status(){return state.status;},get canReadMemberContent(){return state.level==='member'||state.level==='admin';},get canAdmin(){return state.level==='admin';},
   get email(){return state.email;},get error(){return state.error;},get retryAfterSeconds(){return state.retryAfterSeconds;},get activityConsent(){return consent;},get cachedData(){return dataCache;},
-  init,refresh,sendMagicLink,logout,ownerDashboardAccessToken,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,adminPublishLocation,adminLocationHistory,adminRestoreLocation,snapshot
+  init,refresh,sendMagicLink,verifyEmailProof,logout,ownerDashboardAccessToken,fetchMemberBundle,fetchAdminData,signedFileUrl,submitQuiz,saveProgress,setActivityConsent,recordEngagement,adminSummary,adminSaveContent,adminSetMemberEnabled,adminPublishLocation,adminLocationHistory,adminRestoreLocation,snapshot
  });
  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',()=>init(),{once:true}):init();
 })();

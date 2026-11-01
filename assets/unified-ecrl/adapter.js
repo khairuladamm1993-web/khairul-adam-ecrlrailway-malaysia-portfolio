@@ -30,7 +30,7 @@ const loops=registry.loops.map(annotate);
  const assets=[...stations,...loops,...registry.facilities,...portCatalogue.assets,...kerteh.assets];
  const enhancedRegistry={...registry,sources:Object.freeze({...registry.sources,...portCatalogue.sources,...kerteh.sources}),topology:Object.freeze([...registry.topology,...kerteh.logicalInterfaces]),portLogicalInterfaces:portCatalogue.logicalInterfaces,kertehLogicalInterfaces:kerteh.logicalInterfaces};
  if(new Set(assets.map(a=>a.assetId)).size!==assets.length)throw Error('ECRL_DUPLICATE_ID');
- const flags={LOCALITY:false,HISTORICAL:false,MARITIME:false,YARD:false};
+ const flags={LOCALITY:true,HISTORICAL:true,MARITIME:true,YARD:true};
  function references(){return assets.flatMap(a=>{
   if(a.assetType==='STATION'&&a.geometryType==='LOCALITY_REFERENCE_POINT'&&a.point)return [{assetId:a.assetId,kind:'LOCALITY',coordinates:[...a.point],sourceId:a.sourceId}];
   if(a.referencePoint&&a.referenceKind==='HISTORICAL_EIA2017_PROPOSED_STATION')return [{assetId:a.assetId,kind:'HISTORICAL',coordinates:[...a.referencePoint],sourceId:a.referenceSourceId}];
@@ -43,7 +43,7 @@ const loops=registry.loops.map(annotate);
  function features(){return {type:'FeatureCollection',features:refs.map(r=>({type:'Feature',id:r.assetId,geometry:{type:'Point',coordinates:r.coordinates},properties:{assetId:r.assetId,stationCode:get(r.assetId)?.stationCode||null,kind:r.kind,color:COLORS[r.kind],geometryVerification:'REFERENCE_ONLY',sourceId:r.sourceId,operationalStatus:'NOT_OPERATIONAL'}}))}}
  function setVisibility(map,category,mode='NORMAL'){
   if(!map?.getLayer(NS+'-hit'))return;
-  const allowed=(mode==='NORMAL'&&(category==='All'||category==='ECRL'))||mode==='INFRASTRUCTURE_FOCUS';
+  const allowed=(mode==='NORMAL'&&(category==='All'||category==='Malaysia'||category==='ECRL'))||mode==='INFRASTRUCTURE_FOCUS';
   const kinds=allowed?Object.keys(flags).filter(k=>flags[k]):[];
   for(const suffix of ['-hit','-ring','-inner']){map.setLayoutProperty(NS+suffix,'visibility',kinds.length?'visible':'none');map.setFilter(NS+suffix,['in',['get','kind'],['literal',kinds]])}
  }
@@ -59,7 +59,7 @@ const loops=registry.loops.map(annotate);
   if(!map.getLayer(NS+'-inner'))map.addLayer({id:NS+'-inner',type:'circle',source:NS,paint:{'circle-radius':2.5,'circle-color':['get','color']}});
  }
  function hit(map,point){if(!map?.getLayer(NS+'-hit')||map.getLayoutProperty(NS+'-hit','visibility')==='none')return null;return refs.filter(r=>flags[r.kind]).map(r=>{const p=map.project(r.coordinates);return {...r,distance:Math.hypot(p.x-point.x,p.y-point.y)}}).filter(r=>r.distance<=14).sort((a,b)=>a.distance-b.distance)[0]||null}
- function search(q){const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');const text=norm(q);if(!text)return [];if(/^stn\d{1,2}$/.test(text))return stations.filter(a=>norm(a.stationCode)===text);if(/^pl0?[1-7]$/.test(text))return loops.filter(a=>norm(a.plCode)===text||norm(a.plCode)===text.replace(/^pl([1-7])$/,'pl0$1'));return assets.filter(a=>norm(['ECRL',a.officialName,a.historicalName,a.assetId,a.section,a.stationCode,a.plCode,a.chainageLabel,...(a.alternativeNames||[])].join(' ')).includes(text))}
+ function search(q){const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');const text=norm(q);if(!text)return [];if(/^stn\d{1,2}$/.test(text))return stations.filter(a=>norm(a.stationCode)===text);if(/^pl0?[1-7]$/.test(text))return loops.filter(a=>norm(a.plCode)===text||norm(a.plCode)===text.replace(/^pl([1-7])$/,'pl0$1'));return assets.filter(a=>norm(['ECRL',a.officialName,a.historicalName,a.assetId,a.section,a.stationCode,a.plCode,a.chainageLabel,a.assetId==='ecrl-depot-gombak-north'?'GNU EMU Depot':'',...(a.alternativeNames||[])].join(' ')).includes(text))}
  function snapshot(map){return {assetCount:assets.length,stationCount:registry.stations.length,referenceCount:refs.length,referenceKinds:Object.fromEntries(Object.keys(flags).map(k=>[k,refs.filter(r=>r.kind===k).length])),flags:{...flags},verifiedStationPoints:0,verifiedLoopPoints:0,physicalSegments:0,sourcePresent:!!map?.getSource(NS),layersPresent:!!map?.getLayer(NS+'-inner'),visible:!!map?.getLayer(NS+'-hit')&&map.getLayoutProperty(NS+'-hit','visibility')!=='none'}}
  return Object.freeze({namespace:NS,assets,stations,loops,chainage,registry:enhancedRegistry,portCatalogue,kerteh,alignmentEvidence,flags,refs,get,reference,t,features,install,setVisibility,hit,search,snapshot});
 }

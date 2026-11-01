@@ -5,7 +5,9 @@ const $=id=>document.getElementById(id);
 const core=window.MRS10UnifiedV4Registry, kl=window.MRS10KLRegistry,
  ampang=window.MRS10AmpangR219, ampangGIS=window.MRS10AmpangGISR219,
  integration=window.MRS10UnifiedV6Adapter,ktm=window.MRS10UnifiedV7KTM;
-let singapore,physical,ecrl,ecrlUI,journeyView,ownerCalibration,masterIntelligence,threeRailways;
+let singapore,physical,ecrl,ecrlUI,journeyView,ownerCalibration,masterIntelligence,threeRailways,completeSources;
+const referenceMarkers=new Map();
+let pendingRouteFocus=null;
 const paths=new Map();
 const locales=['ms','en','zh','th'];
 const i18n={
@@ -42,11 +44,21 @@ const i18n={
   rights:'GIS: ArcGIS บุคคลที่สาม · ลำดับสถานี: MR-S10 ข้อมูลผู้ให้บริการ · แผนที่ฐาน: OpenFreeMap / OSM · ห้ามใช้เพื่อปฏิบัติการ',
   fail:'ข้อผิดพลาด GIS',show:'แสดงเส้นทาง',found:'จาก'}
 };
-const state={locale:'ms',category:'All',selected:'mrt-kajang',theme:'light',map:null,mapReady:false,zoomDone:false,
+
+const completeCopy={
+ ms:{title:'Peta Rel Bersepadu V8.1',desc:'Malaysia dipaparkan dahulu termasuk ECRL. Malaysia · Singapura · Thailand · China. Lineup sumber, titik rujukan, trek fizikal dan skematik dibezakan.',physical:'Geometri trek bersumber'},
+ en:{title:'Unified Railway Map V8.1',desc:'Malaysia opens first, including ECRL. Malaysia · Singapore · Thailand · China. Source lineups, reference points, physical tracks and schematics remain distinct.',physical:'Sourced physical track geometry'},
+ zh:{title:'综合铁路地图 V8.1',desc:'默认显示马来西亚及 ECRL。马来西亚 · 新加坡 · 泰国 · 中国。来源站序、参考点、实际轨道及示意图分别标注。',physical:'来源轨道几何'},
+ th:{title:'แผนที่รถไฟรวม V8.1',desc:'เริ่มที่มาเลเซียรวม ECRL มาเลเซีย · สิงคโปร์ · ไทย · จีน แยกรายชื่อสถานี จุดอ้างอิง รางจริง และแผนผัง',physical:'แนวรางจากแหล่งข้อมูล'}
+};
+
+const state={locale:'ms',category:'Malaysia',selected:'mrt-kajang',theme:'light',map:null,mapReady:false,zoomDone:false,
  results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
 // V8.1 owns temporary focus only; underlying registries and controls remain intact.
 let pendingRestore=null;
-const relationsFor=p=>window.MRS10V81Relationships.resolve(p,state.manifest,integration,core,singapore);
+const relationsFor=p=>completeSources.enrich(window.MRS10V81Relationships.resolve(p,state.manifest,integration,core,singapore),p,state.manifest,core.normalise);
+const isMalaysia=r=>r.country==='MY'||(!r.country&&r.category!=='Singapore')||['sg-SHUTTLE_TEBRAU','sg-RTS'].includes(r.id);
+const routeVisible=r=>state.category==='All'||(state.category==='Malaysia'?isMalaysia(r):state.category===r.category);
 function ownedLayers(){return (state.map?.getStyle()?.layers||[]).filter(l=>l.id.startsWith('mrs10-v8-'))}
 function layerSnapshot(){return ownedLayers().map(l=>({id:l.id,visibility:state.map.getLayoutProperty(l.id,'visibility')||'visible',filter:state.map.getFilter(l.id)||null}))}
 function restoreLayers(saved){
@@ -58,7 +70,7 @@ const focus=window.MRS10V81Focus.create({
  capture:()=>({layers:layerSnapshot(),category:state.category,selected:state.selected}),
  apply:selection=>{
   if(!state.map?.getLayer('mrs10-v8-geometry'))return;
-  ecrl?.setVisibility(state.map,state.category,selection.mode);
+  ecrl?.setVisibility(state.map,state.category,selection.mode);syncReferenceMarkers(selection);
   const visible=new Set(selection.routeIds);
   for(const r of state.manifest)for(const suffix of ['', '-ring','-inner','-interchange']){
    const id=layerId(r.id)+suffix;if(state.map.getLayer(id))state.map.setLayoutProperty(id,'visibility',visible.has(r.id)?'visible':'none');
@@ -66,7 +78,7 @@ const focus=window.MRS10V81Focus.create({
   const ids=selection.segmentIds||physical.segments.filter(s=>s.routeIds.some(id=>visible.has(id))).map(s=>s.segmentId);
   if(state.map.getLayer('mrs10-v8-geometry'))state.map.setFilter('mrs10-v8-geometry',['in',['get','segmentId'],['literal',ids]]);
  },
- restore:saved=>{state.category=saved.category;state.selected=saved.selected;restoreLayers(saved.layers);buildFilters();buildLegend();buildRoutes();buildLineup()}
+ restore:saved=>{state.category=saved.category;state.selected=saved.selected;restoreLayers(saved.layers);buildFilters();buildLegend();buildRoutes();buildLineup();syncReferenceMarkers()}
 });
 function closeFocus(){$('ecrl-no-point').hidden=true;if(state.popup){const old=state.popup;state.popup=null;old.remove()}focus.exit()}
 function mountPopup(host,position){
@@ -87,7 +99,7 @@ function appendFocusLineup(host,routeIds){
 function tr(k){return i18n[state.locale][k]}
 function say(message){$('qa-note').textContent=message}
 function el(tag,cls,text){const x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=String(text);return x}
-function selectedRoutes(){return state.manifest.filter(r=>state.category==='All'||r.category===state.category)}
+function selectedRoutes(){return state.manifest.filter(routeVisible)}
 function routeStatus(r){const d=state.results.get(r.id);return d?d.matched+'/'+r.expected:r.expected?'0/'+r.expected:'0'}
 function currentCount(){return [...state.results.values()].reduce((n,r)=>n+r.matched,0)}
 function showStatus(){
@@ -107,11 +119,11 @@ function showStatus(){
 function findGeo(routeId,id){return state.points.get(routeId+':'+id)||null}
 function buildFilters(){
  const host=$('filters');host.replaceChildren();
- for(const category of ['All','MRT','LRT','Monorail','ERL','KTM','ETS','Intercity','Singapore','ECRL']){
+ for(const category of ['Malaysia','All','MRT','LRT','Monorail','ERL','KTM','ETS','Intercity','Sabah','Sarawak ART','Singapore','Thailand','China','ECRL']){
   const btn=el('button',null,category==='All'?tr('all'):category);
   btn.type='button';btn.setAttribute('aria-pressed',String(category===state.category));
   btn.onclick=()=>{closeFocus();state.category=category;const allowed=selectedRoutes();if(!allowed.some(x=>x.id===state.selected))state.selected=allowed[0]?.id||state.selected;
-    buildFilters();buildLegend();buildRoutes();buildLineup();applyVisibility();ecrlUI?.render();};
+    buildFilters();buildLegend();buildRoutes();buildLineup();applyVisibility();state.zoomDone=false;fitOnce();ecrlUI?.render();};
   host.append(btn);
  }
  ecrlUI?.render();
@@ -120,7 +132,7 @@ function buildLegend(){
  const host=$('legend');host.replaceChildren();
  for(const r of selectedRoutes()){
   const row=el('div','legend-item'),dot=el('span','swatch'),name=el('span',null,r.label+' · '+routeStatus(r));
-  dot.style.background=r.color;row.append(dot,name);host.append(row);
+  row.dataset.routeId=r.id;row.dataset.color=r.color;dot.style.background=r.color;row.append(dot,name);host.append(row);
  }
 }
 function buildRoutes(){
@@ -129,12 +141,15 @@ function buildRoutes(){
   const btn=el('button',null,r.label);
   btn.type='button';btn.setAttribute('aria-pressed',String(r.id===state.selected));
   btn.onclick=()=>{closeFocus();state.selected=r.id;buildRoutes();buildLineup();focusRoute(r.id)};
-  host.append(btn);
+  btn.dataset.routeId=r.id;btn.style.borderLeft='4px solid '+r.color;host.append(btn);
  }
+ if(['All','China','Malaysia','Sarawak ART'].includes(state.category))for(const ref of completeSources.references.filter(referenceVisible)){const btn=el('button',null,(ref.code?ref.code+' · ':'')+ref.name);btn.type='button';btn.dataset.referenceId=ref.id;btn.onclick=()=>showReference(ref);host.append(btn);}
 }
 function focusRoute(routeId){
  const points=state.results.get(routeId)?.points||[];
- if(!state.mapReady||points.length===0)return;
+ if(!state.mapReady||(!state.results.has(routeId)&&points.length===0)){pendingRouteFocus=routeId;return;}
+ pendingRouteFocus=null;state.zoomDone=true;
+ if(points.length===0){const route=state.manifest.find(r=>r.id===routeId);focus.enter({mode:'STATION_FOCUS',routeIds:[routeId]});const host=el('div');host.append(el('h3',null,route.label),el('p',null,tr('unlocated')),el('p',null,route.geometryStatus||tr('serviceNotTrack')),el('p',null,route.topologyStatus||'UNKNOWN'));appendSource(host,route.source);noPointPanel(host);return;}
  if(points.length===1){state.map.easeTo({center:points[0].coordinates,zoom:11,duration:350});return}
  const c=points.map(p=>p.coordinates);
  state.map.fitBounds([[Math.min(...c.map(p=>p[0])),Math.min(...c.map(p=>p[1]))],
@@ -143,10 +158,9 @@ function focusRoute(routeId){
 function focusStation(routeId,id){
  const route=state.manifest.find(x=>x.id===routeId);if(!route)return;
  state.selected=routeId;
- if(state.category!=='All'&&state.category!==route.category){state.category='All';buildFilters();buildLegend();applyVisibility();}
  buildRoutes();buildLineup();
  const point=findGeo(routeId,id);
- if(!point){say(tr('unlocated'));return}
+ if(!point){showUnlocatedStation(route,route.stops.find(s=>s.id===id));return}
  say(point.name+' · '+tr('located'));
  if(state.map){
   showPopup(point);
@@ -158,11 +172,11 @@ function focusStation(routeId,id){
 function buildLineup(){
  const host=$('lineup');host.replaceChildren();
  const route=state.manifest.find(r=>r.id===state.selected);
- if(!route)return;
- const selector=$('path-select');selector.replaceChildren();selector.hidden=!route.paths;
- $('path-label').textContent=route.paths?tr('direction'):'';
+ if(!route){$('lineup').append(el('li',null,tr('unlocated')));return;}
+ const selector=$('path-select');selector.replaceChildren();selector.hidden=!route.paths?.length;
+ $('path-label').textContent=route.paths?.length?tr('direction'):'';
  let stops=route.stops;
- if(route.paths){
+ if(route.paths?.length){
   for(const p of route.paths){const opt=el('option',null,p.label);opt.value=p.pathId;selector.append(opt)}
   selector.value=paths.get(route.id)||route.paths[0].pathId;
   const path=route.paths.find(p=>p.pathId===selector.value)||route.paths[0];
@@ -171,13 +185,14 @@ function buildLineup(){
   selector.onchange=()=>{paths.set(route.id,selector.value);buildLineup()};
   $('path-status').textContent=(path.operatingStatus==='OPERATIONAL'?tr('operational'):tr('future'))+' · '+(route.topologyStatus.includes('PARTIAL')?tr('partialTopology'):tr('sourceTopology'))+' · '+tr('serviceNotTrack');
  }else $('path-status').textContent=tr('serviceNotTrack');
+ if(route.geometryStatus)$('path-status').textContent+=' · '+route.geometryStatus+(route.colorAuthority?' · '+route.colorAuthority:'')+(route.topologyStatus?' · '+route.topologyStatus:'');
  for(const s of stops){
   const li=el('li'),btn=el('button'),left=el('span'),right=el('span');
   const point=findGeo(route.id,s.id),dot=el('span','dot');
-  dot.style.background=point?route.color:'var(--line)';
-  left.append(dot,document.createTextNode(s.order+'. '+s.name));
-  if(s.code)right.textContent=s.code;
-  btn.type='button';btn.append(left,right);btn.onclick=()=>focusStation(route.id,s.id);
+  dot.style.background=route.color;if(!point)dot.classList.add('unlocated');
+  left.append(dot,document.createTextNode(s.order+'. '+(state.locale==='th'&&s.nameTh?s.nameTh:s.name)));
+  right.textContent=(s.code||'')+(!point?' · '+tr('unlocated'):'');
+  btn.type='button';btn.dataset.stopId=s.id;btn.dataset.routeId=route.id;btn.append(left,right);btn.onclick=()=>focusStation(route.id,s.id);
   btn.setAttribute('aria-label',s.name+(point?' · GIS':' · '+tr('unlocated')));
   li.append(btn);host.append(li);
  }
@@ -188,18 +203,23 @@ function updateSearch(){
  host.hidden=false;
  const matches=[];
  for(const r of state.manifest){
-  for(const s of r.stops){if(core.normalise(s.name).includes(q)||core.normalise(s.code).includes(q)||core.normalise(r.label).includes(q))matches.push({r,s});}
+  for(const s of r.stops){if(core.normalise(s.name+' '+(s.nameTh||'')).includes(q)||core.normalise(s.code).includes(q)||core.normalise(r.label).includes(q))matches.push({r,s});}
  }
  for(const {r,s} of matches.slice(0,35)){
   const btn=el('button',null,r.label+' · '+s.name+(s.code?' ('+s.code+')':''));
-  btn.type='button';btn.onclick=()=>{focusStation(r.id,s.id);host.hidden=true;$('search').value=''};
+  btn.type='button';btn.dataset.routeId=r.id;btn.dataset.stopId=s.id;btn.onclick=()=>{focusStation(r.id,s.id);host.hidden=true;$('search').value=''};
   host.append(btn);
  }
+ const emptyRoutes=state.manifest.filter(r=>!r.stops.length&&core.normalise(r.label).includes(q));
+ for(const r of emptyRoutes){const btn=el('button',null,r.label+' · '+tr('unlocated'));btn.type='button';btn.dataset.routeId=r.id;btn.onclick=()=>{closeFocus();state.selected=r.id;buildLineup();focusRoute(r.id);host.hidden=true;$('search').value=''};host.append(btn);}
+ const references=completeSources.references.filter(r=>core.normalise([r.name,r.code,r.hanzi,r.pinyin].filter(Boolean).join(' ')).includes(q));
+ for(const ref of references){const btn=el('button',null,(ref.code?ref.code+' · ':'')+ref.name);btn.type='button';btn.dataset.referenceId=ref.id;btn.onclick=()=>{showReference(ref);host.hidden=true;$('search').value=''};host.append(btn);}
  const infrastructure=[...(ecrl?.search(q)||[]),...(masterIntelligence?.endpoints.filter(e=>core.normalise(e.officialName+' '+e.assetId).includes(q))||[])];
  for(const asset of infrastructure.slice(0,35)){const btn=el('button',null,'ECRL · '+(asset.officialName||asset.historicalName)+' · '+asset.assetId);btn.type='button';btn.onclick=()=>{showInfrastructure(asset.assetId,true);host.hidden=true;$('search').value=''};host.append(btn)}
- if(!matches.length&&!infrastructure.length)host.append(el('p',null,tr('noResults')));
+ if(!matches.length&&!infrastructure.length&&!references.length&&!emptyRoutes.length)host.append(el('p',null,tr('noResults')));
 }
 function applyLanguage(){
+ Object.assign(i18n[state.locale],completeCopy[state.locale]);
  document.documentElement.lang=state.locale;
  $('details-toggle').setAttribute('aria-label',tr('mapDetails'));
  $('title').textContent=tr('title');$('description').textContent=tr('desc');
@@ -249,13 +269,13 @@ function applyVisibility(){
  if(!state.map?.getLayer('mrs10-v8-geometry'))return;
  for(const r of state.manifest){
   const id=layerId(r.id);
-  if(state.map.getLayer(id+'-interchange'))state.map.setLayoutProperty(id+'-interchange','visibility',state.category==='All'||state.category===r.category?'visible':'none');
-  if(state.map.getLayer(id+'-ring'))state.map.setLayoutProperty(id+'-ring','visibility',state.category==='All'||state.category===r.category?'visible':'none');
-  if(state.map.getLayer(id+'-inner'))state.map.setLayoutProperty(id+'-inner','visibility',state.category==='All'||state.category===r.category?'visible':'none');
+  if(state.map.getLayer(id+'-interchange'))state.map.setLayoutProperty(id+'-interchange','visibility',routeVisible(r)?'visible':'none');
+  if(state.map.getLayer(id+'-ring'))state.map.setLayoutProperty(id+'-ring','visibility',routeVisible(r)?'visible':'none');
+  if(state.map.getLayer(id+'-inner'))state.map.setLayoutProperty(id+'-inner','visibility',routeVisible(r)?'visible':'none');
   if(state.map.getLayer(id))state.map.setLayoutProperty(id,'visibility',
-   state.category==='All'||state.category===r.category?'visible':'none');
+   routeVisible(r)?'visible':'none');
  }
- applyGeometryVisibility();ecrl?.setVisibility(state.map,state.category);ownerCalibration?.visibility();
+ applyGeometryVisibility();ecrl?.setVisibility(state.map,state.category);ownerCalibration?.visibility();syncReferenceMarkers();
 }
 function showPopup(point){
  if(!state.map)return;
@@ -268,7 +288,8 @@ function showPopup(point){
  container.append(el('strong',null,point.name),el('p',null,route.label+(point.code?' · '+point.code:'')),
   el('p',null,point.provenance?.startsWith('OFFICIAL_KTMB_GTFS')?
   'KTMB GTFS rasmi · koordinat hentian, bukan geometri trek':point.provenance?.startsWith('SECONDARY_ARCGIS_KTM')?
-  'GIS awam sekunder · titik stesen, bukan pengukuran operasi':tr('source')));
+  'GIS awam sekunder · titik stesen, bukan pengukuran operasi':point.provenance||tr('source')));
+ if(route.decoder==='COMPLETE_SOURCE'){appendSource(container,point.sourceUrl||route.source);container.append(el('p',null,(point.gisDecision||point.status||'SOURCE_REFERENCE')+' · '+route.geometryStatus));for(const link of completeSources.thailand.links.filter(l=>l.from===point.id||l.to===point.id)){container.append(el('p',null,link.type+' · '+link.status+' · '+link.note));for(const url of link.sourceUrls||[])appendSource(container,url);}}
  if(route.decoder==='SG'){container.append(el('p',null,point.status==='OPERATIONAL'?tr('operational'):tr('future')),el('p',null,tr('secondaryPoint')));appendSource(container,point.sourceUrl);appendSGTransfers(container,point);}
  if(route.sgId==='CHANGI_APM'){const text=threeRailways.copy(state.locale);for(const k of ['areas','point','noJewel'])container.append(el('p',null,text[k]));appendSource(container,threeRailways.sources.guideway);}
  const transfers=integration.transfersFor(point,state.manifest,core.interchangeRegistry,core.normalise);
@@ -287,6 +308,19 @@ function showPopup(point){
  container.append(el('p',null,tr('serviceNotTrack')));appendFocusLineup(container,relationship.routeIds);
  mountPopup(container,point.coordinates);
 }
+function referenceVisible(ref){return state.category==='All'||(ref.country==='CN'?state.category==='China':['Malaysia','Sarawak ART'].includes(state.category));}
+function syncReferenceMarkers(selection=focus.current){
+ if(!state.map||!completeSources)return;
+ for(const ref of completeSources.references.filter(r=>r.coordinates)){
+  const visible=selection.mode==='NORMAL'?referenceVisible(ref):selection.referenceId===ref.id;
+  if(!visible){referenceMarkers.get(ref.id)?.remove();referenceMarkers.delete(ref.id);continue;}
+  if(!referenceMarkers.has(ref.id)){const button=el('button','source-facility-pin',ref.icon);button.type='button';button.dataset.referenceId=ref.id;button.setAttribute('aria-label',ref.name);button.onclick=()=>showReference(ref);referenceMarkers.set(ref.id,new maplibregl.Marker({element:button,anchor:'bottom'}).setLngLat(ref.coordinates).addTo(state.map));}
+ }
+}
+function noPointPanel(host){const old=state.popup;state.popup=null;old?.remove();const panel=$('ecrl-no-point');panel.replaceChildren();const close=el('button',null,'×');close.type='button';close.setAttribute('aria-label','Close');close.onclick=closeFocus;panel.append(close,host);panel.hidden=false;close.focus({preventScroll:true});}
+function showReference(ref){if(!ref)return;focus.enter({mode:'REFERENCE_FOCUS',routeIds:[],referenceId:ref.id});const host=el('div','source-reference');host.dataset.referenceId=ref.id;host.append(el('h3',null,(ref.code?ref.code+' · ':'')+ref.name));for(const value of [ref.hanzi,ref.pinyin,ref.status,ref.geometryStatus])if(value)host.append(el('p',null,value));appendSource(host,ref.sourceUrl);if(ref.coordinates){mountPopup(host,ref.coordinates);state.map.easeTo({center:ref.coordinates,zoom:12,duration:250});}else{host.append(el('p',null,tr('unlocated')));noPointPanel(host);}}
+function showUnlocatedStation(route,stop){if(!stop)return;focus.enter({mode:'STATION_FOCUS',routeIds:[route.id],stationId:stop.id});const host=el('div');host.dataset.unlocatedStation=stop.id;host.append(el('h3',null,stop.name),el('p',null,route.label),el('p',null,tr('unlocated')),el('p',null,stop.locationStatus||route.geometryStatus||'UNKNOWN'));appendSource(host,stop.sourceUrl||route.source);noPointPanel(host);}
+
 function showInfrastructure(assetId,moveCamera=false){
  const asset=ecrl?.get(assetId)||masterIntelligence?.endpoints.find(e=>e.assetId===assetId);if(!asset)return;
  const host=ecrlUI.content(assetId),officialRef=ecrl.reference(assetId),ownerRef=ownerCalibration?.reference(assetId)||null;
@@ -308,7 +342,9 @@ function showInfrastructure(assetId,moveCamera=false){
 function fitOnce(){
  if(state.zoomDone||!state.mapReady)return;
  if(state.pending>0)return;
- const coords=[...state.points.values()].map(p=>p.coordinates);
+ const coords=[...state.points.values()].filter(p=>routeVisible(state.manifest.find(r=>r.id===p.routeId))).map(p=>p.coordinates);
+ if(['Malaysia','All','ECRL'].includes(state.category))coords.push(...ecrl.refs.filter(r=>ecrl.flags[r.kind]).map(r=>r.coordinates));
+ coords.push(...completeSources.references.filter(r=>referenceVisible(r)&&r.coordinates).map(r=>r.coordinates));
  if(coords.length<2)return;
  const minX=Math.min(...coords.map(p=>p[0])),maxX=Math.max(...coords.map(p=>p[0])),
  minY=Math.min(...coords.map(p=>p[1])),maxY=Math.max(...coords.map(p=>p[1]));
@@ -327,7 +363,7 @@ function startMap(){
    updateMapLayer();showStatus();
   });
   state.map.on('load',()=>{
-   state.mapReady=true;updateMapLayer();fitOnce();showStatus();
+   state.mapReady=true;updateMapLayer();if(pendingRouteFocus)focusRoute(pendingRouteFocus);fitOnce();showStatus();
   });
   state.map.on('idle',()=>{
     // Safari/WebKit and Chromium can reach loaded style without a second 'load'
@@ -378,11 +414,12 @@ function startMap(){
 function styleURL(){return 'https://tiles.openfreemap.org/styles/'+(state.theme==='dark'?'dark':'positron')}
 function reset(){
  closeFocus();
- state.category='All';state.selected='mrt-kajang';$('search').value='';$('search-results').hidden=true;
+ state.category='Malaysia';state.selected='mrt-kajang';$('search').value='';$('search-results').hidden=true;
  buildFilters();buildLegend();buildRoutes();buildLineup();applyVisibility();
  state.zoomDone=false;fitOnce();ecrlUI?.render();
 }
 async function fetchRoute(route){
+ if(route.decoder==='COMPLETE_SOURCE')return completeSources.fetchRoute(route);
  if(route.decoder==='SG')return singapore.fetchRoute(route);
  if(route.decoder?.startsWith('KTM_'))return ktm.fetchRoute(route);
  if(route.decoder)return integration.fetchRoute(route);
@@ -401,16 +438,16 @@ async function loadGIS(){
   }catch(e){
    state.results.set(route.id,{ok:false,reason:String(e?.message||e),matched:0,expected:route.expected,points:[]});
   }finally{
-   state.pending--;buildLegend();buildLineup();updateMapLayer();showStatus();
+   state.pending--;buildLegend();buildLineup();updateMapLayer();if(pendingRouteFocus===route.id)focusRoute(route.id);showStatus();
   }
  }));
  fitOnce();
 }
 async function init(){
- try{singapore=await window.MRS10V8Singapore.load();physical=await fetch('./data/unified-v8/physical-network.json').then(r=>{if(!r.ok)throw Error('GEOMETRY_HTTP_'+r.status);return r.json()});window.MRS10V8Geometry.validate(physical);threeRailways=await window.MRS10ThreeRailways.load(window.MRS10V8Geometry);threeRailways.apply(singapore);physical={...physical,nodes:[...physical.nodes,...threeRailways.nodes],segments:[...physical.segments,...threeRailways.segments]};window.MRS10V8Geometry.validate(physical);state.manifest=[...core.loadManifest(kl,ampang),...integration.routes(),...ktm.routes(),...singapore.routes()]}catch(e){$('map-error').textContent='Registry: '+e.message;return}
+ try{completeSources=await window.MRS10CompleteSources.load();singapore=await window.MRS10V8Singapore.load();physical=await fetch('./data/unified-v8/physical-network.json').then(r=>{if(!r.ok)throw Error('GEOMETRY_HTTP_'+r.status);return r.json()});window.MRS10V8Geometry.validate(physical);threeRailways=await window.MRS10ThreeRailways.load(window.MRS10V8Geometry);threeRailways.apply(singapore);physical={...physical,nodes:[...physical.nodes,...threeRailways.nodes],segments:[...physical.segments,...threeRailways.segments]};window.MRS10V8Geometry.validate(physical);state.manifest=[...core.loadManifest(kl,ampang),...integration.routes(),...ktm.routes(),...singapore.routes(),...completeSources.routes()]}catch(e){$('map-error').textContent='Registry: '+e.message;return}
  ecrl=window.MRS10UnifiedECRL.create(window.MRS10ECRLGISV1,window.MRS10ECRLI18N);
  masterIntelligence=window.MRS10ECRLMasterIntelligence.create(ecrl);
- ecrlUI=window.MRS10ECRLIntegrationUI.create(ecrl,{getLocale:()=>state.locale,getCategory:()=>state.category,onSelect:id=>showInfrastructure(id,true),onFlags:(kind,enabled)=>{closeFocus();ecrl.flags[kind]=enabled;applyVisibility();ecrlUI.render()}});
+ ecrlUI=window.MRS10ECRLIntegrationUI.create(ecrl,{getLocale:()=>state.locale,getCategory:()=>state.category,onSelect:id=>showInfrastructure(id,true),onFlags:(kind,enabled)=>{closeFocus();if(kind==='ALL')for(const key of Object.keys(ecrl.flags))ecrl.flags[key]=enabled;else ecrl.flags[kind]=enabled;applyVisibility();ecrlUI.render()}});
  journeyView=window.MRS10JourneyView.create({host:$('journey-foundation'),stations:ecrl.stations,getLocale:()=>state.locale});
  // Preview remains public-only; a separately authenticated RailwayAccess session is
  // required for the Owner map to show canonical approved PL references.
@@ -418,6 +455,10 @@ async function init(){
  $('approximate').addEventListener('change',()=>{closeFocus();installGeometry();applyVisibility();geometryStatus()});
  $('search').addEventListener('input',updateSearch);
  $('reset').addEventListener('click',reset);
+ const fullscreenBox=document.querySelector('.mapbox'),fullscreenButton=$('map-fullscreen');let nativeFullscreen=false;
+ const fullState=on=>{fullscreenBox.classList.toggle('is-fullscreen',on);fullscreenButton.setAttribute('aria-pressed',String(on));requestAnimationFrame(()=>state.map?.resize());};
+ fullscreenButton.onclick=async()=>{const on=fullscreenBox.classList.contains('is-fullscreen');if(on){if(document.fullscreenElement)await document.exitFullscreen?.();nativeFullscreen=false;fullState(false);}else{fullState(true);if(fullscreenBox.requestFullscreen)try{await fullscreenBox.requestFullscreen();nativeFullscreen=true;}catch{nativeFullscreen=false;}}};
+ document.addEventListener('fullscreenchange',()=>{if(nativeFullscreen&&!document.fullscreenElement){nativeFullscreen=false;fullState(false);}state.map?.resize();});
  $('language').addEventListener('click',()=>{state.locale=locales[(locales.indexOf(state.locale)+1)%4];applyLanguage();if(focus.current.mode==='INFRASTRUCTURE_FOCUS'){showInfrastructure(focus.current.assetId)}else if(state.popup){closeFocus()}});
  $('theme').addEventListener('click',()=>{
   state.theme=state.theme==='dark'?'light':'dark';
@@ -570,4 +611,5 @@ function showTrackAt(e){
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 
+window.MRS10CompleteQA=Object.freeze({summary:()=>completeSources.summary(),manifest:()=>state.manifest.map(r=>({id:r.id,label:r.label,color:r.color,category:r.category,expected:r.expected,stops:r.stops,paths:r.paths,source:r.source})),focus:id=>focusRoute(id),select:(route,id)=>focusStation(route,id),layers:layerSnapshot,routeState:id=>({points:(state.results.get(id)?.points||[]).map(p=>({id:p.id,coordinates:p.coordinates})),markerColor:state.map?.getLayer(layerId(id)+'-inner')?state.map.getPaintProperty(layerId(id)+'-inner','circle-color'):null,segments:physical.segments.filter(s=>s.routeIds.includes(id)).map(s=>({id:s.segmentId,status:s.geometryVerification}))}),close:closeFocus,reference:id=>showReference(completeSources.references.find(r=>r.id===id)),camera:()=>({zoom:state.map.getZoom(),center:state.map.getCenter().toArray()}),bounds:()=>state.map.getBounds().toArray()});
 window.MRS10ThreeRailwaysQA=Object.freeze({snapshot:()=>({status:threeRailways?.status,points:threeRailways?.points.length,segments:threeRailways?.segments.length,corridor:masterIntelligence?.corridor.length,endpoints:masterIntelligence?.endpoints.map(e=>({id:e.assetId,point:e.point,status:e.verificationStatus}))}),inspect:(route,id)=>{const p=findGeo(route,id);if(!p)return false;state.map.jumpTo({center:p.coordinates,zoom:16});return true}});

@@ -1,0 +1,781 @@
+{
+  "sourceCommit": "d6e9a59",
+  "sourceReport": "docs/shuttle-timur-v2-40-stop-gis-audit.md",
+  "sourceUrl": "https://api.data.gov.my/gtfs-static/ktmb",
+  "zipSha256": "9a8b431c73747b4397a05eed5006aab88f668370a64c2c45449db7d0f7983b3e",
+  "tripId": "51",
+  "color": "#A8772F",
+  "qualityGate": "PARTIAL_REVIEW_REQUIRED",
+  "physicalTrackGeometry": null,
+  "stops": [
+    {
+      "order": 1,
+      "name": "TUMPAT",
+      "id": "86300",
+      "originalCoordinates": [
+        102.167621,
+        6.19899
+      ],
+      "coordinates": [
+        102.167621,
+        6.19899
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/182970715"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 2,
+      "name": "WAKAF BHARU",
+      "id": "85700",
+      "originalCoordinates": [
+        102.200519,
+        6.118313
+      ],
+      "coordinates": [
+        102.200519,
+        6.118313
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/532504043"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 3,
+      "name": "BUNUT SUSU",
+      "id": "85500",
+      "originalCoordinates": [
+        102.17623,
+        6.09638
+      ],
+      "coordinates": [
+        102.17623,
+        6.09638
+      ],
+      "decision": "ACCEPTABLE_STATION_OFFSET",
+      "confidence": "MEDIUM",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/927043709"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 4,
+      "name": "PASIR MAS",
+      "id": "85100",
+      "originalCoordinates": [
+        102.142574,
+        6.042713
+      ],
+      "coordinates": [
+        102.142574,
+        6.042713
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/953005701"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 5,
+      "name": "TO UBAN",
+      "id": "84600",
+      "originalCoordinates": [
+        102.11687,
+        5.98236
+      ],
+      "coordinates": [
+        102.143948,
+        5.965805
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/node/2630733974",
+        "https://www.openstreetmap.org/way/1488097033"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 6,
+      "name": "BUKIT PANAU",
+      "id": "84200",
+      "originalCoordinates": [
+        102.15727,
+        5.89126
+      ],
+      "coordinates": [
+        102.15727,
+        5.89126
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/423236143"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 7,
+      "name": "TANAH MERAH",
+      "id": "83700",
+      "originalCoordinates": [
+        102.146729,
+        5.806077
+      ],
+      "coordinates": [
+        102.146729,
+        5.806077
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/423236141"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 8,
+      "name": "TEMANGAN",
+      "id": "83100",
+      "originalCoordinates": [
+        102.15165,
+        5.70241
+      ],
+      "coordinates": [
+        102.15165,
+        5.70241
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/421586667"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 9,
+      "name": "KRAI",
+      "id": "82100",
+      "originalCoordinates": [
+        102.202808,
+        5.529884
+      ],
+      "coordinates": [
+        102.202808,
+        5.529884
+      ],
+      "decision": "APPROXIMATE",
+      "confidence": "LOW",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/421642334"
+      ],
+      "displayMarker": false
+    },
+    {
+      "order": 10,
+      "name": "PAHI",
+      "id": "81700",
+      "originalCoordinates": [
+        102.23977,
+        5.54847
+      ],
+      "coordinates": [
+        102.222674,
+        5.471462
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/node/2630745473",
+        "https://www.openstreetmap.org/way/1003919073"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 11,
+      "name": "MANEK URAI",
+      "id": "81200",
+      "originalCoordinates": [
+        102.23263,
+        5.39103
+      ],
+      "coordinates": [
+        102.23263,
+        5.39103
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/1003916320"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 12,
+      "name": "SG MENGKUANG BARU",
+      "id": "80700",
+      "originalCoordinates": [
+        102.14639,
+        5.38989
+      ],
+      "coordinates": [
+        102.14639,
+        5.38989
+      ],
+      "decision": "SUSPECTED_MISMATCH",
+      "confidence": "LOW",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/236081806"
+      ],
+      "displayMarker": false
+    },
+    {
+      "order": 13,
+      "name": "ULU TEMIANG",
+      "id": "80500",
+      "originalCoordinates": [
+        102.15629,
+        5.30765
+      ],
+      "coordinates": [
+        102.15629,
+        5.30765
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/236081808"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 14,
+      "name": "KG BARU BUKIT ABU",
+      "id": "80300",
+      "originalCoordinates": [
+        102.1214,
+        5.32983
+      ],
+      "coordinates": [
+        102.1214,
+        5.32983
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/236081802"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 15,
+      "name": "BUKIT ABU",
+      "id": "80000",
+      "originalCoordinates": [
+        102.08513,
+        5.37267
+      ],
+      "coordinates": [
+        102.08513,
+        5.37267
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/236081793"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 16,
+      "name": "KUALA GRIS",
+      "id": "79800",
+      "originalCoordinates": [
+        102.08047,
+        5.49379
+      ],
+      "coordinates": [
+        102.06428,
+        5.39033
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/node/6997825867"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 17,
+      "name": "DABONG",
+      "id": "79300",
+      "originalCoordinates": [
+        102.010175,
+        5.377071
+      ],
+      "coordinates": [
+        102.010175,
+        5.377071
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/236081810"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 18,
+      "name": "KEMUBU",
+      "id": "78900",
+      "originalCoordinates": [
+        102.31175,
+        5.35271
+      ],
+      "coordinates": [
+        102.02,
+        5.30011
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/node/2630752129"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 19,
+      "name": "SRI JAYA",
+      "id": "78700",
+      "originalCoordinates": [
+        102.00906,
+        5.30785
+      ],
+      "coordinates": [
+        102.00952,
+        5.26824
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/node/10971399485",
+        "https://www.openstreetmap.org/way/235001288"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 20,
+      "name": "SRI MAHLIGAI",
+      "id": "78500",
+      "originalCoordinates": [
+        101.77286,
+        5.31332
+      ],
+      "coordinates": [
+        102.00964,
+        5.24834
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/node/2630752130"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 21,
+      "name": "SRI BINTANG",
+      "id": "78400",
+      "originalCoordinates": [
+        102.08597,
+        5.160115
+      ],
+      "coordinates": [
+        102.01027,
+        5.23068
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/node/11416821606",
+        "https://www.openstreetmap.org/way/1501338581"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 22,
+      "name": "SUNGAI TASIN",
+      "id": "78300",
+      "originalCoordinates": [
+        102.01353,
+        5.19518
+      ],
+      "coordinates": [
+        102.01248,
+        5.21338
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/node/2630752132",
+        "https://www.openstreetmap.org/way/1501338589"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 23,
+      "name": "JEREK BARU",
+      "id": "78100",
+      "originalCoordinates": [
+        102.00993,
+        5.1739
+      ],
+      "coordinates": [
+        102.00993,
+        5.1739
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/1501338587"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 24,
+      "name": "BERTAM",
+      "id": "77900",
+      "originalCoordinates": [
+        102.05066,
+        5.148
+      ],
+      "coordinates": [
+        102.043852,
+        5.151628
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/node/2630769252",
+        "https://www.openstreetmap.org/way/207866039"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 25,
+      "name": "BERTAM BARU",
+      "id": "77800",
+      "originalCoordinates": [
+        102.045598,
+        5.142897
+      ],
+      "coordinates": [
+        102.045598,
+        5.142897
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/1003909749"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 26,
+      "name": "LIMAU KASTURI",
+      "id": "77400",
+      "originalCoordinates": [
+        102.06936,
+        5.08019
+      ],
+      "coordinates": [
+        102.06936,
+        5.08019
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/1501338579"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 27,
+      "name": "SUNGAI SIRIAN",
+      "id": "77200",
+      "originalCoordinates": [
+        102.04945,
+        5.0337
+      ],
+      "coordinates": [
+        102.04945,
+        5.0337
+      ],
+      "decision": "APPROXIMATE",
+      "confidence": "LOW",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/1501338568"
+      ],
+      "displayMarker": false
+    },
+    {
+      "order": 28,
+      "name": "KG. SIRIAN",
+      "id": "77000",
+      "originalCoordinates": [
+        102.03904,
+        5.02507
+      ],
+      "coordinates": [
+        102.03904,
+        5.02507
+      ],
+      "decision": "APPROXIMATE",
+      "confidence": "LOW",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/320156135"
+      ],
+      "displayMarker": false
+    },
+    {
+      "order": 29,
+      "name": "PAN MALAYAN",
+      "id": "76600",
+      "originalCoordinates": [
+        101.977,
+        4.91299
+      ],
+      "coordinates": [
+        101.977,
+        4.91299
+      ],
+      "decision": "APPROXIMATE",
+      "confidence": "LOW",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/137929646"
+      ],
+      "displayMarker": false
+    },
+    {
+      "order": 30,
+      "name": "GUA MUSANG",
+      "id": "76000",
+      "originalCoordinates": [
+        101.966634,
+        4.878941
+      ],
+      "coordinates": [
+        101.966634,
+        4.878941
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/137929646"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 31,
+      "name": "MENTARA BARU",
+      "id": "75000",
+      "originalCoordinates": [
+        102.01179,
+        4.78934
+      ],
+      "coordinates": [
+        102.01179,
+        4.78934
+      ],
+      "decision": "APPROXIMATE",
+      "confidence": "LOW",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/137929648"
+      ],
+      "displayMarker": false
+    },
+    {
+      "order": 32,
+      "name": "MERAPOH",
+      "id": "74800",
+      "originalCoordinates": [
+        102.00328,
+        4.69314
+      ],
+      "coordinates": [
+        102.00328,
+        4.69314
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/1003897904"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 33,
+      "name": "TELUK GUNUNG",
+      "id": "74500",
+      "originalCoordinates": [
+        101.99271,
+        4.63526
+      ],
+      "coordinates": [
+        101.99271,
+        4.63526
+      ],
+      "decision": "APPROXIMATE",
+      "confidence": "LOW",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/1503304228"
+      ],
+      "displayMarker": false
+    },
+    {
+      "order": 34,
+      "name": "SUNGAI TEMAU",
+      "id": "73500",
+      "originalCoordinates": [
+        101.9474,
+        4.49778
+      ],
+      "coordinates": [
+        101.9474,
+        4.49778
+      ],
+      "decision": "APPROXIMATE",
+      "confidence": "LOW",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/1377368221"
+      ],
+      "displayMarker": false
+    },
+    {
+      "order": 35,
+      "name": "CHEGAR PERAH",
+      "id": "73100",
+      "originalCoordinates": [
+        101.94379,
+        4.49059
+      ],
+      "coordinates": [
+        101.94379,
+        4.49059
+      ],
+      "decision": "APPROXIMATE",
+      "confidence": "LOW",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/1271601408"
+      ],
+      "displayMarker": false
+    },
+    {
+      "order": 36,
+      "name": "AUR GADING",
+      "id": "72700",
+      "originalCoordinates": [
+        101.95489,
+        4.44072
+      ],
+      "coordinates": [
+        101.921569,
+        4.358383
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/node/12756959534",
+        "https://www.openstreetmap.org/way/1503304230"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 37,
+      "name": "KG BERKAM",
+      "id": "72400",
+      "originalCoordinates": [
+        102.05187,
+        4.20116
+      ],
+      "coordinates": [
+        101.9221,
+        4.29346
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/node/12753679163",
+        "https://www.openstreetmap.org/way/1503304246"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 38,
+      "name": "BUKIT BETONG",
+      "id": "72200",
+      "originalCoordinates": [
+        101.92368,
+        4.39984
+      ],
+      "coordinates": [
+        101.92527,
+        4.25781
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/node/12753679164",
+        "https://www.openstreetmap.org/way/1503304232"
+      ],
+      "displayMarker": true
+    },
+    {
+      "order": 39,
+      "name": "PADANG TUNGKU",
+      "id": "71800",
+      "originalCoordinates": [
+        101.98883,
+        4.23397
+      ],
+      "coordinates": [
+        101.98883,
+        4.23397
+      ],
+      "decision": "APPROXIMATE",
+      "confidence": "LOW",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/1003889483"
+      ],
+      "displayMarker": false
+    },
+    {
+      "order": 40,
+      "name": "KUALA LIPIS",
+      "id": "71300",
+      "originalCoordinates": [
+        102.053791,
+        4.186634
+      ],
+      "coordinates": [
+        102.053791,
+        4.186634
+      ],
+      "decision": "VERIFIED",
+      "confidence": "HIGH",
+      "sourceUrls": [
+        "https://www.openstreetmap.org/way/207409883"
+      ],
+      "displayMarker": true
+    }
+  ]
+}

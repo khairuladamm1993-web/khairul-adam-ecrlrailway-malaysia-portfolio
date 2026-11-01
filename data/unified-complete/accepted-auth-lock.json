@@ -1,0 +1,13 @@
+{
+  "sourceBranch": "fix/mrs10-p01-simple-login-r26-20261101",
+  "sourceCommit": "7ba3479",
+  "acceptedCode": "4681dc3732e83691eaf9323f5bc872f70adff1be",
+  "ci": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/41287593378",
+  "files": {
+    "assets/access.js": "be7afc60c8fee11c7f7ace628edc0e7b09c61058c114bc6e6f83cebb3f2341ac",
+    "assets/gateway.css": "1b976ef76f81bcd587bef4248cb4dc2e2506eac765bf2c6d603208b05909da5b",
+    "assets/member-gateway.js": "6c47f532ffb9a5b0a9f39d11ef5fbabd5817e0d5d6867d8c985a19bd6c3025fb",
+    "scripts/build-owner-auth-recovery.cjs": "923451d80b5cf4500b6e00b95b674f448bde79a16029d10cf353f94dde52718f",
+    "server/auth-r2/core.cjs": "e2c3356bef81eada2f0c6b79c6dc5fda3994e74e4c2a4ed564410bb9061ca9ec"
+  }
+}
