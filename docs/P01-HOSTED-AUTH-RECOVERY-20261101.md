@@ -52,3 +52,29 @@ Hosted WebKit existing-account login dialog rendered both email confirmation fie
 The temporary deployment share grant is revoked at test cleanup; normal authorized Vercel users can continue opening staging. The pending team-consent link was not required for these share-authorized tests. No general protection setting changed.
 
 Status: NO-GO. The protected-staging access blocker is resolved for automation through a permitted temporary share grant. Active RC callback rejection is still unresolved; successful hosted login/authenticated recovery/logout remain BLOCKED, not PASS. Complete previous CI results are preserved. Owner configuration instruction is the single append-and-Save delta above; it has not been verified applied. Do not request physical Safari UAT.
+
+## Superseding receipt — after Owner saved Redirect URLs, 01:35 UTC
+
+Owner explicitly confirmed the RC Redirect URL was added and saved. Fresh randomly tokenized invalid-token probes now return HTTP303 to the exact requested RC `/gateway.html`; canonical remains accepted. Both responses are CF-Cache-Status DYNAMIC. Sanitized evidence: `qa/p01-hosted-redirect-after-save-20261101.json`. This closes the active redirect-rejection finding above. The accepted configuration change, rather than a new client patch, corrected the observed fallback.
+
+A new deployment-scoped Vercel share grant with TTL1800 seconds enabled real hosted browser tests on the exact RC branch alias. Two separate fresh contexts were used: Chromium and WebKit, each at an iPad viewport. Each context initiated exactly one fresh Magic Link via the deployed `RailwayAccess.sendMagicLink` method and the real pinned Supabase SDK. Login initiation was a call to the application's own page API, not automated email-input form submission. Actual OTP POSTs were observed with the exact RC `redirect_to`. Each new delivered email was read through the connected authorized inbox and its verification URL checked for this project's Auth host, `/auth/v1/verify` path and exact RC redirect before being opened in the browser context that initiated it. No previously issued link was reused across browsers.
+
+The fresh delivered emails both use the correct RC callback, which verifies the active email-delivery path after the allowlist change. No email-template change was required or made. No account was created, deleted or elevated. The connected inbox privately matched the existing enabled Admin identity. No token, verification link, email address, session cookie or protected record was logged in this receipt.
+
+| Hosted check | Chromium | WebKit |
+| --- | --- | --- |
+| Protected gateway HTTP200; initial Public | PASS | PASS |
+| Actual OTP POST uses exact RC callback | PASS | PASS |
+| Fresh received email carries exact RC callback | PASS | PASS |
+| Same-context real PKCE completion; authenticated Admin | PASS | PASS |
+| Callback remains on RC origin; code removed from URL | PASS | PASS |
+| Reload restores authenticated Admin session | PASS | PASS |
+| New tab restores authenticated Admin session | PASS | PASS |
+| Gateway UI logout returns Public/signed-out | PASS | PASS |
+| Other tab loses protected access after logout | PASS | PASS |
+
+These successful hosted scenarios used live hosted Supabase, its email service and the existing account. No provider mock, fabricated user/JWT, injected Supabase cookie, role bypass or intercepted Auth response was used. Vercel's legitimate temporary share mechanism provided only deployment access; application authentication still required actual Supabase PKCE, getUser, account_role and enabled-profile resolution. Logout uses the existing local-session scope, preserving unrelated Owner sessions. No protected data was edited.
+
+Application/deployed SHA remains `6cbc4390e0e47ea00188535d4dc22d4d05d1cd53`; deployment remains `dpl_2K9j4vqkJaWGeaFFsbJcYYFnAARS`. This recovery changes documentation/evidence only. No new branch, build, deployment, reintegration or repeated previously passed CI was needed. Production and canonical Preview remain unchanged.
+
+**Hosted Auth status: GO.** Both assigned hosted-Auth blockers are closed. This is readiness for Owner Safari UAT of this Auth flow, not physical Safari acceptance, certification of R2 private-room activation or approval of a full Production release. Earlier unrelated registry/private-backend/acceptance gates are unchanged. Browser contexts are closed and the new temporary Vercel share grant is revoked after the tested sessions are logged out.

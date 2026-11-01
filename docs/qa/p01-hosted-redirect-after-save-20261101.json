@@ -1,0 +1,16 @@
+[
+  {
+    "requested": "https://khairul-adam-portfolio-preview-safe.vercel.app/gateway.html",
+    "http": 303,
+    "actual": "https://khairul-adam-portfolio-preview-safe.vercel.app/gateway.html",
+    "edgeCache": "DYNAMIC",
+    "matches": true
+  },
+  {
+    "requested": "https://mrs10-p01-unified-v8-sg-geometr-git-6f80d2-1993khairuladam-3016.vercel.app/gateway.html",
+    "http": 303,
+    "actual": "https://mrs10-p01-unified-v8-sg-geometr-git-6f80d2-1993khairuladam-3016.vercel.app/gateway.html",
+    "edgeCache": "DYNAMIC",
+    "matches": true
+  }
+]
