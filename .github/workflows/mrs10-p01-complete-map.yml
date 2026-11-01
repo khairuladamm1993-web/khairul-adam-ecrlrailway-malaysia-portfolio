@@ -39,6 +39,8 @@ jobs:
       P01_ENGINE: ${{ matrix.engine }}
       P01_VIEWPORT: ${{ matrix.viewport }}
       CHROME_PATH: /usr/bin/google-chrome
+      # Transport-only delta; full 44-route x 6 matrix retained from run 41302609307.
+      P01_ROUTES: th-v3-border,sabah-jkns,ktmb-shuttle-timuran
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -55,7 +57,7 @@ jobs:
           echo "P01_PLAYWRIGHT_MODULE=$RUNNER_TEMP/p01-tools/node_modules/playwright" >> "$GITHUB_ENV"
       - name: All route UI, source track taps, default ECRL and privacy on actual canvas
         run: |
-          python3 -m http.server 8765 --bind 127.0.0.1 --directory dist-complete-map > /tmp/p01-complete-http.log 2>&1 &
+          node tests/complete-map-server.cjs dist-complete-map > /tmp/p01-complete-http.log 2>&1 &
           curl --retry 10 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:8765/unified-map-v8.html > /dev/null
           node tests/complete-map-browser.test.mjs
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
