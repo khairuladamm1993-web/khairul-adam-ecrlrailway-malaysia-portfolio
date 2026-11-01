@@ -55,3 +55,17 @@ Release remains NO-GO pending final CI, authenticated staging HTTP/browser smoke
 The remote branch inventory is preserved. KTM V3 Safari/GTFS (`3ecb3f2`), Shuttle Timur V2 (`d6e9a59`), Thailand V3 (`dae5460`) and brand/locale proposal (`c41f2fd`) remain separate. Their latest commit subjects were inspected, but their complete source/QA lineage was not re-certified in this recovery. They are not silently treated as accepted or merged wholesale. This RC retains the baseline Malaysia/Singapore scope and its explicit Eastern Shuttle exclusion. Any broader acceptance requirement remains open rather than overriding the tested map baseline.
 
 Read-only hosted recheck in this session also confirmed zero anon table SELECT grants and absence of `public.owner_private_context_r2()`. Final-head map regression logs independently confirm 371/371 baseline and 116/116 map/source tests PASS. Three-railways browser job `124707475586` completed SUCCESS; remaining suites and real-backend job were still running at this update.
+
+## Final technical QA receipt — 01:07 UTC
+
+Final tested/deployed code SHA: `6cbc4390e0e47ea00188535d4dc22d4d05d1cd53`. Later commits containing this receipt are documentation only.
+
+- Map CI https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/41259386082 — all five jobs SUCCESS. Logs confirm 371 baseline + 116 map/source assertions PASS, zero failures. Browser scenario records: V8 6, V8.1 8, ECRL 6, three-railways 6; Chromium and WebKit.
+- Auth CI https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/41259386239 — SUCCESS including cleanup. Logs confirm 371 baseline, six artifact/review security assertions and 16 mocked-provider unit assertions PASS. Separately, 10 REAL local Supabase backend/RLS/isolation checks, six REAL browser OTP/MFA/privacy/session/logout scenarios and four REAL SDK PKCE callbacks PASS (Chromium/WebKit, iPad/iPhone). Synthetic local identities only; not hosted Owner-login evidence.
+- Intermediate V8 iPad failure on `ce7aaa9`: positive target readiness check followed by a separate empty target read, with styleLoaded=false at failure. Sampling was made atomic after style/tile readiness. Pointer-click/popup assertions remain unchanged. Final V8 job `124709356118` passes all six scenarios. Earlier failures remain in GitHub history and are not relabelled PASS.
+- Final deployment `dpl_2K9j4vqkJaWGeaFFsbJcYYFnAARS`: READY, target staging, exact SHA confirmed from Vercel metadata.
+  Immutable map: https://mrs10-p01-unified-v8-sg-geometry-cbaoqx93u-1993khairuladam-3016.vercel.app/unified-map-v8.html
+  Branch gateway: https://mrs10-p01-unified-v8-sg-geometr-git-6f80d2-1993khairuladam-3016.vercel.app/gateway.html
+- Callback recheck after Owner supplied the URL: deliberately invalid/no-user token probe still redirected to the old GitHub Pages Site URL, not the RC callback. No email sent. Exact RC allowlist is therefore NOT VERIFIED ACTIVE. Approval alone is not application of configuration.
+
+Local synthetic and CI QA are PASS as specified above. Hosted authenticated application smoke and existing Owner/Admin login remain BLOCKED by unavailable protected-page authentication and inactive/unverified RC redirect. R2 private backend remains absent. Registry STN10 and broader unselected branch acceptance remain open. No physical Safari UAT is requested and no official release/Production action is authorized by these results.
