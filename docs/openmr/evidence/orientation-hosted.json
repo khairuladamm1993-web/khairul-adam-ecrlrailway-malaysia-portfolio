@@ -1,0 +1,16 @@
+[
+  {
+    "engine": "chromium",
+    "status": "PASS",
+    "scope": "actual MapLibre keyboard rotate, station focus/close preserves deliberate bearing/zoom/pitch, Reset restores north-up/MRS10/ECRL",
+    "savedBearing": 15,
+    "restoredBearing": 15
+  },
+  {
+    "engine": "webkit",
+    "status": "PASS",
+    "scope": "actual MapLibre keyboard rotate, station focus/close preserves deliberate bearing/zoom/pitch, Reset restores north-up/MRS10/ECRL",
+    "savedBearing": 15,
+    "restoredBearing": 15
+  }
+]

@@ -1,0 +1,141 @@
+{
+  "engine": "chromium",
+  "viewport": "ipad",
+  "status": "PASS",
+  "routes": [
+    {
+      "id": "sg-SHUTTLE_TEBRAU",
+      "search": "PASS",
+      "expected": 2,
+      "matched": 2,
+      "color": "#3B9C9F",
+      "sourceOrder": "PASS",
+      "colors": "PASS",
+      "lineupAndMarkerOrExplicitGap": "PASS",
+      "closeRestore": "PASS",
+      "missing": [],
+      "physicalGeometry": "DATA_GAP"
+    },
+    {
+      "id": "sg-RTS",
+      "search": "PASS",
+      "expected": 2,
+      "matched": 2,
+      "color": "#17ADCF",
+      "sourceOrder": "PASS",
+      "colors": "PASS",
+      "lineupAndMarkerOrExplicitGap": "PASS",
+      "closeRestore": "PASS",
+      "missing": [],
+      "physicalGeometry": "OSM_SOURCE_REFERENCE"
+    },
+    {
+      "id": "sg-SENTOSA",
+      "search": "PASS",
+      "expected": 4,
+      "matched": 4,
+      "color": "#BE668B",
+      "sourceOrder": "PASS",
+      "colors": "PASS",
+      "lineupAndMarkerOrExplicitGap": "PASS",
+      "closeRestore": "PASS",
+      "missing": [],
+      "physicalGeometry": "OSM_SOURCE_REFERENCE"
+    },
+    {
+      "id": "sg-CHANGI_APM",
+      "search": "PASS",
+      "expected": 3,
+      "matched": 3,
+      "color": "#7E8CB8",
+      "sourceOrder": "PASS",
+      "colors": "PASS",
+      "lineupAndMarkerOrExplicitGap": "PASS",
+      "closeRestore": "PASS",
+      "missing": [],
+      "physicalGeometry": "OSM_SOURCE_REFERENCE"
+    },
+    {
+      "id": "th-v3-border",
+      "search": "PASS",
+      "expected": 4,
+      "matched": 3,
+      "color": "#f4b942",
+      "sourceOrder": "PASS",
+      "colors": "PASS",
+      "lineupAndMarkerOrExplicitGap": "PASS",
+      "closeRestore": "PASS",
+      "missing": [
+        {
+          "id": "th-khlong-ngae",
+          "name": "Khlong Ngae"
+        }
+      ],
+      "physicalGeometry": "DATA_GAP"
+    }
+  ],
+  "checks": [
+    "fresh-MRS10-all-visible-bounds-ECRL-default-on",
+    "reload-and-stale-off-preferences-cannot-hide-ECRL",
+    "GPS-foreground-permission-callback-errors-real-browser-coordinate-emulation-accuracy-and-low-accuracy",
+    "all-three-supported-source-track-taps",
+    "China-filter-catalogue-without-unrelated-Malaysia-lineup",
+    "China-English-Hanzi-pinyin-code-search",
+    "multilingual-search-and-explicit-MY-TH-interchange",
+    "ECRL-PL05-unknown-no-fake-pin",
+    "GNU-depot-chainage-and-schematic-preserved",
+    "four-languages-and-dark-light-style-recovery",
+    "fullscreen-and-native-pan-zoom",
+    "popup-restores-exact-camera-filters-MRS10-and-ECRL",
+    "hosted-stress-not-repeated-CI-evidence-retained",
+    "public-no-auth-or-private-requests-or-session-data"
+  ],
+  "cameraRestore": {
+    "beforeRequest": {
+      "center": [
+        107.62214500000005,
+        7.58376718959606
+      ],
+      "zoom": 4.843981887374178,
+      "bearing": 0,
+      "pitch": 0,
+      "padding": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      }
+    },
+    "captured": {
+      "center": [
+        107.62214500000005,
+        7.58376718959606
+      ],
+      "zoom": 4.843981887374178,
+      "bearing": 0,
+      "pitch": 0,
+      "padding": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      }
+    },
+    "restored": {
+      "center": [
+        107.62214500000005,
+        7.58376718959606
+      ],
+      "zoom": 4.843981887374178,
+      "bearing": 0,
+      "pitch": 0,
+      "padding": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      }
+    }
+  },
+  "screenshotStatus": "CAPTURED"
+}

@@ -1,0 +1,1040 @@
+{
+  "run": 41488431805,
+  "qaSha": "3fde70401c276109ab1e63b570a2bae631c368b0",
+  "runtimeSha": "fc1600b35521457eb9ee90ad79070f4dff7726dd",
+  "conclusion": "success",
+  "sourceTests": 155,
+  "cases": [
+    {
+      "engine": "chromium",
+      "viewport": "iphone",
+      "status": "PASS",
+      "routes": [
+        {
+          "id": "mrt-kajang",
+          "search": "PASS",
+          "expected": 29,
+          "matched": 29,
+          "color": "#087D43",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "ktm-padang-besar",
+          "search": "PASS",
+          "expected": 13,
+          "matched": 13,
+          "color": "#008658",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-SHUTTLE_TEBRAU",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#3B9C9F",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-RTS",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#17ADCF",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-SENTOSA",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 4,
+          "color": "#BE668B",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-CHANGI_APM",
+          "search": "PASS",
+          "expected": 3,
+          "matched": 3,
+          "color": "#7E8CB8",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "th-v3-border",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 3,
+          "color": "#f4b942",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [
+            {
+              "id": "th-khlong-ngae",
+              "name": "Khlong Ngae"
+            }
+          ],
+          "physicalGeometry": "DATA_GAP"
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "viewport": "ipadlandscape",
+      "status": "PASS",
+      "routes": [
+        {
+          "id": "mrt-kajang",
+          "search": "PASS",
+          "expected": 29,
+          "matched": 29,
+          "color": "#087D43",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "ktm-padang-besar",
+          "search": "PASS",
+          "expected": 13,
+          "matched": 13,
+          "color": "#008658",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-SHUTTLE_TEBRAU",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#3B9C9F",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-RTS",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#17ADCF",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-SENTOSA",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 4,
+          "color": "#BE668B",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-CHANGI_APM",
+          "search": "PASS",
+          "expected": 3,
+          "matched": 3,
+          "color": "#7E8CB8",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "th-v3-border",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 3,
+          "color": "#f4b942",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [
+            {
+              "id": "th-khlong-ngae",
+              "name": "Khlong Ngae"
+            }
+          ],
+          "physicalGeometry": "DATA_GAP"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "viewport": "iphonelandscape",
+      "status": "PASS",
+      "routes": [
+        {
+          "id": "mrt-kajang",
+          "search": "PASS",
+          "expected": 29,
+          "matched": 29,
+          "color": "#087D43",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "ktm-padang-besar",
+          "search": "PASS",
+          "expected": 13,
+          "matched": 13,
+          "color": "#008658",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-SHUTTLE_TEBRAU",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#3B9C9F",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-RTS",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#17ADCF",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-SENTOSA",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 4,
+          "color": "#BE668B",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-CHANGI_APM",
+          "search": "PASS",
+          "expected": 3,
+          "matched": 3,
+          "color": "#7E8CB8",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "th-v3-border",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 3,
+          "color": "#f4b942",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [
+            {
+              "id": "th-khlong-ngae",
+              "name": "Khlong Ngae"
+            }
+          ],
+          "physicalGeometry": "DATA_GAP"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "viewport": "desktop",
+      "status": "PASS",
+      "routes": [
+        {
+          "id": "mrt-kajang",
+          "search": "PASS",
+          "expected": 29,
+          "matched": 29,
+          "color": "#087D43",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "ktm-padang-besar",
+          "search": "PASS",
+          "expected": 13,
+          "matched": 13,
+          "color": "#008658",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-SHUTTLE_TEBRAU",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#3B9C9F",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-RTS",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#17ADCF",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-SENTOSA",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 4,
+          "color": "#BE668B",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-CHANGI_APM",
+          "search": "PASS",
+          "expected": 3,
+          "matched": 3,
+          "color": "#7E8CB8",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "th-v3-border",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 3,
+          "color": "#f4b942",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [
+            {
+              "id": "th-khlong-ngae",
+              "name": "Khlong Ngae"
+            }
+          ],
+          "physicalGeometry": "DATA_GAP"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "viewport": "iphone",
+      "status": "PASS",
+      "routes": [
+        {
+          "id": "mrt-kajang",
+          "search": "PASS",
+          "expected": 29,
+          "matched": 29,
+          "color": "#087D43",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "ktm-padang-besar",
+          "search": "PASS",
+          "expected": 13,
+          "matched": 13,
+          "color": "#008658",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-SHUTTLE_TEBRAU",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#3B9C9F",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-RTS",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#17ADCF",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-SENTOSA",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 4,
+          "color": "#BE668B",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-CHANGI_APM",
+          "search": "PASS",
+          "expected": 3,
+          "matched": 3,
+          "color": "#7E8CB8",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "th-v3-border",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 3,
+          "color": "#f4b942",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [
+            {
+              "id": "th-khlong-ngae",
+              "name": "Khlong Ngae"
+            }
+          ],
+          "physicalGeometry": "DATA_GAP"
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "viewport": "desktop",
+      "status": "PASS",
+      "routes": [
+        {
+          "id": "mrt-kajang",
+          "search": "PASS",
+          "expected": 29,
+          "matched": 29,
+          "color": "#087D43",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "ktm-padang-besar",
+          "search": "PASS",
+          "expected": 13,
+          "matched": 13,
+          "color": "#008658",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-SHUTTLE_TEBRAU",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#3B9C9F",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-RTS",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#17ADCF",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-SENTOSA",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 4,
+          "color": "#BE668B",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-CHANGI_APM",
+          "search": "PASS",
+          "expected": 3,
+          "matched": 3,
+          "color": "#7E8CB8",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "th-v3-border",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 3,
+          "color": "#f4b942",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [
+            {
+              "id": "th-khlong-ngae",
+              "name": "Khlong Ngae"
+            }
+          ],
+          "physicalGeometry": "DATA_GAP"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "viewport": "ipad",
+      "status": "PASS",
+      "routes": [
+        {
+          "id": "mrt-kajang",
+          "search": "PASS",
+          "expected": 29,
+          "matched": 29,
+          "color": "#087D43",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "ktm-padang-besar",
+          "search": "PASS",
+          "expected": 13,
+          "matched": 13,
+          "color": "#008658",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-SHUTTLE_TEBRAU",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#3B9C9F",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-RTS",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#17ADCF",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-SENTOSA",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 4,
+          "color": "#BE668B",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-CHANGI_APM",
+          "search": "PASS",
+          "expected": 3,
+          "matched": 3,
+          "color": "#7E8CB8",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "th-v3-border",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 3,
+          "color": "#f4b942",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [
+            {
+              "id": "th-khlong-ngae",
+              "name": "Khlong Ngae"
+            }
+          ],
+          "physicalGeometry": "DATA_GAP"
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "viewport": "ipadlandscape",
+      "status": "PASS",
+      "routes": [
+        {
+          "id": "mrt-kajang",
+          "search": "PASS",
+          "expected": 29,
+          "matched": 29,
+          "color": "#087D43",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "ktm-padang-besar",
+          "search": "PASS",
+          "expected": 13,
+          "matched": 13,
+          "color": "#008658",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-SHUTTLE_TEBRAU",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#3B9C9F",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-RTS",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#17ADCF",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-SENTOSA",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 4,
+          "color": "#BE668B",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-CHANGI_APM",
+          "search": "PASS",
+          "expected": 3,
+          "matched": 3,
+          "color": "#7E8CB8",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "th-v3-border",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 3,
+          "color": "#f4b942",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [
+            {
+              "id": "th-khlong-ngae",
+              "name": "Khlong Ngae"
+            }
+          ],
+          "physicalGeometry": "DATA_GAP"
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "viewport": "iphonelandscape",
+      "status": "PASS",
+      "routes": [
+        {
+          "id": "mrt-kajang",
+          "search": "PASS",
+          "expected": 29,
+          "matched": 29,
+          "color": "#087D43",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "ktm-padang-besar",
+          "search": "PASS",
+          "expected": 13,
+          "matched": 13,
+          "color": "#008658",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-SHUTTLE_TEBRAU",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#3B9C9F",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-RTS",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#17ADCF",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-SENTOSA",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 4,
+          "color": "#BE668B",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-CHANGI_APM",
+          "search": "PASS",
+          "expected": 3,
+          "matched": 3,
+          "color": "#7E8CB8",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "th-v3-border",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 3,
+          "color": "#f4b942",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [
+            {
+              "id": "th-khlong-ngae",
+              "name": "Khlong Ngae"
+            }
+          ],
+          "physicalGeometry": "DATA_GAP"
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "viewport": "ipad",
+      "status": "PASS",
+      "routes": [
+        {
+          "id": "mrt-kajang",
+          "search": "PASS",
+          "expected": 29,
+          "matched": 29,
+          "color": "#087D43",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "ktm-padang-besar",
+          "search": "PASS",
+          "expected": 13,
+          "matched": 13,
+          "color": "#008658",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-SHUTTLE_TEBRAU",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#3B9C9F",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "DATA_GAP"
+        },
+        {
+          "id": "sg-RTS",
+          "search": "PASS",
+          "expected": 2,
+          "matched": 2,
+          "color": "#17ADCF",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-SENTOSA",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 4,
+          "color": "#BE668B",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "sg-CHANGI_APM",
+          "search": "PASS",
+          "expected": 3,
+          "matched": 3,
+          "color": "#7E8CB8",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [],
+          "physicalGeometry": "OSM_SOURCE_REFERENCE"
+        },
+        {
+          "id": "th-v3-border",
+          "search": "PASS",
+          "expected": 4,
+          "matched": 3,
+          "color": "#f4b942",
+          "sourceOrder": "PASS",
+          "colors": "PASS",
+          "lineupAndMarkerOrExplicitGap": "PASS",
+          "closeRestore": "PASS",
+          "missing": [
+            {
+              "id": "th-khlong-ngae",
+              "name": "Khlong Ngae"
+            }
+          ],
+          "physicalGeometry": "DATA_GAP"
+        }
+      ]
+    }
+  ],
+  "note": "All runtime assets unchanged since deployed SHA; final delta covers 7 affected routes \u00d710 plus global/GPS/camera/performance checks."
+}

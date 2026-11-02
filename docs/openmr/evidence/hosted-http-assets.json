@@ -1,0 +1,261 @@
+{
+  "url": "https://openmr-s10map.vercel.app/",
+  "http": 200,
+  "https": true,
+  "entryByteMatch": true,
+  "permissionsPolicy": null,
+  "receipt": {
+    "product": "OpenMR-S10Map",
+    "version": "1.0.0-rc1",
+    "scope": "MY-SG-TH",
+    "gitSha": "fc1600b35521457eb9ee90ad79070f4dff7726dd",
+    "branch": "candidate/openmrs10-my-sg-th-20261103",
+    "deploymentId": "dpl_GrsFbdbghy4g3VLLpqCqE3YANrwy",
+    "builtAt": "2026-11-02T16:57:46.332Z",
+    "authRuntime": "4681dc3732e83691eaf9323f5bc872f70adff1be"
+  },
+  "assets": [
+    {
+      "path": "./assets/openmr-build-info.js",
+      "http": 200,
+      "sha256": "d3a5dc023a01572297000d70e81d6740a6b025b745e813f69ea2c542421a51ce",
+      "sourceByteMatch": false
+    },
+    {
+      "path": "./assets/railway-track-registry-kl.js",
+      "http": 200,
+      "sha256": "32938fda8c66fc533169a1f385183f501fb45bd9ba4c0b965752a11478d28bc0",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/mrs10-r219-ampang-service.js",
+      "http": 200,
+      "sha256": "b09a847d19cbc67ca3a981ae8bba05e18c01ca5a7338ed21df56a9498045ba06",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/mrs10-r219-ampang-gis.js",
+      "http": 200,
+      "sha256": "be8ebf8fd7a8fa3fc24114e1d696164ceb3338867a979d26e3ecb6edea054939",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v4-registry.js",
+      "http": 200,
+      "sha256": "4bb5b136bc0ad6b660227112285ffd289de2372407c483616188b16092585acb",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v6/sri-catalogue.js",
+      "http": 200,
+      "sha256": "bf1e69aa65ea4cfa976ad41411551e57335fb760eb7f2d935fd5d51e1bcdd164",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v6/sri-gis.js",
+      "http": 200,
+      "sha256": "2f7fab312be85d8f9a39edca4cb67f7238e1dc5855dbe3cd5dbca8892a5affc1",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v6/monorail-registry.js",
+      "http": 200,
+      "sha256": "326b7480f397eba607d7006f6ad610048098c36ac23d97bba5657b253f94c3eb",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v6/erl-model.js",
+      "http": 200,
+      "sha256": "2eb0a0773eda8bdf25da164d2dd6fa2735a472160941ee5ba73bb9d13468113f",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v6/erl-gis.js",
+      "http": 200,
+      "sha256": "3052e50c9870df86a5b3096bc6bed5e24750b1242d67daa75c67ac72a6259bdc",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v6/adapter.js",
+      "http": 200,
+      "sha256": "e743d52a126db2fc8621a004091689f2d42715678b5caac283f293ee99c421a3",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v7/ktm-dataset.js",
+      "http": 200,
+      "sha256": "f418c6dcafec2a2fd814c0ddf2239d937e431db2f07a772ba3f59f70b6bcca5a",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v7/ktm-adapter.js",
+      "http": 200,
+      "sha256": "7c9706632907549941271ac884218c925c244ed9492e3f8bf3d042c9a05da202",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v8/singapore-adapter.js",
+      "http": 200,
+      "sha256": "f372286afaa0dd3ca92d895af9882c8165f36717de272270bb8cbd0f6f4b763b",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v8/geometry-engine.js",
+      "http": 200,
+      "sha256": "88a5fdba1d6b8fcb445c0b3c7737ac4b164fbe4a493dd8b78a09dff4e1d787c2",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v81/three-railways.js",
+      "http": 200,
+      "sha256": "3728d147f47c358cb2e2da2c3f0c30f10c6671082ccef8c3e0edad902f9f6ce5",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v81/focus-controller.js",
+      "http": 200,
+      "sha256": "b8290d77261a03806daffdca35779b2a238481a51c6b1ec3b19d8ed89ebdd55f",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v81/relationships.js",
+      "http": 200,
+      "sha256": "7d0111560dfa189f9d991799857e951147fb3f3d89211b1f75a8fd58391084bf",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-ecrl/source/data.js",
+      "http": 200,
+      "sha256": "00e5ca2148d266703e170e40aa8ed7e5b5cbf84308b11fd8172674f6c82c9f6e",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-ecrl/source/i18n.js",
+      "http": 200,
+      "sha256": "2c8729f223ff3781c93d8b5b2e82c3d4da646dca7fdd2289a94bad421c96258e",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-ecrl/chainage-manifest.js",
+      "http": 200,
+      "sha256": "8ccfcb035fe769c3f4ebe3c4f4273bb9cfbc9f4a423959e85bf2defcd9962d68",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-ecrl/port-references.js",
+      "http": 200,
+      "sha256": "6ece17e2bcb0929bf6753992486c53d45c2a9d2f8d282d5af716b03f85bac120",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-ecrl/kerteh-freight-reference.js",
+      "http": 200,
+      "sha256": "6baa0bb23f4a863d1fdce4baed1885c984880c0a9b72737f5018c4966cf2042a",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-ecrl/alignment-evidence-r2.js",
+      "http": 200,
+      "sha256": "456995ca0c91f5f337514cb31cd81a3b212873b223320a89d5d7e1df72d48378",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-ecrl/adapter.js",
+      "http": 200,
+      "sha256": "3e4facc484a80ae5d5bae849b3cd249573575b392b433238044917744273f062",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-ecrl/master-intelligence.js",
+      "http": 200,
+      "sha256": "19b72d5a6cbf6aa8fb333d45400fc91eefca23373a287f64a57c6ef1bccda01a",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-ecrl/integration-ui.js",
+      "http": 200,
+      "sha256": "45d9060b3a59f4b45053f7c4e08794531787a01e9468ab69c707c780b1ad17f2",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-ecrl/owner-calibration.js",
+      "http": 200,
+      "sha256": "c28146abacd0615f764bc9d1e6cc30e5426ee877dd25c0bbea144aac18c4fea3",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/consumer-foundation/journey-engine.js",
+      "http": 200,
+      "sha256": "7ab350acac1469383be8540d57c2440a2148094d8672e78553b6697c658d0caa",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/consumer-foundation/view.js",
+      "http": 200,
+      "sha256": "372736df93fb245dcda5aed57f69282856e1732eff2f0899755f79b4a1957055",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-complete/thailand-model.js",
+      "http": 200,
+      "sha256": "0e784987cb13941a4e3ef73c53f7f7ccd67423338037036503f20ebca3c51137",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-complete/ktm-recovery.js",
+      "http": 200,
+      "sha256": "37778da6c9b90dc4c18c827f04eda9a0b0debbba706b5e1009b34d980e893dd8",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-complete/adapter.js",
+      "http": 200,
+      "sha256": "11e632f52c9b26616903af60fea07389f0ba09e344a82c4608904e8f9eef1b75",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/openmr/network.js",
+      "http": 200,
+      "sha256": "0131f691def8867352d1846e8bd8087666f028a1086c91cea9c1026128636503",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/openmr/gps.js",
+      "http": 200,
+      "sha256": "afd028122e807fc58ff35da6d0b87ee28af73ce0f634f45b27b42caa494c3d57",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "./assets/unified-v8-map.js",
+      "http": 200,
+      "sha256": "47f943ce893d30f73793713ad9ee5e4396136389d49616950e15d1c294669372",
+      "sourceByteMatch": true
+    },
+    {
+      "path": "data/unified-complete/borneo-registry.json",
+      "http": 200,
+      "sourceByteMatch": true,
+      "sha256": "45aee719730c50f357154fc9ef8a45bc9e7479146cfa3f0ae73b9c947dbf0311"
+    },
+    {
+      "path": "data/unified-complete/china-references.json",
+      "http": 200,
+      "sourceByteMatch": true,
+      "sha256": "5011616070310a01bf73db434448b6451a493f7fa6ae9eb1b684d7105552403b"
+    },
+    {
+      "path": "data/unified-complete/shuttle-audit.json",
+      "http": 200,
+      "sourceByteMatch": true,
+      "sha256": "c4d7ae094b888d03649854ffff1f7d2ea89128df7978e65e026ba33fc2555680"
+    },
+    {
+      "path": "data/unified-v8/physical-network.json",
+      "http": 200,
+      "sourceByteMatch": true,
+      "sha256": "8f469e80511ace31817162a779f49f2d1a885889e704fee7fd9aa7004da468da"
+    }
+  ],
+  "canonicalAuthNavigation": true,
+  "sourceComparison": "Runtime files match current candidate source; later QA-only commits are not silently described as deployed."
+}

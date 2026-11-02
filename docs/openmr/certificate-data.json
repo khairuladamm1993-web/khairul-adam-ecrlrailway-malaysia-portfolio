@@ -1,0 +1,76 @@
+{
+  "product": "OpenMR-S10Map",
+  "owner": "MR-S10 Railway Systems",
+  "version": "1.0.0-rc1",
+  "branch": "candidate/openmrs10-my-sg-th-20261103",
+  "runtimeSha": "fc1600b35521457eb9ee90ad79070f4dff7726dd",
+  "qaSha": "3fde70401c276109ab1e63b570a2bae631c368b0",
+  "deploymentId": "dpl_GrsFbdbghy4g3VLLpqCqE3YANrwy",
+  "url": "https://openmr-s10map.vercel.app/",
+  "issuedAt": "2026-11-03T01:23:15+08:00",
+  "ci": {
+    "run": 41488431805,
+    "conclusion": "success",
+    "sourceTests": 155,
+    "jobs": 11,
+    "browserCases": 10
+  },
+  "hosted": {
+    "passed": 4,
+    "GPS": "SIMULATED input; physical hardware NOT VERIFIED"
+  },
+  "orientation": {
+    "passed": 2
+  },
+  "ownerUAT": "PENDING",
+  "security": {
+    "activeTemporaryGrants": 0,
+    "unauthenticatedHTTP": 302,
+    "authRuntime": "4681dc3732e83691eaf9323f5bc872f70adff1be",
+    "canonicalAuthDeployment": "dpl_91iA6hiYcjG2JvUGUMiWGnyPSp32",
+    "sourceAuthUnchanged": true,
+    "RLS": "UNCHANGED; no new real-role/RLS execution claimed"
+  },
+  "coverage": {
+    "routes": 44,
+    "listedAssociations": 742,
+    "mappedAssociations": 676,
+    "MY": {
+      "routes": 21,
+      "listed": 395,
+      "points": 371
+    },
+    "SG": {
+      "routes": 17,
+      "listed": 288,
+      "points": 288
+    },
+    "TH": {
+      "routes": 6,
+      "listed": 59,
+      "points": 17
+    }
+  },
+  "geometry": {
+    "OSMSourceSegments": 154,
+    "officialVerifiedSegments": 0,
+    "optionalApproximate": 13,
+    "unassignedOSMSegments": 55
+  },
+  "performance": {
+    "scope": "90 RAF callbacks; 72 country/MRS10 filter transitions, 3 post-GC Chromium heap samples; not physical-device FPS or long-duration leak certification",
+    "callbackP95MS": 16.80000000000291,
+    "callbackMaxMS": 516.5999999999985,
+    "domCounts": [
+      597,
+      597,
+      597
+    ],
+    "heapBytes": [
+      20853676,
+      24336896,
+      24751112
+    ]
+  },
+  "verdict": "GO for protected Preview Owner UAT with declared data gaps; no operational certification"
+}
