@@ -10,7 +10,7 @@ for(const p of ['api','server','.env','db'])if(fs.existsSync(out+'/'+p))throw Er
 console.log('COMPLETE_MAP_PREVIEW_READY_ACCEPTED_AUTH_UNCHANGED');
 
 const accepted=JSON.parse(fs.readFileSync(out+'/assets/build-info.js','utf8').match(/Object.freeze\((.*)\);/)[1]);
-fs.writeFileSync(out+'/assets/openmr-build-info.js','window.OpenMRBuild=Object.freeze('+JSON.stringify({product:'OpenMR-S10Map',version:'1.0.0-rc1',scope:'MY-SG-TH',gitSha:accepted.gitSha,branch:process.env.VERCEL_GIT_COMMIT_REF||'candidate/openmrs10-my-sg-th-20261103',deploymentId:accepted.deploymentId,builtAt:accepted.buildTimestamp,authRuntime:'4681dc3732e83691eaf9323f5bc872f70adff1be'})+');');
+fs.writeFileSync(out+'/assets/openmr-build-info.js','window.OpenMRBuild=Object.freeze('+JSON.stringify({product:'OpenMR-S10Map',version:'3.0.0-rc1',scope:'MY-SG-TH',gitSha:accepted.gitSha,branch:process.env.VERCEL_GIT_COMMIT_REF||'candidate/openmr-r3-economic-intelligence-20261103',deploymentId:accepted.deploymentId,builtAt:accepted.buildTimestamp,authRuntime:'4681dc3732e83691eaf9323f5bc872f70adff1be'})+');');
 const config=JSON.parse(fs.readFileSync(out+'/vercel.json','utf8'));
 config.headers.push({source:'/(.*)',headers:[{key:'Permissions-Policy',value:'geolocation=(self)'}]});
 fs.writeFileSync(out+'/vercel.json',JSON.stringify(config));

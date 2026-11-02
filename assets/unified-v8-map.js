@@ -7,7 +7,7 @@ const core=window.MRS10UnifiedV4Registry, kl=window.MRS10KLRegistry,
  integration=window.MRS10UnifiedV6Adapter,ktm=window.MRS10UnifiedV7KTM;
 let singapore,physical,ecrl,ecrlUI,journeyView,ownerCalibration,masterIntelligence,threeRailways,completeSources;
 const referenceMarkers=new Map();
-let pendingRouteFocus=null,cameraIntent=0,gps;
+let pendingRouteFocus=null,cameraIntent=0,gps,r3UI,r3Data=null,r3Gaps=null;
 const openmr=window.OpenMRNetwork;
 const paths=new Map();
 const locales=['ms','en','zh','th'];
@@ -72,7 +72,7 @@ function restoreLayers(saved){
  pendingRestore=null;
 }
 const focus=window.MRS10V81Focus.create({
- capture:()=>({layers:layerSnapshot(),category:state.category,selected:state.selected,camera:cameraSnapshot()}),
+ capture:()=>({layers:layerSnapshot(),category:state.category,selected:state.selected,camera:cameraSnapshot(),intelligence:r3UI?.selection}),
  apply:selection=>{
   if(!state.map?.getLayer('mrs10-v8-geometry'))return;
   ecrl?.setVisibility(state.map,state.category,selection.mode);syncReferenceMarkers(selection);
@@ -83,7 +83,7 @@ const focus=window.MRS10V81Focus.create({
   const ids=selection.segmentIds||physical.segments.filter(s=>s.routeIds.some(id=>visible.has(id))).map(s=>s.segmentId);
   if(state.map.getLayer('mrs10-v8-geometry'))state.map.setFilter('mrs10-v8-geometry',['in',['get','segmentId'],['literal',ids]]);
  },
- restore:saved=>{state.category=saved.category;state.selected=saved.selected;restoreLayers(saved.layers);if(saved.camera&&state.map){state.map.stop();state.map.jumpTo(saved.camera);state.zoomDone=true;}buildFilters();buildLegend();buildRoutes();buildLineup();syncReferenceMarkers()}
+ restore:saved=>{state.category=saved.category;state.selected=saved.selected;restoreLayers(saved.layers);r3UI?.select(saved.intelligence||{routeIds:[]});if(saved.camera&&state.map){state.map.stop();state.map.jumpTo(saved.camera);state.zoomDone=true;}buildFilters();buildLegend();buildRoutes();buildLineup();syncReferenceMarkers()}
 });
 function cameraSnapshot(){return state.map?{center:state.map.getCenter().toArray(),zoom:state.map.getZoom(),bearing:state.map.getBearing(),pitch:state.map.getPitch(),padding:state.map.getPadding()}:null}
 function closeFocus(){cameraIntent++;pendingRouteFocus=null;$('ecrl-no-point').hidden=true;if(state.popup){const old=state.popup;state.popup=null;old.remove()}focus.exit()}
@@ -161,7 +161,7 @@ function focusRoute(routeId){
  const points=[...(state.results.get(routeId)?.points||[]),...physical.segments.filter(s=>s.routeIds.includes(routeId)&&s.geometry&&($('approximate').checked||s.geometryVerification!=='SECONDARY_APPROXIMATE')).flatMap(s=>(s.geometry.type==='LineString'?s.geometry.coordinates:s.geometry.coordinates.flat()).map(coordinates=>({coordinates})))];
  if(!state.mapReady||(!state.results.has(routeId)&&points.length===0)){pendingRouteFocus=routeId;return;}
  pendingRouteFocus=null;state.zoomDone=true;state.map?.stop();
- if(focus.current.mode==='NORMAL')focus.enter({mode:'ROUTE_FOCUS',routeIds:[routeId]});
+ if(focus.current.mode==='NORMAL')focus.enter({mode:'ROUTE_FOCUS',routeIds:[routeId]});r3UI?.select({routeIds:[routeId],stationId:focus.current.stationId,segmentId:focus.current.segmentId});
  if(points.length===0){const route=state.manifest.find(r=>r.id===routeId);focus.enter({mode:'STATION_FOCUS',routeIds:[routeId]});const host=el('div');host.append(el('h3',null,route.label),el('p',null,tr('unlocated')),el('p',null,route.geometryStatus||tr('serviceNotTrack')),el('p',null,route.topologyStatus||'UNKNOWN'));appendSource(host,route.source);noPointPanel(host);return;}
  if(points.length===1){state.map.easeTo({center:points[0].coordinates,zoom:11,duration:350});return}
  const c=points.map(p=>p.coordinates);
@@ -244,7 +244,7 @@ function renderOpenMRIntelligence(){
 function applyLanguage(){
  Object.assign(i18n[state.locale],completeCopy[state.locale]);
  document.documentElement.lang=state.locale;
- gps?.label();renderOpenMRIntelligence();$('details-toggle').setAttribute('aria-label',tr('mapDetails'));
+ gps?.label();r3UI?.render();renderOpenMRIntelligence();$('details-toggle').setAttribute('aria-label',tr('mapDetails'));
  $('title').textContent=tr('title');$('description').textContent=tr('desc');
  $('lineup-title').textContent=tr('lineup');$('search').placeholder=tr('search');
  $('reset').textContent=tr('reset');$('language').textContent=state.locale==='ms'?'BM':state.locale==='en'?'EN':state.locale==='zh'?'中文':'ไทย';
@@ -360,8 +360,8 @@ function showInfrastructure(assetId,moveCamera=false){
   note.textContent=(label[state.locale]||label.en)+' · '+ownerRef.locationConfidence;
   host.append(note);
  }
+ focus.enter({mode:'INFRASTRUCTURE_FOCUS',routeIds:[],assetId});r3UI?.select({assetIds:[assetId],contexts:['ECRL']});
  if(moveCamera&&visible&&state.map)state.map.easeTo({center:ref.coordinates,zoom:Math.max(state.map.getZoom(),12.5),duration:300});
- focus.enter({mode:'INFRASTRUCTURE_FOCUS',routeIds:[],assetId});
  if(visible&&state.map){mountPopup(host,ref.coordinates)}
  else{const old=state.popup;state.popup=null;old?.remove();const panel=$('ecrl-no-point');panel.replaceChildren();const close=el('button',null,'×');close.type='button';close.setAttribute('aria-label',ecrl.t(state.locale,'close'));close.onclick=closeFocus;panel.append(close,host);panel.hidden=false;close.focus({preventScroll:true})}
 }
@@ -382,7 +382,7 @@ function startMap(){
  try{
   state.map=new maplibregl.Map({container:'map',style:styleURL(),center:[101.69,3.13],zoom:10.1,
    bearing:0,pitch:0,attributionControl:true});
-  gps=window.OpenMRGPS.create({map:state.map,maplibregl,button:$('my-location'),message:$('gps-status'),getLocale:()=>state.locale,onRequest:()=>{pendingRouteFocus=null;state.zoomDone=true;return ++cameraIntent;},canCenter:intent=>intent===cameraIntent});
+  gps=window.OpenMRGPS.create({map:state.map,maplibregl,button:$('my-location'),clearButton:$('gps-clear'),message:$('gps-status'),getLocale:()=>state.locale,onRequest:()=>{pendingRouteFocus=null;state.zoomDone=true;return ++cameraIntent;},canCenter:intent=>intent===cameraIntent});
   window.addEventListener('pagehide',e=>{if(!e.persisted)gps.dispose()});
   state.map.addControl(new maplibregl.NavigationControl({showCompass:true}),'top-right');
   state.map.on('dragstart',()=>{cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;});
@@ -443,7 +443,7 @@ function startMap(){
 }
 function styleURL(){return 'https://tiles.openfreemap.org/styles/'+(state.theme==='dark'?'dark':'positron')}
 function reset(){
- closeFocus();
+ closeFocus();r3UI?.select({routeIds:[]});r3UI?.setMode('network');
  state.category='MRS10';for(const k of Object.keys(ecrl.flags))ecrl.flags[k]=true;state.map?.stop();state.map?.jumpTo({bearing:0,pitch:0});state.selected='mrt-kajang';$('search').value='';$('search-results').hidden=true;
  buildFilters();buildLegend();buildRoutes();buildLineup();applyVisibility();
  state.zoomDone=false;fitOnce();ecrlUI?.render();
@@ -471,7 +471,7 @@ async function loadGIS(){
    state.pending--;buildLegend();buildLineup();updateMapLayer();if(pendingRouteFocus===route.id)focusRoute(route.id);showStatus();
   }
  }));
- fitOnce();
+ r3UI?.refresh();fitOnce();
 }
 async function init(){
  try{completeSources=await window.MRS10CompleteSources.load();singapore=await window.MRS10V8Singapore.load();physical=await fetch('./data/unified-v8/physical-network.json').then(r=>{if(!r.ok)throw Error('GEOMETRY_HTTP_'+r.status);return r.json()});window.MRS10V8Geometry.validate(physical);threeRailways=await window.MRS10ThreeRailways.load(window.MRS10V8Geometry);threeRailways.apply(singapore);physical={...physical,nodes:[...physical.nodes,...threeRailways.nodes],segments:[...physical.segments,...threeRailways.segments]};window.MRS10V8Geometry.validate(physical);state.manifest=[...core.loadManifest(kl,ampang),...integration.routes(),...ktm.routes(),...singapore.routes(),...completeSources.routes()]}catch(e){$('map-error').textContent='Registry: '+e.message;return}
@@ -502,6 +502,8 @@ async function init(){
   if(state.map){state.mapReady=false;state.map.setStyle(styleURL())}
   showStatus();
  });
+ r3UI=window.OpenMRIntelligence.mount({document,controls:$('r3-views'),host:$('corridor-intelligence'),getLocale:()=>state.locale,getData:()=>r3Data||{facilities:[],relationships:[],sectors:[]},getRegistry:()=>window.OpenMRIntelligence.registry({manifest:state.manifest,results:state.results,physical,ecrl,relations:relationsFor}),onAssetSelect:id=>showInfrastructure(id,true)});
+ void Promise.all(['intelligence','gaps'].map(name=>fetch('./data/openmr-r3/'+name+'.json',{credentials:'same-origin'}).then(r=>{if(!r.ok)throw Error('R3_SOURCE_UNAVAILABLE');return r.json()}))).then(([data,gaps])=>{r3Data=data;r3Gaps=gaps;r3UI.refresh();}).catch(()=>{$('r3-source-status').textContent='DATA GAP · Intelligence sources unavailable; accepted railway map remains active.';});
  applyLanguage();startMap();
  if(state.map){
   ownerCalibration=window.MRS10ECRLOwnerCalibration.create({map:state.map,getCategory:()=>state.category,onSelect:id=>showInfrastructure(id)});
@@ -658,7 +660,7 @@ function showTrackAt(e){
  if(state.lastTap)state.lastTap.segmentId=s.segmentId;
  const segmentIds=window.MRS10V81Focus.component(physical,s.segmentId);
  const routeIds=openmr.routesForSegment(s);
- focus.enter({mode:'TRACK_FOCUS',...(routeIds.length?{}:{segmentIds}),routeIds,segmentId:s.segmentId});if(routeIds.length){state.selected=routeIds[0];buildRoutes();buildLineup();}
+ focus.enter({mode:'TRACK_FOCUS',...(routeIds.length?{}:{segmentIds}),routeIds,segmentId:s.segmentId});if(routeIds.length){state.selected=routeIds[0];buildRoutes();buildLineup();}r3UI?.select({routeIds,segmentId:s.segmentId});
  const host=el('div');host.append(el('strong',null,tr('track')),el('p',null,s.segmentId));
  for(const [label,value] of [['railwayType',s.railwayType],['verification',s.geometryVerification],['confidence',s.confidence],['sourceDate',s.sourceDate]])host.append(el('p',null,tr(label)+': '+(value??'UNKNOWN')));
  for(const key of ['trackCount','gauge','electrification','bridge','tunnel','operationalStatus','topologyValidation'])host.append(el('p',null,key+': '+(s[key]==null?'UNKNOWN':typeof s[key]==='object'?JSON.stringify(s[key]):s[key])));
@@ -672,4 +674,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 window.MRS10CompleteQA=Object.freeze({summary:()=>completeSources.summary(),manifest:()=>state.manifest.map(r=>({id:r.id,label:r.label,color:r.color,category:r.category,expected:r.expected,stops:r.stops,paths:r.paths,source:r.source})),focus:id=>focusRoute(id),select:(route,id)=>focusStation(route,id),layers:layerSnapshot,routeState:id=>({points:(state.results.get(id)?.points||[]).map(p=>({id:p.id,coordinates:p.coordinates})),markerColor:state.map?.getLayer(layerId(id)+'-inner')?state.map.getPaintProperty(layerId(id)+'-inner','circle-color'):null,segments:physical.segments.filter(s=>s.routeIds.includes(id)).map(s=>({id:s.segmentId,status:s.geometryVerification}))}),close:closeFocus,reference:id=>showReference(completeSources.references.find(r=>r.id===id)),camera:cameraSnapshot,bounds:()=>state.map.getBounds().toArray()});
 window.MRS10ThreeRailwaysQA=Object.freeze({snapshot:()=>({status:threeRailways?.status,points:threeRailways?.points.length,segments:threeRailways?.segments.length,corridor:masterIntelligence?.corridor.length,endpoints:masterIntelligence?.endpoints.map(e=>({id:e.assetId,point:e.point,status:e.verificationStatus}))}),inspect:(route,id)=>{const p=findGeo(route,id);if(!p)return false;state.map.jumpTo({center:p.coordinates,zoom:16});return true}});
 
-window.OpenMRQA=Object.freeze({gps:()=>gps?.snapshot(),category:()=>state.category,operation:id=>openmr.operation(state.manifest.find(r=>r.id===id)),version:'OpenMR-S10 V1.0'});
+window.OpenMRQA=Object.freeze({gps:()=>gps?.snapshot(),category:()=>state.category,operation:id=>openmr.operation(state.manifest.find(r=>r.id===id)),version:'OpenMR-S10 R3'});
+
+window.OpenMRR3QA=Object.freeze({snapshot:()=>({sourceLoaded:!!r3Data&&!!r3Gaps,...r3UI?.snapshot(),gapCount:r3Gaps?.gaps.length||0}),visual:()=>{const image=id=>{const x=state.map.getImage(id),p=x?.data;return {bytes:p?.data||p,width:p?.width||x?.width}};const star=image('mrs10-v8-interchange-red-star'),idx=(Math.floor(star.width/2)*star.width+Math.floor(star.width/2))*4;const keys=state.map.listImages().filter(k=>k.startsWith('mrs10-v8-shared-'));return {starCentre:Array.from(star.bytes?.slice(idx,idx+4)||[]),paletteCount:keys.length,paletteColorsPreserved:keys.every(key=>{const bytes=image(key).bytes,colors=new Set();for(let i=0;i<bytes.length;i+=4)if(bytes[i+3]===255)colors.add((bytes[i]<<16)|(bytes[i+1]<<8)|bytes[i+2]);return key.slice('mrs10-v8-shared-'.length).split('|').every(id=>colors.has(parseInt(state.manifest.find(r=>r.id===id).color.slice(1),16)));})}},inventory:()=>window.OpenMRIntelligence.registry({manifest:state.manifest,results:state.results,physical,ecrl,relations:relationsFor}).map(({id,objectType,sourceURL,geometryVerificationStatus,missingData})=>({id,objectType,sourceURL,geometryVerificationStatus,missingData}))});

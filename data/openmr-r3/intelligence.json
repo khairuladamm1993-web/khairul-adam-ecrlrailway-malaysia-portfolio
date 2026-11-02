@@ -1,0 +1,920 @@
+{
+  "schemaVersion": "3.0.0",
+  "observedAt": "2026-11-02T21:24:06+00:00",
+  "product": "MR-S10 Freight & Economic Corridor Intelligence",
+  "sources": {
+    "MIDA_EAP": {
+      "url": "https://www.mida.gov.my/ecrl-eap/",
+      "publisher": "MIDA",
+      "date": "UNKNOWN",
+      "kind": "OFFICIAL_DEVELOPMENT_CONTEXT",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometryAuthority": "NONE_FOR_EXACT_RAIL_GEOMETRY"
+    },
+    "MIDA_ECER": {
+      "url": "https://www.mida.gov.my/economic-corridors-ecer/",
+      "publisher": "MIDA",
+      "date": "UNKNOWN",
+      "kind": "OFFICIAL_INDUSTRIAL_CONTEXT",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometryAuthority": "NONE_FOR_EXACT_RAIL_GEOMETRY"
+    },
+    "MIDA_OVERVIEW": {
+      "url": "https://www.mida.gov.my/ecrl-overview/",
+      "publisher": "MIDA",
+      "date": "UNKNOWN",
+      "kind": "OFFICIAL_CORRIDOR_CONTEXT",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometryAuthority": "NONE_FOR_EXACT_RAIL_GEOMETRY"
+    },
+    "MMC_MOU": {
+      "url": "https://www.mmcports.com.my/kuantan-port-consortium-northport-malaysia-rail-link-ink-memorandum-of-understanding/",
+      "publisher": "MMC Ports / Northport",
+      "date": "2024-08-15",
+      "kind": "PORT_OPERATOR_MOU",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometryAuthority": "NONE_FOR_EXACT_RAIL_GEOMETRY"
+    },
+    "KPC_MOU": {
+      "url": "https://www.kuantanport.com.my/zh/kuantan-port-and-malaysian-rail-link-sdn-bhd-forge-transformative-partnership/",
+      "publisher": "Kuantan Port",
+      "date": "UNKNOWN",
+      "kind": "PORT_OPERATOR_MOU",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometryAuthority": "NONE_FOR_EXACT_RAIL_GEOMETRY"
+    },
+    "EPIC": {
+      "url": "https://www.epicgroup.com.my/news/EPIC-Berhad-Drives-Pelabuhan-Kemaman-Expansion-Strengthening-Pelabuhan-Kemaman-As-Leading-Logistic-Centre",
+      "publisher": "EPIC / Konsortium Pelabuhan Kemaman",
+      "date": "2026-03-25",
+      "kind": "PORT_OPERATOR_CONSTRUCTION_REPORT",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometryAuthority": "NONE_FOR_EXACT_RAIL_GEOMETRY"
+    },
+    "MOT_PORTS": {
+      "url": "https://www.mot.gov.my/en/maritime/infrastructure/development-administration-of-ports",
+      "publisher": "Ministry of Transport Malaysia",
+      "date": "UNKNOWN",
+      "kind": "OFFICIAL_PORT_REGISTER",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometryAuthority": "NONE_FOR_EXACT_RAIL_GEOMETRY"
+    },
+    "WESTPORTS": {
+      "url": "https://www.westportsholdings.com/contact-us/",
+      "publisher": "Westports Holdings",
+      "date": "UNKNOWN",
+      "kind": "OPERATOR_FACILITY_IDENTITY",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometryAuthority": "NONE_FOR_EXACT_RAIL_GEOMETRY"
+    },
+    "ECER_LOGISTICS": {
+      "url": "https://www.ecerdc.com.my/en/logistics-and-services/",
+      "publisher": "ECERDC",
+      "date": "UNKNOWN",
+      "kind": "REGIONAL_AGENCY_CONTEXT",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometryAuthority": "NONE_FOR_EXACT_RAIL_GEOMETRY"
+    },
+    "PKNP_LEGACY": {
+      "url": "https://investpknp.gov.my/invest-in-pahang/infrastructure/the-kerteh-kemaman-kuantan-railroad/",
+      "publisher": "Pahang investment agency / PKNP",
+      "date": "UNKNOWN",
+      "kind": "HISTORICAL_RAIL_CONTEXT_NOT_CURRENT_OPERATION",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometryAuthority": "NONE_FOR_EXACT_RAIL_GEOMETRY"
+    },
+    "SRT_TIMETABLE": {
+      "url": "https://ttsview.railway.co.th/SRT_Schedule2022.php?line=4&ln=en&trip=2",
+      "publisher": "State Railway of Thailand",
+      "date": "UNKNOWN",
+      "kind": "OFFICIAL_IDENTITIES_TIMETABLE_NOT_COORDINATES",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometryAuthority": "NONE_FOR_EXACT_RAIL_GEOMETRY"
+    },
+    "KUTS": {
+      "url": "https://mail.mysarawakmetro.com/what-we-do/kuching-urban-transportation-system",
+      "publisher": "Sarawak Metro",
+      "date": "UNKNOWN",
+      "kind": "OPERATOR_PROJECT_NOT_SURVEY",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometryAuthority": "NONE_FOR_EXACT_RAIL_GEOMETRY"
+    },
+    "KTMB": {
+      "url": "https://www.ktmb.com.my/TrainTime.html",
+      "publisher": "KTMB",
+      "date": "2026-10-02",
+      "kind": "OFFICIAL_SHUTTLE_TIMETABLE_NOT_COORDINATES",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometryAuthority": "NONE_FOR_EXACT_RAIL_GEOMETRY"
+    }
+  },
+  "facilities": [
+    {
+      "id": "econ-northport",
+      "name": "Northport · Port Klang",
+      "objectType": "PORT",
+      "sourceURL": "https://www.mmcports.com.my/kuantan-port-consortium-northport-malaysia-rail-link-ink-memorandum-of-understanding/",
+      "sourceDate": "2024-08-15",
+      "sourceId": "MMC_MOU",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "EXISTING_PORT_REFERENCE",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "PORT_KLANG_ANNEX",
+        "MY"
+      ],
+      "railAssetIds": [],
+      "sectors": [
+        "LOGISTICS",
+        "WAREHOUSING"
+      ],
+      "notes": "Port identity exists; ECRL land-bridge cooperation is an MoU, not evidence of freight operations."
+    },
+    {
+      "id": "econ-westports",
+      "name": "Westports · Port Klang",
+      "objectType": "PORT",
+      "sourceURL": "https://www.westportsholdings.com/contact-us/",
+      "sourceDate": "UNKNOWN",
+      "sourceId": "WESTPORTS",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "EXISTING_PORT_REFERENCE",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "PORT_KLANG_ANNEX",
+        "MY"
+      ],
+      "railAssetIds": [],
+      "sectors": [
+        "LOGISTICS",
+        "WAREHOUSING"
+      ],
+      "notes": "Independent Port Klang annex. ECRL chainage, alignment and terminal interfaces remain UNKNOWN."
+    },
+    {
+      "id": "econ-kuantan",
+      "name": "Kuantan Port",
+      "objectType": "PORT",
+      "sourceURL": "https://www.mot.gov.my/en/maritime/infrastructure/development-administration-of-ports",
+      "sourceDate": "UNKNOWN",
+      "sourceId": "MOT_PORTS",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "EXISTING_PORT_REFERENCE",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "ECRL",
+        "MY"
+      ],
+      "railAssetIds": [
+        "ecrl-port-kuantan"
+      ],
+      "sectors": [
+        "LOGISTICS",
+        "MANUFACTURING"
+      ],
+      "notes": "Separate existing port identity from reported ECRL spur construction and future service."
+    },
+    {
+      "id": "econ-kemaman",
+      "name": "Kemaman Port",
+      "objectType": "PORT",
+      "sourceURL": "https://www.mot.gov.my/en/maritime/infrastructure/development-administration-of-ports",
+      "sourceDate": "UNKNOWN",
+      "sourceId": "MOT_PORTS",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "EXISTING_PORT_REFERENCE",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "ECRL",
+        "MY"
+      ],
+      "railAssetIds": [
+        "ecrl-port-kemaman"
+      ],
+      "sectors": [
+        "LOGISTICS",
+        "ENERGY"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "econ-kemaman-spur",
+      "name": "Kemaman ECRL port spur",
+      "objectType": "FREIGHT_SPUR",
+      "sourceURL": "https://www.epicgroup.com.my/news/EPIC-Berhad-Drives-Pelabuhan-Kemaman-Expansion-Strengthening-Pelabuhan-Kemaman-As-Leading-Logistic-Centre",
+      "sourceDate": "2026-03-25",
+      "sourceId": "EPIC",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "UNDER_CONSTRUCTION_REPORTED",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "ECRL",
+        "MY"
+      ],
+      "railAssetIds": [
+        "ecrl-port-kemaman"
+      ],
+      "sectors": [
+        "LOGISTICS",
+        "ENERGY"
+      ],
+      "notes": "Operator reported construction on 25 March 2026; as-built geometry and commencement of rail cargo not verified."
+    },
+    {
+      "id": "econ-kerteh",
+      "name": "Kerteh–Kemaman–Kuantan legacy rail context",
+      "objectType": "INDUSTRIAL_CORRIDOR",
+      "sourceURL": "https://investpknp.gov.my/invest-in-pahang/infrastructure/the-kerteh-kemaman-kuantan-railroad/",
+      "sourceDate": "UNKNOWN",
+      "sourceId": "PKNP_LEGACY",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "HISTORICAL_CURRENT_OPERATION_UNKNOWN",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "ECRL",
+        "MY"
+      ],
+      "railAssetIds": [
+        "ecrl-yard-kerteh-petronas"
+      ],
+      "sectors": [
+        "PETROCHEMICAL",
+        "ENERGY"
+      ],
+      "notes": "Historical freight corridor. Not confirmation of an operational ECRL connection."
+    },
+    {
+      "id": "econ-kbp",
+      "name": "Kerteh Biopolymer Park",
+      "objectType": "INDUSTRIAL_ZONE",
+      "sourceURL": "https://www.mida.gov.my/economic-corridors-ecer/",
+      "sourceDate": "UNKNOWN",
+      "sourceId": "MIDA_ECER",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "AGENCY_LISTED_CONTEXT_CHECK_CURRENT_STATUS",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "ECRL",
+        "MY"
+      ],
+      "railAssetIds": [],
+      "sectors": [
+        "MANUFACTURING",
+        "ENERGY",
+        "AGRIBUSINESS"
+      ],
+      "notes": "Agency-listed park context; no assumed direct rail siding or freight commitment."
+    },
+    {
+      "id": "econ-mckip",
+      "name": "Malaysia–China Kuantan Industrial Park",
+      "objectType": "INDUSTRIAL_ZONE",
+      "sourceURL": "https://www.mida.gov.my/economic-corridors-ecer/",
+      "sourceDate": "UNKNOWN",
+      "sourceId": "MIDA_ECER",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "AGENCY_LISTED_CONTEXT_CHECK_CURRENT_STATUS",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "ECRL",
+        "MY"
+      ],
+      "railAssetIds": [],
+      "sectors": [
+        "MANUFACTURING",
+        "LOGISTICS"
+      ],
+      "notes": "Agency-listed park context; no assumed direct rail siding or freight commitment."
+    },
+    {
+      "id": "econ-gambang",
+      "name": "Gambang Halal Park",
+      "objectType": "INDUSTRIAL_ZONE",
+      "sourceURL": "https://www.mida.gov.my/economic-corridors-ecer/",
+      "sourceDate": "UNKNOWN",
+      "sourceId": "MIDA_ECER",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "AGENCY_LISTED_CONTEXT_CHECK_CURRENT_STATUS",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "ECRL",
+        "MY"
+      ],
+      "railAssetIds": [],
+      "sectors": [
+        "HALAL",
+        "MANUFACTURING"
+      ],
+      "notes": "Agency-listed park context; no assumed direct rail siding or freight commitment."
+    },
+    {
+      "id": "econ-pasir-mas",
+      "name": "Pasir Mas Halal Park",
+      "objectType": "INDUSTRIAL_ZONE",
+      "sourceURL": "https://www.mida.gov.my/economic-corridors-ecer/",
+      "sourceDate": "UNKNOWN",
+      "sourceId": "MIDA_ECER",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "AGENCY_LISTED_CONTEXT_CHECK_CURRENT_STATUS",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "ECRL",
+        "MY"
+      ],
+      "railAssetIds": [],
+      "sectors": [
+        "HALAL",
+        "AGRIBUSINESS"
+      ],
+      "notes": "Agency-listed park context; no assumed direct rail siding or freight commitment."
+    },
+    {
+      "id": "econ-tok-bali",
+      "name": "Tok Bali Industrial Park",
+      "objectType": "INDUSTRIAL_ZONE",
+      "sourceURL": "https://www.mida.gov.my/economic-corridors-ecer/",
+      "sourceDate": "UNKNOWN",
+      "sourceId": "MIDA_ECER",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "AGENCY_LISTED_CONTEXT_CHECK_CURRENT_STATUS",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "ECRL",
+        "MY"
+      ],
+      "railAssetIds": [],
+      "sectors": [
+        "MANUFACTURING",
+        "LOGISTICS"
+      ],
+      "notes": "Agency-listed park context; no assumed direct rail siding or freight commitment."
+    },
+    {
+      "id": "econ-inland-logistics",
+      "name": "ECRL inland logistics / cargo-oriented development context",
+      "objectType": "LOGISTICS_HUB",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN",
+      "sourceId": "MIDA_EAP",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "PLANNED_POLICY_CONTEXT",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "ECRL",
+        "MY"
+      ],
+      "railAssetIds": [],
+      "sectors": [
+        "LOGISTICS",
+        "WAREHOUSING",
+        "REGIONAL_SERVICES"
+      ],
+      "notes": "Policy-level hub context, not a surveyed terminal, named operational hub or executed development."
+    },
+    {
+      "id": "econ-tod",
+      "name": "Station-area transit-oriented development context",
+      "objectType": "DEVELOPMENT_CONTEXT",
+      "sourceURL": "https://www.mida.gov.my/ecrl-overview/",
+      "sourceDate": "UNKNOWN",
+      "sourceId": "MIDA_OVERVIEW",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "PLANNED_POLICY_CONTEXT",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "ECRL",
+        "MY"
+      ],
+      "railAssetIds": [],
+      "sectors": [
+        "TOD",
+        "REGIONAL_SERVICES",
+        "HOSPITALITY"
+      ],
+      "notes": "Preliminary station-area planning context; land, access, demand and approvals require study."
+    },
+    {
+      "id": "econ-tourism",
+      "name": "East Coast tourism and hospitality opportunity context",
+      "objectType": "TOURISM_REGION",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN",
+      "sourceId": "MIDA_EAP",
+      "retrievedAt": "2026-11-02T21:24:06+00:00",
+      "geometry": null,
+      "geometryVerificationStatus": "NO_VERIFIED_GEOMETRY",
+      "operationalStatus": "PLANNED_POLICY_CONTEXT",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NOT_A_PROVEN_PHYSICAL_RAIL_CONNECTION",
+      "missingData": [
+        "EXACT_GEOMETRY",
+        "TRACK_ANCHOR",
+        "CURRENT_SERVICE_CONFIRMATION"
+      ],
+      "contexts": [
+        "ECRL",
+        "MY"
+      ],
+      "railAssetIds": [],
+      "sectors": [
+        "TOURISM",
+        "HOSPITALITY",
+        "REGIONAL_SERVICES"
+      ],
+      "notes": "Regional opportunity theme only; no unsourced visitor volume, itinerary or journey time."
+    }
+  ],
+  "relationships": [
+    {
+      "id": "econ-link-landbridge",
+      "from": "econ-kuantan",
+      "to": "econ-northport",
+      "type": "DOCUMENTARY_RELATION_NOT_GEOMETRY",
+      "sourceURL": "https://www.mmcports.com.my/kuantan-port-consortium-northport-malaysia-rail-link-ink-memorandum-of-understanding/",
+      "sourceDate": "2024-08-15",
+      "geometry": null,
+      "geometryVerificationStatus": "LOGICAL_ONLY",
+      "operationalStatus": "MOU_COOPERATION",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NO_THROUGH_TRACK_INFERRED",
+      "missingData": [
+        "AS_BUILT_CONNECTION",
+        "OPERATING_AGREEMENT",
+        "CARGO_START_DATE"
+      ],
+      "notes": "Cooperation for a proposed land bridge; not evidence that cargo has started."
+    },
+    {
+      "id": "econ-link-westports",
+      "from": "econ-inland-logistics",
+      "to": "econ-westports",
+      "type": "DOCUMENTARY_RELATION_NOT_GEOMETRY",
+      "sourceURL": "https://www.mida.gov.my/ecrl-overview/",
+      "sourceDate": "UNKNOWN",
+      "geometry": null,
+      "geometryVerificationStatus": "LOGICAL_ONLY",
+      "operationalStatus": "PLANNED_POLICY_CONTEXT",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NO_THROUGH_TRACK_INFERRED",
+      "missingData": [
+        "AS_BUILT_CONNECTION",
+        "OPERATING_AGREEMENT",
+        "CARGO_START_DATE"
+      ],
+      "notes": "Port Klang extension context held separately pending chainage and alignment validation."
+    },
+    {
+      "id": "econ-link-kemaman",
+      "from": "econ-inland-logistics",
+      "to": "econ-kemaman-spur",
+      "type": "DOCUMENTARY_RELATION_NOT_GEOMETRY",
+      "sourceURL": "https://www.epicgroup.com.my/news/EPIC-Berhad-Drives-Pelabuhan-Kemaman-Expansion-Strengthening-Pelabuhan-Kemaman-As-Leading-Logistic-Centre",
+      "sourceDate": "2026-03-25",
+      "geometry": null,
+      "geometryVerificationStatus": "LOGICAL_ONLY",
+      "operationalStatus": "UNDER_CONSTRUCTION_REPORTED",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NO_THROUGH_TRACK_INFERRED",
+      "missingData": [
+        "AS_BUILT_CONNECTION",
+        "OPERATING_AGREEMENT",
+        "CARGO_START_DATE"
+      ],
+      "notes": "Operator construction report; no rail cargo commencement assumed."
+    },
+    {
+      "id": "econ-link-industry",
+      "from": "econ-mckip",
+      "to": "econ-kuantan",
+      "type": "DOCUMENTARY_RELATION_NOT_GEOMETRY",
+      "sourceURL": "https://www.ecerdc.com.my/en/logistics-and-services/",
+      "sourceDate": "UNKNOWN",
+      "geometry": null,
+      "geometryVerificationStatus": "LOGICAL_ONLY",
+      "operationalStatus": "REGIONAL_AGENCY_CONTEXT",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NO_THROUGH_TRACK_INFERRED",
+      "missingData": [
+        "AS_BUILT_CONNECTION",
+        "OPERATING_AGREEMENT",
+        "CARGO_START_DATE"
+      ],
+      "notes": "Regional logistics association, not proof of a direct siding."
+    },
+    {
+      "id": "econ-link-kerteh",
+      "from": "econ-kbp",
+      "to": "econ-kerteh",
+      "type": "DOCUMENTARY_RELATION_NOT_GEOMETRY",
+      "sourceURL": "https://investpknp.gov.my/invest-in-pahang/infrastructure/the-kerteh-kemaman-kuantan-railroad/",
+      "sourceDate": "UNKNOWN",
+      "geometry": null,
+      "geometryVerificationStatus": "LOGICAL_ONLY",
+      "operationalStatus": "HISTORICAL_CURRENT_OPERATION_UNKNOWN",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NO_THROUGH_TRACK_INFERRED",
+      "missingData": [
+        "AS_BUILT_CONNECTION",
+        "OPERATING_AGREEMENT",
+        "CARGO_START_DATE"
+      ],
+      "notes": "Industry and legacy railway context; current physical interface is not established."
+    },
+    {
+      "id": "econ-link-proposal",
+      "from": "econ-tod",
+      "to": "econ-tourism",
+      "type": "DOCUMENTARY_RELATION_NOT_GEOMETRY",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN",
+      "geometry": null,
+      "geometryVerificationStatus": "LOGICAL_ONLY",
+      "operationalStatus": "MR_S10_PROPOSAL",
+      "confidence": "DOCUMENTARY_CONTEXT_ONLY",
+      "trackRelationship": "NO_THROUGH_TRACK_INFERRED",
+      "missingData": [
+        "AS_BUILT_CONNECTION",
+        "OPERATING_AGREEMENT",
+        "CARGO_START_DATE"
+      ],
+      "notes": "MR-S10 independent study hypothesis only; not an agency or operator commitment."
+    }
+  ],
+  "sectors": [
+    {
+      "id": "MANUFACTURING",
+      "name": "Manufacturing",
+      "benefit": "Potential regional access and supply-chain diversification — qualitative study hypothesis.",
+      "constraints": [
+        "Land-use and planning approval",
+        "Last-mile access and utility capacity",
+        "Demand and operating agreements not demonstrated"
+      ],
+      "infrastructureGaps": [
+        "Station/terminal access",
+        "Verified rail interface"
+      ],
+      "dataRisks": [
+        "Current status and geospatial coverage incomplete"
+      ],
+      "furtherStudy": [
+        "Independent survey and topology QA",
+        "Demand, environmental and feasibility assessment"
+      ],
+      "confidence": "PRELIMINARY_MR_S10_ANALYSIS_NOT_INVESTMENT_ADVICE",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN"
+    },
+    {
+      "id": "LOGISTICS",
+      "name": "Logistics",
+      "benefit": "Potential regional access and supply-chain diversification — qualitative study hypothesis.",
+      "constraints": [
+        "Land-use and planning approval",
+        "Last-mile access and utility capacity",
+        "Demand and operating agreements not demonstrated"
+      ],
+      "infrastructureGaps": [
+        "Station/terminal access",
+        "Verified rail interface"
+      ],
+      "dataRisks": [
+        "Current status and geospatial coverage incomplete"
+      ],
+      "furtherStudy": [
+        "Independent survey and topology QA",
+        "Demand, environmental and feasibility assessment"
+      ],
+      "confidence": "PRELIMINARY_MR_S10_ANALYSIS_NOT_INVESTMENT_ADVICE",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN"
+    },
+    {
+      "id": "WAREHOUSING",
+      "name": "Warehousing",
+      "benefit": "Potential regional access and supply-chain diversification — qualitative study hypothesis.",
+      "constraints": [
+        "Land-use and planning approval",
+        "Last-mile access and utility capacity",
+        "Demand and operating agreements not demonstrated"
+      ],
+      "infrastructureGaps": [
+        "Station/terminal access",
+        "Verified rail interface"
+      ],
+      "dataRisks": [
+        "Current status and geospatial coverage incomplete"
+      ],
+      "furtherStudy": [
+        "Independent survey and topology QA",
+        "Demand, environmental and feasibility assessment"
+      ],
+      "confidence": "PRELIMINARY_MR_S10_ANALYSIS_NOT_INVESTMENT_ADVICE",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN"
+    },
+    {
+      "id": "AGRIBUSINESS",
+      "name": "Agribusiness",
+      "benefit": "Potential regional access and supply-chain diversification — qualitative study hypothesis.",
+      "constraints": [
+        "Land-use and planning approval",
+        "Last-mile access and utility capacity",
+        "Demand and operating agreements not demonstrated"
+      ],
+      "infrastructureGaps": [
+        "Station/terminal access",
+        "Verified rail interface"
+      ],
+      "dataRisks": [
+        "Current status and geospatial coverage incomplete"
+      ],
+      "furtherStudy": [
+        "Independent survey and topology QA",
+        "Demand, environmental and feasibility assessment"
+      ],
+      "confidence": "PRELIMINARY_MR_S10_ANALYSIS_NOT_INVESTMENT_ADVICE",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN"
+    },
+    {
+      "id": "HALAL",
+      "name": "Halal industry",
+      "benefit": "Potential regional access and supply-chain diversification — qualitative study hypothesis.",
+      "constraints": [
+        "Land-use and planning approval",
+        "Last-mile access and utility capacity",
+        "Demand and operating agreements not demonstrated"
+      ],
+      "infrastructureGaps": [
+        "Station/terminal access",
+        "Verified rail interface"
+      ],
+      "dataRisks": [
+        "Current status and geospatial coverage incomplete"
+      ],
+      "furtherStudy": [
+        "Independent survey and topology QA",
+        "Demand, environmental and feasibility assessment"
+      ],
+      "confidence": "PRELIMINARY_MR_S10_ANALYSIS_NOT_INVESTMENT_ADVICE",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN"
+    },
+    {
+      "id": "PETROCHEMICAL",
+      "name": "Petrochemical",
+      "benefit": "Potential regional access and supply-chain diversification — qualitative study hypothesis.",
+      "constraints": [
+        "Land-use and planning approval",
+        "Last-mile access and utility capacity",
+        "Demand and operating agreements not demonstrated"
+      ],
+      "infrastructureGaps": [
+        "Station/terminal access",
+        "Verified rail interface"
+      ],
+      "dataRisks": [
+        "Current status and geospatial coverage incomplete"
+      ],
+      "furtherStudy": [
+        "Independent survey and topology QA",
+        "Demand, environmental and feasibility assessment"
+      ],
+      "confidence": "PRELIMINARY_MR_S10_ANALYSIS_NOT_INVESTMENT_ADVICE",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN"
+    },
+    {
+      "id": "ENERGY",
+      "name": "Energy",
+      "benefit": "Potential regional access and supply-chain diversification — qualitative study hypothesis.",
+      "constraints": [
+        "Land-use and planning approval",
+        "Last-mile access and utility capacity",
+        "Demand and operating agreements not demonstrated"
+      ],
+      "infrastructureGaps": [
+        "Station/terminal access",
+        "Verified rail interface"
+      ],
+      "dataRisks": [
+        "Current status and geospatial coverage incomplete"
+      ],
+      "furtherStudy": [
+        "Independent survey and topology QA",
+        "Demand, environmental and feasibility assessment"
+      ],
+      "confidence": "PRELIMINARY_MR_S10_ANALYSIS_NOT_INVESTMENT_ADVICE",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN"
+    },
+    {
+      "id": "TOURISM",
+      "name": "Tourism",
+      "benefit": "Potential regional access and supply-chain diversification — qualitative study hypothesis.",
+      "constraints": [
+        "Land-use and planning approval",
+        "Last-mile access and utility capacity",
+        "Demand and operating agreements not demonstrated"
+      ],
+      "infrastructureGaps": [
+        "Station/terminal access",
+        "Verified rail interface"
+      ],
+      "dataRisks": [
+        "Current status and geospatial coverage incomplete"
+      ],
+      "furtherStudy": [
+        "Independent survey and topology QA",
+        "Demand, environmental and feasibility assessment"
+      ],
+      "confidence": "PRELIMINARY_MR_S10_ANALYSIS_NOT_INVESTMENT_ADVICE",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN"
+    },
+    {
+      "id": "HOSPITALITY",
+      "name": "Hospitality",
+      "benefit": "Potential regional access and supply-chain diversification — qualitative study hypothesis.",
+      "constraints": [
+        "Land-use and planning approval",
+        "Last-mile access and utility capacity",
+        "Demand and operating agreements not demonstrated"
+      ],
+      "infrastructureGaps": [
+        "Station/terminal access",
+        "Verified rail interface"
+      ],
+      "dataRisks": [
+        "Current status and geospatial coverage incomplete"
+      ],
+      "furtherStudy": [
+        "Independent survey and topology QA",
+        "Demand, environmental and feasibility assessment"
+      ],
+      "confidence": "PRELIMINARY_MR_S10_ANALYSIS_NOT_INVESTMENT_ADVICE",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN"
+    },
+    {
+      "id": "REGIONAL_SERVICES",
+      "name": "Regional services",
+      "benefit": "Potential regional access and supply-chain diversification — qualitative study hypothesis.",
+      "constraints": [
+        "Land-use and planning approval",
+        "Last-mile access and utility capacity",
+        "Demand and operating agreements not demonstrated"
+      ],
+      "infrastructureGaps": [
+        "Station/terminal access",
+        "Verified rail interface"
+      ],
+      "dataRisks": [
+        "Current status and geospatial coverage incomplete"
+      ],
+      "furtherStudy": [
+        "Independent survey and topology QA",
+        "Demand, environmental and feasibility assessment"
+      ],
+      "confidence": "PRELIMINARY_MR_S10_ANALYSIS_NOT_INVESTMENT_ADVICE",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN"
+    },
+    {
+      "id": "TOD",
+      "name": "Industrial / transit-oriented development",
+      "benefit": "Potential regional access and supply-chain diversification — qualitative study hypothesis.",
+      "constraints": [
+        "Land-use and planning approval",
+        "Last-mile access and utility capacity",
+        "Demand and operating agreements not demonstrated"
+      ],
+      "infrastructureGaps": [
+        "Station/terminal access",
+        "Verified rail interface"
+      ],
+      "dataRisks": [
+        "Current status and geospatial coverage incomplete"
+      ],
+      "furtherStudy": [
+        "Independent survey and topology QA",
+        "Demand, environmental and feasibility assessment"
+      ],
+      "confidence": "PRELIMINARY_MR_S10_ANALYSIS_NOT_INVESTMENT_ADVICE",
+      "sourceURL": "https://www.mida.gov.my/ecrl-eap/",
+      "sourceDate": "UNKNOWN"
+    }
+  ],
+  "portKlangAnnex": {
+    "status": "SEPARATE_UNVALIDATED_LAYER",
+    "chainage": null,
+    "alignment": null,
+    "baselineChainageModified": false
+  },
+  "disclaimer": "Independent MR-S10 R&D. No official MRL/ECRL/operator affiliation or engineering/feasibility approval is implied. No ROI, cargo-volume or travel-time estimate is provided."
+}

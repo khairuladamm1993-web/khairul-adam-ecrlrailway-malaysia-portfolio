@@ -1,7 +1,7 @@
 name: P01 complete unified map isolated QA
 on:
   push:
-    branches: [candidate/openmrs10-my-sg-th-20261103, candidate/openmr-uat-r2-visual-intelligence-20261103]
+    branches: [candidate/openmrs10-my-sg-th-20261103, candidate/openmr-uat-r2-visual-intelligence-20261103, candidate/openmr-r3-economic-intelligence-20261103]
     paths-ignore: ['docs/**']
   workflow_dispatch:
 permissions:
@@ -24,7 +24,7 @@ jobs:
         run: |
           # Baseline 376 PASS retained from run 41300270005; Auth is byte-locked.
           node scripts/build-complete-map.cjs
-          node --test tests/openmr.test.cjs tests/complete-map.test.cjs tests/unified-ecrl*.test.cjs tests/unified-v*.test.cjs tests/three-railways.test.cjs tests/owner-auth-recovery-artifact.test.cjs tests/owner-location-review.test.cjs
+          node --test tests/openmr-r3.test.cjs tests/openmr.test.cjs tests/complete-map.test.cjs tests/unified-ecrl*.test.cjs tests/unified-v*.test.cjs tests/three-railways.test.cjs tests/owner-auth-recovery-artifact.test.cjs tests/owner-location-review.test.cjs
           node scripts/audit-unified-v8-networks.cjs
   browser:
     needs: source-artifact
@@ -39,8 +39,8 @@ jobs:
       P01_ENGINE: ${{ matrix.engine }}
       P01_VIEWPORT: ${{ matrix.viewport }}
       CHROME_PATH: /usr/bin/google-chrome
-      # Full route rows retained from 41486960142; verify corrected settled-camera capture globally.
-      P01_ROUTES: mrt-kajang,sg-RTS,sg-SENTOSA,sg-CHANGI_APM,sg-SHUTTLE_TEBRAU,th-v3-border,ktm-padang-besar
+      # R3 final regression executes the complete accepted 44-route catalogue.
+      P01_ROUTES: ''
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
