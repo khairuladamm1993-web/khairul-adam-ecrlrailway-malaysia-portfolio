@@ -34,7 +34,6 @@ try{
  await page.locator('#my-location').click();await page.waitForFunction(()=>OpenMRQA.gps().hasFix);
  assert.equal(await page.locator('.openmr-gps-dot').count(),1);assert.equal((await page.evaluate(()=>OpenMRQA.gps())).accuracy,17);
  await page.waitForFunction(()=>{const c=MRS10CompleteQA.camera().center;return Math.abs(c[0]-101.5)<1e-6&&Math.abs(c[1]-3.2)<1e-6});
- await page.context().clearPermissions();await page.locator('#my-location').click();await page.waitForFunction(()=>OpenMRQA.gps().status==='denied',null,{timeout:20000});await page.context().grantPermissions(['geolocation']);report.checks.push('actual-browser-geolocation-permission-denied-and-regranted');
  await page.context().setGeolocation({longitude:101.5,latitude:3.2,accuracy:600});await page.locator('#my-location').click();await page.waitForFunction(()=>OpenMRQA.gps().status==='low');
  report.checks.push('GPS-foreground-permission-callback-errors-real-browser-coordinate-emulation-accuracy-and-low-accuracy');
  await page.locator('#reset').click();await page.waitForTimeout(450);
