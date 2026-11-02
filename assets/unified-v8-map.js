@@ -234,7 +234,7 @@ function renderOpenMRIntelligence(){
  const rows=completeSources.thailand.links.map(l=>({name:l.from+' ↔ '+(l.to||l.externalRef),kind:l.type,status:l.status,note:l.note,urls:l.sourceUrls}));
  for(const r of singapore.relations||[])rows.push({name:r.from+' ↔ '+r.to,kind:r.type,status:r.routeId==='RTS'?'UNDER_CONSTRUCTION · target Feb 2027 (pinned source)':r.routeId==='SHUTTLE_TEBRAU'?'OPERATIONAL (pinned source)':'TRANSFER / AREA REFERENCE',note:'No inferred through-track or through-train. Physical route mapping requires independent source evidence.',urls:[r.sourceUrl]});
  for(const row of rows){const d=el('details'),summary=el('summary',null,row.name+' · '+row.status);d.append(summary,el('p',null,row.kind),el('p',null,row.note));for(const url of row.urls||[])appendSource(d,url);host.append(d);}
- const labels=['OPERATIONAL','UNDER_CONSTRUCTION','PLANNED','MR_S10_PROPOSAL'].map((k,i)=>['━','┄','┈','◇'][i]+' '+openmr.statusLabel(k,state.locale));$('network-status-key').textContent=labels.join(' · ')+' · Geometry evidence ≠ operating status · Reference, not survey/feasibility approval';
+ const labels=['OPERATIONAL','UNDER_CONSTRUCTION','PLANNED','MR_S10_PROPOSAL'].map((k,i)=>['━','┄','┈','◇'][i]+' '+openmr.statusLabel(k,state.locale));$('network-status-key').textContent=labels.join(' · ')+' · ★ '+({ms:'Pertukaran (merah) · gelang pelbagai warna = pelbagai perkhidmatan',en:'Interchange (red) · multicolour ring = multiple services',zh:'红色星号=换乘 · 多色环=多条线路',th:'ดาวสีแดง=จุดเปลี่ยนรถ · วงแหวนหลายสี=หลายเส้นทาง'}[state.locale]||'Interchange')+' · Geometry evidence ≠ operating status · Reference, not survey/feasibility approval';
 }
 function applyLanguage(){
  Object.assign(i18n[state.locale],completeCopy[state.locale]);
@@ -259,7 +259,7 @@ function updateMapLayer(){
   for(const r of state.manifest){
    const source=srcId(r.id),lid=layerId(r.id);
    const data=core.toGeoJSON([state.results.get(r.id)]);
-   for(const f of data.features){const p=findGeo(r.id,f.properties.id);f.properties.interchange=!!p&&relationsFor(p).isInterchange;f.properties.future=!!p?.status&&p.status!=='OPERATIONAL';f.properties.pending=!p?.provenance?.startsWith('OFFICIAL_KTMB_GTFS');}
+   for(const f of data.features){const p=findGeo(r.id,f.properties.id),relation=p?relationsFor(p):null;f.properties.interchange=!!relation?.isInterchange;const palette=relation?.isInterchange?registerSharedPalette(relation.routeIds):null;if(palette)f.properties.sharedPalette=palette;f.properties.future=!!p?.status&&p.status!=='OPERATIONAL';f.properties.pending=!p?.provenance?.startsWith('OFFICIAL_KTMB_GTFS');}
    if(!map.getSource(source))map.addSource(source,{type:'geojson',data});
    else map.getSource(source).setData(data);
    if(!map.getLayer(lid))map.addLayer({id:lid,type:'circle',source,
@@ -408,7 +408,7 @@ function startMap(){
    state.lastTap={x:e.point.x,y:e.point.y,time:Date.now()};
    // Screen-space hit testing uses the same source points as the rendered icons.
    // It is never used to infer railway connectivity or interchange membership.
-   const candidates=[...state.points.values()].filter(p=>state.map.getLayer(layerId(p.routeId))&&state.map.getLayoutProperty(layerId(p.routeId),'visibility')!=='none').map(p=>{const q=state.map.project(p.coordinates);return {point:p,distance:Math.hypot(q.x-e.point.x,q.y-e.point.y)}}).filter(p=>p.distance<=14).sort((a,b)=>a.distance-b.distance);
+   const candidates=[...state.points.values()].filter(p=>state.map.getLayer(layerId(p.routeId))&&state.map.getLayoutProperty(layerId(p.routeId),'visibility')!=='none').map(p=>{const q=state.map.project(p.coordinates);return {point:p,distance:Math.hypot(q.x-e.point.x,q.y-e.point.y)}}).filter(p=>p.distance<=18).sort((a,b)=>a.distance-b.distance);
    const infrastructure=ecrl?.hit(state.map,e.point),ownerLoop=ownerCalibration?.hit(e.point);
    const closest=[...(infrastructure?[{assetId:infrastructure.assetId,distance:infrastructure.distance}]:[]),
      ...(ownerLoop?[{assetId:ownerLoop.ref.assetId,distance:ownerLoop.distance}]:[])].sort((a,b)=>a.distance-b.distance)[0];
@@ -606,12 +606,34 @@ function applyGeometryVisibility(){
  const ids=physical.segments.filter(s=>(state.category==='MRS10'&&!s.routeIds.length)||s.routeIds.some(id=>visible.has(id))).map(s=>s.segmentId);
  state.map.setFilter('mrs10-v8-geometry',['in',['get','segmentId'],['literal',ids]]);
 }
-function installInnerDots(){for(const r of state.manifest){
+// This multicolour ring expresses direct registered service membership; not common physical rails.
+function registerSharedPalette(routeIds){
+ const ids=[...new Set(routeIds)].filter(id=>state.manifest.some(r=>r.id===id)).sort();
+ if(ids.length<2)return null;
+ const key='mrs10-v8-shared-'+ids.join('|'),map=state.map;
+ if(!map.hasImage(key)){
+  const c=document.createElement('canvas');c.width=c.height=64;
+  const ctx=c.getContext('2d'),colors=ids.map(id=>state.manifest.find(r=>r.id===id).color);
+  colors.forEach((color,i)=>{ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=12;ctx.arc(32,32,21,-Math.PI/2+2*Math.PI*i/colors.length,-Math.PI/2+2*Math.PI*(i+1)/colors.length);ctx.stroke()});
+  ctx.beginPath();ctx.fillStyle='#ffffff';ctx.arc(32,32,13,0,Math.PI*2);ctx.fill();
+  map.addImage(key,ctx.getImageData(0,0,64,64));
+ }
+ return key;
+}
+function registerInterchangeStar(){
+ const key='mrs10-v8-interchange-red-star',map=state.map;if(map.hasImage(key))return key;
+ const c=document.createElement('canvas');c.width=c.height=64;
+ const ctx=c.getContext('2d');ctx.beginPath();
+ for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?12:26,x=32+r*Math.cos(a),y=32+r*Math.sin(a);i?ctx.lineTo(x,y):ctx.moveTo(x,y)}
+ ctx.closePath();ctx.fillStyle='#d71920';ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.lineJoin='round';ctx.fill();ctx.stroke();
+ map.addImage(key,ctx.getImageData(0,0,64,64));return key;
+}
+function installInnerDots(){const star=registerInterchangeStar();for(const r of state.manifest){
  for(const kind of ['solid','pending','future']){const name=r.id+'-'+kind;if(!state.map.hasImage(name)){
   const c=document.createElement('canvas');c.width=c.height=40;const ctx=c.getContext('2d');ctx.strokeStyle=r.color;ctx.lineWidth=3;ctx.fillStyle=kind==='future'?'#fff3c4':'white';if(kind!=='solid')ctx.setLineDash([5,4]);ctx.beginPath();ctx.arc(20,20,14,0,Math.PI*2);ctx.fill();ctx.stroke();state.map.addImage(name,ctx.getImageData(0,0,40,40));
  }}
- if(!state.map.getLayer(layerId(r.id)+'-ring'))state.map.addLayer({id:layerId(r.id)+'-ring',type:'symbol',source:srcId(r.id),layout:{'icon-image':['case',['get','future'],r.id+'-future',['get','pending'],r.id+'-pending',r.id+'-solid'],'icon-size':['interpolate',['linear'],['zoom'],3,0.28,8,0.42,13,0.6],'icon-allow-overlap':true,'icon-ignore-placement':true}});
- const outer=layerId(r.id)+'-interchange';if(!state.map.getLayer(outer))state.map.addLayer({id:outer,type:'circle',source:srcId(r.id),filter:['==',['get','interchange'],true],paint:{'circle-radius':['interpolate',['linear'],['zoom'],3,3,8,6,13,12],'circle-color':'rgba(0,0,0,0)','circle-stroke-width':2,'circle-stroke-color':r.color}});
+ if(!state.map.getLayer(layerId(r.id)+'-ring'))state.map.addLayer({id:layerId(r.id)+'-ring',type:'symbol',source:srcId(r.id),layout:{'icon-image':['case',['has','sharedPalette'],['get','sharedPalette'],['get','future'],r.id+'-future',['get','pending'],r.id+'-pending',r.id+'-solid'],'icon-size':['interpolate',['linear'],['zoom'],3,0.28,8,0.42,13,0.6],'icon-allow-overlap':true,'icon-ignore-placement':true}});
+ const outer=layerId(r.id)+'-interchange';if(!state.map.getLayer(outer))state.map.addLayer({id:outer,type:'symbol',source:srcId(r.id),filter:['==',['get','interchange'],true],layout:{'icon-image':star,'icon-size':['interpolate',['linear'],['zoom'],3,0.27,8,0.42,13,0.72],'icon-allow-overlap':true,'icon-ignore-placement':true}});
  const id=layerId(r.id)+'-inner';if(!state.map.getLayer(id))state.map.addLayer({id,type:'circle',source:srcId(r.id),paint:{'circle-color':r.color,'circle-radius':['interpolate',['linear'],['zoom'],3,0.8,8,1.5,13,2],'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.45:1}})}}
 function showTrackAt(e){
  if(!state.map.getLayer('mrs10-v8-geometry'))return;
