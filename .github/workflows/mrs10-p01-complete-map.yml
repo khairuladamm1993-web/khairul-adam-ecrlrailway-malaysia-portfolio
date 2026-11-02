@@ -1,7 +1,7 @@
 name: P01 complete unified map isolated QA
 on:
   push:
-    branches: [candidate/openmrs10-my-sg-th-20261103]
+    branches: [candidate/openmrs10-my-sg-th-20261103, candidate/openmr-uat-r2-visual-intelligence-20261103]
     paths-ignore: ['docs/**']
   workflow_dispatch:
 permissions:
