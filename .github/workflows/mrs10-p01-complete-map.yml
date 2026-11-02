@@ -39,8 +39,8 @@ jobs:
       P01_ENGINE: ${{ matrix.engine }}
       P01_VIEWPORT: ${{ matrix.viewport }}
       CHROME_PATH: /usr/bin/google-chrome
-      # Full route matrix for desktop/portrait; affected selection for landscape.
-      P01_ROUTES: ${{ contains(matrix.viewport, 'landscape') && 'mrt-kajang,sg-RTS,sg-SENTOSA,th-v3-border,kuts-green' || '' }}
+      # Retain full route matrix from 41485654501; final direct-segment membership delta.
+      P01_ROUTES: mrt-kajang,sg-RTS,sg-SENTOSA,sg-CHANGI_APM,sg-SHUTTLE_TEBRAU,th-v3-border,ktm-padang-besar
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:

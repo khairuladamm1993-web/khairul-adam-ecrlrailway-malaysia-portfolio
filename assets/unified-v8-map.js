@@ -630,7 +630,7 @@ function showTrackAt(e){
  if(!s)return;cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;
  if(state.lastTap)state.lastTap.segmentId=s.segmentId;
  const segmentIds=window.MRS10V81Focus.component(physical,s.segmentId);
- const routeIds=[...new Set(physical.segments.filter(x=>segmentIds.includes(x.segmentId)).flatMap(x=>x.routeIds))];
+ const routeIds=openmr.routesForSegment(s);
  focus.enter({mode:'TRACK_FOCUS',...(routeIds.length?{}:{segmentIds}),routeIds,segmentId:s.segmentId});if(routeIds.length){state.selected=routeIds[0];buildRoutes();buildLineup();}
  const host=el('div');host.append(el('strong',null,tr('track')),el('p',null,s.segmentId));
  for(const [label,value] of [['railwayType',s.railwayType],['verification',s.geometryVerification],['confidence',s.confidence],['sourceDate',s.sourceDate]])host.append(el('p',null,tr(label)+': '+(value??'UNKNOWN')));
