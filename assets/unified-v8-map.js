@@ -209,7 +209,7 @@ function buildLineup(){
 }
 function updateSearch(){
  const normal=window.MRS10CompleteSources.searchKey;
- const q=normal($('search').value),host=$('search-results');host.replaceChildren();
+ const q=normal($('search').value),host=$('search-results');host.replaceChildren();if(state.popup)state.popup.getElement().style.visibility=q?'hidden':'';
  if(!q){host.hidden=true;return}
  host.hidden=false;
  const matches=[];

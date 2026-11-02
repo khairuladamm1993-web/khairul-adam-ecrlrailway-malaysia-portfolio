@@ -14,3 +14,5 @@ fs.writeFileSync(out+'/assets/openmr-build-info.js','window.OpenMRBuild=Object.f
 const config=JSON.parse(fs.readFileSync(out+'/vercel.json','utf8'));
 config.headers.push({source:'/(.*)',headers:[{key:'Permissions-Policy',value:'geolocation=(self)'}]});
 fs.writeFileSync(out+'/vercel.json',JSON.stringify(config));
+
+for(const entry of ['index.html','unified-map-v8.html']){const file=out+'/'+entry;fs.writeFileSync(file,fs.readFileSync(file,'utf8').replace('</head>','<script src="./assets/openmr-build-info.js"></script></head>'));}

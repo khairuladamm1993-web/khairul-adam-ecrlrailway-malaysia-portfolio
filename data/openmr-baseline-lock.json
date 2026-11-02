@@ -1,0 +1,28 @@
+{
+  "baseline": "c7450e1438adef60a86954da488fee62df6240b3",
+  "files": {
+    "assets/access.js": "be7afc60c8fee11c7f7ace628edc0e7b09c61058c114bc6e6f83cebb3f2341ac",
+    "assets/member-gateway.js": "6c47f532ffb9a5b0a9f39d11ef5fbabd5817e0d5d6867d8c985a19bd6c3025fb",
+    "assets/gateway.css": "1b976ef76f81bcd587bef4248cb4dc2e2506eac765bf2c6d603208b05909da5b",
+    "scripts/build-owner-auth-recovery.cjs": "923451d80b5cf4500b6e00b95b674f448bde79a16029d10cf353f94dde52718f",
+    "assets/unified-v7/ktm-dataset.js": "f418c6dcafec2a2fd814c0ddf2239d937e431db2f07a772ba3f59f70b6bcca5a",
+    "assets/unified-complete/thailand-model.js": "0e784987cb13941a4e3ef73c53f7f7ccd67423338037036503f20ebca3c51137",
+    "data/unified-complete/accepted-auth-lock.json": "0c0c05203d0870e36a244db980c5eb5672696a71c0ae7b82f16ccefc78f5097a",
+    "data/unified-complete/borneo-registry.json": "45aee719730c50f357154fc9ef8a45bc9e7479146cfa3f0ae73b9c947dbf0311",
+    "data/unified-complete/shuttle-audit.json": "c4d7ae094b888d03649854ffff1f7d2ea89128df7978e65e026ba33fc2555680",
+    "data/unified-complete/china-references.json": "5011616070310a01bf73db434448b6451a493f7fa6ae9eb1b684d7105552403b",
+    "singapore/data/lines.json": "50a525cd8371873321b4536c098c0d47f02b1a88c595b8b9f8d73da54b606de5",
+    "singapore/data/stations.geojson": "d308b6067b6720e1622973137d5737c3e1eebce8d7e3bc6fc5986462ca1c8616",
+    "singapore/data/cross-border-terminals.geojson": "558372d6f65d13681dd849327722c0f9bc9116fa880b1540c64112999e8cee93",
+    "singapore/data/cross-border-connections.json": "78b9f99c7ae72ecadb7fa2b83875d132936d5f6707f1edd478c899477671b8d9",
+    "singapore/data/tracks.geojson": "716bd1c4d9f24a6607402a1871d3bddbbd48f5d80706f98fea4bc8257af08102",
+    "singapore/data/route-topology.json": "b9551139f9de862f746219d2fbf2a8f204776e5a239d15a9085777dd2acc1f94",
+    "data/unified-v8/station-registry.json": "b6595e171f0640583a6f646b2152fc5e91d032bd221cd5bd99d38536e62f8d6b",
+    "data/unified-v8/osm-border-raw.json": "1cf274f87de109cb38272c2462800b294da15428cfc076f9fa1848deea8d20de",
+    "data/unified-v8/service-network.json": "8bdc1920792b922c0fe95c763c049a12676c5d646b0435de49d3624c97d98bcb",
+    "data/unified-v8/physical-network.json": "8f469e80511ace31817162a779f49f2d1a885889e704fee7fd9aa7004da468da",
+    "data/unified-v8/evidence-registry.json": "5ddd950e5cf17f3defb6281e321f58fc33c78da7796b0ce5aabc0bdd74124123",
+    "data/unified-v81-integration/changi-osm.json": "00e7dd0216808f58ca747ca1233e3bd3d575ac8ce3ac41774127bc8fa3172dcf",
+    "data/unified-v81-integration/sentosa-osm.json": "2507c0194cce22962b98241bab3109e23dba9621250d6a270c82bbcc3bad1716"
+  }
+}
