@@ -43,7 +43,7 @@ const loops=registry.loops.map(annotate);
  function features(){return {type:'FeatureCollection',features:refs.map(r=>({type:'Feature',id:r.assetId,geometry:{type:'Point',coordinates:r.coordinates},properties:{assetId:r.assetId,stationCode:get(r.assetId)?.stationCode||null,kind:r.kind,color:COLORS[r.kind],geometryVerification:'REFERENCE_ONLY',sourceId:r.sourceId,operationalStatus:'NOT_OPERATIONAL'}}))}}
  function setVisibility(map,category,mode='NORMAL'){
   if(!map?.getLayer(NS+'-hit'))return;
-  const allowed=(mode==='NORMAL'&&(category==='All'||category==='Malaysia'||category==='ECRL'))||mode==='INFRASTRUCTURE_FOCUS';
+  const allowed=(mode==='NORMAL'&&(category==='All'||category==='MRS10'||category==='Malaysia'||category==='ECRL'))||mode==='INFRASTRUCTURE_FOCUS';
   const kinds=allowed?Object.keys(flags).filter(k=>flags[k]):[];
   for(const suffix of ['-hit','-ring','-inner']){map.setLayoutProperty(NS+suffix,'visibility',kinds.length?'visible':'none');map.setFilter(NS+suffix,['in',['get','kind'],['literal',kinds]])}
  }

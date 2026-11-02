@@ -1,7 +1,7 @@
 name: P01 complete unified map isolated QA
 on:
   push:
-    branches: [integration/mrs10-p01-complete-map-20261101]
+    branches: [candidate/openmrs10-my-sg-th-20261103]
     paths-ignore: ['docs/**']
   workflow_dispatch:
 permissions:
@@ -24,7 +24,7 @@ jobs:
         run: |
           # Baseline 376 PASS retained from run 41300270005; Auth is byte-locked.
           node scripts/build-complete-map.cjs
-          node --test tests/complete-map.test.cjs tests/unified-ecrl*.test.cjs tests/unified-v*.test.cjs tests/three-railways.test.cjs tests/owner-auth-recovery-artifact.test.cjs tests/owner-location-review.test.cjs
+          node --test tests/openmr.test.cjs tests/complete-map.test.cjs tests/unified-ecrl*.test.cjs tests/unified-v*.test.cjs tests/three-railways.test.cjs tests/owner-auth-recovery-artifact.test.cjs tests/owner-location-review.test.cjs
           node scripts/audit-unified-v8-networks.cjs
   browser:
     needs: source-artifact
@@ -34,13 +34,13 @@ jobs:
       fail-fast: false
       matrix:
         engine: [chromium, webkit]
-        viewport: [desktop, ipad, iphone]
+        viewport: [desktop, ipad, iphone, ipadlandscape, iphonelandscape]
     env:
       P01_ENGINE: ${{ matrix.engine }}
       P01_VIEWPORT: ${{ matrix.viewport }}
       CHROME_PATH: /usr/bin/google-chrome
-      # Transport-only delta; full 44-route x 6 matrix retained from run 41302609307.
-      P01_ROUTES: th-v3-border,sabah-jkns,kuts-green,ktmb-shuttle-timuran
+      # Full route matrix for desktop/portrait; affected selection for landscape.
+      P01_ROUTES: ${{ contains(matrix.viewport, 'landscape') && 'mrt-kajang,sg-RTS,sg-SENTOSA,th-v3-border,kuts-green' || '' }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
