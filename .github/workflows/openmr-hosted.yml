@@ -1,0 +1,47 @@
+name: OpenMR protected hosted verification
+on:
+  push:
+    branches: [candidate/openmrs10-my-sg-th-20261103]
+    paths: ['.github/workflows/openmr-hosted.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  hosted:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+        viewport: [ipad, iphonelandscape]
+    env:
+      P01_ENGINE: ${{ matrix.engine }}
+      P01_VIEWPORT: ${{ matrix.viewport }}
+      CHROME_PATH: /usr/bin/google-chrome
+      P01_SKIP_STRESS: '1'
+      P01_ROUTES: sg-RTS,sg-SENTOSA,sg-CHANGI_APM,th-v3-border,sg-SHUTTLE_TEBRAU
+      P01_MAP_URL: ${{ secrets.P01_OPENMR_HOSTED_URL }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Pin browser tooling on existing free public runners
+        run: |
+          test -n "$P01_MAP_URL"
+          node -e 'console.log("::add-mask::"+new URL(process.env.P01_MAP_URL).searchParams.get("_vercel_share"))'
+          npm install --prefix "$RUNNER_TEMP/p01-tools" --no-package-lock --ignore-scripts playwright@1.56.1 > /dev/null
+          "$RUNNER_TEMP/p01-tools/node_modules/.bin/playwright" install --with-deps webkit > "$RUNNER_TEMP/p01-browser-install.log" 2>&1
+          echo "P01_PLAYWRIGHT_MODULE=$RUNNER_TEMP/p01-tools/node_modules/playwright" >> "$GITHUB_ENV"
+      - name: Actual protected alias GPS route focus and camera smoke
+        run: node tests/complete-map-browser.test.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: openmr-hosted-${{ matrix.engine }}-${{ matrix.viewport }}
+          path: artifacts/complete-map/
+          retention-days: 7
