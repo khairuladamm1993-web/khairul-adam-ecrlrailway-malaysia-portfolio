@@ -5,6 +5,7 @@
  if(!R||!A)return;
  let bundle=null,loading=false,selected=new Set(),quiz=null,tracker=null,authSubmitting=false,bundleRevision=0;
  let authEmail='',authInputError='',authProofOpen=false;
+ let sessionChecking=false,sessionFeedback='',sessionCheckRevision=0;
  const box=()=>document.querySelector('#gateway-content');
  const category=()=>document.querySelector('#categories [aria-selected="true"]')?.dataset.category||'practical';
  const lang=()=>R.language==='zh'?'zh':R.language==='en'?'en':'ms';
@@ -24,11 +25,19 @@
     (callbackError?'<p class="auth-error" role="alert">Sign-in could not be completed ('+escape(A.status)+'). Open Member Access to review the error.</p>':'');
   }
  }
+ async function checkSession(){
+  if(sessionChecking)return;const revision=++sessionCheckRevision;sessionChecking=true;sessionFeedback='Menyemak sesi dan akses akaun…';renderAuth();let timer;
+  try{const result=await Promise.race([A.refresh(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('TIMEOUT')),15000);})]);
+   if(revision!==sessionCheckRevision)return;
+   sessionFeedback=result.canReadMemberContent?'Sesi disahkan: '+statusText()+' · '+(result.email||'akaun disahkan')+'.':result.error?'Sesi belum dapat disahkan. '+result.error:'Belum ada sesi login sah dalam pelayar ini. E-mel diterima sahaja belum mengesahkan login. Tampal pautan e-mel yang belum digunakan di ruang pengesahan; tiada e-mel baharu dihantar oleh semakan ini.';
+  }catch{if(revision===sessionCheckRevision)sessionFeedback='Semakan sesi tidak selesai. Semak sambungan internet dan cuba Check Session semula. Tiada e-mel baharu dihantar.';}
+  finally{clearTimeout(timer);if(revision===sessionCheckRevision){sessionChecking=false;renderAuth();}}
+ }
  function renderAuth(){
   const controls='<div class="quiz-languages">'+['ms','en','zh'].map(l=>'<button data-auth-lang="'+l+'" aria-pressed="'+(R.language===l)+'">'+({ms:'BM',en:'EN',zh:'中文'})[l]+'</button>').join('')+(R.language==='zh'?'<button data-auth-pinyin>Pinyin '+(R.pinyin?'ON':'OFF')+'</button>':'')+'<button data-auth-theme>'+escape(window.RailwayTheme.value==='light'?'Dark Mode':'Light Mode')+'</button></div>';
   let inner='';
   if(A.canReadMemberContent){
-   inner='<h2 id="member-dialog-title">'+escape(statusText())+'</h2><p class="access-label">Already signed in · '+escape(A.email||'Verified session')+'</p><p>Your saved Supabase session was restored and your access level was resolved by the backend.</p><div class="member-actions"><button class="secondary" data-refresh-member>REFRESH MEMBER DATA</button>'+(A.canAdmin?'<button class="primary" data-admin-dashboard>OPEN ADMIN CONTROLS</button>':'')+(A.canAdmin?'<a class="secondary" href="owner-command-center.html">PROJECT COMMAND CENTER ↗</a>':'')+'<button class="quiet" data-logout>LOG OUT</button></div><section class="learning-card member-consent"><h3>Member activity analytics</h3><p>Visit Duration and Active Engagement Time are recorded separately. Active time pauses while hidden or after 60 seconds without interaction.</p><button class="secondary" data-consent="'+(!A.activityConsent)+'">'+(A.activityConsent?'DISABLE ACTIVITY CONSENT':'ENABLE ACTIVITY CONSENT')+'</button></section>'+(A.canAdmin?'<section class="learning-card"><h3>Owner / Admin</h3><p>Admin controls are available only because the current authenticated session resolved as admin through account_role().</p><div id="admin-dashboard" hidden></div></section>':'');
+   inner='<h2 id="member-dialog-title">'+escape(statusText())+'</h2><p class="access-label">Already signed in · '+escape(A.email||'Verified session')+'</p><p>Your saved Supabase session was restored and your access level was resolved by the backend.</p><div class="member-actions"><button type="button" class="secondary" data-auth-refresh>CHECK SESSION</button><button class="secondary" data-refresh-member>REFRESH MEMBER DATA</button>'+(A.canAdmin?'<button class="primary" data-admin-dashboard>OPEN ADMIN CONTROLS</button>':'')+(A.canAdmin?'<a class="secondary" href="owner-command-center.html">PROJECT COMMAND CENTER ↗</a>':'')+'<button class="quiet" data-logout>LOG OUT</button></div><section class="learning-card member-consent"><h3>Member activity analytics</h3><p>Visit Duration and Active Engagement Time are recorded separately. Active time pauses while hidden or after 60 seconds without interaction.</p><button class="secondary" data-consent="'+(!A.activityConsent)+'">'+(A.activityConsent?'DISABLE ACTIVITY CONSENT':'ENABLE ACTIVITY CONSENT')+'</button></section>'+(A.canAdmin?'<section class="learning-card"><h3>Owner / Admin</h3><p>Admin controls are available only because the current authenticated session resolved as admin through account_role().</p><div id="admin-dashboard" hidden></div></section>':'');
   }else if(pendingAccess()){
    inner='<h2 id="member-dialog-title">Checking verified session</h2><p class="access-label">Session and role validation</p><p>Please wait while the verified Supabase session and backend access role are resolved. A new verification email is not required unless this session is definitively unavailable.</p>';
   }else if(A.status==='verification-sent'||authProofOpen){
@@ -43,7 +52,9 @@
    const showProof=authProofOpen||A.status==='verification-sent';
    inner+=showProof?'<section class="email-recovery-r25"><h3>Log masuk tanpa membuka pautan</h3><p>Masukkan kod enam digit jika ada. Jika e-mel hanya ada butang: tekan lama butang → Copy Link → tampal di bawah, tanpa membuka pautan.</p><form id="member-email-proof-form"><label>E-mel akaun<input name="proof_email" type="email" autocomplete="email" autocapitalize="none" spellcheck="false" required value="'+escape(authEmail||A.email||'')+'"></label><label>Kod atau pautan e-mel<input name="email_proof" type="text" autocomplete="one-time-code" required spellcheck="false" autocapitalize="none" placeholder="Tampal kod atau pautan terbaru" aria-describedby="email-proof-note"></label><p id="email-proof-note">Gunakan e-mel terbaru yang belum digunakan. Jangan kongsi kod atau pautan dalam chat.</p><button class="primary" type="submit">SAHKAN & LOG MASUK</button></form></section>':'<button type="button" class="quiet" data-auth-proof>SUDAH ADA KOD / PAUTAN E-MEL?</button>';
   }
-  body().innerHTML=controls+inner;
+  body().innerHTML=controls+inner+'<p class="study-boundary">Gunakan Safari biasa. Private Mode tidak diperlukan. Sesi pelayar lain atau Private Mode tidak dikongsi dengan Safari biasa.</p>'+(sessionFeedback?'<p id="session-check-result" role="status" aria-live="polite">'+escape(sessionFeedback)+'</p>':'');
+  for(const button of dialog.querySelectorAll('[data-auth-refresh]')){button.disabled=sessionChecking;button.textContent=sessionChecking?'MENYEMAK…':'CHECK SESSION';}
+
   const form=dialog.querySelector('#member-auth-form');
   if(form){
    form.elements.email.value=authEmail||form.elements.email.value;
@@ -168,8 +179,8 @@
   if(e.target.closest('[data-auth-request]')){authProofOpen=false;authInputError='';renderAuth();return;}
   if(e.target.closest('[data-auth-proof]')){authProofOpen=true;renderAuth();dialog.querySelector('[name=email_proof]')?.focus();return;}
   if(e.target.closest('[data-member-close]')){dialog.close();return;}
-  if(e.target.closest('[data-logout]')){authEmail='';authInputError='';authProofOpen=false;await stopTracker(true);await A.logout();bundle=null;selected.clear();renderStatus();renderAuth();return;}
-  if(e.target.closest('[data-auth-refresh]')){await A.refresh();renderAuth();return;}
+  if(e.target.closest('[data-logout]')){sessionCheckRevision++;sessionChecking=false;sessionFeedback='';authEmail='';authInputError='';authProofOpen=false;await stopTracker(true);await A.logout();bundle=null;selected.clear();renderStatus();renderAuth();return;}
+  if(e.target.closest('[data-auth-refresh]')){await checkSession();return;}
   if(e.target.closest('[data-refresh-member]')){await loadBundle();renderAuth();return;}
   const consent=e.target.closest('[data-consent]');if(consent){await A.setActivityConsent(consent.dataset.consent==='true');await loadBundle();renderAuth();return;}
   const save=e.target.closest('[data-save-resource]');if(save){await A.saveProgress(save.dataset.saveResource,1,true);await loadBundle();return;}

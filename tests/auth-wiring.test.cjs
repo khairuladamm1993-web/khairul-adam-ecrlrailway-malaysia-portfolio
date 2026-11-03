@@ -509,3 +509,23 @@ test('original Supabase email link is verified as an email token hash without a 
  assert.equal(A.level,'member');assert.equal(client.calls.find(x=>x[0]==='verifyOtp')[1].type,'email');
  assert.equal(client.calls.filter(x=>x[0]==='exchangeCodeForSession').length,0);
 });
+
+ test('Check Session reports no session and never requests or verifies email',async()=>{
+ const {w,client}=await gateway({session:null});try{
+ w.document.querySelector('[data-member]').click();w.document.querySelector('[data-auth-proof]').click();
+ w.document.querySelector('[data-auth-refresh]').click();await new Promise(r=>setTimeout(r,25));
+ assert.match(w.document.querySelector('#session-check-result').textContent,/Belum ada sesi login sah/);
+ assert.match(w.document.querySelector('#member-dialog').textContent,/Private Mode tidak diperlukan/);
+ assert.equal(client.calls.filter(c=>['signInWithOtp','verifyOtp','exchangeCodeForSession'].includes(c[0])).length,0);
+ assert.equal(w.document.querySelector('[data-auth-refresh]').disabled,false);
+ }finally{w.close()}});
+ test('Check Session reports validated account and blocks duplicate checks',async()=>{
+ const {w,client}=await gateway();try{
+ w.document.querySelector('[data-member]').click();let finish,count=0;
+ client.auth.getSession=()=>{count++;return new Promise(r=>finish=()=>r({data:{session:{access_token:'valid'}},error:null}))};
+ w.document.querySelector('[data-auth-refresh]').click();await new Promise(r=>setTimeout(r,5));
+ assert.equal(w.document.querySelector('[data-auth-refresh]').disabled,true);
+ w.document.querySelector('[data-auth-refresh]').click();assert.equal(count,1);finish();await new Promise(r=>setTimeout(r,20));
+ assert.match(w.document.querySelector('#session-check-result').textContent,/Sesi disahkan: Verified Member/);
+ assert.equal(w.document.querySelector('[data-auth-refresh]').disabled,false);
+ }finally{w.close()}});
