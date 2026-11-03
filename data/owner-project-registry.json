@@ -256,41 +256,46 @@
           "id": "owner-auth-safari",
           "kind": "PENDING",
           "label": "Owner/Admin Safari login",
-          "detail": "Session persistence after OTP is not yet verified; do not claim authenticated Owner dashboard is available.",
+          "detail": "CI for deployed 6/8-digit OTP source has a matching successful GitHub Actions run; authenticated Owner/Admin Safari session persistence after OTP, protected Preview reload and live role authorization remain unverified.",
           "basis": "Owner Safari login",
           "latestDiagnosis": {
             "checkedOn": "2026-11-03",
-            "checkedAt": "2026-11-03T14:16:53.150Z",
-            "recordType": "R2.5 issue-specific GitHub/Vercel read-only diagnostic; Registry-only checkpoint",
-            "status": "PENDING",
+            "checkedAt": "2026-11-03T14:55:27.763Z",
+            "recordType": "R2.5 issue-specific live connected GitHub Actions, source and Vercel read-only recheck; Registry-only checkpoint; no application mutation",
+            "status": "PENDING — commit-linked CI PASS; Owner Safari physical session UAT NOT_PASS",
             "releaseDecision": "NO-GO",
-            "rootCause": "UNCONFIRMED — no independently observed Owner Safari OTP-to-authenticated-session persistence, callback trace, or role verification on the canonical HTTPS Preview. Source changed to support 6/8-digit email OTP, but that change does not prove Safari session persistence.",
+            "rootCause": "UNCONFIRMED — no independently observed physical Owner Safari OTP-to-authenticated-session persistence, callback trace or live account_role() authorization on the canonical HTTPS Preview. Exact 6/8-digit OTP source and isolated CI success do not establish Safari session persistence.",
             "deployedSourceSha": "3f6592c78dcb6f34442e3cb3d9f7654d3673feba",
             "deploymentId": "dpl_2ehKzGgyuwhHWVEVo5HkBrjtuyKh",
-            "deploymentState": "READY (staging metadata only, NOT Owner Safari UAT PASS)",
-            "vercelProtection": "Vercel SSO protection enabled for all deployments; separate from Supabase Owner/Admin session.",
-            "ciVerification": "UNVERIFIED — GitHub combined commit statuses empty; available PR-triggered workflow-run lookup returned no runs for deployed SHA. No CI PASS inferred.",
-            "safariUat": "NOT_PASS — no dated authenticated Owner Safari CHECK SESSION, reload, or dashboard-open evidence.",
-            "securityVerification": "NOT_PASS — live backend account_role, Member/Admin profile and access isolation not independently demonstrated for this deployment.",
-            "evidenceSource": "Connected GitHub fetch_file/fetch_commit/checks/workflow-run lookups and Vercel get_project/get_deployment/list_deployments; 2026-11-03",
+            "deploymentState": "READY (staging metadata only; canonical alias independently mapped to this deployment; not Owner Safari UAT PASS)",
+            "vercelProtection": "Current Vercel project live=false; SSO protection enabled for all deployments; separate from Supabase Owner/Admin session.",
+            "ciVerification": "PASS (scoped to deployed source SHA) — push-triggered GitHub Actions workflow 41607131027 completed success at 2026-11-03T09:01:02Z; real-backend job 125819646938 succeeded, including isolated local Supabase Docker Auth/OTP/MFA/RLS and six Owner isolation checks. GitHub combined commit statuses [] and PR-only workflow lookup [] were insufficient because the successful run was push-triggered. This does not verify real Owner Safari or live backend.",
+            "safariUat": "NOT_PASS/PENDING — no dated redacted real Owner Safari CHECK SESSION, reload/reopen, Owner/Admin authorization or logout evidence on canonical HTTPS Preview.",
+            "securityVerification": "PARTIAL — isolated CI real-backend Auth/MFA/RLS/Owner isolation job PASS; live Preview backend account_role(), Owner/Member privileges, browser session and access boundaries not independently verified; security release gate remains NOT_PASS.",
+            "evidenceSource": "Connected GitHub fetch_file (target Registry blob), fetch_commit/source file, REST actions/runs and check-runs, fetch_workflow_run_jobs; connected Vercel get_project, get_deployment, get_alias and list_deployments; checked 2026-11-03.",
             "supportingEvidence": [
               {
                 "url": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/3f6592c78dcb6f34442e3cb3d9f7654d3673feba",
                 "checkedOn": "2026-11-03",
-                "result": "CONFIRMED R2.8 source change for 6/8-digit OTP; not independently verified browser session PASS"
+                "result": "CONFIRMED exact deployed source commit and six/eight-digit email proof update; not Safari session proof"
+              },
+              {
+                "url": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/41607131027",
+                "checkedOn": "2026-11-03",
+                "result": "PASS — completed success on matching deployed source SHA; push-triggered real-backend job and isolated local Supabase/Auth/MFA/RLS/Owner-isolation steps successful; does not verify physical Safari"
               },
               {
                 "url": "https://vercel.com/1993khairuladam-3016/khairul-adam-portfolio-preview-safe/2ehKzGgyuwhHWVEVo5HkBrjtuyKh",
                 "checkedOn": "2026-11-03",
-                "result": "CONFIRMED current staging READY deployment metadata for deployed source SHA; not Safari Auth UAT"
+                "result": "CONFIRMED canonical Preview alias resolves to this staging READY deployment; SSO all; not Owner authentication proof"
               },
               {
                 "url": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/blob/3f6592c78dcb6f34442e3cb3d9f7654d3673feba/assets/access.js",
                 "checkedOn": "2026-11-03",
-                "result": "CONFIRMED client uses persistent Supabase session plus server role/profile validation; real Owner Safari reload remains unverified"
+                "result": "CONFIRMED client contains durable local storage, getSession/getUser, verifyOtp, backend account_role() logic; Safari persistence not independently tested"
               }
             ],
-            "nextAction": "Owner-controlled, redacted HTTPS Safari UAT on canonical protected Preview after Vercel SSO: verify session after latest email proof, CHECK SESSION, reload/reopen, Owner/Admin dashboard authorization and logout; record dated PASS/FAIL without code, link, email or token. Independently obtain commit-linked CI PASS and validate security/deployment release gates before any SOLVED or READY_FOR_GO. No Prod/Auth/RLS/deploy/merge change authorized.",
+            "nextAction": "Owner-controlled redacted UAT on canonical protected HTTPS Preview after Vercel SSO, using existing authorized Safari access: after latest one-time email proof confirm CHECK SESSION, refresh/reopen persistence, Owner/Admin dashboard privileges, logout and denied access after logout; record dated PASS/FAIL without email, code, links or tokens. Independently validate live role/security and deployment release requirements on exact SHA. Retain OPEN/NO-GO until all gates and separate Owner approval; no Production/Auth/RLS/deploy/merge change authorized.",
             "changesMade": false,
             "registryCheckpointOnly": true
           },
@@ -300,7 +305,7 @@
             "verifiedAt": null,
             "evidence": [],
             "releaseGates": {
-              "ci": "NOT_PASS",
+              "ci": "PASS",
               "safariUat": "NOT_PASS",
               "security": "NOT_PASS",
               "deployment": "NOT_PASS",
