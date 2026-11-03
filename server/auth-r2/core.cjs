@@ -51,7 +51,7 @@ function createHandler({provider,key,origin,enabled=false,now=()=>Date.now()}){
    let s;
    if(action==='otp-verify'){
     if(req.method!=='POST')throw error(405,'POST_REQUIRED');
-    if(typeof b.email!=='string'||!/^\d{6}$/.test(b.code||''))throw error(400,'INVALID_OTP_FORMAT');
+    if(typeof b.email!=='string'||!/^(?:\d{6}|\d{8})$/.test(b.code||''))throw error(400,'INVALID_OTP_FORMAT');
     s=await provider.verify({email:b.email.trim().toLowerCase(),token:b.code});
    }else{
     const params=new URL(req.url,origin).searchParams,p=unpack(cookies(req)[PKCE]||'',key);

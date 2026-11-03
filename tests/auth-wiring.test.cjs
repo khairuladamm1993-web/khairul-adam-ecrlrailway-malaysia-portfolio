@@ -529,3 +529,15 @@ test('original Supabase email link is verified as an email token hash without a 
  assert.match(w.document.querySelector('#session-check-result').textContent,/Sesi disahkan: Verified Member/);
  assert.equal(w.document.querySelector('[data-auth-refresh]').disabled,false);
  }finally{w.close()}});
+
+ test('eight-digit email OTP is forwarded unchanged including leading zeros',async()=>{
+ const {A,client}=await load({session:null});let received;
+ client.auth.verifyOtp=async payload=>{received=payload;return {data:{session:null},error:{message:'synthetic rejected proof'}}};
+ await assert.rejects(()=>A.verifyEmailProof('owner@example.com','01234567'));
+ assert.deepEqual(JSON.parse(JSON.stringify(received)),{email:'owner@example.com',token:'01234567',type:'email'});
+ });
+ test('malformed email OTP lengths never reach Supabase verification',async()=>{
+ for(const token of ['12345','1234567','123456789','12ab5678']){
+ const {A,client}=await load({session:null});let calls=0;client.auth.verifyOtp=async()=>{calls++;return {}};
+ await assert.rejects(()=>A.verifyEmailProof('owner@example.com',token));assert.equal(calls,0);
+ }});

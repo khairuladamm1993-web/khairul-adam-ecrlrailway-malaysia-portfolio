@@ -1,7 +1,7 @@
 name: P01 R2.3 REAL Owner login form E2E
 on:
   push:
-    branches: [test/mrs10-p01-r23-owner-login-e2e-20261101, fix/mrs10-p01-owner-auth-uat-recovery-20261101, fix/mrs10-p01-pkce-flow-binding-r25-20261101, fix/mrs10-p01-simple-login-r26-20261101, fix/mrs10-p01-session-feedback-r27-20261103]
+    branches: [test/mrs10-p01-r23-owner-login-e2e-20261101, fix/mrs10-p01-owner-auth-uat-recovery-20261101, fix/mrs10-p01-pkce-flow-binding-r25-20261101, fix/mrs10-p01-simple-login-r26-20261101, fix/mrs10-p01-session-feedback-r27-20261103, fix/mrs10-p01-eight-digit-otp-r28-20261103]
     paths-ignore: ['docs/**']
   workflow_dispatch:
 permissions:

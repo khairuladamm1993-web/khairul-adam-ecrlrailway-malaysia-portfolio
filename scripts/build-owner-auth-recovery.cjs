@@ -12,7 +12,7 @@ const member=out+'/assets/member-gateway.js';fs.writeFileSync(member,fs.readFile
 let gateway=fs.readFileSync(out+'/gateway.html','utf8');
 gateway=gateway.replace('<head>','<head><meta name="mrs10-auth-origin" content="https://khairul-adam-portfolio-preview-safe.vercel.app"><meta name="referrer" content="no-referrer">');
 fs.writeFileSync(out+'/gateway.html',gateway);
-const info={application:'MR-S10',version:'Owner Auth Recovery R2.7',environment:process.env.VERCEL_ENV||'LOCAL',gitSha:process.env.VERCEL_GIT_COMMIT_SHA||cp.execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),deploymentId:process.env.VERCEL_DEPLOYMENT_ID||null,deploymentUrl:process.env.VERCEL_URL||null,buildTimestamp:new Date().toISOString(),canonicalHost:'khairul-adam-portfolio-preview-safe.vercel.app'};
+const info={application:'MR-S10',version:'Owner Auth Recovery R2.8',environment:process.env.VERCEL_ENV||'LOCAL',gitSha:process.env.VERCEL_GIT_COMMIT_SHA||cp.execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),deploymentId:process.env.VERCEL_DEPLOYMENT_ID||null,deploymentUrl:process.env.VERCEL_URL||null,buildTimestamp:new Date().toISOString(),canonicalHost:'khairul-adam-portfolio-preview-safe.vercel.app'};
 fs.writeFileSync(out+'/assets/build-info.js','window.MRS10BuildInfo=Object.freeze('+JSON.stringify(info)+');\n');
 const cfg=JSON.parse(fs.readFileSync(out+'/vercel.json','utf8'));cfg.headers.unshift({source:'/gateway.html',headers:[{key:'Cache-Control',value:'private, no-store, max-age=0'},{key:'Referrer-Policy',value:'no-referrer'}]});
 fs.writeFileSync(out+'/vercel.json',JSON.stringify(cfg));
