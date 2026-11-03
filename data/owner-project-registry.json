@@ -258,6 +258,42 @@
           "label": "Owner/Admin Safari login",
           "detail": "Session persistence after OTP is not yet verified; do not claim authenticated Owner dashboard is available.",
           "basis": "Owner Safari login",
+          "latestDiagnosis": {
+            "checkedOn": "2026-11-03",
+            "checkedAt": "2026-11-03T14:16:53.150Z",
+            "recordType": "R2.5 issue-specific GitHub/Vercel read-only diagnostic; Registry-only checkpoint",
+            "status": "PENDING",
+            "releaseDecision": "NO-GO",
+            "rootCause": "UNCONFIRMED — no independently observed Owner Safari OTP-to-authenticated-session persistence, callback trace, or role verification on the canonical HTTPS Preview. Source changed to support 6/8-digit email OTP, but that change does not prove Safari session persistence.",
+            "deployedSourceSha": "3f6592c78dcb6f34442e3cb3d9f7654d3673feba",
+            "deploymentId": "dpl_2ehKzGgyuwhHWVEVo5HkBrjtuyKh",
+            "deploymentState": "READY (staging metadata only, NOT Owner Safari UAT PASS)",
+            "vercelProtection": "Vercel SSO protection enabled for all deployments; separate from Supabase Owner/Admin session.",
+            "ciVerification": "UNVERIFIED — GitHub combined commit statuses empty; available PR-triggered workflow-run lookup returned no runs for deployed SHA. No CI PASS inferred.",
+            "safariUat": "NOT_PASS — no dated authenticated Owner Safari CHECK SESSION, reload, or dashboard-open evidence.",
+            "securityVerification": "NOT_PASS — live backend account_role, Member/Admin profile and access isolation not independently demonstrated for this deployment.",
+            "evidenceSource": "Connected GitHub fetch_file/fetch_commit/checks/workflow-run lookups and Vercel get_project/get_deployment/list_deployments; 2026-11-03",
+            "supportingEvidence": [
+              {
+                "url": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/3f6592c78dcb6f34442e3cb3d9f7654d3673feba",
+                "checkedOn": "2026-11-03",
+                "result": "CONFIRMED R2.8 source change for 6/8-digit OTP; not independently verified browser session PASS"
+              },
+              {
+                "url": "https://vercel.com/1993khairuladam-3016/khairul-adam-portfolio-preview-safe/2ehKzGgyuwhHWVEVo5HkBrjtuyKh",
+                "checkedOn": "2026-11-03",
+                "result": "CONFIRMED current staging READY deployment metadata for deployed source SHA; not Safari Auth UAT"
+              },
+              {
+                "url": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/blob/3f6592c78dcb6f34442e3cb3d9f7654d3673feba/assets/access.js",
+                "checkedOn": "2026-11-03",
+                "result": "CONFIRMED client uses persistent Supabase session plus server role/profile validation; real Owner Safari reload remains unverified"
+              }
+            ],
+            "nextAction": "Owner-controlled, redacted HTTPS Safari UAT on canonical protected Preview after Vercel SSO: verify session after latest email proof, CHECK SESSION, reload/reopen, Owner/Admin dashboard authorization and logout; record dated PASS/FAIL without code, link, email or token. Independently obtain commit-linked CI PASS and validate security/deployment release gates before any SOLVED or READY_FOR_GO. No Prod/Auth/RLS/deploy/merge change authorized.",
+            "changesMade": false,
+            "registryCheckpointOnly": true
+          },
           "resolution": {
             "state": "OPEN",
             "tests": "NOT_PASS",
