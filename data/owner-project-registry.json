@@ -391,7 +391,7 @@
           "id": "r211-staging-target",
           "kind": "BLOCKED",
           "label": "R2.11 staging target mismatch",
-          "detail": "Explicit staging request returned target production on new isolated project; protected/all, no project domains; cancellation and pause rejected. No second deployment.",
+          "detail": "Historical 2026-10-25 first R2.11 deployment returned target=production despite staging request (protected isolated project); later same-commit staging deployment dpl_71NTVUVCGU6ZAg6U59bMHQ8N9eGD was independently verified READY. Original target-mismatch mechanism unconfirmed; Owner Safari UAT and release gates pending. No Production release approved.",
           "basis": "integrationR211",
           "resolution": {
             "state": "OPEN",
@@ -407,6 +407,58 @@
               "deployment": "NOT_PASS",
               "ownerApproval": "NOT_APPROVED"
             }
+          },
+          "latestDiagnosis": {
+            "checkedOn": "2026-11-03",
+            "checkedAt": "2026-11-03T14:46:06.489Z",
+            "recordType": "R2.5 issue-specific connected GitHub/Vercel read-only diagnosis; Registry-only checkpoint",
+            "status": "BLOCKED — original first-deployment staging-target mismatch root cause UNCONFIRMED; subsequent R2.11 staging READY; Safari UAT PENDING",
+            "releaseDecision": "NO-GO Production / READY FOR OWNER SAFARI UAT ON EXACT ISOLATED STAGING ONLY; not SOLVED or READY_FOR_GO",
+            "rootCause": "UNCONFIRMED Vercel mechanism for original explicit staging request returning target=production. Vercel live independently confirms original dpl_Cfw9ijKoKsHxBodGejjwwSme7C3T target=production READY and later dpl_71NTVUVCGU6ZAg6U59bMHQ8N9eGD target=staging READY on the same isolated project and source SHA 1011a336809127a7e9b75a31aa67a2c71a18c705. Original used SHA git ref, later used branch git ref; this correlation does NOT prove causality. Existing Registry's 'No second deployment' issue detail was stale versus its own integrationR211. No redeploy/cancel/pause performed in this review.",
+            "sourceCommit": "1011a336809127a7e9b75a31aa67a2c71a18c705",
+            "originalDeployment": {
+              "id": "dpl_Cfw9ijKoKsHxBodGejjwwSme7C3T",
+              "target": "production",
+              "state": "READY",
+              "classification": "historical unintended isolated-project target; NOT approved staging"
+            },
+            "verifiedStagingDeployment": {
+              "id": "dpl_71NTVUVCGU6ZAg6U59bMHQ8N9eGD",
+              "target": "staging",
+              "state": "READY",
+              "sourceSha": "1011a336809127a7e9b75a31aa67a2c71a18c705",
+              "ownerSafariUat": "PENDING"
+            },
+            "projectProtection": "Project live=false, ssoProtection enabled/all; project settings custom domains empty; default *.vercel.app project hostname exists. No public anonymous test or security gate PASS implied.",
+            "sourceQa": "Historical integrationR211 records 256/256 Node PASS, 14/14 Catalogue PASS and build/integrity PASS on 2026-10-25; not rerun on 2026-11-03.",
+            "ciVerification": "NOT_PASS as release gate — connected GitHub combined commit statuses [] and commit workflow_runs [] for source SHA at 2026-11-03 read-only check.",
+            "safariUat": "NOT_PASS/PENDING — no new dated physical Owner Safari iPhone/iPad visual interaction evidence.",
+            "evidenceSource": "Connected GitHub fetch_file/fetch_commit/get_commit_combined_status/fetch_commit_workflow_runs and Vercel get_project/get_deployment/list_deployments/list_project_domains; observed 2026-11-03",
+            "supportingEvidence": [
+              {
+                "url": "https://vercel.com/1993khairuladam-3016/mrs10-r211-mobile-map-uat/Cfw9ijKoKsHxBodGejjwwSme7C3T",
+                "checkedOn": "2026-11-03",
+                "result": "CONFIRMED initial deployment READY with target production; source SHA 1011a336, same isolated project"
+              },
+              {
+                "url": "https://vercel.com/1993khairuladam-3016/mrs10-r211-mobile-map-uat/71NTVUVCGU6ZAg6U59bMHQ8N9eGD",
+                "checkedOn": "2026-11-03",
+                "result": "CONFIRMED later staging READY with matching R2.11 source SHA 1011a336; protected project live=false"
+              },
+              {
+                "url": "https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/commit/1011a336809127a7e9b75a31aa67a2c71a18c705",
+                "checkedOn": "2026-11-03",
+                "result": "CONFIRMED R2.11 source commit metadata; no observed GitHub combined statuses or commit workflow runs"
+              },
+              {
+                "url": "https://mrs10-r211-mobile-map-cshmbbwpn-1993khairuladam-3016.vercel.app/map-language-lab.html",
+                "checkedOn": "2026-11-03",
+                "result": "CONFIRMED exact deployment HTTPS UAT endpoint by Vercel deployment metadata; HTTP rendering and Safari visual QA NOT re-tested in this review"
+              }
+            ],
+            "nextAction": "Owner performs redacted real iPhone/iPad Safari UAT on exact protected R2.11 staging URL: Dark/Light campus popup contrast, scroll, expanded enter/exit, 44px control tap areas, four languages, railway legend; record dated PASS/FAIL only. Separately investigate original Vercel target-selection behavior via read-only provider evidence and verify CI/security gates. Keep issue OPEN until independently evidenced resolution; no auto retry, new deployment, Production, Supabase Auth/RLS, pause/unpause, merge or deletion without separate Owner approval.",
+            "changesMade": false,
+            "registryCheckpointOnly": true
           }
         },
         {
