@@ -256,22 +256,22 @@
           "id": "owner-auth-safari",
           "kind": "PENDING",
           "label": "Owner/Admin Safari login",
-          "detail": "CI for deployed 6/8-digit OTP source has a matching successful GitHub Actions run; authenticated Owner/Admin Safari session persistence after OTP, protected Preview reload and live role authorization remain unverified.",
+          "detail": "Owner reported all five canonical HTTPS Safari UAT steps PASS on 2026-11-03, including session check, refresh/reopen, Owner/Admin access and logout; CI for deployed OTP source PASS. Independent Safari trace and live Preview security verification remain pending.",
           "basis": "Owner Safari login",
           "latestDiagnosis": {
             "checkedOn": "2026-11-03",
-            "checkedAt": "2026-11-03T14:55:27.763Z",
-            "recordType": "R2.5 issue-specific live connected GitHub Actions, source and Vercel read-only recheck; Registry-only checkpoint; no application mutation",
-            "status": "PENDING — commit-linked CI PASS; Owner Safari physical session UAT NOT_PASS",
+            "checkedAt": "2026-11-03T15:00:35.807Z",
+            "recordType": "R2.5 direct Owner UAT attestation captured as redacted public-safe Registry checkpoint, with earlier connected CI/deployment evidence retained",
+            "status": "PENDING — Owner-reported Safari UAT PASS; CI PASS; independent live security/session proof PENDING",
             "releaseDecision": "NO-GO",
-            "rootCause": "UNCONFIRMED — no independently observed physical Owner Safari OTP-to-authenticated-session persistence, callback trace or live account_role() authorization on the canonical HTTPS Preview. Exact 6/8-digit OTP source and isolated CI success do not establish Safari session persistence.",
+            "rootCause": "UNCONFIRMED historically — Owner directly reports Safari OTP-to-session CHECK SESSION, refresh/reopen, dashboard authorization and logout all PASS on 2026-11-03, but no independent browser/callback trace or live backend role verification was captured. Treat as Owner UAT evidence, not independently verified fix.",
             "deployedSourceSha": "3f6592c78dcb6f34442e3cb3d9f7654d3673feba",
             "deploymentId": "dpl_2ehKzGgyuwhHWVEVo5HkBrjtuyKh",
             "deploymentState": "READY (staging metadata only; canonical alias independently mapped to this deployment; not Owner Safari UAT PASS)",
             "vercelProtection": "Current Vercel project live=false; SSO protection enabled for all deployments; separate from Supabase Owner/Admin session.",
             "ciVerification": "PASS (scoped to deployed source SHA) — push-triggered GitHub Actions workflow 41607131027 completed success at 2026-11-03T09:01:02Z; real-backend job 125819646938 succeeded, including isolated local Supabase Docker Auth/OTP/MFA/RLS and six Owner isolation checks. GitHub combined commit statuses [] and PR-only workflow lookup [] were insufficient because the successful run was push-triggered. This does not verify real Owner Safari or live backend.",
-            "safariUat": "NOT_PASS/PENDING — no dated redacted real Owner Safari CHECK SESSION, reload/reopen, Owner/Admin authorization or logout evidence on canonical HTTPS Preview.",
-            "securityVerification": "PARTIAL — isolated CI real-backend Auth/MFA/RLS/Owner isolation job PASS; live Preview backend account_role(), Owner/Member privileges, browser session and access boundaries not independently verified; security release gate remains NOT_PASS.",
+            "safariUat": "PASS (OWNER-REPORTED, 2026-11-03 MYT) — Owner directly confirmed completion of all five previously specified protected canonical HTTPS Preview Safari checks: SSO/OTP sign-in, CHECK SESSION, reload/reopen persistence, Owner/Admin dashboard authorization, and logout/access denial. No screenshots or machine trace supplied; independent evidence still pending.",
+            "securityVerification": "PARTIAL — isolated CI real-backend Auth/MFA/RLS/Owner isolation job PASS, and Owner reports dashboard authorization PASS on Safari. No independent live Preview account_role(), role isolation or callback trace captured; security release gate remains NOT_PASS.",
             "evidenceSource": "Connected GitHub fetch_file (target Registry blob), fetch_commit/source file, REST actions/runs and check-runs, fetch_workflow_run_jobs; connected Vercel get_project, get_deployment, get_alias and list_deployments; checked 2026-11-03.",
             "supportingEvidence": [
               {
@@ -295,9 +295,16 @@
                 "result": "CONFIRMED client contains durable local storage, getSession/getUser, verifyOtp, backend account_role() logic; Safari persistence not independently tested"
               }
             ],
-            "nextAction": "Owner-controlled redacted UAT on canonical protected HTTPS Preview after Vercel SSO, using existing authorized Safari access: after latest one-time email proof confirm CHECK SESSION, refresh/reopen persistence, Owner/Admin dashboard privileges, logout and denied access after logout; record dated PASS/FAIL without email, code, links or tokens. Independently validate live role/security and deployment release requirements on exact SHA. Retain OPEN/NO-GO until all gates and separate Owner approval; no Production/Auth/RLS/deploy/merge change authorized.",
+            "nextAction": "Preserve Owner's reported Safari UAT PASS without requesting repetition. Collect independently observable redacted live session/role/access evidence if and when permitted, including precise deployed SHA correspondence; validate security/deployment release gates separately. Do not declare SOLVED/READY_FOR_GO without evidence and separate Owner approval. No Production/Auth/RLS/deploy/merge mutation authorized.",
             "changesMade": false,
-            "registryCheckpointOnly": true
+            "registryCheckpointOnly": true,
+            "ownerUatAttestation": {
+              "date": "2026-11-03",
+              "source": "Direct Owner first-party confirmation in issue-specific ChatGPT workflow; summarized public-safe without transcript or identity",
+              "result": "PASS — all five prescribed Safari UAT steps",
+              "evidenceLevel": "OWNER_ATTESTATION_ONLY",
+              "independentlyObserved": false
+            }
           },
           "resolution": {
             "state": "OPEN",
@@ -306,7 +313,7 @@
             "evidence": [],
             "releaseGates": {
               "ci": "PASS",
-              "safariUat": "NOT_PASS",
+              "safariUat": "PASS",
               "security": "NOT_PASS",
               "deployment": "NOT_PASS",
               "ownerApproval": "NOT_APPROVED"
