@@ -1,0 +1,45 @@
+name: MR-S10 Railway Discovery source quality
+on:
+  push:
+    branches:
+      - candidate/p01-railway-discovery-r0-20261114
+    paths:
+      - 'discovery/**'
+      - 'data/openmr-r3/**'
+      - 'scripts/validate-discovery-source.cjs'
+      - 'tests/discovery*.cjs'
+      - '.github/workflows/p01-discovery-quality.yml'
+  pull_request:
+    branches:
+      - candidate/p01-railway-discovery-r0-20261114
+    paths:
+      - 'discovery/**'
+      - 'data/openmr-r3/**'
+      - 'scripts/validate-discovery-source.cjs'
+      - 'tests/discovery*.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: railway-discovery-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout candidate (read-only)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Set up Node LTS
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked test dependencies
+        run: npm ci --ignore-scripts --no-audit
+      - name: Validate sources and railway data relationships
+        run: node scripts/validate-discovery-source.cjs
+      - name: Regression of intake, discovery and R3 economic map
+        run: node --test tests/discovery-source-gate.test.cjs tests/discovery-r0.test.cjs tests/openmr-r3.test.cjs
