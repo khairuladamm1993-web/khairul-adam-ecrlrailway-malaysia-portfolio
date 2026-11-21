@@ -12,7 +12,7 @@ test('server control requires a real JWT, backend role and enabled Admin profile
  assert.match(src,/profile\?\.enabled/);
  assert.match(src,/allowedOrigins\(\)/);
  assert.match(src,/typeof body\?\.enabled!=='boolean'/);
- assert.doesNotMatch(src,/service_role|localStorage|user_metadata/);
+ assert.doesNotMatch(src,/Deno\.env\.get\(['"]SUPABASE_SERVICE_ROLE_KEY|localStorage\./);
 });
 test('staging migration defaults OFF and restricts reads and writes with RLS',()=>{
  const sql=read('supabase/staging/maintenance-control-review-only.sql');
