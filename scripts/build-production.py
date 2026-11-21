@@ -13,7 +13,7 @@ if any(out.iterdir()):
     raise SystemExit("Use a fresh empty production output directory.")
 
 root_files=[
-    ".nojekyll","index.html","gateway.html","owner-command-center.html","portfolio.html","references.html",
+    ".nojekyll","index.html","gateway.html","owner-command-center.html","public-maintenance-preview.html","portfolio.html","references.html",
     "PRIVACY.md","robots.txt","sitemap.xml","map-language-lab.html","ampang-line-r219.html",
     "reading/index.html","reading/library-catalogue.json","reading/railway-fundamentals-01.html","reading/chapter-01-i18n.js"
 ]
