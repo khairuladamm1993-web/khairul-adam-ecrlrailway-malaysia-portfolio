@@ -279,7 +279,7 @@ function updateMapLayer(){
      'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.35:1
     }});
   }
-  installInnerDots();ecrl?.install(map);ownerCalibration?.install();applyVisibility();if(pendingRestore)restoreLayers(pendingRestore);
+  installInnerDots();ecrl?.install(map);window.MRS10SignaturePortLayer?.install(map);ownerCalibration?.install();applyVisibility();if(pendingRestore)restoreLayers(pendingRestore);
  }catch(e){
   state.networkError=true;
   $('map-error').hidden=false;
