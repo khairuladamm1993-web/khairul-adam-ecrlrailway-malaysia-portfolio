@@ -20,8 +20,8 @@ for(const [engine,launcher] of [['chromium',chromium],['webkit',webkit]]){
       provenance:port?.references().filter(r=>r.sourceRegistry==='port-klang-references').every(r=>r.sourceIds.length===1),
       legend:!!document.getElementById('mrs10-port-reference-key')};
    });
-   assert.equal(result.mapReady,true);assert.equal(result.count,2);
-   assert.equal(result.provenance,true);assert.equal(result.legend,true);
+   assert.equal(result.mapReady,true,JSON.stringify(result));assert.equal(result.count,2,JSON.stringify(result));
+   assert.equal(result.provenance,true,JSON.stringify(result));assert.equal(result.legend,true,JSON.stringify(result));
    assert.deepEqual(errors,[]);
    report.push({engine,viewport:viewport.name,status:'PASS',result});
   }catch(e){report.push({engine,viewport:viewport.name,status:'FAIL',error:String(e),pageErrors:errors});
