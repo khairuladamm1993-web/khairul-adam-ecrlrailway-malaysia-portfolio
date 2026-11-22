@@ -45,7 +45,7 @@ const loops=registry.loops.map(annotate);
   if(!map?.getLayer(NS+'-hit'))return;
   const allowed=(mode==='NORMAL'&&(category==='All'||category==='MRS10'||category==='Malaysia'||category==='ECRL'))||mode==='INFRASTRUCTURE_FOCUS';
   const kinds=allowed?Object.keys(flags).filter(k=>flags[k]):[];
-  for(const suffix of ['-hit','-ring','-inner']){map.setLayoutProperty(NS+suffix,'visibility',kinds.length?'visible':'none');map.setFilter(NS+suffix,['in',['get','kind'],['literal',kinds]])}
+  for(const suffix of ['-hit','-ring','-inner','-signature-port-halo']){map.setLayoutProperty(NS+suffix,'visibility',kinds.length?'visible':'none');map.setFilter(NS+suffix,['in',['get','kind'],['literal',kinds]])}
  }
  function install(map){
   // The host has passed its style gate; other GeoJSON sources may now be loading.
@@ -56,6 +56,12 @@ const loops=registry.loops.map(annotate);
    const c=document.createElement('canvas');c.width=c.height=44;const x=c.getContext('2d');x.lineWidth=3;x.strokeStyle=color;x.fillStyle='white';x.setLineDash([5,4]);x.beginPath();if(kind==='YARD')x.rect(7,7,30,30);else x.arc(22,22,15,0,Math.PI*2);x.fill();x.stroke();map.addImage(NS+'-'+kind,x.getImageData(0,0,44,44));
   }
   if(!map.getLayer(NS+'-ring'))map.addLayer({id:NS+'-ring',type:'symbol',source:NS,layout:{'icon-image':['concat',NS+'-',['get','kind']],'icon-size':0.65,'icon-allow-overlap':true,'icon-ignore-placement':true}});
+  // Signature purple outer halo for source-backed maritime and yard reference areas.
+  // Preserve the existing amber yard / purple maritime identity and do not invent rail endpoints.
+  if(!map.getLayer(NS+'-signature-port-halo'))map.addLayer({id:NS+'-signature-port-halo',type:'circle',source:NS,
+   filter:['in',['get','kind'],['literal',['MARITIME','YARD']]],
+   paint:{'circle-radius':17,'circle-color':'#7c3aed','circle-opacity':0,
+    'circle-stroke-color':'#7c3aed','circle-stroke-width':2,'circle-stroke-opacity':0.9}});
   if(!map.getLayer(NS+'-inner'))map.addLayer({id:NS+'-inner',type:'circle',source:NS,paint:{'circle-radius':2.5,'circle-color':['get','color']}});
  }
  function hit(map,point){if(!map?.getLayer(NS+'-hit')||map.getLayoutProperty(NS+'-hit','visibility')==='none')return null;return refs.filter(r=>flags[r.kind]).map(r=>{const p=map.project(r.coordinates);return {...r,distance:Math.hypot(p.x-point.x,p.y-point.y)}}).filter(r=>r.distance<=14).sort((a,b)=>a.distance-b.distance)[0]||null}
