@@ -15,7 +15,7 @@ function references(){
   coordinates:isPair(a.referencePoint)?Object.freeze([...a.referencePoint]):null,
   verification:a.verificationStatus||'UNVERIFIED',
   geometryStatus:'NO_VERIFIED_RAIL_ENDPOINT',physicalLineString:null,
-  sourceIds:Object.freeze([...(a.sourceIds||[])]),
+  sourceIds:Object.freeze([...(a.sourceIds||(a.sourceId?[a.sourceId]:[]))]),
   sourceRegistry:a.assetId.startsWith('ecrl-yard')||a.assetId.startsWith('ecrl-kerteh')?'kerteh-freight-reference':a.assetId.startsWith('mrs10-port-klang')?'port-klang-references':'port-references'
  })));
 }
