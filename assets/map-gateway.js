@@ -137,7 +137,7 @@
   instance=state;
   const localizer=window.RailwayMapLocale;
   host.innerHTML='<section class="map-module" aria-label="ECRL reference map">'+
-   '<div class="map-identity-row"><span class="map-malaysia-badge" aria-label="Malaysia map context">🇲🇾 <span>Malaysia</span></span></div>'+
+   '<div class="map-identity-row"><span class="map-malaysia-badge" aria-label="Malaysia map context">🇲🇾 <span>Malaysia</span></span><span class="map-mrs10-stamp" aria-label="MR-S10 railway reference">MR-S10 · ECRL</span><span class="map-asset-count" aria-label="16 stations, 7 passing loops, 2 depots">16 STN · 7 PL · 2 DEPOT</span></div>'+
    '<p class="map-localization-note" data-map-localization-note><strong>MAP BASE LABELS</strong> · Basemap labels remain in source language; website controls follow your selected language.</p>'+
    '<div class="map-toolbar"><label class="map-search"><span>Search</span><input type="search" data-map-search placeholder="Station name; Member code / chainage when available" autocomplete="off"></label>'+
    '<div class="map-filters" role="group" aria-label="Map filters">'+['All','STN','PL','Depot'].map(x=>'<button type="button" data-map-filter="'+x+'" aria-pressed="'+(x==='All')+'">'+x+'</button>').join('')+'</div>'+
