@@ -25,6 +25,23 @@ function sourceGraphReachability(features, start, target) {
   }
   return {connected:graph.has(start) && graph.has(target) && seen.has(target), componentNodeCount:graph.has(start)?seen.size:0};
 }
+function buildEvidenceRequests(report) {
+  if (!report || !Array.isArray(report.rows)) throw Error('Audit rows required');
+  return report.rows.filter(r => r.decision === 'HOLD_NOT_ACCEPTED').map(r => ({
+    candidate_index:r.candidate_index, osm_way_id:r.osm_way_id,
+    endpoint_node_ids:[r.node_a,r.node_b],
+    original_edge_length_m:r.edge_length_m,
+    missing_endpoint_node_ids:[!r.node_a_in_detailed?r.node_a:null,!r.node_b_in_detailed?r.node_b:null].filter(Boolean),
+    source_graph_connected:r.same_way_source_graph_connected,
+    evidence_needed:[
+      'Authorized intermediate rail LineString geometry including original endpoint nodes',
+      'Source ID, revision, snapshot and raw node sequence',
+      'CRS/datum, accuracy statement and redistribution rights',
+      'Independent chainage controls and survey or authoritative alignment evidence'
+    ],
+    decision:'HOLD_PENDING_NEW_SOURCE'
+  }));
+}
 function audit(candidate, detailed) {
   if (candidate?.type !== 'FeatureCollection' || detailed?.type !== 'FeatureCollection' || !Array.isArray(candidate.features) || !Array.isArray(detailed.features)) throw Error('Expected two GeoJSON FeatureCollections');
   const byWay = new Map();
@@ -53,8 +70,9 @@ function audit(candidate, detailed) {
   return {rows, summary:{candidates:rows.length, one_endpoint:rows.filter(r=>r.node_a_in_detailed !== r.node_b_in_detailed).length, both_separate:rows.filter(r=>r.node_a_in_detailed && r.node_b_in_detailed && !r.both_nodes_same_feature).length, same_feature:rows.filter(r=>r.both_nodes_same_feature).length, adjacent:rows.filter(r=>r.adjacent_nodes_same_feature).length, graph_connected:rows.filter(r=>r.same_way_source_graph_connected).length, promoted:0}};
 }
 if (require.main === module) {
-  const [a,b] = process.argv.slice(2);
+  const [a,b,mode] = process.argv.slice(2);
   if (!a || !b) { console.error('Usage: node scripts/p01-ecrl-gap-coverage-audit.cjs candidates.geojson detailed.geojson'); process.exit(2); }
-  console.log(JSON.stringify(audit(JSON.parse(fs.readFileSync(a,'utf8')), JSON.parse(fs.readFileSync(b,'utf8'))), null, 2));
+  const report=audit(JSON.parse(fs.readFileSync(a,'utf8')), JSON.parse(fs.readFileSync(b,'utf8')));
+  console.log(JSON.stringify(mode==='--requests' ? buildEvidenceRequests(report) : report, null, 2));
 }
-module.exports = {audit, provenanceGate, sourceGraphReachability};
+module.exports = {audit, provenanceGate, sourceGraphReachability, buildEvidenceRequests};
