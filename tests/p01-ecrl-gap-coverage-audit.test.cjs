@@ -137,3 +137,9 @@ test('malformed OSM way and endpoint identifiers fail closed',()=>{
  }
  assert.throws(()=>audit(fc([candidate(1,2,{osm_way_id:'invalid'})]),fc([])),/Invalid candidate/);
 });
+
+test('incomplete or malformed detailed node sequences fail closed',()=>{
+ for(const nodes of [[],[1],[1,null],[1,'bad'],[0,2]]){
+  assert.throws(()=>audit(fc([candidate(1,2)]),fc([detailed(nodes)])),/source_node_ids/);
+ }
+});
