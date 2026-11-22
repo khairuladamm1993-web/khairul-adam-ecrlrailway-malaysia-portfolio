@@ -12,3 +12,6 @@ test('rejects reversed chainage, invalid coordinate and degenerate line',()=>{co
 
 test('rejects impossible straight-line distance for declared chainage span',()=>{const v=sample();v.features=[feature(1000,1010,[[102.5,4.1],[102.4,4.0]])];const r=validateAlignment(v);assert.equal(r.status,'REJECTED');assert.match(r.errors.join(' '),/endpoint separation exceeds chainage span/);});
 test('allows sub-metre join tolerance while rejecting larger discontinuities',()=>{const v=sample();v.features[1].geometry.coordinates[0]=[102.499004,4.099];assert.equal(validateAlignment(v).status,'CANDIDATE_ONLY');v.features[1].geometry.coordinates[0]=[102.4991,4.099];assert.equal(validateAlignment(v).status,'REJECTED');});
+
+test('rejects long zigzag even when endpoints are close',()=>{const v=sample();v.features=[feature(1000,1200,[[102.5,4.1],[102.49,4.1],[102.5,4.1]])];const r=validateAlignment(v);assert.equal(r.status,'REJECTED');assert.match(r.errors.join(' '),/polyline distance exceeds chainage span/);});
+test('rejects invalid CRS and metadata self-approval absent',()=>{const v=sample();v.metadata.crs='EPSG:3857';v.metadata.approvedForUse=false;const r=validateAlignment(v);assert.equal(r.status,'REJECTED');assert.match(r.errors.join(' '),/EPSG:4326/);assert.match(r.errors.join(' '),/approvedForUse/);});
