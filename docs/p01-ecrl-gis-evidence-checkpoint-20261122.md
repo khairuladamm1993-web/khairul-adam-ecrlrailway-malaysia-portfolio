@@ -36,3 +36,9 @@ No Production, P02, P03, Auth/RLS or live data mutation authorized.
 - Added summed polyline-length plausibility guard to catch zigzag routes whose endpoints alone appear close. Source commit `4e267072b716d1696e7f297ebbd1341f201e76fe`.
 - Added two regression scenarios for zigzag overlength and invalid CRS/approval flag, test commit `d80316360ba79e9d5f3aaef282894dbe3b27d4d3`.
 - **QA status: IMPLEMENTED / NOT TESTED in this checkpoint.** Earlier V1.1 7/7 local result does not apply to the revised V1.2 code. CI evidence remains unverified. Candidate metadata and approval flag are untrusted self-assertions until reviewed independently.
+
+## V1.2 execution evidence (2026-11-22)
+- Fetched latest GitHub source and tests, reproduced them as a temporary local copy and executed with Node.js v22.16.0.
+- `node --check scripts/p01-ecrl-alignment-evidence-gate.cjs`: PASS.
+- `node --test tests/p01-ecrl-alignment-evidence-gate.test.cjs`: **9 PASS, 0 FAIL, 0 SKIPPED**, 94.827014 ms total.
+- Evidence scope: local isolated fixture tests only; GitHub Actions workflow execution, real alignment, Safari UAT and production runtime remain UNVERIFIED.
