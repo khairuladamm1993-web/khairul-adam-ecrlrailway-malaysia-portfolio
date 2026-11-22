@@ -23,12 +23,13 @@ function audit(candidate, detailed) {
     if (!way || !Array.isArray(ends) || ends.length !== 2 || String(ends[0]) === String(ends[1])) throw Error('Invalid candidate #' + (i+1));
     if (p.approved_alignment !== false || p.do_not_use_for_train_movement !== true) throw Error('Unsafe approval flags candidate #' + (i+1));
     const entries = byWay.get(way) || [], features = entries.map(e=>e.nodes), [a,b] = ends.map(String);
-    const revisionMatch = entries.length > 0 && entries.every(e => e.revision != null && p.rechecked_way_version != null && String(e.revision) === String(p.rechecked_way_version));
+    const revisionComparable = entries.length > 0 && p.rechecked_way_version != null && entries.every(e => e.revision != null);
+    const revisionMatch = revisionComparable ? entries.every(e => String(e.revision) === String(p.rechecked_way_version)) : null;
     const snapshotMatch = entries.length > 0 && entries.every(e => typeof e.snapshot === 'string' && e.snapshot && e.snapshot === p.source_snapshot);
     const aFound = features.some(ns => ns.includes(a)), bFound = features.some(ns => ns.includes(b));
     const same = features.some(ns => ns.includes(a) && ns.includes(b));
     const adjacent = features.some(ns => ns.some((n,j) => j+1 < ns.length && ((n===a && ns[j+1]===b) || (n===b && ns[j+1]===a))));
-    return {candidate_index:i+1, osm_way_id:way, node_a:a, node_b:b, edge_length_m:p.original_edge_length_m ?? null, detailed_features_same_way:features.length, source_revision_match:revisionMatch, source_snapshot_match:snapshotMatch, node_a_in_detailed:aFound, node_b_in_detailed:bFound, both_nodes_same_feature:same, adjacent_nodes_same_feature:adjacent, provenance:provenanceGate(p.provenance), decision:'HOLD_NOT_ACCEPTED'};
+    return {candidate_index:i+1, osm_way_id:way, node_a:a, node_b:b, edge_length_m:p.original_edge_length_m ?? null, detailed_features_same_way:features.length, source_revision_comparable:revisionComparable, source_revision_match:revisionMatch, source_snapshot_match:snapshotMatch, node_a_in_detailed:aFound, node_b_in_detailed:bFound, both_nodes_same_feature:same, adjacent_nodes_same_feature:adjacent, provenance:provenanceGate(p.provenance), decision:'HOLD_NOT_ACCEPTED'};
   });
   return {rows, summary:{candidates:rows.length, one_endpoint:rows.filter(r=>r.node_a_in_detailed !== r.node_b_in_detailed).length, both_separate:rows.filter(r=>r.node_a_in_detailed && r.node_b_in_detailed && !r.both_nodes_same_feature).length, same_feature:rows.filter(r=>r.both_nodes_same_feature).length, adjacent:rows.filter(r=>r.adjacent_nodes_same_feature).length, promoted:0}};
 }
