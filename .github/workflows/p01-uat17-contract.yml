@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - candidate/p01-uat17-maintenance-preview-20261122
+      - candidate/p01-product-first-map-fullscreen-r1
   pull_request:
     paths:
       - 'assets/map-gateway.js'
