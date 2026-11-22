@@ -81,3 +81,8 @@ No Production, P02, P03, Auth/RLS or live data mutation authorized.
 - **0/9** have both endpoints in a single detailed feature, **0/9** have adjacent endpoints in a single detailed feature, and **0/9** can be promoted to accepted alignment.
 - Priority way `1420666687`, nodes `13055510163` and `13785440684`, original reported edge length `9503.9 m`: only node `13785440684` appears in same-way detailed features; the opposite endpoint is absent. This isolates the source coverage deficit, not a renderer defect.
 - Local reproducible audit output: `P01-ECRL-9-GAP-DIRECT-SOURCE-AUDIT.csv` (conversation artifact). This candidate branch records conclusions only; original source GeoJSON and restricted/private geometry are **not** committed or published.
+
+## Reproducible nine-gap audit CI verification (2026-11-22)
+- Candidate SHA `021a4c824111ad3c3766c978c4fb4d4d775c6bdb`: `scripts/p01-ecrl-gap-coverage-audit.cjs`, five safety tests and workflow inclusion.
+- GitHub Actions Run #66 (`44967252583`), job `source-contract` (`137038970979`), **SUCCESS**. Actual logs: **28/28 PASS**, **0 FAIL**, **0 SKIPPED**, static artifact build PASS. https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44967252583
+- These are source-contract and synthetic safety tests; the private original GeoJSON datasets are not bundled in CI. No new independent rail geometry or physical verification was acquired.
