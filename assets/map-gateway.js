@@ -138,6 +138,7 @@
   const localizer=window.RailwayMapLocale;
   host.innerHTML='<section class="map-module" aria-label="ECRL reference map">'+
    '<div class="map-identity-row"><span class="map-malaysia-badge" aria-label="Malaysia map context">🇲🇾 <span>Malaysia</span></span><span class="map-mrs10-stamp" aria-label="MR-S10 railway reference">MR-S10 · ECRL</span><span class="map-asset-count" aria-label="16 stations, 7 passing loops, 2 depots">16 STN · 7 PL · 2 DEPOT</span></div>'+
+   '<p class="map-confidence-summary" data-map-confidence-summary role="status">ECRL GIS: reference markers only · surveyed alignment not established</p>'+
    '<p class="map-localization-note" data-map-localization-note><strong>MAP BASE LABELS</strong> · Basemap labels remain in source language; website controls follow your selected language.</p>'+
    '<div class="map-toolbar"><label class="map-search"><span>Search</span><input type="search" data-map-search placeholder="Station name; Member code / chainage when available" autocomplete="off"></label>'+
    '<div class="map-filters" role="group" aria-label="Map filters">'+['All','STN','PL','Depot'].map(x=>'<button type="button" data-map-filter="'+x+'" aria-pressed="'+(x==='All')+'">'+x+'</button>').join('')+'</div>'+
@@ -302,8 +303,21 @@
     state.markers.set(r.id,marker);
    }
   }
+  function renderConfidenceSummary(){
+   const records=corridorRecords();
+   const counts={engineering:0,personal:0,public:0,pending:0};
+   for(const r of records){
+    if(r.locationConfidence===ENGINEERING)counts.engineering++;
+    else if([VALID,PERSONAL].includes(r.locationConfidence))counts.personal++;
+    else if(r.locationConfidence===PUBLIC)counts.public++;
+    else counts.pending++;
+   }
+   const target=host.querySelector('[data-map-confidence-summary]');
+   if(target)target.textContent='ECRL reference assets: '+records.length+' · Engineering/survey-classified points: '+counts.engineering+' · Field-validated references: '+counts.personal+' · Public references: '+counts.public+' · Pending: '+counts.pending+' · Continuous track alignment: NOT VERIFIED';
+  }
   function renderResults(){
    const rows=visible();
+   renderConfidenceSummary();
    resultHost.innerHTML=rows.map(r=>{const o=r.overlay||{},meta=[r.type,o.code,o.chainage].filter(Boolean).join(' · ');return '<button type="button" data-map-point="'+r.id+'" aria-current="'+(state.selected?.id===r.id)+'"><strong>'+esc(r.name)+'</strong><span>'+esc(meta||r.type)+'</span><small>'+esc(r.locationConfidence)+' · '+esc(note(r))+'</small></button>';}).join('')||'<p class="map-empty">No matching Corridor records.</p>';
    syncMarkers();
   }
