@@ -91,3 +91,8 @@ No Production, P02, P03, Auth/RLS or live data mutation authorized.
 - Candidate commit `ce029144d80696976b2065227b7aa85ed957405e` adds fail-closed provenance fields and three synthetic tests. These tests are part of the candidate-only `tests/p01-ecrl-gap-coverage-audit.test.cjs` suite.
 - GitHub Actions Run #72 (`44967401742`), job `source-contract` (`137039429454`) **SUCCESS**. Inspected logs: **31 tests PASS, 0 FAIL, 0 SKIPPED**; static artifact build PASS; no Node20 deprecation warning in inspected output. https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44967401742
 - Provenance completeness is only a metadata check. `redistributionApproved` is a caller-supplied assertion, not a legal license verification; independent physical control and geometry remain NOT VERIFIED. All candidate rows retain HOLD status and no automatic promotion.
+
+## Same-way graph continuity QA verification (2026-11-22)
+- Candidate commit `260bf2156a1b2106cccdb3d32d8dc47941a78181` adds source-node graph reachability diagnostics and three synthetic tests. Source edges are built only from adjacent `source_node_ids` within each detailed feature, grouped by exact OSM way ID; no straight-line bridge or cross-way inference.
+- GitHub Actions Run #86 (`44968055218`), job `source-contract` (`137041444357`) **SUCCESS**. Logs inspected: **38/38 PASS**, **0 FAIL**, **0 SKIPPED**, static artifact build PASS. https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44968055218
+- Source-contract test success does not verify physical rail alignment or independently surveyed CH. Nine candidates remain HOLD; 17 known gaps remain unresolved. Original GeoJSON not published to GitHub.
