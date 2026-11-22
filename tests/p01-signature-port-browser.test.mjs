@@ -74,8 +74,14 @@ for(const [engine,launcher] of [['chromium',chromium],['webkit',webkit]]){
      assert.match(await popup.innerText(),warning);
      assert.equal(new URL(await popup.locator('a').getAttribute('href')).hostname,'www.pka.gov.my');
      await page.screenshot({path:`artifacts/p01-signature-port/${engine}-${viewport.name}-${id}.png`});
-     portPopupChecks.push({id,status:'PASS',disclaimer:true});
-     await popup.locator('.maplibregl-popup-close-button').click();
+     const planning=popup.getByRole('button',{name:'Lihat rekod perancangan ECRL'});
+     if(touch)await planning.tap();else await planning.click();
+     const planningPopup=allPopups.filter({has:page.locator('.ecrl-intelligence')});
+     await planningPopup.waitFor({state:'visible',timeout:15000});
+     assert.match(await planningPopup.innerText(),new RegExp(label));
+     assert.equal(await allPopups.count(),1);
+     portPopupChecks.push({id,status:'PASS',disclaimer:true,coLocatedPlanningPopup:true});
+     await planningPopup.locator('.maplibregl-popup-close-button').click();
      await allPopups.waitFor({state:'detached'});
    }
    // At this zoom the two real source references fall within each other's hit radius.

@@ -341,6 +341,11 @@ function showPortReference(ref){
  host.dataset.portReferenceId=ref.id;
  host.append(el('strong',null,ref.name),el('p',null,'Rujukan kawasan pelabuhan (Port Klang Authority). Bukan titik hujung rel atau sambungan ECRL yang disahkan.'));
  appendSource(host,window.MRS10PortKlangReferences.source.url);
+ const ecrlId=ref.id.replace('mrs10-port-klang-','ecrl-port-');
+ if(ecrl?.get(ecrlId)){
+  const planning=el('button','service-change','Lihat rekod perancangan ECRL');
+  planning.type='button';planning.onclick=()=>showInfrastructure(ecrlId);host.append(planning);
+ }
  mountPopup(host,ref.coordinates);
 }
 function syncReferenceMarkers(selection=focus.current){
@@ -426,7 +431,9 @@ function startMap(){
    const closest=[...(infrastructure?[{assetId:infrastructure.assetId,distance:infrastructure.distance}]:[]),
      ...(ownerLoop?[{assetId:ownerLoop.ref.assetId,distance:ownerLoop.distance}]:[])].sort((a,b)=>a.distance-b.distance)[0];
    const port=window.MRS10SignaturePortLayer?.hit(state.map,e.point);
-   if(port&&port.distance<=Math.min(closest?.distance??Infinity,candidates[0]?.distance??Infinity)){
+   // The two Port Klang planning references share the maritime markers' positions
+   // at screen precision. Give the visible port symbol priority over rounding noise.
+   if(port&&port.distance<=Math.min(closest?.distance??Infinity,candidates[0]?.distance??Infinity)+1){
     showPortReference(port.reference);return;
    }
    if(closest&&(!candidates.length||closest.distance<candidates[0].distance)){showInfrastructure(closest.assetId);return}
