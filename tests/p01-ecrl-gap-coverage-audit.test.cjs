@@ -129,3 +129,11 @@ test('missing OSM tags cannot imply an operational railway',()=>{
  assert.equal(r.rows[0].source_railway_tag,null);
  assert.equal(r.rows[0].operational_evidence_status,'NOT_VERIFIED_FROM_OSM_TAGS');
 });
+
+test('malformed OSM way and endpoint identifiers fail closed',()=>{
+ for(const bad of [null,'',0,'abc','-12']){
+  assert.throws(()=>audit(fc([candidate(bad,2)]),fc([])),/Invalid candidate/);
+  assert.throws(()=>audit(fc([candidate(1,bad)]),fc([])),/Invalid candidate/);
+ }
+ assert.throws(()=>audit(fc([candidate(1,2,{osm_way_id:'invalid'})]),fc([])),/Invalid candidate/);
+});
