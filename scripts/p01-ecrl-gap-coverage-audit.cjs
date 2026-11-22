@@ -1,5 +1,12 @@
 'use strict';
 const fs = require('node:fs');
+function provenanceGate(meta) {
+  const m = meta && typeof meta === 'object' && !Array.isArray(meta) ? meta : {};
+  const required = ['sourceId','sourceRevision','coordinateReferenceSystem','license','chainageDatum','independentControlReference'];
+  const missing = required.filter(k => typeof m[k] !== 'string' || !m[k].trim());
+  const restricted = m.redistributionApproved !== true;
+  return {status:'HOLD_NOT_VERIFIED', missing, redistributionAllowed:!restricted, eligibleForAutomaticPromotion:false};
+}
 function audit(candidate, detailed) {
   if (candidate?.type !== 'FeatureCollection' || detailed?.type !== 'FeatureCollection' || !Array.isArray(candidate.features) || !Array.isArray(detailed.features)) throw Error('Expected two GeoJSON FeatureCollections');
   const byWay = new Map();
@@ -19,7 +26,7 @@ function audit(candidate, detailed) {
     const aFound = features.some(ns => ns.includes(a)), bFound = features.some(ns => ns.includes(b));
     const same = features.some(ns => ns.includes(a) && ns.includes(b));
     const adjacent = features.some(ns => ns.some((n,j) => j+1 < ns.length && ((n===a && ns[j+1]===b) || (n===b && ns[j+1]===a))));
-    return {candidate_index:i+1, osm_way_id:way, node_a:a, node_b:b, edge_length_m:p.original_edge_length_m ?? null, detailed_features_same_way:features.length, node_a_in_detailed:aFound, node_b_in_detailed:bFound, both_nodes_same_feature:same, adjacent_nodes_same_feature:adjacent, decision:'HOLD_NOT_ACCEPTED'};
+    return {candidate_index:i+1, osm_way_id:way, node_a:a, node_b:b, edge_length_m:p.original_edge_length_m ?? null, detailed_features_same_way:features.length, node_a_in_detailed:aFound, node_b_in_detailed:bFound, both_nodes_same_feature:same, adjacent_nodes_same_feature:adjacent, provenance:provenanceGate(p.provenance), decision:'HOLD_NOT_ACCEPTED'};
   });
   return {rows, summary:{candidates:rows.length, one_endpoint:rows.filter(r=>r.node_a_in_detailed !== r.node_b_in_detailed).length, both_separate:rows.filter(r=>r.node_a_in_detailed && r.node_b_in_detailed && !r.both_nodes_same_feature).length, same_feature:rows.filter(r=>r.both_nodes_same_feature).length, adjacent:rows.filter(r=>r.adjacent_nodes_same_feature).length, promoted:0}};
 }
@@ -28,4 +35,4 @@ if (require.main === module) {
   if (!a || !b) { console.error('Usage: node scripts/p01-ecrl-gap-coverage-audit.cjs candidates.geojson detailed.geojson'); process.exit(2); }
   console.log(JSON.stringify(audit(JSON.parse(fs.readFileSync(a,'utf8')), JSON.parse(fs.readFileSync(b,'utf8'))), null, 2));
 }
-module.exports = {audit};
+module.exports = {audit, provenanceGate};
