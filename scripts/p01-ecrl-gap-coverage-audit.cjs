@@ -52,7 +52,7 @@ function audit(candidate, detailed) {
     const p = f.properties || {}, way = String(p.osm_way_id ?? '');
     if (!way) continue;
     const nodes = p.source_node_ids;
-    if (!Array.isArray(nodes) || nodes.length < 2 || nodes.some(id=>!/^[1-9]\d*$/.test(String(id)))) throw Error('Missing or invalid source_node_ids for detailed way ' + way);
+    if (!Array.isArray(nodes) || nodes.length < 2 || nodes.some(id=>!/^[1-9]\d*$/.test(String(id)))) throw Error('Missing source_node_ids or invalid sequence for detailed way ' + way);
     if (!byWay.has(way)) byWay.set(way, []);
     byWay.get(way).push({nodes:nodes.map(String), revision:p.rechecked_way_version, snapshot:p.source_snapshot});
   }
