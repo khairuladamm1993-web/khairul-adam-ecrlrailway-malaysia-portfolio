@@ -24,12 +24,26 @@ for(const [engine,launcher] of [['chromium',chromium],['webkit',webkit]]){
       styleLoaded:map?.styleLoaded,webglReady:map?.webglReady,
       canvas:map?.rect,ecrlLayers:map?.ecrl?.layersPresent};
    });
-   if(!result.mapReady)await page.waitForFunction(()=>window.MRS10V8Diagnostics?.snapshot()?.mapReady===true,{timeout:30000}).catch(()=>{});
-   const ready=await page.evaluate(()=>window.MRS10V8Diagnostics?.snapshot()?.mapReady);
-   assert.equal(ready,true,JSON.stringify({result,networkFailures:networkFailures.slice(0,12),consoleErrors:consoleErrors.slice(0,12)}));assert.equal(result.count,2,JSON.stringify(result));
-   assert.equal(result.provenance,true,JSON.stringify(result));assert.equal(result.legend,true,JSON.stringify(result));
+   // Only final MapLibre state counts: the initial snapshot can precede style loading.
+   await page.waitForFunction(()=>{
+     const d=window.MRS10V8Diagnostics?.snapshot();
+     return d?.mapReady===true&&d?.styleLoaded===true&&d?.webglReady===true&&d?.ecrl?.layersPresent===true;
+   },null,{timeout:45000});
+   const final=await page.evaluate(()=>{
+     const d=window.MRS10V8Diagnostics.snapshot();
+     return {mapReady:d.mapReady,styleLoaded:d.styleLoaded,webglReady:d.webglReady,
+       ecrlLayers:d.ecrl?.layersPresent,canvas:d.rect};
+   });
+   assert.equal(final.mapReady,true,JSON.stringify({final,networkFailures:networkFailures.slice(0,12),consoleErrors:consoleErrors.slice(0,12)}));
+   assert.equal(final.styleLoaded,true);
+   assert.equal(final.webglReady,true);
+   assert.equal(final.ecrlLayers,true);
+   assert(final.canvas.width>0&&final.canvas.height>0);
+   assert.equal(result.count,2,JSON.stringify(result));
+   assert.equal(result.provenance,true,JSON.stringify(result));
+   assert.equal(result.legend,true,JSON.stringify(result));
    assert.deepEqual(errors,[]);
-   report.push({engine,viewport:viewport.name,status:'PASS',result});
+   report.push({engine,viewport:viewport.name,status:'PASS',result:final});
   }catch(e){report.push({engine,viewport:viewport.name,status:'FAIL',error:String(e),pageErrors:errors,networkFailures:networkFailures.slice(0,12),consoleErrors:consoleErrors.slice(0,12)});
    await page.screenshot({path:`artifacts/p01-signature-port/${engine}-${viewport.name}-fail.png`}).catch(()=>{});}
   await page.close();
