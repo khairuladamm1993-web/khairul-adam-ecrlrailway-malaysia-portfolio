@@ -56,3 +56,12 @@ No Production, P02, P03, Auth/RLS or live data mutation authorized.
 - Inspected actual logs: **23 tests PASS, 0 FAIL, 0 SKIPPED**; static artifact build PASS. Previous Node.js 20 deprecation warning not present in inspected logs.
 - Evidence: https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44966754626
 - CI validation is scoped to candidate source, not survey-grade ECRL geometry or production deployment.
+
+## Existing private geospatial engineering continuity (2026-11-22)
+- Read the owner's Drive reports `MR-S10-P01-R33-GEOSPATIAL-EVIDENCE-FINAL-REPORT.md` (2026-11-17) and `MR-S10-P01-R15B-LAPORAN-ROOT-CAUSE-V1.0.md` (2026-11-20); do **not** restart research or imply this candidate gate supersedes those mature private workpacks.
+- R3.3 private engineering checkpoint: `feature/p01-ecrl-geospatial-evidence-r33` SHA `089dc275e0d57797377b395a982672d39bb0c1a6`. Historical ArcGIS planning layer: two feature objects / five polyline parts / 5,180 vertices; **0 accepted current alignment geometries**, source license and independent CH calibration absent. Private evaluation only, not public redistribution.
+- R1.5b private engineering checkpoint: `research/p01-r15b-geometry-recovery` SHA `39da64c86fea2c9c022130af208f7cfbac07d188`. Nine private diagnostic candidates, 17/17 gaps HOLD; client graph 453 unique features, 2,843 nodes, 22 components; no proof of continuous physical rail alignment. 7 PL and 2 depot geometry/control targets remain unverified.
+- Source-specific issue: R1.5b gap #9 way `1420666687` has approx. 9.5 km R32 endpoint chord; prioritize an independently authorized intermediate-linework package with source rights, revision/datum, matching endpoint IDs and independent controls before considering any promotion.
+- The public-safe `scripts/p01-ecrl-alignment-evidence-gate.cjs` remains a **candidate-only structural plausibility filter**, not a replacement for R32/R33/R1.5b source lineage, calibration, owner acceptance or physical survey. No private historical linework should be copied into public artifacts without license authorization.
+- Drive source references (private): https://docs.google.com/document/d/12q4ax2AgDKmgR6HLabAgAkGPYj5APuMM/edit and https://docs.google.com/document/d/1AcG8HsCDvZ-g7JWU5qVguIae7jq-tZiF/edit
+- Next execution: reconcile against the exact private bundle and source receipts if accessible; do not claim bundle contents inspected from the report alone. No automatic merge/deploy/data writes.
