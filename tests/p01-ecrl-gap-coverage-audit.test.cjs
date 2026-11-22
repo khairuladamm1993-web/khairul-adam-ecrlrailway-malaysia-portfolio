@@ -143,3 +143,10 @@ test('incomplete or malformed detailed node sequences fail closed',()=>{
   assert.throws(()=>audit(fc([candidate(1,2)]),fc([detailed(nodes)])),/source_node_ids/);
  }
 });
+
+test('invalid detailed OSM way IDs cannot enter source graph matching',()=>{
+ for(const bad of ['abc','-7','0']){
+  const f=detailed([1,2]);f.properties.osm_way_id=bad;
+  assert.throws(()=>audit(fc([candidate(1,2)]),fc([f])),/Invalid detailed OSM way ID/);
+ }
+});
