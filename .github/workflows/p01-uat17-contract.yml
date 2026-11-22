@@ -1,0 +1,30 @@
+name: P01 UAT17 Candidate QA
+on:
+  push:
+    branches:
+      - candidate/p01-uat17-maintenance-preview-20261122
+  pull_request:
+    paths:
+      - 'assets/map-gateway.js'
+      - 'assets/gateway.css'
+      - 'tests/p01-*.test.cjs'
+      - 'supabase/functions/mrs10-maintenance-control/**'
+      - 'supabase/staging/maintenance-control-review-only.sql'
+      - '.github/workflows/p01-uat17-contract.yml'
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: node --check assets/map-gateway.js
+      - name: P01 UAT17 focused regression tests
+        run: node --test tests/p01-uat17-ecrl-inventory.test.cjs tests/p01-uat17-map-fullscreen.test.cjs tests/p01-uat17-refresh.test.cjs tests/p01-uat17-maintenance-source.test.cjs tests/p01-maintenance-server-contract.test.cjs
+      - name: Safe static artifact build
+        run: python3 scripts/build-production.py dist-production
