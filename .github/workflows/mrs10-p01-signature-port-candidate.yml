@@ -1,0 +1,25 @@
+name: MR-S10 P01 Signature Port Candidate QA
+on:
+  push:
+    branches:
+      - candidate/p01-signature-port-layer-r1-20261122
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  signature-unit-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit
+      - name: Signature layer and existing ECRL regression
+        run: |
+          node --test tests/p01-signature-port-layer.test.cjs tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-consumer-popup.test.cjs tests/unified-ecrl-chainage.test.cjs tests/unified-ecrl-port-references.test.cjs tests/unified-ecrl-kerteh-freight.test.cjs tests/p01-ecrl-alignment-evidence-gate.test.cjs
+      - name: Build unified map V8
+        run: node scripts/build-unified-v8.cjs
