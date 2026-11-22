@@ -1,0 +1,109 @@
+# P01 ECRL GIS evidence checkpoint — 22 November 2026
+
+Status: **READ-ONLY VERIFIED (data shape)** / **TRACK GEOMETRY NOT VERIFIED**.
+
+## Live Supabase read-only observations
+- `public.member_content`, `kind='corridor'`: 25 records, all approved at inspection.
+- 24 parseable, distinct chainages in `CHddd+ddd` format; 1 missing (`DEPOT-KTN`); 0 malformed nonempty values.
+- Chainage endpoints: `CH000+670` to `CH524+160`.
+- Location confidence: 5 Personal Field-Validated, 18 Public Reference, 2 Pending Validation, 0 Engineering/Survey-classified.
+- No top-level `geometry`, `geojson`, `alignment` or `routeGeometry` in any of 25 Corridor bodies; 0 `surveySource` or `geospatialSource`; 3 records include `sourceReferences`.
+- These results **do not establish surveyed railway geometry**, turnout topology, a polyline, a rail-grade gradient profile, or physical chainage accuracy.
+
+## Source review
+The previously existing P01 ECRL GIS branches examined had the same `assets/map-gateway.js` and `assets/corridor-reference.js` object SHAs. No independently verified route geometry was recovered from those inspected files.
+
+## Repeatable diagnostic
+`scripts/p01-ecrl-readonly-integrity.sql` contains a SELECT-only integrity probe. Do not interpret a valid chainage as an accurate geographic point. Never interpolate latitude/longitude from endpoint markers and claim engineering accuracy.
+
+## Next evidence gate
+Obtain a licensed/authorized railway alignment GeoJSON or surveyed coordinate-and-chainage dataset with provenance, coordinate reference system, coverage and accuracy. Keep candidate ingestion isolated; run geometric continuity, CH monotonicity, provenance and Safari rendering checks before approval.
+
+No Production, P02, P03, Auth/RLS or live data mutation authorized.
+
+## Candidate-only evidence gate QA (2026-11-22)
+- Source: `scripts/p01-ecrl-alignment-evidence-gate.cjs`; tests: `tests/p01-ecrl-alignment-evidence-gate.test.cjs`.
+- Local isolated execution of the fetched source and test contents: `node --check` PASS; `node --test` **5/5 PASS, 0 failed**.
+- This proves the five included fixture cases in a local copy only. GitHub Actions push-run and end-to-end integration remain UNVERIFIED; no production runtime or actual ECRL geometry was tested.
+- The gate returns `CANDIDATE_ONLY` on accepted fixture geometry, never `VERIFIED`. Source-provided `approvedForUse` and metadata require independent review before any Owner approval.
+
+## GIS evidence gate V1.1 QA
+- Gate commit `11d6a1570948262b7c7e726d6118e81948e42969`; fixture commit `39ee1676bfc571900e00e8add7f1f8d548e7e885`.
+- Local copy of the revised gate and its seven fixture tests: `node --check` PASS; `node --test` **7 PASS / 0 FAIL**. The local files were transcribed from the connector-fetched source and corresponding test changes; CI execution on the GitHub runner remains UNVERIFIED.
+- Added endpoint straight-line distance vs chainage-span plausibility and metre-based segment join tolerance. These are screening heuristics, not an engineering survey or route verification.
+
+## V1.2 candidate gate checkpoint
+- Added summed polyline-length plausibility guard to catch zigzag routes whose endpoints alone appear close. Source commit `4e267072b716d1696e7f297ebbd1341f201e76fe`.
+- Added two regression scenarios for zigzag overlength and invalid CRS/approval flag, test commit `d80316360ba79e9d5f3aaef282894dbe3b27d4d3`.
+- **QA status: IMPLEMENTED / NOT TESTED in this checkpoint.** Earlier V1.1 7/7 local result does not apply to the revised V1.2 code. CI evidence remains unverified. Candidate metadata and approval flag are untrusted self-assertions until reviewed independently.
+
+## V1.2 execution evidence (2026-11-22)
+- Fetched latest GitHub source and tests, reproduced them as a temporary local copy and executed with Node.js v22.16.0.
+- `node --check scripts/p01-ecrl-alignment-evidence-gate.cjs`: PASS.
+- `node --test tests/p01-ecrl-alignment-evidence-gate.test.cjs`: **9 PASS, 0 FAIL, 0 SKIPPED**, 94.827014 ms total.
+- Evidence scope: local isolated fixture tests only; GitHub Actions workflow execution, real alignment, Safari UAT and production runtime remain UNVERIFIED.
+
+## GitHub Actions CI verified — Run #46 (2026-11-22)
+- Run ID `44966455635`, workflow `P01 UAT17 Candidate QA`, conclusion `success`, job `source-contract` ID `137036475249` conclusion `success`, SHA `ad1007e5b87f1d493e37e1d2c1e66646d1a8a08a`.
+- Inspected actual job logs: **23 tests PASS, 0 FAIL, 0 SKIPPED**, Node syntax step PASS, `python3 scripts/build-production.py dist-production` PASS; protected legacy assets excluded.
+- CI warning: `actions/checkout@v4` and `actions/setup-node@v4` rely on deprecated Node.js 20 runtime and are forced to Node.js 24; plan version bump in candidate, do not mistake warning for test failure.
+- Evidence: https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44966455635
+- This is **CI VERIFIED** for the specified SHA only, not physical alignment/survey validation or Production deployment.
+
+## Actions v5 migration VERIFIED (2026-11-22)
+- Commit `c1f74e6ebcd674f467934e2d636f99737814a9a1` updates candidate QA workflow to `actions/checkout@v5` and `actions/setup-node@v5`.
+- GitHub Actions run #52 (`44966754626`), job `source-contract` (`137037411758`) concluded **SUCCESS**.
+- Inspected actual logs: **23 tests PASS, 0 FAIL, 0 SKIPPED**; static artifact build PASS. Previous Node.js 20 deprecation warning not present in inspected logs.
+- Evidence: https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44966754626
+- CI validation is scoped to candidate source, not survey-grade ECRL geometry or production deployment.
+
+## Existing private geospatial engineering continuity (2026-11-22)
+- Read the owner's Drive reports `MR-S10-P01-R33-GEOSPATIAL-EVIDENCE-FINAL-REPORT.md` (2026-11-17) and `MR-S10-P01-R15B-LAPORAN-ROOT-CAUSE-V1.0.md` (2026-11-20); do **not** restart research or imply this candidate gate supersedes those mature private workpacks.
+- R3.3 private engineering checkpoint: `feature/p01-ecrl-geospatial-evidence-r33` SHA `089dc275e0d57797377b395a982672d39bb0c1a6`. Historical ArcGIS planning layer: two feature objects / five polyline parts / 5,180 vertices; **0 accepted current alignment geometries**, source license and independent CH calibration absent. Private evaluation only, not public redistribution.
+- R1.5b private engineering checkpoint: `research/p01-r15b-geometry-recovery` SHA `39da64c86fea2c9c022130af208f7cfbac07d188`. Nine private diagnostic candidates, 17/17 gaps HOLD; client graph 453 unique features, 2,843 nodes, 22 components; no proof of continuous physical rail alignment. 7 PL and 2 depot geometry/control targets remain unverified.
+- Source-specific issue: R1.5b gap #9 way `1420666687` has approx. 9.5 km R32 endpoint chord; prioritize an independently authorized intermediate-linework package with source rights, revision/datum, matching endpoint IDs and independent controls before considering any promotion.
+- The public-safe `scripts/p01-ecrl-alignment-evidence-gate.cjs` remains a **candidate-only structural plausibility filter**, not a replacement for R32/R33/R1.5b source lineage, calibration, owner acceptance or physical survey. No private historical linework should be copied into public artifacts without license authorization.
+- Drive source references (private): https://docs.google.com/document/d/12q4ax2AgDKmgR6HLabAgAkGPYj5APuMM/edit and https://docs.google.com/document/d/1AcG8HsCDvZ-g7JWU5qVguIae7jq-tZiF/edit
+- Next execution: reconcile against the exact private bundle and source receipts if accessible; do not claim bundle contents inspected from the report alone. No automatic merge/deploy/data writes.
+
+## Direct inspection of two original Drive GeoJSON assets (2026-11-22)
+- Downloaded and parsed the actual `ECRL-MISSING-SPANS-SOURCE-CANDIDATES.geojson` (9 GeoJSON Features) and `ECRL-TRACK-ONLY-DETAILED.geojson` (280 Features), rather than relying on earlier report summaries.
+- **All 9 candidate missing-span features are two-coordinate LineStrings** and have `approved_alignment:false` and `do_not_use_for_train_movement:true`. No intermediate curvature is encoded in those candidates.
+- Highest-priority way `1420666687`: candidate line has endpoints OSM node IDs `[13055510163,13785440684]`, reported `original_edge_length_m:9503.9`, `approved_alignment:false`. The detailed dataset contains one feature for the same way, `rg-osm-1420666687-13785440684-10295534633`, whose `source_node_ids` include endpoint `13785440684` but not `13055510163`; it does **not** provide the missing intermediate alignment.
+- Candidate list position is **8th of 9** for this way; the R1.5b report's `gap #9` is a separate **17-gap audit index**, not the candidate list index. Do not conflate indices.
+- Direct matching by OSM way ID shows that all nine candidate ways exist in the detailed dataset, but **none** of their missing endpoint pairs occur as an adjacent node pair in the same detailed feature. This is consistent with, but does not independently prove, the prior R1.5b full-source graph conclusion.
+- Decision: 9 candidates remain PRIVATE DIAGNOSTIC / HOLD, 0 promoted to accepted physical alignment. Do not bridge endpoints by straight lines in public UI or simulator. No network re-fetch of source OSM/ArcGIS performed.
+
+## Nine-gap direct endpoint coverage matrix (2026-11-22)
+- Recomputed against original downloaded GeoJSON candidate (9 features) and detailed (280 features) datasets. All 9 candidate OSM way IDs are represented in the detailed dataset.
+- Five candidate endpoint pairs have exactly one of two endpoint IDs represented among the same-way detailed features: candidate indices **1,2,7,8,9**.
+- Four pairs have both endpoint IDs somewhere in same-way detailed features but **not within the same detailed feature**: indices **3,4,5,6**. This is not proof of a connecting edge.
+- **0/9** have both endpoints in a single detailed feature, **0/9** have adjacent endpoints in a single detailed feature, and **0/9** can be promoted to accepted alignment.
+- Priority way `1420666687`, nodes `13055510163` and `13785440684`, original reported edge length `9503.9 m`: only node `13785440684` appears in same-way detailed features; the opposite endpoint is absent. This isolates the source coverage deficit, not a renderer defect.
+- Local reproducible audit output: `P01-ECRL-9-GAP-DIRECT-SOURCE-AUDIT.csv` (conversation artifact). This candidate branch records conclusions only; original source GeoJSON and restricted/private geometry are **not** committed or published.
+
+## Reproducible nine-gap audit CI verification (2026-11-22)
+- Candidate SHA `021a4c824111ad3c3766c978c4fb4d4d775c6bdb`: `scripts/p01-ecrl-gap-coverage-audit.cjs`, five safety tests and workflow inclusion.
+- GitHub Actions Run #66 (`44967252583`), job `source-contract` (`137038970979`), **SUCCESS**. Actual logs: **28/28 PASS**, **0 FAIL**, **0 SKIPPED**, static artifact build PASS. https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44967252583
+- These are source-contract and synthetic safety tests; the private original GeoJSON datasets are not bundled in CI. No new independent rail geometry or physical verification was acquired.
+
+## Private gap provenance CI verification (2026-11-22)
+- Candidate commit `ce029144d80696976b2065227b7aa85ed957405e` adds fail-closed provenance fields and three synthetic tests. These tests are part of the candidate-only `tests/p01-ecrl-gap-coverage-audit.test.cjs` suite.
+- GitHub Actions Run #72 (`44967401742`), job `source-contract` (`137039429454`) **SUCCESS**. Inspected logs: **31 tests PASS, 0 FAIL, 0 SKIPPED**; static artifact build PASS; no Node20 deprecation warning in inspected output. https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44967401742
+- Provenance completeness is only a metadata check. `redistributionApproved` is a caller-supplied assertion, not a legal license verification; independent physical control and geometry remain NOT VERIFIED. All candidate rows retain HOLD status and no automatic promotion.
+
+## Same-way graph continuity QA verification (2026-11-22)
+- Candidate commit `260bf2156a1b2106cccdb3d32d8dc47941a78181` adds source-node graph reachability diagnostics and three synthetic tests. Source edges are built only from adjacent `source_node_ids` within each detailed feature, grouped by exact OSM way ID; no straight-line bridge or cross-way inference.
+- GitHub Actions Run #86 (`44968055218`), job `source-contract` (`137041444357`) **SUCCESS**. Logs inspected: **38/38 PASS**, **0 FAIL**, **0 SKIPPED**, static artifact build PASS. https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44968055218
+- Source-contract test success does not verify physical rail alignment or independently surveyed CH. Nine candidates remain HOLD; 17 known gaps remain unresolved. Original GeoJSON not published to GitHub.
+
+## P0 manifest correction from direct source reinspection (2026-11-22)
+- CORRECTION to previous P0 acquisition manifest: detailed feature for OSM way `1420666687` **does contain** `rechecked_way_version: 3`; candidate version is also `3`. Both show `source_snapshot: 2026-11-05T23:25:19Z`. Previous `UNKNOWN_DETAILED_VERSION_ABSENT` assertion was incorrect. This is a match **within supplied files**, not an independent current-source verification.
+- Reinspected all nine candidate ways: `rechecked_way_version` and `source_snapshot` agree with same-way detailed features in the supplied datasets. Geometry still lacks the missing intermediate linework and physical/CH verification.
+- SHA-256 integrity of original local source files: `ECRL-MISSING-SPANS-SOURCE-CANDIDATES.geojson` = `37383112ef8139a5158fa240da727c65fad2ed05587d21b6d17110be88b56711` (18,327 bytes); `ECRL-TRACK-ONLY-DETAILED.geojson` = `cb89fd9519bcfa4c5a402c446a2c9438de6bea38c7019679ad44b4ccfb2f207c` (677,601 bytes).
+- Corrected local manifest: `P01-ECRL-P0-WAY-1420666687-ACQUISITION-MANIFEST-CORRECTED.json` (conversation artifact). Original private GeoJSON and manifest not committed. **HOLD** retained; no Production changes.
+
+## Construction versus operational evidence gate verified (2026-11-22)
+- Commit `0e84520e44ca76f592aba24d1ac60a46290e437b` preserves OSM `railway`, `construction`, and `tunnel` tags as source context only. Operational status remains `NOT_VERIFIED_FROM_OSM_TAGS` even when source graph endpoints are connected.
+- GitHub Actions Run #98 (`44968953395`), job `source-contract` (`137044258190`), **SUCCESS**; actual logs: **43 tests PASS, 0 FAIL, 0 SKIPPED**, static artifact build PASS. https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44968953395
+- No acceptance or promotion of any of nine candidates. Seventeen alignment gaps still unresolved. Further test-only churn should pause until new authorized intermediate geometry or independent chainage/physical controls are available; do not treat CI as evidence of alignment completion.

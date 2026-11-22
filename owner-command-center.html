@@ -58,6 +58,13 @@
         <p class="support">Latest public source commits are checked when this page is opened or refreshed. This does not assert that Vercel has deployed them.</p>
         <div id="github-live"></div>
       </section>
+      <section class="evidence-panel" id="maintenance-panel" aria-labelledby="maintenance-heading">
+        <h2 id="maintenance-heading">Public Maintenance Mode · P01</h2>
+        <p class="support">Kawalan ini hanya dipaparkan selepas pengesahan sesi Owner/Admin oleh Project Command Center. Halaman promosi telah tersedia dalam branch pembangunan, tetapi routing Maintenance Mode belum diaktifkan.</p>
+        <p role="status" id="maintenance-state"><strong>INACTIVE · NOT DEPLOYED</strong> — Tiada redirect Public/Member. Owner access kekal melalui Gateway.</p>
+        <p><a class="refresh" href="public-maintenance-preview.html" target="_blank" rel="noopener noreferrer">BUKA PRATONTON MAINTENANCE ↗</a></p>
+        <p class="support">ACTIVATE / DEACTIVATE memerlukan server-side gate dan ujian Owner bypass. Jangan gunakan localStorage, query parameter atau client-side role untuk melindungi akses. Tiada butang pengaktifan palsu.</p>
+      </section>
       <section class="evidence-panel" id="vercel-panel">
         <h2>Vercel deployment status</h2>
         <p class="support">Live only after secure Owner backend connection. READY does not prove the URL works.</p>
