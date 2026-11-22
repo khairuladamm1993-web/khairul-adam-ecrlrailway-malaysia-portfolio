@@ -26,7 +26,8 @@ test('unified map includes the reference module and visible purple legend',()=>{
  const html=fs.readFileSync(path.join(__dirname,'../unified-map-v8.html'),'utf8');
  assert.match(html,/assets\/unified-ecrl\/signature-port-layer\.js/);
  assert.match(html,/id="mrs10-port-reference-key"/);
- assert.match(html,/bukan titik hujung spurline yang disahkan/);
+ assert.match(html,/Northport dan Westports di Port Klang/);
+ assert.match(html,/bukan titik hujung rel atau sambungan ECRL yang disahkan/);
 });
 
 test('purple halo only targets maritime and yard references, preserving existing colors',()=>{
@@ -48,4 +49,10 @@ test('Port Klang source positions are locality-only and map integration exists',
  const map=fs.readFileSync(path.join(__dirname,'../assets/unified-v8-map.js'),'utf8');
  assert.match(html,/port-klang-references\.js/);
  assert.match(map,/MRS10SignaturePortLayer\?\.install\(map\)/);
+ const points=[{x:0,y:0},{x:10,y:0}];
+ const fixture={getLayer:()=>({}),getLayoutProperty:()=>undefined,project:coord=>points[coord[0]>101.35?0:1]};
+ assert.equal(layer.hit(fixture,{x:1,y:0}).reference.id,pk.assets[0].assetId);
+ assert.equal(layer.hit(fixture,{x:9,y:0}).reference.id,pk.assets[1].assetId);
+ assert.equal(layer.hit(fixture,{x:40,y:0}),null);
+ assert.equal(layer.hit({...fixture,getLayoutProperty:()=> 'none'},{x:1,y:0}),null);
 });

@@ -335,6 +335,14 @@ function showPopup(point){
  compactSourceDetails(container);mountPopup(container,point.coordinates);focusRoute(point.routeId);
 }
 function referenceVisible(ref){return openmr.reference(ref,state.category);}
+function showPortReference(ref){
+ closeFocus();state.zoomDone=true;
+ const host=el('div');
+ host.dataset.portReferenceId=ref.id;
+ host.append(el('strong',null,ref.name),el('p',null,'Rujukan kawasan pelabuhan (Port Klang Authority). Bukan titik hujung rel atau sambungan ECRL yang disahkan.'));
+ appendSource(host,window.MRS10PortKlangReferences.source.url);
+ mountPopup(host,ref.coordinates);
+}
 function syncReferenceMarkers(selection=focus.current){
  if(!state.map||!completeSources)return;
  for(const ref of completeSources.references.filter(r=>r.coordinates)){
@@ -417,6 +425,10 @@ function startMap(){
    const infrastructure=ecrl?.hit(state.map,e.point),ownerLoop=ownerCalibration?.hit(e.point);
    const closest=[...(infrastructure?[{assetId:infrastructure.assetId,distance:infrastructure.distance}]:[]),
      ...(ownerLoop?[{assetId:ownerLoop.ref.assetId,distance:ownerLoop.distance}]:[])].sort((a,b)=>a.distance-b.distance)[0];
+   const port=window.MRS10SignaturePortLayer?.hit(state.map,e.point);
+   if(port&&port.distance<=Math.min(closest?.distance??Infinity,candidates[0]?.distance??Infinity)){
+    showPortReference(port.reference);return;
+   }
    if(closest&&(!candidates.length||closest.distance<candidates[0].distance)){showInfrastructure(closest.assetId);return}
    const point=candidates[0]?.point;
    state.lastTap.stationId=point?.id||null;
@@ -574,7 +586,22 @@ function trackHitTargets(routeId='sg-RTS'){
 function inspectStation(routeId,id){const p=findGeo(routeId,id);if(!p||!state.map?.getLayer(layerId(routeId)))return false;state.map.resize();state.map.jumpTo({center:p.coordinates,zoom:18});return true}
 function stationHitTarget(routeId,id){const p=findGeo(routeId,id);if(!p||!state.map)return null;const q=state.map.project(p.coordinates);const rect=state.map.getCanvas().getBoundingClientRect();if(document.elementFromPoint(rect.left+q.x,rect.top+q.y)!==state.map.getCanvas())return null;return {x:q.x,y:q.y}}
 window.MRS10ECRLCandidateQA=Object.freeze({snapshot:()=>({infrastructure:ecrl?.snapshot(state.map),focus:focus.current,journey:journeyView?.snapshot()}),inspectAsset:id=>{const ref=ecrl?.reference(id);if(!ref||!state.map)return false;state.map.resize();state.map.jumpTo({center:ref.coordinates,zoom:15});return true},assetHitTarget:id=>{const ref=ecrl?.reference(id);if(!ref||!ecrl.flags[ref.kind]||!state.map)return null;const p=state.map.project(ref.coordinates),rect=state.map.getCanvas().getBoundingClientRect();return document.elementFromPoint(rect.left+p.x,rect.top+p.y)===state.map.getCanvas()?{x:p.x,y:p.y}:null}});
-window.MRS10V8Diagnostics=Object.freeze({snapshot:diagnosticSnapshot,focusTrackInspection,trackHitTargets,inspectStation,stationHitTarget,focusPortReference:id=>{const r=window.MRS10SignaturePortLayer?.references().find(x=>x.id===id&&x.sourceRegistry==='port-klang-references');if(!r?.coordinates||!state.mapReady||!state.map?.getLayer('mrs10-signature-port-klang-halo'))return false;state.map.resize();state.map.jumpTo({center:r.coordinates,zoom:13});return true;},focusSnapshot:()=>({current:focus.current,original:focus.original,layers:layerSnapshot(),approximate:$('approximate').checked})});
+function portReference(id){return window.MRS10SignaturePortLayer?.references().find(r=>r.id===id&&r.sourceRegistry==='port-klang-references')}
+function focusPortReference(id,zoom=13){
+ const map=state.map,ref=portReference(id);
+ if(!ref?.coordinates||!state.mapReady||!map?.getLayer('mrs10-signature-port-klang-halo'))return false;
+ map.resize();map.jumpTo({center:ref.coordinates,zoom});return true;
+}
+function portHitTarget(id){
+ const map=state.map,ref=portReference(id);
+ if(!ref?.coordinates||!map?.getLayer('mrs10-signature-port-klang-center'))return null;
+ const p=map.project(ref.coordinates),canvas=map.getCanvas(),rect=canvas.getBoundingClientRect();
+ if(document.elementFromPoint(rect.left+p.x,rect.top+p.y)!==canvas)return null;
+ const features=map.queryRenderedFeatures(p,{layers:['mrs10-signature-port-klang-halo','mrs10-signature-port-klang-center']});
+ if(!['-halo','-center'].every(suffix=>features.some(f=>f.id===id&&f.layer.id==='mrs10-signature-port-klang'+suffix)))return null;
+ return {x:p.x,y:p.y};
+}
+window.MRS10V8Diagnostics=Object.freeze({snapshot:diagnosticSnapshot,focusTrackInspection,trackHitTargets,inspectStation,stationHitTarget,focusPortReference,portHitTarget,focusSnapshot:()=>({current:focus.current,original:focus.original,layers:layerSnapshot(),approximate:$('approximate').checked})});
 
 const v8texts={
 ms:{desc:'Malaysia V7 + 17 laluan Singapore. Turutan perkhidmatan dan geometri fizikal diasingkan. Shuttle Timur dikecualikan.',direction:'Arah / cabang',approximate:'Paparkan 13 geometri sekunder — anggaran, bukan landasan disahkan',operational:'Beroperasi (registry sumber)',future:'Akan datang / status terhad — bukan pengesahan operasi',partialTopology:'Turutan sebahagian; jurang sumber',sourceTopology:'Turutan berpaut sumber',serviceNotTrack:'Turutan perkhidmatan bukan sambungan fizikal landasan.',secondaryPoint:'Titik GIS sekunder; bukan ukuran rasmi.',coverageNote:'Rekod laluan-stesen, bukan bilangan stesen fizikal unik. Lokasi belum tersedia kekal dalam turutan.',physical:'Segmen fizikal disahkan',approx:'Geometri anggaran',unresolved:'Jajaran lain belum disahkan',track:'Maklumat landasan',verification:'Pengesahan geometri',confidence:'Keyakinan',railwayType:'Jenis landasan',sourceLabel:'Sumber',sourceDate:'Tarikh sumber',unknown:'Belum disahkan',serviceRelation:'Hubungan perkhidmatan',walk:'Pertukaran penumpang; tiada through-track',area:'Kawasan berdekatan; tiada through-track'},
