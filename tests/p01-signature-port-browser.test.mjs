@@ -73,14 +73,22 @@ for(const [engine,launcher] of [['chromium',chromium],['webkit',webkit]]){
      assert.equal(await popup.locator('strong').innerText(),`Port Klang — ${label}`);
      assert.match(await popup.innerText(),warning);
      assert.equal(new URL(await popup.locator('a').getAttribute('href')).hostname,'www.pka.gov.my');
+     const close=popup.locator('.maplibregl-popup-close-button');
+     const closeBox=await close.boundingBox();
+     assert(closeBox&&closeBox.width>=44&&closeBox.height>=44&&closeBox.y>=0&&closeBox.y+closeBox.height<=viewport.height,
+      `Close button must fit the viewport for ${label}`);
      await page.screenshot({path:`artifacts/p01-signature-port/${engine}-${viewport.name}-${id}.png`});
+     if(touch)await close.tap();else await close.click();
+     await allPopups.waitFor({state:'detached'});
+     await activate(await hitTarget(page,'portHitTarget',id));
+     await popup.waitFor({state:'visible',timeout:15000});
      const planning=popup.getByRole('button',{name:'Lihat rekod perancangan ECRL'});
      if(touch)await planning.tap();else await planning.click();
      const planningPopup=allPopups.filter({has:page.locator('.ecrl-intelligence')});
      await planningPopup.waitFor({state:'visible',timeout:15000});
      assert.match(await planningPopup.innerText(),new RegExp(label));
      assert.equal(await allPopups.count(),1);
-     portPopupChecks.push({id,status:'PASS',disclaimer:true,coLocatedPlanningPopup:true});
+     portPopupChecks.push({id,status:'PASS',disclaimer:true,closeButton:true,coLocatedPlanningPopup:true});
      await planningPopup.locator('.maplibregl-popup-close-button').click();
      await allPopups.waitFor({state:'detached'});
    }

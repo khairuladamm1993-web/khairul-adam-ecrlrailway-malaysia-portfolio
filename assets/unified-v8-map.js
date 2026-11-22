@@ -96,6 +96,7 @@ function mountPopup(host,position){
   // MapLibre removes the popup, reopening an underlying station/track focus.
   // Keep button handlers working while isolating popup interactions from map taps.
   popupNode.addEventListener('click',event=>event.stopPropagation());
+  if(host.dataset.portReferenceId)popupNode.classList.add('mrs10-port-popup');
   if(host.classList?.contains('ecrl-intelligence'))popupNode.classList.add('ecrl-popup');popupNode.querySelector('.maplibregl-popup-close-button')?.focus({preventScroll:true});
 }
 function appendFocusLineup(host,routeIds){

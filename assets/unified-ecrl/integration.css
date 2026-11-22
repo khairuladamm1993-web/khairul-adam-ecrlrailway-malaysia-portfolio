@@ -66,3 +66,7 @@
  max-height:min(50dvh,345px)!important;
  }
 }
+.mrs10-port-popup [data-port-reference-id]>strong{display:block;padding-inline-end:36px}
+.maplibregl-map .mrs10-port-popup .maplibregl-popup-close-button{
+ position:absolute!important;top:0!important;right:0;float:none;min-width:44px;min-height:44px;
+}
