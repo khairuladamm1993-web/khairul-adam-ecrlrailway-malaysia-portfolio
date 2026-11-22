@@ -24,7 +24,7 @@ jobs:
       - name: Build unified map V8
         run: node scripts/build-unified-v8.cjs
   signature-browser:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
