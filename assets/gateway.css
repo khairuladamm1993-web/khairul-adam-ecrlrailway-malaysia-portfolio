@@ -92,3 +92,6 @@ html.mrs10-map-fullscreen-open{overflow:hidden!important}
 .mrs10-map-fullscreen .map-canvas{flex:1 1 auto;height:calc(100dvh - 240px);min-height:220px}
 .mrs10-map-fullscreen .map-side{max-height:180px;overflow:auto}
 @media(max-width:719px){.mrs10-map-fullscreen .map-side{max-height:140px}.mrs10-map-fullscreen .map-canvas{height:calc(100dvh - 280px)}}
+
+/* ECRL confidence is evidence metadata, not a surveyed line. */
+.map-confidence-summary{margin:0;padding:7px 10px;border:1px solid var(--line);border-radius:8px;color:var(--muted);font-size:11px;line-height:1.5;overflow-wrap:anywhere}
