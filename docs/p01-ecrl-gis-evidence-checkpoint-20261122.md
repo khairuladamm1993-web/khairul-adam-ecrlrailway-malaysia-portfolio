@@ -31,3 +31,8 @@ No Production, P02, P03, Auth/RLS or live data mutation authorized.
 - Gate commit `11d6a1570948262b7c7e726d6118e81948e42969`; fixture commit `39ee1676bfc571900e00e8add7f1f8d548e7e885`.
 - Local copy of the revised gate and its seven fixture tests: `node --check` PASS; `node --test` **7 PASS / 0 FAIL**. The local files were transcribed from the connector-fetched source and corresponding test changes; CI execution on the GitHub runner remains UNVERIFIED.
 - Added endpoint straight-line distance vs chainage-span plausibility and metre-based segment join tolerance. These are screening heuristics, not an engineering survey or route verification.
+
+## V1.2 candidate gate checkpoint
+- Added summed polyline-length plausibility guard to catch zigzag routes whose endpoints alone appear close. Source commit `4e267072b716d1696e7f297ebbd1341f201e76fe`.
+- Added two regression scenarios for zigzag overlength and invalid CRS/approval flag, test commit `d80316360ba79e9d5f3aaef282894dbe3b27d4d3`.
+- **QA status: IMPLEMENTED / NOT TESTED in this checkpoint.** Earlier V1.1 7/7 local result does not apply to the revised V1.2 code. CI evidence remains unverified. Candidate metadata and approval flag are untrusted self-assertions until reviewed independently.
