@@ -19,14 +19,59 @@
   if(mapLoader)return mapLoader;
   const load=(src,attr,ready)=>new Promise((resolve,reject)=>{
    if(ready())return resolve();
+   // A failed or stale script tag must not trap every subsequent MAP attempt.
    const existing=document.querySelector('script['+attr+']');
-   if(existing){existing.addEventListener('load',()=>ready()?resolve():reject(new Error(src+' unavailable')),{once:true});existing.addEventListener('error',reject,{once:true});return;}
-   const s=document.createElement('script');s.src=src;s.async=true;s.setAttribute(attr,'1');s.onload=()=>ready()?resolve():reject(new Error(src+' unavailable'));s.onerror=()=>reject(new Error(src+' failed to load'));document.head.append(s);
+   if(existing)existing.remove();
+   const s=document.createElement('script');s.src=src;s.async=true;s.setAttribute(attr,'1');
+   s.onload=()=>{if(ready())resolve();else{s.remove();reject(new Error(src+' unavailable'));}};
+   s.onerror=()=>{s.remove();reject(new Error(src+' failed to load'));};
+   document.head.append(s);
   });
-  mapLoader=(async()=>{await load('assets/map-locale.js','data-railway-map-locale',()=>Boolean(window.RailwayMapLocale));await load('assets/map-intelligence.js','data-railway-map-intelligence',()=>Boolean(window.RailwayMapIntelligence));await load('assets/map-gateway.js','data-railway-map-module',()=>Boolean(window.RailwayMap));return window.RailwayMap;})();
+  mapLoader=(async()=>{
+   await load('assets/map-locale.js','data-railway-map-locale',()=>Boolean(window.RailwayMapLocale));
+   await load('assets/map-intelligence.js','data-railway-map-intelligence',()=>Boolean(window.RailwayMapIntelligence));
+   await load('assets/map-gateway.js','data-railway-map-module',()=>Boolean(window.RailwayMap));
+   return window.RailwayMap;
+  })().catch(error=>{mapLoader=null;throw error;});
   return mapLoader;
  };
- const mountMap=()=>ensureMap().then(m=>m.mount(document.querySelector('#railway-map-mount'))).catch(error=>{const host=document.querySelector('#railway-map-mount');if(host)host.innerHTML='<article class="learning-card"><h2>MAP</h2><p>'+R.escape(error.message||error)+'</p></article>';});
+
+ // V7 and V8 are existing source-backed public-safe standalone maps.
+ // The live Member role gates gateway presentation; the raw maps do not contain protected Member data.
+ const renderRailwayStage=()=>{
+  const member=Boolean(window.RailwayAccess?.canReadMemberContent);
+  const locale=['ms','en','zh','th'].includes(R.language)?R.language:'ms';
+  const labels={
+   ms:{member:'Peta Rangkaian Rel · Member / Owner',public:'Peta Rel Malaysia · Public',summary:'Rujukan GIS ECRL lama',details:'Peta lama dikekalkan untuk semakan sumber dan tahap keyakinan koordinat. Bukan geometri operasi rasmi.',open:'Buka rujukan lama',full:'Buka peta penuh',disclaimer:'Peta rujukan pendidikan. Penjajaran ECRL masih belum disahkan.'},
+   en:{member:'Rail Network Map · Member / Owner',public:'Malaysia Rail Map · Public',summary:'Legacy ECRL GIS reference',details:'The previous reference map is retained for source and coordinate-confidence review; not official operational geometry.',open:'Open reference map',full:'Open full map',disclaimer:'Educational reference. ECRL alignment remains unverified.'},
+   zh:{member:'铁路网络图 · 会员/所有者',public:'马来西亚铁路图 · 公众',summary:'旧版 ECRL GIS 参考',details:'保留旧地图以核查来源及坐标可信度，不代表官方运营线路。',open:'打开旧版参考',full:'打开完整地图',disclaimer:'教育参考。ECRL 线路尚未核实。'},
+   th:{member:'แผนที่เครือข่ายรถไฟ · สมาชิก',public:'แผนที่รถไฟมาเลเซีย · สาธารณะ',summary:'แผนที่อ้างอิง ECRL เดิม',details:'เก็บแผนที่เดิมเพื่อเทียบแหล่งข้อมูล ไม่ใช่แนวเส้นทางปฏิบัติการอย่างเป็นทางการ',open:'เปิดแผนที่อ้างอิง',full:'เปิดแผนที่เต็ม',disclaimer:'ข้อมูลเพื่อการศึกษา แนวเส้นทาง ECRL ยังไม่ได้รับการยืนยัน'}
+  }[locale];
+  const src=member?'unified-map-v8.html':'unified-map-v7.html';
+  const note='<p class="study-boundary" data-map-caveat>'+R.escape(labels.disclaimer)+'</p>';
+  const archive=member?'<details class="mrs10-map-archive" data-gis-reference><summary>'+R.escape(labels.summary)+'</summary><p>'+R.escape(labels.details)+'</p><button type="button" class="secondary" data-legacy-map-load>'+R.escape(labels.open)+'</button><div id="railway-map-mount" class="railway-map-mount" hidden></div></details>':'';
+  box.innerHTML='<section class="content-row mrs10-rail-network" data-railway-map-stage data-map-audience="'+(member?'member':'public')+'">'+
+   '<div class="content-heading"><div><h2>'+R.escape(member?labels.member:labels.public)+'</h2></div><a class="secondary" href="'+src+'" target="_blank" rel="noopener noreferrer">'+R.escape(labels.full)+' ↗</a></div>'+
+   '<iframe class="mrs10-map-frame" title="'+R.escape(member?labels.member:labels.public)+'" src="'+src+'" loading="lazy" referrerpolicy="no-referrer"></iframe>'+note+archive+'</section>';
+  const open=box.querySelector('[data-legacy-map-load]');
+  open?.addEventListener('click',()=>{
+   if(!window.RailwayAccess?.canReadMemberContent)return;
+   const host=box.querySelector('#railway-map-mount');
+   if(!host)return;
+   host.hidden=false;
+   host.innerHTML='<article class="learning-card"><p>Loading reference map…</p></article>';
+   open.disabled=true;
+   void mountMap();
+  },{once:true});
+ };
+ const mountMap=()=>ensureMap().then(m=>m.mount(document.querySelector('#railway-map-mount'))).catch(error=>{
+  const host=document.querySelector('#railway-map-mount');if(!host)return;
+  host.innerHTML='<article class="learning-card" role="alert"><h2>Peta belum tersedia</h2><p>Komponen peta gagal dimuatkan. Sila cuba semula.</p><button type="button" class="secondary" data-map-retry>CUBA SEMULA</button><details><summary>Butiran teknikal</summary><p>'+R.escape(error.message||error)+'</p></details></article>';
+  host.querySelector('[data-map-retry]')?.addEventListener('click',()=>{
+   host.innerHTML='<article class="learning-card"><p>Memuatkan peta…</p></article>';
+   void mountMap();
+  },{once:true});
+ });
  function renderDetail(){
   const body=document.querySelector('#detail-content');
   const controls=`<div class="quiz-languages">${['ms','en','zh','th'].map(l=>`<button data-detail-lang="${l}" aria-pressed="${R.language===l}">${({ms:'BM',en:'EN',zh:'中文',th:'ไทย'})[l]}</button>`).join('')}${R.language==='zh'?`<button data-detail-pinyin aria-pressed="${R.pinyin}">Pinyin ${R.pinyin?'ON':'OFF'}</button>`:''}<button data-detail-theme>${h(window.RailwayTheme.value==='light'?'Dark Mode':'Light Mode')}</button></div>`;
@@ -64,7 +109,7 @@
    box.innerHTML=`<section class="content-row"><h2>${h('E-BOOK TRAIN OPERATION')}</h2><article class="learning-card"><span class="access-label">${R.escape(copy.status)}</span><h3>${R.escape(copy.title)}</h3><p>${R.escape(copy.description)}</p><a class="primary" href="reading/railway-fundamentals-01.html?lang=${language}">${R.escape(copy.action)} ↗</a></article></section>`;
   }
   else if(category==='corridor')box.innerHTML=`<section class="content-row"><h2>${h('ECRL STATIONS & CORRIDOR')}</h2><article class="learning-card locked-card"><h3>${h('Corridor Master Overview')}</h3><div class="map-placeholder" role="img" aria-label="${R.escape(R.text('Protected image pending secure member storage.'))}"><span>${h('Verified Member access')}</span></div><p>${h('Personal corridor compilation / working reference. Not an official engineering drawing.')}</p><p>${h('Protected image pending secure member storage.')}</p>${accessButton('LOGIN TO VIEW FULL CORRIDOR')}</article></section><section class="content-row"><h2>${h('Station & facility details')}</h2><p>${h('Station codes, approved chainage, section groups and facility details will be available to verified members.')}</p>${boundary()}</section>`;
-  else if(category==='map'){box.innerHTML='<section class="content-row"><div class="content-heading"><div><h2>'+h('MAP')+'</h2><p>'+h('Visual projection of approved Corridor references. No route line.')+'</p><a class="primary" href="map-language-lab.html" style="display:inline-block;margin:8px 0 16px;padding:10px 14px;border-radius:9px">'+h({ms:'🌏 Peta Pelawat Pelbagai Bahasa (BETA)',en:'🌏 Multilingual Visitor Map (BETA)',zh:'🌏 多语言旅行地图（测试版）',th:'🌏 แผนที่ท่องเที่ยวหลายภาษา (BETA)'})+' ↗</a></div></div><div id="railway-map-mount" class="railway-map-mount" aria-live="polite"><article class="learning-card"><p>'+h('Loading map on demand…')+'</p></article></div></section>';setTimeout(mountMap,0);}
+  else if(category==='map'){window.RailwayMap?.unmount();renderRailwayStage();}
   else if(category==='future')box.innerHTML=`<article class="learning-card locked-card"><h2>${h('COMING SOON')}</h2><p class="access-label">${h('Restricted Development Preview — Verified Member Access')}</p><p>${h('Development details are reserved for verified members.')}</p>${accessButton()}</article>`;
   else box.innerHTML=`<section class="content-row" data-news-row="news"><h2>01 / ${h('News')}</h2><article class="learning-card"><span class="access-label">${h('Official source directory')}</span><h3>CCC / CHEC — ECRL</h3><p>${h('No dated news item has been added yet. Updates will show a date, source, short summary and original link after verification.')}</p><p class="study-boundary">${h('CHEC Malaysia source site — under maintenance when checked on 5 October 2026.')}</p><a href="https://chec.my/" target="_blank" rel="noopener noreferrer">${h('Visit original source')} ↗</a></article></section><section class="content-row" data-news-row="insights"><h2>02 / ${h('Insights')}</h2><div class="learning-grid">${window.RailwayInsights.map((item,i)=>`<button class="insight-button" data-insight="${i}" aria-haspopup="dialog">${h(item.title)} <span aria-hidden="true">↗</span></button>`).join('')}</div></section><section class="content-row" data-news-row="references"><h2>03 / ${h('References')}</h2><article class="learning-card"><h3>${h('Independent Railway Development')}</h3><p>${h('Project references support this independent portfolio. Organisations are credited as sources, not endorsers.')}</p><a href="references.html">${h('Railway Project References')} ↗</a></article></section>`;
   if(dialog.open)renderDetail();
@@ -86,7 +131,7 @@
  let hadMemberAccess=Boolean(window.RailwayAccess?.canReadMemberContent);
  window.addEventListener('railway-access-change',()=>{
   const hasMemberAccess=Boolean(window.RailwayAccess?.canReadMemberContent);
-  if(hadMemberAccess&&!hasMemberAccess)render();
+  if(hadMemberAccess!==hasMemberAccess&&(category==='map'||!hasMemberAccess))render();
   hadMemberAccess=hasMemberAccess;
  });
  R.onLanguage(()=>{
