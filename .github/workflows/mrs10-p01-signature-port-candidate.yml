@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - candidate/p01-signature-port-layer-r1-20261122
+      - candidate/p01-pl-depot-discovery-r1
   workflow_dispatch:
 permissions:
   contents: read
@@ -14,6 +15,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
@@ -23,6 +25,25 @@ jobs:
           node --test tests/p01-signature-port-layer.test.cjs tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-consumer-popup.test.cjs tests/unified-ecrl-chainage.test.cjs tests/unified-ecrl-port-references.test.cjs tests/unified-ecrl-kerteh-freight.test.cjs tests/p01-ecrl-alignment-evidence-gate.test.cjs
       - name: Build unified map V8
         run: node scripts/build-unified-v8.cjs
+      - name: PL, depot and GIS preservation regression
+        if: github.ref_name == 'candidate/p01-pl-depot-discovery-r1'
+        run: |
+          node --test tests/unified-ecrl-owner-calibration.test.cjs tests/p01-uat17-ecrl-inventory.test.cjs tests/p01-ecrl-gap-coverage-audit.test.cjs
+      - name: Verify candidate ancestry, preserved source and V8 output
+        if: github.ref_name == 'candidate/p01-pl-depot-discovery-r1'
+        run: |
+          baseline=528d9709b8f4edd19a683c6aee317c46d5dca5f4
+          git merge-base --is-ancestor "$baseline" HEAD
+          git diff --check "$baseline" HEAD
+          git diff --exit-code "$baseline" HEAD -- . \
+            ':(exclude)assets/unified-ecrl/integration-ui.js' \
+            ':(exclude)assets/unified-ecrl/integration.css' \
+            ':(exclude)assets/unified-v8-map.js' \
+            ':(exclude)tests/unified-ecrl-chainage-browser.test.mjs' \
+            ':(exclude).github/workflows/mrs10-p01-signature-port-candidate.yml'
+          cmp unified-map-v8.html dist-unified-v8/unified-map-v8.html
+          cmp assets/unified-ecrl/signature-port-layer.js dist-unified-v8/assets/unified-ecrl/signature-port-layer.js
+          cmp assets/unified-ecrl/port-klang-references.js dist-unified-v8/assets/unified-ecrl/port-klang-references.js
   signature-browser:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
@@ -41,9 +62,20 @@ jobs:
         run: |
           python3 -m http.server 8765 --directory dist-unified-v8 >/tmp/mrs10-signature-http.log 2>&1 &
           node tests/p01-signature-port-browser.test.mjs
+      - name: Open all seven PL and both depot cards across desktop iPad iPhone
+        if: ${{ !cancelled() && github.ref_name == 'candidate/p01-pl-depot-discovery-r1' }}
+        run: |
+          python3 -m http.server 8766 --directory dist-unified-v8 >/tmp/mrs10-pl-depot-http.log 2>&1 &
+          V8_URL=http://127.0.0.1:8766/unified-map-v8.html node tests/unified-ecrl-chainage-browser.test.mjs
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: p01-signature-browser-qa
           path: artifacts/p01-signature-port/
+          retention-days: 14
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: ${{ always() && github.ref_name == 'candidate/p01-pl-depot-discovery-r1' }}
+        with:
+          name: p01-pl-depot-browser-qa
+          path: artifacts/ecrl-chainage-pl/
           retention-days: 14
