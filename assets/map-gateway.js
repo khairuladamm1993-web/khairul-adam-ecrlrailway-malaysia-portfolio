@@ -135,7 +135,6 @@
   const controller=new AbortController(),signal=controller.signal;
   const state={host,controller,map:null,leaflet:null,markers:new Map(),chainageMarker:null,selected:null,filter:'All',query:'',chainageMode:false,ownerLoaded:false,layers:{...MAP_LAYERS}};
   instance=state;
-  const localizer=window.RailwayMapLocale;
   host.innerHTML='<section class="map-module" aria-label="ECRL reference map">'+
    '<div class="map-identity-row"><span class="map-malaysia-badge" aria-label="Malaysia map context">🇲🇾 <span>Malaysia</span></span><span class="map-mrs10-stamp" aria-label="MR-S10 railway reference">MR-S10 · ECRL</span><span class="map-asset-count" aria-label="16 stations, 7 passing loops, 2 depots">16 STN · 7 PL · 2 DEPOT</span></div>'+
    '<p class="map-confidence-summary" data-map-confidence-summary role="status">ECRL GIS: reference markers only · surveyed alignment not established</p>'+
@@ -148,7 +147,8 @@
    '<p class="study-boundary">No route line / no polyline. Manual pan or zoom never recalculates stored marker coordinates.</p>'+
    '</section>';
 
-  const applyLocale=()=>localizer?.apply(host,R?.language||'ms');
+  const applyLocale=()=>window.RailwayMapLocale?.apply(host,R?.language||'ms');
+  state.updateLocale=()=>{applyLocale();renderSerendahHold();};
   state.localeObservers=[];
   for(const selector of ['[data-map-detail]','[data-map-results]']){
    const target=host.querySelector(selector);
@@ -303,6 +303,31 @@
     state.markers.set(r.id,marker);
    }
   }
+  // Source-only metadata from the P01 GIS evidence checkpoint. No stored geometry.
+  function renderSerendahHold(){
+   const existing=host.querySelector('[data-map-serendah-hold]');
+   if(!A?.canReadMemberContent){existing?.remove();return;}
+   const confidence=host.querySelector('[data-map-confidence-summary]');
+   const card=existing||document.createElement('details');
+   if(!existing){
+    card.className='map-confidence-summary';
+    card.setAttribute('data-map-serendah-hold','');
+    card.append(document.createElement('summary'),document.createElement('p'));
+    const source=document.createElement('a');
+    source.href='https://www.openstreetmap.org/way/1420666687';
+    source.target='_blank';
+    source.rel='noopener noreferrer';
+    source.textContent='© OpenStreetMap contributors · way 1420666687';
+    card.append(source);
+    confidence.insertAdjacentElement('afterend',card);
+   }
+   const ms=!R?.language||R.language==='ms';
+   card.lang=ms?'ms':'en';
+   card.querySelector('summary').textContent=ms?'Serendah 2 · HOLD sumber OSM':'Serendah 2 · OSM source HOLD';
+   card.querySelector('p').textContent=ms
+    ?'Dalam OSM way 1420666687, pasangan nod 13055510163 → 13785440684 ditahan oleh penapis sumber. Anggaran jarak lurus antara nod dalam build ialah 9,503.9 m, melebihi ambang 2,500 m. Tiada titik perantaraan bagi pasangan ini. Garisan rujukan yang kelihatan pada peta tidak menunjukkan geometri segmen yang ditahan. Garis tengah as-built, portal dan chainage belum disahkan.'
+    :'The source filter withholds node pair 13055510163 → 13785440684 on OSM way 1420666687. The build estimates the straight-line node distance at 9,503.9 m, above the 2,500 m threshold. This pair has no intermediate vertices. Visible reference linework does not show the withheld edge geometry. The as-built centreline, portals and chainage remain unverified.';
+  }
   function renderConfidenceSummary(){
    const records=corridorRecords();
    const counts={engineering:0,personal:0,public:0,pending:0};
@@ -321,6 +346,7 @@
   function renderResults(){
    const rows=visible();
    renderConfidenceSummary();
+   renderSerendahHold();
    resultHost.innerHTML=rows.map(r=>{const o=r.overlay||{},meta=[r.type,o.code,o.chainage].filter(Boolean).join(' · ');return '<button type="button" data-map-point="'+r.id+'" aria-current="'+(state.selected?.id===r.id)+'"><strong>'+esc(r.name)+'</strong><span>'+esc(meta||r.type)+'</span><small>'+esc(r.locationConfidence)+' · '+esc(note(r))+'</small></button>';}).join('')||'<p class="map-empty">No matching Corridor records.</p>';
    syncMarkers();
   }
@@ -470,6 +496,6 @@
   if(!instance)return;
   const old=instance;instance=null;window.RailwayOwnerMap?.unmount();old.controller.abort();for(const observer of old.localeObservers||[])observer.disconnect();try{old.chainageMarker?.remove();}catch{}try{old.map?.remove();}catch{}old.markers.clear();
  }
- R?.onLanguage?.(()=>{if(instance?.host)window.RailwayMapLocale?.apply(instance.host,R.language);});
+ R?.onLanguage?.(()=>instance?.updateLocale());
  window.RailwayMap=Object.freeze({mount,unmount,get mounted(){return Boolean(instance);},referenceCount(){return points().length}});
 })();
