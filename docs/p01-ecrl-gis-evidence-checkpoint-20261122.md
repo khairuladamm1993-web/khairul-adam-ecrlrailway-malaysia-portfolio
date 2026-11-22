@@ -42,3 +42,10 @@ No Production, P02, P03, Auth/RLS or live data mutation authorized.
 - `node --check scripts/p01-ecrl-alignment-evidence-gate.cjs`: PASS.
 - `node --test tests/p01-ecrl-alignment-evidence-gate.test.cjs`: **9 PASS, 0 FAIL, 0 SKIPPED**, 94.827014 ms total.
 - Evidence scope: local isolated fixture tests only; GitHub Actions workflow execution, real alignment, Safari UAT and production runtime remain UNVERIFIED.
+
+## GitHub Actions CI verified — Run #46 (2026-11-22)
+- Run ID `44966455635`, workflow `P01 UAT17 Candidate QA`, conclusion `success`, job `source-contract` ID `137036475249` conclusion `success`, SHA `ad1007e5b87f1d493e37e1d2c1e66646d1a8a08a`.
+- Inspected actual job logs: **23 tests PASS, 0 FAIL, 0 SKIPPED**, Node syntax step PASS, `python3 scripts/build-production.py dist-production` PASS; protected legacy assets excluded.
+- CI warning: `actions/checkout@v4` and `actions/setup-node@v4` rely on deprecated Node.js 20 runtime and are forced to Node.js 24; plan version bump in candidate, do not mistake warning for test failure.
+- Evidence: https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44966455635
+- This is **CI VERIFIED** for the specified SHA only, not physical alignment/survey validation or Production deployment.
