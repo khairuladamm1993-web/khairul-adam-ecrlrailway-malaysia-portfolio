@@ -14,16 +14,36 @@ for(const [name,browserType] of [['chromium',chromium],['webkit',webkit]]){
    await page.waitForFunction(()=>{const d=window.MRS10V8Diagnostics?.snapshot();return d?.stage==='DONE'&&d.ecrl?.layersPresent},null,{timeout:90000});
    await page.locator('#filters button').getByText('ECRL',{exact:true}).click();
    assert.equal(await page.locator('.ecrl-pl-guide-item').count(),7);
+   assert.equal(await page.locator('.ecrl-depot-guide-item').count(),2);
    checks.push('seven-pl-records-accessible');
    await page.locator('.ecrl-chainage-guide>summary').click();
-   const pl=page.locator('.ecrl-pl-guide-item').filter({hasText:'PL05'});
-   assert.match(await pl.innerText(),/CH415\+180/);
-   await pl.click();
-   assert(await page.locator('#ecrl-no-point').isVisible());
-   assert.match(await page.locator('#ecrl-no-point').innerText(),/PL05/);
-   assert.match(await page.locator('#ecrl-no-point').innerText(),/CH415\+180/);
-   checks.push('pl05-list-only-with-CH-no-fake-map-pin');
-   await page.locator('#ecrl-no-point>button').click();
+   const panel=page.locator('#ecrl-no-point');
+   // The ECRL filter can still be completing its initial camera transition.
+   const before=await page.evaluate(async()=>{
+    let previous='',stable=0;
+    while(stable<4){
+     await new Promise(resolve=>requestAnimationFrame(resolve));
+     const current=JSON.stringify(window.MRS10CompleteQA.camera());
+     stable=current===previous?stable+1:0;
+     previous=current;
+    }
+    return JSON.parse(previous);
+   });
+   for(const row of await page.locator('.ecrl-chainage-guide button').all()){
+    const id=await row.getAttribute('data-ecrl-asset');
+    if(viewport.name==='desktop')await row.click();else await row.tap();
+    await panel.locator(`[data-ecrl-asset="${id}"]`).waitFor();
+    const bounds=await panel.boundingBox();
+    assert(bounds && bounds.y<viewport.height && bounds.y+bounds.height>0,'Asset card should be in the visible viewport');
+    assert.equal(await page.locator('.maplibregl-popup').count(),0);
+    assert.deepEqual(await page.evaluate(()=>window.MRS10CompleteQA.camera()),before);
+    if(id==='ecrl-loop-historical-05')assert.match(await panel.innerText(),/CH415\+180/);
+    if(id==='ecrl-depot-gombak-north')assert.match(await panel.innerText(),/CH519\+750/);
+    if(id==='ecrl-depot-kuantan')assert.doesNotMatch(await panel.innerText(),/CH\d+\+\d+/);
+    await panel.locator(':scope > button').click();
+    await panel.waitFor({state:'hidden'});
+   }
+   checks.push('all-seven-loops-and-two-depots-open-without-a-map-pin');
    await page.locator('#search').fill('STN14');
    const station=page.locator('#search-results button').filter({hasText:'ecrl-stn-13'});
    await station.click();

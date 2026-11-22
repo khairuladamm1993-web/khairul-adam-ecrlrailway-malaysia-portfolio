@@ -363,7 +363,13 @@ function syncReferenceMarkers(selection=focus.current){
   if(!referenceMarkers.has(ref.id)){const button=el('button','source-facility-pin',ref.icon);button.type='button';button.dataset.referenceId=ref.id;button.setAttribute('aria-label',ref.name);button.onclick=()=>showReference(ref);referenceMarkers.set(ref.id,new maplibregl.Marker({element:button,anchor:'bottom'}).setLngLat(ref.coordinates).addTo(state.map));}
  }
 }
-function noPointPanel(host){const old=state.popup;state.popup=null;old?.remove();const panel=$('ecrl-no-point');panel.replaceChildren();const close=el('button',null,'×');close.type='button';close.setAttribute('aria-label','Close');close.onclick=closeFocus;panel.append(close,host);panel.hidden=false;close.focus({preventScroll:true});}
+function noPointPanel(host,{label='Close',reveal=false}={}){
+ const old=state.popup;state.popup=null;old?.remove();
+ const panel=$('ecrl-no-point'),close=el('button',null,'×');close.type='button';close.setAttribute('aria-label',label);close.onclick=closeFocus;
+ panel.replaceChildren(close,host);panel.hidden=false;panel.scrollTop=0;
+ if(reveal)panel.scrollIntoView({block:'nearest'});
+ close.focus({preventScroll:true});
+}
 function showReference(ref){if(!ref)return;cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;focus.enter({mode:'REFERENCE_FOCUS',routeIds:[],referenceId:ref.id});state.selected='reference:'+ref.id;buildRoutes();buildLineup();const host=el('div','source-reference');host.dataset.referenceId=ref.id;host.append(el('h3',null,(ref.code?ref.code+' · ':'')+ref.name));for(const value of [ref.hanzi,ref.pinyin,ref.status,ref.geometryStatus])if(value)host.append(el('p',null,value));appendSource(host,ref.sourceUrl);if(ref.coordinates){mountPopup(host,ref.coordinates);state.map.easeTo({center:ref.coordinates,zoom:12,duration:250});}else{host.append(el('p',null,tr('unlocated')));noPointPanel(host);}}
 function showUnlocatedStation(route,stop){if(!stop)return;focus.enter({mode:'STATION_FOCUS',routeIds:[route.id],stationId:stop.id});state.selected=route.id;buildRoutes();buildLineup();const host=el('div');host.dataset.unlocatedStation=stop.id;host.append(el('h3',null,stop.name),el('p',null,route.label),el('p',null,tr('unlocated')),el('p',null,stop.locationStatus||route.geometryStatus||'UNKNOWN'));appendSource(host,stop.sourceUrl||route.source);noPointPanel(host);}
 
@@ -383,7 +389,7 @@ function showInfrastructure(assetId,moveCamera=false){
  focus.enter({mode:'INFRASTRUCTURE_FOCUS',routeIds:[],assetId});r3UI?.select({assetIds:[assetId],contexts:['ECRL']});
  if(moveCamera&&visible&&state.map)state.map.easeTo({center:ref.coordinates,zoom:Math.max(state.map.getZoom(),12.5),duration:300});
  if(visible&&state.map){mountPopup(host,ref.coordinates)}
- else{const old=state.popup;state.popup=null;old?.remove();const panel=$('ecrl-no-point');panel.replaceChildren();const close=el('button',null,'×');close.type='button';close.setAttribute('aria-label',ecrl.t(state.locale,'close'));close.onclick=closeFocus;panel.append(close,host);panel.hidden=false;close.focus({preventScroll:true})}
+ else noPointPanel(host,{label:ecrl.t(state.locale,'close'),reveal:moveCamera});
 }
 function fitOnce(){
  if(state.zoomDone||!state.mapReady)return;
