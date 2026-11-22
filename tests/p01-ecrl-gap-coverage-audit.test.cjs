@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const {audit} = require('../scripts/p01-ecrl-gap-coverage-audit.cjs');
+const {audit, provenanceGate} = require('../scripts/p01-ecrl-gap-coverage-audit.cjs');
 const fc = features => ({type:'FeatureCollection',features});
 const candidate = (a,b,flags={}) => ({type:'Feature',properties:{osm_way_id:7,original_adjacent_osm_nodes:[a,b],approved_alignment:false,do_not_use_for_train_movement:true,...flags}});
 const detailed = nodes => ({type:'Feature',properties:{osm_way_id:7,source_node_ids:nodes}});
@@ -22,4 +22,24 @@ test('reject candidate with unsafe approval flags',()=>{
 });
 test('reject missing node provenance',()=>{
  assert.throws(()=>audit(fc([candidate(1,2)]),fc([{type:'Feature',properties:{osm_way_id:7}}])),/Missing source_node_ids/);
+});
+
+test('missing provenance stays HOLD and forbids redistribution',()=>{
+ const g=provenanceGate(undefined);
+ assert.equal(g.status,'HOLD_NOT_VERIFIED');
+ assert.equal(g.missing.length,6);
+ assert.equal(g.redistributionAllowed,false);
+ assert.equal(g.eligibleForAutomaticPromotion,false);
+});
+test('complete self-declared provenance never automatically verifies geometry',()=>{
+ const g=provenanceGate({sourceId:'source',sourceRevision:'v1',coordinateReferenceSystem:'EPSG:4326',license:'restricted',chainageDatum:'datum',independentControlReference:'control',redistributionApproved:true});
+ assert.deepEqual(g.missing,[]);
+ assert.equal(g.redistributionAllowed,true);
+ assert.equal(g.eligibleForAutomaticPromotion,false);
+ assert.equal(g.status,'HOLD_NOT_VERIFIED');
+});
+test('candidate output carries fail-closed provenance status',()=>{
+ const r=audit(fc([candidate(1,2)]),fc([detailed([1,2])]));
+ assert.equal(r.rows[0].provenance.status,'HOLD_NOT_VERIFIED');
+ assert.equal(r.rows[0].decision,'HOLD_NOT_ACCEPTED');
 });
