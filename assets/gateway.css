@@ -107,3 +107,15 @@ html.mrs10-map-fullscreen-open{overflow:hidden!important}
 .railway-map-mount[data-map-view="public"] [data-map-fullscreen],
 .railway-map-mount[data-map-view="public"] [data-map-results]{display:none}
 .railway-map-mount[data-map-view="public"] .map-attribution-note{font-size:11px;line-height:1.45}
+
+
+/* Isolated V7/V8 map stage. Browser map artifacts remain public-safe. */
+.mrs10-rail-network{min-width:0}
+.mrs10-rail-network .content-heading{gap:12px;flex-wrap:wrap}
+.mrs10-rail-network .content-heading .secondary{min-height:44px;margin-left:auto}
+.mrs10-map-frame{width:100%;height:clamp(490px,68svh,900px);border:1px solid var(--line);border-radius:12px;background:#e4e9ec;display:block}
+.mrs10-map-archive{margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#0a1f2a}
+.mrs10-map-archive summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:650}
+.mrs10-map-archive p{color:var(--muted);font-size:13px}
+.mrs10-map-archive #railway-map-mount{margin-top:12px}
+@media(max-width:719px){.mrs10-map-frame{height:68svh;min-height:480px}.mrs10-rail-network .content-heading .secondary{width:100%;margin:0}}
