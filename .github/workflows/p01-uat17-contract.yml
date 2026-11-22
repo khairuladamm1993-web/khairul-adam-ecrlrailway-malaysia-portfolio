@@ -26,9 +26,10 @@ jobs:
       - name: JavaScript syntax
         run: |
           node --check assets/map-gateway.js
+          node --check assets/public-gateway.js
           node --check scripts/p01-ecrl-alignment-evidence-gate.cjs
           node --check scripts/p01-ecrl-gap-coverage-audit.cjs
       - name: P01 UAT17 focused regression tests
-        run: node --test tests/p01-ecrl-gap-coverage-audit.test.cjs tests/p01-ecrl-alignment-evidence-gate.test.cjs tests/p01-uat17-ecrl-inventory.test.cjs tests/p01-uat17-map-fullscreen.test.cjs tests/p01-uat17-refresh.test.cjs tests/p01-uat17-maintenance-source.test.cjs tests/p01-maintenance-server-contract.test.cjs
+        run: node --test tests/p01-ecrl-gap-coverage-audit.test.cjs tests/p01-ecrl-alignment-evidence-gate.test.cjs tests/p01-uat17-ecrl-inventory.test.cjs tests/p01-uat17-map-fullscreen.test.cjs tests/p01-member-public-map-contract.test.cjs tests/p01-uat17-refresh.test.cjs tests/p01-uat17-maintenance-source.test.cjs tests/p01-maintenance-server-contract.test.cjs
       - name: Safe static artifact build
         run: python3 scripts/build-production.py dist-production

@@ -19,14 +19,30 @@
   if(mapLoader)return mapLoader;
   const load=(src,attr,ready)=>new Promise((resolve,reject)=>{
    if(ready())return resolve();
+   // A failed or stale script tag must not trap every subsequent MAP attempt.
    const existing=document.querySelector('script['+attr+']');
-   if(existing){existing.addEventListener('load',()=>ready()?resolve():reject(new Error(src+' unavailable')),{once:true});existing.addEventListener('error',reject,{once:true});return;}
-   const s=document.createElement('script');s.src=src;s.async=true;s.setAttribute(attr,'1');s.onload=()=>ready()?resolve():reject(new Error(src+' unavailable'));s.onerror=()=>reject(new Error(src+' failed to load'));document.head.append(s);
+   if(existing)existing.remove();
+   const s=document.createElement('script');s.src=src;s.async=true;s.setAttribute(attr,'1');
+   s.onload=()=>{if(ready())resolve();else{s.remove();reject(new Error(src+' unavailable'));}};
+   s.onerror=()=>{s.remove();reject(new Error(src+' failed to load'));};
+   document.head.append(s);
   });
-  mapLoader=(async()=>{await load('assets/map-locale.js','data-railway-map-locale',()=>Boolean(window.RailwayMapLocale));await load('assets/map-intelligence.js','data-railway-map-intelligence',()=>Boolean(window.RailwayMapIntelligence));await load('assets/map-gateway.js','data-railway-map-module',()=>Boolean(window.RailwayMap));return window.RailwayMap;})();
+  mapLoader=(async()=>{
+   await load('assets/map-locale.js','data-railway-map-locale',()=>Boolean(window.RailwayMapLocale));
+   await load('assets/map-intelligence.js','data-railway-map-intelligence',()=>Boolean(window.RailwayMapIntelligence));
+   await load('assets/map-gateway.js','data-railway-map-module',()=>Boolean(window.RailwayMap));
+   return window.RailwayMap;
+  })().catch(error=>{mapLoader=null;throw error;});
   return mapLoader;
  };
- const mountMap=()=>ensureMap().then(m=>m.mount(document.querySelector('#railway-map-mount'))).catch(error=>{const host=document.querySelector('#railway-map-mount');if(host)host.innerHTML='<article class="learning-card"><h2>MAP</h2><p>'+R.escape(error.message||error)+'</p></article>';});
+ const mountMap=()=>ensureMap().then(m=>m.mount(document.querySelector('#railway-map-mount'))).catch(error=>{
+  const host=document.querySelector('#railway-map-mount');if(!host)return;
+  host.innerHTML='<article class="learning-card" role="alert"><h2>Peta belum tersedia</h2><p>Komponen peta gagal dimuatkan. Sila cuba semula.</p><button type="button" class="secondary" data-map-retry>CUBA SEMULA</button><details><summary>Butiran teknikal</summary><p>'+R.escape(error.message||error)+'</p></details></article>';
+  host.querySelector('[data-map-retry]')?.addEventListener('click',()=>{
+   host.innerHTML='<article class="learning-card"><p>Memuatkan peta…</p></article>';
+   void mountMap();
+  },{once:true});
+ });
  function renderDetail(){
   const body=document.querySelector('#detail-content');
   const controls=`<div class="quiz-languages">${['ms','en','zh','th'].map(l=>`<button data-detail-lang="${l}" aria-pressed="${R.language===l}">${({ms:'BM',en:'EN',zh:'中文',th:'ไทย'})[l]}</button>`).join('')}${R.language==='zh'?`<button data-detail-pinyin aria-pressed="${R.pinyin}">Pinyin ${R.pinyin?'ON':'OFF'}</button>`:''}<button data-detail-theme>${h(window.RailwayTheme.value==='light'?'Dark Mode':'Light Mode')}</button></div>`;

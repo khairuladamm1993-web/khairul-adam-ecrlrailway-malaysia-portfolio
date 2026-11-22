@@ -136,8 +136,26 @@
   const state={host,controller,map:null,leaflet:null,markers:new Map(),chainageMarker:null,selected:null,filter:'All',query:'',chainageMode:false,ownerLoaded:false,layers:{...MAP_LAYERS}};
   instance=state;
   const localizer=window.RailwayMapLocale;
+  const applyAccessView=()=>{
+   // One shared map engine; the verified live role controls presentation only.
+   const canMember=Boolean(A?.canReadMemberContent);
+   host.dataset.mapView=canMember?'member':'public';
+   const copy={
+    ms:{public:'PETA AWAM · Rujukan ringkas. Jajaran ECRL belum disahkan.',member:'PETA MEMBER · Rujukan terperinci. Jajaran ECRL belum disahkan.',search:'Cari stesen atau lokasi'},
+    en:{public:'PUBLIC MAP · Simplified reference. ECRL alignment is unverified.',member:'MEMBER MAP · Detailed reference. ECRL alignment is unverified.',search:'Search station or place'},
+    zh:{public:'公共地图 · 简明参考。ECRL线路尚未核实。',member:'会员地图 · 详细参考。ECRL线路尚未核实。',search:'搜索车站或地点'},
+    th:{public:'แผนที่สาธารณะ · ข้อมูลอ้างอิง ECRL ยังไม่ยืนยันแนวเส้นทาง',member:'แผนที่สมาชิก · ข้อมูลอ้างอิง ECRL ยังไม่ยืนยันแนวเส้นทาง',search:'ค้นหาสถานีหรือสถานที่'}
+   };
+   const labels=copy[R?.language]||copy.ms;
+   const note=host.querySelector('[data-map-role-note]');
+   if(note)note.textContent=canMember?labels.member:labels.public;
+   const search=host.querySelector('[data-map-search]');
+   if(search)search.placeholder=canMember?'Station name / Member code / chainage':labels.search;
+  };
+  state.applyAccessView=applyAccessView;
   host.innerHTML='<section class="map-module" aria-label="ECRL reference map">'+
    '<div class="map-identity-row"><span class="map-malaysia-badge" aria-label="Malaysia map context">🇲🇾 <span>Malaysia</span></span><span class="map-mrs10-stamp" aria-label="MR-S10 railway reference">MR-S10 · ECRL</span><span class="map-asset-count" aria-label="16 stations, 7 passing loops, 2 depots">16 STN · 7 PL · 2 DEPOT</span></div>'+
+   '<p class="map-role-note" data-map-role-note role="status">Peta rujukan — jajaran ECRL belum disahkan.</p>'+ 
    '<p class="map-confidence-summary" data-map-confidence-summary role="status">ECRL GIS: reference markers only · surveyed alignment not established</p>'+
    '<p class="map-localization-note" data-map-localization-note><strong>MAP BASE LABELS</strong> · Basemap labels remain in source language; website controls follow your selected language.</p>'+
    '<div class="map-toolbar"><label class="map-search"><span>Search</span><input type="search" data-map-search placeholder="Station name; Member code / chainage when available" autocomplete="off"></label>'+
@@ -158,7 +176,7 @@
     state.localeObservers.push(observer);
    }
   }
-  applyLocale();
+  applyLocale();applyAccessView();
   const resultHost=host.querySelector('[data-map-results]'),detailHost=host.querySelector('[data-map-detail]');
   const input=host.querySelector('[data-map-search]'),focusBtn=host.querySelector('[data-map-focus]');
   const corridorBase=()=>points().filter(p=>p.phase==='current');
@@ -344,7 +362,7 @@
   }
   function resolveInput(){
    state.query=input.value.trim();clearChainageMarker();
-   const km=I.parseChainage(state.query);
+   const km=A?.canReadMemberContent?I.parseChainage(state.query):null;
    if(state.query&&km!==null){
     state.chainageMode=true;renderResults();
     const result=resolveChainage(km);
@@ -432,7 +450,7 @@
    ownerPromise=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='assets/owner-map.js';s.async=true;s.dataset.railwayOwnerMap='1';s.onload=()=>window.RailwayOwnerMap?resolve(window.RailwayOwnerMap):reject(new Error('Owner MAP tools unavailable'));s.onerror=reject;document.head.append(s);});
    ownerPromise.then(m=>{if(instance===state&&A.canAdmin){m.mount(ownerContext(),host.querySelector('[data-owner-map-slot]'),{force:true});state.ownerLoaded=true;}}).catch(()=>{});
   }
-  const accessRefresh=async()=>{if(instance!==state)return;await ensureMemberData();if(instance===state){state.selected=state.selected?effective(points().find(x=>x.id===state.selected.id)||state.selected):null;renderDetail(state.selected);renderResults();if(A.canAdmin)loadOwnerTools(true);else window.RailwayOwnerMap?.unmount();}};
+  const accessRefresh=async()=>{if(instance!==state)return;await ensureMemberData();if(instance===state){applyAccessView();state.selected=state.selected?effective(points().find(x=>x.id===state.selected.id)||state.selected):null;renderDetail(state.selected);renderResults();if(A.canAdmin)loadOwnerTools(true);else window.RailwayOwnerMap?.unmount();}};
   window.addEventListener('railway-access-change',accessRefresh,{signal});
 
   try{
@@ -470,6 +488,6 @@
   if(!instance)return;
   const old=instance;instance=null;window.RailwayOwnerMap?.unmount();old.controller.abort();for(const observer of old.localeObservers||[])observer.disconnect();try{old.chainageMarker?.remove();}catch{}try{old.map?.remove();}catch{}old.markers.clear();
  }
- R?.onLanguage?.(()=>{if(instance?.host)window.RailwayMapLocale?.apply(instance.host,R.language);});
+ R?.onLanguage?.(()=>{if(instance?.host){window.RailwayMapLocale?.apply(instance.host,R.language);instance.applyAccessView?.();}});
  window.RailwayMap=Object.freeze({mount,unmount,get mounted(){return Boolean(instance);},referenceCount(){return points().length}});
 })();

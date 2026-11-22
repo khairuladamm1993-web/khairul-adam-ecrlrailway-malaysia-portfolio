@@ -95,3 +95,15 @@ html.mrs10-map-fullscreen-open{overflow:hidden!important}
 
 /* ECRL confidence is evidence metadata, not a surveyed line. */
 .map-confidence-summary{margin:0;padding:7px 10px;border:1px solid var(--line);border-radius:8px;color:var(--muted);font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+
+
+/* P01 role-aware MAP experience: same engine, compact Public view and full authenticated tools. */
+.railway-map-mount .map-role-note{margin:8px 0 12px;padding:9px 12px;border-left:3px solid var(--cyan);background:#102b3788;color:var(--text);font-size:12px;line-height:1.5}
+.railway-map-mount[data-map-view="public"] .map-filters,
+.railway-map-mount[data-map-view="public"] [data-map-confidence-summary],
+.railway-map-mount[data-map-view="public"] [data-map-localization-note],
+.railway-map-mount[data-map-view="public"] [data-map-focus],
+.railway-map-mount[data-map-view="public"] [data-map-refresh],
+.railway-map-mount[data-map-view="public"] [data-map-fullscreen],
+.railway-map-mount[data-map-view="public"] [data-map-results]{display:none}
+.railway-map-mount[data-map-view="public"] .map-attribution-note{font-size:11px;line-height:1.45}
