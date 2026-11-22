@@ -43,3 +43,26 @@ test('candidate output carries fail-closed provenance status',()=>{
  assert.equal(r.rows[0].provenance.status,'HOLD_NOT_VERIFIED');
  assert.equal(r.rows[0].decision,'HOLD_NOT_ACCEPTED');
 });
+
+test('matching source revision and snapshot are reported, not promoted',()=>{
+ const c=candidate(1,2,{rechecked_way_version:3,source_snapshot:'2026-11-05T23:25:19Z'});
+ const d=detailed([1,3]);d.properties.rechecked_way_version=3;d.properties.source_snapshot='2026-11-05T23:25:19Z';
+ const r=audit(fc([c]),fc([d]));
+ assert.equal(r.rows[0].source_revision_match,true);
+ assert.equal(r.rows[0].source_snapshot_match,true);
+ assert.equal(r.summary.promoted,0);
+});
+test('source revision mismatch is explicit and remains HOLD',()=>{
+ const c=candidate(1,2,{rechecked_way_version:3,source_snapshot:'a'});
+ const d=detailed([1,3]);d.properties.rechecked_way_version=4;d.properties.source_snapshot='a';
+ const r=audit(fc([c]),fc([d]));
+ assert.equal(r.rows[0].source_revision_match,false);
+ assert.equal(r.rows[0].decision,'HOLD_NOT_ACCEPTED');
+});
+test('source snapshot mismatch is explicit and remains HOLD',()=>{
+ const c=candidate(1,2,{rechecked_way_version:3,source_snapshot:'a'});
+ const d=detailed([1,3]);d.properties.rechecked_way_version=3;d.properties.source_snapshot='b';
+ const r=audit(fc([c]),fc([d]));
+ assert.equal(r.rows[0].source_snapshot_match,false);
+ assert.equal(r.summary.promoted,0);
+});
