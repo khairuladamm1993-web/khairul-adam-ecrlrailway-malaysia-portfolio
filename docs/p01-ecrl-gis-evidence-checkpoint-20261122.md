@@ -73,3 +73,11 @@ No Production, P02, P03, Auth/RLS or live data mutation authorized.
 - Candidate list position is **8th of 9** for this way; the R1.5b report's `gap #9` is a separate **17-gap audit index**, not the candidate list index. Do not conflate indices.
 - Direct matching by OSM way ID shows that all nine candidate ways exist in the detailed dataset, but **none** of their missing endpoint pairs occur as an adjacent node pair in the same detailed feature. This is consistent with, but does not independently prove, the prior R1.5b full-source graph conclusion.
 - Decision: 9 candidates remain PRIVATE DIAGNOSTIC / HOLD, 0 promoted to accepted physical alignment. Do not bridge endpoints by straight lines in public UI or simulator. No network re-fetch of source OSM/ArcGIS performed.
+
+## Nine-gap direct endpoint coverage matrix (2026-11-22)
+- Recomputed against original downloaded GeoJSON candidate (9 features) and detailed (280 features) datasets. All 9 candidate OSM way IDs are represented in the detailed dataset.
+- Five candidate endpoint pairs have exactly one of two endpoint IDs represented among the same-way detailed features: candidate indices **1,2,7,8,9**.
+- Four pairs have both endpoint IDs somewhere in same-way detailed features but **not within the same detailed feature**: indices **3,4,5,6**. This is not proof of a connecting edge.
+- **0/9** have both endpoints in a single detailed feature, **0/9** have adjacent endpoints in a single detailed feature, and **0/9** can be promoted to accepted alignment.
+- Priority way `1420666687`, nodes `13055510163` and `13785440684`, original reported edge length `9503.9 m`: only node `13785440684` appears in same-way detailed features; the opposite endpoint is absent. This isolates the source coverage deficit, not a renderer defect.
+- Local reproducible audit output: `P01-ECRL-9-GAP-DIRECT-SOURCE-AUDIT.csv` (conversation artifact). This candidate branch records conclusions only; original source GeoJSON and restricted/private geometry are **not** committed or published.
