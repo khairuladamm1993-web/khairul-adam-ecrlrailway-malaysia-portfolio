@@ -141,7 +141,7 @@
    '<p class="map-localization-note" data-map-localization-note><strong>MAP BASE LABELS</strong> · Basemap labels remain in source language; website controls follow your selected language.</p>'+
    '<div class="map-toolbar"><label class="map-search"><span>Search</span><input type="search" data-map-search placeholder="Station name; Member code / chainage when available" autocomplete="off"></label>'+
    '<div class="map-filters" role="group" aria-label="Map filters">'+['All','STN','PL','Depot'].map(x=>'<button type="button" data-map-filter="'+x+'" aria-pressed="'+(x==='All')+'">'+x+'</button>').join('')+'</div>'+
-   '<div class="map-actions"><button type="button" data-map-fit>FIT FULL ROUTE</button><button type="button" data-map-focus disabled>FOCUS SELECTED</button><button type="button" data-map-fullscreen aria-pressed="false">FULL SCREEN</button></div></div>'+
+   '<div class="map-actions"><button type="button" data-map-fit>FIT FULL ROUTE</button><button type="button" data-map-focus disabled>FOCUS SELECTED</button><button type="button" data-map-refresh>SEMAK SEMULA / REFRESH</button><button type="button" data-map-fullscreen aria-pressed="false">FULL SCREEN</button></div></div>'+
    '<div class="map-layout"><div class="map-canvas-wrap"><div class="map-canvas" data-map-canvas aria-label="Interactive Malaysia railway-first reference map"></div><p class="map-attribution-note">Railway context is a visual OpenStreetMap/OpenRailwayMap reference layer, not surveyed ECRL geometry. Exact asset markers still require a validated confidence class; Public Reference and Pending markers remain approximate/reference only.</p></div>'+
    '<aside class="map-side"><div data-map-detail class="map-detail"><span class="access-label">MAP</span><h3>Select an asset</h3><p>Choose a result to inspect coordinate confidence. Exact markers appear only for validated locations.</p></div><div class="map-results" data-map-results></div></aside></div>'+
    '<p class="study-boundary">No route line / no polyline. Manual pan or zoom never recalculates stored marker coordinates.</p>'+
@@ -349,6 +349,23 @@
   resultHost.addEventListener('click',e=>{const b=e.target.closest('[data-map-point]');if(!b)return;const base=points().find(x=>x.id===b.dataset.mapPoint);if(!base)return;selectAsset(effective(base));},{signal});
   host.querySelector('[data-map-fit]').addEventListener('click',()=>{clearChainageMarker();fitCorridor();},{signal});
   focusBtn.addEventListener('click',()=>focusStored(state.selected),{signal});
+  const refreshBtn=host.querySelector('[data-map-refresh]');
+  refreshBtn.addEventListener('click',async()=>{
+   if(refreshBtn.disabled)return;
+   refreshBtn.disabled=true;
+   refreshBtn.textContent='REFRESHING…';
+   try{
+    if(A?.canReadMemberContent&&typeof A.fetchMemberBundle==='function')await A.fetchMemberBundle();
+    if(instance!==state)return;
+    if(state.selected)state.selected=effective(points().find(x=>x.id===state.selected.id)||state.selected);
+    renderDetail(state.selected);renderResults();fitCorridor();
+    if(A?.canAdmin)loadOwnerTools(true);
+    state.map?.invalidateSize(false);
+    refreshBtn.textContent='REFRESH COMPLETE';
+   }catch(error){
+    if(instance===state){refreshBtn.textContent='REFRESH FAILED · RETRY';}
+   }finally{refreshBtn.disabled=false;}
+  },{signal});
   const fullBtn=host.querySelector('[data-map-fullscreen]');
   const setFullScreen=enabled=>{
    host.classList.toggle('mrs10-map-fullscreen',enabled);
