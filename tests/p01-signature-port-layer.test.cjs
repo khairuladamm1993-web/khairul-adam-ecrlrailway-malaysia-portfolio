@@ -20,3 +20,11 @@ test('unknown industrial loading interface has no invented coordinate',()=>{
  const x=layer.references().find(x=>x.id==='ecrl-kerteh-petronas-loading-interface');
  assert.equal(x.coordinates,null);
 });
+
+test('unified map includes the reference module and visible purple legend',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const html=fs.readFileSync(path.join(__dirname,'../unified-map-v8.html'),'utf8');
+ assert.match(html,/assets\/unified-ecrl\/signature-port-layer\.js/);
+ assert.match(html,/id="mrs10-port-reference-key"/);
+ assert.match(html,/bukan titik hujung spurline yang disahkan/);
+});
