@@ -76,3 +76,22 @@ test('missing detailed revision is UNKNOWN, not a verified match or mismatch',()
  assert.equal(r.rows[0].source_snapshot_match,true);
  assert.equal(r.rows[0].decision,'HOLD_NOT_ACCEPTED');
 });
+
+test('disconnected source features do not imply traversable linework',()=>{
+ const r=audit(fc([candidate(1,4)]),fc([detailed([1,2]),detailed([3,4])]));
+ assert.equal(r.rows[0].same_way_source_graph_connected,false);
+ assert.equal(r.rows[0].source_component_node_count,2);
+ assert.equal(r.summary.graph_connected,0);
+});
+test('shared source node establishes graph reachability, not survey approval',()=>{
+ const r=audit(fc([candidate(1,4)]),fc([detailed([1,2,3]),detailed([3,4])]));
+ assert.equal(r.rows[0].same_way_source_graph_connected,true);
+ assert.equal(r.summary.graph_connected,1);
+ assert.equal(r.summary.promoted,0);
+ assert.equal(r.rows[0].decision,'HOLD_NOT_ACCEPTED');
+});
+test('graph connectivity never bridges separate OSM way IDs',()=>{
+ const other={type:'Feature',properties:{osm_way_id:8,source_node_ids:[2,3]}};
+ const r=audit(fc([candidate(1,4)]),fc([detailed([1,2]),other,detailed([3,4])]));
+ assert.equal(r.rows[0].same_way_source_graph_connected,false);
+});
