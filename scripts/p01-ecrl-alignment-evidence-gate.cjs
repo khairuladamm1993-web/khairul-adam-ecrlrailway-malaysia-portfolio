@@ -29,6 +29,8 @@ function validateAlignment(featureCollection){
   if(coords.every((point,i)=>i===0||point[0]===coords[0][0]&&point[1]===coords[0][1]))errors.push('Feature '+index+': degenerate line');
   const straightMetres=distanceMetres(coords[0],coords[coords.length-1]);
   if(straightMetres>(end-start)+Math.max(10,meta.accuracyMetres||0))errors.push('Feature '+index+': geographic endpoint separation exceeds chainage span');
+  const lineMetres=coords.slice(1).reduce((sum,point,i)=>sum+distanceMetres(coords[i],point),0);
+  if(lineMetres>(end-start)+Math.max(10,meta.accuracyMetres||0))errors.push('Feature '+index+': polyline distance exceeds chainage span');
   segments.push({start,end,coords,index});
  }
  segments.sort((a,b)=>a.start-b.start);
