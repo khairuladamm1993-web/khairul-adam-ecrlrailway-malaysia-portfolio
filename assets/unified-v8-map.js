@@ -605,7 +605,7 @@ function portHitTarget(id){
  const p=map.project(ref.coordinates),canvas=map.getCanvas(),rect=canvas.getBoundingClientRect();
  if(document.elementFromPoint(rect.left+p.x,rect.top+p.y)!==canvas)return null;
  const features=map.queryRenderedFeatures(p,{layers:['mrs10-signature-port-klang-halo','mrs10-signature-port-klang-center']});
- if(!['-halo','-center'].every(suffix=>features.some(f=>f.id===id&&f.layer.id==='mrs10-signature-port-klang'+suffix)))return null;
+ if(!['-halo','-center'].every(suffix=>features.some(f=>f.properties.referenceId===id&&f.layer.id==='mrs10-signature-port-klang'+suffix)))return null;
  return {x:p.x,y:p.y};
 }
 window.MRS10V8Diagnostics=Object.freeze({snapshot:diagnosticSnapshot,focusTrackInspection,trackHitTargets,inspectStation,stationHitTarget,focusPortReference,portHitTarget,focusSnapshot:()=>({current:focus.current,original:focus.original,layers:layerSnapshot(),approximate:$('approximate').checked})});

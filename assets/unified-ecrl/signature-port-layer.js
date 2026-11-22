@@ -24,7 +24,7 @@ const portReferences=references().filter(r=>r.sourceRegistry==='port-klang-refer
 function install(map){
  if(!map?.getStyle?.())return false;
  const id=portLayer;
- const data={type:'FeatureCollection',features:portReferences.map(r=>({type:'Feature',id:r.id,geometry:{type:'Point',coordinates:r.coordinates},properties:{name:r.name,source:'Port Klang Authority Marine Handbook',meaning:r.markerMeaning}}))};
+ const data={type:'FeatureCollection',features:portReferences.map(r=>({type:'Feature',id:r.id,geometry:{type:'Point',coordinates:r.coordinates},properties:{referenceId:r.id,name:r.name,source:'Port Klang Authority Marine Handbook',meaning:r.markerMeaning}}))};
  if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
  if(!map.getLayer(id+'-halo'))map.addLayer({id:id+'-halo',type:'circle',source:id,paint:{'circle-radius':12,'circle-color':'#7c3aed','circle-opacity':0.2,'circle-stroke-color':'#7c3aed','circle-stroke-width':2}});
  if(!map.getLayer(id+'-center'))map.addLayer({id:id+'-center',type:'circle',source:id,paint:{'circle-radius':4,'circle-color':'#7c3aed'}});

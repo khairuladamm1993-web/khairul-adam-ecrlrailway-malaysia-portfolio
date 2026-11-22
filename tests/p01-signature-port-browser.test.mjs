@@ -8,7 +8,9 @@ async function hitTarget(page,selector,id){
  const handle=await page.waitForFunction(([selector,id])=>{
   const qa=selector==='portHitTarget'?window.MRS10V8Diagnostics:window.MRS10ECRLCandidateQA;
   return qa[selector](id);
- },[selector,id],{timeout:15000});
+ },[selector,id],{timeout:15000}).catch(error=>{
+  throw new Error(`No visible map hit target for ${id} (${selector}): ${error.message}`);
+ });
  return handle.jsonValue();
 }
 for(const [engine,launcher] of [['chromium',chromium],['webkit',webkit]]){
@@ -34,15 +36,13 @@ for(const [engine,launcher] of [['chromium',chromium],['webkit',webkit]]){
       canvas:map?.rect,ecrlLayers:map?.ecrl?.layersPresent};
    });
    // Only final MapLibre state counts: the initial snapshot can precede style loading.
-   await page.waitForFunction(()=>{
+   const ready=await page.waitForFunction(()=>{
      const d=window.MRS10V8Diagnostics?.snapshot();
-     return d?.mapReady===true&&d?.styleLoaded===true&&d?.webglReady===true&&d?.ecrl?.layersPresent===true;
-   },null,{timeout:45000});
-   const final=await page.evaluate(()=>{
-     const d=window.MRS10V8Diagnostics.snapshot();
+     if(!d?.mapReady||!d.styleLoaded||!d.webglReady||!d.ecrl?.layersPresent)return false;
      return {mapReady:d.mapReady,styleLoaded:d.styleLoaded,webglReady:d.webglReady,
-       ecrlLayers:d.ecrl?.layersPresent,canvas:d.rect};
-   });
+       ecrlLayers:d.ecrl.layersPresent,canvas:d.rect};
+   },null,{timeout:45000});
+   const final=await ready.jsonValue();
    assert.equal(final.mapReady,true,JSON.stringify({final,networkFailures:networkFailures.slice(0,12),consoleErrors:consoleErrors.slice(0,12)}));
    assert.equal(final.styleLoaded,true);
    assert.equal(final.webglReady,true);
