@@ -49,3 +49,10 @@ No Production, P02, P03, Auth/RLS or live data mutation authorized.
 - CI warning: `actions/checkout@v4` and `actions/setup-node@v4` rely on deprecated Node.js 20 runtime and are forced to Node.js 24; plan version bump in candidate, do not mistake warning for test failure.
 - Evidence: https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44966455635
 - This is **CI VERIFIED** for the specified SHA only, not physical alignment/survey validation or Production deployment.
+
+## Actions v5 migration VERIFIED (2026-11-22)
+- Commit `c1f74e6ebcd674f467934e2d636f99737814a9a1` updates candidate QA workflow to `actions/checkout@v5` and `actions/setup-node@v5`.
+- GitHub Actions run #52 (`44966754626`), job `source-contract` (`137037411758`) concluded **SUCCESS**.
+- Inspected actual logs: **23 tests PASS, 0 FAIL, 0 SKIPPED**; static artifact build PASS. Previous Node.js 20 deprecation warning not present in inspected logs.
+- Evidence: https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44966754626
+- CI validation is scoped to candidate source, not survey-grade ECRL geometry or production deployment.
