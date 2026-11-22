@@ -2,6 +2,24 @@
 ((root)=>{
 'use strict';
 const labels={
+  "ECRL · Reference map": {
+    "ms": "ECRL · Peta rujukan",
+    "en": "ECRL · Reference map",
+    "zh": "ECRL · 参考地图",
+    "th": "ECRL · แผนที่อ้างอิง"
+  },
+  "Full screen": {
+    "ms": "Skrin penuh",
+    "en": "Full screen",
+    "zh": "全屏",
+    "th": "เต็มหน้าจอ"
+  },
+  "Exit full screen": {
+    "ms": "Keluar skrin penuh",
+    "en": "Exit full screen",
+    "zh": "退出全屏",
+    "th": "ออกจากโหมดเต็มหน้าจอ"
+  },
   "MAP": {
     "ms": "PETA",
     "en": "MAP",
