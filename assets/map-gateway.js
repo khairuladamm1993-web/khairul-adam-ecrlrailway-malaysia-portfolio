@@ -450,7 +450,13 @@
    ownerPromise=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='assets/owner-map.js';s.async=true;s.dataset.railwayOwnerMap='1';s.onload=()=>window.RailwayOwnerMap?resolve(window.RailwayOwnerMap):reject(new Error('Owner MAP tools unavailable'));s.onerror=reject;document.head.append(s);});
    ownerPromise.then(m=>{if(instance===state&&A.canAdmin){m.mount(ownerContext(),host.querySelector('[data-owner-map-slot]'),{force:true});state.ownerLoaded=true;}}).catch(()=>{});
   }
-  const accessRefresh=async()=>{if(instance!==state)return;await ensureMemberData();if(instance===state){applyAccessView();state.selected=state.selected?effective(points().find(x=>x.id===state.selected.id)||state.selected):null;renderDetail(state.selected);renderResults();if(A.canAdmin)loadOwnerTools(true);else window.RailwayOwnerMap?.unmount();}};
+  const accessRefresh=async()=>{if(instance!==state)return;await ensureMemberData();if(instance===state){
+   if(!A?.canReadMemberContent){
+    // Revocation must leave no privileged filter, chainage search or fullscreen trap.
+    if(host.classList.contains('mrs10-map-fullscreen'))setFullScreen(false);
+    state.filter='All';setFilter('All');state.query='';input.value='';state.chainageMode=false;clearChainageMarker();
+   }
+   applyAccessView();state.selected=state.selected?effective(points().find(x=>x.id===state.selected.id)||state.selected):null;renderDetail(state.selected);renderResults();if(A.canAdmin)loadOwnerTools(true);else window.RailwayOwnerMap?.unmount();}};
   window.addEventListener('railway-access-change',accessRefresh,{signal});
 
   try{

@@ -13,6 +13,9 @@ test('MAP runtime uses one engine with authenticated role-aware presentation',()
  assert.match(source,/applyAccessView\(\);state\.selected=/);
  assert.match(source,/instance\.applyAccessView\?\.\(\)/);
  assert.match(source,/A\?\.canReadMemberContent\?I\.parseChainage\(state\.query\):null/);
+ assert.match(source,/if\(!A\?\.canReadMemberContent\)\{/);
+ assert.match(source,/state\.filter='All';setFilter\('All'\)/);
+ assert.match(source,/if\(host\.classList\.contains\('mrs10-map-fullscreen'\)\)setFullScreen\(false\)/);
 });
 
 test('Public map hides advanced controls while member and owner retain existing tool path',()=>{
