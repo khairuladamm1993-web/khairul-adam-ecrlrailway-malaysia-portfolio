@@ -1,46 +1,36 @@
-# MR-S10 P01 — Signature Port Candidate Release Readiness R1
+# MR-S10 P01 · Signature Port Release Readiness R1
 
-Date: 2026-11-22 (Malaysia) · Scope: P01 candidate only · Decision: **HOLD PREVIEW DEPLOYMENT**
+Tarikh 22 November 2026 · Skop branch calon P01 · Owner UAT = 0
 
-## Immutable QA baseline
+## Sumber dan keputusan
 
-- Candidate branch: `candidate/p01-signature-port-layer-r1-20261122`
-- Verified source SHA: `9bfd8108c30d1a4e3e535ca94be034a04a3252dd`
-- GitHub Actions run: https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/45002848357
-- Jobs: `signature-unit-regression` SUCCESS; `signature-browser` SUCCESS.
-- Unit regression: 42/42 PASS; V8 build: `V8_PUBLIC_ONLY_BUILD_READY`.
-- Browser smoke: 6/6 PASS (Chromium and WebKit; desktop 1180×820, iPad 810×1080, iPhone 390×844). Final snapshots confirmed `mapReady`, `styleLoaded`, `webglReady`, ECRL layers present, and nonzero canvas dimensions.
-- Browser QA artifact: `p01-signature-browser-qa` on run 45002848357; JSON report, **not** visual screenshots on PASS.
-- Rollback reference for the last test-only commit: `481e483f432ac3a24028cda5eac303b339df7a88`. **Not** a deployment rollback receipt. Before any Preview deploy, capture existing deployment ID/alias and its exact source SHA.
+- Branch `candidate/p01-signature-port-layer-r1-20261122`.
+- SHA aplikasi yang diuji `52aa354b771dcd7afce28804438e8358180ec479`.
+- Rujukan rollback perubahan R2 `4f8a5ea7518be931e27fd6c259a05c6ee3447043`. Ini ialah checkpoint source sebelum pembaikan. CI pada checkpoint itu gagal pada dua konfigurasi WebKit mudah alih.
+- **GO untuk memohon kelulusan Protected Preview**. Kelulusan Principal Owner diperlukan sebelum deployment Protected Preview. Tiada deployment atau pergerakan alias dijalankan dalam workpack ini.
 
-## Scope and source preservation
+## Punca dan pembaikan
 
-- Northport and Westports are **maritime locality reference points**, not verified ECRL rail endpoints, spurs, turnouts, or freight connections.
-- `assets/unified-ecrl/port-klang-references.js` cites Port Klang Authority Marine Handbook and stores reference grid positions. The underlying grid transcription and licensing must be independently checked before claiming survey-grade accuracy or approved reuse.
-- `assets/unified-ecrl/signature-port-layer.js` emits two Point features, purple halo and center layers, and a click popup warning that these are not verified rail endpoints.
-- Existing Kuantan Port, Kemaman Port and Kerteh source-backed references remain in the signature registry. No physical rail LineString is created.
-- Preserve station lineup, PL01–PL07, depots, Auth/RLS and all GIS baseline gates. The 17 ECRL spans remain **UNVERIFIED**.
+Pada [CI asal 45003332643](https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/45003332643), Chromium lulus pada ketiga-tiga viewport dan WebKit lulus pada desktop sahaja. WebKit iPad dan iPhone membuka popup infrastruktur Northport sehingga ujian tamat masa menunggu popup pelabuhan. Tangkapan kegagalan menunjukkan marker ungu sudah dilukis. Kod sebelum pembaikan menggunakan pendengar klik MapLibre untuk pelabuhan dan pengendali sentuhan berasingan untuk ECRL. Kedua-dua rekod Northport berkongsi kedudukan pada ketepatan skrin. Westports mempunyai keadaan koordinat rujukan yang sama.
 
-## Release gates
+Klik dan sentuhan kini melalui pemilihan aset yang sama. Marker ungu mendapat keutamaan apabila jarak hampir sama dalam toleransi 1 piksel. Rekod perancangan ECRL di lokasi itu boleh dibuka melalui butang khusus dalam popup pelabuhan. Popup berkongsi pengurusan penutupan sedia ada. Legenda menamakan kedua-dua pelabuhan dan popup memaparkan sumber Port Klang Authority serta penjelasan bahawa marker ialah rujukan kawasan tanpa sambungan ECRL yang disahkan.
 
-| Gate | Status | Evidence / outstanding action |
+## Resit QA
+
+[GitHub Actions 45004206552](https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/45004206552) · [Artifak p01-signature-browser-qa](https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/45004206552/artifacts/14746809656)
+
+- Unit Regression 42/42 PASS, 0 FAIL. Build V8 mengeluarkan `V8_PUBLIC_ONLY_BUILD_READY`.
+- Artifak mengandungi `report.json` dan tangkapan skrin legenda, Northport, Westports serta pemilihan ECRL berhampiran.
+- Ujian pelayar menyemak MapLibre, WebGL, lapisan ECRL, marker halo dan pusat yang dirender, identiti popup, sumber, penjelasan, satu popup pada satu masa serta capaian rekod ECRL. Pada zoom 7, kedudukan sasaran Northport dan Jalan Kastam berbeza kira-kira 6.67 piksel. Kedua-duanya diuji dengan klik atau sentuhan pada posisi sebenar.
+
+| Konfigurasi | Chromium | WebKit |
 |---|---|---|
-| Unit and regression tests | VERIFIED PASS | CI run 45002848357 |
-| Public-only V8 build | VERIFIED PASS | CI run 45002848357 |
-| Headless Chromium/WebKit map readiness | VERIFIED PASS | 6 final MapLibre snapshots |
-| Northport/Westports marker visual comparison | NOT TESTED | No accepted screenshot or pixel-level visual review |
-| Northport/Westports popup click and copy | NOT TESTED | Existing browser smoke does not click these markers |
-| iPad/iPhone physical Safari | NOT TESTED | Headless WebKit is not physical Safari |
-| External source coordinate and license audit | UNVERIFIED | Official handbook claim in source; independent evidence pending |
-| Protected Preview source/deployment receipt | NOT TESTED | No Preview deployment authorized or executed |
-| Owner UAT | 0 | No Owner acceptance |
+| Desktop 1180 × 820 | PASS | PASS |
+| iPad 810 × 1080 | PASS | PASS |
+| iPhone 390 × 844 | PASS | PASS |
 
-## Before requesting Preview deployment approval
+## Baseline dan baki risiko
 
-1. Extend isolated browser QA to check both Port Klang markers and popup text; capture screenshots and evidence of non-rail disclaimer.
-2. Check marker position, legend, overlays and visual layout against Owner vision without replacing or connecting ECRL physical geometry.
-3. Record exact candidate SHA, build receipt, existing Preview deployment ID and rollback target. Verify Vercel protection remains enabled.
-4. Request **specific Owner approval** for protected Preview deployment and alias only after the above evidence is available. Never infer Production authorization.
-5. After approved Preview deployment: verify served SHA, hosted smoke, Public/Member/Owner access as applicable, reload/logout, ECRL zoom/popup, and physical Safari Owner UAT.
+16 stesen berkod, PL01–PL07, dua depot, warna, koordinat rujukan dan lapisan GIS dikekalkan. Kesemua 17 segmen GIS ECRL kekal **UNVERIFIED**. Tiada spurline, turnout atau sambungan rel baharu ditambah. Bahan sumber pelabuhan kekal pada taraf rujukan kawasan. Audit bebas transkripsi koordinat dan hak penggunaan handbook masih belum selesai.
 
-**Governance:** No Production, Preview alias, Supabase, Auth/RLS, P02/P03 or physical GIS changes are authorized by this document. QA PASS does not equal Owner UAT PASS.
+Safari fizikal, kawalan sentuhan dan rotasi pada peranti Owner serta sesi Member/Owner di hos belum diuji. Sebelum Protected Preview dibina mengikut kelulusan Owner, rekod projek, perlindungan akses, SHA sasaran dan deployment/alias terdahulu sebagai rujukan rollback. Selepas diluluskan, sahkan SHA hos dan uji pemilihan kedua-dua marker, butang rekod ECRL dan penutupan popup pada iPad dan iPhone Safari.
