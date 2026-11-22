@@ -58,7 +58,7 @@ function audit(candidate, detailed) {
   }
   const rows = candidate.features.map((f, i) => {
     const p = f.properties || {}, way = String(p.osm_way_id ?? ''), ends = p.original_adjacent_osm_nodes;
-    if (!way || !Array.isArray(ends) || ends.length !== 2 || String(ends[0]) === String(ends[1])) throw Error('Invalid candidate #' + (i+1));
+    if (!/^[1-9]\d*$/.test(way) || !Array.isArray(ends) || ends.length !== 2 || ends.some(id=>!/^[1-9]\d*$/.test(String(id))) || String(ends[0]) === String(ends[1])) throw Error('Invalid candidate #' + (i+1));
     if (p.approved_alignment !== false || p.do_not_use_for_train_movement !== true) throw Error('Unsafe approval flags candidate #' + (i+1));
     const entries = byWay.get(way) || [], features = entries.map(e=>e.nodes), [a,b] = ends.map(String);
     const revisionComparable = entries.length > 0 && p.rechecked_way_version != null && entries.every(e => e.revision != null);
