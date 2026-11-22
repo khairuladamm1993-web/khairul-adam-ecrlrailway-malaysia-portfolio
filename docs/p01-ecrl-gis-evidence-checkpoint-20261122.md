@@ -102,3 +102,8 @@ No Production, P02, P03, Auth/RLS or live data mutation authorized.
 - Reinspected all nine candidate ways: `rechecked_way_version` and `source_snapshot` agree with same-way detailed features in the supplied datasets. Geometry still lacks the missing intermediate linework and physical/CH verification.
 - SHA-256 integrity of original local source files: `ECRL-MISSING-SPANS-SOURCE-CANDIDATES.geojson` = `37383112ef8139a5158fa240da727c65fad2ed05587d21b6d17110be88b56711` (18,327 bytes); `ECRL-TRACK-ONLY-DETAILED.geojson` = `cb89fd9519bcfa4c5a402c446a2c9438de6bea38c7019679ad44b4ccfb2f207c` (677,601 bytes).
 - Corrected local manifest: `P01-ECRL-P0-WAY-1420666687-ACQUISITION-MANIFEST-CORRECTED.json` (conversation artifact). Original private GeoJSON and manifest not committed. **HOLD** retained; no Production changes.
+
+## Construction versus operational evidence gate verified (2026-11-22)
+- Commit `0e84520e44ca76f592aba24d1ac60a46290e437b` preserves OSM `railway`, `construction`, and `tunnel` tags as source context only. Operational status remains `NOT_VERIFIED_FROM_OSM_TAGS` even when source graph endpoints are connected.
+- GitHub Actions Run #98 (`44968953395`), job `source-contract` (`137044258190`), **SUCCESS**; actual logs: **43 tests PASS, 0 FAIL, 0 SKIPPED**, static artifact build PASS. https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44968953395
+- No acceptance or promotion of any of nine candidates. Seventeen alignment gaps still unresolved. Further test-only churn should pause until new authorized intermediate geometry or independent chainage/physical controls are available; do not treat CI as evidence of alignment completion.
