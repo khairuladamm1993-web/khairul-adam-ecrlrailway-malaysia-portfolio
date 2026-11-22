@@ -15,3 +15,5 @@ test('allows sub-metre join tolerance while rejecting larger discontinuities',()
 
 test('rejects long zigzag even when endpoints are close',()=>{const v=sample();v.features=[feature(1000,1200,[[102.5,4.1],[102.49,4.1],[102.5,4.1]])];const r=validateAlignment(v);assert.equal(r.status,'REJECTED');assert.match(r.errors.join(' '),/polyline distance exceeds chainage span/);});
 test('rejects invalid CRS and metadata self-approval absent',()=>{const v=sample();v.metadata.crs='EPSG:3857';v.metadata.approvedForUse=false;const r=validateAlignment(v);assert.equal(r.status,'REJECTED');assert.match(r.errors.join(' '),/EPSG:4326/);assert.match(r.errors.join(' '),/approvedForUse/);});
+
+test('rejects repeated adjacent coordinates inside otherwise valid line',()=>{const v=sample();v.features=[feature(1000,2000,[a,b,b,c])];const r=validateAlignment(v);assert.equal(r.status,'REJECTED');assert.match(r.errors.join(' '),/repeated adjacent coordinate/);});
