@@ -53,7 +53,7 @@ for(const [engine,launcher] of [['chromium',chromium],['webkit',webkit]]){
      const bounds=await canvas.boundingBox();
      assert(bounds&&bounds.width>0&&bounds.height>0,'Map canvas must be visible for port click');
      await canvas.click({position:{x:bounds.width/2,y:bounds.height/2},force:true});
-     const popup=page.locator('.maplibregl-popup').filter({hasText:label});
+     const popup=page.locator('.maplibregl-popup:not(.ecrl-popup)').filter({hasText:`Port Klang — ${label}`});
      await popup.waitFor({state:'visible',timeout:15000});
      const copy=await popup.innerText();
      assert.match(copy,/Bukan titik hujung rel atau sambungan ECRL yang disahkan/i);
