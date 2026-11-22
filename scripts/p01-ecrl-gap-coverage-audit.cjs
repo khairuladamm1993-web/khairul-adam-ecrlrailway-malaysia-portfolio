@@ -33,6 +33,9 @@ function buildEvidenceRequests(report) {
     original_edge_length_m:r.edge_length_m,
     missing_endpoint_node_ids:[!r.node_a_in_detailed?r.node_a:null,!r.node_b_in_detailed?r.node_b:null].filter(Boolean),
     source_graph_connected:r.same_way_source_graph_connected,
+    source_railway_tag:r.source_railway_tag,
+    source_tunnel_tag:r.source_tunnel_tag,
+    operational_evidence_status:r.operational_evidence_status,
     evidence_needed:[
       'Authorized intermediate rail LineString geometry including original endpoint nodes',
       'Source ID, revision, snapshot and raw node sequence',
@@ -65,7 +68,12 @@ function audit(candidate, detailed) {
     const same = features.some(ns => ns.includes(a) && ns.includes(b));
     const adjacent = features.some(ns => ns.some((n,j) => j+1 < ns.length && ((n===a && ns[j+1]===b) || (n===b && ns[j+1]===a))));
     const graph = sourceGraphReachability(features,a,b);
-    return {candidate_index:i+1, osm_way_id:way, node_a:a, node_b:b, edge_length_m:p.original_edge_length_m ?? null, detailed_features_same_way:features.length, source_revision_comparable:revisionComparable, source_revision_match:revisionMatch, source_snapshot_match:snapshotMatch, node_a_in_detailed:aFound, node_b_in_detailed:bFound, both_nodes_same_feature:same, adjacent_nodes_same_feature:adjacent, same_way_source_graph_connected:graph.connected, source_component_node_count:graph.componentNodeCount, provenance:provenanceGate(p.provenance), decision:'HOLD_NOT_ACCEPTED'};
+    const tags = p.raw_osm_tags || {};
+    const sourceRailwayTag = typeof tags.railway === 'string' ? tags.railway : null;
+    const sourceConstructionTag = typeof tags.construction === 'string' ? tags.construction : null;
+    const sourceTunnelTag = typeof tags.tunnel === 'string' ? tags.tunnel : null;
+    const operationalEvidenceStatus = 'NOT_VERIFIED_FROM_OSM_TAGS';
+    return {candidate_index:i+1, osm_way_id:way, node_a:a, node_b:b, edge_length_m:p.original_edge_length_m ?? null, detailed_features_same_way:features.length, source_revision_comparable:revisionComparable, source_revision_match:revisionMatch, source_snapshot_match:snapshotMatch, node_a_in_detailed:aFound, node_b_in_detailed:bFound, both_nodes_same_feature:same, adjacent_nodes_same_feature:adjacent, same_way_source_graph_connected:graph.connected, source_component_node_count:graph.componentNodeCount, source_railway_tag:sourceRailwayTag, source_construction_tag:sourceConstructionTag, source_tunnel_tag:sourceTunnelTag, operational_evidence_status:operationalEvidenceStatus, provenance:provenanceGate(p.provenance), decision:'HOLD_NOT_ACCEPTED'};
   });
   return {rows, summary:{candidates:rows.length, one_endpoint:rows.filter(r=>r.node_a_in_detailed !== r.node_b_in_detailed).length, both_separate:rows.filter(r=>r.node_a_in_detailed && r.node_b_in_detailed && !r.both_nodes_same_feature).length, same_feature:rows.filter(r=>r.both_nodes_same_feature).length, adjacent:rows.filter(r=>r.adjacent_nodes_same_feature).length, graph_connected:rows.filter(r=>r.same_way_source_graph_connected).length, promoted:0}};
 }
