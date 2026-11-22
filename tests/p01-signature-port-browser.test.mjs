@@ -60,14 +60,32 @@ for(const [engine,launcher] of [['chromium',chromium],['webkit',webkit]]){
    await canvas.scrollIntoViewIfNeeded();
    const activate=position=>touch?canvas.tap({position}):canvas.click({position});
    const allPopups=page.locator('#map .maplibregl-popup');
+   const north='mrs10-port-klang-northport',west='mrs10-port-klang-westports';
+   assert.equal(await page.evaluate(id=>window.MRS10V8Diagnostics.focusPortReference(id,4),north),true);
+   const northOverview=await hitTarget(page,'portHitTarget',north);
+   const westOverview=await hitTarget(page,'portHitTarget',west);
+   const overviewSeparation=Math.hypot(northOverview.x-westOverview.x,northOverview.y-westOverview.y);
+   assert(overviewSeparation<4,`Expected overview markers to overlap, got ${overviewSeparation}px`);
    const portPopupChecks=[];
    for(const [id,label] of [
-     ['mrs10-port-klang-northport','Northport'],
-     ['mrs10-port-klang-westports','Westports']
+     [north,'Northport'],
+     [west,'Westports']
    ]){
+     assert.equal(await page.evaluate(id=>window.MRS10V8Diagnostics.focusPortReference(id,4),north),true);
+     const shortcut=legend.getByRole('button',{name:label,exact:true});
+     const shortcutBox=await shortcut.boundingBox();
+     assert(shortcutBox&&shortcutBox.height>=44&&shortcutBox.x>=0&&shortcutBox.x+shortcutBox.width<=viewport.width);
+     if(touch)await shortcut.tap();else await shortcut.press('Enter');
+     const popup=allPopups.filter({has:page.locator(`[data-port-reference-id="${id}"]`)});
+     await popup.waitFor({state:'visible',timeout:15000});
+     assert.match(await popup.innerText(),warning);
+     assert.equal(await page.evaluate(()=>window.MRS10CompleteQA.camera().zoom),13);
+     await popup.locator('.maplibregl-popup-close-button').click();
+     await allPopups.waitFor({state:'detached'});
+
+     await canvas.scrollIntoViewIfNeeded();
      assert.equal(await page.evaluate(id=>window.MRS10V8Diagnostics.focusPortReference(id),id),true);
      await activate(await hitTarget(page,'portHitTarget',id));
-     const popup=allPopups.filter({has:page.locator(`[data-port-reference-id="${id}"]`)});
      await popup.waitFor({state:'visible',timeout:15000});
      assert.equal(await allPopups.count(),1);
      assert.equal(await popup.locator('strong').innerText(),`Port Klang — ${label}`);
@@ -88,12 +106,12 @@ for(const [engine,launcher] of [['chromium',chromium],['webkit',webkit]]){
      await planningPopup.waitFor({state:'visible',timeout:15000});
      assert.match(await planningPopup.innerText(),new RegExp(label));
      assert.equal(await allPopups.count(),1);
-     portPopupChecks.push({id,status:'PASS',disclaimer:true,closeButton:true,coLocatedPlanningPopup:true});
+     portPopupChecks.push({id,status:'PASS',disclaimer:true,closeButton:true,coLocatedPlanningPopup:true,overviewShortcut:true});
      await planningPopup.locator('.maplibregl-popup-close-button').click();
      await allPopups.waitFor({state:'detached'});
    }
    // At this zoom the two real source references fall within each other's hit radius.
-   const north='mrs10-port-klang-northport',rail='ecrl-stn-20';
+   const rail='ecrl-stn-20';
    assert.equal(await page.evaluate(id=>window.MRS10V8Diagnostics.focusPortReference(id,7),north),true);
    const portPoint=await hitTarget(page,'portHitTarget',north);
    const ecrlPoint=await hitTarget(page,'assetHitTarget',rail);
@@ -110,7 +128,7 @@ for(const [engine,launcher] of [['chromium',chromium],['webkit',webkit]]){
    await allPopups.waitFor({state:'detached'});
    assert.deepEqual(errors,[]);
    report.push({engine,viewport:viewport.name,input:touch?'tap':'click',status:'PASS',result:final,portPopupChecks,
-    overlap:{port:north,ecrl:rail,separation,status:'PASS'}});
+    overlap:{port:north,ecrl:rail,separation,overviewSeparation,status:'PASS'}});
   }catch(e){report.push({engine,viewport:viewport.name,status:'FAIL',error:String(e),pageErrors:errors,networkFailures:networkFailures.slice(0,12),consoleErrors:consoleErrors.slice(0,12)});
    await page.screenshot({path:`artifacts/p01-signature-port/${engine}-${viewport.name}-fail.png`}).catch(()=>{});}
   await page.close();

@@ -280,7 +280,7 @@ function updateMapLayer(){
      'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.35:1
     }});
   }
-  installInnerDots();ecrl?.install(map);window.MRS10SignaturePortLayer?.install(map);ownerCalibration?.install();applyVisibility();if(pendingRestore)restoreLayers(pendingRestore);
+  installInnerDots();ecrl?.install(map);window.MRS10SignaturePortLayer?.install(map);syncPortShortcuts();ownerCalibration?.install();applyVisibility();if(pendingRestore)restoreLayers(pendingRestore);
  }catch(e){
   state.networkError=true;
   $('map-error').hidden=false;
@@ -336,8 +336,14 @@ function showPopup(point){
  compactSourceDetails(container);mountPopup(container,point.coordinates);focusRoute(point.routeId);
 }
 function referenceVisible(ref){return openmr.reference(ref,state.category);}
-function showPortReference(ref){
+const portShortcuts=[...document.querySelectorAll('[data-port-shortcut]')];
+function syncPortShortcuts(){
+ const ready=state.mapReady&&state.map?.getLayer('mrs10-signature-port-klang-halo');
+ for(const button of portShortcuts)button.disabled=!ready;
+}
+function showPortReference(ref,focusCamera=false){
  closeFocus();state.zoomDone=true;
+ if(focusCamera)state.map.jumpTo({center:ref.coordinates,zoom:Math.max(state.map.getZoom(),13)});
  const host=el('div');
  host.dataset.portReferenceId=ref.id;
  host.append(el('strong',null,ref.name),el('p',null,'Rujukan kawasan pelabuhan (Port Klang Authority). Bukan titik hujung rel atau sambungan ECRL yang disahkan.'));
@@ -505,6 +511,10 @@ async function init(){
  $('approximate').addEventListener('change',()=>{closeFocus();installGeometry();applyVisibility();geometryStatus()});
  $('search').addEventListener('input',updateSearch);
  $('reset').addEventListener('click',reset);
+ for(const button of portShortcuts)button.addEventListener('click',()=>{
+  const ref=portReference(button.dataset.portShortcut);
+  if(ref?.coordinates)showPortReference(ref,true);
+ });
  const fullscreenBox=document.querySelector('.mapbox'),fullscreenButton=$('map-fullscreen');let nativeFullscreen=false,fullscreenBusy=false;
  const fullState=on=>{fullscreenBox.classList.toggle('is-fullscreen',on);fullscreenButton.setAttribute('aria-pressed',String(on));requestAnimationFrame(()=>state.map?.resize());};
  fullscreenButton.onclick=async()=>{
@@ -519,7 +529,7 @@ async function init(){
  $('theme').addEventListener('click',()=>{
   state.theme=state.theme==='dark'?'light':'dark';
   document.documentElement.dataset.theme=state.theme;
-  if(state.map){state.mapReady=false;state.map.setStyle(styleURL())}
+  if(state.map){state.mapReady=false;syncPortShortcuts();state.map.setStyle(styleURL())}
   showStatus();
  });
  r3UI=window.OpenMRIntelligence.mount({document,controls:$('r3-views'),host:$('corridor-intelligence'),getLocale:()=>state.locale,getData:()=>r3Data||{facilities:[],relationships:[],sectors:[]},getRegistry:()=>window.OpenMRIntelligence.registry({manifest:state.manifest,results:state.results,physical,ecrl,relations:relationsFor}),onAssetSelect:id=>showInfrastructure(id,true)});

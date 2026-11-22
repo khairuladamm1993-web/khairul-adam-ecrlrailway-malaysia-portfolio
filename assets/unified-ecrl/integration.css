@@ -67,6 +67,9 @@
  }
 }
 .mrs10-port-popup [data-port-reference-id]>strong{display:block;padding-inline-end:36px}
+.port-reference-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.port-reference-actions button{min-height:44px;padding:4px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:inherit;cursor:pointer}
+.port-reference-actions button:disabled{cursor:wait}
 .maplibregl-map .mrs10-port-popup .maplibregl-popup-close-button{
  position:absolute!important;top:0!important;right:0;float:none;min-width:44px;min-height:44px;
 }
