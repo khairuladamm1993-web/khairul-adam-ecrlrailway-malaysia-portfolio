@@ -28,3 +28,12 @@ test('unified map includes the reference module and visible purple legend',()=>{
  assert.match(html,/id="mrs10-port-reference-key"/);
  assert.match(html,/bukan titik hujung spurline yang disahkan/);
 });
+
+test('purple halo only targets maritime and yard references, preserving existing colors',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const src=fs.readFileSync(path.join(__dirname,'../assets/unified-ecrl/adapter.js'),'utf8');
+ assert.match(src,/signature-port-halo/);
+ assert.match(src,/kinds\.filter\(k=>k==='MARITIME'\|\|k==='YARD'\)/);
+ assert.match(src,/YARD:'#b57925'/);
+ assert.match(src,/MARITIME:'#7c3aed'/);
+});
