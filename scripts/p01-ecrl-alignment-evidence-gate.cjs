@@ -2,6 +2,7 @@
 // Candidate-only ECRL GeoJSON evidence gate. Never draw or publish a rejected alignment.
 // GeoJSON positions are [longitude, latitude] in WGS84. Chainage is metres.
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
+const distanceMetres=(a,b)=>{const rad=x=>x*Math.PI/180,R=6371000,dLat=rad(b[1]-a[1]),dLon=rad(b[0]-a[0]);const h=Math.sin(dLat/2)**2+Math.cos(rad(a[1]))*Math.cos(rad(b[1]))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));};
 const validPoint=p=>Array.isArray(p)&&(p.length===2||p.length===3)&&p.every(finite)&&p[0]>=99.5&&p[0]<=104.8&&p[1]>=1&&p[1]<=7.5;
 function validateAlignment(featureCollection){
  const errors=[];
@@ -26,10 +27,12 @@ function validateAlignment(featureCollection){
    errors.push('Feature '+index+': monotonic integer chainage metres required');continue;
   }
   if(coords.every((point,i)=>i===0||point[0]===coords[0][0]&&point[1]===coords[0][1]))errors.push('Feature '+index+': degenerate line');
+  const straightMetres=distanceMetres(coords[0],coords[coords.length-1]);
+  if(straightMetres>(end-start)+Math.max(10,meta.accuracyMetres||0))errors.push('Feature '+index+': geographic endpoint separation exceeds chainage span');
   segments.push({start,end,coords,index});
  }
  segments.sort((a,b)=>a.start-b.start);
- const close=(a,b)=>Math.abs(a[0]-b[0])<1e-7&&Math.abs(a[1]-b[1])<1e-7;
+ const close=(a,b)=>distanceMetres(a,b)<=Math.min(1,meta.accuracyMetres||1);
  for(let i=1;i<segments.length;i++){
   const a=segments[i-1],b=segments[i];
   if(a.end!==b.start)errors.push('Chainage gap/overlap between features '+a.index+' and '+b.index);
