@@ -86,3 +86,8 @@ No Production, P02, P03, Auth/RLS or live data mutation authorized.
 - Candidate SHA `021a4c824111ad3c3766c978c4fb4d4d775c6bdb`: `scripts/p01-ecrl-gap-coverage-audit.cjs`, five safety tests and workflow inclusion.
 - GitHub Actions Run #66 (`44967252583`), job `source-contract` (`137038970979`), **SUCCESS**. Actual logs: **28/28 PASS**, **0 FAIL**, **0 SKIPPED**, static artifact build PASS. https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44967252583
 - These are source-contract and synthetic safety tests; the private original GeoJSON datasets are not bundled in CI. No new independent rail geometry or physical verification was acquired.
+
+## Private gap provenance CI verification (2026-11-22)
+- Candidate commit `ce029144d80696976b2065227b7aa85ed957405e` adds fail-closed provenance fields and three synthetic tests. These tests are part of the candidate-only `tests/p01-ecrl-gap-coverage-audit.test.cjs` suite.
+- GitHub Actions Run #72 (`44967401742`), job `source-contract` (`137039429454`) **SUCCESS**. Inspected logs: **31 tests PASS, 0 FAIL, 0 SKIPPED**; static artifact build PASS; no Node20 deprecation warning in inspected output. https://github.com/khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio/actions/runs/44967401742
+- Provenance completeness is only a metadata check. `redistributionApproved` is a caller-supplied assertion, not a legal license verification; independent physical control and geometry remain NOT VERIFIED. All candidate rows retain HOLD status and no automatic promotion.
