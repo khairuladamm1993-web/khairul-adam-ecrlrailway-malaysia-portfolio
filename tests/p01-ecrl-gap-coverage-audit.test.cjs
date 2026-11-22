@@ -66,3 +66,13 @@ test('source snapshot mismatch is explicit and remains HOLD',()=>{
  assert.equal(r.rows[0].source_snapshot_match,false);
  assert.equal(r.summary.promoted,0);
 });
+
+test('missing detailed revision is UNKNOWN, not a verified match or mismatch',()=>{
+ const c=candidate(1,2,{rechecked_way_version:7,source_snapshot:'a'});
+ const d=detailed([1,3]);d.properties.source_snapshot='a';
+ const r=audit(fc([c]),fc([d]));
+ assert.equal(r.rows[0].source_revision_comparable,false);
+ assert.equal(r.rows[0].source_revision_match,null);
+ assert.equal(r.rows[0].source_snapshot_match,true);
+ assert.equal(r.rows[0].decision,'HOLD_NOT_ACCEPTED');
+});
