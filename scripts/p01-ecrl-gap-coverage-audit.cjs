@@ -51,6 +51,7 @@ function audit(candidate, detailed) {
   for (const f of detailed.features) {
     const p = f.properties || {}, way = String(p.osm_way_id ?? '');
     if (!way) continue;
+    if (!/^[1-9]\d*$/.test(way)) throw Error('Invalid detailed OSM way ID');
     const nodes = p.source_node_ids;
     if (!Array.isArray(nodes) || nodes.length < 2 || nodes.some(id=>!/^[1-9]\d*$/.test(String(id)))) throw Error('Missing source_node_ids or invalid sequence for detailed way ' + way);
     if (!byWay.has(way)) byWay.set(way, []);
