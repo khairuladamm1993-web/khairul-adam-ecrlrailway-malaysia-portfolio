@@ -45,7 +45,7 @@ const loops=registry.loops.map(annotate);
   if(!map?.getLayer(NS+'-hit'))return;
   const allowed=(mode==='NORMAL'&&(category==='All'||category==='MRS10'||category==='Malaysia'||category==='ECRL'))||mode==='INFRASTRUCTURE_FOCUS';
   const kinds=allowed?Object.keys(flags).filter(k=>flags[k]):[];
-  for(const suffix of ['-hit','-ring','-inner','-signature-port-halo']){map.setLayoutProperty(NS+suffix,'visibility',kinds.length?'visible':'none');map.setFilter(NS+suffix,['in',['get','kind'],['literal',kinds]])}
+  for(const suffix of ['-hit','-ring','-inner','-signature-port-halo']){const visibleKinds=suffix==='-signature-port-halo'?kinds.filter(k=>k==='MARITIME'||k==='YARD'):kinds;map.setLayoutProperty(NS+suffix,'visibility',visibleKinds.length?'visible':'none');map.setFilter(NS+suffix,['in',['get','kind'],['literal',visibleKinds]])}
  }
  function install(map){
   // The host has passed its style gate; other GeoJSON sources may now be loading.
