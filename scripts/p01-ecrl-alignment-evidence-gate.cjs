@@ -27,6 +27,7 @@ function validateAlignment(featureCollection){
    errors.push('Feature '+index+': monotonic integer chainage metres required');continue;
   }
   if(coords.every((point,i)=>i===0||point[0]===coords[0][0]&&point[1]===coords[0][1]))errors.push('Feature '+index+': degenerate line');
+  if(coords.slice(1).some((point,i)=>point[0]===coords[i][0]&&point[1]===coords[i][1]))errors.push('Feature '+index+': repeated adjacent coordinate');
   const straightMetres=distanceMetres(coords[0],coords[coords.length-1]);
   if(straightMetres>(end-start)+Math.max(10,meta.accuracyMetres||0))errors.push('Feature '+index+': geographic endpoint separation exceeds chainage span');
   const lineMetres=coords.slice(1).reduce((sum,point,i)=>sum+distanceMetres(coords[i],point),0);
