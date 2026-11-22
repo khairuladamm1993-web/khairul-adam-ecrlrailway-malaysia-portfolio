@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const {audit, provenanceGate} = require('../scripts/p01-ecrl-gap-coverage-audit.cjs');
+const {audit, provenanceGate, buildEvidenceRequests} = require('../scripts/p01-ecrl-gap-coverage-audit.cjs');
 const fc = features => ({type:'FeatureCollection',features});
 const candidate = (a,b,flags={}) => ({type:'Feature',properties:{osm_way_id:7,original_adjacent_osm_nodes:[a,b],approved_alignment:false,do_not_use_for_train_movement:true,...flags}});
 const detailed = nodes => ({type:'Feature',properties:{osm_way_id:7,source_node_ids:nodes}});
@@ -94,4 +94,23 @@ test('graph connectivity never bridges separate OSM way IDs',()=>{
  const other={type:'Feature',properties:{osm_way_id:8,source_node_ids:[2,3]}};
  const r=audit(fc([candidate(1,4)]),fc([detailed([1,2]),other,detailed([3,4])]));
  assert.equal(r.rows[0].same_way_source_graph_connected,false);
+});
+
+test('evidence requests identify missing endpoint and retain HOLD',()=>{
+ const r=audit(fc([candidate(1,2)]),fc([detailed([1,3])]));
+ const req=buildEvidenceRequests(r);
+ assert.equal(req.length,1);
+ assert.deepEqual(req[0].missing_endpoint_node_ids,['2']);
+ assert.deepEqual(req[0].endpoint_node_ids,['1','2']);
+ assert.equal(req[0].decision,'HOLD_PENDING_NEW_SOURCE');
+ assert.equal(req[0].evidence_needed.length,4);
+});
+test('disconnected endpoint pairs request linework even if both endpoints exist',()=>{
+ const r=audit(fc([candidate(1,4)]),fc([detailed([1,2]),detailed([3,4])]));
+ const req=buildEvidenceRequests(r);
+ assert.deepEqual(req[0].missing_endpoint_node_ids,[]);
+ assert.equal(req[0].source_graph_connected,false);
+});
+test('evidence request generator rejects missing audit input',()=>{
+ assert.throws(()=>buildEvidenceRequests(null),/Audit rows required/);
 });
