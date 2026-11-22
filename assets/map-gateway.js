@@ -313,7 +313,10 @@
     else counts.pending++;
    }
    const target=host.querySelector('[data-map-confidence-summary]');
-   if(target)target.textContent='ECRL reference assets: '+records.length+' · Engineering/survey-classified points: '+counts.engineering+' · Field-validated references: '+counts.personal+' · Public references: '+counts.public+' · Pending: '+counts.pending+' · Continuous track alignment: NOT VERIFIED';
+   const memberRecords=A?.canReadMemberContent?records.filter(r=>r.overlay):[];
+   const chainageCount=memberRecords.filter(r=>Number.isFinite(I.parseChainage(r.overlay?.chainage))).length;
+   const chainageLabel=memberRecords.length?' · Chainage references: '+chainageCount+'/'+memberRecords.length+' (not rail geometry)':'';
+   if(target)target.textContent='ECRL reference assets: '+records.length+' · Engineering/survey-classified points: '+counts.engineering+' · Field-validated references: '+counts.personal+' · Public references: '+counts.public+' · Pending: '+counts.pending+chainageLabel+' · Continuous track alignment: NOT VERIFIED';
   }
   function renderResults(){
    const rows=visible();
