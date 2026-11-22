@@ -114,3 +114,18 @@ test('disconnected endpoint pairs request linework even if both endpoints exist'
 test('evidence request generator rejects missing audit input',()=>{
  assert.throws(()=>buildEvidenceRequests(null),/Audit rows required/);
 });
+
+test('construction railway tag is evidence context, never operational approval',()=>{
+ const c=candidate(1,2,{raw_osm_tags:{railway:'construction',construction:'rail',tunnel:'yes'}});
+ const r=audit(fc([c]),fc([detailed([1,2])]));
+ assert.equal(r.rows[0].source_railway_tag,'construction');
+ assert.equal(r.rows[0].source_tunnel_tag,'yes');
+ assert.equal(r.rows[0].operational_evidence_status,'NOT_VERIFIED_FROM_OSM_TAGS');
+ assert.equal(buildEvidenceRequests(r)[0].operational_evidence_status,'NOT_VERIFIED_FROM_OSM_TAGS');
+ assert.equal(r.summary.promoted,0);
+});
+test('missing OSM tags cannot imply an operational railway',()=>{
+ const r=audit(fc([candidate(1,2)]),fc([detailed([1,2])]));
+ assert.equal(r.rows[0].source_railway_tag,null);
+ assert.equal(r.rows[0].operational_evidence_status,'NOT_VERIFIED_FROM_OSM_TAGS');
+});
