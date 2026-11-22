@@ -27,7 +27,9 @@
   'client-error':'The authentication client could not complete the request.',
   'email-proof-rejected':'Kod atau pautan tidak sah, sudah digunakan atau tamat tempoh. Gunakan e-mel terbaru.',
   'email-mismatch':'E-mel pengesahan tidak sepadan dengan akaun yang dimasukkan. Akses ditolak.',
-  'invalid-email-proof':'Masukkan kod enam digit atau pautan asal daripada e-mel Supabase MR-S10.',
+  'invalid-email-proof':window.Railway?.language==='en'
+   ?'Enter the 6–10 digit code or original verification link from your latest MR-S10 sign-in email.'
+   :'Masukkan kod 6–10 digit atau pautan pengesahan asal daripada e-mel log masuk MR-S10 yang terbaru.',
   'callback-origin-mismatch':'Open the canonical Preview login. This origin is not configured for email callbacks.',
   'storage-unavailable':'Safari storage is unavailable. Sign-in cannot safely retain its PKCE verifier.',
   'auth-network-error':'Authentication backend could not be reached. Check the connection and try again.'
@@ -221,7 +223,7 @@
  }
  function emailProof(value){
   const raw=String(value||'').trim();
-  if(/^\d{6}$/.test(raw))return {token:raw};
+  if(/^[0-9]{6,10}$/.test(raw))return {token:raw};
   try{
    const u=new URL(raw);
    if(u.origin!==PROJECT_URL||u.pathname!=='/auth/v1/verify'||u.username||u.password)throw Error();

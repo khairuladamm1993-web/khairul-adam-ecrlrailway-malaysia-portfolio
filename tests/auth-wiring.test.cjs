@@ -509,3 +509,57 @@ test('original Supabase email link is verified as an email token hash without a 
  assert.equal(A.level,'member');assert.equal(client.calls.find(x=>x[0]==='verifyOtp')[1].type,'email');
  assert.equal(client.calls.filter(x=>x[0]==='exchangeCodeForSession').length,0);
 });
+
+test('synthetic 6–10 digit codes are passed intact to Supabase and role checks still govern login',async()=>{
+ for(const length of [6,7,8,9,10]){
+  const role=length===8?'admin':'member';
+  const {A,client}=await load({session:null,role});
+  const code='0'+'7'.repeat(length-1);
+  await A.verifyEmailProof(' Member@Example.com ',' '+code+' ');
+  const payload=client.calls.find(c=>c[0]==='verifyOtp')[1];
+  assert.equal(payload.token,code);
+  assert.equal(payload.email,'member@example.com');
+  assert.equal(payload.type,'email');
+  assert.equal(A.level,role);
+  assert.equal(A.canAdmin,role==='admin');
+  await A.logout();
+  assert.equal(A.level,'public');
+  assert.equal(A.canReadMemberContent,false);
+  await assert.rejects(()=>A.fetchMemberBundle());
+ }
+});
+
+test('malformed proof is rejected before any request to Supabase',async()=>{
+ const {A,client}=await load({session:null});
+ for(const code of ['','1'.repeat(5),'1'.repeat(11),'12 345678','1234x678','１２３４５６７８']){
+  await assert.rejects(()=>A.verifyEmailProof('member@example.com',code),/6–10/);
+  assert.equal(A.level,'public');
+ }
+ assert.equal(client.calls.filter(c=>c[0]==='verifyOtp').length,0);
+});
+
+test('Supabase rejection of an eight-digit fixture leaves access Public',async()=>{
+ const {A,client}=await load({session:null,role:'admin'});
+ let calls=0;
+ client.auth.verifyOtp=async()=>{calls++;return {data:{session:null},error:{code:'otp_expired'}};};
+ await assert.rejects(()=>A.verifyEmailProof('member@example.com','0'+'7'.repeat(7)));
+ assert.equal(calls,1);
+ assert.equal(A.status,'email-proof-rejected');
+ assert.equal(A.level,'public');
+ assert.equal(A.canAdmin,false);
+ assert(!client.calls.some(c=>c[0]==='rpc'&&c[1]==='account_role'));
+});
+
+test('Gateway shows code and link instructions in English and Bahasa Melayu',async()=>{
+ const {w}=await gateway({session:null});
+ try{
+  w.document.querySelector('[data-member]').click();
+  w.document.querySelector('[data-auth-proof]').click();
+  const proof=()=>w.document.querySelector('.email-recovery-r25');
+  assert.match(proof().textContent,/full 6–10 digit code.*original link/);
+  assert.equal(proof().querySelector('[name=email_proof]').autocomplete,'one-time-code');
+  w.Railway.language='ms';
+  w.document.querySelector('[data-auth-lang=ms]').click();
+  assert.match(proof().textContent,/kod penuh 6–10 digit.*pautan asal/);
+ }finally{w.close();}
+});
