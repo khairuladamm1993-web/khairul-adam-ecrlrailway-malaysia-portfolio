@@ -1,0 +1,2 @@
+const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');const js=fs.readFileSync(path.join(__dirname,'../assets/map-gateway.js'),'utf8');
+test('Semak Semula refetches authenticated data and redraws ECRL markers',()=>{assert.match(js,/data-map-refresh/);assert.match(js,/A\.fetchMemberBundle\(\)/);assert.match(js,/renderDetail\(state\.selected\);renderResults\(\);fitCorridor\(\)/);assert.match(js,/REFRESH FAILED · RETRY/);assert.match(js,/refreshBtn\.disabled=false/);});
