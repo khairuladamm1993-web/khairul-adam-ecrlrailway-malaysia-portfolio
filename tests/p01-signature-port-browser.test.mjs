@@ -42,8 +42,27 @@ for(const [engine,launcher] of [['chromium',chromium],['webkit',webkit]]){
    assert.equal(result.count,2,JSON.stringify(result));
    assert.equal(result.provenance,true,JSON.stringify(result));
    assert.equal(result.legend,true,JSON.stringify(result));
+   const portPopupChecks=[];
+   for(const [id,label] of [
+     ['mrs10-port-klang-northport','Northport'],
+     ['mrs10-port-klang-westports','Westports']
+   ]){
+     assert.equal(await page.evaluate(id=>window.MRS10V8Diagnostics.focusPortReference(id),id),true);
+     await page.waitForFunction(()=>window.MRS10V8Diagnostics.snapshot().styleLoaded===true);
+     const canvas=page.locator('#map canvas').first();
+     const bounds=await canvas.boundingBox();
+     assert(bounds&&bounds.width>0&&bounds.height>0,'Map canvas must be visible for port click');
+     await canvas.click({position:{x:bounds.width/2,y:bounds.height/2},force:true});
+     const popup=page.locator('.maplibregl-popup').filter({hasText:label});
+     await popup.waitFor({state:'visible',timeout:15000});
+     const copy=await popup.innerText();
+     assert.match(copy,/Bukan titik hujung rel atau sambungan ECRL yang disahkan/i);
+     await page.screenshot({path:`artifacts/p01-signature-port/${engine}-${viewport.name}-${id}.png`});
+     portPopupChecks.push({id,status:'PASS',disclaimer:true});
+     await popup.locator('.maplibregl-popup-close-button').click();
+   }
    assert.deepEqual(errors,[]);
-   report.push({engine,viewport:viewport.name,status:'PASS',result:final});
+   report.push({engine,viewport:viewport.name,status:'PASS',result:final,portPopupChecks});
   }catch(e){report.push({engine,viewport:viewport.name,status:'FAIL',error:String(e),pageErrors:errors,networkFailures:networkFailures.slice(0,12),consoleErrors:consoleErrors.slice(0,12)});
    await page.screenshot({path:`artifacts/p01-signature-port/${engine}-${viewport.name}-fail.png`}).catch(()=>{});}
   await page.close();
