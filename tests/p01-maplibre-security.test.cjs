@@ -23,6 +23,7 @@ test('P01 map entry points load the pinned patched ESM and matching CSS',()=>{
  assert.ok(lab.includes(`href="${root}maplibre-gl.css" integrity="${cssIntegrity}" crossorigin="anonymous"`));
  assert.ok(lab.includes('type="module" src="./assets/unified-ecrl/route-lab-ui.js"'));
  assert.ok(read('assets/unified-ecrl/route-lab-ui.js').includes("import maplibregl from '../p01-maplibre.js'"));
+ assert.doesNotMatch(read('assets/unified-ecrl/route-lab-ui.js'),/root\.maplibregl/);
  assert.doesNotMatch(lab,/maplibre-gl@5\.|maplibre-gl\.js/);
 });
 
