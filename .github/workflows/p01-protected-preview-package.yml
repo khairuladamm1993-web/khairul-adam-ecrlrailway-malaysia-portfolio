@@ -1,7 +1,7 @@
 name: P01 Protected Preview Package
 on:
   push:
-    branches: [candidate/p01-preview-blocker-resolution-v1-20261123]
+    branches: [candidate/p01-preview-blocker-resolution-v1-20261123, candidate/p01-visual-refinement-mrnext-20261124]
 permissions:
   contents: read
 jobs:

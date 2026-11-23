@@ -19,7 +19,7 @@ const jump=ProbeMap.prototype.jumpTo;
 ProbeMap.prototype.jumpTo=function(...args){window.ecrlTestMap=this;return jump.apply(this,args)};
 `;
 const rows=[];
-const profiles=[['desktop',1200,900],['ipad',810,1080],['iphone',390,844]];
+const profiles=[['desktop',1200,900],['ipad',810,1080],['iphone',390,844],['iphone-landscape',844,390]];
 const arcgis=/^https:\/\/[^/]*arcgis\.com\//;
 const emptyGis=r=>r.fulfill({json:{features:[]},headers:{'access-control-allow-origin':'*'}});
 
@@ -71,11 +71,14 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
     assert.equal((await page.goto(base+'/unified-map-v8.html')).status(),200);
     assert.equal(await page.evaluate(()=>window.ecrlTestVersion),'6.13.0');
     assert.equal(await page.evaluate(()=>window.MRS10RailwayDataContractV1.VERSION),1);
+    assert.equal(await page.locator('.mrs10-product-badge').innerText(),'MR-S10 · Railway Intelligence');
     await page.waitForFunction(()=>{const d=window.MRS10V8Diagnostics?.snapshot();return d?.stage==='DONE'&&d.styleLoaded&&d.webglReady&&d.ecrl?.layersPresent},null,{timeout:45000});
     await page.locator('#filters').getByRole('button',{name:'ECRL',exact:true}).click();
     await page.locator('#map-fullscreen').click();
     const panel=page.locator('#ecrl-schematic');
     assert.equal(await panel.locator('[data-schematic-asset]').count(),25);
+    assert.deepEqual(await page.evaluate(()=>window.ecrlTestMap.getLayoutProperty('mrs10-v8-ecrl-infra-station-marker','icon-size')),
+     ['step',['zoom'],0.62,8,0.82,12,1]);
     for(const [tier,zoom,pl,depot,spur] of [['far',7,0,0,0],['mid',9,7,0,0],['near',12,7,2,7]]){
      await page.evaluate(z=>window.ecrlTestMap.jumpTo({center:[103,3.8],zoom:z}),zoom);
      await page.waitForFunction(k=>document.querySelector('#ecrl-schematic').dataset.detail===k,tier);
@@ -108,11 +111,32 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
     const {point,size}=await hit.jsonValue();
     assert.equal(size,34);
     await canvas.click({position:point});
-    await page.locator('.maplibregl-popup').getByText('STN12 · Kota SAS',{exact:true}).waitFor();
+    const popup=page.locator('.p01-map-popup');
+    await popup.getByText('STN12 · Kota SAS',{exact:true}).waitFor();
+    const measure=()=>page.evaluate(()=>{
+     const bounds=s=>document.querySelector(s).getBoundingClientRect();
+     const p=bounds('.p01-map-popup'),c=bounds('.maplibregl-popup-close-button');
+     const overlaps=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
+     const controls=['#map-fullscreen','#my-location','.maplibregl-ctrl-top-right'];
+     return {inside:p.top>=0&&p.left>=0&&p.bottom<=innerHeight+1&&p.right<=innerWidth+1,
+      obstruction:controls.some(s=>overlaps(p,bounds(s))),
+      closeVisible:c.top>=p.top&&c.bottom<=p.bottom&&c.width>=44&&c.height>=44};
+    });
+    assert.deepEqual(await measure(),{inside:true,obstruction:false,closeVisible:true});
+    await popup.locator('.ecrl-engineering > summary').click();
+    assert.equal(await popup.locator('.ecrl-engineering').evaluate(e=>e.open),true);
+    assert.ok(await popup.locator('.maplibregl-popup-content').evaluate(e=>{
+     e.scrollTop=e.scrollHeight;
+     return e.scrollTop>0;
+    }));
+    assert.deepEqual(await measure(),{inside:true,obstruction:false,closeVisible:true});
+    await page.screenshot({path:`${out}/${engine}-${device}-popup.png`});
+    await popup.locator('.maplibregl-popup-close-button').click();
+    await popup.waitFor({state:'detached'});
     assert.equal(await page.evaluate(()=>window.MRS10V8Diagnostics.snapshot().ecrl.physicalSegments),0);
     assert.deepEqual(errors,[]);
     assert.deepEqual(localFailures,[]);
-    rows.push({engine,device,status:'PASS',maplibre:'6.13.0',publicV7:true,tiers:[[16,0,0,0],[16,7,0,0],[16,7,2,7]],stationPopup:true,plNoPoint:true});
+    rows.push({engine,device,status:'PASS',maplibre:'6.13.0',publicV7:true,tiers:[[16,0,0,0],[16,7,0,0],[16,7,2,7]],stationPopup:true,popupScroll:true,controlsClear:true,plNoPoint:true});
    }catch(e){rows.push({engine,device,status:'FAIL',error:String(e.stack||e)});await page.screenshot({path:`${out}/${engine}-${device}-fail.png`}).catch(()=>{})}
    finally{await fs.writeFile(out+'/visual-qa.json',JSON.stringify(rows,null,2));console.log(JSON.stringify(rows.at(-1)));await page.close()}
   }

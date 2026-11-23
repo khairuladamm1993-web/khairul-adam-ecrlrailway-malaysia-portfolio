@@ -96,7 +96,13 @@ function mountPopup(host,position){
   // MapLibre removes the popup, reopening an underlying station/track focus.
   // Keep button handlers working while isolating popup interactions from map taps.
   popupNode.addEventListener('click',event=>event.stopPropagation());
-  if(host.classList?.contains('ecrl-intelligence'))popupNode.classList.add('ecrl-popup');popupNode.querySelector('.maplibregl-popup-close-button')?.focus({preventScroll:true});
+  popupNode.classList.add('p01-map-popup');
+  if(host.classList?.contains('ecrl-intelligence'))popupNode.classList.add('ecrl-popup');
+  const close=popupNode.querySelector('.maplibregl-popup-close-button');
+  if(close){
+   popupNode.querySelector('.maplibregl-popup-content').prepend(close);
+   close.focus({preventScroll:true});
+  }
 }
 function appendFocusLineup(host,routeIds){
  for(const id of routeIds){const r=state.manifest.find(r=>r.id===id);if(!r)continue;

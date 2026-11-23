@@ -92,7 +92,7 @@ const loops=registry.loops.map(annotate);
   if(!map.getLayer(NS+'-station-marker')){
    trainImage(map,NS+'-train');
    map.addLayer({id:NS+'-station-marker',type:'symbol',source:NS,filter:codedStation,layout:{
-    'icon-image':NS+'-train','icon-size':1,'icon-padding':2
+    'icon-image':NS+'-train','icon-size':['step',['zoom'],0.62,8,0.82,12,1],'icon-padding':['step',['zoom'],4,12,2]
    }});
   }
   if(!map.getLayer(NS+'-station-label')){
@@ -100,8 +100,8 @@ const loops=registry.loops.map(annotate);
     labelImage(map,NS+'-code-'+station.stationCode,station.stationCode);
     labelImage(map,NS+'-name-'+station.stationCode,station.stationCode+' · '+station.officialName);
    }
-   map.addLayer({id:NS+'-station-label',type:'symbol',source:NS,filter:codedStation,minzoom:8,layout:{
-    'icon-image':['step',['zoom'],['concat',NS+'-code-',['get','stationCode']],DETAIL_ZOOM.DEPOT,['concat',NS+'-name-',['get','stationCode']]],
+   map.addLayer({id:NS+'-station-label',type:'symbol',source:NS,filter:codedStation,minzoom:9,layout:{
+    'icon-image':['step',['zoom'],['concat',NS+'-code-',['get','stationCode']],14,['concat',NS+'-name-',['get','stationCode']]],
     'icon-anchor':'bottom','icon-offset':[0,-19],'icon-padding':2
    }},NS+'-station-marker');
   }

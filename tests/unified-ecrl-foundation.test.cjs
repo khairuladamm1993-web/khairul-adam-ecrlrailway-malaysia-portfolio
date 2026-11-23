@@ -15,7 +15,8 @@ test('overlay installs after host style gate even while other GeoJSON sources lo
  adapter.install(map);
  assert.equal(layers.size,5);assert.equal(sources.size,1);
  const marker=ecrlDesign.NS+'-station-marker',label=ecrlDesign.NS+'-station-label';
- assert.equal(layers.get(marker).layout['icon-size'],1);
+ assert.deepEqual(layers.get(marker).layout['icon-size'],['step',['zoom'],0.62,8,0.82,12,1]);
+ assert.equal(layers.get(label).minzoom,9);
  assert.notEqual(layers.get(marker).layout['icon-allow-overlap'],true);
  assert.equal(before.get(label),marker);
 });
