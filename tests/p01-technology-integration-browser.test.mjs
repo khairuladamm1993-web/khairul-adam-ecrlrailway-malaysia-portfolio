@@ -1,12 +1,12 @@
 import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
-import path from 'node:path';
 const require=createRequire(import.meta.url);
 const {chromium,webkit}=require('playwright');
 const base=process.env.P01_QA_ORIGIN||'http://127.0.0.1:8765';
 const out=process.env.P01_QA_OUTPUT||'artifacts/p01-technology-integration';
-const vendor=process.env.P01_MAPLIBRE_DIST||path.dirname(require.resolve('maplibre-gl'));
+const vendor=process.env.P01_MAPLIBRE_DIST;
+assert.ok(vendor,'P01_MAPLIBRE_DIST must point to the pinned MapLibre browser assets');
 await fs.mkdir(out,{recursive:true});
 const sdk=await fs.readFile(vendor+'/maplibre-gl.js','utf8');
 // Capture the app's MapLibre instance in the test harness to set repeatable camera zooms.

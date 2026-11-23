@@ -20,7 +20,7 @@ permissions:
   contents: read
 jobs:
   source-contract:
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.ref_name == 'candidate/p01-technology-integration-v1-20261123' && 'ubuntu-24.04' || 'ubuntu-latest' }}
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v5
@@ -69,8 +69,15 @@ jobs:
       - name: Install P01 visual QA dependencies
         if: github.event_name == 'push' && github.ref_name == 'candidate/p01-technology-integration-v1-20261123'
         run: |
-          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1 maplibre-gl@5.12.0
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
           npx --no-install playwright install --with-deps chromium webkit
+          vendor="$RUNNER_TEMP/p01-maplibre"
+          mkdir -p "$vendor"
+          curl --fail --silent --show-error --location --retry 3 https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js --output "$vendor/maplibre-gl.js"
+          curl --fail --silent --show-error --location --retry 3 https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.css --output "$vendor/maplibre-gl.css"
+          echo "06b392de571c99e242581b0f3f23893e6e95efd3656974d6edfd8f8599ddf362  $vendor/maplibre-gl.js" | sha256sum --check
+          echo "1dae8925ee5906e442f0fd7028dded2884381b9acd7a780e5270025e09fc7c5e  $vendor/maplibre-gl.css" | sha256sum --check
+          echo "P01_MAPLIBRE_DIST=$vendor" >> "$GITHUB_ENV"
       - name: P01 integrated visual QA
         if: github.event_name == 'push' && github.ref_name == 'candidate/p01-technology-integration-v1-20261123'
         run: |
