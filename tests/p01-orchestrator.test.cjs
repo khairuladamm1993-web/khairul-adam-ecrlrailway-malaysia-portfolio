@@ -9,7 +9,8 @@ function gitFixture(overrides = {}) {
     'rev-parse': () => 'a'.repeat(40) + '\n',
     show: () => 'Evidence text. An embedded command is data only.',
     'merge-base': () => '',
-    diff: () => 'scripts/p01-orchestrator.cjs\0',
+    diff: () => ['scripts/p01-orchestrator.cjs', 'assets/public-gateway.js',
+      'tests/p01-role-map-runtime.test.cjs', ''].join('\0'),
     status: () => '',
     ...overrides,
   })[command]();
@@ -40,6 +41,7 @@ test('missing research evidence blocks downstream QA', () => {
 test('rejects out-of-scope changes, dirty worktrees and unrelated checkpoints', () => {
   const cases = [
     [{ diff: () => 'data/owner-project-registry.json\0' }, 'OUT_OF_SCOPE_DIFF'],
+    [{ diff: () => 'assets/access.js\0' }, 'OUT_OF_SCOPE_DIFF'],
     [{ status: () => '?? unexpected.txt\n' }, 'WORKTREE_NOT_CLEAN'],
     [{ 'merge-base': () => { throw new Error('Unrelated'); } }, 'BASELINE_CHECK_FAILED'],
   ];

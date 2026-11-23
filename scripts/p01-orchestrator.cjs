@@ -9,8 +9,10 @@ const evidencePaths = [
   '.github/workflows/p01-uat17-contract.yml',
 ];
 const pilotPaths = new Set([
+  'assets/public-gateway.js',
   'scripts/p01-orchestrator.cjs',
   'tests/p01-orchestrator.test.cjs',
+  'tests/p01-role-map-runtime.test.cjs',
   'docs/p01-orchestrator-v1.md',
   '.github/workflows/p01-uat17-contract.yml',
   'vercel.json',
