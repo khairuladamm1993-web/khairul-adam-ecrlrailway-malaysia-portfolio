@@ -116,6 +116,7 @@ jobs:
       - name: P01 integrated visual QA
         run: |
           if [ "$GITHUB_REF_NAME" = 'candidate/p01-visual-refinement-mrnext-20261124' ]; then
+            git config --global --add safe.directory "$GITHUB_WORKSPACE"
             P01_EXPECTED_SHA="$GITHUB_SHA" node scripts/build-p01-protected-preview.cjs "$RUNNER_TEMP/p01-visual-package"
             static="$RUNNER_TEMP/p01-visual-package/.vercel/output/static"
           else
