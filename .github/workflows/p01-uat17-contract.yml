@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - candidate/p01-uat17-maintenance-preview-20261122
+      - candidate/p01-orchestrator-v1-20261123
   pull_request:
     paths:
       - 'assets/map-gateway.js'
@@ -20,6 +21,8 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: ${{ github.ref_name == 'candidate/p01-orchestrator-v1-20261123' && '0' || '1' }}
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
@@ -32,6 +35,11 @@ jobs:
           node --check scripts/p01-ecrl-gap-coverage-audit.cjs
       - name: P01 UAT17 focused regression tests
         run: node --test tests/p01-ecrl-gap-coverage-audit.test.cjs tests/p01-ecrl-alignment-evidence-gate.test.cjs tests/p01-uat17-ecrl-inventory.test.cjs tests/p01-uat17-map-fullscreen.test.cjs tests/p01-member-public-map-contract.test.cjs tests/p01-role-map-integration.test.cjs tests/p01-role-map-runtime.test.cjs tests/p01-uat17-refresh.test.cjs tests/p01-uat17-maintenance-source.test.cjs tests/p01-maintenance-server-contract.test.cjs
+      - name: Verify and run the P01 orchestrator pilot
+        if: github.event_name == 'push' && github.ref_name == 'candidate/p01-orchestrator-v1-20261123'
+        run: |
+          node --test tests/p01-orchestrator.test.cjs
+          node scripts/p01-orchestrator.cjs
       - name: Safe static artifact build
         run: python3 scripts/build-production.py dist-production
 
