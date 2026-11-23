@@ -44,3 +44,10 @@ test('Authenticated first render shows V8 without a public intermediate frame',(
  assert.match(html,/src="unified-map-v8\.html"/);
  assert.doesNotMatch(html,/src="unified-map-v7\.html"/);
 });
+
+test('Lazy legacy map mount refuses stale member sessions and detached hosts',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../assets/public-gateway.js'),'utf8');
+ assert.match(source,/if\(!window\.RailwayAccess\?\.canReadMemberContent\)return Promise\.resolve\(\)/);
+ assert.match(source,/if\(!window\.RailwayAccess\?\.canReadMemberContent\|\|!host\|\|host\.hidden\)return/);
+ assert.match(source,/return m\.mount\(host\)/);
+});
