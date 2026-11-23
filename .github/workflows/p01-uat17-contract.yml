@@ -76,13 +76,30 @@ jobs:
           printf '%s\n' '{"name":"p01-maplibre-audit","version":"1.0.0","private":true,"dependencies":{"maplibre-gl":"6.13.0"}}' > "$audit/package.json"
           npm --prefix "$audit" install --package-lock-only --ignore-scripts --no-audit
           npm --prefix "$audit" audit --audit-level=moderate
+
+  browser-qa:
+    if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || github.ref_name == 'candidate/p01-maplibre-security-v1-20261123')
+    needs: source-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble@sha256:f1e7e01021efd65dd1a2c56064be399f3e4de00fd021ac561325f2bfbb2b837a
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Install P01 visual QA dependencies
-        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || github.ref_name == 'candidate/p01-maplibre-security-v1-20261123')
-        run: |
-          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
-          npx --no-install playwright install --with-deps chromium webkit
+        run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
       - name: Verify P01 MapLibre browser assets
-        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || github.ref_name == 'candidate/p01-maplibre-security-v1-20261123')
         run: |
           vendor="$RUNNER_TEMP/p01-maplibre"
           checksums="$GITHUB_WORKSPACE/tests/fixtures/p01-maplibre-6.13.0.sha256"
@@ -96,14 +113,14 @@ jobs:
           (cd "$vendor" && sha256sum --check "$checksums")
           echo "P01_MAPLIBRE_DIST=$vendor" >> "$GITHUB_ENV"
       - name: P01 integrated visual QA
-        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || github.ref_name == 'candidate/p01-maplibre-security-v1-20261123')
         run: |
+          node scripts/build-p01-map-candidate.cjs dist-p01-map-candidate
           python3 -m http.server 8765 --bind 127.0.0.1 --directory dist-p01-map-candidate > "$RUNNER_TEMP/p01-visual-http.log" 2>&1 &
           trap 'kill "$!" 2>/dev/null || true' EXIT
           curl --fail --silent --retry 4 --retry-connrefused --output /dev/null http://127.0.0.1:8765/unified-map-v8.html
           node tests/p01-technology-integration-browser.test.mjs
       - name: Archive visual QA evidence
-        if: always() && github.event_name == 'push' && (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || github.ref_name == 'candidate/p01-maplibre-security-v1-20261123')
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: p01-technology-integration-visual-qa
