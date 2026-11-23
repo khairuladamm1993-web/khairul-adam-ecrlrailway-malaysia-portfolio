@@ -2,7 +2,8 @@
   "git": {"deploymentEnabled": {
     "candidate/p01-orchestrator-v1-20261123": false,
     "candidate/p01-auth-client-readiness-20261123": false,
-    "candidate/p01-ecrl-unified-design-v1-20261123": false
+    "candidate/p01-ecrl-unified-design-v1-20261123": false,
+    "candidate/p01-technology-integration-v1-20261123": false
   }},
   "headers": [
     {"source":"/gateway.html","headers":[{"key":"Cache-Control","value":"private, no-store, max-age=0"},{"key":"Referrer-Policy","value":"no-referrer"}]},

@@ -12,8 +12,7 @@ const SCHEMATIC_COPY={
  zh:['ECRL 示意图','参考顺序 · 非实体线路','参考站序','终点位置尚未核实'],
  th:['แผนผัง ECRL','ลำดับอ้างอิง · ไม่ใช่แนวรางจริง','ลำดับอ้างอิง','ยังไม่ยืนยันตำแหน่งปลายทาง']
 };
-function create(adapter,{getLocale,getCategory,getZoom,onSelect,onFlags}){
- const master=root.MRS10ECRLMasterIntelligence?.create(adapter);
+function create(adapter,{master=root.MRS10ECRLMasterIntelligence?.create(adapter),dataContract,getLocale,getCategory,getZoom,onSelect,onFlags}){
  const $=id=>document.getElementById(id);
  const el=(tag,value,cls)=>{const n=document.createElement(tag);if(value!=null)n.textContent=String(value);if(cls)n.className=cls;return n};
  const t=k=>adapter.t(getLocale(),k), ui=k=>(COPY[getLocale()]||COPY.en)[k]||COPY.en[k]||k;
@@ -28,31 +27,27 @@ function create(adapter,{getLocale,getCategory,getZoom,onSelect,onFlags}){
  function field(host,label,value){const row=el('p',null,'ecrl-fact');row.append(el('span',label),el('b',value));host.append(row)}
  function referenceLabel(ref){return ref?.kind==='HISTORICAL'?ui('historic'):ref?.kind==='MARITIME'?ui('maritime'):ref?.kind==='YARD'?ui('yardAccuracy'):ref?ui('location'):ui('noPoint')}
  function syncSchematic(){
-  const panel=$('ecrl-schematic');if(!panel)return;
+  const panel=$('ecrl-schematic');if(!panel||!dataContract)return;
   panel.dataset.detail=root.MRS10UnifiedECRL.detailLevel(getZoom());
   panel.hidden=!['ECRL','Malaysia','All','MRS10'].includes(getCategory())||!Object.values(adapter.flags).some(Boolean);
  }
  function renderSchematic(){
-  const panel=$('ecrl-schematic');if(!panel)return;
+  const panel=$('ecrl-schematic');if(!panel||!dataContract)return;
   syncSchematic();
   const [title,warning,lineupLabel,unknown]=SCHEMATIC_COPY[getLocale()]||SCHEMATIC_COPY.en;
   panel.querySelector('summary').textContent=title;
   const body=panel.querySelector('div'),list=el('ol',null,'ecrl-schematic-lineup');
   list.setAttribute('aria-label',lineupLabel);list.tabIndex=0;
-  function addAsset(asset,kind,label){
-   const row=el('li',null,'ecrl-schematic-'+kind);
+  for(const asset of dataContract.records){
+   const row=el('li',null,'ecrl-schematic-'+asset.type.toLowerCase());
    const button=el('button',null,'ecrl-schematic-asset');
    const icon=el('span',null,'ecrl-design-icon');
    icon.setAttribute('aria-hidden','true');
    button.type='button';button.dataset.schematicAsset=asset.assetId;
+   const label=asset.code?asset.code+' · '+asset.name:asset.name+' · '+ui('pending');
    button.append(icon,el('span',label));button.onclick=()=>{panel.open=false;onSelect(asset.assetId)};
    row.append(button);list.append(row);
   }
-  for(const entry of adapter.chainage.records){
-   const asset=adapter.get(entry.assetId);
-   addAsset(asset,asset.plCode?'pl':'stn',entry.code+' · '+(asset.officialName||asset.historicalName));
-  }
-  for(const asset of adapter.assets.filter(a=>a.assetType==='DEPOT'))addAsset(asset,'depot',asset.officialName+' · '+ui('pending'));
   const spurs=el('ul',null,'ecrl-schematic-spurs');
   for(const spur of adapter.alignmentEvidence.spurs){
    const row=el('li',null,'ecrl-schematic-spur');

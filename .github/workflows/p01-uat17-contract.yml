@@ -6,6 +6,7 @@ on:
       - candidate/p01-orchestrator-v1-20261123
       - candidate/p01-auth-client-readiness-20261123
       - candidate/p01-ecrl-unified-design-v1-20261123
+      - candidate/p01-technology-integration-v1-20261123
   pull_request:
     paths:
       - 'assets/map-gateway.js'
@@ -38,7 +39,7 @@ jobs:
       - name: P01 UAT17 focused regression tests
         run: node --test tests/p01-ecrl-gap-coverage-audit.test.cjs tests/p01-ecrl-alignment-evidence-gate.test.cjs tests/p01-uat17-ecrl-inventory.test.cjs tests/p01-uat17-map-fullscreen.test.cjs tests/p01-member-public-map-contract.test.cjs tests/p01-role-map-integration.test.cjs tests/p01-role-map-runtime.test.cjs tests/p01-uat17-refresh.test.cjs tests/p01-uat17-maintenance-source.test.cjs tests/p01-maintenance-server-contract.test.cjs
       - name: P01 authentication client regression tests
-        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-auth-client-readiness-20261123' || github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123')
+        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-auth-client-readiness-20261123' || github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123' || github.ref_name == 'candidate/p01-technology-integration-v1-20261123')
         run: |
           node -e 'require("node:assert/strict").equal(require("./vercel.json").git.deploymentEnabled[process.env.GITHUB_REF_NAME], false)'
           npm ci
@@ -46,12 +47,15 @@ jobs:
           node --check assets/member-gateway.js
           node --test tests/auth-wiring.test.cjs
       - name: P01 ECRL design and preservation tests
-        if: github.event_name == 'push' && github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123'
+        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123' || github.ref_name == 'candidate/p01-technology-integration-v1-20261123')
         run: |
           node --check assets/unified-ecrl/adapter.js
           node --check assets/unified-ecrl/integration-ui.js
           node --check assets/unified-v8-map.js
           node --test tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-alignment-r2.test.cjs tests/unified-ecrl-consumer-popup.test.cjs tests/unified-ecrl-chainage.test.cjs tests/unified-v8-regression.test.cjs tests/unified-v81-focus.test.cjs
+      - name: P01 Railway Data Contract V1
+        if: github.event_name == 'push' && github.ref_name == 'candidate/p01-technology-integration-v1-20261123'
+        run: node --test tests/p01-ecrl-data-contract.test.cjs
       - name: Verify and run the P01 orchestrator pilot
         if: github.event_name == 'push' && github.ref_name == 'candidate/p01-orchestrator-v1-20261123'
         run: |
@@ -62,3 +66,22 @@ jobs:
 
       - name: Build isolated P01 Public and Member map candidate artifact
         run: node scripts/build-p01-map-candidate.cjs dist-p01-map-candidate
+      - name: Install P01 visual QA dependencies
+        if: github.event_name == 'push' && github.ref_name == 'candidate/p01-technology-integration-v1-20261123'
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1 maplibre-gl@5.12.0
+          npx --no-install playwright install --with-deps chromium webkit
+      - name: P01 integrated visual QA
+        if: github.event_name == 'push' && github.ref_name == 'candidate/p01-technology-integration-v1-20261123'
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory dist-p01-map-candidate > "$RUNNER_TEMP/p01-visual-http.log" 2>&1 &
+          trap 'kill "$!" 2>/dev/null || true' EXIT
+          curl --fail --silent --retry 4 --retry-connrefused --output /dev/null http://127.0.0.1:8765/unified-map-v8.html
+          node tests/p01-technology-integration-browser.test.mjs
+      - name: Archive visual QA evidence
+        if: always() && github.event_name == 'push' && github.ref_name == 'candidate/p01-technology-integration-v1-20261123'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p01-technology-integration-visual-qa
+          path: artifacts/p01-technology-integration/
+          retention-days: 14
