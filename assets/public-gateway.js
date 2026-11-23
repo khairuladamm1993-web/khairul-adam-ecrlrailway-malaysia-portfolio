@@ -64,14 +64,22 @@
    void mountMap();
   },{once:true});
  };
- const mountMap=()=>ensureMap().then(m=>m.mount(document.querySelector('#railway-map-mount'))).catch(error=>{
+ const mountMap=()=>{
+  // The member session may end while lazy scripts are loading. Never mount a stale reference.
+  if(!window.RailwayAccess?.canReadMemberContent)return Promise.resolve();
+  return ensureMap().then(m=>{
+   const host=document.querySelector('#railway-map-mount');
+   if(!window.RailwayAccess?.canReadMemberContent||!host||host.hidden)return;
+   return m.mount(host);
+  }).catch(error=>{
   const host=document.querySelector('#railway-map-mount');if(!host)return;
   host.innerHTML='<article class="learning-card" role="alert"><h2>Peta belum tersedia</h2><p>Komponen peta gagal dimuatkan. Sila cuba semula.</p><button type="button" class="secondary" data-map-retry>CUBA SEMULA</button><details><summary>Butiran teknikal</summary><p>'+R.escape(error.message||error)+'</p></details></article>';
   host.querySelector('[data-map-retry]')?.addEventListener('click',()=>{
    host.innerHTML='<article class="learning-card"><p>Memuatkan peta…</p></article>';
    void mountMap();
   },{once:true});
- });
+  });
+ };
  function renderDetail(){
   const body=document.querySelector('#detail-content');
   const controls=`<div class="quiz-languages">${['ms','en','zh','th'].map(l=>`<button data-detail-lang="${l}" aria-pressed="${R.language===l}">${({ms:'BM',en:'EN',zh:'中文',th:'ไทย'})[l]}</button>`).join('')}${R.language==='zh'?`<button data-detail-pinyin aria-pressed="${R.pinyin}">Pinyin ${R.pinyin?'ON':'OFF'}</button>`:''}<button data-detail-theme>${h(window.RailwayTheme.value==='light'?'Dark Mode':'Light Mode')}</button></div>`;
