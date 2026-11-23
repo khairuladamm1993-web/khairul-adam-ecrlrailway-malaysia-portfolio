@@ -67,7 +67,7 @@
  }
 }
 .ecrl-schematic{position:absolute;z-index:6;top:12px;right:52px;max-width:calc(100% - 120px);color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:8px}
-.ecrl-schematic[open]{width:min(620px,calc(100% - 72px));right:52px;max-width:none}
+.ecrl-schematic[open]{width:min(620px,calc(100% - 120px))}
 .ecrl-schematic>summary{cursor:pointer;padding:10px;min-height:44px;font-weight:700}
 .ecrl-schematic>div{max-height:min(54dvh,390px);overflow:auto;overscroll-behavior:contain;padding:0 10px 10px}
 .ecrl-schematic>div>p{margin:0 0 7px;color:var(--sub);font-size:.8rem}
