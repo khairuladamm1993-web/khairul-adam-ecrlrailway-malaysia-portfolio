@@ -1,6 +1,34 @@
 /* Infrastructure only. Never appended to the passenger service manifest. */
 (function(root){'use strict';
 const NS='mrs10-v8-ecrl-infra',COLORS={LOCALITY:'#0f8b8d',HISTORICAL:'#c76a1b',MARITIME:'#7c3aed',YARD:'#b57925'};
+const DETAIL_ZOOM=Object.freeze({PL:9,DEPOT:12});
+const detailLevel=zoom=>zoom>=DETAIL_ZOOM.DEPOT?'near':zoom>=DETAIL_ZOOM.PL?'mid':'far';
+const codedStation=['!=',['to-string',['get','stationCode']],''];
+function trainImage(map,id){
+ if(map.hasImage(id))return;
+ const canvas=document.createElement('canvas');canvas.width=68;canvas.height=68;
+ const ctx=canvas.getContext('2d');ctx.scale(68/24,68/24);
+ ctx.fillStyle='#1457a6';ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;
+ ctx.beginPath();ctx.roundRect(3.5,2.5,17,17,4);ctx.fill();ctx.stroke();
+ ctx.fillStyle='#ffffff';ctx.fillRect(7,6,10,6);
+ for(const x of [8,16]){ctx.beginPath();ctx.arc(x,15.5,1.2,0,2*Math.PI);ctx.fill()}
+ ctx.strokeStyle='#1457a6';ctx.lineWidth=2;
+ ctx.beginPath();ctx.moveTo(8,19);ctx.lineTo(6,22);ctx.moveTo(16,19);ctx.lineTo(18,22);ctx.stroke();
+ map.addImage(id,ctx.getImageData(0,0,68,68),{pixelRatio:2});
+}
+function labelImage(map,id,text){
+ if(map.hasImage(id))return;
+ const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+ const font='bold 12px sans-serif';
+ ctx.font=font;
+ const width=Math.ceil(ctx.measureText(text).width)+14,height=22;
+ canvas.width=width*2;canvas.height=height*2;
+ ctx.scale(2,2);ctx.font=font;
+ ctx.fillStyle='#16457b';ctx.fillRect(0,0,width,height);
+ ctx.strokeStyle='#ffffff';ctx.strokeRect(.5,.5,width-1,height-1);
+ ctx.fillStyle='#ffffff';ctx.textBaseline='middle';ctx.fillText(text,7,height/2);
+ map.addImage(id,ctx.getImageData(0,0,canvas.width,canvas.height),{pixelRatio:2});
+}
 function create(registry,translations){
  const chainage=(root&&root.MRS10ECRLChainage)||(typeof require==='function'?require('./chainage-manifest.js'):null);
  const portCatalogue=(root&&root.MRS10ECRLPortReferences)||(typeof require==='function'?require('./port-references.js'):null);
@@ -45,7 +73,11 @@ const loops=registry.loops.map(annotate);
   if(!map?.getLayer(NS+'-hit'))return;
   const allowed=(mode==='NORMAL'&&(category==='All'||category==='MRS10'||category==='Malaysia'||category==='ECRL'))||mode==='INFRASTRUCTURE_FOCUS';
   const kinds=allowed?Object.keys(flags).filter(k=>flags[k]):[];
-  for(const suffix of ['-hit','-ring','-inner']){map.setLayoutProperty(NS+suffix,'visibility',kinds.length?'visible':'none');map.setFilter(NS+suffix,['in',['get','kind'],['literal',kinds]])}
+  for(const suffix of ['-hit','-ring','-inner','-station-marker','-station-label']){
+   const kindFilter=['in',['get','kind'],['literal',kinds]];
+   const filter=suffix.startsWith('-station-')?['all',kindFilter,codedStation]:['all',kindFilter,['!',codedStation]];
+   map.setLayoutProperty(NS+suffix,'visibility',kinds.length?'visible':'none');map.setFilter(NS+suffix,filter);
+  }
  }
  function install(map){
   // The host has passed its style gate; other GeoJSON sources may now be loading.
@@ -57,11 +89,35 @@ const loops=registry.loops.map(annotate);
   }
   if(!map.getLayer(NS+'-ring'))map.addLayer({id:NS+'-ring',type:'symbol',source:NS,layout:{'icon-image':['concat',NS+'-',['get','kind']],'icon-size':0.65,'icon-allow-overlap':true,'icon-ignore-placement':true}});
   if(!map.getLayer(NS+'-inner'))map.addLayer({id:NS+'-inner',type:'circle',source:NS,paint:{'circle-radius':2.5,'circle-color':['get','color']}});
+  if(!map.getLayer(NS+'-station-marker')){
+   trainImage(map,NS+'-train');
+   map.addLayer({id:NS+'-station-marker',type:'symbol',source:NS,filter:codedStation,layout:{
+    'icon-image':NS+'-train','icon-size':1,'icon-padding':2
+   }});
+  }
+  if(!map.getLayer(NS+'-station-label')){
+   for(const station of stations.filter(asset=>asset.stationCode)){
+    labelImage(map,NS+'-code-'+station.stationCode,station.stationCode);
+    labelImage(map,NS+'-name-'+station.stationCode,station.stationCode+' · '+station.officialName);
+   }
+   map.addLayer({id:NS+'-station-label',type:'symbol',source:NS,filter:codedStation,minzoom:8,layout:{
+    'icon-image':['step',['zoom'],['concat',NS+'-code-',['get','stationCode']],DETAIL_ZOOM.DEPOT,['concat',NS+'-name-',['get','stationCode']]],
+    'icon-anchor':'bottom','icon-offset':[0,-19],'icon-padding':2
+   }},NS+'-station-marker');
+  }
  }
- function hit(map,point){if(!map?.getLayer(NS+'-hit')||map.getLayoutProperty(NS+'-hit','visibility')==='none')return null;return refs.filter(r=>flags[r.kind]).map(r=>{const p=map.project(r.coordinates);return {...r,distance:Math.hypot(p.x-point.x,p.y-point.y)}}).filter(r=>r.distance<=14).sort((a,b)=>a.distance-b.distance)[0]||null}
+ function hit(map,point){
+  if(!map?.getLayer(NS+'-hit')||map.getLayoutProperty(NS+'-hit','visibility')==='none')return null;
+  const rect=[[point.x-5,point.y-5],[point.x+5,point.y+5]];
+  const visibleStations=new Set(map.queryRenderedFeatures(rect,{layers:[NS+'-station-marker',NS+'-station-label']}).map(f=>f.properties.assetId));
+  return refs.filter(r=>flags[r.kind]&&(r.kind!=='LOCALITY'||visibleStations.has(r.assetId))).map(r=>{
+   const p=map.project(r.coordinates);
+   return {...r,distance:Math.hypot(p.x-point.x,p.y-point.y)};
+  }).filter(r=>r.distance<=14||(r.kind==='LOCALITY'&&visibleStations.has(r.assetId))).sort((a,b)=>a.distance-b.distance)[0]||null;
+ }
  function search(q){const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');const text=norm(q);if(!text)return [];if(/^stn\d{1,2}$/.test(text))return stations.filter(a=>norm(a.stationCode)===text);if(/^pl0?[1-7]$/.test(text))return loops.filter(a=>norm(a.plCode)===text||norm(a.plCode)===text.replace(/^pl([1-7])$/,'pl0$1'));return assets.filter(a=>norm(['ECRL',a.officialName,a.historicalName,a.assetId,a.section,a.stationCode,a.plCode,a.chainageLabel,a.assetId==='ecrl-depot-gombak-north'?'GNU EMU Depot':'',...(a.alternativeNames||[])].join(' ')).includes(text))}
  function snapshot(map){return {assetCount:assets.length,stationCount:registry.stations.length,referenceCount:refs.length,referenceKinds:Object.fromEntries(Object.keys(flags).map(k=>[k,refs.filter(r=>r.kind===k).length])),flags:{...flags},verifiedStationPoints:0,verifiedLoopPoints:0,physicalSegments:0,sourcePresent:!!map?.getSource(NS),layersPresent:!!map?.getLayer(NS+'-inner'),visible:!!map?.getLayer(NS+'-hit')&&map.getLayoutProperty(NS+'-hit','visibility')!=='none'}}
  return Object.freeze({namespace:NS,assets,stations,loops,chainage,registry:enhancedRegistry,portCatalogue,kerteh,alignmentEvidence,flags,refs,get,reference,t,features,install,setVisibility,hit,search,snapshot});
 }
-const api={create,NS};if(typeof module==='object')module.exports=api;if(root)root.MRS10UnifiedECRL=api;
+const api={create,NS,DETAIL_ZOOM,detailLevel};if(typeof module==='object')module.exports=api;if(root)root.MRS10UnifiedECRL=api;
 })(typeof window!=='undefined'?window:null);

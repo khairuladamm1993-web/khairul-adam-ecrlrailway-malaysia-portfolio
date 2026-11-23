@@ -5,6 +5,7 @@ on:
       - candidate/p01-uat17-maintenance-preview-20261122
       - candidate/p01-orchestrator-v1-20261123
       - candidate/p01-auth-client-readiness-20261123
+      - candidate/p01-ecrl-unified-design-v1-20261123
   pull_request:
     paths:
       - 'assets/map-gateway.js'
@@ -37,13 +38,20 @@ jobs:
       - name: P01 UAT17 focused regression tests
         run: node --test tests/p01-ecrl-gap-coverage-audit.test.cjs tests/p01-ecrl-alignment-evidence-gate.test.cjs tests/p01-uat17-ecrl-inventory.test.cjs tests/p01-uat17-map-fullscreen.test.cjs tests/p01-member-public-map-contract.test.cjs tests/p01-role-map-integration.test.cjs tests/p01-role-map-runtime.test.cjs tests/p01-uat17-refresh.test.cjs tests/p01-uat17-maintenance-source.test.cjs tests/p01-maintenance-server-contract.test.cjs
       - name: P01 authentication client regression tests
-        if: github.event_name == 'push' && github.ref_name == 'candidate/p01-auth-client-readiness-20261123'
+        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-auth-client-readiness-20261123' || github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123')
         run: |
           node -e 'require("node:assert/strict").equal(require("./vercel.json").git.deploymentEnabled[process.env.GITHUB_REF_NAME], false)'
           npm ci
           node --check assets/access.js
           node --check assets/member-gateway.js
           node --test tests/auth-wiring.test.cjs
+      - name: P01 ECRL design and preservation tests
+        if: github.event_name == 'push' && github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123'
+        run: |
+          node --check assets/unified-ecrl/adapter.js
+          node --check assets/unified-ecrl/integration-ui.js
+          node --check assets/unified-v8-map.js
+          node --test tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-alignment-r2.test.cjs tests/unified-ecrl-consumer-popup.test.cjs tests/unified-ecrl-chainage.test.cjs tests/unified-v8-regression.test.cjs tests/unified-v81-focus.test.cjs
       - name: Verify and run the P01 orchestrator pilot
         if: github.event_name == 'push' && github.ref_name == 'candidate/p01-orchestrator-v1-20261123'
         run: |

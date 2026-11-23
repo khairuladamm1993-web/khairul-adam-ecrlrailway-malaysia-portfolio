@@ -6,7 +6,13 @@ const COPY={
  zh:{station:'ECRL 车站',facility:'基础设施资产',location:'区域参考点 · 非车站实际位置',historic:'2017 年环评规划位置 · 非现行车站地点',maritime:'港口区域参考点 · 非铁路货运终点站',noPoint:'没有已核实的车站位置',type:'资产类型',section:'区段',service:'服务',verified:'车站身份已核实',partial:'部分已核实',conflict:'来源存在冲突',pending:'尚未核实',technical:'工程详细信息',internal:'内部技术编号',references:'来源与参考资料',layers:'数据与地图准确性',list:'ECRL 资产',passenger:'客运',freight:'货运',future:'未来规划',unknown:'尚未核实',chReference:'CH（项目参考）',chSafety:'CH 不是 GPS 或已核实轨道位置',loop:'会让线 · 历史参考',plList:'PL01–PL07 · CH',plNoPoint:'PL 位置未核实 · 仅显示 CH 参考',yardRef:'Kerteh 货场参考（橙色方框）',yardAccuracy:'OSM 历史铁路用地 · 非已核实的 ECRL 终点线',yardEndUnknown:'轨道终点／装卸区／停放线：尚未核实',alignmentPanel:'线路与支线 · 证据状态',alignmentNoLine:'尚无符合条件的竣工测绘轨道数据。',alignmentPL:'待核实位置的会让线',alignmentSpurs:'支线连接（示意）',alignmentSource:'政府／运营商资料',alignmentWarning:'不能根据里程、示意图或区域点生成会让线及轨道终点。',yardEnd:'终点线',yardType:'铁路货场区域（参考）',yardInterfaceType:'货物装卸接口',portArea:'官方港区参考点 · 非铁路终点',portSpur:'ECRL 货运连接',terminalUnits:'港口码头',terminalPending:'装卸场／会让线／铁路终点：尚未核实',portLength:'规划支线长度（参考）',portRailStatus:'支线建设中 · 非客运服务',portOperator:'运营商'},
  th:{station:'สถานี ECRL',facility:'สินทรัพย์โครงสร้างพื้นฐาน',location:'จุดอ้างอิงพื้นที่ · ไม่ใช่ตำแหน่งสถานีจริง',historic:'จุดอ้างอิงแผน EIA ปี 2017 · ไม่ใช่ที่ตั้งสถานีปัจจุบัน',maritime:'จุดอ้างอิงพื้นที่ท่าเรือ · ไม่ใช่สถานีรถไฟ',noPoint:'ยังไม่มีพิกัดสถานีที่ยืนยันแล้ว',type:'ประเภทสินทรัพย์',section:'ช่วง',service:'บริการ',verified:'ยืนยันตัวตนสถานี',partial:'ยืนยันบางส่วน',conflict:'แหล่งข้อมูลขัดแย้ง',pending:'ยังไม่ยืนยัน',technical:'รายละเอียดทางวิศวกรรม',internal:'รหัสเทคนิคภายใน',references:'แหล่งข้อมูลและเอกสารอ้างอิง',layers:'ความถูกต้องของข้อมูลและแผนที่',list:'สินทรัพย์ ECRL',passenger:'ผู้โดยสาร',freight:'สินค้า',future:'แผนในอนาคต',unknown:'ยังไม่ยืนยัน',chReference:'CH (อ้างอิงโครงการ)',chSafety:'CH ไม่ใช่ GPS หรือพิกัดรางที่ยืนยัน',loop:'ทางหลีก · อ้างอิงประวัติ',plList:'PL01–PL07 · CH',plNoPoint:'ตำแหน่ง PL ยังไม่ยืนยัน · อ้างอิง CH เท่านั้น',yardRef:'อ้างอิงลาน Kerteh (กรอบสี่เหลี่ยม)',yardAccuracy:'พื้นที่ทางรถไฟเดิมจาก OSM · ไม่ใช่รางปลายทาง ECRL ที่ยืนยันแล้ว',yardEndUnknown:'ปลายราง/จุดขนถ่าย/รางพัก: ยังไม่ยืนยัน',alignmentPanel:'แนวเส้นทางและทางแยก · หลักฐาน',alignmentNoLine:'ยังไม่มีข้อมูลสำรวจแนวรางจริงที่ผ่านการตรวจสอบ',alignmentPL:'ทางหลีกที่รอตรวจสอบตำแหน่ง',alignmentSpurs:'ทางเชื่อมต่อ (แผนผัง)',alignmentSource:'เอกสารรัฐ / ผู้ดำเนินการ',alignmentWarning:'ห้ามสร้างหมุดทางหลีกหรือปลายรางจาก CH แผนผัง หรือจุดอ้างอิงพื้นที่',yardEnd:'ปลายราง',yardType:'พื้นที่ลานรถไฟ (อ้างอิง)',yardInterfaceType:'จุดเชื่อมต่อขนส่งสินค้า',portArea:'จุดอ้างอิงพื้นที่ท่าเรือทางการ · ไม่ใช่ปลายทางรถไฟ',portSpur:'เส้นทางขนส่งสินค้า ECRL',terminalUnits:'ท่าเรือ',terminalPending:'จุดโหลดสินค้า/รางรอง/ปลายราง: ยังไม่ยืนยัน',portLength:'ระยะทางแยกตามแผน (อ้างอิง)',portRailStatus:'อยู่ระหว่างพัฒนา · ไม่ใช่บริการผู้โดยสาร',portOperator:'ผู้ดำเนินการ'}
 };
-function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
+const SCHEMATIC_COPY={
+ ms:['Skema ECRL','Turutan rujukan · bukan peta jajaran fizikal','Jajaran rujukan','Lokasi hujung belum disahkan'],
+ en:['ECRL schematic','Reference order · no physical alignment','Reference lineup','Endpoint location unverified'],
+ zh:['ECRL 示意图','参考顺序 · 非实体线路','参考站序','终点位置尚未核实'],
+ th:['แผนผัง ECRL','ลำดับอ้างอิง · ไม่ใช่แนวรางจริง','ลำดับอ้างอิง','ยังไม่ยืนยันตำแหน่งปลายทาง']
+};
+function create(adapter,{getLocale,getCategory,getZoom,onSelect,onFlags}){
  const master=root.MRS10ECRLMasterIntelligence?.create(adapter);
  const $=id=>document.getElementById(id);
  const el=(tag,value,cls)=>{const n=document.createElement(tag);if(value!=null)n.textContent=String(value);if(cls)n.className=cls;return n};
@@ -21,7 +27,42 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
  }
  function field(host,label,value){const row=el('p',null,'ecrl-fact');row.append(el('span',label),el('b',value));host.append(row)}
  function referenceLabel(ref){return ref?.kind==='HISTORICAL'?ui('historic'):ref?.kind==='MARITIME'?ui('maritime'):ref?.kind==='YARD'?ui('yardAccuracy'):ref?ui('location'):ui('noPoint')}
+ function syncSchematic(){
+  const panel=$('ecrl-schematic');if(!panel)return;
+  panel.dataset.detail=root.MRS10UnifiedECRL.detailLevel(getZoom());
+  panel.hidden=!['ECRL','Malaysia','All','MRS10'].includes(getCategory())||!Object.values(adapter.flags).some(Boolean);
+ }
+ function renderSchematic(){
+  const panel=$('ecrl-schematic');if(!panel)return;
+  syncSchematic();
+  const [title,warning,lineupLabel,unknown]=SCHEMATIC_COPY[getLocale()]||SCHEMATIC_COPY.en;
+  panel.querySelector('summary').textContent=title;
+  const body=panel.querySelector('div'),list=el('ol',null,'ecrl-schematic-lineup');
+  list.setAttribute('aria-label',lineupLabel);list.tabIndex=0;
+  function addAsset(asset,kind,label){
+   const row=el('li',null,'ecrl-schematic-'+kind);
+   const button=el('button',null,'ecrl-schematic-asset');
+   const icon=el('span',null,'ecrl-design-icon');
+   icon.setAttribute('aria-hidden','true');
+   button.type='button';button.dataset.schematicAsset=asset.assetId;
+   button.append(icon,el('span',label));button.onclick=()=>{panel.open=false;onSelect(asset.assetId)};
+   row.append(button);list.append(row);
+  }
+  for(const entry of adapter.chainage.records){
+   const asset=adapter.get(entry.assetId);
+   addAsset(asset,asset.plCode?'pl':'stn',entry.code+' · '+(asset.officialName||asset.historicalName));
+  }
+  for(const asset of adapter.assets.filter(a=>a.assetType==='DEPOT'))addAsset(asset,'depot',asset.officialName+' · '+ui('pending'));
+  const spurs=el('ul',null,'ecrl-schematic-spurs');
+  for(const spur of adapter.alignmentEvidence.spurs){
+   const row=el('li',null,'ecrl-schematic-spur');
+   const end=el('span',null,'ecrl-spur-end');end.setAttribute('aria-hidden','true');
+   row.append(el('span',spur.name),end,el('small',unknown));spurs.append(row);
+  }
+  body.replaceChildren(el('p',warning),list,spurs);
+ }
  function render(){
+  renderSchematic();
   const host=$('ecrl-controls');host.hidden=!['ECRL','Malaysia','All','MRS10'].includes(getCategory());host.replaceChildren();const heading=el('div',null,'ecrl-compact-heading');heading.append(el('strong',t('title')));const options=el('details',null,'ecrl-map-options');summary(options,ui('layers'));
   const labels={LOCALITY:t('reference'),HISTORICAL:t('legendHistoric'),MARITIME:t('legendPort'),YARD:ui('yardRef')};
   const switches=el('div',null,'ecrl-switches');
@@ -144,7 +185,7 @@ function create(adapter,{getLocale,getCategory,onSelect,onFlags}){
   for(const sid of ids){const source=adapter.registry.sources[sid];if(!source)continue;const p=el('p'),link=el('a',sid+' · '+source.kind);link.href=source.url;link.target='_blank';link.rel='noopener noreferrer';p.append(link,el('span',' · '+source.revision));sources.append(p)}host.append(sources);
   return host;
  }
- return {render,content};
+ return {render,content,syncSchematic};
 }
 root.MRS10ECRLIntegrationUI=Object.freeze({create});
 })(window);

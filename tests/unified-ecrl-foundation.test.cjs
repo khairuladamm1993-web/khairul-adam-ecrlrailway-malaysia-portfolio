@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),crypto=require('node:crypto');
 const window={};for(const f of ['source/data.js','source/i18n.js'])vm.runInNewContext(fs.readFileSync('assets/unified-ecrl/'+f,'utf8'),{window});
-const raw=window.MRS10ECRLGISV1,adapter=require('../assets/unified-ecrl/adapter').create(raw,window.MRS10ECRLI18N),engine=require('../assets/consumer-foundation/journey-engine');
+const raw=window.MRS10ECRLGISV1,ecrlDesign=require('../assets/unified-ecrl/adapter'),adapter=ecrlDesign.create(raw,window.MRS10ECRLI18N),engine=require('../assets/consumer-foundation/journey-engine');
 test('pinned source modules remain byte-for-byte read-only handoff',()=>{const lock=JSON.parse(fs.readFileSync('assets/unified-ecrl/source-lock.json'));assert.equal(lock.sourceCommit,'900705e2b109ba281c5be2a04812c7e401f03cf3');for(const [p,sha]of Object.entries(lock.files))assert.equal(crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'),sha,p)});
 test('infrastructure identities and reference types remain distinct from services',()=>{assert.equal(adapter.assets.length,37);assert.equal(adapter.stations.length,20);assert.equal(adapter.refs.length,25);assert.deepEqual(adapter.snapshot().referenceKinds,{LOCALITY:16,HISTORICAL:4,MARITIME:4,YARD:1});assert.equal(new Set(adapter.assets.map(a=>a.assetId)).size,37);assert.deepEqual(adapter.flags,{LOCALITY:true,HISTORICAL:true,MARITIME:true,YARD:true})});
 test('only exact upstream reference coordinates are used; no lines or loop pins',()=>{for(const f of adapter.features().features){assert.equal(f.geometry.type,'Point');const a=adapter.get(f.properties.assetId);assert.equal(a.assetType==='STATION'||a.assetType==='PORT_INTERFACE'||a.assetType==='HISTORICAL_RAIL_YARD_AREA',true);assert.equal(JSON.stringify(f.geometry.coordinates),JSON.stringify(a.point||a.referencePoint));assert.equal(f.properties.geometryVerification,'REFERENCE_ONLY')}assert.equal(adapter.snapshot().physicalSegments,0);assert.equal(adapter.snapshot().verifiedLoopPoints,0);assert(raw.segments.every(s=>s.geometry===null))});
@@ -9,7 +9,25 @@ test('simulation uses source station order with explicit reverse direction',()=>
 test('manual progress terminates safely and survives offline transitions',()=>{let j=engine.create(raw.stations,'ecrl-stn-11','ecrl-stn-01');j=engine.advance(j);j=engine.network(j,false);assert.equal(j.currentIndex,1);assert.equal(j.network,'OFFLINE');for(let i=0;i<15;i++)j=engine.advance(j);assert.equal(engine.progress(j).percentage,100);assert.equal(engine.progress(j).nextStation,null);assert.equal(engine.progress(j).currentStation.name,'Kota Bharu');assert.equal(j.eta.status,'UNKNOWN')});
 test('unavailable data cannot yield a GPS match or fabricated ETA',()=>{assert.equal(engine.mapMatch({longitude:103,latitude:4}).stationId,null);assert.equal(engine.mapMatch().status,'UNKNOWN');assert.throws(()=>engine.create(raw.stations,'invalid','ecrl-stn-01'),/UNKNOWN_STATION/);assert.throws(()=>engine.create(raw.stations,'ecrl-stn-01','ecrl-stn-01'),/SAME_STATION/);assert.throws(()=>engine.create([{assetId:'a',stationOrder:1},{assetId:'b',stationOrder:1}],'a','b'),/UNRESOLVED_STATION_ORDER/)});
 test('all four locales retain reference/conflict/chainage terminology',()=>{for(const lang of ['ms','en','zh','th'])for(const key of ['reference','referenceWarning','portReferenceWarning','conflict','chainage','notOperational'])assert(window.MRS10ECRLI18N[lang][key],lang+':'+key)});
-test('overlay installs after host style gate even while other GeoJSON sources load',()=>{const layers=new Map(),sources=new Map();const map={isStyleLoaded:()=>false,getStyle:()=>({version:8,layers:[]}),getSource:id=>sources.get(id),addSource:(id,s)=>sources.set(id,s),getLayer:id=>layers.get(id),addLayer:l=>layers.set(l.id,l),hasImage:()=>true};adapter.install(map);assert.equal(layers.size,3);assert.equal(sources.size,1);assert([...layers.keys()].every(id=>id.startsWith('mrs10-v8-ecrl-infra')))});
+test('overlay installs after host style gate even while other GeoJSON sources load',()=>{
+ const layers=new Map(),sources=new Map(),before=new Map();
+ const map={isStyleLoaded:()=>false,getStyle:()=>({version:8,layers:[]}),getSource:id=>sources.get(id),addSource:(id,s)=>sources.set(id,s),getLayer:id=>layers.get(id),addLayer:(l,b)=>{layers.set(l.id,l);before.set(l.id,b)},hasImage:()=>true};
+ adapter.install(map);
+ assert.equal(layers.size,5);assert.equal(sources.size,1);
+ const marker=ecrlDesign.NS+'-station-marker',label=ecrlDesign.NS+'-station-label';
+ assert.equal(layers.get(marker).layout['icon-size'],1);
+ assert.notEqual(layers.get(marker).layout['icon-allow-overlap'],true);
+ assert.equal(before.get(label),marker);
+});
+
+test('ECRL zoom tiers preserve the entire schematic inventory without promoting pins',()=>{
+ assert.deepEqual([8.99,9,11.99,12].map(ecrlDesign.detailLevel),['far','mid','mid','near']);
+ assert.equal(adapter.chainage.records.filter(r=>r.code.startsWith('STN')).length,16);
+ assert.equal(adapter.chainage.records.filter(r=>r.code.startsWith('PL')).length,7);
+ assert.equal(adapter.assets.filter(a=>a.assetType==='DEPOT').length,2);
+ assert.equal(adapter.alignmentEvidence.spurs.length,7);
+ assert(adapter.alignmentEvidence.spurs.every(spur=>!spur.verifiedLine&&!spur.verifiedRailEndpoint));
+});
 
 test('accepted STN codes skip STN10 without renumbering stable ECRL asset IDs',()=>{
  const records=[['ecrl-stn-09','STN09','Cherating'],['ecrl-stn-10','STN11','Kuantan Port City'],['ecrl-stn-11','STN12','Kota SAS'],['ecrl-stn-15','STN16','Bentong'],['ecrl-stn-16','STN17','ITT Gombak']];

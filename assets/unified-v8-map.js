@@ -386,6 +386,7 @@ function startMap(){
   window.addEventListener('pagehide',e=>{if(!e.persisted)gps.dispose()});
   state.map.addControl(new maplibregl.NavigationControl({showCompass:true}),'top-right');
   state.map.on('dragstart',()=>{cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;});
+  state.map.on('zoomend',()=>ecrlUI?.syncSchematic());
   state.map.on('style.load',()=>{
    state.mapReady=true;state.networkError=false;
    // style.load is earlier than isStyleLoaded() on some MapLibre builds.
@@ -477,7 +478,7 @@ async function init(){
  try{completeSources=await window.MRS10CompleteSources.load();singapore=await window.MRS10V8Singapore.load();physical=await fetch('./data/unified-v8/physical-network.json').then(r=>{if(!r.ok)throw Error('GEOMETRY_HTTP_'+r.status);return r.json()});window.MRS10V8Geometry.validate(physical);threeRailways=await window.MRS10ThreeRailways.load(window.MRS10V8Geometry);threeRailways.apply(singapore);physical={...physical,nodes:[...physical.nodes,...threeRailways.nodes],segments:[...physical.segments,...threeRailways.segments]};window.MRS10V8Geometry.validate(physical);state.manifest=[...core.loadManifest(kl,ampang),...integration.routes(),...ktm.routes(),...singapore.routes(),...completeSources.routes()]}catch(e){$('map-error').textContent='Registry: '+e.message;return}
  ecrl=window.MRS10UnifiedECRL.create(window.MRS10ECRLGISV1,window.MRS10ECRLI18N);
  masterIntelligence=window.MRS10ECRLMasterIntelligence.create(ecrl);
- ecrlUI=window.MRS10ECRLIntegrationUI.create(ecrl,{getLocale:()=>state.locale,getCategory:()=>state.category,onSelect:id=>showInfrastructure(id,true),onFlags:(kind,enabled)=>{closeFocus();if(kind==='ALL')for(const key of Object.keys(ecrl.flags))ecrl.flags[key]=enabled;else ecrl.flags[kind]=enabled;applyVisibility();ecrlUI.render()}});
+ ecrlUI=window.MRS10ECRLIntegrationUI.create(ecrl,{getLocale:()=>state.locale,getCategory:()=>state.category,getZoom:()=>state.map?.getZoom()??0,onSelect:id=>showInfrastructure(id,true),onFlags:(kind,enabled)=>{closeFocus();if(kind==='ALL')for(const key of Object.keys(ecrl.flags))ecrl.flags[key]=enabled;else ecrl.flags[kind]=enabled;applyVisibility();ecrlUI.render()}});
  journeyView=window.MRS10JourneyView.create({host:$('journey-foundation'),stations:ecrl.stations,getLocale:()=>state.locale});
  // Preview remains public-only; a separately authenticated RailwayAccess session is
  // required for the Owner map to show canonical approved PL references.
