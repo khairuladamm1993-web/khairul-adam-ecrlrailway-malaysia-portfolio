@@ -1,6 +1,6 @@
 /* MR-S10 P01 V4. All geographic points arrive from GIS query responses.
    No route alignment is inferred from stop order. */
-const maplibregl=window.maplibregl;
+import maplibregl from './p01-maplibre.js';
 const $=id=>document.getElementById(id);
 const core=window.MRS10UnifiedV4Registry, kl=window.MRS10KLRegistry,
  ampang=window.MRS10AmpangR219, ampangGIS=window.MRS10AmpangGISR219,

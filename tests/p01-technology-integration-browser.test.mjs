@@ -8,14 +8,40 @@ const out=process.env.P01_QA_OUTPUT||'artifacts/p01-technology-integration';
 const vendor=process.env.P01_MAPLIBRE_DIST;
 assert.ok(vendor,'P01_MAPLIBRE_DIST must point to the pinned MapLibre browser assets');
 await fs.mkdir(out,{recursive:true});
-const sdk=await fs.readFile(vendor+'/maplibre-gl.js','utf8');
-// Capture the app's MapLibre instance in the test harness to set repeatable camera zooms.
-const mapHook=';{const p=maplibregl.Map.prototype;const jump=p.jumpTo;p.jumpTo=function(...args){window.ecrlTestMap=this;return jump.apply(this,args)}}';
+const moduleRoot='https://unpkg.com/maplibre-gl@6.13.0/dist/';
+const loader=await fetch(base+'/assets/p01-maplibre.js');
+assert.equal(loader.status,200);
+// Attach a camera probe to the local loader. The verified SDK and worker bytes remain intact.
+const loaderWithProbe=await loader.text()+`
+import {Map as ProbeMap,getVersion as probeVersion} from '${moduleRoot}maplibre-gl.mjs';
+window.ecrlTestVersion=probeVersion();
+const jump=ProbeMap.prototype.jumpTo;
+ProbeMap.prototype.jumpTo=function(...args){window.ecrlTestMap=this;return jump.apply(this,args)};
+`;
 const rows=[];
 const profiles=[['desktop',1200,900],['ipad',810,1080],['iphone',390,844]];
+const arcgis=/^https:\/\/[^/]*arcgis\.com\//;
+const emptyGis=r=>r.fulfill({json:{features:[]},headers:{'access-control-allow-origin':'*'}});
+
+async function checkUnavailableRenderer(browser){
+ const page=await browser.newPage();
+ try{
+  await page.route(moduleRoot+'**',r=>r.abort());
+  await page.route(arcgis,emptyGis);
+  for(const version of [7,8]){
+   assert.equal((await page.goto(base+'/unified-map-v'+version+'.html')).status(),200);
+   await page.waitForFunction(v=>window['MRS10V'+v+'Diagnostics']?.snapshot()?.stage==='DONE'&&
+    document.querySelector('#lineup li')&&document.querySelector('#map-error')?.textContent.includes('gagal dimuatkan'),version);
+   assert.match(await page.locator('#map-error').innerText(),/Peta geografi gagal dimuatkan/);
+   assert.ok(await page.locator('#lineup li').count()>0);
+  }
+  console.log('P01_MAPLIBRE_UNAVAILABLE_CATALOGUE_PASS V7 V8');
+ }finally{await page.close()}
+}
 for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
  const browser=await driver.launch({headless:true,args:engine==='chromium'?['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']:[]});
  try{
+  if(engine==='chromium')await checkUnavailableRenderer(browser);
   for(const [device,width,height] of profiles){
    const page=await browser.newPage({viewport:{width,height},hasTouch:device!=='desktop',isMobile:device!=='desktop'});
    const errors=[];
@@ -23,12 +49,27 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    page.on('response',r=>{if(r.url().startsWith(base+'/')&&!r.ok())localFailures.push(new URL(r.url()).pathname)});
    page.on('pageerror',e=>errors.push(e.message));
    page.on('console',m=>{if(/^V8_MAP_LAYER_INSTALL_FAILED/.test(m.text())) errors.push(m.text())});
-   await page.route('https://unpkg.com/maplibre-gl@5.12.0/dist/**',r=>r.request().url().endsWith('.js')?
-    r.fulfill({body:sdk+'\n'+mapHook,contentType:'application/javascript'}):r.fulfill({path:vendor+'/maplibre-gl.css'}));
+   const allowedAssets=new Set(['maplibre-gl.css','maplibre-gl.mjs','maplibre-gl-shared.mjs','maplibre-gl-worker.mjs']);
+   await page.route(moduleRoot+'**',async r=>{
+    const name=new URL(r.request().url()).pathname.split('/').pop();
+    assert.ok(allowedAssets.has(name),name);
+    return r.fulfill({
+     path:vendor+'/'+name,contentType:name.endsWith('.css')?'text/css':'application/javascript',
+     headers:{'access-control-allow-origin':'*'}
+    });
+   });
+   await page.route(base+'/assets/p01-maplibre.js',r=>r.fulfill({body:loaderWithProbe,contentType:'application/javascript'}));
    await page.route('https://tiles.openfreemap.org/styles/**', r=>r.fulfill({json:{version:8,sources:{},layers:[{id:'bg',type:'background',paint:{'background-color':'#dce6e4'}}]},headers:{'access-control-allow-origin':'*'}}));
-   await page.route(/^https:\/\/[^/]*arcgis\.com\//,r=>r.fulfill({json:{features:[]},headers:{'access-control-allow-origin':'*'}}));
+   await page.route(arcgis,emptyGis);
    try{
+    assert.equal((await page.goto(base+'/unified-map-v7.html')).status(),200);
+    await page.waitForFunction(()=>{
+     const d=window.MRS10V7Diagnostics?.snapshot();
+     return d?.stage==='DONE'&&d.styleLoaded&&d.webglReady&&d.layerCount>0;
+    },null,{timeout:45000});
+    assert.equal(await page.evaluate(()=>window.ecrlTestVersion),'6.13.0');
     assert.equal((await page.goto(base+'/unified-map-v8.html')).status(),200);
+    assert.equal(await page.evaluate(()=>window.ecrlTestVersion),'6.13.0');
     assert.equal(await page.evaluate(()=>window.MRS10RailwayDataContractV1.VERSION),1);
     await page.waitForFunction(()=>{const d=window.MRS10V8Diagnostics?.snapshot();return d?.stage==='DONE'&&d.styleLoaded&&d.webglReady&&d.ecrl?.layersPresent},null,{timeout:45000});
     await page.locator('#filters').getByRole('button',{name:'ECRL',exact:true}).click();
@@ -71,7 +112,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
     assert.equal(await page.evaluate(()=>window.MRS10V8Diagnostics.snapshot().ecrl.physicalSegments),0);
     assert.deepEqual(errors,[]);
     assert.deepEqual(localFailures,[]);
-    rows.push({engine,device,status:'PASS',tiers:[[16,0,0,0],[16,7,0,0],[16,7,2,7]],stationPopup:true,plNoPoint:true});
+    rows.push({engine,device,status:'PASS',maplibre:'6.13.0',publicV7:true,tiers:[[16,0,0,0],[16,7,0,0],[16,7,2,7]],stationPopup:true,plNoPoint:true});
    }catch(e){rows.push({engine,device,status:'FAIL',error:String(e.stack||e)});await page.screenshot({path:`${out}/${engine}-${device}-fail.png`}).catch(()=>{})}
    finally{await fs.writeFile(out+'/visual-qa.json',JSON.stringify(rows,null,2));console.log(JSON.stringify(rows.at(-1)));await page.close()}
   }

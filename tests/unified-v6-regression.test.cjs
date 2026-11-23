@@ -39,7 +39,8 @@ test('One runtime, different source+layer per route, theme recovery and public-o
  assert(js.includes('state.map.isStyleLoaded()'));
  assert(!html.includes('<iframe'));
  assert(html.includes('unified-v6/adapter.js'));
- assert(html.includes('maplibre-gl@5.12.0/dist/maplibre-gl.js'));
+ assert(html.includes('maplibre-gl@6.13.0/dist/maplibre-gl.css'));
+ assert(fs.readFileSync('assets/unified-v6-map.js','utf8').includes('./p01-maplibre.js'));
 });
 test('V6 isolated public packaging and exact module audit',()=>{
  const read=p=>fs.readFileSync(path.join(root,p),'utf8');

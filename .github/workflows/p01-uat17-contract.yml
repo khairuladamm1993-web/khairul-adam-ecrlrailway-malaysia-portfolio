@@ -7,6 +7,7 @@ on:
       - candidate/p01-auth-client-readiness-20261123
       - candidate/p01-ecrl-unified-design-v1-20261123
       - candidate/p01-technology-integration-v1-20261123
+      - candidate/p01-maplibre-security-v1-20261123
   pull_request:
     paths:
       - 'assets/map-gateway.js'
@@ -20,7 +21,7 @@ permissions:
   contents: read
 jobs:
   source-contract:
-    runs-on: ${{ github.ref_name == 'candidate/p01-technology-integration-v1-20261123' && 'ubuntu-24.04' || 'ubuntu-latest' }}
+    runs-on: ${{ (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || github.ref_name == 'candidate/p01-maplibre-security-v1-20261123') && 'ubuntu-24.04' || 'ubuntu-latest' }}
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v5
@@ -39,7 +40,7 @@ jobs:
       - name: P01 UAT17 focused regression tests
         run: node --test tests/p01-ecrl-gap-coverage-audit.test.cjs tests/p01-ecrl-alignment-evidence-gate.test.cjs tests/p01-uat17-ecrl-inventory.test.cjs tests/p01-uat17-map-fullscreen.test.cjs tests/p01-member-public-map-contract.test.cjs tests/p01-role-map-integration.test.cjs tests/p01-role-map-runtime.test.cjs tests/p01-uat17-refresh.test.cjs tests/p01-uat17-maintenance-source.test.cjs tests/p01-maintenance-server-contract.test.cjs
       - name: P01 authentication client regression tests
-        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-auth-client-readiness-20261123' || github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123' || github.ref_name == 'candidate/p01-technology-integration-v1-20261123')
+        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-auth-client-readiness-20261123' || github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123' || (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || github.ref_name == 'candidate/p01-maplibre-security-v1-20261123'))
         run: |
           node -e 'require("node:assert/strict").equal(require("./vercel.json").git.deploymentEnabled[process.env.GITHUB_REF_NAME], false)'
           npm ci
@@ -47,14 +48,14 @@ jobs:
           node --check assets/member-gateway.js
           node --test tests/auth-wiring.test.cjs
       - name: P01 ECRL design and preservation tests
-        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123' || github.ref_name == 'candidate/p01-technology-integration-v1-20261123')
+        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123' || (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || github.ref_name == 'candidate/p01-maplibre-security-v1-20261123'))
         run: |
           node --check assets/unified-ecrl/adapter.js
           node --check assets/unified-ecrl/integration-ui.js
           node --check assets/unified-v8-map.js
           node --test tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-alignment-r2.test.cjs tests/unified-ecrl-consumer-popup.test.cjs tests/unified-ecrl-chainage.test.cjs tests/unified-v8-regression.test.cjs tests/unified-v81-focus.test.cjs
       - name: P01 Railway Data Contract V1
-        if: github.event_name == 'push' && github.ref_name == 'candidate/p01-technology-integration-v1-20261123'
+        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || github.ref_name == 'candidate/p01-maplibre-security-v1-20261123')
         run: node --test tests/p01-ecrl-data-contract.test.cjs
       - name: Verify and run the P01 orchestrator pilot
         if: github.event_name == 'push' && github.ref_name == 'candidate/p01-orchestrator-v1-20261123'
@@ -66,27 +67,37 @@ jobs:
 
       - name: Build isolated P01 Public and Member map candidate artifact
         run: node scripts/build-p01-map-candidate.cjs dist-p01-map-candidate
+      - name: P01 MapLibre dependency audit and pins
+        if: github.event_name == 'push' && github.ref_name == 'candidate/p01-maplibre-security-v1-20261123'
+        run: |
+          node --test tests/p01-maplibre-security.test.cjs tests/unified-v5-regression.test.cjs tests/unified-v6-regression.test.cjs
+          audit="$RUNNER_TEMP/p01-maplibre-audit"
+          mkdir -p "$audit"
+          printf '%s\n' '{"name":"p01-maplibre-audit","version":"1.0.0","private":true,"dependencies":{"maplibre-gl":"6.13.0"}}' > "$audit/package.json"
+          npm --prefix "$audit" install --package-lock-only --ignore-scripts --no-audit
+          npm --prefix "$audit" audit --audit-level=moderate
       - name: Install P01 visual QA dependencies
-        if: github.event_name == 'push' && github.ref_name == 'candidate/p01-technology-integration-v1-20261123'
+        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || github.ref_name == 'candidate/p01-maplibre-security-v1-20261123')
         run: |
           npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
           npx --no-install playwright install --with-deps chromium webkit
           vendor="$RUNNER_TEMP/p01-maplibre"
+          checksums="$GITHUB_WORKSPACE/tests/fixtures/p01-maplibre-6.13.0.sha256"
           mkdir -p "$vendor"
-          curl --fail --silent --show-error --location --retry 3 https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js --output "$vendor/maplibre-gl.js"
-          curl --fail --silent --show-error --location --retry 3 https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.css --output "$vendor/maplibre-gl.css"
-          echo "06b392de571c99e242581b0f3f23893e6e95efd3656974d6edfd8f8599ddf362  $vendor/maplibre-gl.js" | sha256sum --check
-          echo "1dae8925ee5906e442f0fd7028dded2884381b9acd7a780e5270025e09fc7c5e  $vendor/maplibre-gl.css" | sha256sum --check
+          while read -r digest filename; do
+            curl --fail --silent --show-error --location --retry 3 "https://unpkg.com/maplibre-gl@6.13.0/dist/$filename" --output "$vendor/$filename"
+          done < "$checksums"
+          (cd "$vendor" && sha256sum --check "$checksums")
           echo "P01_MAPLIBRE_DIST=$vendor" >> "$GITHUB_ENV"
       - name: P01 integrated visual QA
-        if: github.event_name == 'push' && github.ref_name == 'candidate/p01-technology-integration-v1-20261123'
+        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || github.ref_name == 'candidate/p01-maplibre-security-v1-20261123')
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 --directory dist-p01-map-candidate > "$RUNNER_TEMP/p01-visual-http.log" 2>&1 &
           trap 'kill "$!" 2>/dev/null || true' EXIT
           curl --fail --silent --retry 4 --retry-connrefused --output /dev/null http://127.0.0.1:8765/unified-map-v8.html
           node tests/p01-technology-integration-browser.test.mjs
       - name: Archive visual QA evidence
-        if: always() && github.event_name == 'push' && github.ref_name == 'candidate/p01-technology-integration-v1-20261123'
+        if: always() && github.event_name == 'push' && (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || github.ref_name == 'candidate/p01-maplibre-security-v1-20261123')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: p01-technology-integration-visual-qa

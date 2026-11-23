@@ -23,7 +23,8 @@ test('V5 one MapLibre runtime with unique route-specific GIS Source + Layer IDs'
  assert.match(js,/map\.queryRenderedFeatures\(\{layers:\[layer\]\}\)/);
  assert(!html.includes('<iframe'));
  assert(html.includes('unified-v5-map.js'));
- assert(html.includes('maplibre-gl@5.12.0/dist/maplibre-gl.js'));
+ assert(html.includes('maplibre-gl@6.13.0/dist/maplibre-gl.css'));
+ assert(fs.readFileSync('assets/unified-v5-map.js','utf8').includes('./p01-maplibre.js'));
 });
 test('V5 fail closed on empty canvas, missing basemap or invisible route',()=>{
  const js=get('assets/unified-v5-map.js');
