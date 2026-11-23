@@ -19,7 +19,7 @@
   if(A.canReadMemberContent)el.innerHTML='<span class="access-label">'+escape(statusText())+'</span><button class="member-entry" data-member title="'+escape(A.canAdmin?'Open Owner/Admin controls':'Open Member controls')+'">'+escape(A.email||'MEMBER SESSION')+'</button>';
   else if(pendingAccess())el.innerHTML='<span class="access-label">Session</span><button class="member-entry" type="button" disabled>CHECKING VERIFIED SESSION…</button>';
   else {
-   const callbackError=['email-proof-rejected','email-mismatch','invalid-email-proof','callback-origin-mismatch','storage-unavailable','pkce-exchange-failed','verification-failed','session-restore-failed','session-expired','role-error','role-denied','profile-error','get-user-failed','auth-network-error','client-error'].includes(A.status);
+   const callbackError=['email-proof-rejected','email-mismatch','invalid-email-proof','callback-origin-mismatch','storage-unavailable','pkce-exchange-failed','verification-failed','session-restore-failed','session-expired','role-error','role-denied','profile-error','get-user-failed','auth-network-error','auth-client-unavailable','client-error'].includes(A.status);
    el.innerHTML='<span class="access-label">Public</span><button class="member-entry" data-member>LOGIN / MEMBER ACCESS</button>'+
     (callbackError?'<p class="auth-error" role="alert">Sign-in could not be completed ('+escape(A.status)+'). Open Member Access to review the error.</p>':'');
   }

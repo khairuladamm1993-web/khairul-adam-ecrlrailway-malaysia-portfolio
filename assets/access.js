@@ -6,6 +6,7 @@
  let client=null,authSubscription=null,consent=false,dataCache=null,userId=null,magicLinkInFlight=null,hydrationPromise=null;
  let authRevision=0,initialization=null,manualVerification=false;
  const ATTEMPT_KEY='mrs10-auth-pending-v1',ATTEMPT_LOCK='mrs10-auth-request-v1';
+ const SDK_UNAVAILABLE='auth-client-unavailable';
  const readAttempt=()=>{try{return JSON.parse(localStorage.getItem(ATTEMPT_KEY)||'null')}catch{return null}};
  const pendingAttempt=()=>{const p=readAttempt();return p&&Number.isFinite(p.until)&&p.until>Date.now()?p:null};
  function durableStorage(){
@@ -24,6 +25,7 @@
   'role-error':'The backend access role could not be resolved. Check the existing session again.',
   'role-denied':'The backend has not granted an enabled Member or Admin profile.',
   'profile-error':'The Member profile could not be read securely.',
+  [SDK_UNAVAILABLE]:'The sign-in library did not load. Reload this page and try again. / Pustaka log masuk gagal dimuatkan. Muat semula halaman ini dan cuba lagi.',
   'client-error':'The authentication client could not complete the request.',
   'email-proof-rejected':'Kod atau pautan tidak sah, sudah digunakan atau tamat tempoh. Gunakan e-mel terbaru.',
   'email-mismatch':'E-mel pengesahan tidak sepadan dengan akaun yang dimasukkan. Akses ditolak.',
@@ -33,9 +35,13 @@
   'auth-network-error':'Authentication backend could not be reached. Check the connection and try again.'
  }[status]||'Protected data could not be loaded securely. Check the existing session again.');
  const failClosed=(status='public',error=null)=>{consent=false;dataCache=null;userId=null;return set({level:'public',status,canReadMemberContent:false,canAdmin:false,email:null,error:error?(['pkce-exchange-failed','verification-failed'].includes(status)?String(error):safeError(status)):null,retryAfterSeconds:null});};
+ const clientFailure=error=>{
+  if(error?.code===SDK_UNAVAILABLE)return SDK_UNAVAILABLE;
+  return /fetch|network|timeout|connection/i.test(String(error?.message||error||''))?'auth-network-error':'client-error';
+ };
  const requireClient=()=>{
   if(client)return client;
-  if(!window.supabase?.createClient)throw new Error('Supabase client library unavailable');
+  if(typeof window.supabase?.createClient!=='function')throw Object.assign(new Error('Supabase client library unavailable'),{code:SDK_UNAVAILABLE});
   // Keep existing session storage; isolate ONLY PKCE slots from older gateway tabs.
   const slot=k=>k.includes('code-verifier')?'mrs10-r25:'+k:k;
   const storage={getItem:k=>localStorage.getItem(slot(k)),setItem:(k,v)=>localStorage.setItem(slot(k),v),removeItem:k=>localStorage.removeItem(slot(k))};
@@ -45,7 +51,8 @@
  const validateSession=async(options={})=>{
   if(hydrationPromise)return hydrationPromise;
   const revision=authRevision;
-  hydrationPromise=(async()=>{
+  // Assign the shared promise before a synchronous SDK error can clear it.
+  hydrationPromise=Promise.resolve().then(async()=>{
    try{
     const c=requireClient();
     const previousAuthenticated=state.level==='member'||state.level==='admin'||state.status==='authenticated';
@@ -82,11 +89,9 @@
     return set({level:role,status:'authenticated',canReadMemberContent:true,canAdmin:role==='admin',email:user.email||profile.data?.email||null,error:null,retryAfterSeconds:null});
    }catch(error){
     if(revision!==authRevision)return snapshot();
-    const message=String(error?.message||error||'');
-    const network=/fetch|network|timeout|connection/i.test(message);
-    return failClosed(network?'auth-network-error':'client-error',network?'Authentication backend could not be reached. Check the connection and try again.':error);
+    return failClosed(clientFailure(error),true);
    }finally{hydrationPromise=null;}
-  })();
+  });
   return hydrationPromise;
  };
  function cleanAuthCallback(){
@@ -171,9 +176,7 @@
    }
    return await validateSession({expectSession:Boolean(code)});
   }catch(error){
-   const message=String(error?.message||error||'');
-   const network=/fetch|network|timeout|connection/i.test(message);
-   return failClosed(network?'auth-network-error':'client-error',network?'Authentication backend could not be reached. Check the connection and try again.':error);
+   return failClosed(clientFailure(error),true);
   }
  }
  const rateLimitInfo=error=>{
@@ -195,17 +198,21 @@
   magicLinkInFlight=withAttemptLock(async()=>{
    // The lock covers the SDK verifier write AND send, across tabs on this origin.
    if(pendingAttempt()){set({status:'verification-sent',error:null});return snapshot();}
+   let c;
+   try{c=requireClient();}
+   catch(error){
+    failClosed(clientFailure(error),true);
+    throw new Error(state.error);
+   }
    localStorage.setItem(ATTEMPT_KEY,JSON.stringify({until:Date.now()+60000}));
    const restored=await validateSession();
    if(restored.canReadMemberContent)return restored;
-   const c=requireClient();
    set({status:'sending',error:null,email:normalized});
    const redirectTo=location.origin+'/gateway.html';
    let response;
    try{response=await c.auth.signInWithOtp({email:normalized,options:{emailRedirectTo:redirectTo,shouldCreateUser:true}});}
    catch(error){
-    const network=/fetch|network|timeout|connection/i.test(String(error?.message||''));
-    failClosed(network?'auth-network-error':'client-error',true);
+    failClosed(clientFailure(error),true);
     throw new Error(state.error);
    }
    const {error}=response;

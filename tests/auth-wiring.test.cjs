@@ -38,7 +38,8 @@ function makeClient({session={access_token:'x'},exchangeSession=null,exchangeErr
 async function load(options={}){
  const client=options.client||makeClient(options);
  const events=[];
- const window={supabase:{createClient(url,key,config){client.calls.push(['createClient',config]);return client}},dispatchEvent(e){events.push(e)},addEventListener(){},removeEventListener(){}};
+ const sdk={createClient(url,key,config){client.calls.push(['createClient',config]);return client}};
+ const window={supabase:options.sdkUnavailable?undefined:sdk,dispatchEvent(e){events.push(e)},addEventListener(){},removeEventListener(){}};
  const document={readyState:'complete',addEventListener(){}};
  const location={origin:options.origin||'https://preview.example',pathname:options.pathname||'/gateway.html',search:options.locationSearch||'',hash:options.locationHash||''};
  const history={replaceState(){location.search='';location.hash='';}};
@@ -46,11 +47,28 @@ async function load(options={}){
  const context={window,document,location,history,localStorage,URL,URLSearchParams,CustomEvent:class{constructor(type,init){this.type=type;this.detail=init?.detail}},setTimeout,clearTimeout,console};
  vm.createContext(context);vm.runInContext(source,context);
  await new Promise(r=>setTimeout(r,5));
- return {A:window.RailwayAccess,client,events,location};
+ return {A:window.RailwayAccess,client,events,location,restoreSdk(){window.supabase=sdk}};
 }
 test('no session resolves Public and never unlocks protected content',async()=>{
  const {A}=await load({session:null});
  assert.equal(A.level,'public');assert.equal(A.canReadMemberContent,false);assert.equal(A.canAdmin,false);
+});
+test('missing client SDK stays Public and cannot falsely report a queued email on retry',async()=>{
+ const storage=new Map();
+ const {A,client,restoreSdk}=await load({session:null,storage,sdkUnavailable:true});
+ assert.equal(A.status,'auth-client-unavailable');
+ for(let i=0;i<2;i++){
+  await assert.rejects(()=>A.sendMagicLink('member@example.com'),/sign-in library did not load/);
+  assert.equal(A.status,'auth-client-unavailable');
+  assert.equal(A.canReadMemberContent,false);
+  assert.equal(storage.has('mrs10-auth-pending-v1'),false);
+ }
+ assert.deepEqual(client.calls,[]);
+ assert.equal((await A.refresh()).status,'auth-client-unavailable');
+ restoreSdk();
+ assert.equal((await A.refresh()).status,'public');
+ assert.equal((await A.sendMagicLink('member@example.com')).status,'verification-sent');
+ assert.equal(client.calls.filter(([method])=>method==='signInWithOtp').length,1);
 });
 test('invalid session fails closed to Public',async()=>{
  const {A}=await load({user:null});
