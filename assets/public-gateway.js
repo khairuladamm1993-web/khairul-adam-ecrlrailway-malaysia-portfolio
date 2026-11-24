@@ -1,11 +1,11 @@
 /* Public gateway: preserved navigation, no member data or simulated login. */
 (()=>{
- const R=window.Railway,h=R.html;
+ const R=window.Railway,h=R.html,mapRoutes=window.MRS10P01MapCore.routes;
  const categories=[['practical','PRACTICAL QUALIFICATION'],['ebook','E-BOOK TRAIN OPERATION'],['corridor','ECRL STATIONS & CORRIDOR'],['map','MAP'],['future','COMING SOON'],['news','NEWS, INSIGHTS & REFERENCES']];
  const destinations=[['home','Full Portfolio'],['journey','Railway Journey'],['experience','Field Experience'],['lab','Simulator Lab']];
  const read=(key,fallback)=>{try{return JSON.parse(sessionStorage.getItem(key))??fallback;}catch{return fallback;}};
  const write=(key,value)=>{try{sessionStorage.setItem(key,JSON.stringify(value));}catch{}};
- let category=read('railway-gateway-category','practical'),destination=read('railway-gateway-destination','home');
+ let category=window.location?.hash==='#map'?'map':read('railway-gateway-category','practical'),destination=read('railway-gateway-destination','home');
  if(!categories.some(c=>c[0]===category))category='practical';if(!destinations.some(c=>c[0]===destination))destination='home';
  const box=document.querySelector('#gateway-content'),dialog=document.querySelector('#detail-dialog');
  let currentDetail=null,returnSelector=null;
@@ -47,11 +47,12 @@
    zh:{member:'铁路网络图 · 会员/所有者',public:'马来西亚铁路图 · 公众',summary:'旧版 ECRL GIS 参考',details:'保留旧地图以核查来源及坐标可信度，不代表官方运营线路。',open:'打开旧版参考',full:'打开完整地图',disclaimer:'教育参考。ECRL 线路尚未核实。'},
    th:{member:'แผนที่เครือข่ายรถไฟ · สมาชิก',public:'แผนที่รถไฟมาเลเซีย · สาธารณะ',summary:'แผนที่อ้างอิง ECRL เดิม',details:'เก็บแผนที่เดิมเพื่อเทียบแหล่งข้อมูล ไม่ใช่แนวเส้นทางปฏิบัติการอย่างเป็นทางการ',open:'เปิดแผนที่อ้างอิง',full:'เปิดแผนที่เต็ม',disclaimer:'ข้อมูลเพื่อการศึกษา แนวเส้นทาง ECRL ยังไม่ได้รับการยืนยัน'}
   }[locale];
-  const src=member?'unified-map-v8.html':'unified-map-v7.html';
+  const src=member?mapRoutes.member:mapRoutes.malaysia;
   const note='<p class="study-boundary" data-map-caveat>'+R.escape(labels.disclaimer)+'</p>';
+  const publicLinks=member?'':'<nav class="p01-public-map-nav" aria-label="MR-S10 map navigation"><a href="'+mapRoutes.global+'">Global Explorer</a><a href="'+mapRoutes.ecrl+'">'+h('ECRL Asset Reference')+'</a></nav>';
   const archive=member?'<details class="mrs10-map-archive" data-gis-reference><summary>'+R.escape(labels.summary)+'</summary><p>'+R.escape(labels.details)+'</p><button type="button" class="secondary" data-legacy-map-load>'+R.escape(labels.open)+'</button><div id="railway-map-mount" class="railway-map-mount" hidden></div></details>':'';
   box.innerHTML='<section class="content-row mrs10-rail-network" data-railway-map-stage data-map-audience="'+(member?'member':'public')+'">'+
-   '<div class="content-heading"><div><h2>'+R.escape(member?labels.member:labels.public)+'</h2></div><a class="secondary" href="'+src+'" target="_blank" rel="noopener noreferrer">'+R.escape(labels.full)+' ↗</a></div>'+
+   '<div class="content-heading"><div><h2>'+R.escape(member?labels.member:labels.public)+'</h2></div><a class="secondary" href="'+src+'"'+(member?' target="_blank" rel="noopener noreferrer"':'')+'>'+R.escape(labels.full)+'</a></div>'+publicLinks+
    '<iframe class="mrs10-map-frame" title="'+R.escape(member?labels.member:labels.public)+'" src="'+src+'" loading="lazy" referrerpolicy="no-referrer"></iframe>'+note+archive+'</section>';
   const open=box.querySelector('[data-legacy-map-load]');
   open?.addEventListener('click',()=>{
@@ -141,6 +142,11 @@
   const hasMemberAccess=Boolean(window.RailwayAccess?.canReadMemberContent);
   if(hadMemberAccess!==hasMemberAccess&&(category==='map'||!hasMemberAccess))render();
   hadMemberAccess=hasMemberAccess;
+ });
+ window.addEventListener('hashchange',()=>{
+  if(window.location.hash!=='#map'||category==='map')return;
+  category='map';
+  render();
  });
  R.onLanguage(()=>{
   // Retain Leaflet viewport/markers when only the website language changes.

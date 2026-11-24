@@ -3,7 +3,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const source=fs.readFileSync(path.join(__dirname,'../assets/public-gateway.js'),'utf8');
-function boot(initialMember=false){
+function boot(initialMember=false,hash='',category='map'){
  const nodes=new Map(),listeners=new Map();
  function stub(){
   return {innerHTML:'',hidden:false,open:false,scrollTop:0,
@@ -15,11 +15,12 @@ function boot(initialMember=false){
  };
  const railway={html:x=>String(x),escape:x=>String(x),language:'ms',onLanguage(){}};
  const window={
+  MRS10P01MapCore:require('../assets/p01-map-core.js'),location:{hash},
   Railway:railway,RailwayAccess:{canReadMemberContent:initialMember},
   RailwayModulePreviews:[],RailwayInsights:[],
   addEventListener(name,callback){listeners.set(name,callback);}
  };
- const sessionStorage={getItem(key){return key==='railway-gateway-category'?'"map"':key==='railway-gateway-destination'?'"journey"':null;},setItem(){}};
+ const sessionStorage={getItem(key){return key==='railway-gateway-category'?JSON.stringify(category):key==='railway-gateway-destination'?'"journey"':null;},setItem(){}};
  vm.runInNewContext(source,{window,document,sessionStorage,CustomEvent:class{},setTimeout(){}},{timeout:3000});
  return {window,nodes,dispatch:name=>listeners.get(name)?.()};
 }
@@ -50,4 +51,13 @@ test('Lazy legacy map mount refuses stale member sessions and detached hosts',()
  assert.match(source,/if\(!window\.RailwayAccess\?\.canReadMemberContent\)return Promise\.resolve\(\)/);
  assert.match(source,/if\(!window\.RailwayAccess\?\.canReadMemberContent\|\|!host\|\|host\.hidden\)return/);
  assert.match(source,/return m\.mount\(host\)/);
+});
+
+test('Direct Public Map return supersedes stored category and links locally',()=>{
+ const app=boot(false,'#map','about');
+ const html=app.nodes.get('#gateway-content').innerHTML;
+ assert.match(html,/src="unified-map-v7\.html"/);
+ assert.match(html,/href="map-language-lab\.html\?railPilot=1"/);
+ assert.match(html,/href="ecrl-asset-reference\.html"/);
+ assert.doesNotMatch(html,/vercel\.app|data-gis-reference|unified-map-v8/);
 });

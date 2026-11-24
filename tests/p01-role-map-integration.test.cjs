@@ -5,7 +5,7 @@ const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 test('Public map uses existing V7; Member/Owner main map uses existing V8',()=>{
  const source=read('assets/public-gateway.js');
  assert.match(source,/const member=Boolean\(window\.RailwayAccess\?\.canReadMemberContent\)/);
- assert.match(source,/const src=member\?'unified-map-v8\.html':'unified-map-v7\.html'/);
+ assert.match(source,/const src=member\?mapRoutes\.member:mapRoutes\.malaysia/);
  assert.match(source,/data-map-audience/);
  assert.match(source,/class="mrs10-map-frame"/);
  assert.match(source,/loading="lazy" referrerpolicy="no-referrer"/);

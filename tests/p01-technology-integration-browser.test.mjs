@@ -23,6 +23,72 @@ const profiles=[['desktop',1200,900],['ipad',810,1080],['iphone',390,844],['ipho
 const arcgis=/^https:\/\/[^/]*arcgis\.com\//;
 const emptyGis=r=>r.fulfill({json:{features:[]},headers:{'access-control-allow-origin':'*'}});
 
+async function checkPublicNavigation(page,engine,device){
+ const otherDeployments=[];
+ page.setDefaultTimeout(12000);
+ const recordNavigation=frame=>{
+  const url=frame.url();
+  if(url.startsWith('http')&&new URL(url).origin!==new URL(base).origin)otherDeployments.push(url);
+ };
+ page.on('framenavigated',recordNavigation);
+ try{
+  await page.route('https://cdn.jsdelivr.net/npm/@supabase/**',r=>r.abort());
+  await page.goto(base+'/index.html',{waitUntil:'domcontentloaded'});
+  await page.locator('#continue').click();
+  await page.waitForURL('**/gateway.html');
+  await page.locator('[data-category="map"]').click();
+  const stage=page.locator('[data-map-audience="public"]');
+  await stage.locator('iframe[src="unified-map-v7.html"]').waitFor();
+  assert.equal(await page.locator('[data-gis-reference],iframe[src="unified-map-v8.html"]').count(),0);
+  await stage.locator('a[href="unified-map-v7.html"]').click();
+  await page.waitForURL('**/unified-map-v7.html');
+  await page.locator('#search').fill('Kajang');
+  assert.ok(await page.locator('#search-results button').count()>0);
+  const filter=page.locator('#filters button').last();
+  await filter.click();
+  assert.equal(await filter.getAttribute('aria-pressed'),'true');
+  const fullscreen=page.locator('#p01-v7-fullscreen');
+  await fullscreen.click();
+  assert.equal(await fullscreen.getAttribute('aria-pressed'),'true');
+  await page.screenshot({path:out+'/'+engine+'-'+device+'-public-fullscreen.png'});
+  await page.keyboard.press('Escape');
+  assert.equal(await fullscreen.getAttribute('aria-pressed'),'false');
+  await page.locator('.p01-public-map-nav a[href^="map-language-lab.html"]').click();
+  await page.waitForURL('**/map-language-lab.html?railPilot=1');
+  await page.locator('#visitor-map canvas').waitFor({timeout:45000});
+  const expand=page.locator('#map-expand');
+  await expand.click();
+  assert.equal(await expand.getAttribute('aria-expanded'),'true');
+  await expand.click();
+  assert.equal(await expand.getAttribute('aria-expanded'),'false');
+  await page.locator('.p01-public-map-nav a[href="ecrl-asset-reference.html"]').click();
+  await page.waitForURL('**/ecrl-asset-reference.html');
+  const assets=page.locator('#asset-reference-list');
+  assert.equal(await assets.locator('[data-type=STN]').count(),16);
+  assert.equal(await assets.locator('[data-type=PL]').count(),7);
+  assert.equal(await assets.locator('[data-type=DEPOT]').count(),2);
+  assert.equal(await assets.getByText('STN10',{exact:false}).count(),0);
+  await page.locator('#asset-search').fill('STN12');
+  assert.equal(await assets.locator('li').count(),1);
+  assert.match(await assets.innerText(),/Lokasi fizikal belum disahkan/);
+  await page.locator('#asset-search').fill('');
+  await page.locator('[data-asset-kind=PL]').click();
+  assert.equal(await assets.locator('li').count(),7);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
+  await page.screenshot({path:out+'/'+engine+'-'+device+'-ecrl-public.png'});
+  await page.locator('.p01-public-map-nav a[href="gateway.html#map"]').click();
+  await page.waitForURL('**/gateway.html#map');
+  await page.locator('[data-map-audience="public"] iframe[src="unified-map-v7.html"]').waitFor();
+  await page.locator('[data-map-audience="public"] a[href="unified-map-v7.html"]').click();
+  await page.locator('footer a[href="./ampang-line-r219.html"]').click();
+  await page.waitForURL('**/ampang-line-r219.html');
+  await page.locator('a[href="./gateway.html#map"]').click();
+  await page.waitForURL('**/gateway.html#map');
+  await page.locator('a[href="index.html"]').first().click();
+  await page.waitForURL('**/index.html');
+  assert.deepEqual(otherDeployments,[]);
+ }finally{page.off('framenavigated',recordNavigation)}
+}
 async function checkUnavailableRenderer(browser){
  const page=await browser.newPage();
  try{
@@ -44,6 +110,8 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
   if(engine==='chromium')await checkUnavailableRenderer(browser);
   for(const [device,width,height] of profiles){
    const page=await browser.newPage({viewport:{width,height},hasTouch:device!=='desktop',isMobile:device!=='desktop'});
+   // Run the local smoke test with the application's opt-out for external analytics.
+   await page.addInitScript(()=>Object.defineProperty(navigator,'globalPrivacyControl',{value:true}));
    const errors=[];
    const localFailures=[];
    page.on('response',r=>{if(r.url().startsWith(base+'/')&&!r.ok())localFailures.push(new URL(r.url()).pathname)});
@@ -62,6 +130,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    await page.route('https://tiles.openfreemap.org/styles/**', r=>r.fulfill({json:{version:8,sources:{},layers:[{id:'bg',type:'background',paint:{'background-color':'#dce6e4'}}]},headers:{'access-control-allow-origin':'*'}}));
    await page.route(arcgis,emptyGis);
    try{
+    await checkPublicNavigation(page,engine,device);
     assert.equal((await page.goto(base+'/unified-map-v7.html')).status(),200);
     await page.waitForFunction(()=>{
      const d=window.MRS10V7Diagnostics?.snapshot();
@@ -156,7 +225,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
     assert.equal(await page.evaluate(()=>window.MRS10V8Diagnostics.snapshot().ecrl.physicalSegments),0);
     assert.deepEqual(errors,[]);
     assert.deepEqual(localFailures,[]);
-    rows.push({engine,device,status:'PASS',maplibre:'6.13.0',publicV7:true,tiers:[[16,0,0,0],[16,7,0,0],[16,7,2,7]],stationPopup:true,popupScroll:true,controlsClear:true,plNoPoint:true,fullscreenFallbackEscape:true});
+    rows.push({engine,device,status:'PASS',maplibre:'6.13.0',publicV7:true,publicNavigation:true,tiers:[[16,0,0,0],[16,7,0,0],[16,7,2,7]],stationPopup:true,popupScroll:true,controlsClear:true,plNoPoint:true,fullscreenFallbackEscape:true});
    }catch(e){rows.push({engine,device,status:'FAIL',error:String(e.stack||e)});await page.screenshot({path:`${out}/${engine}-${device}-fail.png`}).catch(()=>{})}
    finally{await fs.writeFile(out+'/visual-qa.json',JSON.stringify(rows,null,2));console.log(JSON.stringify(rows.at(-1)));await page.close()}
   }

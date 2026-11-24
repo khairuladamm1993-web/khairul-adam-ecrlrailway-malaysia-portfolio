@@ -26,7 +26,12 @@ for name in root_files:
         raise SystemExit(f"Missing required production file: {name}")
     dest=out/name
     dest.parent.mkdir(parents=True,exist_ok=True)
-    shutil.copy2(src,dest)
+    if name=="map-language-lab.html":
+        text=src.read_text(encoding="utf-8")
+        text=re.sub(r"<!-- P01 candidate navigation -->.*?<!-- End P01 candidate navigation -->","",text,flags=re.S)
+        dest.write_text(text,encoding="utf-8")
+    else:
+        shutil.copy2(src,dest)
 
 # Owner dashboard registry contains only public-safe project evidence. Never add private data.
 registry=root/"data"/"owner-project-registry.json"

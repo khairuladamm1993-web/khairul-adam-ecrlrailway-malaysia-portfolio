@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ms"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>MR-S10 · Rujukan Aset ECRL</title>
+<link rel="stylesheet" href="./assets/unified-v5.css">
+<link rel="stylesheet" href="./assets/p01-public-map-nav.css">
+</head><body><main>
+<p class="p01-public-map-brand">MR-S10 · Railway Intelligence</p>
+<nav class="p01-public-map-nav" aria-label="Navigasi peta">
+ <a href="gateway.html#map" target="_top">← Gateway</a>
+ <a href="unified-map-v7.html" target="_top">Peta Rel Malaysia</a>
+ <a href="map-language-lab.html?railPilot=1" target="_top">Global Explorer</a>
+</nav>
+<h1>Rujukan Aset ECRL</h1>
+<p class="notice">Peta skematik identiti aset. Turutan rujukan tidak menunjukkan kedudukan, jarak atau jajaran landasan fizikal.</p>
+<div class="search"><label for="asset-search">Cari aset</label><input type="search" id="asset-search" placeholder="Contoh STN12 atau PL01"></div>
+<div class="filters" role="group" aria-label="Jenis aset">
+ <button type="button" data-asset-kind="ALL" aria-pressed="true">Semua</button>
+ <button type="button" data-asset-kind="STN" aria-pressed="false">Stesen</button>
+ <button type="button" data-asset-kind="PL" aria-pressed="false">Passing loop</button>
+ <button type="button" data-asset-kind="DEPOT" aria-pressed="false">Depot</button>
+</div>
+<p id="asset-status" role="status" aria-live="polite">Memuatkan rujukan aset…</p>
+<ol class="p01-ecrl-lineup" id="asset-reference-list" aria-label="Turutan rujukan aset"></ol>
+<footer>Kontrak Data Perkeretaapian MR-S10 V1 · Rujukan pendidikan · Bukan untuk operasi</footer>
+<script src="./assets/unified-ecrl/source/data.js"></script>
+<script src="./assets/unified-ecrl/source/i18n.js"></script>
+<script src="./assets/unified-ecrl/chainage-manifest.js"></script>
+<script src="./assets/unified-ecrl/port-references.js"></script>
+<script src="./assets/unified-ecrl/kerteh-freight-reference.js"></script>
+<script src="./assets/unified-ecrl/alignment-evidence-r2.js"></script>
+<script src="./assets/unified-ecrl/adapter.js"></script>
+<script src="./assets/unified-ecrl/master-intelligence.js"></script>
+<script src="./assets/unified-ecrl/railway-data-contract-v1.js"></script>
+<script src="./assets/p01-map-core.js"></script>
+<script src="./assets/p01-ecrl-public-reference.js"></script>
+</main></body></html>

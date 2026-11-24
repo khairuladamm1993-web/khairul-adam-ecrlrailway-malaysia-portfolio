@@ -393,7 +393,7 @@ async function gateway(options={}){
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};
  w.Railway={html:s=>String(s),text:s=>String(s),escape:s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),language:'en',onLanguage(){}};
  w.RailwayModulePreviews=[];w.RailwayInsights=[];
- for(const file of ['access.js','public-gateway.js','member-gateway.js'])w.eval(fs.readFileSync(path.join(root,'assets',file),'utf8'));
+ for(const file of ['p01-map-core.js','access.js','public-gateway.js','member-gateway.js'])w.eval(fs.readFileSync(path.join(root,'assets',file),'utf8'));
  await new Promise(r=>setTimeout(r,25));
  return {dom,w,client,A:w.RailwayAccess};
 }

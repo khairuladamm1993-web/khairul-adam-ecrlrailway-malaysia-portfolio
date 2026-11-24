@@ -48,7 +48,8 @@ test('vector visitor map exports proper name fallback in all four languages',()=
 });
 test('public vector map uses sourced OpenFreeMap and railway-overlay only; no secret API key',()=>{
  const html=read('map-language-lab.html'),script=read('assets/map-language-lab.js');
- assert.match(html,/maplibre-gl@6\.13\.0\/dist\/maplibre-gl\.mjs/);
+ assert.match(html,/assets\/p01-maplibre\.js/);
+ assert.match(read('assets/p01-maplibre.js'),/maplibre-gl@6\.13\.0\/dist\/maplibre-gl\.mjs/);
  assert.match(script,/tiles\.openfreemap\.org\/styles/);
  assert.match(script,/tiles\.openrailwaymap\.org\/standard/);
  assert.match(script,/setLayoutProperty\(layer\.id,'text-field'/);
@@ -61,6 +62,7 @@ test('visitor map packaged into main Unified Gateway but separate from canonical
  const prod=read('scripts/build-production.py');
  const pub=read('assets/public-gateway.js');
  assert(prod.includes('"map-language-lab.html"'));
- assert(pub.includes('href="map-language-lab.html"'));
+ assert.match(pub,/mapRoutes\.global/);
+ assert.equal(require('../assets/p01-map-core.js').routes.global,'map-language-lab.html?railPilot=1');
  assert(pub.includes('mountMap'));
 });

@@ -141,13 +141,35 @@ function updateSearch(){
  }
  if(!matches.length)host.append(el('p',null,tr('noResults')));
 }
+function updateFullscreenLabel(){
+ const button=$('p01-v7-fullscreen'), active=button.getAttribute('aria-pressed')==='true';
+ const labels={ms:['Skrin penuh','Keluar skrin penuh'],en:['Fullscreen','Exit fullscreen'],zh:['全屏','退出全屏'],th:['เต็มหน้าจอ','ออกจากเต็มหน้าจอ']};
+ button.textContent=labels[state.locale][Number(active)];
+}
+function bindFullscreen(){
+ const button=$('p01-v7-fullscreen'), shell=button.closest('.mapbox');
+ function setFullscreen(active){
+  shell.classList.toggle('p01-v7-fullscreen',active);
+  document.body.classList.toggle('p01-v7-fullscreen-open',active);
+  button.setAttribute('aria-pressed',String(active));
+  updateFullscreenLabel();
+  requestAnimationFrame(()=>state.map?.resize());
+ }
+ button.addEventListener('click',()=>setFullscreen(button.getAttribute('aria-pressed')!=='true'));
+ document.addEventListener('keydown',event=>{
+  if(event.key!=='Escape'||event.defaultPrevented||button.getAttribute('aria-pressed')!=='true')return;
+  event.preventDefault();
+  setFullscreen(false);
+  button.focus({preventScroll:true});
+ });
+}
 function applyLanguage(){
  document.documentElement.lang=state.locale;
  $('title').textContent=tr('title');$('description').textContent=tr('desc');
  $('lineup-title').textContent=tr('lineup');$('search').placeholder=tr('search');
  $('reset').textContent=tr('reset');$('language').textContent=state.locale==='ms'?'BM':state.locale==='en'?'EN':state.locale==='zh'?'中文':'ไทย';
  $('attribution').textContent=tr('rights');
- buildFilters();buildLegend();buildRoutes();buildLineup();updateSearch();showStatus();
+ updateFullscreenLabel();buildFilters();buildLegend();buildRoutes();buildLineup();updateSearch();showStatus();
 }
 function geoJSON(){
  return core.toGeoJSON(state.manifest.map(r=>state.results.get(r.id)));
@@ -301,7 +323,7 @@ function init(){
   if(state.map){state.mapReady=false;state.map.setStyle(styleURL())}
   showStatus();
  });
- applyLanguage();startMap();void loadGIS();
+ bindFullscreen();applyLanguage();startMap();void loadGIS();
 }
 function diagnosticSnapshot(){
  const map=state.map,rows={};
