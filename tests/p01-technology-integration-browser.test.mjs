@@ -133,10 +133,30 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
     await page.screenshot({path:`${out}/${engine}-${device}-popup.png`});
     await popup.locator('.maplibregl-popup-close-button').click();
     await popup.waitFor({state:'detached'});
+    const fullscreen=page.locator('#map-fullscreen');
+    await fullscreen.click();
+    await page.waitForFunction(()=>!document.fullscreenElement&&!document.querySelector('.mapbox').classList.contains('is-fullscreen'));
+    await page.locator('.mapbox').evaluate(box=>{
+     box.requestFullscreen=()=>Promise.reject(new Error('Fullscreen API unavailable'));
+    });
+    await fullscreen.click();
+    await page.waitForFunction(()=>!document.querySelector('#map-fullscreen').disabled);
+    assert.equal(await fullscreen.getAttribute('aria-label'),'Keluar daripada skrin penuh');
+    assert.equal(await fullscreen.getAttribute('aria-pressed'),'true');
+    assert.equal(await page.evaluate(()=>document.fullscreenElement),null);
+    await canvas.focus();
+    await page.keyboard.press('Escape');
+    assert.equal(await fullscreen.getAttribute('aria-label'),'Skrin penuh');
+    assert.equal(await fullscreen.getAttribute('aria-pressed'),'false');
+    assert.equal(await fullscreen.evaluate(button=>document.activeElement===button),true);
+    assert.equal(await page.locator('.mapbox.is-fullscreen').count(),0);
+    await fullscreen.click();
+    await fullscreen.click();
+    await page.waitForFunction(()=>document.querySelector('#map-fullscreen').getAttribute('aria-pressed')==='false');
     assert.equal(await page.evaluate(()=>window.MRS10V8Diagnostics.snapshot().ecrl.physicalSegments),0);
     assert.deepEqual(errors,[]);
     assert.deepEqual(localFailures,[]);
-    rows.push({engine,device,status:'PASS',maplibre:'6.13.0',publicV7:true,tiers:[[16,0,0,0],[16,7,0,0],[16,7,2,7]],stationPopup:true,popupScroll:true,controlsClear:true,plNoPoint:true});
+    rows.push({engine,device,status:'PASS',maplibre:'6.13.0',publicV7:true,tiers:[[16,0,0,0],[16,7,0,0],[16,7,2,7]],stationPopup:true,popupScroll:true,controlsClear:true,plNoPoint:true,fullscreenFallbackEscape:true});
    }catch(e){rows.push({engine,device,status:'FAIL',error:String(e.stack||e)});await page.screenshot({path:`${out}/${engine}-${device}-fail.png`}).catch(()=>{})}
    finally{await fs.writeFile(out+'/visual-qa.json',JSON.stringify(rows,null,2));console.log(JSON.stringify(rows.at(-1)));await page.close()}
   }

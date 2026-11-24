@@ -247,10 +247,17 @@ function renderOpenMRIntelligence(){
  for(const row of rows){const d=el('details'),summary=el('summary',null,row.name+' · '+row.status);d.append(summary,el('p',null,row.kind),el('p',null,row.note));for(const url of row.urls||[])appendSource(d,url);host.append(d);}
  const labels=['OPERATIONAL','UNDER_CONSTRUCTION','PLANNED','MR_S10_PROPOSAL'].map((k,i)=>['━','┄','┈','◇'][i]+' '+openmr.statusLabel(k,state.locale));$('network-status-key').textContent=labels.join(' · ')+' · ★ '+({ms:'Pertukaran (merah) · gelang pelbagai warna = pelbagai perkhidmatan',en:'Interchange (red) · multicolour ring = multiple services',zh:'红色星号=换乘 · 多色环=多条线路',th:'ดาวสีแดง=จุดเปลี่ยนรถ · วงแหวนหลายสี=หลายเส้นทาง'}[state.locale]||'Interchange')+' · Geometry evidence ≠ operating status · Reference, not survey/feasibility approval';
 }
+function labelFullscreen(){
+ const button=$('map-fullscreen');
+ const labels={ms:['Skrin penuh','Keluar daripada skrin penuh'],en:['Fullscreen','Exit fullscreen'],zh:['全屏','退出全屏'],th:['เต็มหน้าจอ','ออกจากโหมดเต็มหน้าจอ']};
+ const label=labels[state.locale][button.getAttribute('aria-pressed')==='true'?1:0];
+ button.setAttribute('aria-label',label);
+ button.title=label;
+}
 function applyLanguage(){
  Object.assign(i18n[state.locale],completeCopy[state.locale]);
  document.documentElement.lang=state.locale;
- gps?.label();r3UI?.render();renderOpenMRIntelligence();$('details-toggle').setAttribute('aria-label',tr('mapDetails'));
+ gps?.label();r3UI?.render();renderOpenMRIntelligence();$('details-toggle').setAttribute('aria-label',tr('mapDetails'));labelFullscreen();
  $('title').textContent=tr('title');$('description').textContent=tr('desc');
  $('lineup-title').textContent=tr('lineup');$('search').placeholder=tr('search');
  $('reset').textContent=tr('reset');$('language').textContent=state.locale==='ms'?'BM':state.locale==='en'?'EN':state.locale==='zh'?'中文':'ไทย';
@@ -494,7 +501,7 @@ async function init(){
  $('search').addEventListener('input',updateSearch);
  $('reset').addEventListener('click',reset);
  const fullscreenBox=document.querySelector('.mapbox'),fullscreenButton=$('map-fullscreen');let nativeFullscreen=false,fullscreenBusy=false;
- const fullState=on=>{fullscreenBox.classList.toggle('is-fullscreen',on);fullscreenButton.setAttribute('aria-pressed',String(on));requestAnimationFrame(()=>state.map?.resize());};
+ const fullState=on=>{fullscreenBox.classList.toggle('is-fullscreen',on);fullscreenButton.setAttribute('aria-pressed',String(on));labelFullscreen();requestAnimationFrame(()=>state.map?.resize());};
  fullscreenButton.onclick=async()=>{
   if(fullscreenBusy)return;fullscreenBusy=true;fullscreenButton.disabled=true;
   const on=fullscreenBox.classList.contains('is-fullscreen');
@@ -502,7 +509,13 @@ async function init(){
   else{fullState(true);if(fullscreenBox.requestFullscreen)try{await fullscreenBox.requestFullscreen();nativeFullscreen=Boolean(document.fullscreenElement);}catch{nativeFullscreen=false;}}}
   finally{fullscreenBusy=false;fullscreenButton.disabled=false;requestAnimationFrame(()=>state.map?.resize());}
  };
- document.addEventListener('fullscreenchange',()=>{if(nativeFullscreen&&!document.fullscreenElement){nativeFullscreen=false;fullState(false);}state.map?.resize();});
+ document.addEventListener('fullscreenchange',()=>{if(nativeFullscreen&&document.fullscreenElement!==fullscreenBox){nativeFullscreen=false;fullState(false);fullscreenButton.focus({preventScroll:true});}state.map?.resize();});
+ document.addEventListener('keydown',event=>{
+  if(event.key!=='Escape'||event.defaultPrevented||fullscreenBusy||document.fullscreenElement||!fullscreenBox.classList.contains('is-fullscreen'))return;
+  event.preventDefault();
+  fullState(false);
+  fullscreenButton.focus({preventScroll:true});
+ });
  $('language').addEventListener('click',()=>{state.locale=locales[(locales.indexOf(state.locale)+1)%4];applyLanguage();if(focus.current.mode==='INFRASTRUCTURE_FOCUS'){showInfrastructure(focus.current.assetId)}else if(state.popup){closeFocus()}});
  $('theme').addEventListener('click',()=>{
   state.theme=state.theme==='dark'?'light':'dark';
