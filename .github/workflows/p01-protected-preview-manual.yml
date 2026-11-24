@@ -1,0 +1,176 @@
+name: P01 Protected Preview manual recovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      approved_sha:
+        description: Exact SHA approved for one Protected Preview
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: p01-protected-preview-04a0bfc7
+  cancel-in-progress: false
+
+env:
+  APPROVED_SHA: 04a0bfc7b45a2bfb790ad815d6fc58245b7bcb57
+  ARTIFACT_ID: '14940687178'
+  PACKAGE_RUN: '45435113655'
+  QA_RUN: '45435113789'
+  ZIP_SHA256: fbca929433d1a9e42dd05296c238cc674b147bfe253715174daadddb8aefcc7f
+  SOURCE_REPO: khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio
+  SOURCE_BRANCH: candidate/p01-visual-refinement-mrnext-20261124
+  VERCEL_PROJECT_ID: prj_lCXBrXOHCNYABx8TLx2FhCEAIYus
+  VERCEL_ORG_ID: team_0JRmhxIIyLuWMPHsxwWxJfTv
+  VERCEL_TEAM_SLUG: 1993khairuladam-3016
+  ROLLBACK_ALIAS: mrs10-p01-unified-v8-sg-geometr-git-6f80d2-1993khairuladam-3016.vercel.app
+  ROLLBACK_ID: dpl_2K9j4vqkJaWGeaFFsbJcYYFnAARS
+
+jobs:
+  preview:
+    if: >-
+      github.repository == 'khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio' &&
+      github.ref == 'refs/heads/candidate/p01-protected-preview-manual-ci-20261125' &&
+      inputs.approved_sha == '04a0bfc7b45a2bfb790ad815d6fc58245b7bcb57' &&
+      github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    environment: p01-protected-preview
+
+    steps:
+      - name: Verify CI receipts and extract the exact prebuilt ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          stage="$RUNNER_TEMP/p01-preview"
+          mkdir -p "$stage"
+          for run in "$PACKAGE_RUN" "$QA_RUN"; do
+            gh api "repos/$SOURCE_REPO/actions/runs/$run" |
+              jq -e --arg sha "$APPROVED_SHA" --arg branch "$SOURCE_BRANCH" +                '.head_sha == $sha and .head_branch == $branch and .conclusion == "success"' >/dev/null
+          done
+          gh api "repos/$SOURCE_REPO/actions/artifacts/$ARTIFACT_ID" |
+            jq -e --arg sha "$APPROVED_SHA" --arg digest "sha256:$ZIP_SHA256" --arg run "$PACKAGE_RUN" +              '.workflow_run.head_sha == $sha and (.workflow_run.id|tostring) == $run and .digest == $digest and .expired == false' >/dev/null
+          gh api "repos/$SOURCE_REPO/actions/artifacts/$ARTIFACT_ID/zip" > "$stage/prebuilt.zip"
+          printf '%s  %s\n' "$ZIP_SHA256" "$stage/prebuilt.zip" | sha256sum --check
+          python - "$stage" "$APPROVED_SHA" <<'PY'
+          import hashlib, json, stat, sys, zipfile
+          from pathlib import Path, PurePosixPath
+
+          stage, expected_sha = Path(sys.argv[1]), sys.argv[2]
+          with zipfile.ZipFile(stage / 'prebuilt.zip') as archive:
+              entries = archive.infolist()
+              names = {entry.filename for entry in entries}
+              assert len(names) == len(entries)
+              assert all(not PurePosixPath(e.filename).is_absolute() and
+                         '..' not in PurePosixPath(e.filename).parts and
+                         not stat.S_ISLNK(e.external_attr >> 16) for e in entries)
+              manifest = json.loads(archive.read('release-manifest.json'))
+              assert manifest['sourceSha'] == expected_sha and manifest['target'] == 'preview'
+              checksums = {x['path']: x['sha256'] for x in manifest['files']}
+              assert set(checksums) == {n for n in names if not n.endswith('/')} - {'release-manifest.json'}
+              assert all(hashlib.sha256(archive.read(p)).hexdigest() == h for p, h in checksums.items())
+              static_root = '.vercel/output/static/'
+              assert all(static_root + p in checksums for p in ('gateway.html', 'unified-map-v7.html',
+                                                               'unified-map-v8.html', 'assets/build-info.js'))
+              assert not any(p.startswith((static_root + 'api/', static_root + 'supabase/')) or
+                             'owner-project-registry.json' in p or PurePosixPath(p).name.startswith('.env')
+                             for p in checksums)
+              assert expected_sha.encode() in archive.read(static_root + 'assets/build-info.js')
+              assert json.loads(archive.read('.vercel/output/config.json'))['version'] == 3
+              archive.extractall(stage / 'upload')
+          PY
+
+      - name: Install pinned Vercel CLI
+        run: npm install --no-audit --no-fund --prefix "$RUNNER_TEMP/p01-vercel" vercel@66.2.0
+
+      - name: Verify protection, deploy once and verify the final Preview
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$VERCEL_TOKEN" || { echo 'Protected environment VERCEL_TOKEN unavailable'; exit 1; }
+          vc="$RUNNER_TEMP/p01-vercel/node_modules/.bin/vercel"
+          cd "$RUNNER_TEMP/p01-preview/upload"
+          "$vc" whoami --format json | jq -e '.loggedIn == true' >/dev/null
+
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+
+          const e = process.env;
+          async function get(path, params = {}) {
+            const url = new URL(path, 'https://api.vercel.com');
+            for (const [key, val] of Object.entries({ teamId: e.VERCEL_ORG_ID, ...params })) {
+              url.searchParams.set(key, val);
+            }
+            const response = await fetch(url, { headers: { authorization: 'Bearer ' + e.VERCEL_TOKEN } });
+            assert.ok(response.ok, 'Vercel preflight failed: HTTP ' + response.status);
+            return response.json();
+          }
+
+          const project = await get('/v9/projects/' + e.VERCEL_PROJECT_ID);
+          assert.equal(project.id, e.VERCEL_PROJECT_ID);
+          assert.equal(project.accountId, e.VERCEL_ORG_ID);
+          assert.equal(project.name, 'mrs10-p01-unified-v8-sg-geometry');
+          assert.ok(['preview', 'all'].includes(project.ssoProtection?.deploymentType));
+          assert.notEqual(project.ssoProtection?.enabled, false);
+          const rollback = await get('/v13/deployments/' + e.ROLLBACK_ALIAS);
+          assert.equal(rollback.id, e.ROLLBACK_ID);
+          assert.equal(rollback.readyState, 'READY');
+          const query = { projectId: e.VERCEL_PROJECT_ID, limit: '100' };
+          for (;;) {
+            const list = await get('/v6/deployments', query);
+            assert.ok(Array.isArray(list.deployments));
+            assert.ok(!list.deployments.some(d => [d.meta?.p01SourceSha, d.meta?.githubCommitSha].includes(e.APPROVED_SHA)),
+                      'An attempt for the approved SHA already exists');
+            const next = list.pagination?.next;
+            if (next == null) break;
+            assert.ok(Number.isSafeInteger(next) && (!query.until || next < Number(query.until)));
+            query.until = String(next);
+          }
+          fs.writeFileSync('.vercel/project.json', JSON.stringify({
+            projectId: e.VERCEL_PROJECT_ID, orgId: e.VERCEL_ORG_ID, projectName: project.name
+          }));
+          JS
+
+          url="$("$vc" deploy --prebuilt --skip-domain --yes --scope "$VERCEL_TEAM_SLUG" +            --meta "p01SourceSha=$APPROVED_SHA" --meta "p01ArtifactId=$ARTIFACT_ID")"
+          CANDIDATE_URL="$url" node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+
+          const e = process.env;
+          const url = new URL(e.CANDIDATE_URL);
+          assert.equal(url.origin, e.CANDIDATE_URL);
+          assert.equal(url.protocol, 'https:');
+          assert.match(url.hostname, /^mrs10-p01-unified-v8-sg-geometry-[a-z0-9]+-1993khairuladam-3016\.vercel\.app$/);
+          async function deployment(host) {
+            const api = new URL('/v13/deployments/' + host, 'https://api.vercel.com');
+            api.searchParams.set('teamId', e.VERCEL_ORG_ID);
+            const response = await fetch(api, { headers: { authorization: 'Bearer ' + e.VERCEL_TOKEN } });
+            assert.ok(response.ok, 'Cannot read deployment metadata: HTTP ' + response.status);
+            return response.json();
+          }
+          const d = await deployment(url.hostname);
+          assert.equal(d.projectId, e.VERCEL_PROJECT_ID);
+          assert.equal(d.target ?? null, null);
+          assert.equal(d.readyState, 'READY');
+          assert.equal(d.meta?.p01SourceSha, e.APPROVED_SHA);
+          assert.equal(d.meta?.p01ArtifactId, e.ARTIFACT_ID);
+          assert.equal((await deployment(e.ROLLBACK_ALIAS)).id, e.ROLLBACK_ID);
+          for (const pathname of ['/unified-map-v7.html', '/unified-map-v8.html', '/gateway.html']) {
+            const r = await fetch(new URL(pathname, url), { redirect: 'manual' });
+            const location = r.headers.get('location');
+            const ssoRedirect = [302, 303, 307, 308].includes(r.status) && location &&
+              new URL(location, url).hostname === 'vercel.com' &&
+              new URL(location, url).pathname === '/sso-api';
+            assert.ok(r.status === 401 || ssoRedirect, 'Unexpected unauthenticated response for ' + pathname);
+          }
+          fs.appendFileSync(e.GITHUB_STEP_SUMMARY,
+            'Protected Preview ' + url.origin + '\n\nDeployment ID ' + d.id +
+            '\n\nSource SHA ' + e.APPROVED_SHA + '\n\nAuthenticated app smoke and Owner Safari UAT pending.\n');
+          JS
