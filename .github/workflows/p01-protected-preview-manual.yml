@@ -1,12 +1,9 @@
 name: P01 Protected Preview manual recovery
 
 on:
-  workflow_dispatch:
-    inputs:
-      approved_sha:
-        description: Exact SHA approved for one Protected Preview
-        required: true
-        type: string
+  push:
+    branches:
+      - candidate/p01-protected-preview-manual-ci-20261125
 
 permissions:
   actions: read
@@ -31,12 +28,78 @@ env:
   ROLLBACK_ID: dpl_2K9j4vqkJaWGeaFFsbJcYYFnAARS
 
 jobs:
-  preview:
+  preflight:
     if: >-
       github.repository == 'khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio' &&
       github.ref == 'refs/heads/candidate/p01-protected-preview-manual-ci-20261125' &&
-      inputs.approved_sha == '04a0bfc7b45a2bfb790ad815d6fc58245b7bcb57' &&
+      github.event.created == true &&
+      github.event.forced == false &&
       github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Prove exact Vercel Git opt-out at the pushed commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          branch="${GITHUB_REF#refs/heads/}"
+          gh api "repos/$SOURCE_REPO/contents/vercel.json?ref=$GITHUB_SHA" --jq .content |
+            base64 --decode |
+            jq -e --arg branch "$branch" '
+              .git.deploymentEnabled as $rules |
+              $rules[$branch] == false and
+              ($rules | to_entries | all(.value == false)) and
+              ($rules | keys | all(test("^[[:alnum:]_/-]+$")))
+            ' >/dev/null
+
+      - name: Verify CI receipts and extract the exact prebuilt ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          stage="$RUNNER_TEMP/p01-preview"
+          mkdir -p "$stage"
+          for run in "$PACKAGE_RUN" "$QA_RUN"; do
+            gh api "repos/$SOURCE_REPO/actions/runs/$run" |
+              jq -e --arg sha "$APPROVED_SHA" --arg branch "$SOURCE_BRANCH" \
+                '.head_sha == $sha and .head_branch == $branch and .conclusion == "success"' >/dev/null
+          done
+          gh api "repos/$SOURCE_REPO/actions/artifacts/$ARTIFACT_ID" |
+            jq -e --arg sha "$APPROVED_SHA" --arg digest "sha256:$ZIP_SHA256" --arg run "$PACKAGE_RUN" \
+              '.workflow_run.head_sha == $sha and (.workflow_run.id|tostring) == $run and .digest == $digest and .expired == false' >/dev/null
+          gh api "repos/$SOURCE_REPO/actions/artifacts/$ARTIFACT_ID/zip" > "$stage/prebuilt.zip"
+          printf '%s  %s\n' "$ZIP_SHA256" "$stage/prebuilt.zip" | sha256sum --check
+          python3 - "$stage" "$APPROVED_SHA" <<'PY'
+          import hashlib, json, stat, sys, zipfile
+          from pathlib import Path, PurePosixPath
+
+          stage, expected_sha = Path(sys.argv[1]), sys.argv[2]
+          with zipfile.ZipFile(stage / 'prebuilt.zip') as archive:
+              entries = archive.infolist()
+              names = {entry.filename for entry in entries}
+              assert len(names) == len(entries)
+              assert all(not PurePosixPath(e.filename).is_absolute() and
+                         '..' not in PurePosixPath(e.filename).parts and
+                         not stat.S_ISLNK(e.external_attr >> 16) for e in entries)
+              manifest = json.loads(archive.read('release-manifest.json'))
+              assert manifest['sourceSha'] == expected_sha and manifest['target'] == 'preview'
+              checksums = {x['path']: x['sha256'] for x in manifest['files']}
+              assert set(checksums) == {n for n in names if not n.endswith('/')} - {'release-manifest.json'}
+              assert all(hashlib.sha256(archive.read(p)).hexdigest() == h for p, h in checksums.items())
+              static_root = '.vercel/output/static/'
+              assert all(static_root + p in checksums for p in ('gateway.html', 'unified-map-v7.html',
+                                                               'unified-map-v8.html', 'assets/build-info.js'))
+              assert not any(p.startswith((static_root + 'api/', static_root + 'supabase/')) or
+                             'owner-project-registry.json' in p or PurePosixPath(p).name.startswith('.env')
+                             for p in checksums)
+              assert expected_sha.encode() in archive.read(static_root + 'assets/build-info.js')
+              assert json.loads(archive.read('.vercel/output/config.json'))['version'] == 3
+              archive.extractall(stage / 'upload')
+          PY
+
+  preview:
+    needs: preflight
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     environment: p01-protected-preview
@@ -51,13 +114,15 @@ jobs:
           mkdir -p "$stage"
           for run in "$PACKAGE_RUN" "$QA_RUN"; do
             gh api "repos/$SOURCE_REPO/actions/runs/$run" |
-              jq -e --arg sha "$APPROVED_SHA" --arg branch "$SOURCE_BRANCH" +                '.head_sha == $sha and .head_branch == $branch and .conclusion == "success"' >/dev/null
+              jq -e --arg sha "$APPROVED_SHA" --arg branch "$SOURCE_BRANCH" \
+                '.head_sha == $sha and .head_branch == $branch and .conclusion == "success"' >/dev/null
           done
           gh api "repos/$SOURCE_REPO/actions/artifacts/$ARTIFACT_ID" |
-            jq -e --arg sha "$APPROVED_SHA" --arg digest "sha256:$ZIP_SHA256" --arg run "$PACKAGE_RUN" +              '.workflow_run.head_sha == $sha and (.workflow_run.id|tostring) == $run and .digest == $digest and .expired == false' >/dev/null
+            jq -e --arg sha "$APPROVED_SHA" --arg digest "sha256:$ZIP_SHA256" --arg run "$PACKAGE_RUN" \
+              '.workflow_run.head_sha == $sha and (.workflow_run.id|tostring) == $run and .digest == $digest and .expired == false' >/dev/null
           gh api "repos/$SOURCE_REPO/actions/artifacts/$ARTIFACT_ID/zip" > "$stage/prebuilt.zip"
           printf '%s  %s\n' "$ZIP_SHA256" "$stage/prebuilt.zip" | sha256sum --check
-          python - "$stage" "$APPROVED_SHA" <<'PY'
+          python3 - "$stage" "$APPROVED_SHA" <<'PY'
           import hashlib, json, stat, sys, zipfile
           from pathlib import Path, PurePosixPath
 
@@ -138,7 +203,8 @@ jobs:
           }));
           JS
 
-          url="$("$vc" deploy --prebuilt --skip-domain --yes --scope "$VERCEL_TEAM_SLUG" +            --meta "p01SourceSha=$APPROVED_SHA" --meta "p01ArtifactId=$ARTIFACT_ID")"
+          url="$("$vc" deploy --prebuilt --skip-domain --yes --scope "$VERCEL_TEAM_SLUG" \
+            --meta "p01SourceSha=$APPROVED_SHA" --meta "p01ArtifactId=$ARTIFACT_ID")"
           CANDIDATE_URL="$url" node --input-type=module <<'JS'
           import assert from 'node:assert/strict';
           import fs from 'node:fs';
