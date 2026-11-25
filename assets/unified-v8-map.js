@@ -240,6 +240,26 @@ function updateSearch(){
  for(const asset of infrastructure.slice(0,35)){const btn=el('button',null,'ECRL · '+(asset.officialName||asset.historicalName)+' · '+asset.assetId);btn.type='button';btn.onclick=()=>{showInfrastructure(asset.assetId,true);host.hidden=true;$('search').value=''};host.append(btn)}
  if(!matches.length&&!infrastructure.length&&!references.length&&!emptyRoutes.length)host.append(el('p',null,tr('noResults')));
 }
+function handleSearchKeys(event){
+ const input=$('search'),results=$('search-results');
+ if(results.hidden||event.isComposing||event.defaultPrevented)return;
+ if(event.key==='Escape'){
+  event.preventDefault();
+  input.value='';
+  updateSearch();
+  input.focus({preventScroll:true});
+  return;
+ }
+ if(event.key!=='ArrowDown'&&event.key!=='ArrowUp')return;
+ const buttons=Array.from(results.querySelectorAll('button'));
+ if(!buttons.length)return;
+ const index=buttons.indexOf(event.target);
+ const next=event.target===input
+  ? (event.key==='ArrowDown'?buttons[0]:buttons.at(-1))
+  : (event.key==='ArrowDown'?buttons[index+1]:(buttons[index-1]||input));
+ event.preventDefault();
+ next?.focus();
+}
 function renderOpenMRIntelligence(){
  const host=$('cross-border-content');if(!host||!completeSources)return;host.replaceChildren();
  const rows=completeSources.thailand.links.map(l=>({name:l.from+' ↔ '+(l.to||l.externalRef),kind:l.type,status:l.status,note:l.note,urls:l.sourceUrls}));
@@ -498,6 +518,11 @@ async function init(){
  $('details-toggle').addEventListener('click',()=>{const expanded=$('details-toggle').getAttribute('aria-expanded')!=='true';$('details-toggle').setAttribute('aria-expanded',String(expanded));$('map-details').hidden=!expanded});
  $('approximate').addEventListener('change',()=>{closeFocus();installGeometry();applyVisibility();geometryStatus()});
  $('search').addEventListener('input',updateSearch);
+ $('search').addEventListener('keydown',handleSearchKeys);
+ $('search-results').addEventListener('keydown',handleSearchKeys);
+ $('search-results').addEventListener('click',event=>{
+  if(event.detail===0&&event.target.closest('button'))$('search').focus({preventScroll:true});
+ });
  $('reset').addEventListener('click',reset);
  const fullscreenBox=document.querySelector('.mapbox'),fullscreenButton=$('map-fullscreen');let nativeFullscreen=false,fullscreenBusy=false;
  const fullState=on=>{fullscreenBox.classList.toggle('is-fullscreen',on);fullscreenButton.setAttribute('aria-pressed',String(on));labelFullscreen();requestAnimationFrame(()=>state.map?.resize());};

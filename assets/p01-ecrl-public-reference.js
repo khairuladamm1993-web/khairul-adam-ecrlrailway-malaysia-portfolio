@@ -16,8 +16,11 @@
   return;
  }
  function render(){
-  const query=normalize(search.value);
-  const visible=assets.filter(a=>(kind==='ALL'||a.type===kind)&&normalize([a.code,a.name].join(' ')).includes(query));
+  const query=normalize(search.value).replace(/^(stn|pl)([1-9])$/,(match,prefix,digit)=>prefix+'0'+digit);
+  const visible=assets.filter(asset=>{
+   if(kind!=='ALL'&&asset.type!==kind)return false;
+   return normalize(asset.assetId)===query||normalize([asset.code,asset.name].join(' ')).includes(query);
+  });
   list.replaceChildren(...visible.map(asset=>{
    const row=document.createElement('li'),title=document.createElement('strong'),detail=document.createElement('small');
    row.dataset.type=asset.type;

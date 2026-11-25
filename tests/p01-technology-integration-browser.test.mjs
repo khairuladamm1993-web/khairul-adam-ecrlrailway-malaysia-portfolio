@@ -19,9 +19,47 @@ const jump=ProbeMap.prototype.jumpTo;
 ProbeMap.prototype.jumpTo=function(...args){window.ecrlTestMap=this;return jump.apply(this,args)};
 `;
 const rows=[];
+const batchOnly=process.env.P01_QA_ECRL_BATCH_ONLY==='1';
 const profiles=[['desktop',1200,900],['ipad',810,1080],['iphone',390,844],['iphone-landscape',844,390]];
 const arcgis=/^https:\/\/[^/]*arcgis\.com\//;
 const emptyGis=r=>r.fulfill({json:{features:[]},headers:{'access-control-allow-origin':'*'}});
+
+async function checkPublicAssetLookup(page){
+  const list=page.locator('#asset-reference-list'),search=page.locator('#asset-search');
+  await search.fill('ECRL Depot Kuantan');
+  assert.equal(await list.locator('li').count(),1);
+  assert.equal(await list.locator('li').getAttribute('data-asset-id'),'ecrl-depot-kuantan');
+  assert.match(await list.innerText(),/Lokasi fizikal belum disahkan/);
+  await page.locator('[data-asset-kind=PL]').click();
+  assert.equal(await list.locator('li').count(),0);
+  await search.fill('pl 1');
+  assert.equal(await list.locator('li').count(),1);
+  assert.match(await list.innerText(),/PL01/);
+}
+
+async function checkMemberKeyboardSearch(page){
+  const search=page.locator('#search'), searchResults=page.locator('#search-results');
+  await search.fill('PL01');
+  const result=searchResults.getByRole('button',{name:/ecrl-loop-historical-01/i});
+  await result.waitFor();
+  await search.press('ArrowDown');
+  assert.equal(await result.evaluate(button=>document.activeElement===button),true);
+  await result.press('ArrowUp');
+  assert.equal(await search.evaluate(input=>document.activeElement===input),true);
+  await search.press('ArrowDown');
+  await result.press('Escape');
+  assert.equal(await search.inputValue(),'');
+  assert.equal(await searchResults.isHidden(),true);
+  assert.equal(await search.evaluate(input=>document.activeElement===input),true);
+  await search.fill('PL01');
+  await search.press('ArrowDown');
+  await result.press('Enter');
+  await page.locator('#ecrl-no-point').waitFor();
+  assert.match(await page.locator('#ecrl-no-point').innerText(),/Lokasi PL belum disahkan/);
+  assert.equal(await searchResults.isHidden(),true);
+  assert.equal(await search.evaluate(input=>document.activeElement===input),true);
+  await page.locator('#ecrl-no-point > button').click();
+}
 
 async function checkPublicNavigation(page,engine,device){
  const otherDeployments=[];
@@ -68,6 +106,8 @@ async function checkPublicNavigation(page,engine,device){
   assert.equal(await assets.locator('[data-type=PL]').count(),7);
   assert.equal(await assets.locator('[data-type=DEPOT]').count(),2);
   assert.equal(await assets.getByText('STN10',{exact:false}).count(),0);
+  await checkPublicAssetLookup(page);
+  await page.locator('[data-asset-kind=ALL]').click();
   await page.locator('#asset-search').fill('STN12');
   assert.equal(await assets.locator('li').count(),1);
   assert.match(await assets.innerText(),/Lokasi fizikal belum disahkan/);
@@ -107,8 +147,9 @@ async function checkUnavailableRenderer(browser){
 for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
  const browser=await driver.launch({headless:true,args:engine==='chromium'?['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']:[]});
  try{
-  if(engine==='chromium')await checkUnavailableRenderer(browser);
+  if(!batchOnly&&engine==='chromium')await checkUnavailableRenderer(browser);
   for(const [device,width,height] of profiles){
+   if(batchOnly&&!["desktop","iphone"].includes(device))continue;
    const page=await browser.newPage({viewport:{width,height},hasTouch:device!=='desktop',isMobile:device!=='desktop'});
    // Run the local smoke test with the application's opt-out for external analytics.
    await page.addInitScript(()=>Object.defineProperty(navigator,'globalPrivacyControl',{value:true}));
@@ -130,6 +171,21 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    await page.route('https://tiles.openfreemap.org/styles/**', r=>r.fulfill({json:{version:8,sources:{},layers:[{id:'bg',type:'background',paint:{'background-color':'#dce6e4'}}]},headers:{'access-control-allow-origin':'*'}}));
    await page.route(arcgis,emptyGis);
    try{
+    if(batchOnly){
+     assert.equal((await page.goto(base+'/ecrl-asset-reference.html')).status(),200);
+     await checkPublicAssetLookup(page);
+     assert.equal((await page.goto(base+'/unified-map-v8.html')).status(),200);
+     await page.waitForFunction(()=>{
+      const d=window.MRS10V8Diagnostics?.snapshot();
+      return d?.stage==='DONE'&&d.styleLoaded&&d.webglReady&&d.ecrl?.layersPresent;
+     },null,{timeout:45000});
+     await checkMemberKeyboardSearch(page);
+     assert.equal(await page.evaluate(()=>window.MRS10V8Diagnostics.snapshot().ecrl.physicalSegments),0);
+     assert.deepEqual(errors,[]);
+     assert.deepEqual(localFailures,[]);
+     rows.push({engine,device,status:'PASS',publicAssetLookup:true,memberKeyboardSearch:true});
+     continue;
+    }
     await checkPublicNavigation(page,engine,device);
     assert.equal((await page.goto(base+'/unified-map-v7.html')).status(),200);
     await page.waitForFunction(()=>{
@@ -142,6 +198,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
     assert.equal(await page.evaluate(()=>window.MRS10RailwayDataContractV1.VERSION),1);
     assert.equal(await page.locator('.mrs10-product-badge').innerText(),'MR-S10 · Railway Intelligence');
     await page.waitForFunction(()=>{const d=window.MRS10V8Diagnostics?.snapshot();return d?.stage==='DONE'&&d.styleLoaded&&d.webglReady&&d.ecrl?.layersPresent},null,{timeout:45000});
+    await checkMemberKeyboardSearch(page);
     await page.locator('#filters').getByRole('button',{name:'ECRL',exact:true}).click();
     await page.locator('#map-fullscreen').click();
     const panel=page.locator('#ecrl-schematic');
