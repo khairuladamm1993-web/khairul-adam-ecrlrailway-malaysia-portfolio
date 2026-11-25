@@ -41,7 +41,19 @@
   if(data.version!==1||data.corridor!=='ECRL'||!Array.isArray(data.records))throw Error('ECRL_PUBLIC_IDENTITY_CONTRACT');
   return data.records;
  }
- const api=Object.freeze({routes,createEcrlContext,publicAssetIdentity,publicStationReferences,findPublicAssets,loadPublicAssetIdentity});
+ function installStationType2(map,id){
+  if(map.hasImage(id))return;
+  const canvas=document.createElement('canvas');canvas.width=68;canvas.height=68;
+  const ctx=canvas.getContext('2d');ctx.scale(68/24,68/24);
+  ctx.fillStyle='#1457a6';ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.roundRect(3.5,2.5,17,17,4);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#ffffff';ctx.fillRect(7,6,10,6);
+  for(const x of [8,16]){ctx.beginPath();ctx.arc(x,15.5,1.2,0,2*Math.PI);ctx.fill()}
+  ctx.strokeStyle='#1457a6';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(8,19);ctx.lineTo(6,22);ctx.moveTo(16,19);ctx.lineTo(18,22);ctx.stroke();
+  map.addImage(id,ctx.getImageData(0,0,68,68),{pixelRatio:2});
+ }
+ const api=Object.freeze({routes,createEcrlContext,publicAssetIdentity,publicStationReferences,installStationType2,findPublicAssets,loadPublicAssetIdentity});
  if(typeof module==='object')module.exports=api;
  if(root)root.MRS10P01MapCore=api;
 })(typeof window==='undefined'?null:window);

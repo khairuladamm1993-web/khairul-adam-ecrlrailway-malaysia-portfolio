@@ -121,12 +121,18 @@ async function checkMapComposition(page,engine,device){
  const layers=await page.evaluate(async ()=>{
   const map=window.ecrlTestMap,source=map.getSource('mrs10-v7-ecrl-localities');
   const data=await source.getData(),rail=map.getLayer('mrs10-v7-rail-context');
+  const marker=map.getLayer('mrs10-v7-ecrl-localities-point');
   return {types:[...new Set(data.features.map(f=>f.geometry.type))],codes:data.features.map(f=>f.properties.code),
+   markerType:marker.type,iconSize:map.getLayoutProperty(marker.id,'icon-size'),
+   iconRegistered:map.hasImage(map.getLayoutProperty(marker.id,'icon-image')),
    railSource:rail.source,railType:rail.type,legacyVisibility:map.getLayoutProperty('mrs10-v7-mrt-kajang','visibility'),
    centre:map.getCenter().toArray()};
  });
  assert.deepEqual(layers.types,['Point']);
  assert.equal(layers.codes.length,16);
+ assert.equal(layers.markerType,'symbol');
+ assert.equal(layers.iconRegistered,true);
+ assert.deepEqual(layers.iconSize,['step',['zoom'],0.62,8,0.82,12,1]);
  assert.ok(!layers.codes.includes('STN10'));
  assert.equal(layers.legacyVisibility,'none');
  assert.equal(layers.railSource,'transport');
@@ -216,6 +222,8 @@ async function checkMapComposition(page,engine,device){
  await tap(fullscreen);
  await page.locator('#filters').getByRole('button',{name:'Semua',exact:true}).click();
  assert.equal(await page.locator('#rail-lineup-panel').isVisible(),true);
+ await page.locator('#theme').click();
+ await page.waitForFunction(()=>window.ecrlTestMap.isStyleLoaded()&&window.ecrlTestMap.hasImage('mrs10-ecrl-station-type-2'));
 }
 
 async function checkRailwayHierarchy(page,engine,device){

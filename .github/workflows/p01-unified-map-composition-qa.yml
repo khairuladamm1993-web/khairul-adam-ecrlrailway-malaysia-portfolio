@@ -1,7 +1,7 @@
-name: P01 ECRL Geographic Integration QA
+name: P01 ECRL Type 2 Geographic QA
 on:
   push:
-    branches: [candidate/p01-geographic-integration-20261125]
+    branches: [candidate/p01-type2-geographic-uat-20261125]
 permissions:
   contents: read
   actions: read

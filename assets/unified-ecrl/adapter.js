@@ -4,18 +4,6 @@ const NS='mrs10-v8-ecrl-infra',COLORS={LOCALITY:'#0f8b8d',HISTORICAL:'#c76a1b',M
 const DETAIL_ZOOM=Object.freeze({PL:9,DEPOT:12});
 const detailLevel=zoom=>zoom>=DETAIL_ZOOM.DEPOT?'near':zoom>=DETAIL_ZOOM.PL?'mid':'far';
 const codedStation=['!=',['to-string',['get','stationCode']],''];
-function trainImage(map,id){
- if(map.hasImage(id))return;
- const canvas=document.createElement('canvas');canvas.width=68;canvas.height=68;
- const ctx=canvas.getContext('2d');ctx.scale(68/24,68/24);
- ctx.fillStyle='#1457a6';ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;
- ctx.beginPath();ctx.roundRect(3.5,2.5,17,17,4);ctx.fill();ctx.stroke();
- ctx.fillStyle='#ffffff';ctx.fillRect(7,6,10,6);
- for(const x of [8,16]){ctx.beginPath();ctx.arc(x,15.5,1.2,0,2*Math.PI);ctx.fill()}
- ctx.strokeStyle='#1457a6';ctx.lineWidth=2;
- ctx.beginPath();ctx.moveTo(8,19);ctx.lineTo(6,22);ctx.moveTo(16,19);ctx.lineTo(18,22);ctx.stroke();
- map.addImage(id,ctx.getImageData(0,0,68,68),{pixelRatio:2});
-}
 function labelImage(map,id,text){
  if(map.hasImage(id))return;
  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
@@ -91,7 +79,8 @@ const loops=registry.loops.map(annotate);
   if(!map.getLayer(NS+'-ring'))map.addLayer({id:NS+'-ring',type:'symbol',source:NS,layout:{'icon-image':['concat',NS+'-',['get','kind']],'icon-size':0.65,'icon-allow-overlap':true,'icon-ignore-placement':true}});
   if(!map.getLayer(NS+'-inner'))map.addLayer({id:NS+'-inner',type:'circle',source:NS,paint:{'circle-radius':2.5,'circle-color':['get','color']}});
   if(!map.getLayer(NS+'-station-marker')){
-   trainImage(map,NS+'-train');
+   const mapCore=root?.MRS10P01MapCore||(typeof module==='object'?require('../p01-map-core.js'):null);
+   mapCore.installStationType2(map,NS+'-train');
    map.addLayer({id:NS+'-station-marker',type:'symbol',source:NS,filter:codedStation,layout:{
     'icon-image':NS+'-train','icon-size':['step',['zoom'],0.62,8,0.82,12,1],'icon-padding':['step',['zoom'],4,12,2]
    }});

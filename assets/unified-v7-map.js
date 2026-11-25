@@ -53,6 +53,7 @@ const mapLabels={
  th:['สถานี ECRL · จุดอ้างอิงพื้นที่','ทางรถไฟ OpenStreetMap · บริบทเครือข่าย','ข้อมูลอ้างอิงจากเจ้าของ: จุดเชื่อมต่อผู้โดยสารและสินค้าของ KTMB แผนระบุทางแยก Temerloh ส่วนการเดินรถ การต่อรถ และแนวรางยังไม่ยืนยัน']
 };
 const ecrlSource='mrs10-v7-ecrl-localities',ecrlMarker=ecrlSource+'-point',ecrlLabel=ecrlSource+'-label',railContext='mrs10-v7-rail-context';
+const ecrlType2='mrs10-ecrl-station-type-2';
 const state={locale:'ms',category:'ECRL',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
  ecrlPublic:[],ecrlStations:[],activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
 function tr(k){return i18n[state.locale][k]}
@@ -325,9 +326,11 @@ function installGeographicContext(map){
  }
  if(!state.ecrlStations.length)return;
  if(!map.getSource(ecrlSource))map.addSource(ecrlSource,{type:'geojson',data:{type:'FeatureCollection',features:state.ecrlStations}});
- if(!map.getLayer(ecrlMarker))map.addLayer({id:ecrlMarker,type:'circle',source:ecrlSource,
-  paint:{'circle-color':'#1457a6','circle-stroke-color':'#fff','circle-stroke-width':2,
-   'circle-radius':['interpolate',['linear'],['zoom'],6,5,9,8,13,11]}});
+ if(!map.getLayer(ecrlMarker)){
+  window.MRS10P01MapCore.installStationType2(map,ecrlType2);
+  map.addLayer({id:ecrlMarker,type:'symbol',source:ecrlSource,
+   layout:{'icon-image':ecrlType2,'icon-size':['step',['zoom'],0.62,8,0.82,12,1],'icon-padding':['step',['zoom'],4,12,2]}});
+ }
  if(style.glyphs&&!map.getLayer(ecrlLabel))map.addLayer({id:ecrlLabel,type:'symbol',source:ecrlSource,minzoom:8,
   layout:{'text-field':['step',['zoom'],['get','code'],11,['concat',['get','code'],' · ',['get','name']]],
    'text-font':['Noto Sans Regular'],'text-size':12,'text-offset':[0,1.35],'text-anchor':'top'},
