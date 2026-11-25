@@ -18,6 +18,16 @@
  function publicAssetIdentity(dataContract){
   return dataContract.records.map(({assetId,type,code,name,section})=>({assetId,type,code,name,section}));
  }
+ function publicStationReferences(records,localities){
+  return records.filter(asset=>asset.type==='STN').flatMap(asset=>{
+   const matches=localities.filter(row=>row.type==='STN'&&row.name===asset.name&&row.locationConfidence==='Public Reference Location');
+   if(matches.length!==1)return [];
+   const {lon,lat}=matches[0];
+   if(!Number.isFinite(lon)||!Number.isFinite(lat)||Math.abs(lon)>180||Math.abs(lat)>90)return [];
+   return [{type:'Feature',id:asset.assetId,properties:{assetId:asset.assetId,code:asset.code,name:asset.name},
+    geometry:{type:'Point',coordinates:[lon,lat]}}];
+  });
+ }
  function findPublicAssets(records,query,type='ALL'){
   const normalize=text=>text.toLowerCase().replace(/[^a-z0-9]/g,'');
   const key=normalize(query).replace(/^(stn|pl)([1-9])$/,(_,prefix,digit)=>prefix+'0'+digit);
@@ -31,7 +41,7 @@
   if(data.version!==1||data.corridor!=='ECRL'||!Array.isArray(data.records))throw Error('ECRL_PUBLIC_IDENTITY_CONTRACT');
   return data.records;
  }
- const api=Object.freeze({routes,createEcrlContext,publicAssetIdentity,findPublicAssets,loadPublicAssetIdentity});
+ const api=Object.freeze({routes,createEcrlContext,publicAssetIdentity,publicStationReferences,findPublicAssets,loadPublicAssetIdentity});
  if(typeof module==='object')module.exports=api;
  if(root)root.MRS10P01MapCore=api;
 })(typeof window==='undefined'?null:window);

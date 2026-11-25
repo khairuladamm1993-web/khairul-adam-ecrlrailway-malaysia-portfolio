@@ -1,7 +1,7 @@
-name: P01 ECRL Reference Data QA
+name: P01 ECRL Geographic Integration QA
 on:
   push:
-    branches: [candidate/p01-data-section-followup-20261125]
+    branches: [candidate/p01-geographic-integration-20261125]
 permissions:
   contents: read
   actions: read
@@ -65,7 +65,7 @@ jobs:
             assert.equal(hash(fs.readFileSync(path.join(root, row.path))), row.sha256);
           }
           for (const file of [
-            'unified-map-v7.html', 'assets/unified-v7-map.js', 'assets/p01-public-map-nav.css',
+            'unified-map-v7.html', 'assets/unified-v7-map.js', 'assets/p01-public-map-nav.css', 'assets/p01-map-core.js',
             'assets/unified-ecrl/adapter.js', 'assets/unified-ecrl/chainage-manifest.js',
             'assets/unified-ecrl/railway-data-contract-v1.js', 'assets/unified-ecrl/alignment-evidence-r2.js',
             'assets/unified-ecrl/route-lab-d102-preflight.js', 'assets/unified-ecrl/route-lab-station-intelligence.js'
@@ -120,6 +120,7 @@ jobs:
           trap 'kill "$server"' EXIT
           curl --fail --silent --retry 4 --retry-connrefused --output /dev/null http://127.0.0.1:8765/unified-map-v7.html
           P01_QA_MAP_COMPOSITION_ONLY=1 P01_MAPLIBRE_DIST="$vendor" node tests/p01-technology-integration-browser.test.mjs
+          P01_QA_RAILWAY_HIERARCHY_ONLY=1 P01_MAPLIBRE_DIST="$vendor" P01_QA_OUTPUT=artifacts/p01-technology-integration/hierarchy node tests/p01-technology-integration-browser.test.mjs
       - name: Archive browser evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

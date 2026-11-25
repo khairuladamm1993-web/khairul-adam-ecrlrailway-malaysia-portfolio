@@ -44,6 +44,7 @@ async function checkPublicAssetLookup(page){
 async function checkSharedIdentity(page){
  const projection='/data/ecrl-public-identity-v1.json';
  assert.equal((await page.goto(base+'/unified-map-v7.html')).status(),200);
+ await page.locator('#filters').getByRole('button',{name:'Semua',exact:true}).click();
  const search=page.locator('#search'), results=page.locator('#search-results');
  await search.fill('PL 1');
  const row=results.locator('[data-ecrl-identity="ecrl-loop-historical-01"]');
@@ -103,11 +104,33 @@ async function checkSharedIdentity(page){
 
 async function checkMapComposition(page,engine,device){
  const tap=locator=>device==='desktop'?locator.click():locator.tap();
+ await page.route(base+'/context-fixture-tiles/**',route=>route.fulfill({status:204}));
+ await page.route('https://tiles.openfreemap.org/styles/**',route=>route.fulfill({json:{
+  version:8,sources:{transport:{type:'vector',tiles:[base+'/context-fixture-tiles/{z}/{x}/{y}.pbf']}},
+  layers:[{id:'bg',type:'background',paint:{'background-color':'#dce6e4'}},
+   {id:'fixture-transport',type:'line',source:'transport','source-layer':'transportation'}]
+ },headers:{'access-control-allow-origin':'*'}}));
  assert.equal((await page.goto(base+'/unified-map-v7.html')).status(),200);
  await page.waitForFunction(()=>{
   const d=window.MRS10V7Diagnostics?.snapshot();
-  return d?.stage==='DONE'&&d.styleLoaded&&d.webglReady&&d.layerCount>0;
+  return d?.stage==='DONE'&&d.styleLoaded&&d.webglReady&&d.layerCount>0&&
+   !!window.ecrlTestMap.getLayer('mrs10-v7-ecrl-localities-point');
  });
+ assert.equal(await page.locator('#filters [aria-pressed=true]').innerText(),'ECRL');
+ assert.equal(await page.locator('.p01-v7-map-badge').innerText(),'MR-S10');
+ const layers=await page.evaluate(async ()=>{
+  const map=window.ecrlTestMap,source=map.getSource('mrs10-v7-ecrl-localities');
+  const data=await source.getData(),rail=map.getLayer('mrs10-v7-rail-context');
+  return {types:[...new Set(data.features.map(f=>f.geometry.type))],codes:data.features.map(f=>f.properties.code),
+   railSource:rail.source,railType:rail.type,legacyVisibility:map.getLayoutProperty('mrs10-v7-mrt-kajang','visibility'),
+   centre:map.getCenter().toArray()};
+ });
+ assert.deepEqual(layers.types,['Point']);
+ assert.equal(layers.codes.length,16);
+ assert.ok(!layers.codes.includes('STN10'));
+ assert.equal(layers.legacyVisibility,'none');
+ assert.equal(layers.railSource,'transport');
+ assert.equal(layers.railType,'line');
  const opener=page.locator('#ecrl-context-open'),panel=page.locator('#ecrl-context');
  const fullscreen=page.locator('#p01-v7-fullscreen');
  const mapPath=new URL(page.url()).pathname;
@@ -125,7 +148,7 @@ async function checkMapComposition(page,engine,device){
  const before=await camera();
  await tap(opener);
  assert.equal(await opener.getAttribute('aria-expanded'),'true');
- assert.match(await panel.locator('.notice').innerText(),/jajaran fizikal belum disahkan/);
+ assert.match(await panel.locator('#ecrl-context-status').innerText(),/jajaran fizikal belum disahkan/);
  const {records}=await (await page.request.get(base+'/data/ecrl-public-identity-v1.json')).json();
  const tally={STN:0,PL:0,DEPOT:0};
  for(const section of new Set(records.map(row=>row.section))){
@@ -172,7 +195,26 @@ async function checkMapComposition(page,engine,device){
  await tap(panel.locator('#ecrl-context-back'));
  assert.equal(await panel.isHidden(),true);
  assert.equal(await opener.evaluate(button=>button===document.activeElement),true);
+ const position=await page.evaluate(async ()=>{
+  const map=window.ecrlTestMap;
+  const data=await map.getSource('mrs10-v7-ecrl-localities').getData();
+  const {geometry}=data.features.find(f=>f.properties.code==='STN15');
+  map.jumpTo({center:geometry.coordinates,zoom:10});
+  const {x,y}=map.project(geometry.coordinates);
+  return {x,y};
+ });
+ await page.waitForFunction(({x,y})=>window.ecrlTestMap.queryRenderedFeatures([x,y],{layers:['mrs10-v7-ecrl-localities-point']})
+  .some(f=>f.properties.code==='STN15'),position);
+ const canvas=page.locator('#map canvas');
+ if(device==='desktop')await canvas.click({position});else await canvas.tap({position});
+ assert.equal(await panel.locator('[aria-current=true]').getAttribute('data-asset-id'),'ecrl-stn-14');
+ assert.match(await panel.locator('#ecrl-context-detail').innerText(),/KTMB.*Temerloh.*belum disahkan/);
+ await page.screenshot({path:out+'/'+engine+'-'+device+'-geographic-stn15.png'});
+ await tap(panel.getByRole('button',{name:'Mentakab · KTM ERT'}));
+ assert.equal(await panel.isHidden(),true);
+ await page.locator('.maplibregl-popup').getByText('MENTAKAB',{exact:true}).waitFor();
  await tap(fullscreen);
+ await page.locator('#filters').getByRole('button',{name:'Semua',exact:true}).click();
  assert.equal(await page.locator('#rail-lineup-panel').isVisible(),true);
 }
 
@@ -223,6 +265,7 @@ async function checkRailwayHierarchy(page,engine,device){
   return map?.queryRenderedFeatures(map.project(coordinate),{layers:[specs.kajang,specs.putrajaya]})[0]?.layer.id===top;
  },{top,specs,coordinate},{timeout:12000});
  await ready();
+ await page.locator('#filters').getByRole('button',{name:'Semua',exact:true}).click();
  await position();
  await waitForTop(specs.putrajaya);
  const before=await snapshot();
@@ -255,6 +298,8 @@ async function checkRailwayHierarchy(page,engine,device){
  await page.locator('#ecrl-context-back').click();
  await page.locator('#route-buttons button').filter({hasText:'MRT Kajang'}).click();
  await page.locator('#reset').click();
+ assert.equal(await page.locator('#filters [aria-pressed=true]').innerText(),'ECRL');
+ await page.locator('#filters').getByRole('button',{name:'Semua',exact:true}).click();
  await position();
  await waitForTop(specs.putrajaya);
  const reset=await snapshot();

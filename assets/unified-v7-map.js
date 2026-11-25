@@ -46,8 +46,15 @@ const ecrlLabels={
  zh:{open:'ECRL 参考',close:'关闭',scope:'按区段排列的资产参考。实际位置、距离及线路走向尚未核实。',STN:'车站',PL:'会让线',DEPOT:'车辆段'},
  th:{open:'ข้อมูลอ้างอิง ECRL',close:'ปิด',scope:'ลำดับอ้างอิงตามช่วง ยังไม่ยืนยันตำแหน่ง ระยะทาง และแนวรางจริง',STN:'สถานี',PL:'ทางหลีก',DEPOT:'ศูนย์ซ่อมบำรุง'}
 };
-const state={locale:'ms',category:'All',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
- ecrlPublic:[],activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
+const mapLabels={
+ ms:['Stesen ECRL · titik rujukan kawasan','Rel latar OpenStreetMap · konteks rangkaian', 'Rujukan Owner: antara muka penumpang dan kargo KTMB. Skim menyenaraikan spur Temerloh. Operasi, pertukaran penumpang dan jajaran belum disahkan.'],
+ en:['ECRL stations · locality references','OpenStreetMap rail · network context','Owner reference: KTMB passenger and freight interface. The scheme lists the Temerloh spur. Operations, passenger transfer and alignment remain unverified.'],
+ zh:['ECRL 车站 · 地区参考点','OpenStreetMap 铁路 · 路网背景','业主参考：KTMB 客货接口。规划列有 Temerloh 支线。运营、换乘和线路走向尚未核实。'],
+ th:['สถานี ECRL · จุดอ้างอิงพื้นที่','ทางรถไฟ OpenStreetMap · บริบทเครือข่าย','ข้อมูลอ้างอิงจากเจ้าของ: จุดเชื่อมต่อผู้โดยสารและสินค้าของ KTMB แผนระบุทางแยก Temerloh ส่วนการเดินรถ การต่อรถ และแนวรางยังไม่ยืนยัน']
+};
+const ecrlSource='mrs10-v7-ecrl-localities',ecrlMarker=ecrlSource+'-point',ecrlLabel=ecrlSource+'-label',railContext='mrs10-v7-rail-context';
+const state={locale:'ms',category:'ECRL',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
+ ecrlPublic:[],ecrlStations:[],activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
 function tr(k){return i18n[state.locale][k]}
 function say(message){$('qa-note').textContent=message}
 function el(tag,cls,text){const x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=String(text);return x}
@@ -66,21 +73,35 @@ function showStatus(){
   ready!==total?tr('partial'):tr('visualPending');
  say(message+' · '+ready+'/'+total+' '+tr('status')+' · '+tr('notTrack'));
  $('map-error').textContent=state.networkError?tr('offline'):message;
- $('map-error').hidden=!!(canvasOk&&baselineOk);
+ const ecrlVisible=state.category==='ECRL'&&state.ecrlStations.length>0&&state.map?.getLayer(ecrlMarker);
+ $('map-error').hidden=!!(canvasOk&&(baselineOk||ecrlVisible));
 }
 function findGeo(routeId,id){return state.points.get(routeId+':'+id)||null}
 function buildFilters(){
  const host=$('filters');host.replaceChildren();
- for(const category of ['All','MRT','LRT','Monorail','ERL','KTM','ETS','Intercity']){
+ for(const category of ['ECRL','All','MRT','LRT','Monorail','ERL','KTM','ETS','Intercity']){
   const btn=el('button',null,category==='All'?tr('all'):category);
   btn.type='button';btn.setAttribute('aria-pressed',String(category===state.category));
-  btn.onclick=()=>{state.category=category;state.railFocus=false;const allowed=selectedRoutes();if(!allowed.some(x=>x.id===state.selected))state.selected=allowed[0]?.id||state.selected;
-    buildFilters();buildLegend();buildRoutes();buildLineup();applyVisibility();};
+  btn.onclick=()=>setCategory(category);
   host.append(btn);
  }
 }
+function setCategory(category){
+ closeReferenceContext();
+ state.popup?.remove();
+ state.category=category;
+ state.railFocus=false;
+ const allowed=selectedRoutes();
+ if(!allowed.some(x=>x.id===state.selected))state.selected=allowed[0]?.id||state.selected;
+ renderReferenceContext();buildFilters();buildLegend();buildRoutes();buildLineup();applyVisibility();
+ state.zoomDone=false;fitOnce();showStatus();
+}
 function buildLegend(){
  const host=$('legend');host.replaceChildren();
+ if(state.category==='ECRL'||state.category==='All'){
+  const [station,rail]=mapLabels[state.locale];
+  host.append(el('span','legend-item',station),el('span','legend-item',rail));
+ }
  for(const r of selectedRoutes()){
   const row=el('div','legend-item'),dot=el('span','swatch'),name=el('span',null,r.label+' · '+routeStatus(r));
   dot.style.background=r.color;row.append(dot,name);host.append(row);
@@ -108,9 +129,10 @@ function focusStation(routeId,id){
  closeReferenceContext();
  state.selected=routeId;state.railFocus=true;
  if(state.category!=='All'&&state.category!==route.category){state.category='All';buildFilters();buildLegend();}
- buildRoutes();buildLineup();applyVisibility();
+ renderReferenceContext();buildRoutes();buildLineup();applyVisibility();
  const point=findGeo(routeId,id);
  if(!point){say(tr('unlocated'));return}
+ state.zoomDone=true;
  say(point.name+' · '+tr('located'));
  if(state.map){
   const open=()=>{state.map.easeTo({center:point.coordinates,zoom:Math.max(state.map.getZoom(),12.3),duration:360});showPopup(point)};
@@ -141,7 +163,7 @@ function renderReferenceContext(){
  opener.hidden=state.ecrlPublic.length===0;
  opener.setAttribute('aria-expanded',String(!!reference));
  $('ecrl-context').hidden=!reference;
- $('rail-lineup-panel').hidden=!!reference;
+ $('rail-lineup-panel').hidden=!!reference||state.category==='ECRL';
  if(!reference)return;
  const {section,assetId}=reference;
  $('ecrl-context-title').textContent=tr('ecrlSection')+' · '+section;
@@ -167,19 +189,60 @@ function renderReferenceContext(){
   const item=el('li');
   item.dataset.assetId=row.assetId;
   item.dataset.type=row.type;
-  item.append(el('strong',null,[row.code,row.name].filter(Boolean).join(' · ')),el('small',null,labels[row.type]));
-  if(row.assetId===assetId)item.setAttribute('aria-current','true');
+  const title=[row.code,row.name].filter(Boolean).join(' · ');
+  if(state.ecrlStations.some(point=>point.id===row.assetId)){
+   const button=el('button',null,title);
+   button.type='button';button.dataset.mapStation=row.assetId;
+   button.onclick=()=>selectEcrlStation(row,opener,true);
+   item.append(button);
+  }else item.append(el('strong',null,title));
+  item.append(el('small',null,labels[row.type]));
+  if(row.assetId===assetId){
+   item.setAttribute('aria-current','true');
+   if(assetId==='ecrl-stn-14')item.append(temerlohContext());
+  }
   return item;
  }));
  list.scrollTop=0;
  const selected=list.querySelector('[aria-current=true]');
  if(selected)list.scrollTop=Math.max(0,selected.getBoundingClientRect().top-list.getBoundingClientRect().top);
 }
+function temerlohContext(){
+ const detail=el('div','notice');
+ detail.id='ecrl-context-detail';
+ const link=el('a',null,'PLANMalaysia PeGTaECRL');
+ link.href='https://myplan.planmalaysia.gov.my/admin/uploads_publication/pdf_20250117162247_10.pdf';
+ link.target='_blank';link.rel='noopener noreferrer';
+ detail.append(el('p',null,mapLabels[state.locale][2]+' '),link);
+ const ert=state.manifest.find(route=>route.id==='ktmb-ert');
+ const stop=ert?.stops.find(row=>row.id==='ktmb-ert:66100');
+ if(stop){
+  const button=el('button',null,'Mentakab · KTM ERT');
+  button.type='button';
+  button.onclick=()=>focusStation(ert.id,stop.id);
+  detail.append(button);
+ }
+ return detail;
+}
 function openReferenceContext(reference,opener){
  state.activeReference=reference;
  state.referenceOpener=opener;
  renderReferenceContext();
  $('ecrl-context-title').focus();
+}
+function selectEcrlStation(asset,opener,zoom){
+ const point=state.ecrlStations.find(row=>row.id===asset.assetId);
+ state.railFocus=false;
+ state.popup?.remove();
+ if(point&&state.mapReady){
+  state.zoomDone=true;
+  if(!['ECRL','All'].includes(state.category)){
+   state.category='ECRL';buildFilters();buildLegend();buildRoutes();buildLineup();
+  }
+  if(zoom)state.map.easeTo({center:point.geometry.coordinates,zoom:Math.max(9,state.map.getZoom()),duration:320});
+ }
+ applyVisibility();
+ openReferenceContext(asset,opener);
 }
 function closeReferenceContext(){
  if(!state.activeReference)return;
@@ -207,10 +270,8 @@ function updateSearch(){
   button.dataset.ecrlIdentity=asset.assetId;
   button.setAttribute('aria-controls','ecrl-context');
   button.onclick=()=>{
-   state.railFocus=false;
-   applyVisibility();
    host.hidden=true;
-   openReferenceContext(asset,$('search'));
+   selectEcrlStation(asset,$('search'),true);
   };
   host.append(button);
  }
@@ -251,6 +312,27 @@ function geoJSON(){
 }
 const srcId=id=>'mrs10-v7-source-'+id;
 const layerId=id=>'mrs10-v7-'+id;
+function installGeographicContext(map){
+ const style=map.getStyle();
+ const transportation=style.layers.find(layer=>layer['source-layer']==='transportation'&&style.sources[layer.source]?.type==='vector');
+ if(transportation&&!map.getLayer(railContext)){
+  // Same source taxonomy as R211. Basemap rail is context without an ECRL designation.
+  map.addLayer({id:railContext,type:'line',source:transportation.source,'source-layer':'transportation',minzoom:8,
+   filter:['all',['==',['get','class'],'rail'],['in',['get','subclass'],['literal',['rail','narrow_gauge']]]],
+   paint:{'line-color':state.theme==='dark'?'#87c6d6':'#527d8b','line-opacity':0.72,
+    'line-width':['interpolate',['linear'],['zoom'],8,0.8,14,1.9,18,3]}},
+   style.layers.find(layer=>layer.type==='symbol')?.id);
+ }
+ if(!state.ecrlStations.length)return;
+ if(!map.getSource(ecrlSource))map.addSource(ecrlSource,{type:'geojson',data:{type:'FeatureCollection',features:state.ecrlStations}});
+ if(!map.getLayer(ecrlMarker))map.addLayer({id:ecrlMarker,type:'circle',source:ecrlSource,
+  paint:{'circle-color':'#1457a6','circle-stroke-color':'#fff','circle-stroke-width':2,
+   'circle-radius':['interpolate',['linear'],['zoom'],6,5,9,8,13,11]}});
+ if(style.glyphs&&!map.getLayer(ecrlLabel))map.addLayer({id:ecrlLabel,type:'symbol',source:ecrlSource,minzoom:8,
+  layout:{'text-field':['step',['zoom'],['get','code'],11,['concat',['get','code'],' · ',['get','name']]],
+   'text-font':['Noto Sans Regular'],'text-size':12,'text-offset':[0,1.35],'text-anchor':'top'},
+  paint:{'text-color':state.theme==='dark'?'#e9f4ff':'#16457b','text-halo-color':state.theme==='dark'?'#183140':'#fff','text-halo-width':1.5}});
+}
 function updateMapLayer(){
  const map=state.map;
  if(!map||!map.isStyleLoaded())return;
@@ -272,6 +354,7 @@ function updateMapLayer(){
      'circle-opacity':1
     }});
   }
+  installGeographicContext(map);
   applyVisibility();
  }catch(e){
   state.networkError=true;
@@ -318,7 +401,16 @@ function applyVisibility(){
  if(layers.some((id,index)=>current[index]?.id!==id)){
   for(const id of layers)map.moveLayer(id);
  }
- applyBasemapLabelFocus(map,styleLayers,!!focusedId&&railLayers.has(focusedId));
+ const ecrlVisible=['ECRL','All'].includes(state.category);
+ for(const id of [ecrlMarker,ecrlLabel,railContext]){
+  if(!map.getLayer(id))continue;
+  const visible=ecrlVisible||(id===railContext&&state.category==='KTM');
+  if(map.getLayoutProperty(id,'visibility')!==(visible?'visible':'none'))map.setLayoutProperty(id,'visibility',visible?'visible':'none');
+ }
+ if(ecrlVisible&&layers.some(id=>styleLayers.findIndex(l=>l.id===id)>styleLayers.findIndex(l=>l.id===ecrlMarker))){
+  for(const id of [ecrlMarker,ecrlLabel])if(map.getLayer(id))map.moveLayer(id);
+ }
+ applyBasemapLabelFocus(map,styleLayers,state.category==='ECRL'||!!focusedId&&railLayers.has(focusedId));
 }
 function showPopup(point){
  if(!state.map)return;
@@ -345,9 +437,13 @@ function showPopup(point){
 }
 function fitOnce(){
  if(state.zoomDone||!state.mapReady)return;
- if(state.pending>0)return;
- const coords=[...state.points.values()].map(p=>p.coordinates);
- if(coords.length<2)return;
+ if(state.category!=='ECRL'&&state.pending>0)return;
+ const coords=state.category==='ECRL'?state.ecrlStations.map(f=>f.geometry.coordinates):
+  [...state.points.values()].filter(p=>selectedRoutes().some(r=>r.id===p.routeId)).map(p=>p.coordinates);
+ if(!coords.length)return;
+ if(coords.length===1){
+  state.map.easeTo({center:coords[0],zoom:10,duration:320});state.zoomDone=true;return;
+ }
  const minX=Math.min(...coords.map(p=>p[0])),maxX=Math.max(...coords.map(p=>p[0])),
  minY=Math.min(...coords.map(p=>p[1])),maxY=Math.max(...coords.map(p=>p[1]));
  state.map.fitBounds([[minX,minY],[maxX,maxY]],{padding:45,maxZoom:12,duration:400});
@@ -358,6 +454,7 @@ function startMap(){
   state.map=new maplibregl.Map({container:'map',style:styleURL(),center:[101.69,3.13],zoom:10.1,
    attributionControl:true});
   state.map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
+  state.map.on('movestart',e=>{if(e.originalEvent)state.zoomDone=true});
   state.map.on('style.load',()=>{
    state.basemapLabelOpacity.clear();
    state.mapReady=true;state.networkError=false;
@@ -382,21 +479,26 @@ function startMap(){
    state.map.on('error',()=>{if(!state.mapReady){state.networkError=true;showStatus()}});
   state.map.on('click',e=>{
    if(!state.mapReady)return;
-   const layers=state.manifest.map(r=>'mrs10-v7-'+r.id).filter(id=>state.map.getLayer(id));
+   const layers=[ecrlLabel,ecrlMarker,...state.manifest.map(r=>layerId(r.id))].filter(id=>state.map.getLayer(id));
    if(!layers.length)return;
    const hits=state.map.queryRenderedFeatures([[e.point.x-11,e.point.y-11],[e.point.x+11,e.point.y+11]],{layers});
+   const reference=hits.find(hit=>[ecrlMarker,ecrlLabel].includes(hit.layer.id));
+   if(reference){
+    const asset=state.ecrlPublic.find(row=>row.assetId===reference.properties.assetId);
+    if(asset)selectEcrlStation(asset,$('ecrl-context-open'),false);
+    return;
+   }
    const hit=hits[0];if(!hit)return;
    const point=findGeo(hit.properties.routeId,hit.properties.id);if(!point)return;
+   closeReferenceContext();
    state.selected=point.routeId;state.railFocus=true;buildRoutes();buildLineup();applyVisibility();showPopup(point);
   });
  }catch(e){state.networkError=true;showStatus()}
 }
 function styleURL(){return 'https://tiles.openfreemap.org/styles/'+(state.theme==='dark'?'dark':'positron')}
 function reset(){
- closeReferenceContext();
- state.category='All';state.selected='mrt-kajang';state.railFocus=false;$('search').value='';$('search-results').hidden=true;
- buildFilters();buildLegend();buildRoutes();buildLineup();applyVisibility();
- state.zoomDone=false;fitOnce();
+ state.selected='mrt-kajang';$('search').value='';$('search-results').hidden=true;
+ setCategory('ECRL');
 }
 async function fetchRoute(route){
  if(route.decoder?.startsWith('KTM_'))return ktm.fetchRoute(route);
@@ -451,7 +553,9 @@ function init(){
  });
  bindFullscreen();applyLanguage();startMap();void loadGIS();
  window.MRS10P01MapCore?.loadPublicAssetIdentity().then(records=>{
-  state.ecrlPublic=records;renderReferenceContext();updateSearch();
+  state.ecrlPublic=records;
+  state.ecrlStations=window.MRS10P01MapCore.publicStationReferences(records,window.RailwayCorridorReference??[]);
+  renderReferenceContext();updateSearch();updateMapLayer();fitOnce();showStatus();
  }).catch(()=>{});
 }
 function diagnosticSnapshot(){

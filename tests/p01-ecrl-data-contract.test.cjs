@@ -64,6 +64,24 @@ test('V1 preserves independent confidence and source provenance without promotin
  assert.equal(gombak.chainage.datum,null);
 });
 
+test('V7 joins only previously public station localities and retains V8 provenance positions',()=>{
+ vm.runInNewContext(fs.readFileSync('assets/corridor-reference.js','utf8'),{window});
+ const core=require('../assets/p01-map-core.js');
+ const identity=core.publicAssetIdentity(data);
+ const localities=window.RailwayCorridorReference;
+ const points=core.publicStationReferences(identity,localities);
+ assert.equal(points.length,16);
+ for(const point of points){
+  const source=data.records.find(row=>row.assetId===point.id);
+  assert.equal(source.type,'STN');
+  assert.equal(point.geometry.type,'Point');
+  assert.deepEqual(point.geometry.coordinates,[...source.referencePosition.coordinates]);
+  assert.deepEqual(Object.keys(point.properties).sort(),['assetId','code','name']);
+ }
+ const duplicate=localities.find(row=>row.name==='Temerloh');
+ assert.equal(core.publicStationReferences(identity,[...localities,duplicate]).length,15);
+});
+
 test('V1 seals collection, rows and nested values independently of source arrays',()=>{
  const first=data.records[0];
  assert.throws(()=>data.records.pop(),TypeError);
