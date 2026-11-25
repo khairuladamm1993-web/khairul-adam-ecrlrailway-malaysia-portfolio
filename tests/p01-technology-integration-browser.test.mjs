@@ -22,6 +22,7 @@ const rows=[];
 const batchOnly=process.env.P01_QA_ECRL_BATCH_ONLY==='1';
 const sharedOnly=process.env.P01_QA_SHARED_CORE_ONLY==='1';
 const hierarchyOnly=process.env.P01_QA_RAILWAY_HIERARCHY_ONLY==='1';
+const compositionOnly=process.env.P01_QA_MAP_COMPOSITION_ONLY==='1';
 const profiles=[['desktop',1200,900],['ipad',810,1080],['iphone',390,844],['iphone-landscape',844,390]];
 const arcgis=/^https:\/\/[^/]*arcgis\.com\//;
 const emptyGis=r=>r.fulfill({json:{features:[]},headers:{'access-control-allow-origin':'*'}});
@@ -90,6 +91,67 @@ async function checkSharedIdentity(page){
  await page.goto(base+'/ecrl-asset-reference.html');
  await page.getByText('Rujukan aset belum tersedia.').waitFor();
  await page.unroute(base+projection);
+}
+
+async function checkMapComposition(page,engine,device){
+ const tap=locator=>device==='desktop'?locator.click():locator.tap();
+ assert.equal((await page.goto(base+'/unified-map-v7.html')).status(),200);
+ await page.waitForFunction(()=>{
+  const d=window.MRS10V7Diagnostics?.snapshot();
+  return d?.stage==='DONE'&&d.styleLoaded&&d.webglReady&&d.layerCount>0;
+ });
+ const opener=page.locator('#ecrl-context-open'),panel=page.locator('#ecrl-context');
+ const fullscreen=page.locator('#p01-v7-fullscreen');
+ const mapPath=new URL(page.url()).pathname;
+ const camera=()=>page.evaluate(()=>({
+  center:window.ecrlTestMap.getCenter().toArray(),
+  zoom:window.ecrlTestMap.getZoom(),
+  layers:window.ecrlTestMap.getStyle().layers.map(({id})=>id)
+ }));
+ await tap(fullscreen);
+ await page.waitForFunction(()=>{
+  const map=window.ecrlTestMap;
+  const container=map.getContainer().getBoundingClientRect();
+  return !map.isMoving()&&Math.abs(map.getCanvas().clientHeight-container.height)<2;
+ });
+ const before=await camera();
+ await tap(opener);
+ assert.equal(await opener.getAttribute('aria-expanded'),'true');
+ assert.match(await panel.locator('.notice').innerText(),/jajaran fizikal belum disahkan/);
+ const {records}=await (await page.request.get(base+'/data/ecrl-public-identity-v1.json')).json();
+ const tally={STN:0,PL:0,DEPOT:0};
+ for(const section of new Set(records.map(row=>row.section))){
+  const button=panel.getByRole('button',{name:section,exact:true});
+  await tap(button);
+  assert.equal(await button.getAttribute('aria-pressed'),'true');
+  assert.deepEqual(await panel.locator('li').evaluateAll(items=>items.map(({dataset})=>[dataset.assetId,dataset.type])),
+   records.filter(row=>row.section===section).map(({assetId,type})=>[assetId,type]));
+  for(const type of Object.keys(tally))tally[type]+=await panel.locator('li[data-type="'+type+'"]').count();
+ }
+ assert.deepEqual(tally,{STN:16,PL:7,DEPOT:2});
+ assert.equal(await page.locator('#search').inputValue(),'');
+ assert.deepEqual(await camera(),before);
+ assert.equal(new URL(page.url()).pathname,mapPath);
+ assert.equal(await fullscreen.getAttribute('aria-pressed'),'true');
+ assert.equal(await panel.evaluate(node=>{
+  const box=node.getBoundingClientRect(),map=node.closest('.mapbox').getBoundingClientRect();
+  return box.left>=map.left&&box.top>=map.top&&box.right<=map.right&&box.bottom<=map.bottom;
+ }),true);
+ assert.equal(await page.evaluate(()=>{
+  const overlap=(a,b)=>{
+   if(!a||!b||a.hidden||b.hidden)return false;
+   const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();
+   return x.left<y.right&&x.right>y.left&&x.top<y.bottom&&x.bottom>y.top;
+  };
+  return !overlap(document.querySelector('.p01-v7-map-actions'),document.querySelector('.maplibregl-ctrl-attrib'))
+   &&!overlap(document.querySelector('#map-error'),document.querySelector('.maplibregl-ctrl-zoom-in'));
+ }),true);
+ await page.screenshot({path:out+'/'+engine+'-'+device+'-composition.png'});
+ await tap(panel.locator('#ecrl-context-back'));
+ assert.equal(await panel.isHidden(),true);
+ assert.equal(await opener.evaluate(button=>button===document.activeElement),true);
+ await tap(fullscreen);
+ assert.equal(await page.locator('#rail-lineup-panel').isVisible(),true);
 }
 
 async function checkRailwayHierarchy(page,engine,device){
@@ -290,7 +352,7 @@ async function checkUnavailableRenderer(browser){
 for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
  const browser=await driver.launch({headless:true,args:engine==='chromium'?['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']:[]});
  try{
-  if(!batchOnly&&!sharedOnly&&!hierarchyOnly&&engine==='chromium')await checkUnavailableRenderer(browser);
+  if(!batchOnly&&!sharedOnly&&!hierarchyOnly&&!compositionOnly&&engine==='chromium')await checkUnavailableRenderer(browser);
   for(const [device,width,height] of profiles){
    if((batchOnly||sharedOnly||hierarchyOnly)&&!["desktop","iphone"].includes(device))continue;
    const page=await browser.newPage({viewport:{width,height},hasTouch:device!=='desktop',isMobile:device!=='desktop'});
@@ -314,6 +376,14 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    await page.route('https://tiles.openfreemap.org/styles/**', r=>r.fulfill({json:{version:8,sources:{},layers:[{id:'bg',type:'background',paint:{'background-color':'#dce6e4'}}]},headers:{'access-control-allow-origin':'*'}}));
    await page.route(arcgis,emptyGis);
    try{
+    if(compositionOnly){
+     await checkMapComposition(page,engine,device);
+     if(device==='desktop')await checkSharedIdentity(page);
+     assert.deepEqual(errors,[]);
+     assert.ok(localFailures.every(path=>path==='/data/ecrl-public-identity-v1.json'));
+     rows.push({engine,device,status:'PASS',mapComposition:true,physicalLayersUnchanged:true,touch:device!=='desktop'});
+     continue;
+    }
     if(hierarchyOnly){
      await checkRailwayHierarchy(page,engine,device);
      assert.deepEqual(errors,[]);

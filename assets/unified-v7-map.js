@@ -8,7 +8,7 @@ const core=window.MRS10UnifiedV4Registry, kl=window.MRS10KLRegistry,
 const locales=['ms','en','zh','th'];
 const i18n={
  ms:{title:'Peta Rel Bersepadu V7',desc:'Enam belas lapisan: 8 perkhidmatan V6, 6 KTM Komuter, ETS dan Ekspres Rakyat Timuran. Shuttle Timur belum diintegrasikan. Titik stesen daripada GIS awam pihak ketiga; bukan koordinat operasi atau jajaran trek.',
-  ecrlReference:'Rujukan ECRL · lokasi fizikal belum disahkan',ecrlSection:'Rujukan ECRL mengikut seksyen',ecrlBack:'Kembali ke turutan stesen',all:'Semua',search:'Cari stesen, kod atau laluan',reset:'Set semula',lineup:'Turutan stesen',
+  ecrlReference:'Rujukan ECRL · lokasi fizikal belum disahkan',ecrlSection:'Rujukan ECRL mengikut seksyen',all:'Semua',search:'Cari stesen, kod atau laluan',reset:'Set semula',lineup:'Turutan stesen',
   loading:'Memuatkan stesen daripada GIS awam…',offline:'Peta geografi gagal dimuatkan. Senarai stesen masih boleh digunakan.',
   partial:'GIS tidak lengkap: hanya penanda yang dipadankan dipaparkan.',complete:'Semua penanda dipadankan kepada sumber GIS awam.',
   located:'Penanda sumber GIS dipadankan',unlocated:'Tiada lokasi GIS yang disahkan untuk stesen ini.',source:'GIS awam pihak ketiga (bukan pengukuran operasi)',
@@ -16,7 +16,7 @@ const i18n={
   rights:'Data sumber GIS: ArcGIS awam pihak ketiga · Turutan stesen: MR-S10 operator references · Basemap: OpenFreeMap / OSM · Bukan untuk operasi.',
   fail:'Ralat GIS',show:'Paparkan laluan',found:'daripada'},
  en:{title:'Unified Railway Map V7',desc:'Sixteen layers: 8 baseline services, 6 KTM Komuter services, ETS and Ekspres Rakyat Timuran. Eastern Shuttle excluded. Station points from third-party public GIS; not operational coordinates or track alignments.',
-  ecrlReference:'ECRL reference · physical location unverified',ecrlSection:'ECRL reference by section',ecrlBack:'Back to station lineup',all:'All',search:'Search station, code or service',reset:'Reset',lineup:'Station lineup',
+  ecrlReference:'ECRL reference · physical location unverified',ecrlSection:'ECRL reference by section',all:'All',search:'Search station, code or service',reset:'Reset',lineup:'Station lineup',
   loading:'Loading public GIS stations…',offline:'Geographic map unavailable. The station list remains accessible.',
   partial:'GIS incomplete: only source-matched markers are shown.',complete:'All markers matched against public GIS sources.',
   located:'Source GIS marker matched',unlocated:'No verified GIS position for this station.',source:'Third-party public GIS (not an operational survey)',
@@ -24,7 +24,7 @@ const i18n={
   rights:'GIS data: third-party ArcGIS · Station order: MR-S10 operator references · Basemap: OpenFreeMap / OSM · Not for operations.',
   fail:'GIS error',show:'Show route',found:'of'},
  zh:{title:'综合铁路地图 V7',desc:'同时显示16个客运服务图层，不包括东海岸接驳列车。车站点位来自第三方公共 GIS，并非运营测量坐标或轨道线路。',
-  ecrlReference:'ECRL 参考 · 位置尚未核实',ecrlSection:'ECRL 分段参考',ecrlBack:'返回车站顺序',all:'全部',search:'搜索车站、代码或线路',reset:'重置',lineup:'车站顺序',
+  ecrlReference:'ECRL 参考 · 位置尚未核实',ecrlSection:'ECRL 分段参考',all:'全部',search:'搜索车站、代码或线路',reset:'重置',lineup:'车站顺序',
   loading:'正在加载公共 GIS 车站…',offline:'地理地图不可用，但车站列表仍可使用。',
   partial:'GIS 数据不完整：仅显示来源匹配的标记。',complete:'所有标记已与公共 GIS 来源匹配。',
   located:'已匹配 GIS 标记',unlocated:'该车站尚无已核对的 GIS 位置。',source:'第三方公共 GIS（非运营测量）',
@@ -32,7 +32,7 @@ const i18n={
   rights:'GIS 来源：第三方 ArcGIS · 车站顺序：MR-S10 运营商参考资料 · 底图：OpenFreeMap / OSM · 不作运营用途。',
   fail:'GIS 错误',show:'显示线路',found:'／'},
  th:{title:'แผนที่รถไฟรวม V7',desc:'แสดง 16 ชั้นข้อมูลบริการ ไม่รวมรถรับส่งฝั่งตะวันออก จุดสถานีจาก GIS สาธารณะของบุคคลที่สาม ไม่ใช่พิกัดปฏิบัติการหรือแนวรางที่ตรวจวัด',
-  ecrlReference:'ข้อมูลอ้างอิง ECRL · ยังไม่ยืนยันตำแหน่งจริง',ecrlSection:'ข้อมูลอ้างอิง ECRL ตามช่วง',ecrlBack:'กลับไปยังลำดับสถานี',all:'ทั้งหมด',search:'ค้นหาสถานี รหัส หรือเส้นทาง',reset:'รีเซ็ต',lineup:'ลำดับสถานี',
+  ecrlReference:'ข้อมูลอ้างอิง ECRL · ยังไม่ยืนยันตำแหน่งจริง',ecrlSection:'ข้อมูลอ้างอิง ECRL ตามช่วง',all:'ทั้งหมด',search:'ค้นหาสถานี รหัส หรือเส้นทาง',reset:'รีเซ็ต',lineup:'ลำดับสถานี',
   loading:'กำลังโหลดสถานีจาก GIS สาธารณะ…',offline:'แผนที่ภูมิศาสตร์ไม่พร้อมใช้งาน แต่ยังดูรายชื่อสถานีได้',
   partial:'GIS ไม่ครบ: แสดงเฉพาะจุดที่จับคู่กับแหล่งข้อมูลได้',complete:'จับคู่หมุดทั้งหมดกับแหล่ง GIS สาธารณะแล้ว',
   located:'จับคู่หมุด GIS แล้ว',unlocated:'ยังไม่มีพิกัด GIS ที่ตรวจสอบแล้วสำหรับสถานีนี้',source:'GIS สาธารณะของบุคคลที่สาม (ไม่ใช่การสำรวจเพื่อปฏิบัติการ)',
@@ -40,8 +40,14 @@ const i18n={
   rights:'GIS: ArcGIS บุคคลที่สาม · ลำดับสถานี: MR-S10 ข้อมูลผู้ให้บริการ · แผนที่ฐาน: OpenFreeMap / OSM · ห้ามใช้เพื่อปฏิบัติการ',
   fail:'ข้อผิดพลาด GIS',show:'แสดงเส้นทาง',found:'จาก'}
 };
+const ecrlLabels={
+ ms:{open:'Rujukan ECRL',close:'Tutup',scope:'Susunan rujukan aset mengikut seksyen. Lokasi, jarak dan jajaran fizikal belum disahkan.',STN:'Stesen',PL:'Passing loop',DEPOT:'Depot'},
+ en:{open:'ECRL reference',close:'Close',scope:'Reference asset order by section. Physical locations, distances and alignment are unverified.',STN:'Station',PL:'Passing loop',DEPOT:'Depot'},
+ zh:{open:'ECRL 参考',close:'关闭',scope:'按区段排列的资产参考。实际位置、距离及线路走向尚未核实。',STN:'车站',PL:'会让线',DEPOT:'车辆段'},
+ th:{open:'ข้อมูลอ้างอิง ECRL',close:'ปิด',scope:'ลำดับอ้างอิงตามช่วง ยังไม่ยืนยันตำแหน่ง ระยะทาง และแนวรางจริง',STN:'สถานี',PL:'ทางหลีก',DEPOT:'ศูนย์ซ่อมบำรุง'}
+};
 const state={locale:'ms',category:'All',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
- ecrlPublic:[],activeReference:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
+ ecrlPublic:[],activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
 function tr(k){return i18n[state.locale][k]}
 function say(message){$('qa-note').textContent=message}
 function el(tag,cls,text){const x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=String(text);return x}
@@ -128,23 +134,57 @@ function buildLineup(){
  }
 }
 function renderReferenceContext(){
- const asset=state.activeReference;
- $('ecrl-context').hidden=!asset;
- $('rail-lineup-panel').hidden=!!asset;
- if(!asset)return;
- $('ecrl-context-title').textContent=[tr('ecrlSection'),asset.section].filter(Boolean).join(' · ');
- $('ecrl-context-status').textContent=tr('ecrlReference');
- $('ecrl-context-back').textContent=tr('ecrlBack');
- $('ecrl-context-list').replaceChildren(...state.ecrlPublic.filter(row=>row.section===asset.section).map(row=>{
-  const item=el('li',null,[row.code,row.name].filter(Boolean).join(' · '));
+ const reference=state.activeReference;
+ const labels=ecrlLabels[state.locale];
+ const opener=$('ecrl-context-open');
+ opener.textContent=labels.open;
+ opener.hidden=state.ecrlPublic.length===0;
+ opener.setAttribute('aria-expanded',String(!!reference));
+ $('ecrl-context').hidden=!reference;
+ $('rail-lineup-panel').hidden=!!reference;
+ if(!reference)return;
+ const {section,assetId}=reference;
+ $('ecrl-context-title').textContent=tr('ecrlSection')+' · '+section;
+ $('ecrl-context-status').textContent=labels.scope;
+ $('ecrl-context-back').textContent=labels.close;
+ const sections=$('ecrl-context-sections');
+ sections.setAttribute('aria-label',tr('ecrlSection'));
+ sections.replaceChildren(...[...new Set(state.ecrlPublic.map(row=>row.section))].map(key=>{
+  const button=el('button',null,key);
+  button.type='button';
+  button.dataset.section=key;
+  button.setAttribute('aria-pressed',String(key===section));
+  button.setAttribute('aria-controls','ecrl-context-list');
+  button.onclick=()=>{
+   state.activeReference={section:key};
+   renderReferenceContext();
+   [...sections.children].find(child=>child.dataset.section===key).focus();
+  };
+  return button;
+ }));
+ const list=$('ecrl-context-list');
+ list.replaceChildren(...state.ecrlPublic.filter(row=>row.section===section).map(row=>{
+  const item=el('li');
   item.dataset.assetId=row.assetId;
-  if(row.assetId===asset.assetId)item.setAttribute('aria-current','true');
+  item.dataset.type=row.type;
+  item.append(el('strong',null,[row.code,row.name].filter(Boolean).join(' · ')),el('small',null,labels[row.type]));
+  if(row.assetId===assetId)item.setAttribute('aria-current','true');
   return item;
  }));
+ list.scrollTop=0;
+ const selected=list.querySelector('[aria-current=true]');
+ if(selected)list.scrollTop=Math.max(0,selected.getBoundingClientRect().top-list.getBoundingClientRect().top);
+}
+function openReferenceContext(reference,opener){
+ state.activeReference=reference;
+ state.referenceOpener=opener;
+ renderReferenceContext();
+ $('ecrl-context-title').focus();
 }
 function closeReferenceContext(){
  if(!state.activeReference)return;
  state.activeReference=null;
+ state.referenceOpener=null;
  renderReferenceContext();
 }
 function updateSearch(){
@@ -167,12 +207,10 @@ function updateSearch(){
   button.dataset.ecrlIdentity=asset.assetId;
   button.setAttribute('aria-controls','ecrl-context');
   button.onclick=()=>{
-   state.activeReference=asset;
    state.railFocus=false;
    applyVisibility();
-   renderReferenceContext();
    host.hidden=true;
-   $('ecrl-context-title').focus();
+   openReferenceContext(asset,$('search'));
   };
   host.append(button);
  }
@@ -386,8 +424,22 @@ async function loadGIS(){
 function init(){
  try{state.manifest=[...core.loadManifest(kl,ampang),...integration.routes(),...ktm.routes()]}catch(e){$('map-error').textContent='Registry: '+e.message;return}
  $('search').addEventListener('input',updateSearch);
- $('ecrl-context-back').addEventListener('click',()=>{
-  closeReferenceContext();updateSearch();$('search').focus();
+ function dismissReference(){
+  const opener=state.referenceOpener;
+  closeReferenceContext();
+  updateSearch();
+  opener?.focus();
+ }
+ $('ecrl-context-open').addEventListener('click',event=>{
+  if(state.activeReference){dismissReference();return}
+  const first=state.ecrlPublic[0];
+  if(first)openReferenceContext({section:first.section},event.currentTarget);
+ });
+ $('ecrl-context-back').addEventListener('click',dismissReference);
+ $('ecrl-context').addEventListener('keydown',event=>{
+  if(event.key!=='Escape')return;
+  event.preventDefault();
+  dismissReference();
  });
  $('reset').addEventListener('click',reset);
  $('language').addEventListener('click',()=>{state.locale=locales[(locales.indexOf(state.locale)+1)%4];applyLanguage();if(state.popup){state.popup.remove();state.popup=null}});
@@ -399,7 +451,7 @@ function init(){
  });
  bindFullscreen();applyLanguage();startMap();void loadGIS();
  window.MRS10P01MapCore?.loadPublicAssetIdentity().then(records=>{
-  state.ecrlPublic=records;updateSearch();
+  state.ecrlPublic=records;renderReferenceContext();updateSearch();
  }).catch(()=>{});
 }
 function diagnosticSnapshot(){
