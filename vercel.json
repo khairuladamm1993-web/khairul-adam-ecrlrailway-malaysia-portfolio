@@ -7,7 +7,8 @@
     "candidate/p01-maplibre-security-v1-20261123": false,
     "candidate/p01-preview-blocker-resolution-v1-20261123": false,
     "candidate/p01-visual-refinement-mrnext-20261124": false,
-    "candidate/p01-public-ecosystem-nav-001-20261125": false
+    "candidate/p01-public-ecosystem-nav-001-20261125": false,
+    "candidate/p01-ecrl-integration-batch-20261125": false
   }},
   "headers": [
     {"source":"/gateway.html","headers":[{"key":"Cache-Control","value":"private, no-store, max-age=0"},{"key":"Referrer-Policy","value":"no-referrer"}]},
