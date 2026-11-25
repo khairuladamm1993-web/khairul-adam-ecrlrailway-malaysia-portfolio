@@ -329,7 +329,7 @@ function installGeographicContext(map){
  if(!map.getLayer(ecrlMarker)){
   window.MRS10P01MapCore.installStationType2(map,ecrlType2);
   map.addLayer({id:ecrlMarker,type:'symbol',source:ecrlSource,
-   layout:{'icon-image':ecrlType2,'icon-size':['step',['zoom'],0.62,8,0.82,12,1],'icon-padding':['step',['zoom'],4,12,2]}});
+   layout:{'icon-image':ecrlType2,'icon-size':['step',['zoom'],0.62,8,0.82,12,1],'icon-allow-overlap':true}});
  }
  if(style.glyphs&&!map.getLayer(ecrlLabel))map.addLayer({id:ecrlLabel,type:'symbol',source:ecrlSource,minzoom:8,
   layout:{'text-field':['step',['zoom'],['get','code'],11,['concat',['get','code'],' · ',['get','name']]],
@@ -485,7 +485,12 @@ function startMap(){
    const layers=[ecrlLabel,ecrlMarker,...state.manifest.map(r=>layerId(r.id))].filter(id=>state.map.getLayer(id));
    if(!layers.length)return;
    const hits=state.map.queryRenderedFeatures([[e.point.x-11,e.point.y-11],[e.point.x+11,e.point.y+11]],{layers});
-   const reference=hits.find(hit=>[ecrlMarker,ecrlLabel].includes(hit.layer.id));
+   const references=hits.filter(hit=>[ecrlMarker,ecrlLabel].includes(hit.layer.id));
+   const byDistance=hit=>{
+    const {x,y}=state.map.project(hit.geometry.coordinates);
+    return Math.hypot(x-e.point.x,y-e.point.y);
+   };
+   const reference=references.sort((a,b)=>byDistance(a)-byDistance(b))[0];
    if(reference){
     const asset=state.ecrlPublic.find(row=>row.assetId===reference.properties.assetId);
     if(asset)selectEcrlStation(asset,$('ecrl-context-open'),false);

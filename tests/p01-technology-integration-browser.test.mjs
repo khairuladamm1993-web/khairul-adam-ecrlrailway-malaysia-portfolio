@@ -125,6 +125,7 @@ async function checkMapComposition(page,engine,device){
   return {types:[...new Set(data.features.map(f=>f.geometry.type))],codes:data.features.map(f=>f.properties.code),
    markerType:marker.type,iconSize:map.getLayoutProperty(marker.id,'icon-size'),
    iconRegistered:map.hasImage(map.getLayoutProperty(marker.id,'icon-image')),
+   iconCanOverlapBasemap:map.getLayoutProperty(marker.id,'icon-allow-overlap'),
    railSource:rail.source,railType:rail.type,legacyVisibility:map.getLayoutProperty('mrs10-v7-mrt-kajang','visibility'),
    centre:map.getCenter().toArray()};
  });
@@ -132,6 +133,7 @@ async function checkMapComposition(page,engine,device){
  assert.equal(layers.codes.length,16);
  assert.equal(layers.markerType,'symbol');
  assert.equal(layers.iconRegistered,true);
+ assert.equal(layers.iconCanOverlapBasemap,true);
  assert.deepEqual(layers.iconSize,['step',['zoom'],0.62,8,0.82,12,1]);
  assert.ok(!layers.codes.includes('STN10'));
  assert.equal(layers.legacyVisibility,'none');
