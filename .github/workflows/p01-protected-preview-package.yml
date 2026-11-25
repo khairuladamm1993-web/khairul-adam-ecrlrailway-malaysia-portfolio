@@ -1,7 +1,7 @@
 name: P01 Protected Preview Package
 on:
   push:
-    branches: [candidate/p01-preview-blocker-resolution-v1-20261123, candidate/p01-visual-refinement-mrnext-20261124, candidate/p01-public-ecosystem-nav-001-20261125, candidate/p01-ecrl-integration-batch-20261125]
+    branches: [candidate/p01-preview-blocker-resolution-v1-20261123, candidate/p01-visual-refinement-mrnext-20261124, candidate/p01-public-ecosystem-nav-001-20261125, candidate/p01-ecrl-integration-batch-20261125, candidate/p01-shared-core-identity-20261125]
 permissions:
   contents: read
 jobs:
@@ -26,7 +26,7 @@ jobs:
           P01_PREVIEW_PACKAGE="$RUNNER_TEMP/p01-protected-preview" node --test tests/p01-protected-preview-package.test.cjs
           node --test tests/p01-member-public-map-contract.test.cjs tests/p01-role-map-integration.test.cjs tests/p01-role-map-runtime.test.cjs tests/p01-ecrl-data-contract.test.cjs
       - name: Archive verified prebuilt Preview bundle
-        if: github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125'
+        if: github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125' || github.ref_name == 'candidate/p01-shared-core-identity-20261125'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: p01-prebuilt-${{ github.sha }}

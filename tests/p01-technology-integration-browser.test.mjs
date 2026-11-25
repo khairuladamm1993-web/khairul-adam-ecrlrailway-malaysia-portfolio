@@ -20,12 +20,14 @@ ProbeMap.prototype.jumpTo=function(...args){window.ecrlTestMap=this;return jump.
 `;
 const rows=[];
 const batchOnly=process.env.P01_QA_ECRL_BATCH_ONLY==='1';
+const sharedOnly=process.env.P01_QA_SHARED_CORE_ONLY==='1';
 const profiles=[['desktop',1200,900],['ipad',810,1080],['iphone',390,844],['iphone-landscape',844,390]];
 const arcgis=/^https:\/\/[^/]*arcgis\.com\//;
 const emptyGis=r=>r.fulfill({json:{features:[]},headers:{'access-control-allow-origin':'*'}});
 
 async function checkPublicAssetLookup(page){
   const list=page.locator('#asset-reference-list'),search=page.locator('#asset-search');
+  await list.locator('li').first().waitFor();
   await search.fill('ECRL Depot Kuantan');
   assert.equal(await list.locator('li').count(),1);
   assert.equal(await list.locator('li').getAttribute('data-asset-id'),'ecrl-depot-kuantan');
@@ -35,6 +37,37 @@ async function checkPublicAssetLookup(page){
   await search.fill('pl 1');
   assert.equal(await list.locator('li').count(),1);
   assert.match(await list.innerText(),/PL01/);
+}
+
+async function checkSharedIdentity(page){
+ const projection='/data/ecrl-public-identity-v1.json';
+ assert.equal((await page.goto(base+'/unified-map-v7.html')).status(),200);
+ const search=page.locator('#search'), results=page.locator('#search-results');
+ await search.fill('PL 1');
+ const row=results.locator('[data-ecrl-identity="ecrl-loop-historical-01"]');
+ await row.waitFor();
+ assert.match(await row.innerText(),/belum disahkan.*PL01/);
+ await search.fill('ecrl-depot-kuantan');
+ await results.locator('[data-ecrl-identity="ecrl-depot-kuantan"]').waitFor();
+ assert.equal((await page.goto(base+'/ecrl-asset-reference.html')).status(),200);
+ await checkPublicAssetLookup(page);
+ const response=await page.request.get(base+projection);
+ assert.equal(response.status(),200);
+ const payload=await response.json();
+ assert.equal(payload.records.length,25);
+ for(const record of payload.records){
+  assert.deepEqual(Object.keys(record).sort(),['assetId','code','name','section','type']);
+ }
+ for(const path of ['/data/owner-project-registry.json','/api/member','/supabase/config.toml','/release-manifest.json','/assets/quiz-core.js']){
+  assert.equal((await page.request.get(base+path)).status(),404,path);
+ }
+ await page.route(base+projection,r=>r.fulfill({status:503,body:'Unavailable fixture'}));
+ await page.goto(base+'/unified-map-v7.html');
+ await page.locator('#search').fill('Kajang');
+ assert.ok(await page.locator('#search-results').getByRole('button').count()>0);
+ await page.goto(base+'/ecrl-asset-reference.html');
+ await page.getByText('Rujukan aset belum tersedia.').waitFor();
+ await page.unroute(base+projection);
 }
 
 async function checkMemberKeyboardSearch(page){
@@ -102,6 +135,7 @@ async function checkPublicNavigation(page,engine,device){
   await page.locator('.p01-public-map-nav a[href="ecrl-asset-reference.html"]').click();
   await page.waitForURL('**/ecrl-asset-reference.html');
   const assets=page.locator('#asset-reference-list');
+  await assets.locator('li').first().waitFor();
   assert.equal(await assets.locator('[data-type=STN]').count(),16);
   assert.equal(await assets.locator('[data-type=PL]').count(),7);
   assert.equal(await assets.locator('[data-type=DEPOT]').count(),2);
@@ -147,9 +181,9 @@ async function checkUnavailableRenderer(browser){
 for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
  const browser=await driver.launch({headless:true,args:engine==='chromium'?['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']:[]});
  try{
-  if(!batchOnly&&engine==='chromium')await checkUnavailableRenderer(browser);
+  if(!batchOnly&&!sharedOnly&&engine==='chromium')await checkUnavailableRenderer(browser);
   for(const [device,width,height] of profiles){
-   if(batchOnly&&!["desktop","iphone"].includes(device))continue;
+   if((batchOnly||sharedOnly)&&!["desktop","iphone"].includes(device))continue;
    const page=await browser.newPage({viewport:{width,height},hasTouch:device!=='desktop',isMobile:device!=='desktop'});
    // Run the local smoke test with the application's opt-out for external analytics.
    await page.addInitScript(()=>Object.defineProperty(navigator,'globalPrivacyControl',{value:true}));
@@ -171,6 +205,13 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    await page.route('https://tiles.openfreemap.org/styles/**', r=>r.fulfill({json:{version:8,sources:{},layers:[{id:'bg',type:'background',paint:{'background-color':'#dce6e4'}}]},headers:{'access-control-allow-origin':'*'}}));
    await page.route(arcgis,emptyGis);
    try{
+    if(sharedOnly){
+     await checkSharedIdentity(page);
+     assert.deepEqual(errors,[]);
+     assert.ok(localFailures.every(path=>path==='/data/ecrl-public-identity-v1.json'));
+     rows.push({engine,device,status:'PASS',sharedIdentity:true,g1DataStaticBoundary:true});
+     continue;
+    }
     if(batchOnly){
      assert.equal((await page.goto(base+'/ecrl-asset-reference.html')).status(),200);
      await checkPublicAssetLookup(page);
