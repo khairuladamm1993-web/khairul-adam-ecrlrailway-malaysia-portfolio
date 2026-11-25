@@ -21,7 +21,13 @@
 </section>
 <section class="legend" id="legend" aria-label="Route colour legend"></section>
 <p id="qa-note" class="notice" role="status" aria-live="polite"></p>
-<section class="rail-panel"><h2 id="lineup-title">Senarai stesen</h2><nav id="route-buttons" aria-label="Select a railway route"></nav><ol id="lineup"></ol></section>
+<section id="rail-lineup-panel" class="rail-panel"><h2 id="lineup-title">Senarai stesen</h2><nav id="route-buttons" aria-label="Select a railway route"></nav><ol id="lineup"></ol></section>
+<section id="ecrl-context" class="rail-panel" aria-labelledby="ecrl-context-title" hidden>
+ <h2 id="ecrl-context-title" tabindex="-1"></h2>
+ <p id="ecrl-context-status" class="notice"></p>
+ <ol id="ecrl-context-list"></ol>
+ <button id="ecrl-context-back" type="button"></button>
+</section>
 <section id="search-results" class="search-results" aria-live="polite" hidden></section>
 <footer><p id="attribution">Rujukan GIS: ArcGIS awam dan GTFS rasmi KTMB (CC BY 4.0) · Stesen dan turutan: registry MR-S10 · Basemap: OpenFreeMap / OpenStreetMap. Tiada geometri trek direka. ETS dan ERT ialah corak hentian satu perjalanan GTFS, bukan semua jadual.</p><p><a href="./map-language-lab.html?railPilot=1">Global Explorer</a> · <a href="./ampang-line-r219.html">Ampang GIS standalone</a></p><small>Isolated integration · No Production merge · No operational use</small></footer>
 </main>

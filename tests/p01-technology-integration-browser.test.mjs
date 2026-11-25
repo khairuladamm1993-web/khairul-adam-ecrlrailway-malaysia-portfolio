@@ -47,13 +47,34 @@ async function checkSharedIdentity(page){
  const row=results.locator('[data-ecrl-identity="ecrl-loop-historical-01"]');
  await row.waitFor();
  assert.match(await row.innerText(),/belum disahkan.*PL01/);
- await search.fill('ecrl-depot-kuantan');
- await results.locator('[data-ecrl-identity="ecrl-depot-kuantan"]').waitFor();
- assert.equal((await page.goto(base+'/ecrl-asset-reference.html')).status(),200);
- await checkPublicAssetLookup(page);
  const response=await page.request.get(base+projection);
  assert.equal(response.status(),200);
  const payload=await response.json();
+ const current=payload.records.find(item=>item.code==='PL01');
+ const originalRoute=await page.locator('#route-buttons [aria-pressed=true]').innerText();
+ await row.press('Enter');
+ const context=page.locator('#ecrl-context');
+ assert.equal(await context.isVisible(),true);
+ assert.equal(await page.locator('#rail-lineup-panel').isHidden(),true);
+ assert.equal(await context.locator('h2').evaluate(h=>h===document.activeElement),true);
+ assert.match(await context.locator('h2').innerText(),new RegExp(' · '+current.section+'$'));
+ assert.deepEqual(await context.locator('li').evaluateAll(items=>items.map(item=>item.dataset.assetId)),
+  payload.records.filter(item=>item.section===current.section).map(item=>item.assetId));
+ assert.equal(await context.locator('[aria-current=true]').getAttribute('data-asset-id'),current.assetId);
+ assert.equal(new URL(page.url()).pathname,'/unified-map-v7.html');
+ await page.locator('#ecrl-context-back').click();
+ assert.equal(await context.isHidden(),true);
+ assert.equal(await page.locator('#rail-lineup-panel').isVisible(),true);
+ assert.equal(await page.locator('#route-buttons [aria-pressed=true]').innerText(),originalRoute);
+ assert.equal(await search.evaluate(input=>input===document.activeElement),true);
+ await search.fill('ecrl-depot-kuantan');
+ const depot=results.locator('[data-ecrl-identity="ecrl-depot-kuantan"]');
+ await depot.click();
+ assert.equal(await context.locator('[aria-current=true]').getAttribute('data-asset-id'),'ecrl-depot-kuantan');
+ await page.locator('#reset').click();
+ assert.equal(await context.isHidden(),true);
+ assert.equal((await page.goto(base+'/ecrl-asset-reference.html')).status(),200);
+ await checkPublicAssetLookup(page);
  assert.equal(payload.records.length,25);
  for(const record of payload.records){
   assert.deepEqual(Object.keys(record).sort(),['assetId','code','name','section','type']);
@@ -209,7 +230,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
      await checkSharedIdentity(page);
      assert.deepEqual(errors,[]);
      assert.ok(localFailures.every(path=>path==='/data/ecrl-public-identity-v1.json'));
-     rows.push({engine,device,status:'PASS',sharedIdentity:true,g1DataStaticBoundary:true});
+     rows.push({engine,device,status:'PASS',sharedIdentity:true,g1DataStaticBoundary:true,referenceContext:true});
      continue;
     }
     if(batchOnly){
