@@ -14,16 +14,32 @@ for(const file of ['data.js','i18n.js']){
 const adapter=bridge.create(window.MRS10ECRLGISV1,window.MRS10ECRLI18N);
 const data=contract.create(adapter,master.create(adapter));
 
-test('V1 projects the V8 schematic inventory in its existing order',()=>{
+test('V1 matches the Owner reference inventory for all 25 assets in order',()=>{
  assert.equal(data.version,1);
  assert.equal(data.corridor,'ECRL');
  assert.equal(data.records.length,25);
  assert.equal(new Set(data.records.map(row=>row.assetId)).size,25);
- assert.deepEqual(data.records.slice(0,23).map(row=>row.assetId),adapter.chainage.records.map(row=>row.assetId));
- assert.deepEqual(data.records.filter(row=>row.type==='STN').map(row=>row.code),
-  [...Array(17)].map((_,i)=>i+1).filter(i=>i!==10).map(i=>'STN'+String(i).padStart(2,'0')));
- assert.equal(data.records.filter(row=>row.type==='PL').length,7);
- assert.deepEqual(data.records.filter(row=>row.type==='DEPOT').map(row=>row.assetId),['ecrl-depot-gombak-north','ecrl-depot-kuantan']);
+ assert.deepEqual(data.records.map(({section,type,code,name})=>[section,type,code,name]),[
+  ['A','STN','STN01','Kota Bharu'],['A','STN','STN02','Pasir Puteh'],
+  ['A','STN','STN03','Jerteh'],['A','STN','STN04','Bandar Permaisuri'],
+  ['A','PL','PL01','Pekan Sg. Tong'],['A','STN','STN05','Kuala Terengganu'],
+  ['A','PL','PL02','Bukit Payung'],['A','STN','STN06','Dungun'],
+  ['B','STN','STN07','Kemasik'],['B','STN','STN08','Chukai'],
+  ['B','STN','STN09','Cherating'],['B','DEPOT',null,'Kuantan Port City Depot'],
+  ['B','STN','STN11','Kuantan Port City'],['B','STN','STN12','Kota SAS'],
+  ['B','STN','STN13','Paya Besar'],['B','PL','PL03','Felda Lepar'],
+  ['B','PL','PL04','Kampung Alur Gading'],['B','STN','STN14','Maran'],
+  ['B','PL','PL05','Chenor'],['B','STN','STN15','Temerloh'],
+  ['C1','PL','PL06','Lanchang'],['C1','STN','STN16','Bentong'],
+  ['C1','PL','PL07','Alang Sedayu'],['C1','DEPOT',null,'Gombak North EMU Depot'],
+  ['C1','STN','STN17','ITT Gombak']
+ ]);
+ assert.deepEqual(data.records.filter(row=>row.type!=='DEPOT').map(row=>row.assetId),
+  adapter.chainage.records.map(row=>row.assetId));
+ assert.equal(data.records.find(row=>row.code==='STN11').assetId,'ecrl-stn-10');
+ assert.equal(data.records.find(row=>row.code==='PL06').assetId,'ecrl-loop-historical-06');
+ assert.deepEqual(data.records.filter(row=>row.type==='DEPOT').map(row=>row.assetId),
+  ['ecrl-depot-kuantan','ecrl-depot-gombak-north']);
 });
 
 test('V1 preserves independent confidence and source provenance without promoting coordinates',()=>{
@@ -40,11 +56,12 @@ test('V1 preserves independent confidence and source provenance without promotin
    assert.equal(row.confidence.position,'UNVERIFIED');
   }
  }
- const depots=data.records.filter(row=>row.type==='DEPOT');
- assert.equal(depots[0].chainage.label,'CH519+750');
- assert.match(depots[0].confidence.chainage,/NOT_SURVEYED/);
- assert.equal(depots[0].chainage.datum,null);
- assert.equal(depots[1].chainage,null);
+ const kuantan=data.records.find(row=>row.assetId==='ecrl-depot-kuantan');
+ const gombak=data.records.find(row=>row.assetId==='ecrl-depot-gombak-north');
+ assert.equal(kuantan.chainage,null);
+ assert.equal(gombak.chainage.label,'CH519+750');
+ assert.match(gombak.confidence.chainage,/NOT_SURVEYED/);
+ assert.equal(gombak.chainage.datum,null);
 });
 
 test('V1 seals collection, rows and nested values independently of source arrays',()=>{

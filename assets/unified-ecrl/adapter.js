@@ -35,10 +35,10 @@ function create(registry,translations){
  if(!portCatalogue||portCatalogue.assets.length!==2)throw Error('ECRL_PORT_CATALOGUE_MISSING');
  const kerteh=(root&&root.MRS10ECRLKertehFreight)||(typeof require==='function'?require('./kerteh-freight-reference.js'):null);
  if(!kerteh||kerteh.assets.length!==2)throw Error('ECRL_KERTEH_FREIGHT_REFERENCE_MISSING');
- if(!chainage||chainage.records.length!==23)throw Error('ECRL_CHAINAGE_MANIFEST_MISSING');
+ if(!chainage||chainage.records.length!==23||chainage.lineup?.length!==25)throw Error('ECRL_CHAINAGE_MANIFEST_MISSING');
  const alignmentEvidence=(root&&root.MRS10ECRLAlignmentEvidence)||(typeof require==='function'?require('./alignment-evidence-r2.js'):null);
  if(!alignmentEvidence||alignmentEvidence.passingLoops.length!==7||alignmentEvidence.spurs.length!==7)throw Error('ECRL_ALIGNMENT_EVIDENCE_MISSING');
- const annotate=a=>{const c=chainage.get(a.assetId);return Object.freeze({...a,chainageCode:c?.code||null,plCode:c?.code?.startsWith('PL')?c.code:null,chainageKm:c?.km??null,chainageLabel:c?.label||null,chainageDatum:c?.datum||null,chainageStatus:c?.status||'UNKNOWN',chainageProvenance:c?.provenance||null})};
+ const annotate=a=>{const c=chainage.get(a.assetId);return Object.freeze({...a,section:chainage.getLineup(a.assetId)?.section??a.section,chainageCode:c?.code||null,plCode:c?.code?.startsWith('PL')?c.code:null,chainageKm:c?.km??null,chainageLabel:c?.label||null,chainageDatum:c?.datum||null,chainageStatus:c?.status||'UNKNOWN',chainageProvenance:c?.provenance||null})};
  // Owner-accepted ECRL station designations. STN10 is absent; assetId is an immutable ordinal key.
 const CORRIDOR_STATION_CODES=Object.freeze({
  'Kota Bharu':'STN01','Pasir Puteh':'STN02','Jerteh':'STN03','Bandar Permaisuri':'STN04',
@@ -55,7 +55,8 @@ const knownCodes=stations.filter(a=>a.stationCode).map(a=>a.stationCode);
 if(knownCodes.length!==16||new Set(knownCodes).size!==16||stations.some(a=>a.section==='C2'&&a.stationCode))throw Error('ECRL_STATION_CODE_MANIFEST_MISMATCH');
 const loops=registry.loops.map(annotate);
  if(loops.length!==7||loops.some((a,i)=>a.plCode!=='PL'+String(i+1).padStart(2,'0')))throw Error('ECRL_PL_MANIFEST_MISMATCH');
- const assets=[...stations,...loops,...registry.facilities,...portCatalogue.assets,...kerteh.assets];
+ const facilities=registry.facilities.map(a=>a.assetType==='DEPOT'?annotate(a):a);
+ const assets=[...stations,...loops,...facilities,...portCatalogue.assets,...kerteh.assets];
  const enhancedRegistry={...registry,sources:Object.freeze({...registry.sources,...portCatalogue.sources,...kerteh.sources}),topology:Object.freeze([...registry.topology,...kerteh.logicalInterfaces]),portLogicalInterfaces:portCatalogue.logicalInterfaces,kertehLogicalInterfaces:kerteh.logicalInterfaces};
  if(new Set(assets.map(a=>a.assetId)).size!==assets.length)throw Error('ECRL_DUPLICATE_ID');
  const flags={LOCALITY:true,HISTORICAL:true,MARITIME:true,YARD:true};

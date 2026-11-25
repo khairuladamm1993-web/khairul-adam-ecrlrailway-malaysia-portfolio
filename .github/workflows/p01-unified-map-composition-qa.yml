@@ -1,7 +1,7 @@
-name: P01 Unified Map Composition QA
+name: P01 ECRL Reference Data QA
 on:
   push:
-    branches: [candidate/p01-unified-map-composition-20261125]
+    branches: [candidate/p01-data-section-correction-20261125]
 permissions:
   contents: read
   actions: read
@@ -15,11 +15,9 @@ jobs:
       run:
         shell: bash
     env:
-      PRODUCT_SHA: 887f59174336272578a57ad9b8ba1e2aefbe838e
       BASELINE_SHA: fc148cc35b7bceb4fd4b328386729d2066694cb8
       BASELINE_ARTIFACT: '15016991693'
       BASELINE_ARCHIVE_HASH: f73f286bbf55fdcbd0999f4e1039c0450be41b5ebc39c53390fc84db7f0681ea
-      PACKAGE_MANIFEST_HASH: 5333c56c65e1c5944e2a53a2289bfe0fbf91c898d8b669f0edf1b8c82a8b7754
     steps:
       - uses: actions/checkout@v5
         with:
@@ -31,13 +29,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify candidate lineage and disable Git deployment
+      - name: Verify candidate checkout and Git deployment guard
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git merge-base --is-ancestor "$PRODUCT_SHA" HEAD
-          test "$(git diff --name-only "$PRODUCT_SHA" HEAD)" = "$(printf '%s\n' .github/workflows/p01-unified-map-composition-qa.yml vercel.json)"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           node -e 'require("node:assert/strict").equal(require("./vercel.json").git.deploymentEnabled[process.env.GITHUB_REF_NAME], false)'
-          git checkout --detach "$PRODUCT_SHA"
       - name: Download and verify immutable baseline archive
         env:
           GH_TOKEN: ${{ github.token }}
@@ -49,7 +45,7 @@ jobs:
             --output "$archive"
           echo "$BASELINE_ARCHIVE_HASH  $archive" | sha256sum --check
           python3 -m zipfile -e "$archive" "$RUNNER_TEMP/p01-package"
-      - name: Match every byte to the approved prebuilt manifest without a build
+      - name: Overlay candidate sources and Public projection on the verified QA fixture
         run: |
           export P01_PREVIEW_PACKAGE="$RUNNER_TEMP/p01-package"
           node <<'NODE'
@@ -57,6 +53,8 @@ jobs:
           const { createHash } = require('node:crypto');
           const fs = require('node:fs');
           const path = require('node:path');
+          const vm = require('node:vm');
+          const core = require('./assets/p01-map-core.js');
           const root = process.env.P01_PREVIEW_PACKAGE;
           const staticPath = '.vercel/output/static/';
           const hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -66,28 +64,44 @@ jobs:
           for (const row of manifest.files) {
             assert.equal(hash(fs.readFileSync(path.join(root, row.path))), row.sha256);
           }
-          for (const file of ['unified-map-v7.html', 'assets/unified-v7-map.js', 'assets/p01-public-map-nav.css']) {
+          for (const file of [
+            'unified-map-v7.html', 'assets/unified-v7-map.js', 'assets/p01-public-map-nav.css',
+            'assets/unified-ecrl/adapter.js', 'assets/unified-ecrl/chainage-manifest.js',
+            'assets/unified-ecrl/railway-data-contract-v1.js'
+          ]) {
             fs.copyFileSync(file, path.join(root, staticPath, file));
           }
+          const ecrlRuntime = {
+            MRS10UnifiedECRL: require('./assets/unified-ecrl/adapter.js'),
+            MRS10ECRLMasterIntelligence: require('./assets/unified-ecrl/master-intelligence.js'),
+            MRS10RailwayDataContractV1: require('./assets/unified-ecrl/railway-data-contract-v1.js')
+          };
+          for (const file of ['data.js', 'i18n.js']) {
+            vm.runInNewContext(fs.readFileSync('assets/unified-ecrl/source/' + file, 'utf8'), {window:ecrlRuntime});
+          }
+          const {dataContract} = core.createEcrlContext(ecrlRuntime);
+          const {version,corridor} = dataContract;
+          const records = core.publicAssetIdentity(dataContract);
+          assert.equal(records.length, 25);
+          fs.writeFileSync(path.join(root, staticPath, 'data/ecrl-public-identity-v1.json'),
+            JSON.stringify({version,corridor,records}, null, 2) + '\n');
+          fs.copyFileSync('vercel.json', path.join(root, 'vercel.json'));
           const stampPath = path.join(root, staticPath, 'assets/build-info.js');
           const stamp = fs.readFileSync(stampPath, 'utf8')
-            .replace(process.env.BASELINE_SHA, process.env.PRODUCT_SHA)
-            .replace('2026-11-25T11:21:04.172387Z', '2026-11-25T11:32:57.232995Z');
+            .replace(process.env.BASELINE_SHA, process.env.GITHUB_SHA);
           fs.writeFileSync(stampPath, stamp);
-          manifest.sourceSha = process.env.PRODUCT_SHA;
+          manifest.sourceSha = process.env.GITHUB_SHA;
           for (const row of manifest.files) {
             row.sha256 = hash(fs.readFileSync(path.join(root, row.path)));
           }
-          const bytes = JSON.stringify(manifest, null, 2) + '\n';
-          assert.equal(hash(bytes), process.env.PACKAGE_MANIFEST_HASH);
-          fs.writeFileSync(manifestPath, bytes);
-          console.log('P01_APPROVED_PREBUILT_MATCH', manifest.sourceSha, manifest.files.length);
+          fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+          console.log('P01_QA_FIXTURE_NO_BUILD', manifest.sourceSha, manifest.files.length);
           NODE
           node --test tests/p01-protected-preview-package.test.cjs
       - name: Run Public, Member, ECRL and R211 regression
         run: |
           npm ci --ignore-scripts
-          node --test tests/p01-ecrl-data-contract.test.cjs tests/p01-member-public-map-contract.test.cjs tests/p01-role-map-runtime.test.cjs tests/p01-role-map-integration.test.cjs tests/r211-mobile-map-ux.test.cjs
+          node --test tests/p01-ecrl-data-contract.test.cjs tests/p01-member-public-map-contract.test.cjs tests/p01-role-map-runtime.test.cjs tests/p01-role-map-integration.test.cjs tests/r211-mobile-map-ux.test.cjs tests/unified-ecrl-chainage.test.cjs tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-alignment-r2.test.cjs
       - name: Run composition QA in MapLibre, Chromium and WebKit
         run: |
           npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1

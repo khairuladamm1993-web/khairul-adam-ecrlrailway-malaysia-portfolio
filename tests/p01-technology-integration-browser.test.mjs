@@ -73,9 +73,17 @@ async function checkSharedIdentity(page){
  const depot=results.locator('[data-ecrl-identity="ecrl-depot-kuantan"]');
  await depot.click();
  assert.equal(await context.locator('[aria-current=true]').getAttribute('data-asset-id'),'ecrl-depot-kuantan');
+ await search.fill('PL06');
+ await results.locator('[data-ecrl-identity="ecrl-loop-historical-06"]').click();
+ assert.match(await context.locator('h2').innerText(),/ · C1$/);
+ assert.equal(await context.locator('[aria-current=true]').getAttribute('data-asset-id'),'ecrl-loop-historical-06');
  await page.locator('#reset').click();
  assert.equal(await context.isHidden(),true);
  assert.equal((await page.goto(base+'/ecrl-asset-reference.html')).status(),200);
+ const catalogue=page.locator('#asset-reference-list li');
+ await catalogue.first().waitFor();
+ assert.deepEqual(await catalogue.evaluateAll(items=>items.map(item=>[item.dataset.assetId,item.dataset.type,item.querySelector('small').textContent])),
+  payload.records.map(({assetId,type,section})=>[assetId,type,({STN:'Stesen',PL:'Passing loop',DEPOT:'Depot'})[type]+' · Seksyen '+section+' · Lokasi fizikal belum disahkan']));
  await checkPublicAssetLookup(page);
  assert.equal(payload.records.length,25);
  for(const record of payload.records){
@@ -129,6 +137,20 @@ async function checkMapComposition(page,engine,device){
   for(const type of Object.keys(tally))tally[type]+=await panel.locator('li[data-type="'+type+'"]').count();
  }
  assert.deepEqual(tally,{STN:16,PL:7,DEPOT:2});
+ const bSection=panel.getByRole('button',{name:'B',exact:true});
+ await tap(bSection);
+ assert.equal(await panel.locator('#ecrl-context-list').evaluate(list=>list.scrollTop),0);
+ assert.equal(await panel.locator('[data-asset-id="ecrl-loop-historical-06"]').count(),0);
+ assert.deepEqual(await panel.locator('[data-asset-id="ecrl-depot-kuantan"]').evaluate(item=>
+  [item.previousElementSibling.dataset.assetId,item.dataset.type,item.nextElementSibling.dataset.assetId]),
+ ['ecrl-stn-09','DEPOT','ecrl-stn-10']);
+ assert.equal(await panel.locator('#ecrl-context-list').evaluate(list=>{
+  list.scrollTop=list.scrollHeight;
+  return list.lastElementChild.getBoundingClientRect().bottom<=list.getBoundingClientRect().bottom+1;
+ }),true);
+ await tap(panel.getByRole('button',{name:'C1',exact:true}));
+ assert.equal(await panel.locator('#ecrl-context-list').evaluate(list=>list.scrollTop),0);
+ assert.equal(await panel.locator('#ecrl-context-list li').first().getAttribute('data-asset-id'),'ecrl-loop-historical-06');
  assert.equal(await page.locator('#search').inputValue(),'');
  assert.deepEqual(await camera(),before);
  assert.equal(new URL(page.url()).pathname,mapPath);

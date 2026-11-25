@@ -3,17 +3,18 @@
 const VERSION=1;
 
 function create(adapter,master){
- const ordered=adapter.chainage.records.map(entry=>adapter.get(entry.assetId));
- const depots=adapter.assets.filter(asset=>asset.assetType==='DEPOT');
- const records=Object.freeze([...ordered,...depots].map(asset=>{
-  const chainage=master.get(asset.assetId).chainage;
-  const reference=adapter.reference(asset.assetId);
+ const records=Object.freeze(adapter.chainage.lineup.map(({assetId,code,section})=>{
+  const asset=adapter.get(assetId);
+  if(!asset||(asset.stationCode||asset.plCode||null)!==code||asset.section!==section||
+   (code===null&&asset.assetType!=='DEPOT'))throw Error('ECRL_LINEUP_IDENTITY_MISMATCH:'+assetId);
+  const chainage=master.get(assetId).chainage;
+  const reference=adapter.reference(assetId);
   return Object.freeze({
-   assetId:asset.assetId,
+   assetId,
    type:asset.stationCode?'STN':asset.plCode?'PL':'DEPOT',
-   code:asset.stationCode||asset.plCode||null,
+   code,
    name:asset.officialName||asset.historicalName,
-   section:asset.section,
+   section,
    chainage:chainage?Object.freeze({
     metres:chainage.metres,label:chainage.label,datum:chainage.datum??null,
     provenance:chainage.provenance??chainage.source??null,status:chainage.status
