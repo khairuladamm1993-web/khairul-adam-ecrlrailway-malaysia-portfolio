@@ -3,8 +3,8 @@
  * No PL coordinate is interpolated from chainage or guessed from a city.
  * Isolated browser storage only; no server/cloud writes. */
 (function(root){'use strict';
-const rows=root.MRS10ECRLChainage?.records||[],gis=root.MRS10ECRLGISV1||{},pls=root.MRS10ECRLAlignmentEvidence?.passingLoops||[];
-if(rows.length!==23||pls.length!==7)throw Error('D102_PREFLIGHT_REGISTER_MISSING');
+const manifest=root.MRS10ECRLChainage,rows=manifest?.records||[],gis=root.MRS10ECRLGISV1||{},pls=root.MRS10ECRLAlignmentEvidence?.passingLoops||[];
+if(rows.length!==23||pls.length!==7||manifest.lineup?.length!==25)throw Error('D102_PREFLIGHT_REGISTER_MISSING');
 const REV=1,KEY='mrs10-p01-d102-owner-preflight-v1',MALAYSIA={lat:[1,7],lon:[99,105]};
 const fixed=(n)=>Math.round(n*1e7)/1e7;
 const format=ch=>'CH'+String(Math.floor(ch/1000)).padStart(3,'0')+'+'+String(ch%1000).padStart(3,'0');
@@ -13,7 +13,7 @@ const valid=(lat,lon)=>Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=MALAYSIA
 const controls=Object.freeze(rows.map((r,i)=>{const station=r.code.startsWith('STN')?gis.stations?.find(x=>x.assetId===r.assetId):null,pl=pls.find(x=>x.code===r.code);
  const ref=station?.point?.length===2&&valid(station.point[1],station.point[0])?{latitude:station.point[1],longitude:station.point[0],confidence:'PUBLIC_LOCALITY_REFERENCE_ONLY'}:null;
  return Object.freeze({code:r.code,assetId:r.assetId,CH:r.metres,CHLabel:format(r.metres),type:pl?'PASSING_LOOP':'STATION',
-  name:station?.officialName||pl?.name||r.code,section:station?.section||pl?.section||'UNKNOWN',
+  name:station?.officialName||pl?.name||r.code,section:manifest.getLineup(r.assetId).section,
   publicReference:ref,publicSource:station?.sourceId||null,
   previous:rows[i-1]?.code||null,next:rows[i+1]?.code||null,
   deltaPreviousKm:i>0?Math.round((r.metres-rows[i-1].metres)/10)/100:null,

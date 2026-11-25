@@ -1,14 +1,14 @@
 /* Source-backed ECRL STN01 intelligence, not a surveyed station track plan.
  * Never infer platform arrangement/coordinates of a surveyed asset from locality. */
 (function(root){'use strict';
-const rows=root.MRS10ECRLChainage?.records||[],gis=root.MRS10ECRLGISV1||{};
+const manifest=root.MRS10ECRLChainage,rows=manifest?.records||[],gis=root.MRS10ECRLGISV1||{};
 function getStation(code){
  const c=rows.find(x=>x.code===code);if(!c||!code.startsWith('STN'))return null;
  const station=gis.stations?.find(x=>x.assetId===c.assetId);if(!station)return null;
  const sourceIds=station.sourceIds||[];
  return Object.freeze({
    code,assetId:c.assetId,displayName:station.officialName,CH:c.metres,CHLabel:'CH'+String(Math.floor(c.metres/1000)).padStart(3,'0')+'+'+String(c.metres%1000).padStart(3,'0'),
-   section:station.section,services:station.serviceType,assetStatus:station.assetStatus,
+   section:manifest.getLineup(c.assetId).section,services:station.serviceType,assetStatus:station.assetStatus,
    verificationStatus:station.verificationStatus,trackGaugeMm:gis.schemeTechnicalReference?.gaugeMm??null,
    electrificationVolts:gis.schemeTechnicalReference?.electrificationVolts??null,
    trackFormation:gis.schemeTechnicalReference?.trackFormation||'UNKNOWN',

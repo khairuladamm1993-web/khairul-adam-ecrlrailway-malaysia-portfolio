@@ -13,7 +13,8 @@
     "candidate/p01-v7-ecrl-reference-context-20261125": false,
     "candidate/p01-v7-railway-hierarchy-20261125": false,
     "candidate/p01-unified-map-composition-20261125": false,
-    "candidate/p01-data-section-correction-20261125": false
+    "candidate/p01-data-section-correction-20261125": false,
+    "candidate/p01-data-section-followup-20261125": false
   }},
   "headers": [
     {"source":"/gateway.html","headers":[{"key":"Cache-Control","value":"private, no-store, max-age=0"},{"key":"Referrer-Policy","value":"no-referrer"}]},

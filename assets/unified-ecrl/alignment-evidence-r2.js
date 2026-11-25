@@ -2,6 +2,7 @@
    Public railway schemes establish topology, NOT coordinates of physical rails.
    No generated/snap-to-road LineString, terminal point, PL pin, train position or ETA. */
 (function(root){'use strict';
+const lineup=root?.MRS10ECRLChainage||(typeof module==='object'?require('./chainage-manifest.js'):null);
 const SOURCES=Object.freeze({
  MRL_2023:Object.freeze({url:'https://www.mrl.com.my/wp-content/uploads/2023/05/ECRL-Alignment-1552023.pdf',kind:'OFFICIAL_RAIL_SCHEMATIC',revision:'MRL overall corridor and Kerteh/Kemaman/Kuantan/Port Klang spur schematic, May 2023',surveyGeometry:false}),
  PLAN_PEGTA_2025:Object.freeze({url:'https://myplan.planmalaysia.gov.my/admin/uploads_publication/pdf_20250117162247_10.pdf',kind:'GOVERNMENT_INTEGRATED_LAND_USE_MASTER_PLAN',revision:'PeGTaECRL Vol I Chapter 5, Table 5.79: existing MRL spurline programmes vs proposed future studies',surveyGeometry:false}),
@@ -18,11 +19,16 @@ const PL=Object.freeze([
  ['PL05','ecrl-loop-historical-05','Chenor','B','OWNER_HISTORICAL_TRACK_LAYOUT_REVIEWED'],
  ['PL06','ecrl-loop-historical-06','Lanchang','B','OWNER_HISTORICAL_CH'],
  ['PL07','ecrl-loop-historical-07','Alang Sedayu','C1','HISTORICAL_C1_DO_NOT_RELOCATE_TO_C2']
-].map(([code,assetId,name,section,evidenceClass])=>Object.freeze({
- code,assetId,name,section,evidenceClass,placement:'LIST_ONLY_PENDING_GEOSPATIAL_VERIFICATION',
- point:null,geometry:null,verifiedTurnouts:0,verifiedPhysicalLoop:false,ownerCoordinateDisclosure:'AUTHENTICATED_ONLY',
- independentSurveyGeometry:false
-})));
+].map(([code,assetId,name,historicalSection,evidenceClass])=>{
+ const current=lineup?.getLineup(assetId);
+ if(!current||current.code!==code)throw Error('ECRL_PL_LINEUP_MISMATCH:'+assetId);
+ return Object.freeze({
+  code,assetId,name,section:current.section,historicalSection,evidenceClass,
+  placement:'LIST_ONLY_PENDING_GEOSPATIAL_VERIFICATION',
+  point:null,geometry:null,verifiedTurnouts:0,verifiedPhysicalLoop:false,ownerCoordinateDisclosure:'AUTHENTICATED_ONLY',
+  independentSurveyGeometry:false
+ });
+}));
 const SPURS=Object.freeze([
  ['KERTEH_PETRONAS','Kerteh / PETRONAS','ecrl-kerteh-petronas-loading-interface','Dungun–Kemasik corridor context','MRL_2023','OSM_KERTEH'],
  ['KEMAMAN_PORT','Kemaman Port','ecrl-port-kemaman','Kemasik–Chukai corridor context','MRL_2023','PORT_KEMAMAN'],

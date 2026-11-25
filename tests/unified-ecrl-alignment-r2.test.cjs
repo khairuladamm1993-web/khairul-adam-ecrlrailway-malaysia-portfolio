@@ -7,12 +7,18 @@ test('7 historical PL are CH-linked but physically unlocated, including PL07 C1 
  assert.equal(evidence.passingLoops.length,7);
  for(const item of evidence.passingLoops){
   const a=adapter.get(item.assetId);assert(a);assert.equal(a.plCode,item.code);
+  assert.equal(item.section,a.section);
   assert.match(a.chainageLabel,/^CH\d+\+\d{3}$/);
   assert.equal(item.point,null);assert.equal(item.geometry,null);
   assert.equal(item.placement,'LIST_ONLY_PENDING_GEOSPATIAL_VERIFICATION');
   assert.equal(adapter.reference(item.assetId),undefined);
  }
  assert.equal(evidence.passingLoops.at(-1).section,'C1');
+ const lanchang=evidence.passingLoops.find(item=>item.code==='PL06');
+ assert.equal(lanchang.section,'C1');
+ assert.equal(lanchang.historicalSection,'B');
+ assert.equal(w.MRS10ECRLGISV1.loops.find(loop=>loop.assetId===lanchang.assetId).section,'B');
+ assert.equal(lanchang.evidenceClass,'OWNER_HISTORICAL_CH');
  assert.match(evidence.passingLoops.at(-1).evidenceClass,/DO_NOT_RELOCATE_TO_C2/);
  assert.equal(adapter.snapshot().verifiedLoopPoints,0);
 });

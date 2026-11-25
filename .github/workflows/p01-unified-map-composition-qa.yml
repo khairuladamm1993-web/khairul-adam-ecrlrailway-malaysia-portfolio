@@ -1,7 +1,7 @@
 name: P01 ECRL Reference Data QA
 on:
   push:
-    branches: [candidate/p01-data-section-correction-20261125]
+    branches: [candidate/p01-data-section-followup-20261125]
 permissions:
   contents: read
   actions: read
@@ -67,7 +67,8 @@ jobs:
           for (const file of [
             'unified-map-v7.html', 'assets/unified-v7-map.js', 'assets/p01-public-map-nav.css',
             'assets/unified-ecrl/adapter.js', 'assets/unified-ecrl/chainage-manifest.js',
-            'assets/unified-ecrl/railway-data-contract-v1.js'
+            'assets/unified-ecrl/railway-data-contract-v1.js', 'assets/unified-ecrl/alignment-evidence-r2.js',
+            'assets/unified-ecrl/route-lab-d102-preflight.js', 'assets/unified-ecrl/route-lab-station-intelligence.js'
           ]) {
             fs.copyFileSync(file, path.join(root, staticPath, file));
           }
@@ -101,7 +102,7 @@ jobs:
       - name: Run Public, Member, ECRL and R211 regression
         run: |
           npm ci --ignore-scripts
-          node --test tests/p01-ecrl-data-contract.test.cjs tests/p01-member-public-map-contract.test.cjs tests/p01-role-map-runtime.test.cjs tests/p01-role-map-integration.test.cjs tests/r211-mobile-map-ux.test.cjs tests/unified-ecrl-chainage.test.cjs tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-alignment-r2.test.cjs
+          node --test tests/p01-ecrl-data-contract.test.cjs tests/p01-member-public-map-contract.test.cjs tests/p01-role-map-runtime.test.cjs tests/p01-role-map-integration.test.cjs tests/r211-mobile-map-ux.test.cjs tests/unified-ecrl-chainage.test.cjs tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-alignment-r2.test.cjs tests/unified-ecrl-d102-preflight.test.cjs tests/unified-ecrl-route-lab-satellite-stations.test.cjs
       - name: Run composition QA in MapLibre, Chromium and WebKit
         run: |
           npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1

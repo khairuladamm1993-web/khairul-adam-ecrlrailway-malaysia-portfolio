@@ -7,6 +7,7 @@ for(const path of [
  'assets/unified-ecrl/chainage-manifest.js',
  'assets/unified-ecrl/source/data.js',
  'assets/unified-ecrl/alignment-evidence-r2.js',
+ 'assets/unified-ecrl/route-lab-station-intelligence.js',
  'assets/unified-ecrl/route-lab-d102-preflight.js',
  'assets/unified-ecrl/route-lab-d102-observations.js'
 ])vm.runInNewContext(fs.readFileSync(path,'utf8'),browser,{filename:path});
@@ -39,6 +40,26 @@ test('Owner candidate requires complete source+note and geographic Malaysia coor
  assert.equal(D.create(mem).checks().completed,1);
  assert.equal(s.checks().missing.length,22);
  assert(s.revoke('STN01'));assert.equal(s.checks().completed,0);
+});
+test('D102 cards use current sections even with a historical PL06 evidence row',()=>{
+ const lineage=dom.window.MRS10ECRLChainage;
+ const evidence=dom.window.MRS10ECRLAlignmentEvidence;
+ const pl06=evidence.passingLoops.find(row=>row.code==='PL06');
+ assert.equal(pl06.historicalSection,'B');
+ const historicalRuntime={
+  MRS10ECRLChainage:lineage,
+  MRS10ECRLGISV1:dom.window.MRS10ECRLGISV1,
+  MRS10ECRLAlignmentEvidence:{passingLoops:evidence.passingLoops.map(row=>row.code==='PL06'?{...row,section:row.historicalSection}:row)}
+ };
+ vm.runInNewContext(fs.readFileSync('assets/unified-ecrl/route-lab-d102-preflight.js','utf8'),{window:historicalRuntime});
+ for(const control of historicalRuntime.MRS10ECRLD102Preflight.controls){
+  assert.equal(control.section,lineage.getLineup(control.assetId).section);
+  if(control.type==='STATION')assert.equal(dom.window.MRS10ECRLStationIntelligence.getStation(control.code).section,control.section);
+ }
+ const control=historicalRuntime.MRS10ECRLD102Preflight.controls.find(row=>row.code==='PL06');
+ assert.equal(control.section,'C1');
+ assert.equal(control.sourceClass,'OWNER_HISTORICAL_CH');
+ assert.equal(control.physicalTrackGeometry,null);
 });
 test('neighbor CH comparison rejects impossible straight-line > measured CH without claiming a route',()=>{
  const s=D.create(storage());

@@ -400,7 +400,17 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    try{
     if(compositionOnly){
      await checkMapComposition(page,engine,device);
-     if(device==='desktop')await checkSharedIdentity(page);
+     if(device==='desktop'){
+      await checkSharedIdentity(page);
+      assert.equal((await page.goto(base+'/unified-map-v8.html')).status(),200);
+      const lanchang=await page.evaluate(()=>{
+       const {dataContract}=window.MRS10P01MapCore.createEcrlContext();
+       const current=dataContract.records.find(row=>row.code==='PL06');
+       const evidence=window.MRS10ECRLAlignmentEvidence.passingLoops.find(row=>row.code==='PL06');
+       return {contractSection:current.section,evidenceSection:evidence.section,historicalSection:evidence.historicalSection};
+      });
+      assert.deepEqual(lanchang,{contractSection:'C1',evidenceSection:'C1',historicalSection:'B'});
+     }
      assert.deepEqual(errors,[]);
      assert.ok(localFailures.every(path=>path==='/data/ecrl-public-identity-v1.json'));
      rows.push({engine,device,status:'PASS',mapComposition:true,physicalLayersUnchanged:true,touch:device!=='desktop'});
