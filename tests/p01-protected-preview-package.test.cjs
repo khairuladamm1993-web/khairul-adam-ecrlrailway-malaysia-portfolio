@@ -54,3 +54,32 @@ test('manifest covers every packaged file and matches their SHA-256 digests',()=
   assert.equal(createHash('sha256').update(fs.readFileSync(path.join(pkg,file))).digest('hex'),sha256,file);
  }
 });
+
+test('Public ECRL identity is derived from V1 and exposes only existing identity fields',()=>{
+ const vm=require('node:vm');
+ const mapCore=require('../assets/p01-map-core.js');
+ const deps={
+  MRS10UnifiedECRL:require('../assets/unified-ecrl/adapter.js'),
+  MRS10ECRLMasterIntelligence:require('../assets/unified-ecrl/master-intelligence.js'),
+  MRS10RailwayDataContractV1:require('../assets/unified-ecrl/railway-data-contract-v1.js')
+ };
+ for(const file of ['data.js','i18n.js']){
+  vm.runInNewContext(read(process.cwd(),'assets/unified-ecrl/source/'+file),{window:deps});
+ }
+ const {dataContract}=mapCore.createEcrlContext(deps);
+ const projected=json(staticRoot,'data/ecrl-public-identity-v1.json');
+ assert.deepEqual(Object.keys(projected).sort(),['corridor','records','version']);
+ assert.equal(projected.version,dataContract.version);
+ assert.equal(projected.corridor,dataContract.corridor);
+ assert.equal(projected.records.length,25);
+ for(const [i,row] of projected.records.entries()){
+  assert.deepEqual(Object.keys(row).sort(),['assetId','code','name','section','type']);
+  for(const key of Object.keys(row))assert.equal(row[key],dataContract.records[i][key]);
+ }
+ assert.deepEqual(mapCore.findPublicAssets(projected.records,'PL 1','PL').map(r=>r.code),['PL01']);
+ assert.deepEqual(mapCore.findPublicAssets(projected.records,'ecrl-depot-kuantan').map(r=>r.type),['DEPOT']);
+ assert.deepEqual(mapCore.findPublicAssets(projected.records,'STN10'),[]);
+ for(const html of ['unified-map-v7.html','ecrl-asset-reference.html']){
+  assert.doesNotMatch(read(staticRoot,html),/src="[^"]*unified-ecrl\//);
+ }
+});

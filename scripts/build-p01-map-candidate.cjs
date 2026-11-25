@@ -1,6 +1,8 @@
 'use strict';
 // Only builds an isolated preview candidate; Production deployment/pipeline is unchanged.
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
+const {runInNewContext}=require('node:vm');
+const mapCore=require('../assets/p01-map-core.js');
 const root=path.resolve(__dirname,'..');
 const out=path.resolve(process.argv[2]||'dist-p01-map-candidate');
 if(fs.existsSync(out))throw Error('OUTPUT_MUST_BE_FRESH');
@@ -44,4 +46,23 @@ for(const page of ['gateway.html','map-language-lab.html','ampang-line-r219.html
 for(const file of ['data/openmr-r3/intelligence.json','data/unified-v8/physical-network.json','data/unified-complete/borneo-registry.json']){
  if(!fs.existsSync(path.join(out,file)))throw Error('MAP_RUNTIME_DATA_MISSING:'+file);
 }
+// Build the Public identity projection from the same contract used by V8.
+const ecrl={
+ MRS10UnifiedECRL:require('../assets/unified-ecrl/adapter.js'),
+ MRS10ECRLMasterIntelligence:require('../assets/unified-ecrl/master-intelligence.js'),
+ MRS10RailwayDataContractV1:require('../assets/unified-ecrl/railway-data-contract-v1.js')
+};
+for(const file of ['data.js','i18n.js']){
+ const source=path.join(root,'assets/unified-ecrl/source',file);
+ runInNewContext(fs.readFileSync(source,'utf8'),{window:ecrl},{filename:source,timeout:3000});
+}
+const {dataContract}=mapCore.createEcrlContext(ecrl);
+const records=mapCore.publicAssetIdentity(dataContract);
+for(const {assetId,type,code,name,section} of records){
+ if(!/^ecrl-[a-z0-9-]+$/.test(assetId)||!['STN','PL','DEPOT'].includes(type)||
+  (code!==null&&!/^(STN|PL)\d{2}$/.test(code))||typeof name!=='string'||typeof section!=='string')
+  throw Error('P01_PUBLIC_ECRL_INVALID_IDENTITY');
+}
+fs.writeFileSync(path.join(out,'data/ecrl-public-identity-v1.json'),
+ JSON.stringify({version:dataContract.version,corridor:dataContract.corridor,records},null,2)+'\n');
 console.log('P01_MAP_CANDIDATE_ARTIFACT_PASS',out);
