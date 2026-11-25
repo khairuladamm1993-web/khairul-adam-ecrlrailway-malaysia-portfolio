@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 2
+          fetch-depth: 20
           persist-credentials: false
       - uses: actions/setup-node@v5
         with:
@@ -34,7 +34,8 @@ jobs:
       - name: Verify candidate lineage and disable Git deployment
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          test "$(git rev-parse HEAD^)" = "$PRODUCT_SHA"
+          git merge-base --is-ancestor "$PRODUCT_SHA" HEAD
+          test "$(git diff --name-only "$PRODUCT_SHA" HEAD)" = "$(printf '%s\n' .github/workflows/p01-unified-map-composition-qa.yml vercel.json)"
           node -e 'require("node:assert/strict").equal(require("./vercel.json").git.deploymentEnabled[process.env.GITHUB_REF_NAME], false)'
           git checkout --detach "$PRODUCT_SHA"
       - name: Download and verify immutable baseline archive
@@ -47,7 +48,7 @@ jobs:
             "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/artifacts/$BASELINE_ARTIFACT/zip" \
             --output "$archive"
           echo "$BASELINE_ARCHIVE_HASH  $archive" | sha256sum --check
-          unzip -q "$archive" -d "$RUNNER_TEMP/p01-package"
+          python3 -m zipfile -e "$archive" "$RUNNER_TEMP/p01-package"
       - name: Match every byte to the approved prebuilt manifest without a build
         run: |
           export P01_PREVIEW_PACKAGE="$RUNNER_TEMP/p01-package"
