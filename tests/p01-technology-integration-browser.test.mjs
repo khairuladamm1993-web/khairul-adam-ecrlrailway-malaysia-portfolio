@@ -21,6 +21,7 @@ ProbeMap.prototype.jumpTo=function(...args){window.ecrlTestMap=this;return jump.
 const rows=[];
 const batchOnly=process.env.P01_QA_ECRL_BATCH_ONLY==='1';
 const sharedOnly=process.env.P01_QA_SHARED_CORE_ONLY==='1';
+const hierarchyOnly=process.env.P01_QA_RAILWAY_HIERARCHY_ONLY==='1';
 const profiles=[['desktop',1200,900],['ipad',810,1080],['iphone',390,844],['iphone-landscape',844,390]];
 const arcgis=/^https:\/\/[^/]*arcgis\.com\//;
 const emptyGis=r=>r.fulfill({json:{features:[]},headers:{'access-control-allow-origin':'*'}});
@@ -89,6 +90,93 @@ async function checkSharedIdentity(page){
  await page.goto(base+'/ecrl-asset-reference.html');
  await page.getByText('Rujukan aset belum tersedia.').waitFor();
  await page.unroute(base+projection);
+}
+
+async function checkRailwayHierarchy(page,engine,device){
+ // Deterministic overlap fixture for two existing station identities. Never published as data.
+ const coordinate=[101.58,3.17];
+ const specs={
+  kajang:'mrs10-v7-mrt-kajang',putrajaya:'mrs10-v7-mrt-putrajaya',
+  road:'fixture-road-label',water:'fixture-water-label',place:'fixture-place-label'
+ };
+ await page.route('**/FeatureServer/6/query?*',route=>route.fulfill({json:{features:[
+  {attributes:{STN_NAME:'Kwasa Damansara',STN_CODE:'KG01'},geometry:{x:coordinate[0],y:coordinate[1]}}
+ ]},headers:{'access-control-allow-origin':'*'}}));
+ await page.route('**/FeatureServer/8/query?*',route=>route.fulfill({json:{features:[
+  {attributes:{STN_NAME:'Kwasa Damansara',STN_CODE:'PY01'},geometry:{x:coordinate[0],y:coordinate[1]}}
+ ]},headers:{'access-control-allow-origin':'*'}}));
+ await page.route(base+'/hierarchy-fixture-tiles/**',route=>route.fulfill({status:204}));
+ await page.route('https://tiles.openfreemap.org/styles/**',route=>{
+  const dark=route.request().url().endsWith('/dark');
+  return route.fulfill({json:{
+   version:8,sources:{labels:{type:'vector',tiles:[base+'/hierarchy-fixture-tiles/{z}/{x}/{y}.pbf']}},
+   layers:[{id:'bg',type:'background',paint:{'background-color':dark?'#16272a':'#dce6e4'}},
+    {id:specs.road,type:'symbol',source:'labels','source-layer':'transportation_name',paint:{'text-opacity':dark?0.6:0.8}},
+    {id:specs.water,type:'symbol',source:'labels','source-layer':'water_name'},
+    {id:specs.place,type:'symbol',source:'labels','source-layer':'place',paint:{'text-opacity':0.9}}
+   ]},headers:{'access-control-allow-origin':'*'}});
+ });
+ assert.equal((await page.goto(base+'/unified-map-v7.html')).status(),200);
+ const ready=()=>page.waitForFunction(()=>{
+  const d=window.MRS10V7Diagnostics?.snapshot();
+  return d?.stage==='DONE'&&d.styleLoaded&&d.webglReady&&d.layerCount>0;
+ },null,{timeout:45000});
+ const position=()=>page.evaluate(center=>window.ecrlTestMap.jumpTo({center,zoom:12}),coordinate);
+ const snapshot=()=>page.evaluate(({specs,coordinate})=>{
+  const map=window.ecrlTestMap,point=map.project(coordinate);
+  return {
+   pick:map.queryRenderedFeatures(point,{layers:[specs.kajang,specs.putrajaya]}).map(x=>x.layer.id),
+   road:map.getPaintProperty(specs.road,'text-opacity'),
+   water:map.getPaintProperty(specs.water,'text-opacity')??null,
+   place:map.getPaintProperty(specs.place,'text-opacity'),
+   railOpacity:map.getPaintProperty(specs.putrajaya,'circle-opacity'),
+   colours:[map.getPaintProperty(specs.kajang,'circle-color'),map.getPaintProperty(specs.putrajaya,'circle-color')]
+  };
+ },{specs,coordinate});
+ const picture=label=>page.locator('#map').screenshot({path:out+'/'+engine+'-'+device+'-'+label+'.png'});
+ const waitForTop=top=>page.waitForFunction(({top,specs,coordinate})=>{
+  const map=window.ecrlTestMap;
+  return map?.queryRenderedFeatures(map.project(coordinate),{layers:[specs.kajang,specs.putrajaya]})[0]?.layer.id===top;
+ },{top,specs,coordinate},{timeout:12000});
+ await ready();
+ await position();
+ await waitForTop(specs.putrajaya);
+ const before=await snapshot();
+ assert.deepEqual(before.pick,[specs.putrajaya,specs.kajang]);
+ assert.equal(before.road,0.8);
+ await picture('overview');
+ await page.locator('#route-buttons button').filter({hasText:'MRT Kajang'}).click();
+ await position();
+ await waitForTop(specs.kajang);
+ const focus=await snapshot();
+ assert.deepEqual(focus.pick,[specs.kajang,specs.putrajaya]);
+ assert.equal(focus.road,0.4);
+ assert.equal(focus.water,0.5);
+ assert.equal(focus.place,before.place);
+ assert.equal(focus.railOpacity,0.65);
+ assert.deepEqual(focus.colours,before.colours);
+ await picture('railway-focus');
+ await page.locator('#theme').click();
+ await ready();
+ await position();
+ await waitForTop(specs.kajang);
+ assert.equal((await snapshot()).road,0.3);
+ await page.locator('#search').fill('PL 1');
+ await page.locator('[data-ecrl-identity="ecrl-loop-historical-01"]').click();
+ await waitForTop(specs.putrajaya);
+ const context=await snapshot();
+ assert.equal(context.road,0.6);
+ assert.equal(context.water,null);
+ assert.equal(context.railOpacity,1);
+ await page.locator('#ecrl-context-back').click();
+ await page.locator('#route-buttons button').filter({hasText:'MRT Kajang'}).click();
+ await page.locator('#reset').click();
+ await position();
+ await waitForTop(specs.putrajaya);
+ const reset=await snapshot();
+ assert.equal(reset.road,0.6);
+ assert.equal(reset.railOpacity,1);
+ assert.deepEqual(reset.colours,before.colours);
 }
 
 async function checkMemberKeyboardSearch(page){
@@ -202,9 +290,9 @@ async function checkUnavailableRenderer(browser){
 for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
  const browser=await driver.launch({headless:true,args:engine==='chromium'?['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']:[]});
  try{
-  if(!batchOnly&&!sharedOnly&&engine==='chromium')await checkUnavailableRenderer(browser);
+  if(!batchOnly&&!sharedOnly&&!hierarchyOnly&&engine==='chromium')await checkUnavailableRenderer(browser);
   for(const [device,width,height] of profiles){
-   if((batchOnly||sharedOnly)&&!["desktop","iphone"].includes(device))continue;
+   if((batchOnly||sharedOnly||hierarchyOnly)&&!["desktop","iphone"].includes(device))continue;
    const page=await browser.newPage({viewport:{width,height},hasTouch:device!=='desktop',isMobile:device!=='desktop'});
    // Run the local smoke test with the application's opt-out for external analytics.
    await page.addInitScript(()=>Object.defineProperty(navigator,'globalPrivacyControl',{value:true}));
@@ -226,6 +314,13 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    await page.route('https://tiles.openfreemap.org/styles/**', r=>r.fulfill({json:{version:8,sources:{},layers:[{id:'bg',type:'background',paint:{'background-color':'#dce6e4'}}]},headers:{'access-control-allow-origin':'*'}}));
    await page.route(arcgis,emptyGis);
    try{
+    if(hierarchyOnly){
+     await checkRailwayHierarchy(page,engine,device);
+     assert.deepEqual(errors,[]);
+     assert.deepEqual(localFailures,[]);
+     rows.push({engine,device,status:'PASS',railwayHierarchy:true,renderedOverlap:true,basemapLabelFocus:true});
+     continue;
+    }
     if(sharedOnly){
      await checkSharedIdentity(page);
      assert.deepEqual(errors,[]);

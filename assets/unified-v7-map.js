@@ -40,8 +40,8 @@ const i18n={
   rights:'GIS: ArcGIS บุคคลที่สาม · ลำดับสถานี: MR-S10 ข้อมูลผู้ให้บริการ · แผนที่ฐาน: OpenFreeMap / OSM · ห้ามใช้เพื่อปฏิบัติการ',
   fail:'ข้อผิดพลาด GIS',show:'แสดงเส้นทาง',found:'จาก'}
 };
-const state={locale:'ms',category:'All',selected:'mrt-kajang',theme:'light',map:null,mapReady:false,zoomDone:false,
- ecrlPublic:[],activeReference:null,results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
+const state={locale:'ms',category:'All',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
+ ecrlPublic:[],activeReference:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
 function tr(k){return i18n[state.locale][k]}
 function say(message){$('qa-note').textContent=message}
 function el(tag,cls,text){const x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=String(text);return x}
@@ -68,7 +68,7 @@ function buildFilters(){
  for(const category of ['All','MRT','LRT','Monorail','ERL','KTM','ETS','Intercity']){
   const btn=el('button',null,category==='All'?tr('all'):category);
   btn.type='button';btn.setAttribute('aria-pressed',String(category===state.category));
-  btn.onclick=()=>{state.category=category;const allowed=selectedRoutes();if(!allowed.some(x=>x.id===state.selected))state.selected=allowed[0]?.id||state.selected;
+  btn.onclick=()=>{state.category=category;state.railFocus=false;const allowed=selectedRoutes();if(!allowed.some(x=>x.id===state.selected))state.selected=allowed[0]?.id||state.selected;
     buildFilters();buildLegend();buildRoutes();buildLineup();applyVisibility();};
   host.append(btn);
  }
@@ -85,7 +85,7 @@ function buildRoutes(){
  for(const r of selectedRoutes()){
   const btn=el('button',null,r.label);
   btn.type='button';btn.setAttribute('aria-pressed',String(r.id===state.selected));
-  btn.onclick=()=>{state.selected=r.id;buildRoutes();buildLineup();focusRoute(r.id)};
+  btn.onclick=()=>{state.selected=r.id;state.railFocus=true;buildRoutes();buildLineup();applyVisibility();focusRoute(r.id)};
   host.append(btn);
  }
 }
@@ -100,9 +100,9 @@ function focusRoute(routeId){
 function focusStation(routeId,id){
  const route=state.manifest.find(x=>x.id===routeId);if(!route)return;
  closeReferenceContext();
- state.selected=routeId;
- if(state.category!=='All'&&state.category!==route.category){state.category='All';buildFilters();buildLegend();applyVisibility();}
- buildRoutes();buildLineup();
+ state.selected=routeId;state.railFocus=true;
+ if(state.category!=='All'&&state.category!==route.category){state.category='All';buildFilters();buildLegend();}
+ buildRoutes();buildLineup();applyVisibility();
  const point=findGeo(routeId,id);
  if(!point){say(tr('unlocated'));return}
  say(point.name+' · '+tr('located'));
@@ -168,6 +168,8 @@ function updateSearch(){
   button.setAttribute('aria-controls','ecrl-context');
   button.onclick=()=>{
    state.activeReference=asset;
+   state.railFocus=false;
+   applyVisibility();
    renderReferenceContext();
    host.hidden=true;
    $('ecrl-context-title').focus();
@@ -240,13 +242,45 @@ function updateMapLayer(){
   console.error('V7_MAP_LAYER_INSTALL_FAILED',e);
  }
 }
+function applyBasemapLabelFocus(map,styleLayers,focused){
+ for(const layer of styleLayers){
+  if(layer.type!=='symbol'||!['transportation_name','water_name','waterway'].includes(layer['source-layer']))continue;
+  const current=map.getPaintProperty(layer.id,'text-opacity');
+  if(!state.basemapLabelOpacity.has(layer.id)){
+   if(!focused||current!==undefined&&typeof current!=='number')continue;
+   state.basemapLabelOpacity.set(layer.id,current);
+  }
+  const original=state.basemapLabelOpacity.get(layer.id);
+  const opacity=focused?(original??1)*0.5:original;
+  if(current!==opacity)map.setPaintProperty(layer.id,'text-opacity',opacity??null);
+ }
+}
 function applyVisibility(){
- if(!state.map||!state.map.isStyleLoaded())return;
+ const map=state.map;
+ if(!map||!state.mapReady)return;
+ const layers=[];
+ const focusedId=state.railFocus?layerId(state.selected):null;
  for(const r of state.manifest){
   const id=layerId(r.id);
-  if(state.map.getLayer(id))state.map.setLayoutProperty(id,'visibility',
-   state.category==='All'||state.category===r.category?'visible':'none');
+  if(!map.getLayer(id))continue;
+  layers.push(id);
+  const visibility=state.category==='All'||state.category===r.category?'visible':'none';
+  if(map.getLayoutProperty(id,'visibility')!==visibility)map.setLayoutProperty(id,'visibility',visibility);
+  const focused=id===focusedId;
+  const opacity=focusedId&&!focused?0.65:1;
+  for(const [property,value] of [['circle-opacity',opacity],['circle-stroke-opacity',opacity],['circle-stroke-width',focused?3:2]]){
+   if(map.getPaintProperty(id,property)!==value)map.setPaintProperty(id,property,value);
+  }
  }
+ // Raise the selected service above overlaps and restore source order on reset.
+ if(focusedId&&layers.includes(focusedId))layers.push(...layers.splice(layers.indexOf(focusedId),1));
+ const railLayers=new Set(layers);
+ const styleLayers=map.getStyle()?.layers??[];
+ const current=styleLayers.filter(layer=>railLayers.has(layer.id));
+ if(layers.some((id,index)=>current[index]?.id!==id)){
+  for(const id of layers)map.moveLayer(id);
+ }
+ applyBasemapLabelFocus(map,styleLayers,!!focusedId&&railLayers.has(focusedId));
 }
 function showPopup(point){
  if(!state.map)return;
@@ -287,6 +321,7 @@ function startMap(){
    attributionControl:true});
   state.map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
   state.map.on('style.load',()=>{
+   state.basemapLabelOpacity.clear();
    state.mapReady=true;state.networkError=false;
    // style.load is earlier than isStyleLoaded() on some MapLibre builds.
    // A second safe layer-install gate runs on load/idle.
@@ -314,14 +349,14 @@ function startMap(){
    const hits=state.map.queryRenderedFeatures([[e.point.x-11,e.point.y-11],[e.point.x+11,e.point.y+11]],{layers});
    const hit=hits[0];if(!hit)return;
    const point=findGeo(hit.properties.routeId,hit.properties.id);if(!point)return;
-   state.selected=point.routeId;buildRoutes();buildLineup();showPopup(point);
+   state.selected=point.routeId;state.railFocus=true;buildRoutes();buildLineup();applyVisibility();showPopup(point);
   });
  }catch(e){state.networkError=true;showStatus()}
 }
 function styleURL(){return 'https://tiles.openfreemap.org/styles/'+(state.theme==='dark'?'dark':'positron')}
 function reset(){
  closeReferenceContext();
- state.category='All';state.selected='mrt-kajang';$('search').value='';$('search-results').hidden=true;
+ state.category='All';state.selected='mrt-kajang';state.railFocus=false;$('search').value='';$('search-results').hidden=true;
  buildFilters();buildLegend();buildRoutes();buildLineup();applyVisibility();
  state.zoomDone=false;fitOnce();
 }

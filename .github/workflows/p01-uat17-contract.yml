@@ -13,6 +13,7 @@ on:
       - candidate/p01-ecrl-integration-batch-20261125
       - candidate/p01-shared-core-identity-20261125
       - candidate/p01-v7-ecrl-reference-context-20261125
+      - candidate/p01-v7-railway-hierarchy-20261125
   pull_request:
     paths:
       - 'assets/map-gateway.js'
@@ -26,7 +27,7 @@ permissions:
   contents: read
 jobs:
   source-contract:
-    runs-on: ${{ (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || (github.ref_name == 'candidate/p01-maplibre-security-v1-20261123' || (github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125' || github.ref_name == 'candidate/p01-shared-core-identity-20261125' || github.ref_name == 'candidate/p01-v7-ecrl-reference-context-20261125'))) && 'ubuntu-24.04' || 'ubuntu-latest' }}
+    runs-on: ${{ (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || (github.ref_name == 'candidate/p01-maplibre-security-v1-20261123' || (github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125' || github.ref_name == 'candidate/p01-shared-core-identity-20261125' || github.ref_name == 'candidate/p01-v7-ecrl-reference-context-20261125' || github.ref_name == 'candidate/p01-v7-railway-hierarchy-20261125'))) && 'ubuntu-24.04' || 'ubuntu-latest' }}
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v5
@@ -45,7 +46,7 @@ jobs:
       - name: P01 UAT17 focused regression tests
         run: node --test tests/p01-ecrl-gap-coverage-audit.test.cjs tests/p01-ecrl-alignment-evidence-gate.test.cjs tests/p01-uat17-ecrl-inventory.test.cjs tests/p01-uat17-map-fullscreen.test.cjs tests/p01-member-public-map-contract.test.cjs tests/p01-role-map-integration.test.cjs tests/p01-role-map-runtime.test.cjs tests/p01-uat17-refresh.test.cjs tests/p01-uat17-maintenance-source.test.cjs tests/p01-maintenance-server-contract.test.cjs
       - name: P01 authentication client regression tests
-        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-auth-client-readiness-20261123' || github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123' || (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || (github.ref_name == 'candidate/p01-maplibre-security-v1-20261123' || (github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125' || github.ref_name == 'candidate/p01-shared-core-identity-20261125' || github.ref_name == 'candidate/p01-v7-ecrl-reference-context-20261125'))))
+        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-auth-client-readiness-20261123' || github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123' || (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || (github.ref_name == 'candidate/p01-maplibre-security-v1-20261123' || (github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125' || github.ref_name == 'candidate/p01-shared-core-identity-20261125' || github.ref_name == 'candidate/p01-v7-ecrl-reference-context-20261125' || github.ref_name == 'candidate/p01-v7-railway-hierarchy-20261125'))))
         run: |
           node -e 'require("node:assert/strict").equal(require("./vercel.json").git.deploymentEnabled[process.env.GITHUB_REF_NAME], false)'
           npm ci
@@ -53,14 +54,14 @@ jobs:
           node --check assets/member-gateway.js
           node --test tests/auth-wiring.test.cjs
       - name: P01 ECRL design and preservation tests
-        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123' || (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || (github.ref_name == 'candidate/p01-maplibre-security-v1-20261123' || (github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125' || github.ref_name == 'candidate/p01-shared-core-identity-20261125' || github.ref_name == 'candidate/p01-v7-ecrl-reference-context-20261125'))))
+        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-ecrl-unified-design-v1-20261123' || (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || (github.ref_name == 'candidate/p01-maplibre-security-v1-20261123' || (github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125' || github.ref_name == 'candidate/p01-shared-core-identity-20261125' || github.ref_name == 'candidate/p01-v7-ecrl-reference-context-20261125' || github.ref_name == 'candidate/p01-v7-railway-hierarchy-20261125'))))
         run: |
           node --check assets/unified-ecrl/adapter.js
           node --check assets/unified-ecrl/integration-ui.js
           node --check assets/unified-v8-map.js
           node --test tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-alignment-r2.test.cjs tests/unified-ecrl-consumer-popup.test.cjs tests/unified-ecrl-chainage.test.cjs tests/unified-v8-regression.test.cjs tests/unified-v81-focus.test.cjs
       - name: P01 Railway Data Contract V1
-        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || (github.ref_name == 'candidate/p01-maplibre-security-v1-20261123' || (github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125' || github.ref_name == 'candidate/p01-shared-core-identity-20261125' || github.ref_name == 'candidate/p01-v7-ecrl-reference-context-20261125')))
+        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || (github.ref_name == 'candidate/p01-maplibre-security-v1-20261123' || (github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125' || github.ref_name == 'candidate/p01-shared-core-identity-20261125' || github.ref_name == 'candidate/p01-v7-ecrl-reference-context-20261125' || github.ref_name == 'candidate/p01-v7-railway-hierarchy-20261125')))
         run: node --test tests/p01-ecrl-data-contract.test.cjs
       - name: Verify and run the P01 orchestrator pilot
         if: github.event_name == 'push' && github.ref_name == 'candidate/p01-orchestrator-v1-20261123'
@@ -73,7 +74,7 @@ jobs:
       - name: Build isolated P01 Public and Member map candidate artifact
         run: node scripts/build-p01-map-candidate.cjs dist-p01-map-candidate
       - name: P01 MapLibre dependency audit and pins
-        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-maplibre-security-v1-20261123' || (github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125' || github.ref_name == 'candidate/p01-shared-core-identity-20261125' || github.ref_name == 'candidate/p01-v7-ecrl-reference-context-20261125'))
+        if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-maplibre-security-v1-20261123' || (github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125' || github.ref_name == 'candidate/p01-shared-core-identity-20261125' || github.ref_name == 'candidate/p01-v7-ecrl-reference-context-20261125' || github.ref_name == 'candidate/p01-v7-railway-hierarchy-20261125'))
         run: |
           node --test tests/p01-maplibre-security.test.cjs tests/unified-v5-regression.test.cjs tests/unified-v6-regression.test.cjs
           audit="$RUNNER_TEMP/p01-maplibre-audit"
@@ -83,7 +84,7 @@ jobs:
           npm --prefix "$audit" audit --audit-level=moderate
 
   browser-qa:
-    if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || (github.ref_name == 'candidate/p01-maplibre-security-v1-20261123' || (github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125' || github.ref_name == 'candidate/p01-shared-core-identity-20261125' || github.ref_name == 'candidate/p01-v7-ecrl-reference-context-20261125')))
+    if: github.event_name == 'push' && (github.ref_name == 'candidate/p01-technology-integration-v1-20261123' || (github.ref_name == 'candidate/p01-maplibre-security-v1-20261123' || (github.ref_name == 'candidate/p01-visual-refinement-mrnext-20261124' || github.ref_name == 'candidate/p01-public-ecosystem-nav-001-20261125' || github.ref_name == 'candidate/p01-ecrl-integration-batch-20261125' || github.ref_name == 'candidate/p01-shared-core-identity-20261125' || github.ref_name == 'candidate/p01-v7-ecrl-reference-context-20261125' || github.ref_name == 'candidate/p01-v7-railway-hierarchy-20261125')))
     needs: source-contract
     runs-on: ubuntu-24.04
     timeout-minutes: 12
@@ -119,7 +120,7 @@ jobs:
           echo "P01_MAPLIBRE_DIST=$vendor" >> "$GITHUB_ENV"
       - name: P01 integrated visual QA
         run: |
-          if [[ "$GITHUB_REF_NAME" == 'candidate/p01-visual-refinement-mrnext-20261124' || "$GITHUB_REF_NAME" == 'candidate/p01-public-ecosystem-nav-001-20261125' || "$GITHUB_REF_NAME" == 'candidate/p01-ecrl-integration-batch-20261125' || "$GITHUB_REF_NAME" == 'candidate/p01-shared-core-identity-20261125' || "$GITHUB_REF_NAME" == 'candidate/p01-v7-ecrl-reference-context-20261125' ]]; then
+          if [[ "$GITHUB_REF_NAME" == 'candidate/p01-visual-refinement-mrnext-20261124' || "$GITHUB_REF_NAME" == 'candidate/p01-public-ecosystem-nav-001-20261125' || "$GITHUB_REF_NAME" == 'candidate/p01-ecrl-integration-batch-20261125' || "$GITHUB_REF_NAME" == 'candidate/p01-shared-core-identity-20261125' || "$GITHUB_REF_NAME" == 'candidate/p01-v7-ecrl-reference-context-20261125' || "$GITHUB_REF_NAME" == 'candidate/p01-v7-railway-hierarchy-20261125' ]]; then
             git config --global --add safe.directory "$GITHUB_WORKSPACE"
             P01_EXPECTED_SHA="$GITHUB_SHA" node scripts/build-p01-protected-preview.cjs "$RUNNER_TEMP/p01-visual-package"
             static="$RUNNER_TEMP/p01-visual-package/.vercel/output/static"
@@ -134,6 +135,8 @@ jobs:
             export P01_QA_ECRL_BATCH_ONLY=1
           elif [[ "$GITHUB_REF_NAME" == 'candidate/p01-shared-core-identity-20261125' || "$GITHUB_REF_NAME" == 'candidate/p01-v7-ecrl-reference-context-20261125' ]]; then
             export P01_QA_SHARED_CORE_ONLY=1
+          elif [[ "$GITHUB_REF_NAME" == 'candidate/p01-v7-railway-hierarchy-20261125' ]]; then
+            export P01_QA_RAILWAY_HIERARCHY_ONLY=1
           fi
           node tests/p01-technology-integration-browser.test.mjs
       - name: Archive visual QA evidence
