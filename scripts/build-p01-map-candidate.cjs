@@ -56,10 +56,10 @@ for(const file of ['data.js','i18n.js']){
  const source=path.join(root,'assets/unified-ecrl/source',file);
  runInNewContext(fs.readFileSync(source,'utf8'),{window:ecrl},{filename:source,timeout:3000});
 }
-const {dataContract}=mapCore.createEcrlContext(ecrl);
-const records=mapCore.publicAssetIdentity(dataContract);
+const {dataContract,adapter}=mapCore.createEcrlContext(ecrl);
+const records=mapCore.publicAssetIdentity(dataContract,adapter);
 for(const {assetId,type,code,name,section} of records){
- if(!/^ecrl-[a-z0-9-]+$/.test(assetId)||!['STN','PL','DEPOT'].includes(type)||
+ if(!/^ecrl-[a-z0-9-]+$/.test(assetId)||!['STN','PL','DEPOT','YARD'].includes(type)||
   (code!==null&&!/^(STN|PL)\d{2}$/.test(code))||typeof name!=='string'||typeof section!=='string')
   throw Error('P01_PUBLIC_ECRL_INVALID_IDENTITY');
 }

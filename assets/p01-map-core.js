@@ -15,11 +15,19 @@
   const dataContract=deps.MRS10RailwayDataContractV1.create(adapter,master);
   return {adapter,master,dataContract};
  }
- function publicAssetIdentity(dataContract){
-  return dataContract.records.map(({assetId,type,code,name,section})=>({assetId,type,code,name,section}));
+ function publicAssetIdentity(dataContract,adapter){
+  const main=dataContract.records.map(({assetId,type,code,name,section})=>({assetId,type,code,name,section}));
+  const stations=adapter.stations.filter(asset=>asset.section==='C2');
+  const yard=adapter.get('ecrl-yard-puncak-alam');
+  if(stations.length!==4||stations.some(asset=>asset.stationCode||asset.point)||
+    yard?.section!=='C2'||yard.assetType!=='FREIGHT_YARD'||yard.assetStatus!=='PROPOSED_OFFICIAL'||yard.point)
+   throw Error('P01_PUBLIC_C2_REFERENCE_INVENTORY');
+  const references=stations.map(({assetId,officialName:name,section})=>({assetId,type:'STN',code:null,name,section}));
+  references.push({assetId:yard.assetId,type:'YARD',code:null,name:yard.officialName,section:yard.section});
+  return [...main,...references];
  }
  function publicStationReferences(records,localities){
-  return records.filter(asset=>asset.type==='STN').flatMap(asset=>{
+  return records.filter(asset=>asset.type==='STN'&&asset.section!=='C2').flatMap(asset=>{
    const matches=localities.filter(row=>row.type==='STN'&&row.name===asset.name&&row.locationConfidence==='Public Reference Location');
    if(matches.length!==1)return [];
    const {lon,lat}=matches[0];

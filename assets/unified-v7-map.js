@@ -53,6 +53,12 @@ const mapLabels={
  th:['สถานี ECRL · จุดอ้างอิงพื้นที่','ทางรถไฟ OpenStreetMap · บริบทเครือข่าย','ข้อมูลอ้างอิงจากเจ้าของ: จุดเชื่อมต่อผู้โดยสารและสินค้าของ KTMB แผนระบุทางแยก Temerloh ส่วนการเดินรถ การต่อรถ และแนวรางยังไม่ยืนยัน']
 };
 const ecrlSource='mrs10-v7-ecrl-localities',ecrlMarker=ecrlSource+'-point',ecrlLabel=ecrlSource+'-label',railContext='mrs10-v7-rail-context';
+const c2Labels={
+ ms:['Stesen dirancang','Terminal kargo cadangan','Rujukan skema C2. Lokasi semasa dan jajaran belum disahkan.'],
+ en:['Planned station','Proposed freight yard','C2 scheme reference. Current locations and alignment are unverified.'],
+ zh:['规划车站','拟建货场','C2 规划参考。当前点位与线路走向尚未核实。'],
+ th:['สถานีตามแผน','ลานสินค้าที่เสนอ','ข้อมูลอ้างอิงแผน C2 ยังไม่ยืนยันตำแหน่งปัจจุบันหรือแนวราง']
+};
 const ecrlType2='mrs10-ecrl-station-type-2';
 const state={locale:'ms',category:'ECRL',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
  ecrlPublic:[],ecrlStations:[],activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
@@ -168,7 +174,7 @@ function renderReferenceContext(){
  if(!reference)return;
  const {section,assetId}=reference;
  $('ecrl-context-title').textContent=tr('ecrlSection')+' · '+section;
- $('ecrl-context-status').textContent=labels.scope;
+ $('ecrl-context-status').textContent=section==='C2'?c2Labels[state.locale][2]:labels.scope;
  $('ecrl-context-back').textContent=labels.close;
  const sections=$('ecrl-context-sections');
  sections.setAttribute('aria-label',tr('ecrlSection'));
@@ -191,13 +197,16 @@ function renderReferenceContext(){
   item.dataset.assetId=row.assetId;
   item.dataset.type=row.type;
   const title=[row.code,row.name].filter(Boolean).join(' · ');
-  if(state.ecrlStations.some(point=>point.id===row.assetId)){
+  const hasPoint=state.ecrlStations.some(point=>point.id===row.assetId);
+  if(hasPoint||section==='C2'){
    const button=el('button',null,title);
-   button.type='button';button.dataset.mapStation=row.assetId;
-   button.onclick=()=>selectEcrlStation(row,opener,true);
+   button.type='button';
+   if(hasPoint)button.dataset.mapStation=row.assetId;
+   else button.className='p01-ecrl-reference-select';
+   button.onclick=()=>selectEcrlStation(row,opener,hasPoint);
    item.append(button);
   }else item.append(el('strong',null,title));
-  item.append(el('small',null,labels[row.type]));
+  item.append(el('small',null,section==='C2'?c2Labels[state.locale][row.type==='YARD'?1:0]:labels[row.type]));
   if(row.assetId===assetId){
    item.setAttribute('aria-current','true');
    if(assetId==='ecrl-stn-14')item.append(temerlohContext());

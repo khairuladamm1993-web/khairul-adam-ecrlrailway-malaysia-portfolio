@@ -66,15 +66,17 @@ test('Public ECRL identity is derived from V1 and exposes only existing identity
  for(const file of ['data.js','i18n.js']){
   vm.runInNewContext(read(process.cwd(),'assets/unified-ecrl/source/'+file),{window:deps});
  }
- const {dataContract}=mapCore.createEcrlContext(deps);
+ const {dataContract,adapter}=mapCore.createEcrlContext(deps);
  const projected=json(staticRoot,'data/ecrl-public-identity-v1.json');
  assert.deepEqual(Object.keys(projected).sort(),['corridor','records','version']);
  assert.equal(projected.version,dataContract.version);
  assert.equal(projected.corridor,dataContract.corridor);
- assert.equal(projected.records.length,25);
+ assert.equal(projected.records.length,30);
+ assert.deepEqual(projected.records,mapCore.publicAssetIdentity(dataContract,adapter));
  for(const [i,row] of projected.records.entries()){
   assert.deepEqual(Object.keys(row).sort(),['assetId','code','name','section','type']);
-  for(const key of Object.keys(row))assert.equal(row[key],dataContract.records[i][key]);
+  if(i<25)for(const key of Object.keys(row))assert.equal(row[key],dataContract.records[i][key]);
+  else assert.equal(row.code,null);
  }
  assert.deepEqual(mapCore.findPublicAssets(projected.records,'PL 1','PL').map(r=>r.code),['PL01']);
  assert.deepEqual(mapCore.findPublicAssets(projected.records,'ecrl-depot-kuantan').map(r=>r.type),['DEPOT']);

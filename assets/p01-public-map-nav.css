@@ -13,11 +13,12 @@
 .p01-v7-ecrl-panel #ecrl-context-detail{margin:6px 0 0}
 .p01-v7-ecrl-panel #ecrl-context-detail p{margin:0 0 4px}
 .p01-v7-ecrl-panel #ecrl-context-detail button{display:block;margin-top:5px}
-.p01-v7-ecrl-panel [data-map-station]{display:block;width:100%;padding:5px 0;text-align:start;border:0;border-radius:0;background:transparent}
+.p01-v7-ecrl-panel [data-map-station],.p01-ecrl-reference-select{display:block;width:100%;padding:5px 0;text-align:start;border:0;border-radius:0;background:transparent}
 .p01-ecrl-lineup{list-style:none;margin:14px 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,205px),1fr));gap:8px}
 .p01-ecrl-lineup li{padding:10px 12px;background:var(--card);border:1px solid var(--line);border-inline-start:4px solid #1457a6;border-radius:8px}
 .p01-ecrl-lineup li[data-type=PL]{border-inline-start-color:#ac660f}
 .p01-ecrl-lineup li[data-type=DEPOT]{border-inline-start-color:#0f7778}
+.p01-ecrl-lineup li[data-type=YARD]{border-inline-start-color:#ac660f}
 .p01-ecrl-lineup strong,.p01-ecrl-lineup small{display:block}
 
 .p01-v7-ecrl-panel{position:absolute;z-index:4;inset-inline-start:max(10px,env(safe-area-inset-left));bottom:calc(52px + var(--p01-map-actions-bottom));width:min(23rem,calc(100% - 58px - env(safe-area-inset-left) - env(safe-area-inset-right)));max-height:calc(100% - 94px - env(safe-area-inset-top) - var(--p01-map-actions-bottom));margin:0}
@@ -30,6 +31,7 @@
 #ecrl-context-list li{position:relative;margin-bottom:7px;overflow-wrap:anywhere}
 #ecrl-context-list li::before{content:'';position:absolute;inset-inline-start:-13px;top:10px;width:7px;height:7px;border-radius:50%;background:var(--sub)}
 #ecrl-context-list li:not(:last-child)::after{content:'';position:absolute;inset-inline-start:-10px;top:17px;bottom:-17px;width:1px;background:var(--line)}
+#ecrl-context-list li[data-type=YARD]::before,#ecrl-context-list li:has(+li[data-type=YARD])::after{display:none}
 #ecrl-context-list li[aria-current=true]{outline:2px solid #3b8dab;outline-offset:-2px}
 .p01-v7-fullscreen-open{overflow:hidden}
 @media(max-width:540px){

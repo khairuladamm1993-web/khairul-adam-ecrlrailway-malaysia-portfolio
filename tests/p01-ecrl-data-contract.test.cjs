@@ -67,7 +67,7 @@ test('V1 preserves independent confidence and source provenance without promotin
 test('V7 joins only previously public station localities and retains V8 provenance positions',()=>{
  vm.runInNewContext(fs.readFileSync('assets/corridor-reference.js','utf8'),{window});
  const core=require('../assets/p01-map-core.js');
- const identity=core.publicAssetIdentity(data);
+ const identity=core.publicAssetIdentity(data,adapter);
  const localities=window.RailwayCorridorReference;
  const points=core.publicStationReferences(identity,localities);
  assert.equal(points.length,16);
@@ -80,6 +80,38 @@ test('V7 joins only previously public station localities and retains V8 provenan
  }
  const duplicate=localities.find(row=>row.name==='Temerloh');
  assert.equal(core.publicStationReferences(identity,[...localities,duplicate]).length,15);
+ const misplaced={...duplicate,name:'Serendah Baru'};
+ assert.equal(core.publicStationReferences(identity,[...localities,misplaced]).length,16);
+});
+
+test('C2 is a separate five-field scheme projection with unchanged source provenance',()=>{
+ const core=require('../assets/p01-map-core.js');
+ const records=core.publicAssetIdentity(data,adapter);
+ assert.equal(new Set(records.map(row=>row.assetId)).size,30);
+ assert.deepEqual(records.slice(0,25),data.records.map(({assetId,type,section,code,name})=>({assetId,type,section,code,name})));
+ assert.deepEqual(records.slice(25).map(({assetId,type,code,name,section})=>[assetId,type,code,name,section]),[
+  ['ecrl-stn-17','STN',null,'Serendah Baru','C2'],
+  ['ecrl-stn-18','STN',null,'Puncak Alam','C2'],
+  ['ecrl-stn-19','STN',null,'Kapar','C2'],
+  ['ecrl-stn-20','STN',null,'Jalan Kastam (Port Klang)','C2'],
+  ['ecrl-yard-puncak-alam','YARD',null,'Puncak Alam Freight Yard','C2']
+ ]);
+ for(const {assetId} of records.slice(25)){
+  const a=adapter.get(assetId);
+  assert.equal(a.point,null);
+  assert.equal(a.chainageStartKm,null);
+  assert.equal(adapter.chainage.get(assetId),null);
+  assert.equal(Object.keys(records.find(r=>r.assetId===assetId)).length,5);
+  if(a.assetType==='STATION'){
+   assert.equal(a.referenceSourceId,'EIA17');
+   assert.equal(a.assetStatus,'PLANNED_NOT_OPERATIONAL');
+  }else{
+   assert.equal(a.assetStatus,'PROPOSED_OFFICIAL');
+   assert.equal(a.sourceIds[0],'C2_25');
+   assert.equal(a.focusReferenceAssetId,'ecrl-stn-18');
+  }
+ }
+ assert.deepEqual(records.slice(25,29).map(r=>adapter.get(r.assetId).verificationStatus),['PARTIAL','SOURCE_CONFLICT','PARTIAL','SOURCE_CONFLICT']);
 });
 
 test('V1 seals collection, rows and nested values independently of source arrays',()=>{

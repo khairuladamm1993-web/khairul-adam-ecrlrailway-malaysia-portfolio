@@ -78,15 +78,22 @@ async function checkSharedIdentity(page){
  await results.locator('[data-ecrl-identity="ecrl-loop-historical-06"]').click();
  assert.match(await context.locator('h2').innerText(),/ · C1$/);
  assert.equal(await context.locator('[aria-current=true]').getAttribute('data-asset-id'),'ecrl-loop-historical-06');
+ await search.fill('Serendah Baru');
+ await results.locator('[data-ecrl-identity="ecrl-stn-17"]').click();
+ assert.match(await context.locator('h2').innerText(),/ · C2$/);
+ assert.equal(await context.locator('[aria-current=true]').getAttribute('data-asset-id'),'ecrl-stn-17');
  await page.locator('#reset').click();
  assert.equal(await context.isHidden(),true);
  assert.equal((await page.goto(base+'/ecrl-asset-reference.html')).status(),200);
  const catalogue=page.locator('#asset-reference-list li');
  await catalogue.first().waitFor();
  assert.deepEqual(await catalogue.evaluateAll(items=>items.map(item=>[item.dataset.assetId,item.dataset.type,item.querySelector('small').textContent])),
-  payload.records.map(({assetId,type,section})=>[assetId,type,({STN:'Stesen',PL:'Passing loop',DEPOT:'Depot'})[type]+' · Seksyen '+section+' · Lokasi fizikal belum disahkan']));
+  payload.records.map(({assetId,type,section})=>[assetId,type,({STN:section==='C2'?'Stesen dirancang':'Stesen',PL:'Passing loop',DEPOT:'Depot',YARD:'Terminal kargo cadangan'})[type]+' · Seksyen '+section+' · Lokasi fizikal belum disahkan']));
+ await page.locator('[data-asset-kind=YARD]').click();
+ assert.deepEqual(await catalogue.evaluateAll(items=>items.map(item=>item.dataset.assetId)),['ecrl-yard-puncak-alam']);
+ await page.locator('[data-asset-kind=ALL]').click();
  await checkPublicAssetLookup(page);
- assert.equal(payload.records.length,25);
+ assert.equal(payload.records.length,30);
  for(const record of payload.records){
   assert.deepEqual(Object.keys(record).sort(),['assetId','code','name','section','type']);
  }
@@ -158,7 +165,7 @@ async function checkMapComposition(page,engine,device){
  assert.equal(await opener.getAttribute('aria-expanded'),'true');
  assert.match(await panel.locator('#ecrl-context-status').innerText(),/jajaran fizikal belum disahkan/);
  const {records}=await (await page.request.get(base+'/data/ecrl-public-identity-v1.json')).json();
- const tally={STN:0,PL:0,DEPOT:0};
+ const tally={STN:0,PL:0,DEPOT:0,YARD:0};
  for(const section of new Set(records.map(row=>row.section))){
   const button=panel.getByRole('button',{name:section,exact:true});
   await tap(button);
@@ -167,7 +174,14 @@ async function checkMapComposition(page,engine,device){
    records.filter(row=>row.section===section).map(({assetId,type})=>[assetId,type]));
   for(const type of Object.keys(tally))tally[type]+=await panel.locator('li[data-type="'+type+'"]').count();
  }
- assert.deepEqual(tally,{STN:16,PL:7,DEPOT:2});
+ assert.deepEqual(tally,{STN:20,PL:7,DEPOT:2,YARD:1});
+ await tap(panel.getByRole('button',{name:'C2',exact:true}));
+ assert.equal(await panel.locator('[data-map-station]').count(),0);
+ await tap(panel.getByRole('button',{name:'Puncak Alam Freight Yard',exact:true}));
+ assert.equal(await panel.locator('[aria-current=true]').getAttribute('data-type'),'YARD');
+ assert.match(await panel.locator('#ecrl-context-status').innerText(),/Lokasi semasa dan jajaran belum disahkan/);
+ assert.deepEqual(await camera(),before);
+ await page.screenshot({path:out+'/'+engine+'-'+device+'-c2-reference.png'});
  const bSection=panel.getByRole('button',{name:'B',exact:true});
  await tap(bSection);
  assert.equal(await panel.locator('#ecrl-context-list').evaluate(list=>list.scrollTop),0);

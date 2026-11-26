@@ -1,7 +1,7 @@
-name: P01 ECRL Type 2 Geographic QA
+name: P01 ECRL Section C2 QA
 on:
   push:
-    branches: [candidate/p01-type2-geographic-uat-20261125]
+    branches: [candidate/p01-section-c2-integration-20261126]
 permissions:
   contents: read
   actions: read
@@ -66,6 +66,7 @@ jobs:
           }
           for (const file of [
             'unified-map-v7.html', 'assets/unified-v7-map.js', 'assets/p01-public-map-nav.css', 'assets/p01-map-core.js',
+            'ecrl-asset-reference.html', 'assets/p01-ecrl-public-reference.js',
             'assets/unified-ecrl/adapter.js', 'assets/unified-ecrl/chainage-manifest.js',
             'assets/unified-ecrl/railway-data-contract-v1.js', 'assets/unified-ecrl/alignment-evidence-r2.js',
             'assets/unified-ecrl/route-lab-d102-preflight.js', 'assets/unified-ecrl/route-lab-station-intelligence.js'
@@ -80,10 +81,10 @@ jobs:
           for (const file of ['data.js', 'i18n.js']) {
             vm.runInNewContext(fs.readFileSync('assets/unified-ecrl/source/' + file, 'utf8'), {window:ecrlRuntime});
           }
-          const {dataContract} = core.createEcrlContext(ecrlRuntime);
+          const {dataContract,adapter} = core.createEcrlContext(ecrlRuntime);
           const {version,corridor} = dataContract;
-          const records = core.publicAssetIdentity(dataContract);
-          assert.equal(records.length, 25);
+          const records = core.publicAssetIdentity(dataContract,adapter);
+          assert.equal(records.length, 30);
           fs.writeFileSync(path.join(root, staticPath, 'data/ecrl-public-identity-v1.json'),
             JSON.stringify({version,corridor,records}, null, 2) + '\n');
           fs.copyFileSync('vercel.json', path.join(root, 'vercel.json'));
