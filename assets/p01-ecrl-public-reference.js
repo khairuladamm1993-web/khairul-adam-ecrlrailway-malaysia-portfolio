@@ -5,7 +5,7 @@
  const status=document.getElementById('asset-status');
  const search=document.getElementById('asset-search');
  const buttons=[...document.querySelectorAll('[data-asset-kind]')];
- const labels={STN:'Stesen',PL:'Passing loop',DEPOT:'Depot',YARD:'Terminal kargo cadangan'};
+ const labels={STN:'Stesen',PL:'Passing loop',DEPOT:'Depot',YARD:'Terminal kargo cadangan',PORT:'Antara muka pelabuhan dirancang'};
  let kind='ALL';
  let assets;
  try{
@@ -22,7 +22,8 @@
    row.dataset.assetId=asset.assetId;
    title.textContent=[asset.code,asset.name].filter(Boolean).join(' · ');
    const label=asset.type==='STN'&&asset.section==='C2'?'Stesen dirancang':labels[asset.type];
-   detail.textContent=[label,asset.section?'Seksyen '+asset.section:null,'Lokasi fizikal belum disahkan'].filter(Boolean).join(' · ');
+   const note=asset.type==='PORT'?'Rujukan kawasan pelabuhan; sambungan rel belum disahkan':'Lokasi fizikal belum disahkan';
+   detail.textContent=[label,asset.section?'Seksyen '+asset.section:null,note].filter(Boolean).join(' · ');
    row.append(title,detail);
    return row;
   }));

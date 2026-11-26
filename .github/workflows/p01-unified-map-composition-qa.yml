@@ -1,7 +1,7 @@
-name: P01 ECRL Section C2 QA
+name: P01 ECRL Section D QA
 on:
   push:
-    branches: [candidate/p01-section-c2-integration-20261126]
+    branches: [candidate/p01-section-d-integration-20261126]
 permissions:
   contents: read
   actions: read
@@ -84,7 +84,7 @@ jobs:
           const {dataContract,adapter} = core.createEcrlContext(ecrlRuntime);
           const {version,corridor} = dataContract;
           const records = core.publicAssetIdentity(dataContract,adapter);
-          assert.equal(records.length, 30);
+          assert.equal(records.length, 32);
           fs.writeFileSync(path.join(root, staticPath, 'data/ecrl-public-identity-v1.json'),
             JSON.stringify({version,corridor,records}, null, 2) + '\n');
           fs.copyFileSync('vercel.json', path.join(root, 'vercel.json'));

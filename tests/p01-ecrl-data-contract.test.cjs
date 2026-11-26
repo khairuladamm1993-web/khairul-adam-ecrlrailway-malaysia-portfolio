@@ -87,16 +87,16 @@ test('V7 joins only previously public station localities and retains V8 provenan
 test('C2 is a separate five-field scheme projection with unchanged source provenance',()=>{
  const core=require('../assets/p01-map-core.js');
  const records=core.publicAssetIdentity(data,adapter);
- assert.equal(new Set(records.map(row=>row.assetId)).size,30);
+ assert.equal(new Set(records.map(row=>row.assetId)).size,32);
  assert.deepEqual(records.slice(0,25),data.records.map(({assetId,type,section,code,name})=>({assetId,type,section,code,name})));
- assert.deepEqual(records.slice(25).map(({assetId,type,code,name,section})=>[assetId,type,code,name,section]),[
+ assert.deepEqual(records.slice(25,30).map(({assetId,type,code,name,section})=>[assetId,type,code,name,section]),[
   ['ecrl-stn-17','STN',null,'Serendah Baru','C2'],
   ['ecrl-stn-18','STN',null,'Puncak Alam','C2'],
   ['ecrl-stn-19','STN',null,'Kapar','C2'],
   ['ecrl-stn-20','STN',null,'Jalan Kastam (Port Klang)','C2'],
   ['ecrl-yard-puncak-alam','YARD',null,'Puncak Alam Freight Yard','C2']
  ]);
- for(const {assetId} of records.slice(25)){
+ for(const {assetId} of records.slice(25,30)){
   const a=adapter.get(assetId);
   assert.equal(a.point,null);
   assert.equal(a.chainageStartKm,null);
@@ -112,6 +112,29 @@ test('C2 is a separate five-field scheme projection with unchanged source proven
   }
  }
  assert.deepEqual(records.slice(25,29).map(r=>adapter.get(r.assetId).verificationStatus),['PARTIAL','SOURCE_CONFLICT','PARTIAL','SOURCE_CONFLICT']);
+});
+
+test('Section D projects separate planned port interfaces without track positions',()=>{
+ const core=require('../assets/p01-map-core.js');
+ const records=core.publicAssetIdentity(data,adapter).slice(30);
+ assert.deepEqual(records,[
+  {assetId:'ecrl-port-northport',type:'PORT',code:null,name:'Northport',section:'D'},
+  {assetId:'ecrl-port-westports',type:'PORT',code:null,name:'Westports',section:'D'}
+ ]);
+ assert.deepEqual(core.sectionDGauges,{ecrl:1435,ktmb:1000});
+ const scheme=adapter.registry.segments.find(row=>row.segmentId==='ecrl-d-port-access');
+ assert.equal(scheme.trackArrangement,'SEPARATE_PARALLEL_STANDARD_AND_METRE_GAUGE');
+ assert.equal(scheme.geometry,null);
+ for(const {assetId} of records){
+  const asset=adapter.get(assetId);
+  assert.equal(asset.assetType,'PORT_INTERFACE');
+  assert.equal(asset.assetStatus,'PLANNED_CONNECTION');
+  assert.equal(asset.verificationStatus,'PARTIAL');
+  assert.equal(asset.point,null);
+  assert.equal(adapter.chainage.get(assetId),null);
+  assert.equal(asset.referenceSourceId,'PKA22');
+  assert.ok(asset.sourceIds.includes('MOT_D25'));
+ }
 });
 
 test('V1 seals collection, rows and nested values independently of source arrays',()=>{

@@ -71,7 +71,7 @@ test('Public ECRL identity is derived from V1 and exposes only existing identity
  assert.deepEqual(Object.keys(projected).sort(),['corridor','records','version']);
  assert.equal(projected.version,dataContract.version);
  assert.equal(projected.corridor,dataContract.corridor);
- assert.equal(projected.records.length,30);
+ assert.equal(projected.records.length,32);
  assert.deepEqual(projected.records,mapCore.publicAssetIdentity(dataContract,adapter));
  for(const [i,row] of projected.records.entries()){
   assert.deepEqual(Object.keys(row).sort(),['assetId','code','name','section','type']);

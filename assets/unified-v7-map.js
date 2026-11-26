@@ -59,6 +59,12 @@ const c2Labels={
  zh:['规划车站','拟建货场','C2 规划参考。当前点位与线路走向尚未核实。'],
  th:['สถานีตามแผน','ลานสินค้าที่เสนอ','ข้อมูลอ้างอิงแผน C2 ยังไม่ยืนยันตำแหน่งปัจจุบันหรือแนวราง']
 };
+const dLabels={
+ ms:['Antara muka pelabuhan dirancang','Rujukan kawasan pelabuhan. Skim memisahkan trek ECRL {ecrl} mm dan KTMB {ktmb} mm. Terminal, sambungan dan operasi rel belum disahkan.'],
+ en:['Planned port interface','Port-area references. The scheme separates ECRL {ecrl} mm and KTMB {ktmb} mm tracks. Rail terminals, connections and operations are unverified.'],
+ zh:['规划港口接口','港区参考。规划区分 ECRL {ecrl} 毫米轨道与 KTMB {ktmb} 毫米轨道。铁路终端、接轨与运营尚未核实。'],
+ th:['จุดเชื่อมต่อท่าเรือตามแผน','อ้างอิงพื้นที่ท่าเรือ แผนแยกราง ECRL {ecrl} มม. และ KTMB {ktmb} มม. สถานีปลายทาง การเชื่อมราง และการเดินรถยังไม่ยืนยัน']
+};
 const ecrlType2='mrs10-ecrl-station-type-2';
 const state={locale:'ms',category:'ECRL',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
  ecrlPublic:[],ecrlStations:[],activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
@@ -174,7 +180,9 @@ function renderReferenceContext(){
  if(!reference)return;
  const {section,assetId}=reference;
  $('ecrl-context-title').textContent=tr('ecrlSection')+' · '+section;
- $('ecrl-context-status').textContent=section==='C2'?c2Labels[state.locale][2]:labels.scope;
+ const gauges=window.MRS10P01MapCore.sectionDGauges;
+ $('ecrl-context-status').textContent=section==='D'?dLabels[state.locale][1].replace(/\{(ecrl|ktmb)\}/g,(_,domain)=>gauges[domain]):
+  section==='C2'?c2Labels[state.locale][2]:labels.scope;
  $('ecrl-context-back').textContent=labels.close;
  const sections=$('ecrl-context-sections');
  sections.setAttribute('aria-label',tr('ecrlSection'));
@@ -198,7 +206,7 @@ function renderReferenceContext(){
   item.dataset.type=row.type;
   const title=[row.code,row.name].filter(Boolean).join(' · ');
   const hasPoint=state.ecrlStations.some(point=>point.id===row.assetId);
-  if(hasPoint||section==='C2'){
+  if(hasPoint||section==='C2'||row.type==='PORT'){
    const button=el('button',null,title);
    button.type='button';
    if(hasPoint)button.dataset.mapStation=row.assetId;
@@ -206,7 +214,8 @@ function renderReferenceContext(){
    button.onclick=()=>selectEcrlStation(row,opener,hasPoint);
    item.append(button);
   }else item.append(el('strong',null,title));
-  item.append(el('small',null,section==='C2'?c2Labels[state.locale][row.type==='YARD'?1:0]:labels[row.type]));
+  item.append(el('small',null,row.type==='PORT'?dLabels[state.locale][0]:
+   section==='C2'?c2Labels[state.locale][row.type==='YARD'?1:0]:labels[row.type]));
   if(row.assetId===assetId){
    item.setAttribute('aria-current','true');
    if(assetId==='ecrl-stn-14')item.append(temerlohContext());

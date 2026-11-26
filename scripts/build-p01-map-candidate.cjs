@@ -59,7 +59,7 @@ for(const file of ['data.js','i18n.js']){
 const {dataContract,adapter}=mapCore.createEcrlContext(ecrl);
 const records=mapCore.publicAssetIdentity(dataContract,adapter);
 for(const {assetId,type,code,name,section} of records){
- if(!/^ecrl-[a-z0-9-]+$/.test(assetId)||!['STN','PL','DEPOT','YARD'].includes(type)||
+ if(!/^ecrl-[a-z0-9-]+$/.test(assetId)||!['STN','PL','DEPOT','YARD','PORT'].includes(type)||
   (code!==null&&!/^(STN|PL)\d{2}$/.test(code))||typeof name!=='string'||typeof section!=='string')
   throw Error('P01_PUBLIC_ECRL_INVALID_IDENTITY');
 }

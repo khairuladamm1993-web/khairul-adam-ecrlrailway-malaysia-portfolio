@@ -19,6 +19,7 @@
 .p01-ecrl-lineup li[data-type=PL]{border-inline-start-color:#ac660f}
 .p01-ecrl-lineup li[data-type=DEPOT]{border-inline-start-color:#0f7778}
 .p01-ecrl-lineup li[data-type=YARD]{border-inline-start-color:#ac660f}
+.p01-ecrl-lineup li[data-type=PORT]{border-inline-start-color:#7c3aed}
 .p01-ecrl-lineup strong,.p01-ecrl-lineup small{display:block}
 
 .p01-v7-ecrl-panel{position:absolute;z-index:4;inset-inline-start:max(10px,env(safe-area-inset-left));bottom:calc(52px + var(--p01-map-actions-bottom));width:min(23rem,calc(100% - 58px - env(safe-area-inset-left) - env(safe-area-inset-right)));max-height:calc(100% - 94px - env(safe-area-inset-top) - var(--p01-map-actions-bottom));margin:0}
@@ -32,6 +33,7 @@
 #ecrl-context-list li::before{content:'';position:absolute;inset-inline-start:-13px;top:10px;width:7px;height:7px;border-radius:50%;background:var(--sub)}
 #ecrl-context-list li:not(:last-child)::after{content:'';position:absolute;inset-inline-start:-10px;top:17px;bottom:-17px;width:1px;background:var(--line)}
 #ecrl-context-list li[data-type=YARD]::before,#ecrl-context-list li:has(+li[data-type=YARD])::after{display:none}
+#ecrl-context-list li[data-type=PORT]::before,#ecrl-context-list li[data-type=PORT]::after{display:none}
 #ecrl-context-list li[aria-current=true]{outline:2px solid #3b8dab;outline-offset:-2px}
 .p01-v7-fullscreen-open{overflow:hidden}
 @media(max-width:540px){

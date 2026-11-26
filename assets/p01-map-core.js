@@ -9,6 +9,7 @@
   ampang:'ampang-line-r219.html',
   member:'unified-map-v8.html'
  });
+ const sectionDGauges=Object.freeze({ecrl:1435,ktmb:1000});
  function createEcrlContext(deps=root){
   const adapter=deps.MRS10UnifiedECRL.create(deps.MRS10ECRLGISV1,deps.MRS10ECRLI18N);
   const master=deps.MRS10ECRLMasterIntelligence.create(adapter);
@@ -24,7 +25,18 @@
    throw Error('P01_PUBLIC_C2_REFERENCE_INVENTORY');
   const references=stations.map(({assetId,officialName:name,section})=>({assetId,type:'STN',code:null,name,section}));
   references.push({assetId:yard.assetId,type:'YARD',code:null,name:yard.officialName,section:yard.section});
-  return [...main,...references];
+  const scheme=adapter.registry.segments.find(record=>record.segmentId==='ecrl-d-port-access');
+  if(!scheme||scheme.trackGaugeMm!==sectionDGauges.ecrl||scheme.ktmbMetreGaugeMm!==sectionDGauges.ktmb||
+    scheme.trackArrangement!=='SEPARATE_PARALLEL_STANDARD_AND_METRE_GAUGE'||scheme.geometry!==null)
+   throw Error('P01_PUBLIC_D_SCHEME_MISMATCH');
+  const ports=['ecrl-port-northport','ecrl-port-westports'].map(assetId=>{
+   const asset=adapter.get(assetId);
+   if(asset?.section!=='D'||asset.assetType!=='PORT_INTERFACE'||asset.assetStatus!=='PLANNED_CONNECTION'||
+     asset.verificationStatus!=='PARTIAL'||asset.point!==null||asset.referenceKind!=='PORT_FACILITY_AREA_PKA22'||asset.referenceSourceId!=='PKA22')
+    throw Error('P01_PUBLIC_D_PORT_REFERENCE:'+assetId);
+   return {assetId,type:'PORT',code:null,name:asset.officialName,section:asset.section};
+  });
+  return [...main,...references,...ports];
  }
  function publicStationReferences(records,localities){
   return records.filter(asset=>asset.type==='STN'&&asset.section!=='C2').flatMap(asset=>{
@@ -61,7 +73,7 @@
   ctx.beginPath();ctx.moveTo(8,19);ctx.lineTo(6,22);ctx.moveTo(16,19);ctx.lineTo(18,22);ctx.stroke();
   map.addImage(id,ctx.getImageData(0,0,68,68),{pixelRatio:2});
  }
- const api=Object.freeze({routes,createEcrlContext,publicAssetIdentity,publicStationReferences,installStationType2,findPublicAssets,loadPublicAssetIdentity});
+ const api=Object.freeze({routes,sectionDGauges,createEcrlContext,publicAssetIdentity,publicStationReferences,installStationType2,findPublicAssets,loadPublicAssetIdentity});
  if(typeof module==='object')module.exports=api;
  if(root)root.MRS10P01MapCore=api;
 })(typeof window==='undefined'?null:window);
