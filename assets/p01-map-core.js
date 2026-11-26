@@ -61,6 +61,34 @@
   if(data.version!==1||data.corridor!=='ECRL'||!Array.isArray(data.records))throw Error('ECRL_PUBLIC_IDENTITY_CONTRACT');
   return data.records;
  }
+ function publicReferenceAlignment(data){
+  const meta=data?.metadata;
+  if(data?.type!=='FeatureCollection'||meta?.dataset!=='R4_OSM_ECRL_PUBLIC_REFERENCE'||
+    meta.scope!=='PUBLIC_REFERENCE'||meta.classification!=='CONSTRUCTION_AT_SNAPSHOT'||
+    meta.license!=='ODbL-1.0'||meta.physicalVerified!==false||!Array.isArray(data.features))
+   throw Error('ECRL_PUBLIC_ALIGNMENT_CONTRACT');
+  const ids=new Set();
+  const features=data.features.map(feature=>{
+   const coordinates=feature?.geometry?.coordinates;
+   const way=feature?.properties?.osmWayId;
+   if(feature?.type!=='Feature'||!Number.isSafeInteger(way)||way<1||
+     typeof feature.id!=='string'||!/^rg-osm-\d+-\d+-\d+$/.test(feature.id)||
+     feature.id.split('-')[2]!==String(way)||ids.has(feature.id)||
+     feature.geometry?.type!=='LineString'||!Array.isArray(coordinates)||coordinates.length<2||
+     coordinates.some(point=>!Array.isArray(point)||point.length!==2||!point.every(Number.isFinite)||
+      point[0]<99.5||point[0]>104.8||point[1]<1||point[1]>7.5)||
+     Object.keys(feature.properties).length!==1)
+    throw Error('ECRL_PUBLIC_ALIGNMENT_FEATURE');
+   ids.add(feature.id);
+   return {type:'Feature',id:feature.id,geometry:{type:'LineString',coordinates},properties:{osmWayId:way}};
+  });
+  return {type:'FeatureCollection',features};
+ }
+ async function loadPublicReferenceAlignment(){
+  const response=await fetch('./data/ecrl-reference-alignment.geojson');
+  if(!response.ok)throw Error('ECRL_PUBLIC_ALIGNMENT_HTTP_'+response.status);
+  return publicReferenceAlignment(await response.json());
+ }
  function installStationType2(map,id){
   if(map.hasImage(id))return;
   const canvas=document.createElement('canvas');canvas.width=68;canvas.height=68;
@@ -73,7 +101,7 @@
   ctx.beginPath();ctx.moveTo(8,19);ctx.lineTo(6,22);ctx.moveTo(16,19);ctx.lineTo(18,22);ctx.stroke();
   map.addImage(id,ctx.getImageData(0,0,68,68),{pixelRatio:2});
  }
- const api=Object.freeze({routes,sectionDGauges,createEcrlContext,publicAssetIdentity,publicStationReferences,installStationType2,findPublicAssets,loadPublicAssetIdentity});
+ const api=Object.freeze({routes,sectionDGauges,createEcrlContext,publicAssetIdentity,publicStationReferences,installStationType2,findPublicAssets,loadPublicAssetIdentity,publicReferenceAlignment,loadPublicReferenceAlignment});
  if(typeof module==='object')module.exports=api;
  if(root)root.MRS10P01MapCore=api;
 })(typeof window==='undefined'?null:window);

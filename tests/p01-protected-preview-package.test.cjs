@@ -22,11 +22,11 @@ test('package uses checked-out SHA, includes source-exact map and keeps config o
  assert.equal(stamp.deploymentId,null);
  assert.equal(stamp.deploymentUrl,null);
  for(const file of ['gateway.html','unified-map-v7.html','unified-map-v8.html','assets/access.js',
-  'assets/p01-maplibre.js','assets/p01-maplibre-worker.js','assets/unified-ecrl/route-lab-ui.js','assets/unified-ecrl/railway-data-contract-v1.js']){
+  'data/ecrl-reference-alignment.geojson','assets/p01-maplibre.js','assets/p01-maplibre-worker.js','assets/unified-ecrl/route-lab-ui.js','assets/unified-ecrl/railway-data-contract-v1.js']){
   assert.equal(read(staticRoot,file),execFileSync('git',['show',expected+':'+file],{encoding:'utf8'}),file);
  }
  assert.equal(read(pkg,'vercel.json'),read(process.cwd(),'vercel.json'));
- for(const file of ['vercel.json','release-manifest.json','data/owner-project-registry.json','api','supabase','assets/quiz-core.js']){
+ for(const file of ['vercel.json','release-manifest.json','data/owner-project-registry.json','api','supabase','assets/quiz-core.js','data/regional-gis/source','engineering/pipeline','data/ecrl-engineering-alignment.geojson']){
   assert.equal(fs.existsSync(path.join(staticRoot,file)),false,file);
  }
 });

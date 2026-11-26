@@ -1,7 +1,7 @@
-name: P01 ECRL Section D QA
+name: P01 ECRL Reference Map QA
 on:
   push:
-    branches: [candidate/p01-section-d-integration-20261126]
+    branches: [candidate/p01-reference-map-integration-20261126]
 permissions:
   contents: read
   actions: read
@@ -66,7 +66,7 @@ jobs:
           }
           for (const file of [
             'unified-map-v7.html', 'assets/unified-v7-map.js', 'assets/p01-public-map-nav.css', 'assets/p01-map-core.js',
-            'ecrl-asset-reference.html', 'assets/p01-ecrl-public-reference.js',
+            'ecrl-asset-reference.html', 'assets/p01-ecrl-public-reference.js', 'data/ecrl-reference-alignment.geojson',
             'assets/unified-ecrl/adapter.js', 'assets/unified-ecrl/chainage-manifest.js',
             'assets/unified-ecrl/railway-data-contract-v1.js', 'assets/unified-ecrl/alignment-evidence-r2.js',
             'assets/unified-ecrl/route-lab-d102-preflight.js', 'assets/unified-ecrl/route-lab-station-intelligence.js'
@@ -93,6 +93,8 @@ jobs:
             .replace(process.env.BASELINE_SHA, process.env.GITHUB_SHA);
           fs.writeFileSync(stampPath, stamp);
           manifest.sourceSha = process.env.GITHUB_SHA;
+          manifest.files.push({path: staticPath + 'data/ecrl-reference-alignment.geojson'});
+          manifest.files.sort((a,b)=>a.path.localeCompare(b.path));
           for (const row of manifest.files) {
             row.sha256 = hash(fs.readFileSync(path.join(root, row.path)));
           }

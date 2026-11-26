@@ -137,6 +137,28 @@ test('Section D projects separate planned port interfaces without track position
  }
 });
 
+test('Public reference alignment accepts uncalibrated ODbL data and rejects other tiers',()=>{
+ const core=require('../assets/p01-map-core.js');
+ const content=fs.readFileSync('data/ecrl-reference-alignment.geojson','utf8');
+ const payload=JSON.parse(content);
+ assert.equal(require('node:crypto').createHash('sha256').update(content).digest('hex'),
+  '89bdc6486cf00f7c0bac6f9384dbdbc1f783cd4c893149e1e739b6ae88e77eb7');
+ const projection=core.publicReferenceAlignment(payload);
+ assert.equal(projection.features.length,453);
+ assert.equal(new Set(projection.features.map(f=>f.properties.osmWayId)).size,444);
+ assert.equal(projection.features.reduce((n,f)=>n+f.geometry.coordinates.length,0),3278);
+ assert.equal('metadata' in projection,false);
+ for(const change of [{physicalVerified:true},{scope:'PRIVATE_REVIEW'},{license:'PRIVATE_ONLY'},
+   {classification:'HISTORICAL_PLANNING'},{dataset:'R1.5b_HOLD'}]){
+  assert.throws(()=>core.publicReferenceAlignment({...payload,metadata:{...payload.metadata,...change}}),/ALIGNMENT_CONTRACT/);
+ }
+ const feature=payload.features[0];
+ assert.throws(()=>core.publicReferenceAlignment({...payload,features:[feature,{...feature}]}),/ALIGNMENT_FEATURE/);
+ assert.throws(()=>core.publicReferenceAlignment({...payload,features:[
+  {...feature,properties:{...feature.properties,sourceGraph:'private'}}
+ ]}),/ALIGNMENT_FEATURE/);
+});
+
 test('V1 seals collection, rows and nested values independently of source arrays',()=>{
  const first=data.records[0];
  assert.throws(()=>data.records.pop(),TypeError);

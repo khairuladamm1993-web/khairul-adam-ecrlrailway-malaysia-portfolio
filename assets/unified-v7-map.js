@@ -53,6 +53,14 @@ const mapLabels={
  th:['สถานี ECRL · จุดอ้างอิงพื้นที่','ทางรถไฟ OpenStreetMap · บริบทเครือข่าย','ข้อมูลอ้างอิงจากเจ้าของ: จุดเชื่อมต่อผู้โดยสารและสินค้าของ KTMB แผนระบุทางแยก Temerloh ส่วนการเดินรถ การต่อรถ และแนวรางยังไม่ยืนยัน']
 };
 const ecrlSource='mrs10-v7-ecrl-localities',ecrlMarker=ecrlSource+'-point',ecrlLabel=ecrlSource+'-label',railContext='mrs10-v7-rail-context';
+const ecrlReferenceLine='mrs10-v7-ecrl-reference-alignment';
+const ecrlReferenceGreen='#168b45';
+const alignmentLabels={
+ ms:['ECRL · rujukan OSM (pembinaan, Nov 2026)','Jajaran disahkan kejuruteraan · belum tersedia'],
+ en:['ECRL · OSM reference (construction, Nov 2026)','Engineering verified alignment · unavailable'],
+ zh:['ECRL · OSM 参考（施工，2026年11月）','工程验证线路 · 暂无'],
+ th:['ECRL · อ้างอิง OSM (ก่อสร้าง พ.ย. 2026)','แนวรางที่ผ่านการรับรองทางวิศวกรรม · ยังไม่มี']
+};
 const c2Labels={
  ms:['Stesen dirancang','Terminal kargo cadangan','Rujukan skema C2. Lokasi semasa dan jajaran belum disahkan.'],
  en:['Planned station','Proposed freight yard','C2 scheme reference. Current locations and alignment are unverified.'],
@@ -67,7 +75,7 @@ const dLabels={
 };
 const ecrlType2='mrs10-ecrl-station-type-2';
 const state={locale:'ms',category:'ECRL',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
- ecrlPublic:[],ecrlStations:[],activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
+ ecrlPublic:[],ecrlStations:[],referenceAlignment:null,activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
 function tr(k){return i18n[state.locale][k]}
 function say(message){$('qa-note').textContent=message}
 function el(tag,cls,text){const x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=String(text);return x}
@@ -114,6 +122,12 @@ function buildLegend(){
  if(state.category==='ECRL'||state.category==='All'){
   const [station,rail]=mapLabels[state.locale];
   host.append(el('span','legend-item',station),el('span','legend-item',rail));
+  const [reference,engineering]=alignmentLabels[state.locale];
+  if(state.referenceAlignment?.features.length){
+   const entry=el('span','legend-item'),swatch=el('span','swatch p01-reference-swatch');
+   entry.append(swatch,el('span',null,reference));host.append(entry);
+  }
+  host.append(el('span','legend-item',engineering));
  }
  for(const r of selectedRoutes()){
   const row=el('div','legend-item'),dot=el('span','swatch'),name=el('span',null,r.label+' · '+routeStatus(r));
@@ -342,6 +356,15 @@ function installGeographicContext(map){
     'line-width':['interpolate',['linear'],['zoom'],8,0.8,14,1.9,18,3]}},
    style.layers.find(layer=>layer.type==='symbol')?.id);
  }
+ if(state.referenceAlignment?.features.length&&!map.getLayer(ecrlReferenceLine)){
+  if(!map.getSource(ecrlReferenceLine))map.addSource(ecrlReferenceLine,{type:'geojson',data:state.referenceAlignment,
+   attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>'});
+  map.addLayer({id:ecrlReferenceLine,type:'line',source:ecrlReferenceLine,
+   layout:{'line-cap':'butt','line-join':'round'},
+   paint:{'line-color':state.theme==='dark'?'#76d697':ecrlReferenceGreen,'line-opacity':0.85,
+    'line-dasharray':[2.4,1.5],'line-width':['interpolate',['linear'],['zoom'],5,1.5,10,2.5,16,4]}},
+   [ecrlMarker,style.layers.find(layer=>layer.type==='symbol')?.id].find(id=>id&&map.getLayer(id)));
+ }
  if(!state.ecrlStations.length)return;
  if(!map.getSource(ecrlSource))map.addSource(ecrlSource,{type:'geojson',data:{type:'FeatureCollection',features:state.ecrlStations}});
  if(!map.getLayer(ecrlMarker)){
@@ -423,7 +446,7 @@ function applyVisibility(){
   for(const id of layers)map.moveLayer(id);
  }
  const ecrlVisible=['ECRL','All'].includes(state.category);
- for(const id of [ecrlMarker,ecrlLabel,railContext]){
+ for(const id of [ecrlMarker,ecrlLabel,railContext,ecrlReferenceLine]){
   if(!map.getLayer(id))continue;
   const visible=ecrlVisible||(id===railContext&&state.category==='KTM');
   if(map.getLayoutProperty(id,'visibility')!==(visible?'visible':'none'))map.setLayoutProperty(id,'visibility',visible?'visible':'none');
@@ -578,6 +601,10 @@ function init(){
   showStatus();
  });
  bindFullscreen();applyLanguage();startMap();void loadGIS();
+ window.MRS10P01MapCore?.loadPublicReferenceAlignment().then(alignment=>{
+  state.referenceAlignment=alignment;
+  buildLegend();updateMapLayer();
+ }).catch(()=>{});
  window.MRS10P01MapCore?.loadPublicAssetIdentity().then(records=>{
   state.ecrlPublic=records;
   state.ecrlStations=window.MRS10P01MapCore.publicStationReferences(records,window.RailwayCorridorReference??[]);
@@ -607,6 +634,7 @@ function diagnosticSnapshot(){
  return Object.freeze({mapReady:state.mapReady,styleLoaded,tilesLoaded,webglReady,
   rect,perRoute:rows,renderedFeatureCount:Object.values(rows).reduce((n,r)=>n+r.rendered,0),
   layerCount:Object.values(rows).filter(r=>r.present).length,sourceMatched:state.points.size,
+  ecrlReferenceFeatures:state.referenceAlignment?.features.length??0,
   mapInstances:state.map?1:0,stage:state.pending?'LOADING':'DONE',category:state.category});
 }
 window.MRS10V7Diagnostics=Object.freeze({snapshot:diagnosticSnapshot});

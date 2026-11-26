@@ -11,7 +11,7 @@ const rootPages=['unified-map-v7.html','unified-map-v8.html','ecrl-asset-referen
 const assets=['assets/unified-v5.css','assets/unified-v7-map.js','assets/unified-v8-map.js','assets/railway-track-registry-kl.js','assets/mrs10-r219-ampang-service.js','assets/mrs10-r219-ampang-gis.js','assets/unified-v4-registry.js'];
 const assetDirs=['assets/unified-v6','assets/unified-v7','assets/unified-v8','assets/unified-v81','assets/unified-ecrl','assets/consumer-foundation','assets/unified-complete','assets/openmr'];
 const dataDirs=['data/openmr-r3','data/unified-v8','data/unified-v81-integration','singapore/data'];
-const dataFiles=['data/unified-complete/borneo-registry.json','data/unified-complete/shuttle-audit.json','data/unified-complete/china-references.json'];
+const dataFiles=['data/ecrl-reference-alignment.geojson','data/unified-complete/borneo-registry.json','data/unified-complete/shuttle-audit.json','data/unified-complete/china-references.json'];
 const allowedStatic=/\.(?:js|css|json|geojson|png|svg)$/i;
 const copy=file=>{
  const src=path.join(root,file),dest=path.join(out,file);

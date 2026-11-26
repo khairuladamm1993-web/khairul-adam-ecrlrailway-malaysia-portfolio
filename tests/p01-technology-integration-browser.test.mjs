@@ -128,7 +128,8 @@ async function checkMapComposition(page,engine,device){
  await page.waitForFunction(()=>{
   const d=window.MRS10V7Diagnostics?.snapshot();
   return d?.stage==='DONE'&&d.styleLoaded&&d.webglReady&&d.layerCount>0&&
-   !!window.ecrlTestMap.getLayer('mrs10-v7-ecrl-localities-point');
+   !!window.ecrlTestMap.getLayer('mrs10-v7-ecrl-localities-point')&&
+   !!window.ecrlTestMap.getLayer('mrs10-v7-ecrl-reference-alignment');
  });
  assert.equal(await page.locator('#filters [aria-pressed=true]').innerText(),'ECRL');
  assert.equal(await page.locator('.p01-v7-map-badge').innerText(),'MR-S10');
@@ -153,6 +154,20 @@ async function checkMapComposition(page,engine,device){
  assert.equal(layers.legacyVisibility,'none');
  assert.equal(layers.railSource,'transport');
  assert.equal(layers.railType,'line');
+ const alignmentLayer='mrs10-v7-ecrl-reference-alignment';
+ await page.waitForFunction(id=>window.ecrlTestMap.queryRenderedFeatures({layers:[id]}).length>0,alignmentLayer);
+ const alignment=await page.evaluate(async id=>{
+  const map=window.ecrlTestMap, source=map.getSource(id), style=map.getStyle();
+  const {features}=await source.getData();
+  return {count:features.length,dash:map.getPaintProperty(id,'line-dasharray'),
+   beforeMarker:style.layers.findIndex(l=>l.id===id)<style.layers.findIndex(l=>l.id==='mrs10-v7-ecrl-localities-point'),
+   attributed:source.attribution.includes('ODbL 1.0'),
+   verifiedLayer:!!map.getLayer('mrs10-v7-ecrl-engineering-alignment')};
+ },alignmentLayer);
+ assert.deepEqual(alignment,{count:453,dash:[2.4,1.5],beforeMarker:true,attributed:true,verifiedLayer:false});
+ assert.match(await page.locator('#legend').innerText(),/rujukan OSM.*pembinaan/);
+ assert.match(await page.locator('#legend').innerText(),/Jajaran disahkan kejuruteraan.*belum tersedia/);
+ await page.screenshot({path:out+'/'+engine+'-'+device+'-ecrl-reference-alignment.png'});
  const opener=page.locator('#ecrl-context-open'),panel=page.locator('#ecrl-context');
  const fullscreen=page.locator('#p01-v7-fullscreen');
  const mapPath=new URL(page.url()).pathname;
@@ -257,7 +272,12 @@ async function checkMapComposition(page,engine,device){
  await page.locator('#filters').getByRole('button',{name:'Semua',exact:true}).click();
  assert.equal(await page.locator('#rail-lineup-panel').isVisible(),true);
  await page.locator('#theme').click();
- await page.waitForFunction(()=>window.ecrlTestMap.isStyleLoaded()&&window.ecrlTestMap.hasImage('mrs10-ecrl-station-type-2'));
+ await page.waitForFunction(id=>window.ecrlTestMap.isStyleLoaded()&&window.ecrlTestMap.hasImage('mrs10-ecrl-station-type-2')&&
+  !!window.ecrlTestMap.getLayer(id),alignmentLayer);
+ await page.locator('#filters').getByRole('button',{name:'KTM',exact:true}).click();
+ assert.equal(await page.evaluate(id=>window.ecrlTestMap.getLayoutProperty(id,'visibility'),alignmentLayer),'none');
+ await page.locator('#filters').getByRole('button',{name:'ECRL',exact:true}).click();
+ assert.equal(await page.evaluate(id=>window.ecrlTestMap.getLayoutProperty(id,'visibility'),alignmentLayer),'visible');
 }
 
 async function checkRailwayHierarchy(page,engine,device){

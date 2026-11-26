@@ -18,7 +18,8 @@
     "candidate/p01-geographic-integration-20261125": false,
     "candidate/p01-type2-geographic-uat-20261125": false,
     "candidate/p01-section-c2-integration-20261126": false,
-    "candidate/p01-section-d-integration-20261126": false
+    "candidate/p01-section-d-integration-20261126": false,
+    "candidate/p01-reference-map-integration-20261126": false
   }},
   "headers": [
     {"source":"/gateway.html","headers":[{"key":"Cache-Control","value":"private, no-store, max-age=0"},{"key":"Referrer-Policy","value":"no-referrer"}]},
