@@ -112,7 +112,7 @@ async function checkSharedIdentity(page){
  await page.locator('#search').fill('Kajang');
  assert.ok(await page.locator('#search-results').getByRole('button').count()>0);
  await page.goto(base+'/ecrl-asset-reference.html');
- await page.getByText('Rujukan aset belum tersedia.').waitFor();
+ await page.getByText('Rujukan aset ECRL gagal dimuatkan.',{exact:true}).waitFor();
  await page.unroute(base+projection);
 }
 
