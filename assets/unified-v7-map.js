@@ -94,6 +94,8 @@ const dLabels={
  th:['จุดเชื่อมต่อท่าเรือตามแผน','อ้างอิงพื้นที่ท่าเรือ แผนแยกราง ECRL {ecrl} มม. และ KTMB {ktmb} มม. สถานีปลายทาง การเชื่อมราง และการเดินรถยังไม่ยืนยัน']
 };
 const ecrlType2='mrs10-ecrl-station-type-2';
+const linkedAssetIds=new URLSearchParams(location.search).getAll('asset');
+let linkedAssetId=linkedAssetIds.length===1?linkedAssetIds[0]:null;
 const state={locale:'ms',category:'ECRL',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
  ecrlPublic:[],ecrlStations:[],ecrlLoops:[],assetIdentityStatus:'loading',referenceAlignment:null,referenceAlignmentStatus:'loading',activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
 function tr(k){return i18n[state.locale][k]}
@@ -141,6 +143,7 @@ function buildFilters(){
  }
 }
 function setCategory(category){
+ linkedAssetId=null;
  closeReferenceContext();
  state.popup?.remove();
  state.category=category;
@@ -652,6 +655,9 @@ async function loadAssetIdentity(){
   state.ecrlPublic=records;
   state.assetIdentityStatus='ready';
   buildLegend();renderReferenceContext();updateSearch();updateMapLayer();fitOnce();
+  const linkedAsset=records.find(asset=>asset.assetId===linkedAssetId);
+  linkedAssetId=null;
+  if(linkedAsset&&!state.activeReference)openReferenceContext(linkedAsset,$('ecrl-context-open'));
  }catch{
   state.assetIdentityStatus='error';
  }
@@ -659,7 +665,10 @@ async function loadAssetIdentity(){
 }
 function init(){
  try{state.manifest=[...core.loadManifest(kl,ampang),...integration.routes(),...ktm.routes()]}catch(e){$('map-error').textContent='Registry: '+e.message;return}
- $('search').addEventListener('input',updateSearch);
+ $('search').addEventListener('input',()=>{
+  linkedAssetId=null;
+  updateSearch();
+ });
  function dismissReference(){
   const opener=state.referenceOpener;
   closeReferenceContext();

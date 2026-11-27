@@ -17,10 +17,13 @@
  function render(){
   const visible=page.findPublicAssets(assets,search.value,kind);
   list.replaceChildren(...visible.map(asset=>{
-   const row=document.createElement('li'),title=document.createElement('strong'),detail=document.createElement('small');
+   const row=document.createElement('li'),title=document.createElement('strong'),link=document.createElement('a'),detail=document.createElement('small');
    row.dataset.type=asset.type;
    row.dataset.assetId=asset.assetId;
-   title.textContent=[asset.code,asset.name].filter(Boolean).join(' · ');
+   link.textContent=[asset.code,asset.name].filter(Boolean).join(' · ');
+   link.href='./'+page.routes.malaysia+'?'+new URLSearchParams({asset:asset.assetId});
+   link.target='_top';
+   title.append(link);
    const label=asset.type==='STN'&&asset.section==='C2'?'Stesen dirancang':labels[asset.type];
    const note=asset.type==='PORT'?'Rujukan kawasan pelabuhan; sambungan rel belum disahkan':'Lokasi fizikal belum disahkan';
    detail.textContent=[label,asset.section?'Seksyen '+asset.section:null,note].filter(Boolean).join(' · ');

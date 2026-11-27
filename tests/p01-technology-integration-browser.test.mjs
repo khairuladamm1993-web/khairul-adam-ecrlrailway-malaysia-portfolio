@@ -175,6 +175,44 @@ async function checkAssetIdentityRetry(page){
  }
 }
 
+async function checkCatalogueMapHandoff(page){
+ const mapPath='/unified-map-v7.html';
+ const assetId='ecrl-loop-historical-02';
+ const panel=page.locator('#ecrl-context');
+ const active=panel.locator('[aria-current=true]');
+ await page.goto(base+'/ecrl-asset-reference.html');
+ const links=page.locator('#asset-reference-list li a');
+ await links.first().waitFor();
+ assert.equal(await links.count(),32);
+ await links.getByText(/PL02 · Bukit Payung/).click();
+ assert.equal(new URL(page.url()).pathname,mapPath);
+ assert.equal(new URL(page.url()).searchParams.get('asset'),assetId);
+ await active.waitFor();
+ assert.equal(await active.getAttribute('data-asset-id'),assetId);
+ assert.match(await active.innerText(),/kedudukan pada jajaran belum disahkan/);
+ assert.equal(await active.locator('[data-map-reference]').count(),0);
+ assert.equal(await page.evaluate(()=>window.MRS10V7Diagnostics.snapshot().ecrlReferenceLoopMarkers),0);
+ await panel.locator('#ecrl-context-back').click();
+ assert.equal(await panel.isHidden(),true);
+
+ await page.goto(base+mapPath+'?asset=ecrl-port-westports');
+ await active.waitFor();
+ assert.equal(await active.getAttribute('data-asset-id'),'ecrl-port-westports');
+ assert.match(await panel.locator('h2').innerText(),/ · D$/);
+ for(const query of ['asset=missing','asset='+assetId+'&asset=ecrl-port-westports','asset=https%3A%2F%2Fexample.org']){
+  await page.goto(base+mapPath+'?'+query);
+  await page.waitForFunction(()=>window.MRS10V7Diagnostics.snapshot().ecrlAssetIdentityStatus==='ready');
+  assert.equal(await panel.isHidden(),true);
+  assert.equal(new URL(page.url()).pathname,mapPath);
+ }
+ const identity=base+'/data/ecrl-public-identity-v1.json';
+ await page.route(identity,route=>route.fulfill({status:503,body:'Fixture unavailable'}),{times:1});
+ await page.goto(base+mapPath+'?asset='+assetId);
+ await page.getByRole('button',{name:'Cuba lagi'}).click();
+ await active.waitFor();
+ assert.equal(await active.getAttribute('data-asset-id'),assetId);
+}
+
 async function checkMapComposition(page,engine,device){
  const tap=locator=>device==='desktop'?locator.click():locator.tap();
  await page.route(base+'/context-fixture-tiles/**',route=>route.fulfill({status:204}));
@@ -594,6 +632,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
       await checkSharedIdentity(page);
       await checkAlignmentRetry(page);
       await checkAssetIdentityRetry(page);
+      await checkCatalogueMapHandoff(page);
       assert.equal((await page.goto(base+'/unified-map-v8.html')).status(),200);
       const lanchang=await page.evaluate(()=>{
        const {dataContract}=window.MRS10P01MapCore.createEcrlContext();
