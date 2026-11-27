@@ -141,6 +141,40 @@ async function checkAlignmentRetry(page){
  await page.unroute(url);
 }
 
+async function checkAssetIdentityRetry(page){
+ const url=base+'/data/ecrl-public-identity-v1.json';
+ let attempts=0;
+ await page.route(url,route=>{
+  attempts++;
+  if(attempts===1)return route.fulfill({status:503,body:'Fixture unavailable'});
+  if(attempts===2)return route.fulfill({json:{version:1,corridor:'ECRL'}});
+  return route.continue();
+ });
+ try{
+  assert.equal((await page.goto(base+'/unified-map-v7.html')).status(),200);
+  const retry=page.getByRole('button',{name:'Cuba lagi'});
+  const search=page.locator('#search');
+  await search.fill('PL02');
+  for(const expected of [1,2]){
+   await page.waitForFunction(()=>window.MRS10V7Diagnostics.snapshot().ecrlAssetIdentityStatus==='error');
+   await retry.waitFor();
+   assert.equal(attempts,expected);
+   assert.match(await page.locator('#map-status-message').innerText(),/Rujukan aset ECRL gagal dimuatkan/);
+   await retry.click();
+  }
+  await page.waitForFunction(()=>window.MRS10V7Diagnostics.snapshot().ecrlAssetIdentityStatus==='ready'&&
+   !!window.ecrlTestMap.getLayer('mrs10-v7-ecrl-localities-point'));
+  assert.equal(attempts,3);
+  assert.equal(await retry.isHidden(),true);
+  const result=page.locator('[data-ecrl-identity="ecrl-loop-historical-02"]');
+  await result.click();
+  assert.equal(await page.locator('#ecrl-context-list [aria-current=true]').getAttribute('data-asset-id'),'ecrl-loop-historical-02');
+  assert.equal(await page.evaluate(()=>window.MRS10V7Diagnostics.snapshot().ecrlReferenceLoopMarkers),0);
+ }finally{
+  await page.unroute(url);
+ }
+}
+
 async function checkMapComposition(page,engine,device){
  const tap=locator=>device==='desktop'?locator.click():locator.tap();
  await page.route(base+'/context-fixture-tiles/**',route=>route.fulfill({status:204}));
@@ -559,6 +593,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
      if(device==='desktop'){
       await checkSharedIdentity(page);
       await checkAlignmentRetry(page);
+      await checkAssetIdentityRetry(page);
       assert.equal((await page.goto(base+'/unified-map-v8.html')).status(),200);
       const lanchang=await page.evaluate(()=>{
        const {dataContract}=window.MRS10P01MapCore.createEcrlContext();

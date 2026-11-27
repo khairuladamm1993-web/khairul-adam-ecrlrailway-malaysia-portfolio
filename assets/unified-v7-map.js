@@ -67,6 +67,12 @@ const heldLoopLabels={
  zh:'会让线 · 地区参考；线路上的位置尚未核实',
  th:'ทางหลีก · ข้อมูลอ้างอิงพื้นที่ ตำแหน่งบนแนวรางยังไม่ยืนยัน'
 };
+const identityStatusLabels={
+ ms:['Memuatkan rujukan aset ECRL…','Rujukan aset ECRL gagal dimuatkan.'],
+ en:['Loading ECRL asset references…','Could not load ECRL asset references.'],
+ zh:['正在加载 ECRL 资产参考…','无法加载 ECRL 资产参考。'],
+ th:['กำลังโหลดข้อมูลอ้างอิงสินทรัพย์ ECRL…','โหลดข้อมูลอ้างอิงสินทรัพย์ ECRL ไม่สำเร็จ']
+};
 const ecrlReferenceLine='mrs10-v7-ecrl-reference-alignment';
 const ecrlReferenceGreen='#168b45';
 const alignmentLabels={
@@ -89,7 +95,7 @@ const dLabels={
 };
 const ecrlType2='mrs10-ecrl-station-type-2';
 const state={locale:'ms',category:'ECRL',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
- ecrlPublic:[],ecrlStations:[],ecrlLoops:[],referenceAlignment:null,referenceAlignmentStatus:'loading',activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
+ ecrlPublic:[],ecrlStations:[],ecrlLoops:[],assetIdentityStatus:'loading',referenceAlignment:null,referenceAlignmentStatus:'loading',activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
 function tr(k){return i18n[state.locale][k]}
 function say(message){$('qa-note').textContent=message}
 function el(tag,cls,text){const x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=String(text);return x}
@@ -107,17 +113,22 @@ function showStatus(){
  const message=!finished?tr('loading'):loaded?tr('complete'):
   ready!==total?tr('partial'):tr('visualPending');
  say(message+' · '+ready+'/'+total+' '+tr('status')+' · '+tr('notTrack'));
- const showAlignment=['ECRL','All'].includes(state.category)&&state.referenceAlignmentStatus!=='ready';
+ const ecrlSelected=['ECRL','All'].includes(state.category);
+ const showIdentity=ecrlSelected&&state.assetIdentityStatus!=='ready';
+ const showAlignment=ecrlSelected&&state.referenceAlignmentStatus!=='ready';
  const [,alignmentLoading,alignmentError,retryLabel]=ecrlReferenceUi[state.locale];
- const failed=state.referenceAlignmentStatus==='error';
- const statusText=showAlignment?(failed?alignmentError:alignmentLoading):state.networkError?tr('offline'):message;
+ const [identityLoading,identityError]=identityStatusLabels[state.locale];
+ const identityFailed=showIdentity&&state.assetIdentityStatus==='error';
+ const alignmentFailed=showAlignment&&state.referenceAlignmentStatus==='error';
+ const statusText=identityFailed?identityError:alignmentFailed?alignmentError:
+  showIdentity?identityLoading:showAlignment?alignmentLoading:state.networkError?tr('offline'):message;
  const status=$('map-status-message');
  if(status.textContent!==statusText)status.textContent=statusText;
  const retry=$('ecrl-alignment-retry');
- retry.hidden=!(showAlignment&&failed);
+ retry.hidden=!(identityFailed||alignmentFailed);
  if(retry.textContent!==retryLabel)retry.textContent=retryLabel;
  const ecrlVisible=state.category==='ECRL'&&state.ecrlStations.length>0&&state.map?.getLayer(ecrlMarker);
- $('map-error').hidden=!showAlignment&&!!(canvasOk&&(baselineOk||ecrlVisible));
+ $('map-error').hidden=!showIdentity&&!showAlignment&&!!(canvasOk&&(baselineOk||ecrlVisible));
 }
 function findGeo(routeId,id){return state.points.get(routeId+':'+id)||null}
 function buildFilters(){
@@ -628,6 +639,24 @@ async function loadReferenceAlignment(){
  }
  showStatus();
 }
+async function loadAssetIdentity(){
+ const retry=state.assetIdentityStatus==='error';
+ state.assetIdentityStatus='loading';
+ showStatus();
+ try{
+  const mapCore=window.MRS10P01MapCore;
+  const records=await mapCore.loadPublicAssetIdentity(retry);
+  const localities=window.RailwayCorridorReference??[];
+  state.ecrlStations=mapCore.publicStationReferences(records,localities);
+  state.ecrlLoops=mapCore.publicPassingLoopReferences(records,localities);
+  state.ecrlPublic=records;
+  state.assetIdentityStatus='ready';
+  buildLegend();renderReferenceContext();updateSearch();updateMapLayer();fitOnce();
+ }catch{
+  state.assetIdentityStatus='error';
+ }
+ showStatus();
+}
 function init(){
  try{state.manifest=[...core.loadManifest(kl,ampang),...integration.routes(),...ktm.routes()]}catch(e){$('map-error').textContent='Registry: '+e.message;return}
  $('search').addEventListener('input',updateSearch);
@@ -656,14 +685,11 @@ function init(){
   if(state.map){state.mapReady=false;state.map.setStyle(styleURL())}
   showStatus();
  });
- $('ecrl-alignment-retry').addEventListener('click',loadReferenceAlignment);
- bindFullscreen();applyLanguage();startMap();void loadGIS();void loadReferenceAlignment();
- window.MRS10P01MapCore?.loadPublicAssetIdentity().then(records=>{
-  state.ecrlPublic=records;
-  state.ecrlStations=window.MRS10P01MapCore.publicStationReferences(records,window.RailwayCorridorReference??[]);
-  state.ecrlLoops=window.MRS10P01MapCore.publicPassingLoopReferences(records,window.RailwayCorridorReference??[]);
-  buildLegend();renderReferenceContext();updateSearch();updateMapLayer();fitOnce();showStatus();
- }).catch(()=>{});
+ $('ecrl-alignment-retry').addEventListener('click',()=>{
+  if(state.assetIdentityStatus==='error')void loadAssetIdentity();
+  if(state.referenceAlignmentStatus==='error')void loadReferenceAlignment();
+ });
+ bindFullscreen();applyLanguage();startMap();void loadGIS();void loadReferenceAlignment();void loadAssetIdentity();
 }
 function diagnosticSnapshot(){
  const map=state.map,rows={};
@@ -688,7 +714,7 @@ function diagnosticSnapshot(){
  return Object.freeze({mapReady:state.mapReady,styleLoaded,tilesLoaded,webglReady,
   rect,perRoute:rows,renderedFeatureCount:Object.values(rows).reduce((n,r)=>n+r.rendered,0),
   layerCount:Object.values(rows).filter(r=>r.present).length,sourceMatched:state.points.size,
-  ecrlReferenceLoopMarkers:state.ecrlLoops.length, ecrlReferenceAlignmentStatus:state.referenceAlignmentStatus,
+  ecrlReferenceLoopMarkers:state.ecrlLoops.length,ecrlAssetIdentityStatus:state.assetIdentityStatus,ecrlReferenceAlignmentStatus:state.referenceAlignmentStatus,
   ecrlReferenceFeatures:state.referenceAlignment?.features.length??0,
   mapInstances:state.map?1:0,stage:state.pending?'LOADING':'DONE',category:state.category});
 }

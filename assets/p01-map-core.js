@@ -71,8 +71,9 @@
   return records.filter(asset=>(type==='ALL'||asset.type===type)&&
    (normalize(asset.assetId)===key||normalize([asset.code,asset.name].join(' ')).includes(key)));
  }
- async function loadPublicAssetIdentity(){
-  const response=await fetch('./data/ecrl-public-identity-v1.json');
+ async function loadPublicAssetIdentity(retry=false){
+  const url='./data/ecrl-public-identity-v1.json';
+  const response=retry?await fetch(url,{cache:'reload'}):await fetch(url);
   if(!response.ok)throw Error('ECRL_PUBLIC_IDENTITY_HTTP_'+response.status);
   const data=await response.json();
   if(data.version!==1||data.corridor!=='ECRL'||!Array.isArray(data.records))throw Error('ECRL_PUBLIC_IDENTITY_CONTRACT');
