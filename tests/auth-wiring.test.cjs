@@ -514,8 +514,43 @@ test('email proof rejects a foreign origin before calling Auth',async()=>{
  assert.equal(client.calls.filter(x=>x[0]==='verifyOtp').length,0);assert.equal(A.level,'public');
 });
 test('email code uses real identity validation and backend role instead of submitted email privilege',async()=>{
- const {A,client}=await load({session:null});await A.verifyEmailProof('member@example.com','123456');
- assert.equal(A.level,'member');assert.equal(A.canAdmin,false);assert(client.calls.some(x=>x[0]==='rpc'&&x[1]==='account_role'));
+ for(const code of ['012345','01234567','0123456789']){
+  const {A,client}=await load({session:null});await A.verifyEmailProof('member@example.com',code);
+  assert.equal(client.calls.find(x=>x[0]==='verifyOtp')[1].token,code);
+  assert.equal(A.level,'member');assert.equal(A.canAdmin,false);assert(client.calls.some(x=>x[0]==='rpc'&&x[1]==='account_role'));
+ }
+});
+test('invalid numeric proof stays Public without a verification request',async()=>{
+ const {A,client}=await load({session:null});
+ for(const proof of ['01234','01234567890','0123 4567','abcdefgh']){
+  await assert.rejects(()=>A.verifyEmailProof('member@example.com',proof),/6–10 digit/);
+  assert.equal(A.canReadMemberContent,false);
+ }
+ assert.equal(client.calls.filter(x=>x[0]==='verifyOtp').length,0);
+});
+test('unavailable storage stops both proof and PKCE before consuming credentials',async()=>{
+ const localStorage={getItem(){return null},setItem(){throw Error('blocked')},removeItem(){}};
+ const {A,client,location}=await load({session:null,localStorage,locationSearch:'?code=fixture-only'});
+ assert.equal(A.status,'storage-unavailable');
+ assert.equal(location.search,'');
+ await assert.rejects(()=>A.verifyEmailProof('member@example.com','01234567'),/Browser storage is unavailable/);
+ assert.equal(A.canReadMemberContent,false);
+ assert.equal(client.calls.filter(x=>['verifyOtp','exchangeCodeForSession','rpc'].includes(x[0])).length,0);
+});
+test('proof transport failure is distinct from invalid proof and remains Public',async()=>{
+ const client=makeClient({session:null});
+ client.auth.verifyOtp=async()=>{throw new Error('Failed to fetch');};
+ const {A}=await load({client});
+ await assert.rejects(()=>A.verifyEmailProof('member@example.com','01234567'),/could not be reached/);
+ assert.equal(A.status,'auth-network-error');
+ assert.equal(A.canReadMemberContent,false);
+ assert.equal(client.calls.filter(x=>x[0]==='rpc').length,0);
+});
+test('a verified OTP without a backend Member role does not unlock access',async()=>{
+ const {A}=await load({session:null,role:'public'});
+ await A.verifyEmailProof('member@example.com','01234567');
+ assert.equal(A.status,'role-denied');
+ assert.equal(A.canReadMemberContent,false);
 });
 test('token proof for another account is signed out before any role or protected reads',async()=>{
  const {A,client}=await load({session:null,role:'admin'});await assert.rejects(()=>A.verifyEmailProof('owner@example.com','123456'));

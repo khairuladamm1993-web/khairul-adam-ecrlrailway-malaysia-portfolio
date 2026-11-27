@@ -29,9 +29,9 @@
   'client-error':'The authentication client could not complete the request.',
   'email-proof-rejected':'Kod atau pautan tidak sah, sudah digunakan atau tamat tempoh. Gunakan e-mel terbaru.',
   'email-mismatch':'E-mel pengesahan tidak sepadan dengan akaun yang dimasukkan. Akses ditolak.',
-  'invalid-email-proof':'Masukkan kod enam digit atau pautan asal daripada e-mel Supabase MR-S10.',
+  'invalid-email-proof':'Masukkan kod 6–10 digit atau pautan asal daripada e-mel Supabase MR-S10. / Enter the 6–10 digit code or the original MR-S10 verification link.',
   'callback-origin-mismatch':'Open the canonical Preview login. This origin is not configured for email callbacks.',
-  'storage-unavailable':'Safari storage is unavailable. Sign-in cannot safely retain its PKCE verifier.',
+  'storage-unavailable':'Storan pelayar tidak tersedia untuk menyimpan sesi. Buka Gateway yang sama dalam Safari dan cuba lagi. / Browser storage is unavailable. Open the same Gateway in Safari and try again.',
   'auth-network-error':'Authentication backend could not be reached. Check the connection and try again.'
  }[status]||'Protected data could not be loaded securely. Check the existing session again.');
  const failClosed=(status='public',error=null)=>{consent=false;dataCache=null;userId=null;return set({level:'public',status,canReadMemberContent:false,canAdmin:false,email:null,error:error?(['pkce-exchange-failed','verification-failed'].includes(status)?String(error):safeError(status)):null,retryAfterSeconds:null});};
@@ -167,6 +167,7 @@
    if(urlError)return failClosed('verification-failed',urlError);
    const code=callbackCode();
    if(code){
+    if(!durableStorage()){cleanAuthCallback();return failClosed('storage-unavailable',true);}
     const exchanged=await exchangeCallback(c,code);
     if(!exchanged||state.status==='pkce-exchange-failed'||state.status==='verification-failed'||state.status==='session-restore-failed'||state.status==='auth-network-error')return snapshot();
    }
@@ -228,7 +229,7 @@
  }
  function emailProof(value){
   const raw=String(value||'').trim();
-  if(/^\d{6}$/.test(raw))return {token:raw};
+  if(/^\d{6,10}$/.test(raw))return {token:raw};
   try{
    const u=new URL(raw);
    if(u.origin!==PROJECT_URL||u.pathname!=='/auth/v1/verify'||u.username||u.password)throw Error();
@@ -242,7 +243,12 @@
   const normalized=String(email||'').trim().toLowerCase();
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized))throw new Error('Masukkan alamat e-mel akaun yang betul.');
   let proof;try{proof=emailProof(value)}catch{failClosed('invalid-email-proof',true);throw new Error(state.error)}
-  const c=requireClient();if(manualVerification)throw new Error('Pengesahan sedang berjalan.');manualVerification=true;
+  if(manualVerification)throw new Error('Pengesahan sedang berjalan.');
+  if(!durableStorage()){failClosed('storage-unavailable',true);throw new Error(state.error);}
+  let c;
+  try{c=requireClient();}
+  catch(error){failClosed(clientFailure(error),true);throw new Error(state.error);}
+  manualVerification=true;
   authRevision++;
   if(hydrationPromise)await hydrationPromise;
   const revision=authRevision;
@@ -252,17 +258,24 @@
    const payload=proof.token?{email:normalized,token:proof.token,type:'email'}:{token_hash:proof.token_hash,type:'email'};
    const result=await c.auth.verifyOtp(payload);
    if(revision!==authRevision){await c.auth.signOut({scope:'local'});return snapshot();}
-   if(result.error||!result.data?.session){failClosed('email-proof-rejected',true);throw new Error(state.error);}
+   if(result.error)throw result.error;
+   if(!result.data?.session){failClosed('session-restore-failed',true);throw new Error(state.error);}
    const verified=await c.auth.getUser(result.data.session.access_token);
    if(revision!==authRevision){await c.auth.signOut({scope:'local'});return snapshot();}
-   if(verified.error||!verified.data?.user||String(verified.data.user.email||'').toLowerCase()!==normalized){await c.auth.signOut({scope:'local'});failClosed('email-mismatch',true);throw new Error(state.error);}
+   if(verified.error||!verified.data?.user){
+    failClosed(clientFailure(verified.error)==='auth-network-error'?'auth-network-error':'get-user-failed',true);
+    throw new Error(state.error);
+   }
+   if(String(verified.data.user.email||'').toLowerCase()!==normalized){failClosed('email-mismatch',true);throw new Error(state.error);}
    clearAttempt();
    if(!authSubscription){const {data}=c.auth.onAuthStateChange(handleAuthEvent);authSubscription=data?.subscription||null;}
    return await validateSession({expectSession:true,expectedEmail:normalized});
   }catch(error){
-   if(['email-mismatch','email-proof-rejected'].includes(state.status)){const reason=state.status;try{await c.auth.signOut({scope:'local'})}catch{}failClosed(reason,true);throw new Error(state.error);}
    if(revision!==authRevision)return snapshot();
-   failClosed('email-proof-rejected',true);throw new Error(state.error);
+   const reason=['email-mismatch','get-user-failed','auth-network-error','session-restore-failed'].includes(state.status)?state.status:
+    clientFailure(error)==='auth-network-error'?'auth-network-error':'email-proof-rejected';
+   try{await c.auth.signOut({scope:'local'});}catch{}
+   failClosed(reason,true);throw new Error(state.error);
   }finally{manualVerification=false;proof=null;value=null;}
  }
  async function refresh(){
