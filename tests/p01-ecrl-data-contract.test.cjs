@@ -137,24 +137,30 @@ test('Section D projects separate planned port interfaces without track position
  }
 });
 
-test('Public loop markers reuse current public-safe locality coordinates only',()=>{
+test('PL02–PL05 keep their chainage order and cannot use locality coordinates as map pins',()=>{
  const core=require('../assets/p01-map-core.js');
  const records=core.publicAssetIdentity(data,adapter);
  const scope={window:{}};
  vm.runInNewContext(fs.readFileSync('assets/corridor-reference.js','utf8'),scope);
  const localities=scope.window.RailwayCorridorReference;
- const loops=core.publicPassingLoopReferences(records,localities);
- assert.deepEqual(loops.map(f=>f.properties.code),['PL02','PL03','PL04','PL05']);
- for(const f of loops){
-  const source=localities.find(r=>r.type==='PL'&&r.name===f.properties.name);
-  assert.deepEqual(f.geometry.coordinates,[source.lon,source.lat]);
-  assert.deepEqual(Object.keys(f.properties),['assetId','code','name']);
+ const held=records.filter(core.isPassingLoopPlacementHeld);
+ assert.deepEqual(held.map(row=>[row.code,row.section]),[['PL02','A'],['PL03','B'],['PL04','B'],['PL05','B']]);
+ assert.deepEqual(held.map(row=>data.records.find(asset=>asset.assetId===row.assetId).chainage.metres),
+  [172450,353242,377950,415180]);
+ for(const row of held){
+  assert.ok(localities.some(ref=>ref.name===row.name&&ref.type==='PL'));
+  assert.deepEqual(core.findPublicAssets(records,row.code),[row]);
+  assert.equal(data.records.find(asset=>asset.assetId===row.assetId).physicalGeometry,null);
  }
+ assert.deepEqual(core.publicPassingLoopReferences(records,localities),[]);
  const current=localities.find(r=>r.name==='Bukit Payung');
- assert.equal(core.publicPassingLoopReferences(records,[{...current,phase:'historical'}]).length,0);
- assert.equal(core.publicPassingLoopReferences(records,[{...current,locationConfidence:'Personal Field-Validated Location'}]).length,0);
- assert.equal(core.publicPassingLoopReferences(records,[{...current,coordinateSource:'No validated coordinate'}]).length,0);
- assert.equal(core.publicPassingLoopReferences(records,[current,current]).length,0);
+ const other=records.find(row=>row.code==='PL01');
+ const validFixture={...current,name:other.name};
+ assert.equal(core.publicPassingLoopReferences([other],[validFixture]).length,1);
+ assert.equal(core.publicPassingLoopReferences([other],[{...validFixture,phase:'historical'}]).length,0);
+ assert.equal(core.publicPassingLoopReferences([other],[{...validFixture,locationConfidence:'Personal Field-Validated Location'}]).length,0);
+ assert.equal(core.publicPassingLoopReferences([other],[{...validFixture,coordinateSource:'No validated coordinate'}]).length,0);
+ assert.equal(core.publicPassingLoopReferences([other],[validFixture,validFixture]).length,0);
 });
 
 test('Public reference alignment accepts uncalibrated ODbL data and rejects other tiers',()=>{

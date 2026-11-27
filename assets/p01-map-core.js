@@ -10,6 +10,10 @@
   member:'unified-map-v8.html'
  });
  const sectionDGauges=Object.freeze({ecrl:1435,ktmb:1000});
+ const heldPassingLoopPlacements=new Set(['PL02','PL03','PL04','PL05']);
+ function isPassingLoopPlacementHeld(asset){
+  return asset.type==='PL'&&heldPassingLoopPlacements.has(asset.code);
+ }
  function createEcrlContext(deps=root){
   const adapter=deps.MRS10UnifiedECRL.create(deps.MRS10ECRLGISV1,deps.MRS10ECRLI18N);
   const master=deps.MRS10ECRLMasterIntelligence.create(adapter);
@@ -50,6 +54,8 @@
  }
  function publicPassingLoopReferences(records,localities){
   return records.filter(asset=>asset.type==='PL'&&/^PL0[1-7]$/.test(asset.code)).flatMap(asset=>{
+   // An area reference does not identify a usable public alignment segment for these loops.
+   if(isPassingLoopPlacementHeld(asset))return [];
    const matches=localities.filter(row=>row.type==='PL'&&row.name===asset.name&&row.phase==='current'&&
     row.locationConfidence==='Public Reference Location'&&row.coordinateSource==='Public reference / locality position');
    if(matches.length!==1)return [];
@@ -112,7 +118,7 @@
   ctx.beginPath();ctx.moveTo(8,19);ctx.lineTo(6,22);ctx.moveTo(16,19);ctx.lineTo(18,22);ctx.stroke();
   map.addImage(id,ctx.getImageData(0,0,68,68),{pixelRatio:2});
  }
- const api=Object.freeze({routes,sectionDGauges,createEcrlContext,publicAssetIdentity,publicStationReferences,publicPassingLoopReferences,installStationType2,findPublicAssets,loadPublicAssetIdentity,publicReferenceAlignment,loadPublicReferenceAlignment});
+ const api=Object.freeze({routes,sectionDGauges,createEcrlContext,publicAssetIdentity,publicStationReferences,publicPassingLoopReferences,isPassingLoopPlacementHeld,installStationType2,findPublicAssets,loadPublicAssetIdentity,publicReferenceAlignment,loadPublicReferenceAlignment});
  if(typeof module==='object')module.exports=api;
  if(root)root.MRS10P01MapCore=api;
 })(typeof window==='undefined'?null:window);

@@ -61,6 +61,12 @@ const ecrlReferenceUi={
  zh:['会让线 · 地区参考点','正在加载 ECRL 参考线路…','无法加载 ECRL 参考线路。','重试'],
  th:['ทางหลีก · จุดอ้างอิงพื้นที่','กำลังโหลดแนวรางอ้างอิง ECRL…','โหลดแนวรางอ้างอิง ECRL ไม่สำเร็จ','ลองอีกครั้ง']
 };
+const heldLoopLabels={
+ ms:'Passing loop · rujukan kawasan; kedudukan pada jajaran belum disahkan',
+ en:'Passing loop · locality reference; position on the alignment unverified',
+ zh:'会让线 · 地区参考；线路上的位置尚未核实',
+ th:'ทางหลีก · ข้อมูลอ้างอิงพื้นที่ ตำแหน่งบนแนวรางยังไม่ยืนยัน'
+};
 const ecrlReferenceLine='mrs10-v7-ecrl-reference-alignment';
 const ecrlReferenceGreen='#168b45';
 const alignmentLabels={
@@ -241,7 +247,8 @@ function renderReferenceContext(){
   item.dataset.type=row.type;
   const title=[row.code,row.name].filter(Boolean).join(' · ');
   const hasPoint=!!ecrlPoint(row.assetId);
-  if(hasPoint||section==='C2'||row.type==='PORT'){
+  const heldLoop=window.MRS10P01MapCore.isPassingLoopPlacementHeld(row);
+  if(hasPoint||heldLoop||section==='C2'||row.type==='PORT'){
    const button=el('button',null,title);
    button.type='button';
    if(hasPoint)button.dataset[row.type==='STN'?'mapStation':'mapReference']=row.assetId;
@@ -250,7 +257,8 @@ function renderReferenceContext(){
    item.append(button);
   }else item.append(el('strong',null,title));
   item.append(el('small',null,row.type==='PORT'?dLabels[state.locale][0]:
-   section==='C2'?c2Labels[state.locale][row.type==='YARD'?1:0]:row.type==='PL'&&hasPoint?ecrlReferenceUi[state.locale][0]:labels[row.type]));
+   section==='C2'?c2Labels[state.locale][row.type==='YARD'?1:0]:
+   heldLoop?heldLoopLabels[state.locale]:row.type==='PL'&&hasPoint?ecrlReferenceUi[state.locale][0]:labels[row.type]));
   if(row.assetId===assetId){
    item.setAttribute('aria-current','true');
    if(assetId==='ecrl-stn-14')item.append(temerlohContext());

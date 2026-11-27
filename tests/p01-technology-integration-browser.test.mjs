@@ -303,38 +303,30 @@ async function checkMapComposition(page,engine,device){
  const waitForVisibility=visibility=>page.waitForFunction(({ids,visibility})=>{
   const map=window.ecrlTestMap;
   return ids.every(id=>map.getLayoutProperty(id,'visibility')===visibility);
- },{ids:[alignmentLayer,loopLayer],visibility});
+ },{ids:[alignmentLayer],visibility});
  await page.locator('#filters').getByRole('button',{name:'KTM',exact:true}).click();
  await waitForVisibility('none');
  await page.locator('#filters').getByRole('button',{name:'ECRL',exact:true}).click();
  await waitForVisibility('visible');
- const loops=await page.evaluate(async id=>{
-  const map=window.ecrlTestMap,{features}=await map.getSource(id).getData();
-  return {codes:features.map(f=>f.properties.code),minzoom:map.getLayer(id).minzoom,
-   coordinate:features[0].geometry.coordinates};
- },loopLayer);
- assert.deepEqual(loops.codes,['PL02','PL03','PL04','PL05']);
- assert.equal(loops.minzoom,9);
+ await page.evaluate(()=>window.ecrlTestMap.jumpTo({zoom:10}));
+ const heldCamera=await camera();
+ assert.equal(await page.evaluate(id=>!!window.ecrlTestMap.getSource(id)||!!window.ecrlTestMap.getLayer(id),loopLayer),false);
+ for(const n of [2,3,4,5]){
+  const assetId='ecrl-loop-historical-0'+n;
+  await page.locator('#search').fill('PL0'+n);
+  await tap(page.locator('#search-results [data-ecrl-identity="'+assetId+'"]'));
+  const selectedLoop=panel.locator('[aria-current=true]');
+  assert.equal(await selectedLoop.getAttribute('data-asset-id'),assetId);
+  assert.match(await selectedLoop.innerText(),/rujukan kawasan; kedudukan pada jajaran belum disahkan/);
+  assert.equal(await selectedLoop.locator('[data-map-reference]').count(),0);
+  assert.deepEqual(await camera(),heldCamera);
+ }
  await tap(fullscreen);
- await page.waitForFunction(()=>{
-  const map=window.ecrlTestMap;
-  return Math.abs(map.getCanvas().clientHeight-map.getContainer().getBoundingClientRect().height)<2;
- });
- const moveTo=zoom=>page.evaluate(({center,zoom})=>{window.ecrlTestMap.jumpTo({center,zoom});},{center:loops.coordinate,zoom});
- await moveTo(8);
- await page.waitForFunction(()=>window.ecrlTestMap.areTilesLoaded());
- assert.equal(await page.evaluate(id=>window.ecrlTestMap.queryRenderedFeatures({layers:[id]}).length,loopLayer),0);
- await moveTo(10);
- await page.waitForFunction(({coordinate,id})=>{
-  const map=window.ecrlTestMap,{x,y}=map.project(coordinate);
-  return map.queryRenderedFeatures([x,y],{layers:[id]}).some(row=>row.properties.code==='PL02');
- },{coordinate:loops.coordinate,id:loopLayer});
- const loopPosition=await page.evaluate(c=>{const {x,y}=window.ecrlTestMap.project(c);return {x,y}},loops.coordinate);
- if(device==='desktop')await canvas.click({position:loopPosition});else await canvas.tap({position:loopPosition});
- const selectedLoop=panel.locator('[aria-current=true]');
- assert.equal(await selectedLoop.getAttribute('data-asset-id'),'ecrl-loop-historical-02');
- assert.match(await selectedLoop.innerText(),/Passing loop · rujukan kawasan/);
- await page.screenshot({path:out+'/'+engine+'-'+device+'-pl02-locality.png'});
+ await tap(panel.getByRole('button',{name:'A',exact:true}));
+ await tap(panel.getByRole('button',{name:/PL02/}));
+ assert.equal(await panel.locator('[aria-current=true]').getAttribute('data-asset-id'),'ecrl-loop-historical-02');
+ assert.deepEqual(await camera(),heldCamera);
+ await page.screenshot({path:out+'/'+engine+'-'+device+'-pl-hold-reference.png'});
 }
 
 async function checkRailwayHierarchy(page,engine,device){
@@ -580,7 +572,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
      assert.ok(localFailures.every(path=>path==='/data/ecrl-public-identity-v1.json'||
       device==='desktop'&&path==='/data/ecrl-reference-alignment.geojson'));
      rows.push({engine,device,status:'PASS',mapComposition:true,physicalLayersUnchanged:true,
-      plReferenceMarkers:4,alignmentRetry:device==='desktop',touch:device!=='desktop'});
+      plReferenceCards:4,plReferenceMarkers:0,alignmentRetry:device==='desktop',touch:device!=='desktop'});
      continue;
     }
     if(hierarchyOnly){
