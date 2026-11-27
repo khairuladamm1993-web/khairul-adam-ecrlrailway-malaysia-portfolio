@@ -7,6 +7,7 @@ on:
       - candidate/p01-v7-identity-recovery-20261127
       - candidate/p01-ecrl-asset-map-handoff-20261127
       - candidate/p01-ecrl-catalogue-retry-20261127
+      - candidate/p01-ecrl-reference-roundtrip-20261127
 permissions:
   contents: read
   actions: read
