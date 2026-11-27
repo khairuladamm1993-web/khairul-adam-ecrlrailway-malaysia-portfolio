@@ -299,11 +299,15 @@ async function checkMapComposition(page,engine,device){
  await page.locator('#theme').click();
  await page.waitForFunction(id=>window.ecrlTestMap.isStyleLoaded()&&window.ecrlTestMap.hasImage('mrs10-ecrl-station-type-2')&&
   !!window.ecrlTestMap.getLayer(id),alignmentLayer);
- await page.locator('#filters').getByRole('button',{name:'KTM',exact:true}).click();
- assert.equal(await page.evaluate(id=>window.ecrlTestMap.getLayoutProperty(id,'visibility'),alignmentLayer),'none');
- await page.locator('#filters').getByRole('button',{name:'ECRL',exact:true}).click();
- assert.equal(await page.evaluate(id=>window.ecrlTestMap.getLayoutProperty(id,'visibility'),alignmentLayer),'visible');
  const loopLayer='mrs10-v7-ecrl-loop-reference';
+ const waitForVisibility=visibility=>page.waitForFunction(({ids,visibility})=>{
+  const map=window.ecrlTestMap;
+  return ids.every(id=>map.getLayoutProperty(id,'visibility')===visibility);
+ },{ids:[alignmentLayer,loopLayer],visibility});
+ await page.locator('#filters').getByRole('button',{name:'KTM',exact:true}).click();
+ await waitForVisibility('none');
+ await page.locator('#filters').getByRole('button',{name:'ECRL',exact:true}).click();
+ await waitForVisibility('visible');
  const loops=await page.evaluate(async id=>{
   const map=window.ecrlTestMap,{features}=await map.getSource(id).getData();
   return {codes:features.map(f=>f.properties.code),minzoom:map.getLayer(id).minzoom,
