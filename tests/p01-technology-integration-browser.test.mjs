@@ -312,15 +312,20 @@ async function checkMapComposition(page,engine,device){
  assert.deepEqual(loops.codes,['PL02','PL03','PL04','PL05']);
  assert.equal(loops.minzoom,9);
  await tap(fullscreen);
- const moveTo=zoom=>page.evaluate(({center,zoom})=>window.ecrlTestMap.jumpTo({center,zoom})&&undefined,{center:loops.coordinate,zoom});
+ await page.waitForFunction(()=>{
+  const map=window.ecrlTestMap;
+  return Math.abs(map.getCanvas().clientHeight-map.getContainer().getBoundingClientRect().height)<2;
+ });
+ const moveTo=zoom=>page.evaluate(({center,zoom})=>{window.ecrlTestMap.jumpTo({center,zoom});},{center:loops.coordinate,zoom});
  await moveTo(8);
  await page.waitForFunction(()=>window.ecrlTestMap.areTilesLoaded());
  assert.equal(await page.evaluate(id=>window.ecrlTestMap.queryRenderedFeatures({layers:[id]}).length,loopLayer),0);
  await moveTo(10);
- const atLoop=await page.evaluate(c=>{const {x,y}=window.ecrlTestMap.project(c);return [x,y]},loops.coordinate);
- await page.waitForFunction(({xy,id})=>window.ecrlTestMap.queryRenderedFeatures(xy,{layers:[id]})
-  .some(row=>row.properties.code==='PL02'),{xy:atLoop,id:loopLayer});
- const loopPosition={x:atLoop[0],y:atLoop[1]};
+ await page.waitForFunction(({coordinate,id})=>{
+  const map=window.ecrlTestMap,{x,y}=map.project(coordinate);
+  return map.queryRenderedFeatures([x,y],{layers:[id]}).some(row=>row.properties.code==='PL02');
+ },{coordinate:loops.coordinate,id:loopLayer});
+ const loopPosition=await page.evaluate(c=>{const {x,y}=window.ecrlTestMap.project(c);return {x,y}},loops.coordinate);
  if(device==='desktop')await canvas.click({position:loopPosition});else await canvas.tap({position:loopPosition});
  const selectedLoop=panel.locator('[aria-current=true]');
  assert.equal(await selectedLoop.getAttribute('data-asset-id'),'ecrl-loop-historical-02');
