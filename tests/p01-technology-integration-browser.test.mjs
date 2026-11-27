@@ -581,6 +581,38 @@ async function checkAlignmentEvidence(page,engine,device){
  await page.screenshot({path:out+'/'+engine+'-'+device+'-segment-evidence.png'});
  await page.locator('#filters').getByRole('button',{name:'KTM',exact:true}).click();
  assert.equal(await evidence.count(),0);
+ await page.locator('#filters').getByRole('button',{name:'ECRL',exact:true}).click();
+ const structures=await page.evaluate(async layer=>{
+  const map=window.ecrlTestMap;
+  const {features}=await map.getSource(layer).getData();
+  const counts={};
+  let tunnel;
+  for(const {properties,geometry} of features){
+   const {structure}=properties;
+   counts[structure]=(counts[structure]??0)+1;
+   if(structure!=='tunnel')continue;
+   const coords=geometry.coordinates;
+   for(let i=1;i<coords.length;i++){
+    const a=coords[i-1],b=coords[i],length=Math.hypot(b[0]-a[0],b[1]-a[1]);
+    if(!tunnel||length>tunnel.length)tunnel={id:properties.segmentId,length,centre:[(a[0]+b[0])/2,(a[1]+b[1])/2]};
+   }
+  }
+  return {counts,tunnel,color:map.getPaintProperty(layer,'line-color')};
+ },layer);
+ assert.deepEqual(structures.counts,{tunnel:26,bridge:170,viaduct:6,unclassified:251});
+ assert.deepEqual(structures.color,['step',['zoom'],'#168b45',11,
+  ['match',['get','structure'],'tunnel','#222c37',['bridge','viaduct'],'#a84a16','#168b45']]);
+ assert.match(await page.locator('#legend').innerText(),/Terowong.*tag OSM.*Zum dekat/);
+ for(const [zoom,level] of [[8,'corridor'],[10,'locality'],[13,'structure']]){
+  await page.evaluate(({centre,zoom})=>window.ecrlTestMap.jumpTo({center:centre,zoom}),{centre:structures.tunnel.centre,zoom});
+  await page.waitForFunction(({id,centre,layer})=>{
+   const map=window.ecrlTestMap;
+   const {x,y}=map.project(centre);
+   return map.areTilesLoaded()&&map.queryRenderedFeatures([[x-10,y-10],[x+10,y+10]],{layers:[layer]})
+    .some(hit=>hit.properties.segmentId===id&&hit.properties.structure==='tunnel');
+  },{...structures.tunnel,layer});
+  await page.locator('#map').screenshot({path:out+'/'+engine+'-'+device+'-rail-'+level+'.png'});
+ }
 }
 
 async function checkRailwayHierarchy(page,engine,device){

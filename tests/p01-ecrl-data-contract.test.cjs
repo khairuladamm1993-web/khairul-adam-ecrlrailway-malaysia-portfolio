@@ -167,9 +167,17 @@ test('Public reference alignment accepts uncalibrated ODbL data and rejects othe
  const core=require('../assets/p01-map-core.js');
  const content=fs.readFileSync('data/ecrl-reference-alignment.geojson','utf8');
  const payload=JSON.parse(content);
- assert.equal(require('node:crypto').createHash('sha256').update(content).digest('hex'),
+ const {structureTags,...baselineMetadata}=payload.metadata;
+ const featuresAt=content.indexOf(',"features":[');
+ const baseline=JSON.stringify({type:payload.type,metadata:baselineMetadata}).slice(0,-1)+content.slice(featuresAt);
+ assert.equal(require('node:crypto').createHash('sha256').update(baseline).digest('hex'),
   '89bdc6486cf00f7c0bac6f9384dbdbc1f783cd4c893149e1e739b6ae88e77eb7');
+ assert.deepEqual(Object.values(structureTags).reduce((counts,[kind])=>{
+  counts[kind]=(counts[kind]??0)+1;return counts;
+ },{}),{tunnel:26,bridge:170,viaduct:6});
  const projection=core.publicReferenceAlignment(payload);
+ const ids=new Set(projection.features.map(f=>f.id));
+ assert.ok(Object.entries(structureTags).every(([id,[,version]])=>ids.has(id)&&Number.isSafeInteger(version)&&version>0));
  assert.equal(projection.features.length,453);
  assert.equal(new Set(projection.features.map(f=>f.properties.osmWayId)).size,444);
  assert.equal(projection.features.reduce((n,f)=>n+f.geometry.coordinates.length,0),3278);
@@ -184,6 +192,20 @@ test('Public reference alignment accepts uncalibrated ODbL data and rejects othe
  assert.throws(()=>core.publicReferenceAlignment({...payload,features:[
   {...feature,properties:{...feature.properties,sourceGraph:'private'}}
  ]}),/ALIGNMENT_FEATURE/);
+});
+
+test('Rail structure detail is restricted to admitted IDs, tags and way versions',async t=>{
+ const core=require('../assets/p01-map-core.js');
+ const payload=JSON.parse(fs.readFileSync('data/ecrl-reference-alignment.geojson','utf8'));
+ const [allowed,invalidVersion,invalidTag]=payload.features;
+ payload.metadata.structureTags={
+  [allowed.id]:['tunnel',3],[invalidVersion.id]:['bridge',0],[invalidTag.id]:['yard',2],
+  'not-an-admitted-feature':['bridge',5],
+ };
+ t.mock.method(global,'fetch',async()=>({ok:true,json:async()=>payload}));
+ const {geometry,structures}=await core.loadPublicReferenceAlignment();
+ assert.equal(geometry.features.length,453);
+ assert.deepEqual([...structures],[[allowed.id,{kind:'tunnel',version:3}]]);
 });
 
 test('V1 seals collection, rows and nested values independently of source arrays',()=>{

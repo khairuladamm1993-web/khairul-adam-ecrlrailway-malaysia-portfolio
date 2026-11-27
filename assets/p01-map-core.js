@@ -117,11 +117,21 @@
   if(!response.ok)throw Error('ECRL_PUBLIC_ALIGNMENT_HTTP_'+response.status);
   const data=await response.json();
   const geometry=publicReferenceAlignment(data);
-  const {snapshotFrom,snapshotThrough}=data.metadata;
+  const {snapshotFrom,snapshotThrough,structureTags}=data.metadata;
   const date=/^\d{4}-\d{2}-\d{2}$/;
   const snapshot=[snapshotFrom,snapshotThrough].every(value=>typeof value==='string'&&date.test(value))&&snapshotFrom<=snapshotThrough
    ?{from:snapshotFrom,through:snapshotThrough}:null;
-  return {geometry,snapshot};
+  // Enrich only admitted feature IDs. Unknown or malformed tags leave the line in the general reference tier.
+  const structures=new Map();
+  for(const {id} of geometry.features){
+   const entry=structureTags?.[id];
+   if(!Array.isArray(entry)||entry.length!==2)continue;
+   const [kind,version]=entry;
+   if(['tunnel','bridge','viaduct'].includes(kind)&&Number.isSafeInteger(version)&&version>0){
+    structures.set(id,{kind,version});
+   }
+  }
+  return {geometry,snapshot,structures};
  }
  function installStationType2(map,id){
   if(map.hasImage(id))return;

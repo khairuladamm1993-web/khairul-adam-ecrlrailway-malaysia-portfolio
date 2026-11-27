@@ -75,6 +75,14 @@ const identityStatusLabels={
 };
 const ecrlReferenceLine='mrs10-v7-ecrl-reference-alignment';
 const ecrlReferenceGreen='#168b45';
+const ecrlStructureZoom=11;
+const ecrlStructureColors={light:{tunnel:'#222c37',bridge:'#a84a16'},dark:{tunnel:'#ccd2df',bridge:'#ff9b5a'}};
+const ecrlStructureLabels={
+ ms:['Terowong · tag OSM','Jambatan / viaduk · tag OSM','Zum dekat','Viaduk · tag OSM'],
+ en:['Tunnel · OSM tag','Bridge / viaduct · OSM tag','Close zoom','Viaduct · OSM tag'],
+ zh:['隧道 · OSM 标签','桥梁／高架桥 · OSM 标签','放大显示','高架桥 · OSM 标签'],
+ th:['อุโมงค์ · แท็ก OSM','สะพาน / ทางยกระดับ · แท็ก OSM','แสดงเมื่อซูมเข้า','ทางยกระดับ · แท็ก OSM']
+};
 const alignmentLabels={
  ms:['ECRL · rujukan OSM (pembinaan, Nov 2026)','Jajaran disahkan kejuruteraan · belum tersedia'],
  en:['ECRL · OSM reference (construction, Nov 2026)','Engineering verified alignment · unavailable'],
@@ -103,7 +111,7 @@ const ecrlType2='mrs10-ecrl-station-type-2';
 let linkedAssetId=window.MRS10P01MapCore.readAssetId(location.search);
 const catalogueLabels={ms:'Buka dalam katalog aset',en:'Open in asset catalogue',zh:'在资产目录中打开',th:'เปิดในรายการทรัพย์สิน'};
 const state={locale:'ms',category:'ECRL',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
- ecrlPublic:[],ecrlStations:[],ecrlLoops:[],assetIdentityStatus:'loading',referenceAlignment:null,alignmentSnapshot:null,referenceAlignmentStatus:'loading',activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
+ ecrlPublic:[],ecrlStations:[],ecrlLoops:[],assetIdentityStatus:'loading',referenceAlignment:null,alignmentSnapshot:null,alignmentStructures:new Map(),referenceAlignmentStatus:'loading',activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
 function tr(k){return i18n[state.locale][k]}
 function say(message){$('qa-note').textContent=message}
 function el(tag,cls,text){const x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=String(text);return x}
@@ -168,6 +176,14 @@ function buildLegend(){
   if(state.referenceAlignment?.features.length){
    const entry=el('span','legend-item'),swatch=el('span','swatch p01-reference-swatch');
    entry.append(swatch,el('span',null,reference));host.append(entry);
+  }
+  if(state.alignmentStructures.size){
+   const [tunnel,bridge,closeZoom]=ecrlStructureLabels[state.locale];
+   for(const [kind,label] of [['tunnel',tunnel],['bridge',bridge]]){
+    const entry=el('span','legend-item');
+    entry.append(el('span','swatch p01-reference-swatch p01-structure-'+kind),el('span',null,label+' · '+closeZoom));
+    host.append(entry);
+   }
   }
   if(state.ecrlLoops.length){
    const entry=el('span','legend-item');
@@ -407,22 +423,27 @@ function installGeographicContext(map){
   // Same source taxonomy as R211. Basemap rail is context without an ECRL designation.
   map.addLayer({id:railContext,type:'line',source:transportation.source,'source-layer':'transportation',minzoom:8,
    filter:['all',['==',['get','class'],'rail'],['in',['get','subclass'],['literal',['rail','narrow_gauge']]]],
-   paint:{'line-color':state.theme==='dark'?'#87c6d6':'#527d8b','line-opacity':0.72,
-    'line-width':['interpolate',['linear'],['zoom'],8,0.8,14,1.9,18,3]}},
+   paint:{'line-color':state.theme==='dark'?'#87c6d6':'#527d8b','line-opacity':0.62,
+    'line-width':['interpolate',['linear'],['zoom'],8,0.7,14,1.45,18,2.4]}},
    style.layers.find(layer=>layer.type==='symbol')?.id);
  }
  if(state.referenceAlignment?.features.length&&!map.getLayer(ecrlReferenceLine)){
   // Rendered tile IDs may differ from the canonical GeoJSON feature IDs.
   if(!map.getSource(ecrlReferenceLine))map.addSource(ecrlReferenceLine,{type:'geojson',data:{
    ...state.referenceAlignment,features:state.referenceAlignment.features.map(feature=>({
-    ...feature,properties:{...feature.properties,segmentId:feature.id}
+    ...feature,properties:{...feature.properties,segmentId:feature.id,
+     structure:state.alignmentStructures.get(feature.id)?.kind??'unclassified'}
    }))
   },
    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>'});
+  const green=state.theme==='dark'?'#76d697':ecrlReferenceGreen;
+  const {tunnel,bridge}=ecrlStructureColors[state.theme];
   map.addLayer({id:ecrlReferenceLine,type:'line',source:ecrlReferenceLine,
    layout:{'line-cap':'butt','line-join':'round'},
-   paint:{'line-color':state.theme==='dark'?'#76d697':ecrlReferenceGreen,'line-opacity':0.85,
-    'line-dasharray':[2.4,1.5],'line-width':['interpolate',['linear'],['zoom'],5,1.5,10,2.5,16,4]}},
+   paint:{'line-color':['step',['zoom'],green,ecrlStructureZoom,
+    ['match',['get','structure'],'tunnel',tunnel,['bridge','viaduct'],bridge,green]],
+    'line-opacity':0.92,'line-dasharray':[2.4,1.5],
+    'line-width':['interpolate',['linear'],['zoom'],5,1.5,10,2.6,13,3.8,17,5.2]}},
    [ecrlMarker,style.layers.find(layer=>layer.type==='symbol')?.id].find(id=>id&&map.getLayer(id)));
  }
  if(state.ecrlLoops.length&&!map.getLayer(ecrlLoopMarker)){
@@ -542,6 +563,11 @@ function showAlignmentEvidence(event){
   el('p',null,idLabel+' · '+segment.id));
  const snapshot=state.alignmentSnapshot;
  if(snapshot)host.append(el('p',null,snapshotLabel+' · '+snapshot.from+' – '+snapshot.through));
+ const structure=state.alignmentStructures.get(segment.id);
+ if(structure){
+  const label=ecrlStructureLabels[state.locale][{tunnel:0,bridge:1,viaduct:3}[structure.kind]];
+  host.append(el('p',null,label+' · v'+structure.version));
+ }
  const source=el('a',null,'OpenStreetMap way '+segment.properties.osmWayId+' · ODbL 1.0');
  source.href='https://www.openstreetmap.org/way/'+segment.properties.osmWayId;
  source.target='_blank';source.rel='noopener noreferrer';
@@ -687,8 +713,8 @@ async function loadReferenceAlignment(){
  state.referenceAlignmentStatus='loading';
  showStatus();
  try{
-  const {geometry,snapshot}=await window.MRS10P01MapCore.loadPublicReferenceAlignment(retry);
-  state.referenceAlignment=geometry;state.alignmentSnapshot=snapshot;
+  const {geometry,snapshot,structures}=await window.MRS10P01MapCore.loadPublicReferenceAlignment(retry);
+  state.referenceAlignment=geometry;state.alignmentSnapshot=snapshot;state.alignmentStructures=structures;
   state.referenceAlignmentStatus='ready';
   buildLegend();updateMapLayer();
  }catch{

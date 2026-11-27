@@ -46,5 +46,9 @@
 
 .legend .p01-reference-swatch{width:20px;height:0;border-radius:0;border-top:3px dashed #168b45}
 [data-theme=dark] .legend .p01-reference-swatch{border-top-color:#76d697}
+.legend .p01-structure-tunnel{border-top-color:#222c37}
+.legend .p01-structure-bridge{border-top-color:#a84a16}
+[data-theme=dark] .legend .p01-structure-tunnel{border-top-color:#ccd2df}
+[data-theme=dark] .legend .p01-structure-bridge{border-top-color:#ff9b5a}
 
 .legend .p01-loop-swatch{width:10px;height:10px;border-radius:50%;background:#b57925}
