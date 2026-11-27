@@ -116,6 +116,31 @@ async function checkSharedIdentity(page){
  await page.unroute(base+projection);
 }
 
+async function checkAlignmentRetry(page){
+ const url=base+'/data/ecrl-reference-alignment.geojson';
+ let attempts=0;
+ await page.route(url,route=>{
+  attempts++;
+  if(attempts===1)return route.fulfill({status:503,body:'Fixture unavailable'});
+  if(attempts===2)return route.fulfill({json:{type:'FeatureCollection',features:[]}});
+  return route.continue();
+ });
+ assert.equal((await page.goto(base+'/unified-map-v7.html')).status(),200);
+ const retry=page.getByRole('button',{name:'Cuba lagi'});
+ for(let expected=1;expected<=2;expected++){
+  await retry.waitFor();
+  assert.equal(attempts,expected);
+  assert.match(await page.locator('#map-status-message').innerText(),/Jajaran rujukan ECRL gagal dimuatkan/);
+  assert.equal(await page.evaluate(()=>window.MRS10V7Diagnostics.snapshot().ecrlReferenceFeatures),0);
+  await retry.click();
+ }
+ await page.waitForFunction(()=>window.MRS10V7Diagnostics.snapshot().ecrlReferenceFeatures===453&&
+  !!window.ecrlTestMap.getLayer('mrs10-v7-ecrl-reference-alignment'));
+ assert.equal(attempts,3);
+ assert.equal(await retry.isHidden(),true);
+ await page.unroute(url);
+}
+
 async function checkMapComposition(page,engine,device){
  const tap=locator=>device==='desktop'?locator.click():locator.tap();
  await page.route(base+'/context-fixture-tiles/**',route=>route.fulfill({status:204}));
@@ -278,6 +303,29 @@ async function checkMapComposition(page,engine,device){
  assert.equal(await page.evaluate(id=>window.ecrlTestMap.getLayoutProperty(id,'visibility'),alignmentLayer),'none');
  await page.locator('#filters').getByRole('button',{name:'ECRL',exact:true}).click();
  assert.equal(await page.evaluate(id=>window.ecrlTestMap.getLayoutProperty(id,'visibility'),alignmentLayer),'visible');
+ const loopLayer='mrs10-v7-ecrl-loop-reference';
+ const loops=await page.evaluate(async id=>{
+  const map=window.ecrlTestMap,{features}=await map.getSource(id).getData();
+  return {codes:features.map(f=>f.properties.code),minzoom:map.getLayer(id).minzoom,
+   coordinate:features[0].geometry.coordinates};
+ },loopLayer);
+ assert.deepEqual(loops.codes,['PL02','PL03','PL04','PL05']);
+ assert.equal(loops.minzoom,9);
+ await tap(fullscreen);
+ const moveTo=zoom=>page.evaluate(({center,zoom})=>window.ecrlTestMap.jumpTo({center,zoom})&&undefined,{center:loops.coordinate,zoom});
+ await moveTo(8);
+ await page.waitForFunction(()=>window.ecrlTestMap.areTilesLoaded());
+ assert.equal(await page.evaluate(id=>window.ecrlTestMap.queryRenderedFeatures({layers:[id]}).length,loopLayer),0);
+ await moveTo(10);
+ const atLoop=await page.evaluate(c=>{const {x,y}=window.ecrlTestMap.project(c);return [x,y]},loops.coordinate);
+ await page.waitForFunction(({xy,id})=>window.ecrlTestMap.queryRenderedFeatures(xy,{layers:[id]})
+  .some(row=>row.properties.code==='PL02'),{xy:atLoop,id:loopLayer});
+ const loopPosition={x:atLoop[0],y:atLoop[1]};
+ if(device==='desktop')await canvas.click({position:loopPosition});else await canvas.tap({position:loopPosition});
+ const selectedLoop=panel.locator('[aria-current=true]');
+ assert.equal(await selectedLoop.getAttribute('data-asset-id'),'ecrl-loop-historical-02');
+ assert.match(await selectedLoop.innerText(),/Passing loop · rujukan kawasan/);
+ await page.screenshot({path:out+'/'+engine+'-'+device+'-pl02-locality.png'});
 }
 
 async function checkRailwayHierarchy(page,engine,device){
@@ -509,6 +557,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
      await checkMapComposition(page,engine,device);
      if(device==='desktop'){
       await checkSharedIdentity(page);
+      await checkAlignmentRetry(page);
       assert.equal((await page.goto(base+'/unified-map-v8.html')).status(),200);
       const lanchang=await page.evaluate(()=>{
        const {dataContract}=window.MRS10P01MapCore.createEcrlContext();
@@ -519,8 +568,10 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
       assert.deepEqual(lanchang,{contractSection:'C1',evidenceSection:'C1',historicalSection:'B'});
      }
      assert.deepEqual(errors,[]);
-     assert.ok(localFailures.every(path=>path==='/data/ecrl-public-identity-v1.json'));
-     rows.push({engine,device,status:'PASS',mapComposition:true,physicalLayersUnchanged:true,touch:device!=='desktop'});
+     assert.ok(localFailures.every(path=>path==='/data/ecrl-public-identity-v1.json'||
+      device==='desktop'&&path==='/data/ecrl-reference-alignment.geojson'));
+     rows.push({engine,device,status:'PASS',mapComposition:true,physicalLayersUnchanged:true,
+      plReferenceMarkers:4,alignmentRetry:device==='desktop',touch:device!=='desktop'});
      continue;
     }
     if(hierarchyOnly){

@@ -137,6 +137,26 @@ test('Section D projects separate planned port interfaces without track position
  }
 });
 
+test('Public loop markers reuse current public-safe locality coordinates only',()=>{
+ const core=require('../assets/p01-map-core.js');
+ const records=core.publicAssetIdentity(data,adapter);
+ const scope={window:{}};
+ vm.runInNewContext(fs.readFileSync('assets/corridor-reference.js','utf8'),scope);
+ const localities=scope.window.RailwayCorridorReference;
+ const loops=core.publicPassingLoopReferences(records,localities);
+ assert.deepEqual(loops.map(f=>f.properties.code),['PL02','PL03','PL04','PL05']);
+ for(const f of loops){
+  const source=localities.find(r=>r.type==='PL'&&r.name===f.properties.name);
+  assert.deepEqual(f.geometry.coordinates,[source.lon,source.lat]);
+  assert.deepEqual(Object.keys(f.properties),['assetId','code','name']);
+ }
+ const current=localities.find(r=>r.name==='Bukit Payung');
+ assert.equal(core.publicPassingLoopReferences(records,[{...current,phase:'historical'}]).length,0);
+ assert.equal(core.publicPassingLoopReferences(records,[{...current,locationConfidence:'Personal Field-Validated Location'}]).length,0);
+ assert.equal(core.publicPassingLoopReferences(records,[{...current,coordinateSource:'No validated coordinate'}]).length,0);
+ assert.equal(core.publicPassingLoopReferences(records,[current,current]).length,0);
+});
+
 test('Public reference alignment accepts uncalibrated ODbL data and rejects other tiers',()=>{
  const core=require('../assets/p01-map-core.js');
  const content=fs.readFileSync('data/ecrl-reference-alignment.geojson','utf8');
@@ -152,6 +172,7 @@ test('Public reference alignment accepts uncalibrated ODbL data and rejects othe
    {classification:'HISTORICAL_PLANNING'},{dataset:'R1.5b_HOLD'}]){
   assert.throws(()=>core.publicReferenceAlignment({...payload,metadata:{...payload.metadata,...change}}),/ALIGNMENT_CONTRACT/);
  }
+ assert.throws(()=>core.publicReferenceAlignment({...payload,features:[]}),/ALIGNMENT_CONTRACT/);
  const feature=payload.features[0];
  assert.throws(()=>core.publicReferenceAlignment({...payload,features:[feature,{...feature}]}),/ALIGNMENT_FEATURE/);
  assert.throws(()=>core.publicReferenceAlignment({...payload,features:[

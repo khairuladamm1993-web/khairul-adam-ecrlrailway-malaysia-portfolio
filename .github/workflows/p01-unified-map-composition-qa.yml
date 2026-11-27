@@ -1,7 +1,7 @@
-name: P01 ECRL Reference Map QA
+name: P01 ECRL Geographic Asset QA
 on:
   push:
-    branches: [candidate/p01-reference-map-integration-20261126]
+    branches: [candidate/p01-geographic-asset-integration-20261126]
 permissions:
   contents: read
   actions: read

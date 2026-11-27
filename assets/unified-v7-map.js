@@ -53,6 +53,14 @@ const mapLabels={
  th:['สถานี ECRL · จุดอ้างอิงพื้นที่','ทางรถไฟ OpenStreetMap · บริบทเครือข่าย','ข้อมูลอ้างอิงจากเจ้าของ: จุดเชื่อมต่อผู้โดยสารและสินค้าของ KTMB แผนระบุทางแยก Temerloh ส่วนการเดินรถ การต่อรถ และแนวรางยังไม่ยืนยัน']
 };
 const ecrlSource='mrs10-v7-ecrl-localities',ecrlMarker=ecrlSource+'-point',ecrlLabel=ecrlSource+'-label',railContext='mrs10-v7-rail-context';
+const ecrlLoopMarker='mrs10-v7-ecrl-loop-reference';
+const ecrlLoopZoom=9; // V8 DETAIL_ZOOM.PL
+const ecrlReferenceUi={
+ ms:['Passing loop · rujukan kawasan','Memuatkan jajaran rujukan ECRL…','Jajaran rujukan ECRL gagal dimuatkan.','Cuba lagi'],
+ en:['Passing loop · locality reference','Loading the ECRL reference alignment…','Could not load the ECRL reference alignment.','Retry'],
+ zh:['会让线 · 地区参考点','正在加载 ECRL 参考线路…','无法加载 ECRL 参考线路。','重试'],
+ th:['ทางหลีก · จุดอ้างอิงพื้นที่','กำลังโหลดแนวรางอ้างอิง ECRL…','โหลดแนวรางอ้างอิง ECRL ไม่สำเร็จ','ลองอีกครั้ง']
+};
 const ecrlReferenceLine='mrs10-v7-ecrl-reference-alignment';
 const ecrlReferenceGreen='#168b45';
 const alignmentLabels={
@@ -75,7 +83,7 @@ const dLabels={
 };
 const ecrlType2='mrs10-ecrl-station-type-2';
 const state={locale:'ms',category:'ECRL',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
- ecrlPublic:[],ecrlStations:[],referenceAlignment:null,activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
+ ecrlPublic:[],ecrlStations:[],ecrlLoops:[],referenceAlignment:null,referenceAlignmentStatus:'loading',activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
 function tr(k){return i18n[state.locale][k]}
 function say(message){$('qa-note').textContent=message}
 function el(tag,cls,text){const x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=String(text);return x}
@@ -93,9 +101,17 @@ function showStatus(){
  const message=!finished?tr('loading'):loaded?tr('complete'):
   ready!==total?tr('partial'):tr('visualPending');
  say(message+' · '+ready+'/'+total+' '+tr('status')+' · '+tr('notTrack'));
- $('map-error').textContent=state.networkError?tr('offline'):message;
+ const showAlignment=['ECRL','All'].includes(state.category)&&state.referenceAlignmentStatus!=='ready';
+ const [,alignmentLoading,alignmentError,retryLabel]=ecrlReferenceUi[state.locale];
+ const failed=state.referenceAlignmentStatus==='error';
+ const statusText=showAlignment?(failed?alignmentError:alignmentLoading):state.networkError?tr('offline'):message;
+ const status=$('map-status-message');
+ if(status.textContent!==statusText)status.textContent=statusText;
+ const retry=$('ecrl-alignment-retry');
+ retry.hidden=!(showAlignment&&failed);
+ if(retry.textContent!==retryLabel)retry.textContent=retryLabel;
  const ecrlVisible=state.category==='ECRL'&&state.ecrlStations.length>0&&state.map?.getLayer(ecrlMarker);
- $('map-error').hidden=!!(canvasOk&&(baselineOk||ecrlVisible));
+ $('map-error').hidden=!showAlignment&&!!(canvasOk&&(baselineOk||ecrlVisible));
 }
 function findGeo(routeId,id){return state.points.get(routeId+':'+id)||null}
 function buildFilters(){
@@ -126,6 +142,11 @@ function buildLegend(){
   if(state.referenceAlignment?.features.length){
    const entry=el('span','legend-item'),swatch=el('span','swatch p01-reference-swatch');
    entry.append(swatch,el('span',null,reference));host.append(entry);
+  }
+  if(state.ecrlLoops.length){
+   const entry=el('span','legend-item');
+   entry.append(el('span','swatch p01-loop-swatch'),el('span',null,ecrlReferenceUi[state.locale][0]));
+   host.append(entry);
   }
   host.append(el('span','legend-item',engineering));
  }
@@ -219,17 +240,17 @@ function renderReferenceContext(){
   item.dataset.assetId=row.assetId;
   item.dataset.type=row.type;
   const title=[row.code,row.name].filter(Boolean).join(' · ');
-  const hasPoint=state.ecrlStations.some(point=>point.id===row.assetId);
+  const hasPoint=!!ecrlPoint(row.assetId);
   if(hasPoint||section==='C2'||row.type==='PORT'){
    const button=el('button',null,title);
    button.type='button';
-   if(hasPoint)button.dataset.mapStation=row.assetId;
+   if(hasPoint)button.dataset[row.type==='STN'?'mapStation':'mapReference']=row.assetId;
    else button.className='p01-ecrl-reference-select';
-   button.onclick=()=>selectEcrlStation(row,opener,hasPoint);
+   button.onclick=()=>selectEcrlAsset(row,opener,hasPoint);
    item.append(button);
   }else item.append(el('strong',null,title));
   item.append(el('small',null,row.type==='PORT'?dLabels[state.locale][0]:
-   section==='C2'?c2Labels[state.locale][row.type==='YARD'?1:0]:labels[row.type]));
+   section==='C2'?c2Labels[state.locale][row.type==='YARD'?1:0]:row.type==='PL'&&hasPoint?ecrlReferenceUi[state.locale][0]:labels[row.type]));
   if(row.assetId===assetId){
    item.setAttribute('aria-current','true');
    if(assetId==='ecrl-stn-14')item.append(temerlohContext());
@@ -263,8 +284,11 @@ function openReferenceContext(reference,opener){
  renderReferenceContext();
  $('ecrl-context-title').focus();
 }
-function selectEcrlStation(asset,opener,zoom){
- const point=state.ecrlStations.find(row=>row.id===asset.assetId);
+function ecrlPoint(assetId){
+ return state.ecrlStations.find(row=>row.id===assetId)??state.ecrlLoops.find(row=>row.id===assetId);
+}
+function selectEcrlAsset(asset,opener,zoom){
+ const point=ecrlPoint(asset.assetId);
  state.railFocus=false;
  state.popup?.remove();
  if(point&&state.mapReady){
@@ -304,7 +328,7 @@ function updateSearch(){
   button.setAttribute('aria-controls','ecrl-context');
   button.onclick=()=>{
    host.hidden=true;
-   selectEcrlStation(asset,$('search'),true);
+   selectEcrlAsset(asset,$('search'),true);
   };
   host.append(button);
  }
@@ -364,6 +388,14 @@ function installGeographicContext(map){
    paint:{'line-color':state.theme==='dark'?'#76d697':ecrlReferenceGreen,'line-opacity':0.85,
     'line-dasharray':[2.4,1.5],'line-width':['interpolate',['linear'],['zoom'],5,1.5,10,2.5,16,4]}},
    [ecrlMarker,style.layers.find(layer=>layer.type==='symbol')?.id].find(id=>id&&map.getLayer(id)));
+ }
+ if(state.ecrlLoops.length&&!map.getLayer(ecrlLoopMarker)){
+  if(!map.getSource(ecrlLoopMarker))map.addSource(ecrlLoopMarker,{type:'geojson',
+   data:{type:'FeatureCollection',features:state.ecrlLoops}});
+  map.addLayer({id:ecrlLoopMarker,type:'circle',source:ecrlLoopMarker,minzoom:ecrlLoopZoom,
+   paint:{'circle-radius':['interpolate',['linear'],['zoom'],ecrlLoopZoom,5,14,7],
+    'circle-color':'#b57925','circle-stroke-color':'#fff','circle-stroke-width':1.5}},
+   map.getLayer(ecrlMarker)?ecrlMarker:undefined);
  }
  if(!state.ecrlStations.length)return;
  if(!map.getSource(ecrlSource))map.addSource(ecrlSource,{type:'geojson',data:{type:'FeatureCollection',features:state.ecrlStations}});
@@ -446,7 +478,7 @@ function applyVisibility(){
   for(const id of layers)map.moveLayer(id);
  }
  const ecrlVisible=['ECRL','All'].includes(state.category);
- for(const id of [ecrlMarker,ecrlLabel,railContext,ecrlReferenceLine]){
+ for(const id of [ecrlMarker,ecrlLabel,ecrlLoopMarker,railContext,ecrlReferenceLine]){
   if(!map.getLayer(id))continue;
   const visible=ecrlVisible||(id===railContext&&state.category==='KTM');
   if(map.getLayoutProperty(id,'visibility')!==(visible?'visible':'none'))map.setLayoutProperty(id,'visibility',visible?'visible':'none');
@@ -516,17 +548,20 @@ function startMap(){
      state.mapReady=true;
      const missing=state.manifest.some(route=>
       !state.map.getSource(srcId(route.id))||!state.map.getLayer(layerId(route.id)));
-     if(state.points.size&&missing){updateMapLayer();fitOnce();}
+     const missingEcrl=(state.ecrlStations.length&&!state.map.getLayer(ecrlMarker))||
+      (state.ecrlLoops.length&&!state.map.getLayer(ecrlLoopMarker))||
+      (state.referenceAlignment?.features.length&&!state.map.getLayer(ecrlReferenceLine));
+     if((state.points.size&&missing)||missingEcrl){updateMapLayer();fitOnce();}
     }
     showStatus();
    });
    state.map.on('error',()=>{if(!state.mapReady){state.networkError=true;showStatus()}});
   state.map.on('click',e=>{
    if(!state.mapReady)return;
-   const layers=[ecrlLabel,ecrlMarker,...state.manifest.map(r=>layerId(r.id))].filter(id=>state.map.getLayer(id));
+   const layers=[ecrlLabel,ecrlMarker,ecrlLoopMarker,...state.manifest.map(r=>layerId(r.id))].filter(id=>state.map.getLayer(id));
    if(!layers.length)return;
    const hits=state.map.queryRenderedFeatures([[e.point.x-11,e.point.y-11],[e.point.x+11,e.point.y+11]],{layers});
-   const references=hits.filter(hit=>[ecrlMarker,ecrlLabel].includes(hit.layer.id));
+   const references=hits.filter(hit=>[ecrlMarker,ecrlLabel,ecrlLoopMarker].includes(hit.layer.id));
    const byDistance=hit=>{
     const {x,y}=state.map.project(hit.geometry.coordinates);
     return Math.hypot(x-e.point.x,y-e.point.y);
@@ -534,7 +569,7 @@ function startMap(){
    const reference=references.sort((a,b)=>byDistance(a)-byDistance(b))[0];
    if(reference){
     const asset=state.ecrlPublic.find(row=>row.assetId===reference.properties.assetId);
-    if(asset)selectEcrlStation(asset,$('ecrl-context-open'),false);
+    if(asset)selectEcrlAsset(asset,$('ecrl-context-open'),false);
     return;
    }
    const hit=hits[0];if(!hit)return;
@@ -572,6 +607,19 @@ async function loadGIS(){
  }));
  fitOnce();
 }
+async function loadReferenceAlignment(){
+ const retry=state.referenceAlignmentStatus==='error';
+ state.referenceAlignmentStatus='loading';
+ showStatus();
+ try{
+  state.referenceAlignment=await window.MRS10P01MapCore.loadPublicReferenceAlignment(retry);
+  state.referenceAlignmentStatus='ready';
+  buildLegend();updateMapLayer();
+ }catch{
+  state.referenceAlignmentStatus='error';
+ }
+ showStatus();
+}
 function init(){
  try{state.manifest=[...core.loadManifest(kl,ampang),...integration.routes(),...ktm.routes()]}catch(e){$('map-error').textContent='Registry: '+e.message;return}
  $('search').addEventListener('input',updateSearch);
@@ -600,15 +648,13 @@ function init(){
   if(state.map){state.mapReady=false;state.map.setStyle(styleURL())}
   showStatus();
  });
- bindFullscreen();applyLanguage();startMap();void loadGIS();
- window.MRS10P01MapCore?.loadPublicReferenceAlignment().then(alignment=>{
-  state.referenceAlignment=alignment;
-  buildLegend();updateMapLayer();
- }).catch(()=>{});
+ $('ecrl-alignment-retry').addEventListener('click',loadReferenceAlignment);
+ bindFullscreen();applyLanguage();startMap();void loadGIS();void loadReferenceAlignment();
  window.MRS10P01MapCore?.loadPublicAssetIdentity().then(records=>{
   state.ecrlPublic=records;
   state.ecrlStations=window.MRS10P01MapCore.publicStationReferences(records,window.RailwayCorridorReference??[]);
-  renderReferenceContext();updateSearch();updateMapLayer();fitOnce();showStatus();
+  state.ecrlLoops=window.MRS10P01MapCore.publicPassingLoopReferences(records,window.RailwayCorridorReference??[]);
+  buildLegend();renderReferenceContext();updateSearch();updateMapLayer();fitOnce();showStatus();
  }).catch(()=>{});
 }
 function diagnosticSnapshot(){
@@ -634,6 +680,7 @@ function diagnosticSnapshot(){
  return Object.freeze({mapReady:state.mapReady,styleLoaded,tilesLoaded,webglReady,
   rect,perRoute:rows,renderedFeatureCount:Object.values(rows).reduce((n,r)=>n+r.rendered,0),
   layerCount:Object.values(rows).filter(r=>r.present).length,sourceMatched:state.points.size,
+  ecrlReferenceLoopMarkers:state.ecrlLoops.length, ecrlReferenceAlignmentStatus:state.referenceAlignmentStatus,
   ecrlReferenceFeatures:state.referenceAlignment?.features.length??0,
   mapInstances:state.map?1:0,stage:state.pending?'LOADING':'DONE',category:state.category});
 }

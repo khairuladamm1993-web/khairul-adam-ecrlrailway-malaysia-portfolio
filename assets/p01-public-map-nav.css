@@ -43,3 +43,5 @@
 
 .legend .p01-reference-swatch{width:20px;height:0;border-radius:0;border-top:3px dashed #168b45}
 [data-theme=dark] .legend .p01-reference-swatch{border-top-color:#76d697}
+
+.legend .p01-loop-swatch{width:10px;height:10px;border-radius:50%;background:#b57925}
