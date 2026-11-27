@@ -41,7 +41,7 @@ test('V7 one MapLibre with dynamic 16 separate source/layer and category filters
  assert(js.includes("const srcId=id=>'mrs10-v7-source-'+id"));
  assert(js.includes("const layerId=id=>'mrs10-v7-'+id"));
  assert(js.includes('...ktm.routes()'));
- assert(js.includes("['All','MRT','LRT','Monorail','ERL','KTM','ETS','Intercity']"));
+ assert(js.includes("['ECRL','All','MRT','LRT','Monorail','ERL','KTM','ETS','Intercity']"));
  assert(js.includes('ktm.fetchRoute(route)'));
  assert(html.includes('Shuttle Timur dikecualikan'));
  assert(html.includes('unified-v6/adapter.js'));

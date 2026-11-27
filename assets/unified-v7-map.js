@@ -81,6 +81,12 @@ const alignmentLabels={
  zh:['ECRL · OSM 参考（施工，2026年11月）','工程验证线路 · 暂无'],
  th:['ECRL · อ้างอิง OSM (ก่อสร้าง พ.ย. 2026)','แนวรางที่ผ่านการรับรองทางวิศวกรรม · ยังไม่มี']
 };
+const alignmentEvidenceLabels={
+ ms:['Segmen rujukan ECRL','ID segmen','Tangkapan data OSM'],
+ en:['ECRL reference segment','Segment ID','OSM snapshot'],
+ zh:['ECRL 参考区段','区段 ID','OSM 数据快照'],
+ th:['ช่วงอ้างอิง ECRL','รหัสช่วง','ข้อมูล OSM ณ วันที่']
+};
 const c2Labels={
  ms:['Stesen dirancang','Terminal kargo cadangan','Rujukan skema C2. Lokasi semasa dan jajaran belum disahkan.'],
  en:['Planned station','Proposed freight yard','C2 scheme reference. Current locations and alignment are unverified.'],
@@ -97,7 +103,7 @@ const ecrlType2='mrs10-ecrl-station-type-2';
 let linkedAssetId=window.MRS10P01MapCore.readAssetId(location.search);
 const catalogueLabels={ms:'Buka dalam katalog aset',en:'Open in asset catalogue',zh:'在资产目录中打开',th:'เปิดในรายการทรัพย์สิน'};
 const state={locale:'ms',category:'ECRL',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
- ecrlPublic:[],ecrlStations:[],ecrlLoops:[],assetIdentityStatus:'loading',referenceAlignment:null,referenceAlignmentStatus:'loading',activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
+ ecrlPublic:[],ecrlStations:[],ecrlLoops:[],assetIdentityStatus:'loading',referenceAlignment:null,alignmentSnapshot:null,referenceAlignmentStatus:'loading',activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
 function tr(k){return i18n[state.locale][k]}
 function say(message){$('qa-note').textContent=message}
 function el(tag,cls,text){const x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=String(text);return x}
@@ -406,7 +412,12 @@ function installGeographicContext(map){
    style.layers.find(layer=>layer.type==='symbol')?.id);
  }
  if(state.referenceAlignment?.features.length&&!map.getLayer(ecrlReferenceLine)){
-  if(!map.getSource(ecrlReferenceLine))map.addSource(ecrlReferenceLine,{type:'geojson',data:state.referenceAlignment,
+  // Rendered tile IDs may differ from the canonical GeoJSON feature IDs.
+  if(!map.getSource(ecrlReferenceLine))map.addSource(ecrlReferenceLine,{type:'geojson',data:{
+   ...state.referenceAlignment,features:state.referenceAlignment.features.map(feature=>({
+    ...feature,properties:{...feature.properties,segmentId:feature.id}
+   }))
+  },
    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>'});
   map.addLayer({id:ecrlReferenceLine,type:'line',source:ecrlReferenceLine,
    layout:{'line-cap':'butt','line-join':'round'},
@@ -513,6 +524,45 @@ function applyVisibility(){
  }
  applyBasemapLabelFocus(map,styleLayers,state.category==='ECRL'||!!focusedId&&railLayers.has(focusedId));
 }
+function showAlignmentEvidence(event){
+ const map=state.map;
+ if(!state.referenceAlignment||!['ECRL','All'].includes(state.category)||!map.getLayer(ecrlReferenceLine))return;
+ const {x,y}=event.point;
+ const hits=map.queryRenderedFeatures([[x-5,y-5],[x+5,y+5]],{layers:[ecrlReferenceLine]});
+ const ids=new Set(hits.map(hit=>hit.properties.segmentId));
+ if(ids.size!==1)return;
+ const [id]=ids;
+ const segment=state.referenceAlignment.features.find(feature=>feature.id===id);
+ if(!segment)return;
+ const [title,idLabel,snapshotLabel]=alignmentEvidenceLabels[state.locale];
+ const [classification,confidence]=alignmentLabels[state.locale];
+ const host=el('div');
+ host.dataset.ecrlReferenceSegment=segment.id;
+ host.append(el('strong',null,title),el('p',null,classification),el('p',null,confidence),
+  el('p',null,idLabel+' · '+segment.id));
+ const snapshot=state.alignmentSnapshot;
+ if(snapshot)host.append(el('p',null,snapshotLabel+' · '+snapshot.from+' – '+snapshot.through));
+ const source=el('a',null,'OpenStreetMap way '+segment.properties.osmWayId+' · ODbL 1.0');
+ source.href='https://www.openstreetmap.org/way/'+segment.properties.osmWayId;
+ source.target='_blank';source.rel='noopener noreferrer';
+ host.append(source);
+ closeReferenceContext();
+ state.popup?.remove();
+ const {clientWidth,clientHeight}=map.getCanvas();
+ const maxWidth=Math.min(280,Math.floor(clientWidth*0.74));
+ const vertical=y>=(clientHeight-2)/2?'bottom':'top';
+ const horizontal=x<maxWidth/2?'-left':x>clientWidth-maxWidth/2?'-right':'';
+ const popup=new maplibregl.Popup({
+  anchor:vertical+horizontal,className:'p01-v7-alignment-popup',maxWidth:maxWidth+'px',focusAfterOpen:false
+ }).setLngLat(event.lngLat).setDOMContent(host).addTo(map);
+ state.popup=popup;
+ requestAnimationFrame(()=>{
+  if(state.popup!==popup)return;
+  const {top,bottom}=popup.getElement().getBoundingClientRect();
+  if(top<8)window.scrollBy(0,Math.floor(top-8));
+  else if(bottom>window.innerHeight-8)window.scrollBy(0,Math.ceil(bottom-window.innerHeight+8));
+ });
+}
 function showPopup(point){
  if(!state.map)return;
  if(state.popup)state.popup.remove();
@@ -584,8 +634,7 @@ function startMap(){
   state.map.on('click',e=>{
    if(!state.mapReady)return;
    const layers=[ecrlLabel,ecrlMarker,ecrlLoopMarker,...state.manifest.map(r=>layerId(r.id))].filter(id=>state.map.getLayer(id));
-   if(!layers.length)return;
-   const hits=state.map.queryRenderedFeatures([[e.point.x-11,e.point.y-11],[e.point.x+11,e.point.y+11]],{layers});
+   const hits=layers.length?state.map.queryRenderedFeatures([[e.point.x-11,e.point.y-11],[e.point.x+11,e.point.y+11]],{layers}):[];
    const references=hits.filter(hit=>[ecrlMarker,ecrlLabel,ecrlLoopMarker].includes(hit.layer.id));
    const byDistance=hit=>{
     const {x,y}=state.map.project(hit.geometry.coordinates);
@@ -597,8 +646,9 @@ function startMap(){
     if(asset)selectEcrlAsset(asset,$('ecrl-context-open'),false);
     return;
    }
-   const hit=hits[0];if(!hit)return;
-   const point=findGeo(hit.properties.routeId,hit.properties.id);if(!point)return;
+   const hit=hits[0];
+   const point=hit&&findGeo(hit.properties.routeId,hit.properties.id);
+   if(!point){showAlignmentEvidence(e);return;}
    closeReferenceContext();
    state.selected=point.routeId;state.railFocus=true;buildRoutes();buildLineup();applyVisibility();showPopup(point);
   });
@@ -637,7 +687,8 @@ async function loadReferenceAlignment(){
  state.referenceAlignmentStatus='loading';
  showStatus();
  try{
-  state.referenceAlignment=await window.MRS10P01MapCore.loadPublicReferenceAlignment(retry);
+  const {geometry,snapshot}=await window.MRS10P01MapCore.loadPublicReferenceAlignment(retry);
+  state.referenceAlignment=geometry;state.alignmentSnapshot=snapshot;
   state.referenceAlignmentStatus='ready';
   buildLegend();updateMapLayer();
  }catch{

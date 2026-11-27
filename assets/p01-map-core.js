@@ -115,7 +115,13 @@
  async function loadPublicReferenceAlignment(retry=false){
   const response=await fetch('./data/ecrl-reference-alignment.geojson',{cache:retry?'reload':'default'});
   if(!response.ok)throw Error('ECRL_PUBLIC_ALIGNMENT_HTTP_'+response.status);
-  return publicReferenceAlignment(await response.json());
+  const data=await response.json();
+  const geometry=publicReferenceAlignment(data);
+  const {snapshotFrom,snapshotThrough}=data.metadata;
+  const date=/^\d{4}-\d{2}-\d{2}$/;
+  const snapshot=[snapshotFrom,snapshotThrough].every(value=>typeof value==='string'&&date.test(value))&&snapshotFrom<=snapshotThrough
+   ?{from:snapshotFrom,through:snapshotThrough}:null;
+  return {geometry,snapshot};
  }
  function installStationType2(map,id){
   if(map.hasImage(id))return;

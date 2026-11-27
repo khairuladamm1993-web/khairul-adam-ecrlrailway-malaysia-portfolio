@@ -522,6 +522,67 @@ async function checkMapComposition(page,engine,device){
  await page.screenshot({path:out+'/'+engine+'-'+device+'-pl-hold-reference.png'});
 }
 
+async function checkAlignmentEvidence(page,engine,device){
+ const layer='mrs10-v7-ecrl-reference-alignment';
+ await page.goto(base+'/unified-map-v7.html');
+ await page.waitForFunction(id=>{
+  const map=window.ecrlTestMap;
+  return window.MRS10V7Diagnostics?.snapshot().ecrlAssetIdentityStatus==='ready'&&
+   !!map?.getLayer(id)&&map.getZoom()<9&&!map.isMoving();
+ },layer);
+ const source=await page.evaluate(async id=>{
+  const map=window.ecrlTestMap;
+  const {features}=await map.getSource(id).getData();
+  let best;
+  for(const {id,properties,geometry} of features){
+   const coords=geometry.coordinates;
+   for(let i=1;i<coords.length;i++){
+    const a=coords[i-1],b=coords[i],length=Math.hypot(b[0]-a[0],b[1]-a[1]);
+    if(!best||length>best.length)best={id,way:properties.osmWayId,length,centre:[(a[0]+b[0])/2,(a[1]+b[1])/2]};
+   }
+  }
+  map.jumpTo({center:best.centre,zoom:13});
+  return best;
+ },layer);
+ const position=await page.evaluate(centre=>{
+  const {x,y}=window.ecrlTestMap.project(centre);
+  return {x,y};
+ },source.centre);
+ await page.waitForFunction(({layer,position,id})=>{
+  const {x,y}=position;
+  const hits=window.ecrlTestMap.queryRenderedFeatures([[x-5,y-5],[x+5,y+5]],{layers:[layer]});
+  return hits.length>0&&hits.every(hit=>hit.properties.segmentId===id);
+ },{layer,position,id:source.id});
+ const canvas=page.locator('#map canvas');
+ await page.screenshot({path:out+'/'+engine+'-'+device+'-segment-before.png'});
+ if(device==='desktop')await canvas.click({position});else await canvas.tap({position});
+ const evidence=page.locator('[data-ecrl-reference-segment]');
+ await evidence.waitFor();
+ assert.equal(await evidence.getAttribute('data-ecrl-reference-segment'),source.id);
+ assert.match(await evidence.innerText(),/rujukan OSM.*pembinaan/);
+ assert.match(await evidence.innerText(),/Jajaran disahkan kejuruteraan.*belum tersedia/);
+ assert.match(await evidence.innerText(),/2026-11-05.*2026-11-07/);
+ const link=evidence.getByRole('link',{name:/OpenStreetMap way/});
+ assert.equal(await link.getAttribute('href'),'https://www.openstreetmap.org/way/'+source.way);
+ assert.equal(await link.getAttribute('rel'),'noopener noreferrer');
+ assert.equal(await page.locator('#ecrl-context').isHidden(),true);
+ await page.waitForFunction(()=>{
+  const popup=document.querySelector('[data-ecrl-reference-segment]').closest('.maplibregl-popup');
+  const box=popup.getBoundingClientRect();
+  const title=popup.querySelector('strong');
+  const heading=title.getBoundingClientRect();
+  return box.top>=0&&box.bottom<=window.innerHeight+1&&
+   title.contains(document.elementFromPoint(heading.x+heading.width/2,heading.y+heading.height/2));
+ });
+ assert.equal(await link.evaluate(anchor=>{
+  const box=anchor.getClientRects()[0];
+  return anchor.contains(document.elementFromPoint(box.x+box.width/2,box.y+box.height/2));
+ }),true);
+ await page.screenshot({path:out+'/'+engine+'-'+device+'-segment-evidence.png'});
+ await page.locator('#filters').getByRole('button',{name:'KTM',exact:true}).click();
+ assert.equal(await evidence.count(),0);
+}
+
 async function checkRailwayHierarchy(page,engine,device){
  // Deterministic overlap fixture for two existing station identities. Never published as data.
  const coordinate=[101.58,3.17];
@@ -749,6 +810,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    try{
     if(compositionOnly){
      await checkMapComposition(page,engine,device);
+     await checkAlignmentEvidence(page,engine,device);
      await checkReferenceRoundtrip(page,device);
      if(device==='desktop'){
       await checkSharedIdentity(page);
