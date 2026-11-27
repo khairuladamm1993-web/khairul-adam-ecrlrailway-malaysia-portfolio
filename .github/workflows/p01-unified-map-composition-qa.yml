@@ -1,7 +1,11 @@
 name: P01 ECRL Geographic Asset QA
 on:
   push:
-    branches: [candidate/p01-geographic-asset-integration-20261126, candidate/p01-r57-pl-alignment-20261127, candidate/p01-v7-identity-recovery-20261127]
+    branches:
+      - candidate/p01-geographic-asset-integration-20261126
+      - candidate/p01-r57-pl-alignment-20261127
+      - candidate/p01-v7-identity-recovery-20261127
+      - candidate/p01-ecrl-asset-map-handoff-20261127
 permissions:
   contents: read
   actions: read
