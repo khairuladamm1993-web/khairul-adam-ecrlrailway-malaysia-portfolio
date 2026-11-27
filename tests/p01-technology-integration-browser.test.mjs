@@ -261,6 +261,47 @@ async function checkCatalogueMapHandoff(page){
  assert.equal(await active.getAttribute('data-asset-id'),assetId);
 }
 
+async function checkReferenceRoundtrip(page,device){
+ const tap=locator=>device==='desktop'?locator.click():locator.tap();
+ const panel=page.locator('#ecrl-context');
+ const active=panel.locator('li[aria-current=true]');
+ const depot='ecrl-depot-kuantan';
+ const current=page.locator('#asset-reference-list [aria-current=true]');
+ await page.goto(base+'/unified-map-v7.html?asset=ecrl-loop-historical-02');
+ await active.waitFor();
+ await page.waitForFunction(()=>window.MRS10V7Diagnostics.snapshot().mapReady&&
+  window.MRS10V7Diagnostics.snapshot().stage==='DONE'&&
+  !!window.ecrlTestMap.getLayer('mrs10-v7-ecrl-localities-point'));
+ await tap(page.locator('#p01-v7-fullscreen'));
+ await tap(panel.locator('[data-section=B]'));
+ const depotCard=panel.locator('[data-asset-id="'+depot+'"]');
+ const camera=()=>page.evaluate(()=>[window.ecrlTestMap.getCenter().toArray(),window.ecrlTestMap.getZoom()]);
+ await page.evaluate(()=>window.ecrlTestMap.stop());
+ const before=await camera();
+ await tap(depotCard.getByRole('button'));
+ assert.equal(await active.getAttribute('data-asset-id'),depot);
+ assert.equal(await active.locator('[data-map-reference],[data-map-station]').count(),0);
+ assert.deepEqual(await camera(),before);
+ const identity=base+'/data/ecrl-public-identity-v1.json';
+ await page.route(identity,route=>route.fulfill({status:503,body:'Fixture unavailable'}),{times:1});
+ await Promise.all([
+  page.waitForURL(url=>url.pathname==='/ecrl-asset-reference.html'),
+  tap(active.getByRole('link',{name:'Buka dalam katalog aset'}))
+ ]);
+ assert.equal(new URL(page.url()).searchParams.get('asset'),depot);
+ await tap(page.getByRole('button',{name:'Cuba lagi'}));
+ await current.waitFor();
+ assert.equal(await current.evaluate(link=>link.closest('li').dataset.assetId),depot);
+ assert.equal(await page.locator('#asset-reference-list li').count(),32);
+ await tap(current);
+ await active.waitFor();
+ assert.equal(await active.getAttribute('data-asset-id'),depot);
+ assert.equal(await active.locator('[data-map-reference],[data-map-station]').count(),0);
+ await page.goto(base+'/ecrl-asset-reference.html?asset='+depot+'&asset=ecrl-port-westports');
+ await page.locator('#asset-reference-list a').first().waitFor();
+ assert.equal(await current.count(),0);
+}
+
 async function checkMapComposition(page,engine,device){
  const tap=locator=>device==='desktop'?locator.click():locator.tap();
  await page.route(base+'/context-fixture-tiles/**',route=>route.fulfill({status:204}));
@@ -676,6 +717,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    try{
     if(compositionOnly){
      await checkMapComposition(page,engine,device);
+     await checkReferenceRoundtrip(page,device);
      if(device==='desktop'){
       await checkSharedIdentity(page);
       await checkAlignmentRetry(page);

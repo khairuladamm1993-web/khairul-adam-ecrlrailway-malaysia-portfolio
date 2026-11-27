@@ -1,6 +1,7 @@
 (()=>{
  'use strict';
  const page=window.MRS10P01MapCore;
+ const selectedId=page.readAssetId(location.search);
  const list=document.getElementById('asset-reference-list');
  const status=document.getElementById('asset-status');
  const search=document.getElementById('asset-search');
@@ -17,8 +18,9 @@
    row.dataset.type=asset.type;
    row.dataset.assetId=asset.assetId;
    link.textContent=[asset.code,asset.name].filter(Boolean).join(' · ');
-   link.href='./'+page.routes.malaysia+'?'+new URLSearchParams({asset:asset.assetId});
+   link.href=page.assetHref('malaysia',asset.assetId);
    link.target='_top';
+   if(asset.assetId===selectedId)link.setAttribute('aria-current','true');
    title.append(link);
    const label=asset.type==='STN'&&asset.section==='C2'?'Stesen dirancang':labels[asset.type];
    const note=asset.type==='PORT'?'Rujukan kawasan pelabuhan; sambungan rel belum disahkan':'Lokasi fizikal belum disahkan';
@@ -41,9 +43,14 @@
   }finally{
    retryButton.disabled=false;
   }
-  if(document.activeElement===retryButton)search.focus();
+  const restoreSelection=[document.body,retryButton].includes(document.activeElement);
   retryButton.hidden=true;
   render();
+  if(restoreSelection){
+   const selectedLink=list.querySelector('[aria-current=true]');
+   if(selectedLink)selectedLink.focus();
+   else if(retry)search.focus();
+  }
  }
  search.addEventListener('input',render);
  for(const button of buttons)button.addEventListener('click',()=>{

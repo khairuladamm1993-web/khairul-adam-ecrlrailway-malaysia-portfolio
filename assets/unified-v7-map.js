@@ -94,8 +94,8 @@ const dLabels={
  th:['จุดเชื่อมต่อท่าเรือตามแผน','อ้างอิงพื้นที่ท่าเรือ แผนแยกราง ECRL {ecrl} มม. และ KTMB {ktmb} มม. สถานีปลายทาง การเชื่อมราง และการเดินรถยังไม่ยืนยัน']
 };
 const ecrlType2='mrs10-ecrl-station-type-2';
-const linkedAssetIds=new URLSearchParams(location.search).getAll('asset');
-let linkedAssetId=linkedAssetIds.length===1?linkedAssetIds[0]:null;
+let linkedAssetId=window.MRS10P01MapCore.readAssetId(location.search);
+const catalogueLabels={ms:'Buka dalam katalog aset',en:'Open in asset catalogue',zh:'在资产目录中打开',th:'เปิดในรายการทรัพย์สิน'};
 const state={locale:'ms',category:'ECRL',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
  ecrlPublic:[],ecrlStations:[],ecrlLoops:[],assetIdentityStatus:'loading',referenceAlignment:null,referenceAlignmentStatus:'loading',activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
 function tr(k){return i18n[state.locale][k]}
@@ -262,20 +262,22 @@ function renderReferenceContext(){
   const title=[row.code,row.name].filter(Boolean).join(' · ');
   const hasPoint=!!ecrlPoint(row.assetId);
   const heldLoop=window.MRS10P01MapCore.isPassingLoopPlacementHeld(row);
-  if(hasPoint||heldLoop||section==='C2'||row.type==='PORT'){
-   const button=el('button',null,title);
-   button.type='button';
-   if(hasPoint)button.dataset[row.type==='STN'?'mapStation':'mapReference']=row.assetId;
-   else button.className='p01-ecrl-reference-select';
-   button.onclick=()=>selectEcrlAsset(row,opener,hasPoint);
-   item.append(button);
-  }else item.append(el('strong',null,title));
+  const button=el('button',null,title);
+  button.type='button';
+  if(hasPoint)button.dataset[row.type==='STN'?'mapStation':'mapReference']=row.assetId;
+  else button.className='p01-ecrl-reference-select';
+  button.onclick=()=>selectEcrlAsset(row,opener,hasPoint);
+  item.append(button);
   item.append(el('small',null,row.type==='PORT'?dLabels[state.locale][0]:
    section==='C2'?c2Labels[state.locale][row.type==='YARD'?1:0]:
    heldLoop?heldLoopLabels[state.locale]:row.type==='PL'&&hasPoint?ecrlReferenceUi[state.locale][0]:labels[row.type]));
   if(row.assetId===assetId){
    item.setAttribute('aria-current','true');
    if(assetId==='ecrl-stn-14')item.append(temerlohContext());
+   const catalogueLink=el('a',null,catalogueLabels[state.locale]);
+   catalogueLink.href=window.MRS10P01MapCore.assetHref('ecrl',assetId);
+   catalogueLink.target='_top';
+   item.append(catalogueLink);
   }
   return item;
  }));

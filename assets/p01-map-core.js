@@ -10,6 +10,14 @@
   member:'unified-map-v8.html'
  });
  const sectionDGauges=Object.freeze({ecrl:1435,ktmb:1000});
+ const assetIdPattern=/^ecrl-[a-z0-9-]+$/;
+ function readAssetId(search){
+  const values=new URLSearchParams(search).getAll('asset');
+  return values.length===1&&assetIdPattern.test(values[0])?values[0]:null;
+ }
+ function assetHref(route,assetId){
+  return './'+routes[route]+'?'+new URLSearchParams({asset:assetId});
+ }
  const heldPassingLoopPlacements=new Set(['PL02','PL03','PL04','PL05']);
  function isPassingLoopPlacementHeld(asset){
   return asset.type==='PL'&&heldPassingLoopPlacements.has(asset.code);
@@ -119,7 +127,7 @@
   ctx.beginPath();ctx.moveTo(8,19);ctx.lineTo(6,22);ctx.moveTo(16,19);ctx.lineTo(18,22);ctx.stroke();
   map.addImage(id,ctx.getImageData(0,0,68,68),{pixelRatio:2});
  }
- const api=Object.freeze({routes,sectionDGauges,createEcrlContext,publicAssetIdentity,publicStationReferences,publicPassingLoopReferences,isPassingLoopPlacementHeld,installStationType2,findPublicAssets,loadPublicAssetIdentity,publicReferenceAlignment,loadPublicReferenceAlignment});
+ const api=Object.freeze({routes,sectionDGauges,readAssetId,assetHref,createEcrlContext,publicAssetIdentity,publicStationReferences,publicPassingLoopReferences,isPassingLoopPlacementHeld,installStationType2,findPublicAssets,loadPublicAssetIdentity,publicReferenceAlignment,loadPublicReferenceAlignment});
  if(typeof module==='object')module.exports=api;
  if(root)root.MRS10P01MapCore=api;
 })(typeof window==='undefined'?null:window);
