@@ -1,20 +1,16 @@
-(async()=>{
+(()=>{
  'use strict';
  const page=window.MRS10P01MapCore;
  const list=document.getElementById('asset-reference-list');
  const status=document.getElementById('asset-status');
  const search=document.getElementById('asset-search');
+ const retryButton=document.getElementById('asset-retry');
  const buttons=[...document.querySelectorAll('[data-asset-kind]')];
  const labels={STN:'Stesen',PL:'Passing loop',DEPOT:'Depot',YARD:'Terminal kargo cadangan',PORT:'Antara muka pelabuhan dirancang'};
  let kind='ALL';
  let assets;
- try{
-  assets=await page.loadPublicAssetIdentity();
- }catch{
-  status.textContent='Rujukan aset belum tersedia.';
-  return;
- }
  function render(){
+  if(!assets)return;
   const visible=page.findPublicAssets(assets,search.value,kind);
   list.replaceChildren(...visible.map(asset=>{
    const row=document.createElement('li'),title=document.createElement('strong'),link=document.createElement('a'),detail=document.createElement('small');
@@ -32,11 +28,29 @@
   }));
   status.textContent=visible.length?visible.length+' aset rujukan':'Tiada padanan aset.';
  }
+ async function load(retry=false){
+  if(retryButton.disabled)return;
+  retryButton.disabled=true;
+  status.textContent='Memuatkan rujukan aset…';
+  try{
+   assets=await page.loadPublicAssetIdentity(retry);
+  }catch{
+   status.textContent='Rujukan aset ECRL gagal dimuatkan.';
+   retryButton.hidden=false;
+   return;
+  }finally{
+   retryButton.disabled=false;
+  }
+  if(document.activeElement===retryButton)search.focus();
+  retryButton.hidden=true;
+  render();
+ }
  search.addEventListener('input',render);
  for(const button of buttons)button.addEventListener('click',()=>{
   kind=button.dataset.assetKind;
   for(const item of buttons)item.setAttribute('aria-pressed',String(item===button));
   render();
  });
- render();
+ retryButton.addEventListener('click',()=>void load(true));
+ void load();
 })();

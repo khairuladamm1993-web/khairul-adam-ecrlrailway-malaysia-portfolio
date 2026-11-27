@@ -175,6 +175,54 @@ async function checkAssetIdentityRetry(page){
  }
 }
 
+async function checkCatalogueRetry(page){
+ const identity=base+'/data/ecrl-public-identity-v1.json';
+ const status=page.locator('#asset-status');
+ const retry=page.getByRole('button',{name:'Cuba lagi'});
+ const search=page.locator('#asset-search');
+ const filter=page.locator('[data-asset-kind="PL"]');
+ const links=page.locator('#asset-reference-list a');
+ let attempts=0;
+ await page.route(identity,route=>{
+  attempts++;
+  if(attempts===1)return route.fulfill({status:503,body:'Fixture unavailable'});
+  if(attempts===2)return route.fulfill({json:{version:1,corridor:'ECRL'}});
+  return route.continue();
+ });
+ try{
+  await page.goto(base+'/ecrl-asset-reference.html');
+  await retry.waitFor({timeout:5000});
+  assert.equal(attempts,1);
+  assert.match(await status.innerText(),/gagal dimuatkan/);
+  await search.fill('PL02');
+  await filter.click();
+  assert.match(await status.innerText(),/gagal dimuatkan/);
+  await retry.click();
+  await page.waitForFunction(()=>document.querySelector('#asset-status').textContent.includes('gagal dimuatkan'));
+  assert.equal(attempts,2);
+  assert.equal(await links.count(),0);
+  await retry.click();
+  await links.first().waitFor();
+  assert.equal(attempts,3);
+  assert.equal(await retry.isHidden(),true);
+  assert.equal(await search.inputValue(),'PL02');
+  assert.equal(await filter.getAttribute('aria-pressed'),'true');
+  assert.equal(await links.count(),1);
+  const link=await links.first().getAttribute('href');
+  assert.equal(new URL(link,base+'/').searchParams.get('asset'),'ecrl-loop-historical-02');
+  await search.fill('');
+  await page.locator('[data-asset-kind="ALL"]').click();
+  assert.equal(await links.count(),32);
+  await links.getByText(/PL02 · Bukit Payung/).click();
+  const card=page.locator('#ecrl-context [aria-current=true]');
+  await card.waitFor();
+  assert.equal(await card.getAttribute('data-asset-id'),'ecrl-loop-historical-02');
+  assert.equal(await card.locator('[data-map-reference]').count(),0);
+ }finally{
+  await page.unroute(identity);
+ }
+}
+
 async function checkCatalogueMapHandoff(page){
  const mapPath='/unified-map-v7.html';
  const assetId='ecrl-loop-historical-02';
@@ -632,6 +680,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
       await checkSharedIdentity(page);
       await checkAlignmentRetry(page);
       await checkAssetIdentityRetry(page);
+      await checkCatalogueRetry(page);
       await checkCatalogueMapHandoff(page);
       assert.equal((await page.goto(base+'/unified-map-v8.html')).status(),200);
       const lanchang=await page.evaluate(()=>{
