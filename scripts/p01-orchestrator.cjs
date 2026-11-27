@@ -114,4 +114,47 @@ if (require.main === module) {
   if (checkpoint.action.status !== 'TESTED') process.exitCode = 1;
 }
 
-module.exports = { runCycle };
+function reconcileHostedReceipt(checkpoint, run, jobs, recordedKeys = []) {
+  const result = (status, reason, nextAction) => ({ status, reason, nextAction, ownerActionRequired: false });
+  const repo = 'khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio';
+  const branch = 'candidate/p01-orchestrator-v1-20261123';
+  const validId = n => Number.isSafeInteger(n) && n > 0;
+  if (checkpoint?.project !== 'P01' || !/^[a-f0-9]{40}$/.test(checkpoint.commit || '') ||
+      checkpoint.verification?.status !== 'VERIFIED' || checkpoint.action?.status !== 'TESTED' ||
+      checkpoint.handoff?.nextAction !== 'VERIFY_HOSTED_CI') {
+    return result('NOT_VERIFIED', 'INVALID_CHECKPOINT', 'REVALIDATE_CHECKPOINT');
+  }
+  if (run?.repository?.full_name !== repo || run.head_branch !== branch ||
+      run.head_sha !== checkpoint.commit || run.event !== 'push' ||
+      run.path !== '.github/workflows/p01-uat17-contract.yml' ||
+      !validId(run.id) || !validId(run.run_attempt)) {
+    return result('NOT_VERIFIED', 'RUN_IDENTITY_MISMATCH', 'VERIFY_HOSTED_CI');
+  }
+  if (run.status !== 'completed') return result('PENDING', 'RUN_INCOMPLETE', 'VERIFY_HOSTED_CI');
+  if (run.conclusion !== 'success') return result('FAILED', 'RUN_NOT_SUCCESSFUL', 'RECOVER_QA');
+  const matching = Array.isArray(jobs) ? jobs.filter(j => j?.name === 'source-contract') : [];
+  const job = matching[0];
+  if (matching.length !== 1 || !validId(job.id) || job.run_id !== run.id ||
+      job.run_attempt !== run.run_attempt || job.head_sha !== checkpoint.commit ||
+      job.status !== 'completed' || job.conclusion !== 'success') {
+    return result('NOT_VERIFIED', 'JOB_IDENTITY_OR_STATUS_MISMATCH', 'VERIFY_HOSTED_CI');
+  }
+  const required = ['JavaScript syntax', 'P01 UAT17 focused regression tests',
+    'Verify and run the P01 orchestrator pilot', 'Safe static artifact build',
+    'Build isolated P01 Public and Member map candidate artifact'];
+  if (!Array.isArray(job.steps) || !required.every(name => {
+    const steps = job.steps.filter(step => step?.name === name);
+    return steps.length === 1 && steps[0].status === 'completed' && steps[0].conclusion === 'success';
+  })) return result('NOT_VERIFIED', 'REQUIRED_STEP_NOT_SUCCESSFUL', 'VERIFY_HOSTED_CI');
+  const key = 'P01:' + checkpoint.commit + ':hosted-ci';
+  if (!Array.isArray(recordedKeys)) return result('NOT_VERIFIED', 'INVALID_RECEIPT_LEDGER', 'RECOVER_RECEIPT_LEDGER');
+  return {
+    schemaVersion: 1, project: 'P01', commit: checkpoint.commit, status: 'VERIFIED',
+    key, runId: run.id, runAttempt: run.run_attempt, jobId: job.id,
+    evidenceUrl: 'https://github.com/' + repo + '/actions/runs/' + run.id,
+    nextAction: recordedKeys.includes(key) ? 'NO_DUPLICATE_WRITE' : 'RECORD_ENGINEERING_RECEIPT',
+    ownerActionRequired: false,
+  };
+}
+
+module.exports = { runCycle, reconcileHostedReceipt };

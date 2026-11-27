@@ -2,7 +2,7 @@
 
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { runCycle } = require('../scripts/p01-orchestrator.cjs');
+const { runCycle, reconcileHostedReceipt } = require('../scripts/p01-orchestrator.cjs');
 
 function gitFixture(overrides = {}) {
   return command => ({
@@ -102,4 +102,71 @@ test('changed checkpoint is routed to revalidation, not a stale CI handoff', () 
   const result = runCycle(gitFixture({ 'rev-parse': () => String(++observations) }), pass);
   assert.equal(result.handoff.nextAction, 'REVALIDATE_CHECKPOINT');
   assert.equal(result.handoff.hostedCI, 'NOT_VERIFIED');
+});
+
+function hostedFixture() {
+  const checkpoint = runCycle(gitFixture(), pass);
+  const run = {
+    id: 123, run_attempt: 1, repository: { full_name: 'khairuladamm1993-web/khairul-adam-ecrlrailway-malaysia-portfolio' },
+    head_sha: checkpoint.commit, head_branch: 'candidate/p01-orchestrator-v1-20261123',
+    path: '.github/workflows/p01-uat17-contract.yml', event: 'push', status: 'completed', conclusion: 'success',
+  };
+  const job = { id: 456, run_id: 123, run_attempt: 1, head_sha: checkpoint.commit,
+    name: 'source-contract', status: 'completed', conclusion: 'success',
+    steps: ['JavaScript syntax', 'P01 UAT17 focused regression tests',
+      'Verify and run the P01 orchestrator pilot', 'Safe static artifact build',
+      'Build isolated P01 Public and Member map candidate artifact'].map(name => ({ name, status: 'completed', conclusion: 'success' })),
+  };
+  return { checkpoint, run, job };
+}
+
+test('hosted receipt binds exact repository, branch, SHA, run and job', () => {
+  const { checkpoint, run, job } = hostedFixture();
+  const receipt = reconcileHostedReceipt(checkpoint, run, [job]);
+  assert.equal(receipt.status, 'VERIFIED');
+  assert.equal(receipt.commit, checkpoint.commit);
+  assert.equal(receipt.runId, 123);
+  assert.equal(receipt.jobId, 456);
+  assert.equal(receipt.nextAction, 'RECORD_ENGINEERING_RECEIPT');
+  assert.equal(receipt.ownerActionRequired, false);
+  assert.equal(checkpoint.handoff.hostedCI, 'NOT_VERIFIED');
+  assert.equal(checkpoint.ownerDecision, null);
+});
+
+test('receipt deduplicates by project and exact SHA including reruns', () => {
+  const { checkpoint, run, job } = hostedFixture();
+  const first = reconcileHostedReceipt(checkpoint, run, [job]);
+  const retry = reconcileHostedReceipt(checkpoint, { ...run, run_attempt: 2 },
+    [{ ...job, run_attempt: 2 }], [first.key]);
+  assert.equal(retry.key, first.key);
+  assert.equal(retry.nextAction, 'NO_DUPLICATE_WRITE');
+  assert.equal(retry.runAttempt, 2);
+});
+
+test('receipt rejects cross-project, stale SHA, branch, repo, workflow and event', () => {
+  const { checkpoint, run, job } = hostedFixture();
+  for (const override of [{ head_sha: 'b'.repeat(40) }, { head_branch: 'main' },
+    { repository: { full_name: 'another/repo' } }, { path: '.github/workflows/other.yml' },
+    { event: 'pull_request' }]) {
+    assert.equal(reconcileHostedReceipt(checkpoint, { ...run, ...override }, [job]).status, 'NOT_VERIFIED');
+  }
+  assert.equal(reconcileHostedReceipt({ ...checkpoint, project: 'P02' }, run, [job]).status, 'NOT_VERIFIED');
+  assert.equal(reconcileHostedReceipt({ ...checkpoint, action: { status: 'FAILED' } }, run, [job]).status, 'NOT_VERIFIED');
+});
+
+test('receipt distinguishes pending and failed runs from verified success', () => {
+  const { checkpoint, run, job } = hostedFixture();
+  assert.equal(reconcileHostedReceipt(checkpoint, { ...run, status: 'in_progress', conclusion: null }, []).status, 'PENDING');
+  assert.equal(reconcileHostedReceipt(checkpoint, { ...run, conclusion: 'failure' }, [job]).nextAction, 'RECOVER_QA');
+});
+
+test('receipt rejects unrelated jobs, stale attempts and absent or skipped steps', () => {
+  const { checkpoint, run, job } = hostedFixture();
+  for (const jobs of [[], [job, job], [{ ...job, run_id: 999 }],
+    [{ ...job, run_attempt: 2 }], [{ ...job, head_sha: 'b'.repeat(40) }],
+    [{ ...job, conclusion: 'failure' }], [{ ...job, steps: job.steps.slice(1) }],
+    [{ ...job, steps: job.steps.map((s, i) => i === 0 ? { ...s, conclusion: 'skipped' } : s) }]]) {
+    assert.equal(reconcileHostedReceipt(checkpoint, run, jobs).status, 'NOT_VERIFIED');
+  }
+  assert.equal(reconcileHostedReceipt(checkpoint, run, [job], null).status, 'NOT_VERIFIED');
 });

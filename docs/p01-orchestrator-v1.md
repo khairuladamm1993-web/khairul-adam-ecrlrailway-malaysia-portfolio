@@ -23,3 +23,7 @@ Research membaca checkpoint GIS dan kontrak CI pada SHA asas. Verification menye
 Teks bukti kekal data. Perintah QA ditentukan dalam kod dan hanya berjalan selepas pengesahan skop. Tiada arahan bebas, sambungan akaun, ejen berasingan, penjadual baharu atau akses sistem Production. Sembilan calon dan 17 jurang kekal HOLD.
 
 Pemulihan ialah beralih kembali ke branch atau commit asas. Tiada migrasi atau perubahan runtime diperlukan.
+
+## Hosted receipt reconciliation · MATURE THE FOUNDATION
+
+`reconcileHostedReceipt(checkpoint, run, jobs, recordedKeys)` is a pure P01 consumer. The caller must retrieve the run from the authenticated GitHub repository and the jobs endpoint for its exact run attempt; fixture or supplied JSON alone is not independent verification. It accepts only the existing pilot branch, push workflow, exact 40-character commit, completed successful source-contract job and five named successful steps. It returns a sanitized engineering receipt, never deployment or Owner approval. Deduplication key: `P01:<SHA>:hosted-ci`; pass keys already committed in the canonical tracker. A replay returns NO_DUPLICATE_WRITE. A failed run routes to RECOVER_QA; pending or inconsistent evidence never becomes VERIFIED. The consumer does not write the tracker itself, schedule work, or dispatch Codex/Work. Owner Inbox automation remains separate.
