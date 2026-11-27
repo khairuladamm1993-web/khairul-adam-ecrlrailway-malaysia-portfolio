@@ -9,6 +9,7 @@ on:
       - candidate/p01-ecrl-catalogue-retry-20261127
       - candidate/p01-ecrl-reference-roundtrip-20261127
       - candidate/p01-ecrl-gateway-continuity-20261127
+      - candidate/p01-member-auth-recovery-20261127
 permissions:
   contents: read
   actions: read
@@ -74,6 +75,7 @@ jobs:
           for (const file of [
             'unified-map-v7.html', 'assets/unified-v7-map.js', 'assets/p01-public-map-nav.css', 'assets/p01-map-core.js',
             'unified-map-v8.html', 'assets/unified-v8-map.js', 'assets/public-gateway.js',
+            'assets/access.js', 'assets/member-gateway.js',
             'ecrl-asset-reference.html', 'assets/p01-ecrl-public-reference.js', 'data/ecrl-reference-alignment.geojson',
             'assets/unified-ecrl/adapter.js', 'assets/unified-ecrl/chainage-manifest.js',
             'assets/unified-ecrl/railway-data-contract-v1.js', 'assets/unified-ecrl/alignment-evidence-r2.js',
@@ -114,6 +116,9 @@ jobs:
         run: |
           npm ci --ignore-scripts
           node --test tests/p01-ecrl-data-contract.test.cjs tests/p01-member-public-map-contract.test.cjs tests/p01-role-map-runtime.test.cjs tests/p01-role-map-integration.test.cjs tests/r211-mobile-map-ux.test.cjs tests/unified-ecrl-chainage.test.cjs tests/unified-ecrl-foundation.test.cjs tests/unified-ecrl-alignment-r2.test.cjs tests/unified-ecrl-d102-preflight.test.cjs tests/unified-ecrl-route-lab-satellite-stations.test.cjs
+      - name: Run Member Auth regression
+        if: github.ref_name == 'candidate/p01-member-auth-recovery-20261127'
+        run: node --test tests/auth-wiring.test.cjs
       - name: Run composition QA in MapLibre, Chromium and WebKit
         run: |
           npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
@@ -130,6 +135,13 @@ jobs:
           server=$!
           trap 'kill "$server"' EXIT
           curl --fail --silent --retry 4 --retry-connrefused --output /dev/null http://127.0.0.1:8765/unified-map-v7.html
+          if [[ "$GITHUB_REF_NAME" == candidate/p01-member-auth-recovery-20261127 ]]; then
+            sdk="$RUNNER_TEMP/supabase-2.117.2.js"
+            curl --fail --silent --show-error --location --retry 2 https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2 --output "$sdk"
+            echo "2eebfe06b1b5309985dc1526e8981ea3a18b71beeef83e7f38e04c303e142d6d  $sdk" | sha256sum --check
+            mkdir -p artifacts/p01-technology-integration
+            P01_AUTH_SDK="$sdk" node tests/p01-member-auth-browser.test.cjs | tee artifacts/p01-technology-integration/member-auth-qa.jsonl
+          fi
           P01_QA_MAP_COMPOSITION_ONLY=1 P01_MAPLIBRE_DIST="$vendor" node tests/p01-technology-integration-browser.test.mjs
           P01_QA_RAILWAY_HIERARCHY_ONLY=1 P01_MAPLIBRE_DIST="$vendor" P01_QA_OUTPUT=artifacts/p01-technology-integration/hierarchy node tests/p01-technology-integration-browser.test.mjs
       - name: Archive browser evidence

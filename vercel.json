@@ -26,7 +26,8 @@
     "candidate/p01-ecrl-asset-map-handoff-20261127": false,
     "candidate/p01-ecrl-catalogue-retry-20261127": false,
     "candidate/p01-ecrl-reference-roundtrip-20261127": false,
-    "candidate/p01-ecrl-gateway-continuity-20261127": false
+    "candidate/p01-ecrl-gateway-continuity-20261127": false,
+    "candidate/p01-member-auth-recovery-20261127": false
   }},
   "headers": [
     {"source":"/gateway.html","headers":[{"key":"Cache-Control","value":"private, no-store, max-age=0"},{"key":"Referrer-Policy","value":"no-referrer"}]},
