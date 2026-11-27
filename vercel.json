@@ -21,7 +21,8 @@
     "candidate/p01-section-d-integration-20261126": false,
     "candidate/p01-reference-map-integration-20261126": false,
     "candidate/p01-geographic-asset-integration-20261126": false,
-    "candidate/p01-r57-pl-alignment-20261127": false
+    "candidate/p01-r57-pl-alignment-20261127": false,
+    "candidate/p01-v7-identity-recovery-20261127": false
   }},
   "headers": [
     {"source":"/gateway.html","headers":[{"key":"Cache-Control","value":"private, no-store, max-age=0"},{"key":"Referrer-Policy","value":"no-referrer"}]},
