@@ -377,17 +377,35 @@ async function checkMapComposition(page,engine,device){
  const alignment=await page.evaluate(async id=>{
   const map=window.ecrlTestMap, source=map.getSource(id), style=map.getStyle();
   const {features}=await source.getData();
-  return {count:features.length,dash:map.getPaintProperty(id,'line-dasharray'),
+  return {count:features.length,branches:features.filter(f=>f.properties.branch===true).length,
+   dash:map.getPaintProperty(id,'line-dasharray'),
    beforeMarker:style.layers.findIndex(l=>l.id===id)<style.layers.findIndex(l=>l.id==='mrs10-v7-ecrl-localities-point'),
    attributed:source.attribution.includes('ODbL 1.0'),
    verifiedLayer:!!map.getLayer('mrs10-v7-ecrl-engineering-alignment')};
  },alignmentLayer);
- assert.deepEqual(alignment,{count:453,dash:[2.4,1.5],beforeMarker:true,attributed:true,verifiedLayer:false});
+ assert.deepEqual(alignment,{count:453,branches:7,dash:[2.4,1.5],beforeMarker:true,attributed:true,verifiedLayer:false});
  assert.match(await page.locator('#legend').innerText(),/rujukan OSM.*pembinaan/);
  assert.match(await page.locator('#legend').innerText(),/Jajaran disahkan kejuruteraan.*belum tersedia/);
+ assert.match(await page.locator('#legend').innerText(),/Cabang.*tag OSM.*Zum dekat/);
  await page.screenshot({path:out+'/'+engine+'-'+device+'-ecrl-reference-alignment.png'});
  const opener=page.locator('#ecrl-context-open'),panel=page.locator('#ecrl-context');
  const fullscreen=page.locator('#p01-v7-fullscreen');
+ const attribution=page.locator('#map .maplibregl-ctrl-attrib');
+ const attributionToggle=attribution.locator('summary');
+ const credits=attribution.locator('.maplibregl-ctrl-attrib-inner');
+ const checkAttribution=async()=>{
+  if(!await credits.isVisible())await tap(attributionToggle);
+  await credits.waitFor();
+  assert.match(await credits.innerText(),/OpenStreetMap contributors.*ODbL 1.0/);
+  await page.waitForFunction(()=>{
+   const credit=document.querySelector('#map .maplibregl-ctrl-attrib').getBoundingClientRect();
+   const controls=document.querySelector('.p01-v7-map-actions').getBoundingClientRect();
+   return credit.left>=controls.right||credit.top>=controls.bottom+6;
+  });
+  await tap(attributionToggle);
+  await credits.waitFor({state:'hidden'});
+ };
+ await checkAttribution();
  const mapPath=new URL(page.url()).pathname;
  const camera=()=>page.evaluate(()=>({
   center:window.ecrlTestMap.getCenter().toArray(),
@@ -395,6 +413,7 @@ async function checkMapComposition(page,engine,device){
   layers:window.ecrlTestMap.getStyle().layers.map(({id})=>id)
  }));
  await tap(fullscreen);
+ await checkAttribution();
  await page.waitForFunction(()=>{
   const map=window.ecrlTestMap;
   const container=map.getContainer().getBoundingClientRect();

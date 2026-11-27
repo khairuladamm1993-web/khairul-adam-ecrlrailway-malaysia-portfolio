@@ -4,8 +4,10 @@
 .p01-public-map-brand{margin:8px 0;color:inherit;font-weight:750}
 .p01-v7-fullscreen{position:fixed;z-index:20;inset:0;border-radius:0;background:var(--bg)}
 .p01-v7-fullscreen #map{height:100%;min-height:0}
-.mapbox{--p01-map-actions-bottom:max(10px,env(safe-area-inset-bottom))}
+.mapbox{--p01-map-actions-bottom:max(calc(10px + env(safe-area-inset-bottom)),var(--p01-attribution-clearance,0px))}
 .p01-v7-map-actions{position:absolute;inset-inline-start:max(10px,env(safe-area-inset-left));bottom:var(--p01-map-actions-bottom);z-index:4;display:flex;gap:6px}
+.mapbox #map .maplibregl-ctrl-bottom-right{max-width:100%}
+.p01-v7-fullscreen #map .maplibregl-ctrl-bottom-right{bottom:env(safe-area-inset-bottom);right:env(safe-area-inset-right);max-width:calc(100% - env(safe-area-inset-left) - env(safe-area-inset-right))}
 .mapbox .p01-v7-alignment-popup{z-index:6}
 .p01-v7-alignment-popup .maplibregl-popup-content{max-height:min(230px,55vh);overflow:auto;overflow-wrap:anywhere;font-size:.8125rem;line-height:1.35}
 .p01-v7-alignment-popup p{margin:4px 0}
@@ -35,12 +37,15 @@
 #ecrl-context-list li{position:relative;margin-bottom:7px;overflow-wrap:anywhere}
 #ecrl-context-list li::before{content:'';position:absolute;inset-inline-start:-13px;top:10px;width:7px;height:7px;border-radius:50%;background:var(--sub)}
 #ecrl-context-list li:not(:last-child)::after{content:'';position:absolute;inset-inline-start:-10px;top:17px;bottom:-17px;width:1px;background:var(--line)}
-#ecrl-context-list li[data-type=YARD]::before,#ecrl-context-list li:has(+li[data-type=YARD])::after{display:none}
+#ecrl-context-list li[data-type=STN]::before{background:#1457a6}
+#ecrl-context-list li[data-type=PL]::before{background:#b57925}
+#ecrl-context-list li[data-type=DEPOT]::before{border-radius:1px;background:#0f7778}
+#ecrl-context-list li[data-type=YARD]::before{border-radius:0;background:#b57925;transform:rotate(45deg)}
+#ecrl-context-list li[data-type=YARD]::after,#ecrl-context-list li:has(+li[data-type=YARD])::after{display:none}
 #ecrl-context-list li[data-type=PORT]::before,#ecrl-context-list li[data-type=PORT]::after{display:none}
 #ecrl-context-list li[aria-current=true]{outline:2px solid #3b8dab;outline-offset:-2px}
 .p01-v7-fullscreen-open{overflow:hidden}
 @media(max-width:540px){
- .mapbox{--p01-map-actions-bottom:calc(42px + env(safe-area-inset-bottom))}
  .p01-v7-map-actions button{padding-inline:8px;font-size:.9rem}
 }
 
@@ -50,5 +55,6 @@
 .legend .p01-structure-bridge{border-top-color:#a84a16}
 [data-theme=dark] .legend .p01-structure-tunnel{border-top-color:#ccd2df}
 [data-theme=dark] .legend .p01-structure-bridge{border-top-color:#ff9b5a}
+.legend .p01-branch-swatch{border-top-width:2px}
 
 .legend .p01-loop-swatch{width:10px;height:10px;border-radius:50%;background:#b57925}

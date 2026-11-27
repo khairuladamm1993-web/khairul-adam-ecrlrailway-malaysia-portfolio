@@ -67,6 +67,10 @@ const heldLoopLabels={
  zh:'会让线 · 地区参考；线路上的位置尚未核实',
  th:'ทางหลีก · ข้อมูลอ้างอิงพื้นที่ ตำแหน่งบนแนวรางยังไม่ยืนยัน'
 };
+const unlocatedFacilityLabels={
+ ms:'Lokasi fizikal belum disahkan',en:'Physical location unverified',
+ zh:'实际位置尚未核实',th:'ตำแหน่งจริงยังไม่ยืนยัน'
+};
 const identityStatusLabels={
  ms:['Memuatkan rujukan aset ECRL…','Rujukan aset ECRL gagal dimuatkan.'],
  en:['Loading ECRL asset references…','Could not load ECRL asset references.'],
@@ -76,6 +80,9 @@ const identityStatusLabels={
 const ecrlReferenceLine='mrs10-v7-ecrl-reference-alignment';
 const ecrlReferenceGreen='#168b45';
 const ecrlStructureZoom=11;
+const ecrlBranchLabels={
+ ms:'Cabang · tag OSM',en:'Branch · OSM tag',zh:'支线 · OSM 标签',th:'ทางแยก · แท็ก OSM'
+};
 const ecrlStructureColors={light:{tunnel:'#222c37',bridge:'#a84a16'},dark:{tunnel:'#ccd2df',bridge:'#ff9b5a'}};
 const ecrlStructureLabels={
  ms:['Terowong · tag OSM','Jambatan / viaduk · tag OSM','Zum dekat','Viaduk · tag OSM'],
@@ -111,7 +118,7 @@ const ecrlType2='mrs10-ecrl-station-type-2';
 let linkedAssetId=window.MRS10P01MapCore.readAssetId(location.search);
 const catalogueLabels={ms:'Buka dalam katalog aset',en:'Open in asset catalogue',zh:'在资产目录中打开',th:'เปิดในรายการทรัพย์สิน'};
 const state={locale:'ms',category:'ECRL',selected:'mrt-kajang',railFocus:false,theme:'light',map:null,mapReady:false,zoomDone:false,
- ecrlPublic:[],ecrlStations:[],ecrlLoops:[],assetIdentityStatus:'loading',referenceAlignment:null,alignmentSnapshot:null,alignmentStructures:new Map(),referenceAlignmentStatus:'loading',activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
+ ecrlPublic:[],ecrlStations:[],ecrlLoops:[],assetIdentityStatus:'loading',referenceAlignment:null,alignmentSnapshot:null,alignmentStructures:new Map(),alignmentBranches:new Map(),referenceAlignmentStatus:'loading',activeReference:null,referenceOpener:null,basemapLabelOpacity:new Map(),results:new Map(),points:new Map(),pending:0,networkError:false,popup:null,manifest:[]};
 function tr(k){return i18n[state.locale][k]}
 function say(message){$('qa-note').textContent=message}
 function el(tag,cls,text){const x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=String(text);return x}
@@ -184,6 +191,12 @@ function buildLegend(){
     entry.append(el('span','swatch p01-reference-swatch p01-structure-'+kind),el('span',null,label+' · '+closeZoom));
     host.append(entry);
    }
+  }
+  if(state.alignmentBranches.size){
+   const entry=el('span','legend-item');
+   entry.append(el('span','swatch p01-reference-swatch p01-branch-swatch'),
+    el('span',null,ecrlBranchLabels[state.locale]+' · '+ecrlStructureLabels[state.locale][2]));
+   host.append(entry);
   }
   if(state.ecrlLoops.length){
    const entry=el('span','legend-item');
@@ -292,8 +305,10 @@ function renderReferenceContext(){
   button.onclick=()=>selectEcrlAsset(row,opener,hasPoint);
   item.append(button);
   item.append(el('small',null,row.type==='PORT'?dLabels[state.locale][0]:
+   row.type==='DEPOT'?labels.DEPOT+' · '+unlocatedFacilityLabels[state.locale]:
    section==='C2'?c2Labels[state.locale][row.type==='YARD'?1:0]:
-   heldLoop?heldLoopLabels[state.locale]:row.type==='PL'&&hasPoint?ecrlReferenceUi[state.locale][0]:labels[row.type]));
+   heldLoop?heldLoopLabels[state.locale]:row.type==='PL'?
+    (hasPoint?ecrlReferenceUi[state.locale][0]:labels.PL+' · '+unlocatedFacilityLabels[state.locale]):labels[row.type]));
   if(row.assetId===assetId){
    item.setAttribute('aria-current','true');
    if(assetId==='ecrl-stn-14')item.append(temerlohContext());
@@ -432,7 +447,8 @@ function installGeographicContext(map){
   if(!map.getSource(ecrlReferenceLine))map.addSource(ecrlReferenceLine,{type:'geojson',data:{
    ...state.referenceAlignment,features:state.referenceAlignment.features.map(feature=>({
     ...feature,properties:{...feature.properties,segmentId:feature.id,
-     structure:state.alignmentStructures.get(feature.id)?.kind??'unclassified'}
+     structure:state.alignmentStructures.get(feature.id)?.kind??'unclassified',
+     branch:state.alignmentBranches.has(feature.id)}
    }))
   },
    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>'});
@@ -443,7 +459,9 @@ function installGeographicContext(map){
    paint:{'line-color':['step',['zoom'],green,ecrlStructureZoom,
     ['match',['get','structure'],'tunnel',tunnel,['bridge','viaduct'],bridge,green]],
     'line-opacity':0.92,'line-dasharray':[2.4,1.5],
-    'line-width':['interpolate',['linear'],['zoom'],5,1.5,10,2.6,13,3.8,17,5.2]}},
+    'line-width':['interpolate',['linear'],['zoom'],5,1.5,10,2.6,11,3,
+     13,['case',['==',['get','branch'],true],2,3.8],
+     17,['case',['==',['get','branch'],true],2.8,5.2]]}},
    [ecrlMarker,style.layers.find(layer=>layer.type==='symbol')?.id].find(id=>id&&map.getLayer(id)));
  }
  if(state.ecrlLoops.length&&!map.getLayer(ecrlLoopMarker)){
@@ -463,7 +481,8 @@ function installGeographicContext(map){
  }
  if(style.glyphs&&!map.getLayer(ecrlLabel))map.addLayer({id:ecrlLabel,type:'symbol',source:ecrlSource,minzoom:8,
   layout:{'text-field':['step',['zoom'],['get','code'],11,['concat',['get','code'],' · ',['get','name']]],
-   'text-font':['Noto Sans Regular'],'text-size':12,'text-offset':[0,1.35],'text-anchor':'top'},
+   'text-font':['Noto Sans Regular'],'text-size':12,'text-max-width':11,'text-padding':4,
+   'text-offset':[0,1.35],'text-anchor':'top'},
   paint:{'text-color':state.theme==='dark'?'#e9f4ff':'#16457b','text-halo-color':state.theme==='dark'?'#183140':'#fff','text-halo-width':1.5}});
 }
 function updateMapLayer(){
@@ -568,6 +587,8 @@ function showAlignmentEvidence(event){
   const label=ecrlStructureLabels[state.locale][{tunnel:0,bridge:1,viaduct:3}[structure.kind]];
   host.append(el('p',null,label+' · v'+structure.version));
  }
+ const branchVersion=state.alignmentBranches.get(segment.id);
+ if(branchVersion)host.append(el('p',null,ecrlBranchLabels[state.locale]+' · v'+branchVersion));
  const source=el('a',null,'OpenStreetMap way '+segment.properties.osmWayId+' · ODbL 1.0');
  source.href='https://www.openstreetmap.org/way/'+segment.properties.osmWayId;
  source.target='_blank';source.rel='noopener noreferrer';
@@ -626,10 +647,28 @@ function fitOnce(){
  state.map.fitBounds([[minX,minY],[maxX,maxY]],{padding:45,maxZoom:12,duration:400});
  state.zoomDone=true;
 }
+function reserveAttributionSpace(container){
+ const shell=container.closest('.mapbox');
+ const actions=shell.querySelector('.p01-v7-map-actions');
+ const corner=container.querySelector('.maplibregl-ctrl-bottom-right');
+ const observer=new ResizeObserver(()=>{
+  const control=corner.querySelector('.maplibregl-ctrl-attrib');
+  if(!control)return;
+  const credit=control.getBoundingClientRect();
+  const toolbar=actions.getBoundingClientRect();
+  const sharesWidth=credit.left<toolbar.right+8&&credit.right>toolbar.left-8;
+  const clearance=sharesWidth?Math.ceil(container.getBoundingClientRect().bottom-credit.top)+8:0;
+  shell.style.setProperty('--p01-attribution-clearance',clearance+'px');
+ });
+ observer.observe(container);
+ observer.observe(corner);
+ observer.observe(actions);
+}
 function startMap(){
  try{
   state.map=new maplibregl.Map({container:'map',style:styleURL(),center:[101.69,3.13],zoom:10.1,
-   attributionControl:true});
+   attributionControl:{compact:true}});
+  reserveAttributionSpace(state.map.getContainer());
   state.map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
   state.map.on('movestart',e=>{if(e.originalEvent)state.zoomDone=true});
   state.map.on('style.load',()=>{
@@ -713,8 +752,9 @@ async function loadReferenceAlignment(){
  state.referenceAlignmentStatus='loading';
  showStatus();
  try{
-  const {geometry,snapshot,structures}=await window.MRS10P01MapCore.loadPublicReferenceAlignment(retry);
-  state.referenceAlignment=geometry;state.alignmentSnapshot=snapshot;state.alignmentStructures=structures;
+  const {geometry,snapshot,structures,branches}=await window.MRS10P01MapCore.loadPublicReferenceAlignment(retry);
+  state.referenceAlignment=geometry;state.alignmentSnapshot=snapshot;
+  state.alignmentStructures=structures;state.alignmentBranches=branches;
   state.referenceAlignmentStatus='ready';
   buildLegend();updateMapLayer();
  }catch{
