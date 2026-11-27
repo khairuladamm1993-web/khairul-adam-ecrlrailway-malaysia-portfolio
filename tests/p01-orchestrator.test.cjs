@@ -63,3 +63,43 @@ test('checkpoint change during QA invalidates the result', () => {
   const git = gitFixture({ 'rev-parse': () => String(++observations) });
   assert.equal(runCycle(git, pass).action.reason, 'CHECKPOINT_CHANGED_DURING_QA');
 });
+
+test('handoff is deterministic and never implies hosted CI or Owner approval', () => {
+  const result = runCycle(gitFixture(), pass);
+  assert.deepEqual(result.handoff, {
+    schemaVersion: 1, nextAction: 'VERIFY_HOSTED_CI', ownerActionRequired: false,
+    hostedCI: 'NOT_VERIFIED',
+  });
+  assert.equal(result.ownerDecision, null);
+});
+
+test('handoff routes blocked or failed stages to engineering recovery', () => {
+  const cases = [
+    [gitFixture({ show: () => '' }), mustNotRun, 'RECOVER_BASELINE_EVIDENCE'],
+    [gitFixture({ status: () => '?? unexpected.txt\n' }), mustNotRun, 'RECOVER_SCOPE_VERIFICATION'],
+    [gitFixture(), () => ({ tests: 2, passed: 1 }), 'RECOVER_QA'],
+  ];
+  for (const [git, qa, nextAction] of cases) {
+    const result = runCycle(git, qa);
+    assert.equal(result.handoff.nextAction, nextAction);
+    assert.equal(result.handoff.ownerActionRequired, false);
+    assert.equal(result.handoff.hostedCI, 'NOT_VERIFIED');
+  }
+});
+
+test('QA summary cannot override checkpoint status or fixed evidence paths', () => {
+  const result = runCycle(gitFixture(), () => ({
+    tests: 2, passed: 2, status: 'VERIFIED', files: ['untrusted'], reason: 'untrusted',
+  }));
+  assert.equal(result.action.status, 'TESTED');
+  assert.equal(result.action.files.length, 4);
+  assert.equal(result.action.reason, undefined);
+  assert.equal(result.handoff.nextAction, 'VERIFY_HOSTED_CI');
+});
+
+test('changed checkpoint is routed to revalidation, not a stale CI handoff', () => {
+  let observations = 0;
+  const result = runCycle(gitFixture({ 'rev-parse': () => String(++observations) }), pass);
+  assert.equal(result.handoff.nextAction, 'REVALIDATE_CHECKPOINT');
+  assert.equal(result.handoff.hostedCI, 'NOT_VERIFIED');
+});

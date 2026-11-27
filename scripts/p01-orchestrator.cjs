@@ -24,6 +24,18 @@ const qaFiles = [
   'tests/p01-role-map-runtime.test.cjs',
 ];
 
+// Handoff is a bounded P01 recommendation, not a dispatch or approval.
+function finalizeCheckpoint(checkpoint) {
+  let nextAction;
+  if (checkpoint.research.status !== 'COLLECTED') nextAction = 'RECOVER_BASELINE_EVIDENCE';
+  else if (checkpoint.verification.status !== 'VERIFIED') nextAction = 'RECOVER_SCOPE_VERIFICATION';
+  else if (checkpoint.action.status === 'TESTED') nextAction = 'VERIFY_HOSTED_CI';
+  else if (checkpoint.action.reason === 'CHECKPOINT_CHANGED_DURING_QA') nextAction = 'REVALIDATE_CHECKPOINT';
+  else nextAction = 'RECOVER_QA';
+  checkpoint.handoff = { schemaVersion: 1, nextAction, ownerActionRequired: false, hostedCI: 'NOT_VERIFIED' };
+  return checkpoint;
+}
+
 function runCycle(git, runQA) {
   const checkpoint = {
     schemaVersion: 1,
@@ -46,7 +58,7 @@ function runCycle(git, runQA) {
     checkpoint.research = { status: 'COLLECTED', sources };
   } catch {
     checkpoint.research = { status: 'BLOCKED', reason: 'BASELINE_EVIDENCE_UNAVAILABLE' };
-    return checkpoint;
+    return finalizeCheckpoint(checkpoint);
   }
 
   try {
@@ -63,7 +75,7 @@ function runCycle(git, runQA) {
     const allowedReasons = ['OUT_OF_SCOPE_DIFF', 'WORKTREE_NOT_CLEAN'];
     const reason = allowedReasons.includes(error.message) ? error.message : 'BASELINE_CHECK_FAILED';
     checkpoint.verification = { status: 'BLOCKED', reason };
-    return checkpoint;
+    return finalizeCheckpoint(checkpoint);
   }
 
   try {
@@ -71,18 +83,18 @@ function runCycle(git, runQA) {
     if (!summary || !Number.isInteger(summary.tests) || summary.tests < 1 ||
       summary.tests !== summary.passed) {
       checkpoint.action = { status: 'FAILED', reason: 'QA_NOT_ALL_PASSED', files: qaFiles };
-      return checkpoint;
+      return finalizeCheckpoint(checkpoint);
     }
     if (git('rev-parse', 'HEAD').trim() !== checkpoint.commit ||
       git('status', '--porcelain', '--untracked-files=all')) {
       checkpoint.action = { status: 'BLOCKED', reason: 'CHECKPOINT_CHANGED_DURING_QA' };
-      return checkpoint;
+      return finalizeCheckpoint(checkpoint);
     }
-    checkpoint.action = { status: 'TESTED', files: qaFiles, ...summary };
+    checkpoint.action = { status: 'TESTED', files: qaFiles, tests: summary.tests, passed: summary.passed };
   } catch {
     checkpoint.action = { status: 'FAILED', reason: 'QA_EXECUTION_FAILED', files: qaFiles };
   }
-  return checkpoint;
+  return finalizeCheckpoint(checkpoint);
 }
 
 if (require.main === module) {
