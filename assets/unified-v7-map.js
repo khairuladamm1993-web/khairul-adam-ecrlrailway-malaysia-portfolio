@@ -78,12 +78,9 @@ const identityStatusLabels={
  th:['กำลังโหลดข้อมูลอ้างอิงสินทรัพย์ ECRL…','โหลดข้อมูลอ้างอิงสินทรัพย์ ECRL ไม่สำเร็จ']
 };
 const ecrlReferenceLine='mrs10-v7-ecrl-reference-alignment';
-const ecrlReferenceGreen='#168b45';
-const ecrlStructureZoom=11;
 const ecrlBranchLabels={
  ms:'Cabang · tag OSM',en:'Branch · OSM tag',zh:'支线 · OSM 标签',th:'ทางแยก · แท็ก OSM'
 };
-const ecrlStructureColors={light:{tunnel:'#222c37',bridge:'#a84a16'},dark:{tunnel:'#ccd2df',bridge:'#ff9b5a'}};
 const ecrlStructureLabels={
  ms:['Terowong · tag OSM','Jambatan / viaduk · tag OSM','Zum dekat','Viaduk · tag OSM'],
  en:['Tunnel · OSM tag','Bridge / viaduct · OSM tag','Close zoom','Viaduct · OSM tag'],
@@ -442,27 +439,10 @@ function installGeographicContext(map){
     'line-width':['interpolate',['linear'],['zoom'],8,0.7,14,1.45,18,2.4]}},
    style.layers.find(layer=>layer.type==='symbol')?.id);
  }
- if(state.referenceAlignment?.features.length&&!map.getLayer(ecrlReferenceLine)){
-  // Rendered tile IDs may differ from the canonical GeoJSON feature IDs.
-  if(!map.getSource(ecrlReferenceLine))map.addSource(ecrlReferenceLine,{type:'geojson',data:{
-   ...state.referenceAlignment,features:state.referenceAlignment.features.map(feature=>({
-    ...feature,properties:{...feature.properties,segmentId:feature.id,
-     structure:state.alignmentStructures.get(feature.id)?.kind??'unclassified',
-     branch:state.alignmentBranches.has(feature.id)}
-   }))
-  },
-   attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>'});
-  const green=state.theme==='dark'?'#76d697':ecrlReferenceGreen;
-  const {tunnel,bridge}=ecrlStructureColors[state.theme];
-  map.addLayer({id:ecrlReferenceLine,type:'line',source:ecrlReferenceLine,
-   layout:{'line-cap':'butt','line-join':'round'},
-   paint:{'line-color':['step',['zoom'],green,ecrlStructureZoom,
-    ['match',['get','structure'],'tunnel',tunnel,['bridge','viaduct'],bridge,green]],
-    'line-opacity':0.92,'line-dasharray':[2.4,1.5],
-    'line-width':['interpolate',['linear'],['zoom'],5,1.5,10,2.6,11,3,
-     13,['case',['==',['get','branch'],true],2,3.8],
-     17,['case',['==',['get','branch'],true],2.8,5.2]]}},
-   [ecrlMarker,style.layers.find(layer=>layer.type==='symbol')?.id].find(id=>id&&map.getLayer(id)));
+ if(state.referenceAlignment?.features.length){
+  window.MRS10P01MapCore.installReferenceAlignment(map,ecrlReferenceLine,{
+   geometry:state.referenceAlignment,structures:state.alignmentStructures,branches:state.alignmentBranches
+  },state.theme,[ecrlMarker,style.layers.find(layer=>layer.type==='symbol')?.id].find(id=>id&&map.getLayer(id)));
  }
  if(state.ecrlLoops.length&&!map.getLayer(ecrlLoopMarker)){
   if(!map.getSource(ecrlLoopMarker))map.addSource(ecrlLoopMarker,{type:'geojson',

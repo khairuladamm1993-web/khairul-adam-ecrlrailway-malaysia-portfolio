@@ -220,3 +220,37 @@ test('V1 seals collection, rows and nested values independently of source arrays
  assert.throws(()=>{first.referencePosition.coordinates[0]=0},TypeError);
  assert.notEqual(first.referencePosition.coordinates,adapter.reference(first.assetId).coordinates);
 });
+
+test('Public and Member share the exact admitted ECRL rail projection and paint, never physical promotion',async t=>{
+ const core=require('../assets/p01-map-core.js');
+ const payload=JSON.parse(fs.readFileSync('data/ecrl-reference-alignment.geojson','utf8'));
+ t.mock.method(global,'fetch',async()=>({ok:true,json:async()=>payload}));
+ const alignment=await core.loadPublicReferenceAlignment();
+ const publicSpec=core.referenceAlignmentSpec('v7',alignment,'light');
+ const memberSpec=core.referenceAlignmentSpec('v8',alignment,'light');
+ assert.deepEqual(publicSpec.source,memberSpec.source);
+ assert.deepEqual(publicSpec.layer.paint,memberSpec.layer.paint);
+ assert.equal(memberSpec.source.data.features.length,453);
+ assert.equal(memberSpec.source.data.features.filter(f=>f.properties.branch).length,7);
+ assert.equal(memberSpec.source.data.features.filter(f=>f.properties.structure!=='unclassified').length,202);
+ assert.equal(memberSpec.source.data.features.every(f=>f.properties.segmentId===f.id),true);
+ assert.match(memberSpec.source.attribution,/ODbL 1.0/);
+ assert.deepEqual(memberSpec.layer.paint['line-dasharray'],[2.4,1.5]);
+ assert.equal(memberSpec.layer.source,'v8');
+ assert.equal(payload.metadata.physicalVerified,false);
+ assert.equal(core.referenceAlignmentVisible('MRS10'),true);
+ assert.equal(core.referenceAlignmentVisible('ECRL','INFRASTRUCTURE_FOCUS'),true);
+ assert.equal(core.referenceAlignmentVisible('KTM'),false);
+ assert.equal(core.referenceAlignmentVisible('ECRL','TRACK_FOCUS'),false);
+ assert.equal(core.referenceAlignmentVisible('ECRL','NORMAL',false),false);
+ const layers=new Map([['marker',{id:'marker'}]]),sources=new Map();
+ const map={getLayer:id=>layers.get(id),getSource:id=>sources.get(id),
+  addSource:(id,spec)=>sources.set(id,spec),addLayer:(layer,before)=>{assert.equal(before,'marker');layers.set(layer.id,layer)}};
+ assert.equal(core.installReferenceAlignment(map,'v8',alignment,'light','marker'),true);
+ assert.equal(core.installReferenceAlignment(map,'v8',alignment,'light','marker'),false);
+ assert.equal(sources.size,1);
+ assert.equal(layers.size,2);
+ layers.delete('v8');sources.delete('v8');
+ assert.equal(core.installReferenceAlignment(map,'v8',alignment,'dark','marker'),true);
+ assert.equal(layers.get('v8').paint['line-color'][2],'#76d697');
+});

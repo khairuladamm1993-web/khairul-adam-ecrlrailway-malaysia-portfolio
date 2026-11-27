@@ -634,6 +634,42 @@ async function checkAlignmentEvidence(page,engine,device){
  }
 }
 
+async function checkMemberReferenceParity(page,engine,device){
+ const layer='mrs10-v8-ecrl-reference-alignment';
+ const publicPaint=await page.evaluate(()=>window.ecrlTestMap.getPaintProperty('mrs10-v7-ecrl-reference-alignment','line-width'));
+ assert.equal((await page.goto(base+'/unified-map-v8.html')).status(),200);
+ await page.waitForFunction(id=>!!window.ecrlTestMap?.getLayer(id)&&window.ecrlTestMap.isStyleLoaded(),layer,{timeout:45000});
+ const spec=await page.evaluate(async id=>{
+  const map=window.ecrlTestMap,source=map.getSource(id),{features}=await source.getData();
+  return {count:features.length,branch:features.filter(f=>f.properties.branch).length,
+   structures:features.filter(f=>f.properties.structure!=='unclassified').length,
+   paint:map.getPaintProperty(id,'line-width'),dash:map.getPaintProperty(id,'line-dasharray'),
+   separate:map.getLayer(id).source!==map.getLayer('mrs10-v8-geometry').source,
+   attributed:source.attribution.includes('ODbL 1.0'),visible:map.getLayoutProperty(id,'visibility')==='visible'};
+ },layer);
+ assert.deepEqual(spec,{count:453,branch:7,structures:202,paint:publicPaint,dash:[2.4,1.5],separate:true,attributed:true,visible:true});
+ await page.locator('#filters').getByRole('button',{name:'KTM',exact:true}).click();
+ assert.equal(await page.evaluate(id=>window.ecrlTestMap.getLayoutProperty(id,'visibility'),layer),'none');
+ await page.locator('#filters').getByRole('button',{name:'ECRL',exact:true}).click();
+ assert.equal(await page.evaluate(id=>window.ecrlTestMap.getLayoutProperty(id,'visibility'),layer),'visible');
+ const centre=await page.evaluate(async id=>{
+  const map=window.ecrlTestMap,{features}=await map.getSource(id).getData();
+  let best;
+  for(const feature of features)for(let i=1;i<feature.geometry.coordinates.length;i++){
+   const [a,b]=feature.geometry.coordinates.slice(i-1,i+1),length=Math.hypot(b[0]-a[0],b[1]-a[1]);
+   if(!best||length>best.length)best={length,centre:[(a[0]+b[0])/2,(a[1]+b[1])/2]};
+  }
+  map.jumpTo({center:best.centre,zoom:13});
+  return best.centre;
+ },layer);
+ await page.waitForFunction(({id,centre})=>{
+  const map=window.ecrlTestMap,{x,y}=map.project(centre);
+  return map.areTilesLoaded()&&map.queryRenderedFeatures([[x-5,y-5],[x+5,y+5]],{layers:[id]}).length>0;
+ },{id:layer,centre});
+ assert.match(await page.locator('#geometry-status').innerText(),/rujukan OSM.*belum disahkan secara kejuruteraan/);
+ await page.locator('#map').screenshot({path:out+'/'+engine+'-'+device+'-member-reference-alignment.png'});
+}
+
 async function checkRailwayHierarchy(page,engine,device){
  // Deterministic overlap fixture for two existing station identities. Never published as data.
  const coordinate=[101.58,3.17];
@@ -862,6 +898,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
     if(compositionOnly){
      await checkMapComposition(page,engine,device);
      await checkAlignmentEvidence(page,engine,device);
+     await checkMemberReferenceParity(page,engine,device);
      await checkReferenceRoundtrip(page,device);
      if(device==='desktop'){
       await checkSharedIdentity(page);
@@ -882,7 +919,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
      assert.deepEqual(errors,[]);
      assert.ok(localFailures.every(path=>path==='/data/ecrl-public-identity-v1.json'||
       device==='desktop'&&path==='/data/ecrl-reference-alignment.geojson'));
-     rows.push({engine,device,status:'PASS',mapComposition:true,physicalLayersUnchanged:true,
+     rows.push({engine,device,status:'PASS',mapComposition:true,memberReferenceParity:true,physicalLayersUnchanged:true,
       plReferenceCards:4,plReferenceMarkers:0,alignmentRetry:device==='desktop',touch:device!=='desktop'});
      continue;
     }

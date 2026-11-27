@@ -4,6 +4,14 @@ import maplibregl from './p01-maplibre.js';
 const $=id=>document.getElementById(id);
 const mapCore=window.MRS10P01MapCore;
 const publicAssetIds=new Set();
+const ecrlReferenceLine='mrs10-v8-ecrl-reference-alignment';
+let ecrlAlignment=null,ecrlAlignmentStatus='loading';
+const referenceCopy={
+ ms:['Jajaran rujukan OSM · pembinaan pada snapshot · belum disahkan secara kejuruteraan','Memuatkan jajaran rujukan ECRL','Jajaran rujukan ECRL tidak tersedia','Segmen rujukan','Snapshot','Cabang · tag OSM'],
+ en:['OSM reference alignment · construction at snapshot · not engineering verified','Loading ECRL reference alignment','ECRL reference alignment unavailable','Reference segment','Snapshot','Branch · OSM tag'],
+ zh:['OSM 参考线路 · 快照时施工中 · 未经工程核实','正在加载 ECRL 参考线路','ECRL 参考线路不可用','参考区段','快照','支线 · OSM 标签'],
+ th:['แนวอ้างอิง OSM · ก่อสร้าง ณ วันที่บันทึก · ยังไม่ยืนยันทางวิศวกรรม','กำลังโหลดแนวอ้างอิง ECRL','แนวอ้างอิง ECRL ไม่พร้อมใช้งาน','ช่วงอ้างอิง','วันที่บันทึก','ทางแยก · แท็ก OSM']
+};
 const catalogueLabels={ms:'Buka dalam katalog aset',en:'Open in asset catalogue',zh:'在资产目录中打开',th:'เปิดในรายการทรัพย์สิน'};
 const core=window.MRS10UnifiedV4Registry, kl=window.MRS10KLRegistry,
  ampang=window.MRS10AmpangR219, ampangGIS=window.MRS10AmpangGISR219,
@@ -78,7 +86,7 @@ const focus=window.MRS10V81Focus.create({
  capture:()=>({layers:layerSnapshot(),category:state.category,selected:state.selected,camera:cameraSnapshot(),intelligence:r3UI?.selection}),
  apply:selection=>{
   if(!state.map?.getLayer('mrs10-v8-geometry'))return;
-  ecrl?.setVisibility(state.map,state.category,selection.mode);syncReferenceMarkers(selection);
+  ecrl?.setVisibility(state.map,state.category,selection.mode);setReferenceVisibility(selection.mode);syncReferenceMarkers(selection);
   const visible=new Set(selection.routeIds);
   for(const r of state.manifest)for(const suffix of ['', '-ring','-inner','-interchange']){
    const id=layerId(r.id)+suffix;if(state.map.getLayer(id))state.map.setLayoutProperty(id,'visibility',visible.has(r.id)?'visible':'none');
@@ -86,7 +94,7 @@ const focus=window.MRS10V81Focus.create({
   const ids=selection.segmentIds||physical.segments.filter(s=>s.routeIds.some(id=>visible.has(id))).map(s=>s.segmentId);
   if(state.map.getLayer('mrs10-v8-geometry'))state.map.setFilter('mrs10-v8-geometry',['in',['get','segmentId'],['literal',ids]]);
  },
- restore:saved=>{state.category=saved.category;state.selected=saved.selected;restoreLayers(saved.layers);r3UI?.select(saved.intelligence||{routeIds:[]});if(saved.camera&&state.map){state.map.stop();state.map.jumpTo(saved.camera);state.zoomDone=true;}buildFilters();buildLegend();buildRoutes();buildLineup();syncReferenceMarkers()}
+ restore:saved=>{state.category=saved.category;state.selected=saved.selected;restoreLayers(saved.layers);r3UI?.select(saved.intelligence||{routeIds:[]});if(saved.camera&&state.map){state.map.stop();state.map.jumpTo(saved.camera);state.zoomDone=true;}buildFilters();buildLegend();buildRoutes();buildLineup();setReferenceVisibility('NORMAL');syncReferenceMarkers()}
 });
 function cameraSnapshot(){return state.map?{center:state.map.getCenter().toArray(),zoom:state.map.getZoom(),bearing:state.map.getBearing(),pitch:state.map.getPitch(),padding:state.map.getPadding()}:null}
 function closeFocus(){cameraIntent++;pendingRouteFocus=null;$('ecrl-no-point').hidden=true;$('ecrl-gateway-return').href=mapCore.routes.gateway;if(state.popup){const old=state.popup;state.popup=null;old.remove()}focus.exit()}
@@ -315,7 +323,9 @@ function updateMapLayer(){
      'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.35:1
     }});
   }
-  installInnerDots();ecrl?.install(map);ownerCalibration?.install();applyVisibility();if(pendingRestore)restoreLayers(pendingRestore);
+  installInnerDots();ecrl?.install(map);ownerCalibration?.install();
+  mapCore.installReferenceAlignment(map,ecrlReferenceLine,ecrlAlignment,state.theme,ecrl?.namespace+'-ring');
+  applyVisibility();if(pendingRestore)restoreLayers(pendingRestore);setReferenceVisibility(focus.current.mode);
  }catch(e){
   state.networkError=true;
   $('map-error').hidden=false;
@@ -334,7 +344,7 @@ function applyVisibility(){
   if(state.map.getLayer(id))state.map.setLayoutProperty(id,'visibility',
    routeVisible(r)?'visible':'none');
  }
- applyGeometryVisibility();ecrl?.setVisibility(state.map,state.category);ownerCalibration?.visibility();syncReferenceMarkers();
+ applyGeometryVisibility();ecrl?.setVisibility(state.map,state.category);setReferenceVisibility('NORMAL');ownerCalibration?.visibility();syncReferenceMarkers();
 }
 function compactSourceDetails(host){const details=el('details','openmr-source-details'),summary=el('summary',null,'Source details · Provenance');details.append(summary);const children=[...host.children];for(const child of children.slice(3))if(!child.classList.contains('shared-services'))details.append(child);host.append(details);}
 function showPopup(point){
@@ -448,7 +458,7 @@ function startMap(){
      state.mapReady=true;
      const missing=state.manifest.some(route=>
       !state.map.getSource(srcId(route.id))||!state.map.getLayer(layerId(route.id)))||(ecrl&&!ecrl.snapshot(state.map).layersPresent);
-     if(state.points.size&&missing){updateMapLayer();fitOnce();}
+     if((state.points.size&&missing)||(ecrlAlignment&&!state.map.getLayer(ecrlReferenceLine))){updateMapLayer();fitOnce();}
     }
     if(pendingRestore)restoreLayers(pendingRestore);
     showStatus();
@@ -466,7 +476,7 @@ function startMap(){
    if(closest&&(!candidates.length||closest.distance<candidates[0].distance)){showInfrastructure(closest.assetId);return}
    const point=candidates[0]?.point;
    state.lastTap.stationId=point?.id||null;
-   if(!point){showTrackAt(e);return;}
+   if(!point){if(!showTrackAt(e))showReferenceAlignmentAt(e);return;}
    showPopup(point);
   };
   let touchTap=null;
@@ -569,7 +579,7 @@ async function init(){
   ownerCalibration=window.MRS10ECRLOwnerCalibration.create({map:state.map,getCategory:()=>state.category,onSelect:id=>showInfrastructure(id)});
   ownerCalibration.connect();
  }
- void loadGIS();
+ void loadGIS();void loadReferenceAlignment();
  const linkedAssetId=mapCore.readAssetId(location.search);
  if(publicAssetIds.has(linkedAssetId))showInfrastructure(linkedAssetId,false,true);
 }
@@ -661,7 +671,41 @@ function appendSGTransfers(host,point){
  }
 }
 function geometrySnapshot(){return {official:physical?.segments.filter(s=>s.geometryVerification==='OFFICIAL_VERIFIED').length||0,osm:physical?.segments.filter(s=>s.geometryVerification==='OSM_TOPOLOGY_MATCHED').length||0,approximate:physical?.segments.filter(s=>s.geometryVerification==='SECONDARY_APPROXIMATE').length||0,rendered:state.map?.getLayer('mrs10-v8-geometry')&&state.map.isStyleLoaded()?state.map.queryRenderedFeatures({layers:['mrs10-v8-geometry']}).length:0,sourcePresent:!!state.map?.getSource('mrs10-v8-physical')}}
-function geometryStatus(){const g=geometrySnapshot();$('geometry-status').textContent=tr('physical')+': '+g.official+' official / '+g.osm+' OSM · '+tr('approx')+': '+g.approximate+' · '+tr('unresolved')}
+function geometryStatus(){
+ const g=geometrySnapshot(),labels=referenceCopy[state.locale];
+ const reference=ecrlAlignmentStatus==='ready'?labels[0]+' ('+ecrlAlignment.geometry.features.length+')':labels[ecrlAlignmentStatus==='error'?2:1];
+ $('geometry-status').textContent=tr('physical')+': '+g.official+' official / '+g.osm+' OSM · '+tr('approx')+': '+g.approximate+' · '+tr('unresolved')+' · '+reference;
+}
+function setReferenceVisibility(mode){
+ const map=state.map;if(!map?.getLayer(ecrlReferenceLine))return;
+ const enabled=Object.values(ecrl?.flags??{}).some(Boolean);
+ const visibility=mapCore.referenceAlignmentVisible(state.category,mode,enabled)?'visible':'none';
+ if(map.getLayoutProperty(ecrlReferenceLine,'visibility')!==visibility)map.setLayoutProperty(ecrlReferenceLine,'visibility',visibility);
+}
+async function loadReferenceAlignment(){
+ try{ecrlAlignment=await mapCore.loadPublicReferenceAlignment();ecrlAlignmentStatus='ready';updateMapLayer()}
+ catch{ecrlAlignmentStatus='error'}
+ geometryStatus();
+}
+function showReferenceAlignmentAt(e){
+ const map=state.map;
+ if(!ecrlAlignment||!map.getLayer(ecrlReferenceLine)||map.getLayoutProperty(ecrlReferenceLine,'visibility')==='none')return;
+ const {x,y}=e.point;
+ const ids=new Set(map.queryRenderedFeatures([[x-5,y-5],[x+5,y+5]],{layers:[ecrlReferenceLine]}).map(hit=>hit.properties.segmentId));
+ if(ids.size!==1)return;
+ const id=[...ids][0],feature=ecrlAlignment.geometry.features.find(f=>f.id===id);if(!feature)return;
+ const [title,,,segmentLabel,snapshotLabel,branchLabel]=referenceCopy[state.locale];
+ const host=el('div');host.dataset.ecrlReferenceSegment=id;
+ host.append(el('strong',null,title),el('p',null,segmentLabel+' · '+id));
+ if(ecrlAlignment.snapshot)host.append(el('p',null,snapshotLabel+' · '+ecrlAlignment.snapshot.from+' – '+ecrlAlignment.snapshot.through));
+ const structure=ecrlAlignment.structures.get(id);
+ if(structure)host.append(el('p',null,'OSM · '+structure.kind+' · v'+structure.version));
+ const branchVersion=ecrlAlignment.branches.get(id);
+ if(branchVersion)host.append(el('p',null,branchLabel+' · v'+branchVersion));
+ const source=el('a',null,'OpenStreetMap way '+feature.properties.osmWayId+' · ODbL 1.0');
+ source.href='https://www.openstreetmap.org/way/'+feature.properties.osmWayId;source.target='_blank';source.rel='noopener noreferrer';host.append(source);
+ mountPopup(host,e.lngLat);
+}
 function installGeometry(){
  const map=state.map;if(!map?.isStyleLoaded()||!physical)return;
  const colors=Object.fromEntries(state.manifest.map(r=>[r.id,r.color]));
@@ -705,7 +749,7 @@ function installInnerDots(){const star=registerInterchangeStar();for(const r of 
  const outer=layerId(r.id)+'-interchange';if(!state.map.getLayer(outer))state.map.addLayer({id:outer,type:'symbol',source:srcId(r.id),filter:['==',['get','interchange'],true],layout:{'icon-image':star,'icon-size':['interpolate',['linear'],['zoom'],3,0.27,8,0.42,13,0.72],'icon-allow-overlap':true,'icon-ignore-placement':true}});
  const id=layerId(r.id)+'-inner';if(!state.map.getLayer(id))state.map.addLayer({id,type:'circle',source:srcId(r.id),paint:{'circle-color':r.color,'circle-radius':['interpolate',['linear'],['zoom'],3,0.8,8,1.5,13,2],'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.45:1}})}}
 function showTrackAt(e){
- if(!state.map.getLayer('mrs10-v8-geometry'))return;
+ if(!state.map.getLayer('mrs10-v8-geometry'))return false;
  // Source-geometry hit fallback avoids thin-line GPU query differences on WebKit.
  // Only already-visible source segments participate; no alignment is generated.
  const filter=state.map.getFilter('mrs10-v8-geometry');
@@ -718,7 +762,7 @@ function showTrackAt(e){
   const lines=candidate.geometry?.type==='LineString'?[candidate.geometry.coordinates]:candidate.geometry?.type==='MultiLineString'?candidate.geometry.coordinates:[];
   for(const line of lines)for(let i=1;i<line.length;i++){const d=distance(e.point,state.map.project(line[i-1]),state.map.project(line[i]));if(d<best){best=d;s=candidate}}
  }
- if(!s)return;cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;
+ if(!s)return false;cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;
  if(state.lastTap)state.lastTap.segmentId=s.segmentId;
  const segmentIds=window.MRS10V81Focus.component(physical,s.segmentId);
  const routeIds=openmr.routesForSegment(s);
@@ -729,6 +773,7 @@ function showTrackAt(e){
  host.append(el('p',null,tr('serviceRelation')+': '+(routeIds.join(' / ')||'UNKNOWN')),el('p',null,'Station–track anchors: UNKNOWN'));
  if(s.routeIds.includes('sg-CHANGI_APM'))host.append(el('p',null,threeRailways.copy(state.locale).track));
  appendSource(host,s.sourceUrl);appendFocusLineup(host,routeIds);compactSourceDetails(host);mountPopup(host,e.lngLat);if(routeIds.length)focusRoute(routeIds[0]);else{const coords=physical.segments.filter(s=>segmentIds.includes(s.segmentId)).flatMap(s=>s.geometry?.type==='LineString'?s.geometry.coordinates:[]);if(coords.length>1)state.map.fitBounds([[Math.min(...coords.map(c=>c[0])),Math.min(...coords.map(c=>c[1]))],[Math.max(...coords.map(c=>c[0])),Math.max(...coords.map(c=>c[1]))]],{padding:70,maxZoom:14,duration:300,bearing:state.map.getBearing()});}
+ return true;
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();

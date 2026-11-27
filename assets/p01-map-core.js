@@ -136,6 +136,35 @@
   }
   return {geometry,snapshot,structures,branches};
  }
+ function referenceAlignmentSpec(id,alignment,theme='light'){
+  const green=theme==='dark'?'#76d697':'#168b45';
+  const {tunnel,bridge}=theme==='dark'?{tunnel:'#ccd2df',bridge:'#ff9b5a'}:{tunnel:'#222c37',bridge:'#a84a16'};
+  const data={type:'FeatureCollection',features:alignment.geometry.features.map(feature=>({
+   ...feature,properties:{...feature.properties,segmentId:feature.id,
+    structure:alignment.structures.get(feature.id)?.kind??'unclassified',
+    branch:alignment.branches.has(feature.id)}
+  }))};
+  return {
+   source:{type:'geojson',data,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>'},
+   layer:{id,type:'line',source:id,layout:{'line-cap':'butt','line-join':'round'},
+    paint:{'line-color':['step',['zoom'],green,11,
+     ['match',['get','structure'],'tunnel',tunnel,['bridge','viaduct'],bridge,green]],
+     'line-opacity':0.92,'line-dasharray':[2.4,1.5],
+     'line-width':['interpolate',['linear'],['zoom'],5,1.5,10,2.6,11,3,
+      13,['case',['==',['get','branch'],true],2,3.8],
+      17,['case',['==',['get','branch'],true],2.8,5.2]]}}
+  };
+ }
+ function installReferenceAlignment(map,id,alignment,theme,before){
+  if(!alignment?.geometry?.features.length||map.getLayer(id))return false;
+  const {source,layer}=referenceAlignmentSpec(id,alignment,theme);
+  if(!map.getSource(id))map.addSource(id,source);
+  map.addLayer(layer,before&&map.getLayer(before)?before:undefined);
+  return true;
+ }
+ function referenceAlignmentVisible(category,mode='NORMAL',enabled=true){
+  return enabled&&((mode==='NORMAL'&&['MRS10','Malaysia','All','ECRL'].includes(category))||mode==='INFRASTRUCTURE_FOCUS');
+ }
  function installStationType2(map,id){
   if(map.hasImage(id))return;
   const canvas=document.createElement('canvas');canvas.width=68;canvas.height=68;
@@ -148,7 +177,7 @@
   ctx.beginPath();ctx.moveTo(8,19);ctx.lineTo(6,22);ctx.moveTo(16,19);ctx.lineTo(18,22);ctx.stroke();
   map.addImage(id,ctx.getImageData(0,0,68,68),{pixelRatio:2});
  }
- const api=Object.freeze({routes,sectionDGauges,readAssetId,assetHref,createEcrlContext,publicAssetIdentity,publicStationReferences,publicPassingLoopReferences,isPassingLoopPlacementHeld,installStationType2,findPublicAssets,loadPublicAssetIdentity,publicReferenceAlignment,loadPublicReferenceAlignment});
+ const api=Object.freeze({routes,sectionDGauges,readAssetId,assetHref,createEcrlContext,publicAssetIdentity,publicStationReferences,publicPassingLoopReferences,isPassingLoopPlacementHeld,installStationType2,findPublicAssets,loadPublicAssetIdentity,publicReferenceAlignment,loadPublicReferenceAlignment,referenceAlignmentSpec,installReferenceAlignment,referenceAlignmentVisible});
  if(typeof module==='object')module.exports=api;
  if(root)root.MRS10P01MapCore=api;
 })(typeof window==='undefined'?null:window);
