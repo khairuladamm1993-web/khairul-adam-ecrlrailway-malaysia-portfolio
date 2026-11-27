@@ -302,6 +302,38 @@ async function checkReferenceRoundtrip(page,device){
  assert.equal(await current.count(),0);
 }
 
+async function checkGatewayAssetContinuity(page){
+ const asset='ecrl-loop-historical-02';
+ const query='?asset='+asset;
+ const gateway='/gateway.html'+query+'#map';
+ const publicStage=page.locator('[data-map-audience=public]');
+ const localReturn=page.locator('#ecrl-gateway-return');
+ await page.route('https://cdn.jsdelivr.net/npm/@supabase/**',route=>route.abort());
+ await page.goto(base+'/unified-map-v8.html'+query);
+ const panel=page.locator('#ecrl-no-point');
+ await panel.locator('[data-ecrl-asset="'+asset+'"]').waitFor();
+ assert.equal(await page.locator('.maplibregl-popup').count(),0);
+ assert.equal(await localReturn.getAttribute('href'),gateway.slice(1));
+ await panel.getByRole('link',{name:'Buka dalam katalog aset'}).click();
+ const current=page.locator('#asset-reference-list [aria-current=true]');
+ await current.waitFor();
+ assert.equal(await current.evaluate(link=>link.closest('li').dataset.assetId),asset);
+ await localReturn.click();
+ await page.waitForURL(base+gateway);
+ const frame=publicStage.locator('iframe');
+ await frame.waitFor();
+ assert.equal(await frame.getAttribute('src'),'unified-map-v7.html'+query);
+ assert.equal(await page.locator('[data-gis-reference]').count(),0);
+ const card=publicStage.frameLocator('iframe').locator('#ecrl-context [aria-current=true]');
+ await card.waitFor();
+ assert.equal(await card.getAttribute('data-asset-id'),asset);
+ assert.equal(await card.locator('[data-map-reference]').count(),0);
+ await page.goto(base+'/unified-map-v8.html'+query+'&asset=ecrl-stn-01');
+ await page.waitForFunction(()=>window.MRS10V8Diagnostics.snapshot().mapReady);
+ assert.equal(await panel.isHidden(),true);
+ assert.equal(await localReturn.getAttribute('href'),'gateway.html#map');
+}
+
 async function checkMapComposition(page,engine,device){
  const tap=locator=>device==='desktop'?locator.click():locator.tap();
  await page.route(base+'/context-fixture-tiles/**',route=>route.fulfill({status:204}));
@@ -724,6 +756,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
       await checkAssetIdentityRetry(page);
       await checkCatalogueRetry(page);
       await checkCatalogueMapHandoff(page);
+      await checkGatewayAssetContinuity(page);
       assert.equal((await page.goto(base+'/unified-map-v8.html')).status(),200);
       const lanchang=await page.evaluate(()=>{
        const {dataContract}=window.MRS10P01MapCore.createEcrlContext();

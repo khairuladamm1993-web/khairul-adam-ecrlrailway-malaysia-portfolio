@@ -225,6 +225,7 @@ function buildLineup(){
 }
 function renderReferenceContext(){
  const reference=state.activeReference;
+ $('ecrl-gateway-return').href=window.MRS10P01MapCore.assetHref('gateway',reference?.assetId);
  const labels=ecrlLabels[state.locale];
  const opener=$('ecrl-context-open');
  opener.textContent=labels.open;

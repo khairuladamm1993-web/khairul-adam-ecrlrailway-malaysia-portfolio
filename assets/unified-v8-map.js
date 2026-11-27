@@ -2,6 +2,9 @@
    No route alignment is inferred from stop order. */
 import maplibregl from './p01-maplibre.js';
 const $=id=>document.getElementById(id);
+const mapCore=window.MRS10P01MapCore;
+const publicAssetIds=new Set();
+const catalogueLabels={ms:'Buka dalam katalog aset',en:'Open in asset catalogue',zh:'在资产目录中打开',th:'เปิดในรายการทรัพย์สิน'};
 const core=window.MRS10UnifiedV4Registry, kl=window.MRS10KLRegistry,
  ampang=window.MRS10AmpangR219, ampangGIS=window.MRS10AmpangGISR219,
  integration=window.MRS10UnifiedV6Adapter,ktm=window.MRS10UnifiedV7KTM;
@@ -86,7 +89,7 @@ const focus=window.MRS10V81Focus.create({
  restore:saved=>{state.category=saved.category;state.selected=saved.selected;restoreLayers(saved.layers);r3UI?.select(saved.intelligence||{routeIds:[]});if(saved.camera&&state.map){state.map.stop();state.map.jumpTo(saved.camera);state.zoomDone=true;}buildFilters();buildLegend();buildRoutes();buildLineup();syncReferenceMarkers()}
 });
 function cameraSnapshot(){return state.map?{center:state.map.getCenter().toArray(),zoom:state.map.getZoom(),bearing:state.map.getBearing(),pitch:state.map.getPitch(),padding:state.map.getPadding()}:null}
-function closeFocus(){cameraIntent++;pendingRouteFocus=null;$('ecrl-no-point').hidden=true;if(state.popup){const old=state.popup;state.popup=null;old.remove()}focus.exit()}
+function closeFocus(){cameraIntent++;pendingRouteFocus=null;$('ecrl-no-point').hidden=true;$('ecrl-gateway-return').href=mapCore.routes.gateway;if(state.popup){const old=state.popup;state.popup=null;old.remove()}focus.exit()}
 function mountPopup(host,position){
  $('ecrl-no-point').hidden=true;
  const old=state.popup;state.popup=null;old?.remove();
@@ -380,9 +383,18 @@ function noPointPanel(host){const old=state.popup;state.popup=null;old?.remove()
 function showReference(ref){if(!ref)return;cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;focus.enter({mode:'REFERENCE_FOCUS',routeIds:[],referenceId:ref.id});state.selected='reference:'+ref.id;buildRoutes();buildLineup();const host=el('div','source-reference');host.dataset.referenceId=ref.id;host.append(el('h3',null,(ref.code?ref.code+' · ':'')+ref.name));for(const value of [ref.hanzi,ref.pinyin,ref.status,ref.geometryStatus])if(value)host.append(el('p',null,value));appendSource(host,ref.sourceUrl);if(ref.coordinates){mountPopup(host,ref.coordinates);state.map.easeTo({center:ref.coordinates,zoom:12,duration:250});}else{host.append(el('p',null,tr('unlocated')));noPointPanel(host);}}
 function showUnlocatedStation(route,stop){if(!stop)return;focus.enter({mode:'STATION_FOCUS',routeIds:[route.id],stationId:stop.id});state.selected=route.id;buildRoutes();buildLineup();const host=el('div');host.dataset.unlocatedStation=stop.id;host.append(el('h3',null,stop.name),el('p',null,route.label),el('p',null,tr('unlocated')),el('p',null,stop.locationStatus||route.geometryStatus||'UNKNOWN'));appendSource(host,stop.sourceUrl||route.source);noPointPanel(host);}
 
-function showInfrastructure(assetId,moveCamera=false){
- const asset=ecrl?.get(assetId)||masterIntelligence?.endpoints.find(e=>e.assetId===assetId);if(!asset)return;cameraIntent++;pendingRouteFocus=null;state.zoomDone=true;
- const host=ecrlUI.content(assetId),officialRef=ecrl.reference(assetId),ownerRef=ownerCalibration?.reference(assetId)||null;
+function showInfrastructure(assetId,moveCamera=false,referenceOnly=false){
+ const asset=ecrl?.get(assetId)||masterIntelligence?.endpoints.find(e=>e.assetId===assetId);if(!asset)return;cameraIntent++;pendingRouteFocus=null;
+ if(!referenceOnly)state.zoomDone=true;
+ const host=ecrlUI.content(assetId),officialRef=referenceOnly?null:ecrl.reference(assetId),ownerRef=referenceOnly?null:ownerCalibration?.reference(assetId);
+ const publicId=publicAssetIds.has(assetId)?assetId:null;
+ $('ecrl-gateway-return').href=mapCore.assetHref('gateway',publicId);
+ if(publicId){
+  const link=el('a',null,catalogueLabels[state.locale]);
+  link.href=mapCore.assetHref('ecrl',publicId);
+  link.target='_top';
+  host.append(link);
+ }
  const ref=officialRef||ownerRef,visible=Boolean(ref&&(ownerRef||ecrl.flags[ref.kind]));
  if(ownerRef){
   const label={ms:'Rujukan koordinat diluluskan Owner · bukan lokasi jajaran fizikal yang disahkan',
@@ -393,7 +405,7 @@ function showInfrastructure(assetId,moveCamera=false){
   note.textContent=(label[state.locale]||label.en)+' · '+ownerRef.locationConfidence;
   host.append(note);
  }
- focus.enter({mode:'INFRASTRUCTURE_FOCUS',routeIds:[],assetId});r3UI?.select({assetIds:[assetId],contexts:['ECRL']});
+ focus.enter({mode:'INFRASTRUCTURE_FOCUS',routeIds:[],assetId,referenceOnly});r3UI?.select({assetIds:[assetId],contexts:['ECRL']});
  if(moveCamera&&visible&&state.map)state.map.easeTo({center:ref.coordinates,zoom:Math.max(state.map.getZoom(),12.5),duration:300});
  if(visible&&state.map){mountPopup(host,ref.coordinates)}
  else{const old=state.popup;state.popup=null;old?.remove();const panel=$('ecrl-no-point');panel.replaceChildren();const close=el('button',null,'×');close.type='button';close.setAttribute('aria-label',ecrl.t(state.locale,'close'));close.onclick=closeFocus;panel.append(close,host);panel.hidden=false;close.focus({preventScroll:true})}
@@ -509,7 +521,10 @@ async function loadGIS(){
 }
 async function init(){
  try{completeSources=await window.MRS10CompleteSources.load();singapore=await window.MRS10V8Singapore.load();physical=await fetch('./data/unified-v8/physical-network.json').then(r=>{if(!r.ok)throw Error('GEOMETRY_HTTP_'+r.status);return r.json()});window.MRS10V8Geometry.validate(physical);threeRailways=await window.MRS10ThreeRailways.load(window.MRS10V8Geometry);threeRailways.apply(singapore);physical={...physical,nodes:[...physical.nodes,...threeRailways.nodes],segments:[...physical.segments,...threeRailways.segments]};window.MRS10V8Geometry.validate(physical);state.manifest=[...core.loadManifest(kl,ampang),...integration.routes(),...ktm.routes(),...singapore.routes(),...completeSources.routes()]}catch(e){$('map-error').textContent='Registry: '+e.message;return}
- const {adapter,master,dataContract}=window.MRS10P01MapCore.createEcrlContext();
+ const {adapter,master,dataContract}=mapCore.createEcrlContext();
+ try{
+  for(const {assetId} of mapCore.publicAssetIdentity(dataContract,adapter))publicAssetIds.add(assetId);
+ }catch{/* Keep V8 available when the public projection is unavailable. */}
  ecrl=adapter;masterIntelligence=master;
  ecrlUI=window.MRS10ECRLIntegrationUI.create(ecrl,{master:masterIntelligence,dataContract,getLocale:()=>state.locale,getCategory:()=>state.category,getZoom:()=>state.map?.getZoom()??0,onSelect:id=>showInfrastructure(id,true),onFlags:(kind,enabled)=>{closeFocus();if(kind==='ALL')for(const key of Object.keys(ecrl.flags))ecrl.flags[key]=enabled;else ecrl.flags[kind]=enabled;applyVisibility();ecrlUI.render()}});
  journeyView=window.MRS10JourneyView.create({host:$('journey-foundation'),stations:ecrl.stations,getLocale:()=>state.locale});
@@ -540,7 +555,7 @@ async function init(){
   fullState(false);
   fullscreenButton.focus({preventScroll:true});
  });
- $('language').addEventListener('click',()=>{state.locale=locales[(locales.indexOf(state.locale)+1)%4];applyLanguage();if(focus.current.mode==='INFRASTRUCTURE_FOCUS'){showInfrastructure(focus.current.assetId)}else if(state.popup){closeFocus()}});
+ $('language').addEventListener('click',()=>{state.locale=locales[(locales.indexOf(state.locale)+1)%4];applyLanguage();if(focus.current.mode==='INFRASTRUCTURE_FOCUS'){showInfrastructure(focus.current.assetId,false,focus.current.referenceOnly)}else if(state.popup){closeFocus()}});
  $('theme').addEventListener('click',()=>{
   state.theme=state.theme==='dark'?'light':'dark';
   document.documentElement.dataset.theme=state.theme;
@@ -555,6 +570,8 @@ async function init(){
   ownerCalibration.connect();
  }
  void loadGIS();
+ const linkedAssetId=mapCore.readAssetId(location.search);
+ if(publicAssetIds.has(linkedAssetId))showInfrastructure(linkedAssetId,false,true);
 }
 function diagnosticSnapshot(){
  const map=state.map,rows={};

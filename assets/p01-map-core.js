@@ -16,7 +16,9 @@
   return values.length===1&&assetIdPattern.test(values[0])?values[0]:null;
  }
  function assetHref(route,assetId){
-  return './'+routes[route]+'?'+new URLSearchParams({asset:assetId});
+  const [path,anchor]=routes[route].split('#');
+  if(!assetId)return path+(anchor?'#'+anchor:'');
+  return path+'?'+new URLSearchParams({asset:assetId})+(anchor?'#'+anchor:'');
  }
  const heldPassingLoopPlacements=new Set(['PL02','PL03','PL04','PL05']);
  function isPassingLoopPlacementHeld(asset){

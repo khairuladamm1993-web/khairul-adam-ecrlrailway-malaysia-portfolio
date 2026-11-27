@@ -43,6 +43,8 @@
   }finally{
    retryButton.disabled=false;
   }
+  const selected=assets.find(asset=>asset.assetId===selectedId);
+  document.getElementById('ecrl-gateway-return').href=page.assetHref('gateway',selected?.assetId);
   const restoreSelection=[document.body,retryButton].includes(document.activeElement);
   retryButton.hidden=true;
   render();

@@ -3,7 +3,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const source=fs.readFileSync(path.join(__dirname,'../assets/public-gateway.js'),'utf8');
-function boot(initialMember=false,hash='',category='map'){
+function boot(initialMember=false,hash='',category='map',search=''){
  const nodes=new Map(),listeners=new Map();
  function stub(){
   return {innerHTML:'',hidden:false,open:false,scrollTop:0,
@@ -15,7 +15,7 @@ function boot(initialMember=false,hash='',category='map'){
  };
  const railway={html:x=>String(x),escape:x=>String(x),language:'ms',onLanguage(){}};
  const window={
-  MRS10P01MapCore:require('../assets/p01-map-core.js'),location:{hash},
+  MRS10P01MapCore:require('../assets/p01-map-core.js'),location:{hash,search},
   Railway:railway,RailwayAccess:{canReadMemberContent:initialMember},
   RailwayModulePreviews:[],RailwayInsights:[],
   addEventListener(name,callback){listeners.set(name,callback);}
@@ -60,4 +60,23 @@ test('Direct Public Map return supersedes stored category and links locally',()=
  assert.match(html,/href="map-language-lab\.html\?railPilot=1"/);
  assert.match(html,/href="ecrl-asset-reference\.html"/);
  assert.doesNotMatch(html,/vercel\.app|data-gis-reference|unified-map-v8/);
+});
+
+test('Gateway return carries only a single ECRL identifier across role changes',()=>{
+ const app=boot(false,'#map','about','?asset=ecrl-depot-kuantan');
+ const content=()=>app.nodes.get('#gateway-content').innerHTML;
+ assert.match(content(),/src="unified-map-v7\.html\?asset=ecrl-depot-kuantan"/);
+ assert.match(content(),/href="ecrl-asset-reference\.html\?asset=ecrl-depot-kuantan"/);
+ app.window.RailwayAccess.canReadMemberContent=true;
+ app.dispatch('railway-access-change');
+ assert.match(content(),/src="unified-map-v8\.html\?asset=ecrl-depot-kuantan"/);
+ assert.match(content(),/href="ecrl-asset-reference\.html\?asset=ecrl-depot-kuantan"/);
+ app.window.RailwayAccess.canReadMemberContent=false;
+ app.dispatch('railway-access-change');
+ assert.match(content(),/src="unified-map-v7\.html\?asset=ecrl-depot-kuantan"/);
+ assert.doesNotMatch(content(),/unified-map-v8|data-gis-reference|vercel\.app/);
+ for(const search of ['?asset=ecrl-depot-kuantan&asset=ecrl-stn-01','?asset=https%3A%2F%2Fexample.org']){
+  const invalid=boot(false,'#map','about',search);
+  assert.match(invalid.nodes.get('#gateway-content').innerHTML,/src="unified-map-v7\.html"/);
+ }
 });

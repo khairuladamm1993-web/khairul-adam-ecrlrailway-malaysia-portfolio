@@ -72,6 +72,7 @@ jobs:
           }
           for (const file of [
             'unified-map-v7.html', 'assets/unified-v7-map.js', 'assets/p01-public-map-nav.css', 'assets/p01-map-core.js',
+            'unified-map-v8.html', 'assets/unified-v8-map.js', 'assets/public-gateway.js',
             'ecrl-asset-reference.html', 'assets/p01-ecrl-public-reference.js', 'data/ecrl-reference-alignment.geojson',
             'assets/unified-ecrl/adapter.js', 'assets/unified-ecrl/chainage-manifest.js',
             'assets/unified-ecrl/railway-data-contract-v1.js', 'assets/unified-ecrl/alignment-evidence-r2.js',
