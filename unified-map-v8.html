@@ -9,6 +9,7 @@ body{padding-bottom:max(16px,env(safe-area-inset-bottom))}
 .mrs10-product-badge{display:inline-flex;align-items:center;min-height:28px;margin:2px 0 8px;padding:3px 10px;border:1px solid currentColor;border-radius:999px;font-size:.78rem;font-weight:700;letter-spacing:.025em;color:var(--fg,#172033);background:var(--card,#fff)}
 /* Mobile map visual polish: unchanged railway data and hit priority. */
 .p01-v8-map-badge{position:absolute;bottom:max(10px,env(safe-area-inset-bottom));left:max(10px,env(safe-area-inset-left));z-index:2;pointer-events:none;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:.75rem;font-weight:750}
+.p01-v8-map .mapbox:has(.maplibregl-popup, #ecrl-no-point:not([hidden])) .p01-v8-map-badge{visibility:hidden}
 .p01-v8-map .p01-v8-reference-popup .maplibregl-popup-content{max-width:100%;padding:10px 12px;border-radius:10px;font:13px/1.35 system-ui,sans-serif;overflow-wrap:anywhere;max-height:min(230px,40dvh)!important}
 .p01-v8-map .p01-v8-reference-popup .reference-heading{font-size:14px;line-height:1.35}
 .p01-v8-map .p01-v8-reference-popup .reference-qualification{font-size:12px;color:var(--sub)}
@@ -46,6 +47,11 @@ body{padding-bottom:max(16px,env(safe-area-inset-bottom))}
 <section id="ecrl-assets" class="ecrl-assets"></section>
 <section id="journey-foundation" class="consumer-foundation" aria-label="Simulated passenger journey"></section>
 <p class="notice"><a href="https://khairul-adam-portfolio-preview-safe.vercel.app/ecrl-alignment-lab.html" id="owner-route-lab-link">Owner · Akses calibration melalui gateway dilindungi</a></p>
+<section id="owner-pl-reference" class="notice" hidden>
+ <label>Owner · Rujukan PL R57 <input id="owner-pl-file" type="file" accept=".json,application/json"></label>
+ <button id="owner-pl-clear" type="button" hidden>Padam daripada peta / Clear from map</button>
+ <p id="owner-pl-status" role="status"></p>
+</section>
 </div>
 <section id="search-results" class="search-results" aria-live="polite" hidden></section>
 <footer><p id="r3-independent"></p><p><a href="./openmr-privacy.html">Privacy / Terms / Sources</a></p><p id="attribution"></p><small>Source reference · No operational use · No invented track geometry</small></footer>

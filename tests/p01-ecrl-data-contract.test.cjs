@@ -254,3 +254,19 @@ test('Public and Member share the exact admitted ECRL rail projection and paint,
  assert.equal(core.installReferenceAlignment(map,'v8',alignment,'dark','marker'),true);
  assert.equal(layers.get('v8').paint['line-color'][2],'#76d697');
 });
+
+test('Shared Core preserves existing query and fragment when handing off an asset',()=>{
+ const {assetHref,readAssetId,routes}=require('../assets/p01-map-core.js');
+ const asset='ecrl-loop-historical-01';
+ for(const [name,route] of Object.entries(routes)){
+  const original=new URL(route,'https://example.test/');
+  const next=new URL(assetHref(name,asset),'https://example.test/');
+  assert.equal(assetHref(name),route);
+  assert.equal(next.pathname,original.pathname);
+  assert.equal(next.hash,original.hash);
+  assert.equal(readAssetId(next.search),asset);
+  for(const [key,value] of original.searchParams)assert.equal(next.searchParams.get(key),value);
+ }
+ assert.equal(readAssetId('?asset='+asset+'&asset='+asset),null);
+ assert.equal(readAssetId('?asset=not-ecrl'),null);
+});

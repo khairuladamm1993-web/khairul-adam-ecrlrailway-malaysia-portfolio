@@ -17,6 +17,7 @@ const core=window.MRS10UnifiedV4Registry, kl=window.MRS10KLRegistry,
  ampang=window.MRS10AmpangR219, ampangGIS=window.MRS10AmpangGISR219,
  integration=window.MRS10UnifiedV6Adapter,ktm=window.MRS10UnifiedV7KTM;
 let singapore,physical,ecrl,ecrlUI,journeyView,ownerCalibration,masterIntelligence,threeRailways,completeSources;
+let beforePrivateFocus=null;
 const referenceMarkers=new Map();
 let pendingRouteFocus=null,cameraIntent=0,gps,r3UI,r3Data=null,r3Gaps=null;
 const openmr=window.OpenMRNetwork;
@@ -407,7 +408,8 @@ function showInfrastructure(assetId,moveCamera=false,referenceOnly=false){
   host.append(link);
  }
  const ref=officialRef||ownerRef,visible=Boolean(ref&&(ownerRef||ecrl.flags[ref.kind]));
- if(ownerRef){
+ if(ownerRef&&!officialRef){
+  if(!beforePrivateFocus)beforePrivateFocus=cameraSnapshot();
   const label={ms:'Rujukan koordinat diluluskan Owner · bukan lokasi jajaran fizikal yang disahkan',
   en:'Owner-approved coordinate reference · not a survey-verified railway location',
   zh:'Owner 已批准的坐标参考 · 非测量核实的铁路位置',
@@ -420,6 +422,36 @@ function showInfrastructure(assetId,moveCamera=false,referenceOnly=false){
  if(moveCamera&&visible&&state.map)state.map.easeTo({center:ref.coordinates,zoom:Math.max(state.map.getZoom(),12.5),duration:300});
  if(visible&&state.map){mountPopup(host,ref.coordinates)}
  else{const old=state.popup;state.popup=null;old?.remove();const panel=$('ecrl-no-point');panel.replaceChildren();const close=el('button',null,'×');close.type='button';close.setAttribute('aria-label',ecrl.t(state.locale,'close'));close.onclick=closeFocus;panel.append(close,host);panel.hidden=false;close.focus({preventScroll:true})}
+}
+function gatewaySessionHost(){
+ try{
+  const gateway=new URL('./gateway.html',location.href);
+  if(parent!==window&&parent.location.origin===gateway.origin&&parent.location.pathname===gateway.pathname)return parent;
+ }catch(_){/* A cross-origin frame has no trusted Gateway session. */}
+ return null;
+}
+function bindOwnerReference(sessionHost){
+ const panel=$('owner-pl-reference'),input=$('owner-pl-file'),clear=$('owner-pl-clear'),status=$('owner-pl-status');
+ const update=()=>{
+  panel.hidden=!ownerCalibration.isAuthorized;
+  clear.hidden=!ownerCalibration.count;
+  if(panel.hidden){input.value='';status.textContent='';}
+ };
+ input.addEventListener('change',async()=>{
+  const file=input.files[0];
+  input.value='';
+  if(!file)return;
+  const result=await ownerCalibration.importFile(file);
+  if(ownerCalibration.isAuthorized&&result!=='STALE')status.textContent=result==='LOADED'?
+   '3 rujukan R57 dimuat dalam sesi ini / 3 R57 references loaded for this session.':
+   'Fail rujukan R57 tidak dapat disahkan / R57 reference file could not be verified.';
+  update();
+ });
+ clear.addEventListener('click',()=>{ownerCalibration.clear();status.textContent='';update()});
+ sessionHost?.addEventListener('railway-access-change',update);
+ window.addEventListener('pagehide',event=>{if(!event.persisted)sessionHost?.removeEventListener('railway-access-change',update)});
+ window.addEventListener('pagehide',()=>{status.textContent='';update()});
+ update();
 }
 function fitOnce(){
  if(state.zoomDone||!state.mapReady)return;
@@ -577,8 +609,16 @@ async function init(){
  void Promise.all(['intelligence','gaps'].map(name=>fetch('./data/openmr-r3/'+name+'.json',{credentials:'same-origin'}).then(r=>{if(!r.ok)throw Error('R3_SOURCE_UNAVAILABLE');return r.json()}))).then(([data,gaps])=>{r3Data=data;r3Gaps=gaps;r3UI.refresh();}).catch(()=>{$('r3-source-status').textContent='DATA GAP · Intelligence sources unavailable; accepted railway map remains active.';});
  applyLanguage();startMap();
  if(state.map){
-  ownerCalibration=window.MRS10ECRLOwnerCalibration.create({map:state.map,getCategory:()=>state.category,onSelect:id=>showInfrastructure(id)});
+  const sessionHost=gatewaySessionHost();
+  ownerCalibration=window.MRS10ECRLOwnerCalibration.create({map:state.map,getCategory:()=>state.category,sessionHost,onClear:()=>{
+   if(!beforePrivateFocus)return;
+   if(document.querySelector('.ecrl-owner-coordinate-warning'))closeFocus();
+   state.map.stop();
+   state.map.jumpTo(beforePrivateFocus);
+   beforePrivateFocus=null;
+  }});
   ownerCalibration.connect();
+  bindOwnerReference(sessionHost);
  }
  void loadGIS();void loadReferenceAlignment();
  const linkedAssetId=mapCore.readAssetId(location.search);

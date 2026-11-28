@@ -24,6 +24,7 @@ const sharedOnly=process.env.P01_QA_SHARED_CORE_ONLY==='1';
 const hierarchyOnly=process.env.P01_QA_RAILWAY_HIERARCHY_ONLY==='1';
 const compositionOnly=process.env.P01_QA_MAP_COMPOSITION_ONLY==='1';
 const iconsOnly=process.env.P01_QA_ICON_SCALING_ONLY==='1';
+const privateR57=process.env.P01_QA_PRIVATE_R57_FILE;
 const profiles=[['desktop',1200,900],['ipad',810,1080],['iphone',390,844],['iphone-landscape',844,390]];
 const arcgis=/^https:\/\/[^/]*arcgis\.com\//;
 const emptyGis=r=>r.fulfill({json:{features:[]},headers:{'access-control-allow-origin':'*'}});
@@ -743,6 +744,90 @@ async function checkMemberC2Type2(page,engine,device){
  }
 }
 
+async function checkOwnerRecovery(page,device){
+ const ns='mrs10-v8-ecrl-owner-reference',layer=ns+'-symbol';
+ // Exercise the real V8 map with the same-origin Gateway session contract.
+ assert.match(base,/^http:\/\/127\.0\.0\.1:\d+$/);
+ await page.route(base+'/gateway.html?qa-r57',route=>route.fulfill({
+  contentType:'text/html',body:'<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1">'+
+  '<style>html,body,iframe{width:100%;height:100%;margin:0;border:0}</style>'+
+  '<script>window.RailwayAccess={status:"authenticated",canAdmin:false}</script>'+
+  '<iframe src="/unified-map-v8.html"></iframe>'
+ }));
+ assert.equal((await page.goto(base+'/unified-map-v7.html')).status(),200);
+ assert.equal(await page.locator('#owner-pl-reference').count(),0);
+ await page.waitForFunction(()=>window.MRS10V7Diagnostics?.snapshot().ecrlAssetIdentityStatus==='ready');
+ assert.equal(await page.evaluate(()=>window.MRS10V7Diagnostics.snapshot().ecrlReferenceLoopMarkers),0);
+ assert.equal((await page.goto(base+'/gateway.html?qa-r57')).status(),200);
+ const frame=await (await page.locator('iframe').elementHandle()).contentFrame();
+ await frame.waitForFunction(()=>window.ecrlTestMap?.getLayer('mrs10-v8-ecrl-infra-ring')&&window.ecrlTestMap.isStyleLoaded());
+ const dock=frame.locator('#owner-pl-reference'),input=frame.locator('#owner-pl-file');
+ const badge=frame.locator('.p01-v8-map-badge'),search=frame.locator('#search');
+ const setRole=(canAdmin,status)=>page.evaluate(({canAdmin,status})=>{
+  Object.assign(window.RailwayAccess,{canAdmin,status});
+  dispatchEvent(new Event('railway-access-change'));
+ },{canAdmin,status});
+ assert.equal(await dock.isHidden(),true);
+ await input.setInputFiles(privateR57);
+ assert.equal(await frame.evaluate(id=>!!window.ecrlTestMap.getSource(id),ns),false);
+ await setRole(true,'authenticated');
+ await frame.locator('#details-toggle').click();
+ await dock.waitFor({state:'visible'});
+ await input.setInputFiles({name:'changed.json',mimeType:'application/json',buffer:Buffer.from('{}')});
+ await frame.locator('#owner-pl-status').filter({hasText:'could not be verified'}).waitFor();
+ assert.equal(await frame.evaluate(id=>!!window.ecrlTestMap.getSource(id),ns),false);
+ await input.setInputFiles(privateR57);
+ await frame.locator('#owner-pl-status').filter({hasText:'3 R57 references loaded'}).waitFor();
+ const actual=await frame.evaluate(async id=>{
+  const map=window.ecrlTestMap,{features}=await map.getSource(id).getData();
+  return features.map(({properties})=>[properties.code,properties.geometryVerification]);
+ },ns);
+ assert.deepEqual(actual,['PL01','PL04','PL07'].map(code=>[code,'OWNER_REFERENCE_NOT_TRACK']));
+ await frame.locator('#filters').getByRole('button',{name:'ECRL',exact:true}).click();
+ const centreOn=async(code,zoom)=>frame.evaluate(async({ns,code,zoom})=>{
+  const map=window.ecrlTestMap,{features}=await map.getSource(ns).getData();
+  const center=features.find(f=>f.properties.code===code).geometry.coordinates;
+  map.jumpTo({center,zoom});const {x,y}=map.project(center);return {x,y};
+ },{ns,code,zoom});
+ await centreOn('PL01',8);
+ await frame.waitForFunction(()=>window.ecrlTestMap.areTilesLoaded());
+ assert.equal(await frame.evaluate(id=>window.ecrlTestMap.queryRenderedFeatures({layers:[id]}).length,layer),0);
+ assert.equal(await frame.evaluate(id=>window.ecrlTestMap.getLayer(id).minzoom,layer),9);
+ assert.equal(await badge.isVisible(),true);
+ for(const code of ['PL01','PL04','PL07']){
+  const position=await centreOn(code,13);
+  await frame.waitForFunction(({code,layer,position})=>window.ecrlTestMap.queryRenderedFeatures([position.x,position.y],{layers:[layer]}).some(f=>f.properties.code===code),{code,layer,position});
+  const canvas=frame.locator('#map canvas');
+  if(device==='desktop')await canvas.click({position});else await canvas.tap({position});
+  const popup=frame.locator('.maplibregl-popup');
+  await popup.locator('.ecrl-owner-coordinate-warning').waitFor();
+  assert.match(await popup.innerText(),new RegExp(code));
+  assert.equal(await badge.isHidden(),true);
+  if(code!=='PL07'){
+   await popup.locator('.maplibregl-popup-close-button').click();
+   await badge.waitFor({state:'visible'});
+  }
+ }
+ await setRole(false,'authenticated');
+ await badge.waitFor({state:'visible'});
+ assert.equal(await frame.locator('.ecrl-owner-coordinate-warning').count(),0);
+ assert.equal(await dock.isHidden(),true);
+ assert.equal(await frame.evaluate(id=>!!window.ecrlTestMap.getSource(id),ns),false);
+ await search.fill('PL02');
+ await frame.locator('#search-results button').first().click();
+ await frame.locator('#ecrl-no-point').waitFor();
+ assert.equal(await badge.isHidden(),true);
+ await frame.locator('#ecrl-no-point button').first().click();
+ await badge.waitFor({state:'visible'});
+ const kinds=await frame.evaluate(()=>{
+  const {dataContract}=window.MRS10P01MapCore.createEcrlContext();
+  return ['PL','DEPOT'].map(kind=>dataContract.records.filter(r=>r.type===kind).length);
+ });
+ assert.deepEqual(kinds,[7,2]);
+ await setRole(false,'signed-out');
+ assert.equal(await dock.isHidden(),true);
+}
+
 async function checkIconZoomTiers(page,engine,device,member){
  const mapSource=member?'mrs10-v8-ecrl-infra':'mrs10-v7-ecrl-localities';
  const panel=page.locator('#ecrl-schematic');
@@ -980,8 +1065,9 @@ async function checkUnavailableRenderer(browser){
 for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
  const browser=await driver.launch({headless:true,args:engine==='chromium'?['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']:[]});
  try{
-  if(!batchOnly&&!sharedOnly&&!hierarchyOnly&&!compositionOnly&&!iconsOnly&&engine==='chromium')await checkUnavailableRenderer(browser);
-  for(const [device,width,height] of profiles){
+  if(!batchOnly&&!sharedOnly&&!hierarchyOnly&&!compositionOnly&&!iconsOnly&&!privateR57&&engine==='chromium')await checkUnavailableRenderer(browser);
+  for(const [device,originalWidth,height] of profiles){
+   const width=privateR57&&device==='ipad'?700:originalWidth;
    if((batchOnly||sharedOnly||hierarchyOnly)&&!["desktop","iphone"].includes(device))continue;
    const page=await browser.newPage({viewport:{width,height},hasTouch:device!=='desktop',isMobile:device!=='desktop'});
    // Run the local smoke test with the application's opt-out for external analytics.
@@ -991,6 +1077,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    page.on('response',r=>{if(r.url().startsWith(base+'/')&&!r.ok())localFailures.push(new URL(r.url()).pathname)});
    page.on('pageerror',e=>errors.push(e.message));
    page.on('console',m=>{if(/^V8_MAP_LAYER_INSTALL_FAILED/.test(m.text())) errors.push(m.text())});
+   if(privateR57)await page.route('**/*',route=>route.request().url().startsWith(base+'/')?route.fallback():route.abort('blockedbyclient'));
    const allowedAssets=new Set(['maplibre-gl.css','maplibre-gl.mjs','maplibre-gl-shared.mjs','maplibre-gl-worker.mjs']);
    await page.route(moduleRoot+'**',async r=>{
     const name=new URL(r.request().url()).pathname.split('/').pop();
@@ -1004,6 +1091,13 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    await page.route('https://tiles.openfreemap.org/styles/**', r=>r.fulfill({json:{version:8,sources:{},layers:[{id:'bg',type:'background',paint:{'background-color':'#dce6e4'}}]},headers:{'access-control-allow-origin':'*'}}));
    await page.route(arcgis,emptyGis);
    try{
+    if(privateR57){
+     await checkOwnerRecovery(page,device);
+     assert.deepEqual(errors,[]);
+     assert.deepEqual(localFailures,[]);
+     rows.push({engine,device,status:'PASS',referenceAssets:3,publicAndMemberIsolation:true,badgeRestore:true,holdInventory:[7,2]});
+     continue;
+    }
     if(iconsOnly){
      assert.equal((await page.goto(base+'/unified-map-v7.html')).status(),200);
      await page.waitForFunction(()=>window.ecrlTestMap?.getLayer('mrs10-v7-ecrl-localities-point')&&window.ecrlTestMap.isStyleLoaded());
@@ -1178,7 +1272,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
     assert.deepEqual(errors,[]);
     assert.deepEqual(localFailures,[]);
     rows.push({engine,device,status:'PASS',maplibre:'6.13.0',publicV7:true,publicNavigation:true,tiers:[[16,0,0,0],[16,7,2,0],[16,7,2,7]],stationPopup:true,popupScroll:true,controlsClear:true,plNoPoint:true,fullscreenFallbackEscape:true});
-   }catch(e){rows.push({engine,device,status:'FAIL',error:String(e.stack||e)});await page.screenshot({path:`${out}/${engine}-${device}-fail.png`}).catch(()=>{})}
+   }catch(e){rows.push({engine,device,status:'FAIL',error:String(e.stack||e)});if(!privateR57)await page.screenshot({path:`${out}/${engine}-${device}-fail.png`}).catch(()=>{})}
    finally{await fs.writeFile(out+'/visual-qa.json',JSON.stringify(rows,null,2));console.log(JSON.stringify(rows.at(-1)));await page.close()}
   }
  }finally{await browser.close()}

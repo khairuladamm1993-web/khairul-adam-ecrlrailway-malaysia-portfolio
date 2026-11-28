@@ -1,38 +1,37 @@
-/* Owner calibration overlay. Only server-authorized RailwayAccess session data;
-   no public GPS, no private coordinates in assets, no writes or survey promotion. */
+/* R57 Owner-only overlay. Coordinates come from a local file, in session memory. */
 (function(root){'use strict';
-const NS='mrs10-v8-ecrl-owner-reference',ALLOWED=['Personal Field-Validated Location','Public Reference Location','Pending Validation','Validated Location','Engineering/Survey Validated Location'];
-const valid=(lat,lon)=>Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=-90&&lat<=90&&lon>=-180&&lon<=180&&!(lat===0&&lon===0);
-const empty=()=>({type:'FeatureCollection',features:[]});
-function parse(rows){
+const NS='mrs10-v8-ecrl-owner-reference';
+const R57_SHA256='ea5ab061c374673d4f0ba26b3081377da4193c52bc3625c1070fccc78c0d9eea';
+const referenceCodes=new Set(['PL01','PL04','PL07']);
+function parse(payload){
+ if(payload?.version!=='MR-S10-R57-OWNER-PL-V1'||!Array.isArray(payload.references)||payload.references.length!==referenceCodes.size)return null;
  const found=new Map();
- for(const r of Array.isArray(rows)?rows:[]){
-  const code=String(r?.id||'').toUpperCase(),location=r?.body?.location||{};
-  if(r?.kind!=='corridor'||r?.approved!==true||!/^PL0[1-7]$/.test(code)||!ALLOWED.includes(location.locationConfidence))continue;
-  const lat=Number(location.latitude),lon=Number(location.longitude);
-  if(location.latitude==null||location.longitude==null||!valid(lat,lon))continue;
-  const source=String(location.coordinateSource||'').trim();
-  if(source.length<8)continue;
-  const status=location.locationConfidence==='Engineering/Survey Validated Location'?'SURVEY_CLAIM_REQUIRES_SOURCE_AUDIT':'OWNER_APPROVED_REFERENCE';
-  found.set(code,Object.freeze({
-   code,assetId:'ecrl-loop-historical-'+code.slice(-2),coordinates:Object.freeze([lon,lat]),
-   locationConfidence:location.locationConfidence,provenance:source,status,
-   updatedAt:typeof r.updated_at==='string'?r.updated_at:null,
-   // Approval is not equivalent to physical alignment validation.
-   physicallyVerified:false,kind:'OWNER_REFERENCE_NOT_TRACK',surveyConfirmed:false
-  }));
+ for(const row of payload.references){
+  const {code,referenceOnly,physicalVerified}=row?.properties||{};
+  const assetId='ecrl-loop-historical-'+String(code).slice(-2);
+  const pair=row?.geometry?.coordinates;
+  if(!referenceCodes.has(code)||found.has(code)||row.id!==assetId||row.properties.assetId!==assetId||
+     referenceOnly!==true||physicalVerified!==false||row.geometry?.type!=='Point'||!Array.isArray(pair)||pair.length!==2)return null;
+  const [lon,lat]=pair;
+  if(!Number.isFinite(lon)||!Number.isFinite(lat)||Math.abs(lon)>180||Math.abs(lat)>90||(!lon&&!lat))return null;
+  found.set(code,Object.freeze({code,assetId,coordinates:Object.freeze([lon,lat]),
+   locationConfidence:'R57 · reference only',status:'OWNER_APPROVED_REFERENCE',physicallyVerified:false,
+   kind:'OWNER_REFERENCE_NOT_TRACK',surveyConfirmed:false}));
  }
  return Object.freeze([...found.values()].sort((a,b)=>a.code.localeCompare(b.code)));
 }
-function create({map,getCategory,onSelect}){
- let data=Object.freeze([]),generation=0,bound=false,connected=false;
- const allowed=()=>Boolean(root.RailwayAccess?.canAdmin&&root.RailwayAccess?.status==='authenticated');
+function create({map,getCategory,sessionHost,onClear}){
+ let data=Object.freeze([]),generation=0,connected=false;
+ const allowed=()=>{
+  const access=sessionHost?.RailwayAccess;
+  return access?.canAdmin===true&&access.status==='authenticated';
+ };
  const features=()=>({type:'FeatureCollection',features:data.map(r=>({
   type:'Feature',id:r.assetId,properties:{assetId:r.assetId,code:r.code,confidence:r.locationConfidence,
   geometryVerification:r.kind,status:r.status},geometry:{type:'Point',coordinates:[...r.coordinates]}
  }))});
  function install(){
-  if(!map?.getStyle()||!allowed())return;
+  if(!map?.getStyle()||!allowed()||!data.length)return;
   const source=map.getSource(NS);
   if(!source)map.addSource(NS,{type:'geojson',data:features()});
   else source.setData(features());
@@ -53,22 +52,29 @@ function create({map,getCategory,onSelect}){
   if(map?.getLayer(NS+'-symbol'))map.setLayoutProperty(NS+'-symbol','visibility',allowed()&&(getCategory()==='ECRL'||getCategory()==='All')&&data.length?'visible':'none');
  }
  function clear(){
-  data=Object.freeze([]);const source=map?.getSource(NS);if(source)source.setData(empty());
-  visibility();
+  generation++;
+  const wasLoaded=data.length>0;
+  data=Object.freeze([]);
+  if(map?.getLayer(NS+'-symbol'))map.removeLayer(NS+'-symbol');
+  if(map?.getSource(NS))map.removeSource(NS);
+  if(wasLoaded)onClear?.();
  }
- async function sync(){
+ async function importFile(file){
+  if(!allowed())return 'NO_AUTH';
+  if(!file||file.size<1||file.size>16384)return 'INVALID';
   const n=++generation;
-  if(!allowed()){clear();return {status:'NO_AUTH',count:0}}
   try{
-   const payload=await root.RailwayAccess.fetchMemberBundle();
-   if(n!==generation||!allowed())return {status:'STALE_DISCARDED',count:0};
-   data=parse(payload?.content);
-   install();visibility();
-   return {status:'OWNER_REFERENCE_ONLY',count:data.length};
-  }catch(_){
-   if(n===generation)clear();
-   return {status:'UNAVAILABLE',count:0};
-  }
+   const contents=await file.arrayBuffer();
+   const bytes=await root.crypto.subtle.digest('SHA-256',contents);
+   if(n!==generation||!allowed())return 'STALE';
+   const digest=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
+   if(digest!==R57_SHA256)return 'INVALID';
+   const parsed=parse(JSON.parse(new root.TextDecoder().decode(contents)));
+   if(!parsed)return 'INVALID';
+   data=parsed;
+   install();
+   return 'LOADED';
+  }catch(_){return 'INVALID';}
  }
  function reference(id){return allowed()?data.find(r=>r.assetId===id)||null:null}
  function hit(point){
@@ -79,10 +85,14 @@ function create({map,getCategory,onSelect}){
  }
  function connect(){
   if(connected)return;connected=true;
-  root.addEventListener?.('railway-access-change',()=>{void sync()});
-  void sync();
+  const accessChanged=()=>{if(!allowed())clear()};
+  sessionHost?.addEventListener('railway-access-change',accessChanged);
+  root.addEventListener('pagehide',event=>{
+   clear();
+   if(!event.persisted)sessionHost?.removeEventListener('railway-access-change',accessChanged);
+  });
  }
- return Object.freeze({connect,sync,install,visibility,reference,hit,get count(){return allowed()?data.length:0},get isAuthorized(){return allowed()}});
+ return Object.freeze({connect,importFile,clear,install,visibility,reference,hit,get count(){return allowed()?data.length:0},get isAuthorized(){return allowed()}});
 }
 const api=Object.freeze({parse,create,NS});if(typeof module==='object'&&module.exports)module.exports=api;
 if(root)root.MRS10ECRLOwnerCalibration=api;
