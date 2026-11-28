@@ -292,6 +292,12 @@ function renderReferenceContext(){
   const item=el('li');
   item.dataset.assetId=row.assetId;
   item.dataset.type=row.type;
+  if(section==='C2'&&row.type==='STN'){
+   const icon=window.MRS10P01MapCore.stationType2Canvas();
+   icon.className='p01-c2-station-icon';
+   icon.setAttribute('aria-hidden','true');
+   item.append(icon);
+  }
   const title=[row.code,row.name].filter(Boolean).join(' · ');
   const hasPoint=!!ecrlPoint(row.assetId);
   const heldLoop=window.MRS10P01MapCore.isPassingLoopPlacementHeld(row);

@@ -165,19 +165,23 @@
  function referenceAlignmentVisible(category,mode='NORMAL',enabled=true){
   return enabled&&((mode==='NORMAL'&&['MRS10','Malaysia','All','ECRL'].includes(category))||mode==='INFRASTRUCTURE_FOCUS');
  }
- function installStationType2(map,id){
-  if(map.hasImage(id))return;
-  const canvas=document.createElement('canvas');canvas.width=68;canvas.height=68;
-  const ctx=canvas.getContext('2d');ctx.scale(68/24,68/24);
+ function stationType2Canvas(pixelSize=68){
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=pixelSize;
+  const ctx=canvas.getContext('2d');ctx.scale(pixelSize/24,pixelSize/24);
   ctx.fillStyle='#1457a6';ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;
   ctx.beginPath();ctx.roundRect(3.5,2.5,17,17,4);ctx.fill();ctx.stroke();
   ctx.fillStyle='#ffffff';ctx.fillRect(7,6,10,6);
   for(const x of [8,16]){ctx.beginPath();ctx.arc(x,15.5,1.2,0,2*Math.PI);ctx.fill()}
   ctx.strokeStyle='#1457a6';ctx.lineWidth=2;
   ctx.beginPath();ctx.moveTo(8,19);ctx.lineTo(6,22);ctx.moveTo(16,19);ctx.lineTo(18,22);ctx.stroke();
-  map.addImage(id,ctx.getImageData(0,0,68,68),{pixelRatio:2});
+  return canvas;
  }
- const api=Object.freeze({routes,sectionDGauges,readAssetId,assetHref,createEcrlContext,publicAssetIdentity,publicStationReferences,publicPassingLoopReferences,isPassingLoopPlacementHeld,installStationType2,findPublicAssets,loadPublicAssetIdentity,publicReferenceAlignment,loadPublicReferenceAlignment,referenceAlignmentSpec,installReferenceAlignment,referenceAlignmentVisible});
+ function installStationType2(map,id,pixelSize){
+  if(map.hasImage(id))return;
+  const canvas=stationType2Canvas(pixelSize);
+  map.addImage(id,canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height),{pixelRatio:2});
+ }
+ const api=Object.freeze({routes,sectionDGauges,readAssetId,assetHref,createEcrlContext,publicAssetIdentity,publicStationReferences,publicPassingLoopReferences,isPassingLoopPlacementHeld,stationType2Canvas,installStationType2,findPublicAssets,loadPublicAssetIdentity,publicReferenceAlignment,loadPublicReferenceAlignment,referenceAlignmentSpec,installReferenceAlignment,referenceAlignmentVisible});
  if(typeof module==='object')module.exports=api;
  if(root)root.MRS10P01MapCore=api;
 })(typeof window==='undefined'?null:window);

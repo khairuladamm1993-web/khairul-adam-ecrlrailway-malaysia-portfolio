@@ -38,6 +38,8 @@
 #ecrl-context-list li::before{content:'';position:absolute;inset-inline-start:-13px;top:10px;width:7px;height:7px;border-radius:50%;background:var(--sub)}
 #ecrl-context-list li:not(:last-child)::after{content:'';position:absolute;inset-inline-start:-10px;top:17px;bottom:-17px;width:1px;background:var(--line)}
 #ecrl-context-list li[data-type=STN]::before{background:#1457a6}
+#ecrl-context-list li:has(>.p01-c2-station-icon)::before{display:none}
+.p01-c2-station-icon{position:absolute;inset-inline-start:-14.5px;top:8.5px;width:10px;height:10px;pointer-events:none}
 #ecrl-context-list li[data-type=PL]::before{background:#b57925}
 #ecrl-context-list li[data-type=DEPOT]::before{border-radius:1px;background:#0f7778}
 #ecrl-context-list li[data-type=YARD]::before{border-radius:0;background:#b57925;transform:rotate(45deg)}

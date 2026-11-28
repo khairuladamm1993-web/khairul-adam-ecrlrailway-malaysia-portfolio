@@ -436,6 +436,14 @@ async function checkMapComposition(page,engine,device){
  assert.deepEqual(tally,{STN:20,PL:7,DEPOT:2,YARD:1,PORT:2});
  await tap(panel.getByRole('button',{name:'C2',exact:true}));
  assert.equal(await panel.locator('[data-map-station]').count(),0);
+ const c2Stations=panel.locator('li[data-type=STN]');
+ assert.equal(await c2Stations.locator('canvas.p01-c2-station-icon[aria-hidden=true]').count(),4);
+ assert.equal(await panel.locator('li[data-type=YARD] canvas').count(),0);
+ for(const {assetId,name} of records.filter(row=>row.section==='C2'&&row.type==='STN')){
+  await tap(panel.getByRole('button',{name,exact:true}));
+  assert.equal(await panel.locator('[aria-current=true]').getAttribute('data-asset-id'),assetId);
+  assert.deepEqual(await camera(),before);
+ }
  await tap(panel.getByRole('button',{name:'Puncak Alam Freight Yard',exact:true}));
  assert.equal(await panel.locator('[aria-current=true]').getAttribute('data-type'),'YARD');
  assert.match(await panel.locator('#ecrl-context-status').innerText(),/Lokasi semasa dan jajaran belum disahkan/);
@@ -687,6 +695,49 @@ async function checkMemberReferenceParity(page,engine,device){
  await popup.locator('.maplibregl-popup-close-button').click();await popup.waitFor({state:'hidden'});
 }
 
+async function checkMemberC2Type2(page,engine,device){
+ const ns='mrs10-v8-ecrl-infra';
+ assert.equal((await page.goto(base+'/unified-map-v8.html')).status(),200);
+ await page.waitForFunction(ns=>window.ecrlTestMap?.getLayer(ns+'-ring')&&window.ecrlTestMap.isStyleLoaded(),ns);
+ const evidence=await page.evaluate(async ns=>{
+  const map=window.ecrlTestMap;
+  const icon=map.getImage(ns+'-HISTORICAL');
+  const expected=window.MRS10P01MapCore.stationType2Canvas(88).getContext('2d').getImageData(0,0,88,88).data;
+  const {features}=await map.getSource(ns).getData();
+  return {type2:icon.data.data.length===expected.length&&icon.data.data.every((value,i)=>value===expected[i]),
+   logicalWidth:icon.data.width/icon.pixelRatio,scale:map.getLayoutProperty(ns+'-ring','icon-size'),
+   corridorScale:map.getLayoutProperty(ns+'-station-marker','icon-size'),
+   stations:features.filter(feature=>feature.properties.kind==='HISTORICAL').map(feature=>({
+    id:feature.properties.assetId,coordinates:feature.geometry.coordinates,qualifier:feature.properties.geometryVerification
+   }))};
+ },ns);
+ assert.equal(evidence.type2,true);
+ assert.equal(evidence.logicalWidth,44);
+ assert.equal(evidence.scale,0.65);
+ assert.deepEqual(evidence.corridorScale,['step',['zoom'],0.62,8,0.82,12,1]);
+ assert.deepEqual(evidence.stations.map(row=>row.id),['ecrl-stn-17','ecrl-stn-18','ecrl-stn-19','ecrl-stn-20']);
+ const canvas=page.locator('#map canvas');
+ for(const {id,coordinates,qualifier} of evidence.stations){
+  assert.equal(qualifier,'REFERENCE_ONLY');
+  await page.evaluate(center=>window.ecrlTestMap.jumpTo({center,zoom:14}),coordinates);
+  const hit=await page.waitForFunction(({ns,id,coordinates})=>{
+   const map=window.ecrlTestMap,{x,y}=map.project(coordinates);
+   const point=[x,y];
+   if(!map.areTilesLoaded()||!map.queryRenderedFeatures(point,{layers:[ns+'-ring']}).some(f=>f.properties.assetId===id))return false;
+   if(map.queryRenderedFeatures(point,{layers:[ns+'-inner']}).some(f=>f.properties.assetId===id))return false;
+   return {x,y};
+  },{ns,id,coordinates});
+  const position=await hit.jsonValue();
+  if(device==='desktop')await canvas.click({position});else await canvas.tap({position});
+  const popup=page.locator('.maplibregl-popup [data-ecrl-asset="'+id+'"]');
+  await popup.waitFor({state:'visible'});
+  assert.match(await popup.innerText(),/EIA 2017.*bukan lokasi stesen terkini/i);
+  if(id==='ecrl-stn-18')await page.locator('.mapbox').screenshot({path:out+'/'+engine+'-'+device+'-member-c2-type2.png'});
+  await page.locator('.maplibregl-popup-close-button').click();
+  await popup.waitFor({state:'hidden'});
+ }
+}
+
 async function checkRailwayHierarchy(page,engine,device){
  // Deterministic overlap fixture for two existing station identities. Never published as data.
  const coordinate=[101.58,3.17];
@@ -916,6 +967,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
      await checkMapComposition(page,engine,device);
      await checkAlignmentEvidence(page,engine,device);
      await checkMemberReferenceParity(page,engine,device);
+     await checkMemberC2Type2(page,engine,device);
      await checkReferenceRoundtrip(page,device);
      if(device==='desktop'){
       await checkSharedIdentity(page);

@@ -59,7 +59,7 @@ function create(adapter,{master=root.MRS10ECRLMasterIntelligence?.create(adapter
  function render(){
   renderSchematic();
   const host=$('ecrl-controls');host.hidden=!['ECRL','Malaysia','All','MRS10'].includes(getCategory());host.replaceChildren();const heading=el('div',null,'ecrl-compact-heading');heading.append(el('strong',t('title')));const options=el('details',null,'ecrl-map-options');summary(options,ui('layers'));
-  const labels={LOCALITY:t('reference'),HISTORICAL:t('legendHistoric'),MARITIME:t('legendPort'),YARD:ui('yardRef')};
+  const labels={LOCALITY:t('reference'),HISTORICAL:ui('historic'),MARITIME:t('legendPort'),YARD:ui('yardRef')};
   const switches=el('div',null,'ecrl-switches');
   const masterLabel=el('label'),masterBox=el('input');masterBox.type='checkbox';masterBox.id='ecrl-enabled';masterBox.checked=Object.values(adapter.flags).some(Boolean);masterBox.onchange=()=>onFlags('ALL',masterBox.checked);masterLabel.append(masterBox,document.createTextNode('ECRL'));heading.append(masterLabel);
   for(const kind of Object.keys(adapter.flags)){const label=el('label'),box=el('input');box.type='checkbox';box.id='ecrl-reference-'+kind.toLowerCase();box.checked=adapter.flags[kind];box.onchange=()=>onFlags(kind,box.checked);label.append(box,document.createTextNode(labels[kind]));switches.append(label)}

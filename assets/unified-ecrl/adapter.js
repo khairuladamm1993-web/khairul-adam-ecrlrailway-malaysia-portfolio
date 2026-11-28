@@ -4,6 +4,7 @@ const NS='mrs10-v8-ecrl-infra',COLORS={LOCALITY:'#0f8b8d',HISTORICAL:'#c76a1b',M
 const DETAIL_ZOOM=Object.freeze({PL:9,DEPOT:12});
 const detailLevel=zoom=>zoom>=DETAIL_ZOOM.DEPOT?'near':zoom>=DETAIL_ZOOM.PL?'mid':'far';
 const codedStation=['!=',['to-string',['get','stationCode']],''];
+const notHistorical=['!=',['get','kind'],'HISTORICAL'];
 function labelImage(map,id,text){
  if(map.hasImage(id))return;
  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
@@ -65,6 +66,7 @@ const loops=registry.loops.map(annotate);
   for(const suffix of ['-hit','-ring','-inner','-station-marker','-station-label']){
    const kindFilter=['in',['get','kind'],['literal',kinds]];
    const filter=suffix.startsWith('-station-')?['all',kindFilter,codedStation]:['all',kindFilter,['!',codedStation]];
+   if(suffix==='-inner')filter.push(notHistorical);
    map.setLayoutProperty(NS+suffix,'visibility',kinds.length?'visible':'none');map.setFilter(NS+suffix,filter);
   }
  }
@@ -73,13 +75,15 @@ const loops=registry.loops.map(annotate);
   if(!map?.getStyle())return;
   if(!map.getSource(NS))map.addSource(NS,{type:'geojson',data:features()});
   if(!map.getLayer(NS+'-hit'))map.addLayer({id:NS+'-hit',type:'circle',source:NS,paint:{'circle-radius':14,'circle-opacity':0}});
+  const mapCore=root?.MRS10P01MapCore||(typeof module==='object'?require('../p01-map-core.js'):null);
+  // Keep the 44 px logical sprite and existing scale for historical station references.
+  mapCore.installStationType2(map,NS+'-HISTORICAL',88);
   for(const [kind,color] of Object.entries(COLORS))if(!map.hasImage(NS+'-'+kind)){
    const c=document.createElement('canvas');c.width=c.height=44;const x=c.getContext('2d');x.lineWidth=3;x.strokeStyle=color;x.fillStyle='white';x.setLineDash([5,4]);x.beginPath();if(kind==='YARD')x.rect(7,7,30,30);else x.arc(22,22,15,0,Math.PI*2);x.fill();x.stroke();map.addImage(NS+'-'+kind,x.getImageData(0,0,44,44));
   }
   if(!map.getLayer(NS+'-ring'))map.addLayer({id:NS+'-ring',type:'symbol',source:NS,layout:{'icon-image':['concat',NS+'-',['get','kind']],'icon-size':0.65,'icon-allow-overlap':true,'icon-ignore-placement':true}});
-  if(!map.getLayer(NS+'-inner'))map.addLayer({id:NS+'-inner',type:'circle',source:NS,paint:{'circle-radius':2.5,'circle-color':['get','color']}});
+  if(!map.getLayer(NS+'-inner'))map.addLayer({id:NS+'-inner',type:'circle',source:NS,filter:notHistorical,paint:{'circle-radius':2.5,'circle-color':['get','color']}});
   if(!map.getLayer(NS+'-station-marker')){
-   const mapCore=root?.MRS10P01MapCore||(typeof module==='object'?require('../p01-map-core.js'):null);
    mapCore.installStationType2(map,NS+'-train');
    map.addLayer({id:NS+'-station-marker',type:'symbol',source:NS,filter:codedStation,layout:{
     'icon-image':NS+'-train','icon-size':['step',['zoom'],0.62,8,0.82,12,1],'icon-padding':['step',['zoom'],4,12,2]
