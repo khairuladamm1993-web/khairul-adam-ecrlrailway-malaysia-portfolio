@@ -11,6 +11,7 @@ on:
       - candidate/p01-ecrl-gateway-continuity-20261127
       - candidate/p01-member-auth-recovery-20261127
       - candidate/p01-ecrl-segment-evidence-20261127
+      - candidate/p01-ecrl-integration-recovery-20261128
 permissions:
   contents: read
   actions: read
@@ -44,6 +45,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           node -e 'require("node:assert/strict").equal(require("./vercel.json").git.deploymentEnabled[process.env.GITHUB_REF_NAME], false)'
       - name: Resolve exact runtime SHA for prebuilt archive continuation
+        if: github.ref_name != 'candidate/p01-ecrl-integration-recovery-20261128'
         run: |
           set -euo pipefail
           source="$GITHUB_SHA"
@@ -57,6 +59,7 @@ jobs:
           printf 'P01_PACKAGE_SHA=%s\n' "$source" >> "$GITHUB_ENV"
           printf 'P01_PACKAGE_SOURCE=%s\n' "$source"
       - name: Download and verify immutable baseline archive
+        if: github.ref_name != 'candidate/p01-ecrl-integration-recovery-20261128'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -68,6 +71,7 @@ jobs:
           echo "$BASELINE_ARCHIVE_HASH  $archive" | sha256sum --check
           python3 -m zipfile -e "$archive" "$RUNNER_TEMP/p01-package"
       - name: Overlay candidate sources and Public projection on the verified QA fixture
+        if: github.ref_name != 'candidate/p01-ecrl-integration-recovery-20261128'
         run: |
           export P01_PREVIEW_PACKAGE="$RUNNER_TEMP/p01-package"
           node <<'NODE'
@@ -126,6 +130,85 @@ jobs:
           console.log('P01_QA_FIXTURE_NO_BUILD', manifest.sourceSha, manifest.files.length);
           NODE
           node --test tests/p01-protected-preview-package.test.cjs
+      - name: Verify and exercise the original R128 prebuilt without rebuilding
+        if: github.ref_name == 'candidate/p01-ecrl-integration-recovery-20261128'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          source='ed7077cec4b1a0e869e93299c0cdb125be362500'
+          test "$(git rev-parse HEAD^)" = "$source"
+          test "$(git diff --name-only "$source" HEAD)" = $'.github/workflows/p01-unified-map-composition-qa.yml\nvercel.json'
+          git checkout --detach "$source"
+          outer="$RUNNER_TEMP/p01-r118-outer.zip"
+          curl --fail --silent --show-error --location --retry 2 \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/artifacts/15248000226/zip" --output "$outer"
+          echo "13a47ba73a951c9f6e5da51229aebfb4bf253ddf3840e5c2e191267936e0a82b  $outer" | sha256sum --check
+          export P01_PREVIEW_PACKAGE="$RUNNER_TEMP/p01-package"
+          python3 - "$outer" "$source" <<'PY'
+          import hashlib, io, json, os, pathlib, subprocess, sys, zipfile
+
+          base = 'd28c309a76556387c794d52fd3254231ee515598'
+          sha = sys.argv[2]
+          root = pathlib.Path(os.environ['P01_PREVIEW_PACKAGE'])
+          manifest_name = 'release-manifest.json'
+          static = '.vercel/output/static/'
+          stamp_name = static + 'assets/build-info.js'
+          digest = lambda data: hashlib.sha256(data).hexdigest()
+          with zipfile.ZipFile(sys.argv[1]) as outer:
+              assert outer.testzip() is None
+              baseline = outer.read('prebuilt-d28c309.zip')
+          assert digest(baseline) == 'd781a29706062b453fb2353652648e17685a557db7e9f793e0d19420ae438f90'
+          with zipfile.ZipFile(io.BytesIO(baseline)) as original:
+              assert original.testzip() is None and len(original.namelist()) == 158
+              files = {name: original.read(name) for name in original.namelist()}
+          manifest = json.loads(files[manifest_name])
+          assert manifest['sourceSha'] == base and manifest['target'] == 'preview'
+          assert len(manifest['files']) == 157
+          assert set(files) == {row['path'] for row in manifest['files']} | {manifest_name}
+          for row in manifest['files']:
+              assert digest(files[row['path']]) == row['sha256'], row['path']
+
+          def apply_prebuilt_overlay(parent, revision, expected_files, expected_zip_hash):
+              changed = subprocess.check_output(
+                  ['git', 'diff', '--name-only', parent, revision, '--', 'assets/', 'unified-map-v8.html'],
+                  text=True
+              ).splitlines()
+              assert len(changed) == expected_files
+              for name in changed:
+                  assert static + name in files
+                  files[static + name] = subprocess.check_output(['git', 'show', revision + ':' + name])
+              assert files[stamp_name].count(parent.encode()) == 1
+              files[stamp_name] = files[stamp_name].replace(parent.encode(), revision.encode())
+              manifest['sourceSha'] = revision
+              for row in manifest['files']:
+                  row['sha256'] = digest(files[row['path']])
+              files[manifest_name] = (json.dumps(manifest, indent=2) + '\n').encode()
+
+              archive = io.BytesIO()
+              with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as candidate:
+                  for name in sorted(files):
+                      entry = zipfile.ZipInfo(name)
+                      entry.compress_type = zipfile.ZIP_DEFLATED
+                      entry.external_attr = 0o100600 << 16
+                      candidate.writestr(entry, files[name])
+              checksum = digest(archive.getvalue())
+              assert checksum == expected_zip_hash, checksum
+              return archive
+
+          icon = '719f458c86ab2297bd4e259df560dd5a54502b8f'
+          apply_prebuilt_overlay(base, icon, 7, '9a7bb4e372237f9fc2980498d6d2e93a821250a01c1f4614f2cfe0442514f5f1')
+          assert subprocess.check_output(['git','rev-parse',sha+'^'],text=True).strip() == icon
+          archive = apply_prebuilt_overlay(icon, sha, 4, '7fc3ac2101713ad2c7a1a5547f139d0bc0d703ecc20ccd90abe9e4cc65f547f1')
+          with zipfile.ZipFile(archive) as candidate:
+              assert candidate.testzip() is None
+              assert set(candidate.namelist()) == set(files)
+              assert all(digest(candidate.read(r['path'])) == r['sha256'] for r in manifest['files'])
+              candidate.extractall(root)
+          print('P01_R128_PREBUILT_VERIFIED', sha, len(manifest['files']), len(files), digest(archive.getvalue()))
+          PY
+          node --test tests/p01-protected-preview-package.test.cjs
       - name: Run Public, Member, ECRL and R211 regression
         run: |
           npm ci --ignore-scripts
@@ -133,6 +216,9 @@ jobs:
       - name: Run Member Auth regression
         if: github.ref_name == 'candidate/p01-member-auth-recovery-20261127'
         run: node --test tests/auth-wiring.test.cjs
+      - name: Run Owner reference boundary, popup and access regression
+        if: github.ref_name == 'candidate/p01-ecrl-integration-recovery-20261128'
+        run: node --test tests/unified-ecrl-owner-calibration.test.cjs tests/unified-ecrl-consumer-popup.test.cjs tests/p01-maplibre-security.test.cjs tests/auth-wiring.test.cjs
       - name: Run composition QA in MapLibre, Chromium and WebKit
         run: |
           npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
@@ -156,14 +242,25 @@ jobs:
             mkdir -p artifacts/p01-technology-integration
             P01_AUTH_SDK="$sdk" node tests/p01-member-auth-browser.test.cjs | tee artifacts/p01-technology-integration/member-auth-qa.jsonl
           fi
+          unset P01_QA_PRIVATE_R57_FILE
           P01_QA_MAP_COMPOSITION_ONLY=1 P01_MAPLIBRE_DIST="$vendor" node tests/p01-technology-integration-browser.test.mjs
-          P01_QA_RAILWAY_HIERARCHY_ONLY=1 P01_MAPLIBRE_DIST="$vendor" P01_QA_OUTPUT=artifacts/p01-technology-integration/hierarchy node tests/p01-technology-integration-browser.test.mjs
+          if [[ "$GITHUB_REF_NAME" != 'candidate/p01-ecrl-integration-recovery-20261128' ]]; then
+            P01_QA_RAILWAY_HIERARCHY_ONLY=1 P01_MAPLIBRE_DIST="$vendor" P01_QA_OUTPUT=artifacts/p01-technology-integration/hierarchy node tests/p01-technology-integration-browser.test.mjs
+          fi
       - name: Archive browser evidence
-        if: always()
+        if: always() && github.ref_name != 'candidate/p01-ecrl-integration-recovery-20261128'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: p01-unified-map-composition-browser-qa
           path: artifacts/p01-technology-integration/
+          retention-days: 14
+      - name: Archive ECRL recovery test receipts
+        if: always() && github.ref_name == 'candidate/p01-ecrl-integration-recovery-20261128'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p01-ecrl-integration-recovery-qa-receipts
+          path: artifacts/p01-technology-integration/visual-qa.json
+          if-no-files-found: error
           retention-days: 14
       - name: Preserve exact tested prebuilt package without rebuilding
         if: success() && github.ref_name == 'candidate/p01-ecrl-segment-evidence-20261127'
