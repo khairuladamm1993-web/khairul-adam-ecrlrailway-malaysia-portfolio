@@ -166,7 +166,7 @@ jobs:
           path: artifacts/p01-technology-integration/
           retention-days: 14
       - name: Preserve exact tested prebuilt package without rebuilding
-        if: success() && env.P01_PACKAGE_SHA == 'd3bff72bc189100a8da556f797cc7e95246152b3'
+        if: success() && github.ref_name == 'candidate/p01-ecrl-segment-evidence-20261127'
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -185,7 +185,7 @@ jobs:
           assert all(p.startswith('.vercel/output/static/') or p in ('.vercel/output/config.json', 'vercel.json') for p in expected)
           for p, digest in expected.items():
               assert hashlib.sha256((root / p).read_bytes()).hexdigest() == digest, p
-          name = 'prebuilt-d3bff72.zip'
+          name = 'prebuilt-' + manifest['sourceSha'][:7] + '.zip'
           archive = out / name
           with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as z:
               for p in files:
@@ -200,10 +200,10 @@ jobs:
           print('P01_PREBUILT_ARCHIVE_VERIFIED', manifest['sourceSha'], len(expected), archive.stat().st_size, digest)
           PY
       - name: Archive exact tested prebuilt output
-        if: success() && env.P01_PACKAGE_SHA == 'd3bff72bc189100a8da556f797cc7e95246152b3'
+        if: success() && github.ref_name == 'candidate/p01-ecrl-segment-evidence-20261127'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: p01-prebuilt-d3bff72
+          name: p01-prebuilt-tested
           path: ${{ runner.temp }}/p01-release-artifact/
           if-no-files-found: error
           retention-days: 14

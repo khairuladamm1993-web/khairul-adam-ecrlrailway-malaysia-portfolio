@@ -637,6 +637,8 @@ async function checkAlignmentEvidence(page,engine,device){
 async function checkMemberReferenceParity(page,engine,device){
  const layer='mrs10-v8-ecrl-reference-alignment';
  const publicPaint=await page.evaluate(()=>window.ecrlTestMap.getPaintProperty('mrs10-v7-ecrl-reference-alignment','line-width'));
+ const publicRadius=await page.evaluate(()=>window.ecrlTestMap.getPaintProperty('mrs10-v7-mrt-kajang','circle-radius'));
+ assert.deepEqual(publicRadius,['interpolate',['linear'],['zoom'],3,2,7,4,11,8.5,14,11]);
  assert.equal((await page.goto(base+'/unified-map-v8.html')).status(),200);
  await page.waitForFunction(id=>!!window.ecrlTestMap?.getLayer(id)&&window.ecrlTestMap.isStyleLoaded(),layer,{timeout:45000});
  const spec=await page.evaluate(async id=>{
@@ -648,6 +650,10 @@ async function checkMemberReferenceParity(page,engine,device){
    attributed:source.attribution.includes('ODbL 1.0'),visible:map.getLayoutProperty(id,'visibility')==='visible'};
  },layer);
  assert.deepEqual(spec,{count:453,branch:7,structures:202,paint:publicPaint,dash:[2.4,1.5],separate:true,attributed:true,visible:true});
+ const badge=page.locator('.p01-v8-map-badge');await badge.waitFor({state:'visible'});assert.equal(await badge.innerText(),'MR-S10');
+ const badgeBox=await badge.boundingBox(),mapBox=await page.locator('.mapbox').boundingBox();
+ assert.ok(badgeBox.x>=mapBox.x&&badgeBox.x+badgeBox.width<=mapBox.x+mapBox.width&&badgeBox.y+badgeBox.height<=mapBox.y+mapBox.height);
+ assert.deepEqual(await page.evaluate(()=>window.ecrlTestMap.getLayoutProperty('mrs10-v8-mrt-kajang-ring','icon-size')),['interpolate',['linear'],['zoom'],3,0.18,7,0.30,8,0.42,13,0.6]);
  await page.locator('#filters').getByRole('button',{name:'KTM',exact:true}).click();
  assert.equal(await page.evaluate(id=>window.ecrlTestMap.getLayoutProperty(id,'visibility'),layer),'none');
  await page.locator('#filters').getByRole('button',{name:'ECRL',exact:true}).click();
@@ -667,7 +673,18 @@ async function checkMemberReferenceParity(page,engine,device){
   return map.areTilesLoaded()&&map.queryRenderedFeatures([[x-5,y-5],[x+5,y+5]],{layers:[id]}).length>0;
  },{id:layer,centre});
  assert.match(await page.locator('#geometry-status').innerText(),/rujukan OSM.*belum disahkan secara kejuruteraan/);
- await page.locator('#map').screenshot({path:out+'/'+engine+'-'+device+'-member-reference-alignment.png'});
+ await page.locator('.mapbox').screenshot({path:out+'/'+engine+'-'+device+'-member-reference-alignment.png'});
+ const position=await page.evaluate(centre=>{const {x,y}=window.ecrlTestMap.project(centre);return {x,y}},centre);
+ const canvas=page.locator('#map canvas');
+ if(device==='desktop')await canvas.click({position});else await canvas.tap({position});
+ const popup=page.locator('.p01-v8-reference-popup');await popup.waitFor({state:'visible'});
+ assert.match(await popup.locator('.reference-qualification').innerText(),/belum disahkan secara kejuruteraan/);
+ assert.match(await popup.locator('a').getAttribute('href'),/^https:\/\/www\.openstreetmap\.org\/way\/\d+$/);
+ assert.match(await popup.locator('a').innerText(),/ODbL 1\.0/);
+ await popup.locator('summary').click();assert.equal(await popup.locator('details').getAttribute('open'),'');
+ assert.match(await popup.locator('details p').innerText(),/^rg-osm-/);
+ await page.screenshot({path:out+'/'+engine+'-'+device+'-member-reference-polish.png'});
+ await popup.locator('.maplibregl-popup-close-button').click();await popup.waitFor({state:'hidden'});
 }
 
 async function checkRailwayHierarchy(page,engine,device){

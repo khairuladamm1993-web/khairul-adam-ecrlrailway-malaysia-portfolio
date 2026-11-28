@@ -478,9 +478,9 @@ function updateMapLayer(){
     paint:{
      'circle-color':r.color,
      'circle-radius':r.id==='erl-klia-ekspres'?
-       ['interpolate',['linear'],['zoom'],7,9,11,13,14,16]:
-       r.id==='erl-klia-transit'?['interpolate',['linear'],['zoom'],7,4.2,11,7,14,9.5]:
-       ['interpolate',['linear'],['zoom'],7,5.5,11,8.5,14,11],
+       ['interpolate',['linear'],['zoom'],3,3.5,7,7,11,13,14,16]:
+       r.id==='erl-klia-transit'?['interpolate',['linear'],['zoom'],3,2,7,3.6,11,7,14,9.5]:
+       ['interpolate',['linear'],['zoom'],3,2,7,4,11,8.5,14,11],
      'circle-stroke-color':'#fff',
      'circle-stroke-width':2,
      'circle-opacity':1

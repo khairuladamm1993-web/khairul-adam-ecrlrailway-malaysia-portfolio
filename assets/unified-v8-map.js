@@ -108,6 +108,7 @@ function mountPopup(host,position){
   // Keep button handlers working while isolating popup interactions from map taps.
   popupNode.addEventListener('click',event=>event.stopPropagation());
   popupNode.classList.add('p01-map-popup');
+  if(host.dataset.ecrlReferenceSegment)popupNode.classList.add('p01-v8-reference-popup');
   if(host.classList?.contains('ecrl-intelligence'))popupNode.classList.add('ecrl-popup');
   const close=popupNode.querySelector('.maplibregl-popup-close-button');
   if(close){
@@ -315,9 +316,9 @@ function updateMapLayer(){
     paint:{
      'circle-color':'rgba(255,255,255,0.05)',
      'circle-radius':r.id==='erl-klia-ekspres'?
-       ['interpolate',['linear'],['zoom'],7,9,11,13,14,16]:
-       r.id==='erl-klia-transit'?['interpolate',['linear'],['zoom'],7,4.2,11,7,14,9.5]:
-       ['interpolate',['linear'],['zoom'],7,5.5,11,8.5,14,11],
+       ['interpolate',['linear'],['zoom'],3,3.5,7,7,11,13,14,16]:
+       r.id==='erl-klia-transit'?['interpolate',['linear'],['zoom'],3,2,7,3.6,11,7,14,9.5]:
+       ['interpolate',['linear'],['zoom'],3,2,7,4,11,8.5,14,11],
      'circle-stroke-color':r.color,
      'circle-stroke-width':0,
      'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.35:1
@@ -696,7 +697,8 @@ function showReferenceAlignmentAt(e){
  const id=[...ids][0],feature=ecrlAlignment.geometry.features.find(f=>f.id===id);if(!feature)return;
  const [title,,,segmentLabel,snapshotLabel,branchLabel]=referenceCopy[state.locale];
  const host=el('div');host.dataset.ecrlReferenceSegment=id;
- host.append(el('strong',null,title),el('p',null,segmentLabel+' · '+id));
+ const [heading,...qualification]=title.split(' · ');
+ host.append(el('strong','reference-heading',heading),el('p','reference-qualification',qualification.join(' · ')));
  if(ecrlAlignment.snapshot)host.append(el('p',null,snapshotLabel+' · '+ecrlAlignment.snapshot.from+' – '+ecrlAlignment.snapshot.through));
  const structure=ecrlAlignment.structures.get(id);
  if(structure)host.append(el('p',null,'OSM · '+structure.kind+' · v'+structure.version));
@@ -704,6 +706,7 @@ function showReferenceAlignmentAt(e){
  if(branchVersion)host.append(el('p',null,branchLabel+' · v'+branchVersion));
  const source=el('a',null,'OpenStreetMap way '+feature.properties.osmWayId+' · ODbL 1.0');
  source.href='https://www.openstreetmap.org/way/'+feature.properties.osmWayId;source.target='_blank';source.rel='noopener noreferrer';host.append(source);
+ const details=el('details','reference-provenance');details.append(el('summary',null,segmentLabel),el('p',null,id));host.append(details);
  mountPopup(host,e.lngLat);
 }
 function installGeometry(){
@@ -745,8 +748,8 @@ function installInnerDots(){const star=registerInterchangeStar();for(const r of 
  for(const kind of ['solid','pending','future']){const name=r.id+'-'+kind;if(!state.map.hasImage(name)){
   const c=document.createElement('canvas');c.width=c.height=40;const ctx=c.getContext('2d');ctx.strokeStyle=r.color;ctx.lineWidth=3;ctx.fillStyle=kind==='future'?'#fff3c4':'white';if(kind!=='solid')ctx.setLineDash([5,4]);ctx.beginPath();ctx.arc(20,20,14,0,Math.PI*2);ctx.fill();ctx.stroke();state.map.addImage(name,ctx.getImageData(0,0,40,40));
  }}
- if(!state.map.getLayer(layerId(r.id)+'-ring'))state.map.addLayer({id:layerId(r.id)+'-ring',type:'symbol',source:srcId(r.id),layout:{'icon-image':['case',['has','sharedPalette'],['get','sharedPalette'],['get','future'],r.id+'-future',['get','pending'],r.id+'-pending',r.id+'-solid'],'icon-size':['interpolate',['linear'],['zoom'],3,0.28,8,0.42,13,0.6],'icon-allow-overlap':true,'icon-ignore-placement':true}});
- const outer=layerId(r.id)+'-interchange';if(!state.map.getLayer(outer))state.map.addLayer({id:outer,type:'symbol',source:srcId(r.id),filter:['==',['get','interchange'],true],layout:{'icon-image':star,'icon-size':['interpolate',['linear'],['zoom'],3,0.27,8,0.42,13,0.72],'icon-allow-overlap':true,'icon-ignore-placement':true}});
+ if(!state.map.getLayer(layerId(r.id)+'-ring'))state.map.addLayer({id:layerId(r.id)+'-ring',type:'symbol',source:srcId(r.id),layout:{'icon-image':['case',['has','sharedPalette'],['get','sharedPalette'],['get','future'],r.id+'-future',['get','pending'],r.id+'-pending',r.id+'-solid'],'icon-size':['interpolate',['linear'],['zoom'],3,0.18,7,0.30,8,0.42,13,0.6],'icon-allow-overlap':true,'icon-ignore-placement':true}});
+ const outer=layerId(r.id)+'-interchange';if(!state.map.getLayer(outer))state.map.addLayer({id:outer,type:'symbol',source:srcId(r.id),filter:['==',['get','interchange'],true],layout:{'icon-image':star,'icon-size':['interpolate',['linear'],['zoom'],3,0.17,7,0.29,8,0.42,13,0.72],'icon-allow-overlap':true,'icon-ignore-placement':true}});
  const id=layerId(r.id)+'-inner';if(!state.map.getLayer(id))state.map.addLayer({id,type:'circle',source:srcId(r.id),paint:{'circle-color':r.color,'circle-radius':['interpolate',['linear'],['zoom'],3,0.8,8,1.5,13,2],'circle-opacity':r.operationalStatus&&r.operationalStatus!=='OPERATIONAL'?0.45:1}})}}
 function showTrackAt(e){
  if(!state.map.getLayer('mrs10-v8-geometry'))return false;
