@@ -11,6 +11,7 @@ on:
       - candidate/p01-ecrl-gateway-continuity-20261127
       - candidate/p01-member-auth-recovery-20261127
       - candidate/p01-ecrl-segment-evidence-20261127
+      - candidate/p01-ecrl-c2-type2-20261128
 permissions:
   contents: read
   actions: read
@@ -47,7 +48,12 @@ jobs:
         run: |
           set -euo pipefail
           source="$GITHUB_SHA"
-          if [[ "$(git rev-parse HEAD^)" == 'd3bff72bc189100a8da556f797cc7e95246152b3' ]] &&
+          if [[ "$GITHUB_REF_NAME" == 'candidate/p01-ecrl-c2-type2-20261128' ]]; then
+            source='d28c309a76556387c794d52fd3254231ee515598'
+            test "$(git rev-parse HEAD^)" = "$source"
+            test "$(git diff --name-only HEAD^ HEAD)" = $'.github/workflows/p01-unified-map-composition-qa.yml\nvercel.json'
+            git checkout --detach "$source"
+          elif [[ "$(git rev-parse HEAD^)" == 'd3bff72bc189100a8da556f797cc7e95246152b3' ]] &&
              [[ "$(git diff --name-only HEAD^ HEAD)" == '.github/workflows/p01-unified-map-composition-qa.yml' ]] &&
              [[ "$GITHUB_REF_NAME" == 'candidate/p01-ecrl-segment-evidence-20261127' ]]; then
             source='d3bff72bc189100a8da556f797cc7e95246152b3'
@@ -60,12 +66,24 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           archive="$RUNNER_TEMP/p01-baseline.zip"
-          curl --fail --silent --show-error --location --retry 2 \
-            --header "Authorization: Bearer $GH_TOKEN" \
-            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/artifacts/$BASELINE_ARTIFACT/zip" \
-            --output "$archive"
-          echo "$BASELINE_ARCHIVE_HASH  $archive" | sha256sum --check
+          if [[ "$GITHUB_REF_NAME" == 'candidate/p01-ecrl-c2-type2-20261128' ]]; then
+            outer="$RUNNER_TEMP/p01-accepted-outer.zip"
+            curl --fail --silent --show-error --location --retry 2 \
+              --header "Authorization: Bearer $GH_TOKEN" \
+              "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/artifacts/15246476510/zip" --output "$outer"
+            echo "0d8c211175537e19058e530b3903fc179101e81ecfc8a5a9e05747ddf497c455  $outer" | sha256sum --check
+            python3 -c 'import sys, zipfile; sys.stdout.buffer.write(zipfile.ZipFile(sys.argv[1]).read("prebuilt-a2da2a0.zip"))' "$outer" > "$archive"
+            echo "0510c18d41f57d45282c75d5cb2c9b4b5a78aaa5747ccff6a4ee5f394070984e  $archive" | sha256sum --check
+            printf 'BASELINE_SHA=a2da2a000602867091503036f457adbe87b14b61\n' >> "$GITHUB_ENV"
+          else
+            curl --fail --silent --show-error --location --retry 2 \
+              --header "Authorization: Bearer $GH_TOKEN" \
+              "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/artifacts/$BASELINE_ARTIFACT/zip" \
+              --output "$archive"
+            echo "$BASELINE_ARCHIVE_HASH  $archive" | sha256sum --check
+          fi
           python3 -m zipfile -e "$archive" "$RUNNER_TEMP/p01-package"
       - name: Overlay candidate sources and Public projection on the verified QA fixture
         run: |
@@ -91,7 +109,7 @@ jobs:
             'unified-map-v8.html', 'assets/unified-v8-map.js', 'assets/public-gateway.js',
             'assets/access.js', 'assets/member-gateway.js',
             'ecrl-asset-reference.html', 'assets/p01-ecrl-public-reference.js', 'data/ecrl-reference-alignment.geojson',
-            'assets/unified-ecrl/adapter.js', 'assets/unified-ecrl/chainage-manifest.js',
+            'assets/unified-ecrl/adapter.js', 'assets/unified-ecrl/integration-ui.js', 'assets/unified-ecrl/chainage-manifest.js',
             'assets/unified-ecrl/railway-data-contract-v1.js', 'assets/unified-ecrl/alignment-evidence-r2.js',
             'assets/unified-ecrl/route-lab-d102-preflight.js', 'assets/unified-ecrl/route-lab-station-intelligence.js'
           ]) {
@@ -117,7 +135,8 @@ jobs:
             .replace(process.env.BASELINE_SHA, process.env.P01_PACKAGE_SHA);
           fs.writeFileSync(stampPath, stamp);
           manifest.sourceSha = process.env.P01_PACKAGE_SHA;
-          manifest.files.push({path: staticPath + 'data/ecrl-reference-alignment.geojson'});
+          const alignmentPath = staticPath + 'data/ecrl-reference-alignment.geojson';
+          if (!manifest.files.some(row => row.path === alignmentPath)) manifest.files.push({path: alignmentPath});
           manifest.files.sort((a,b)=>a.path.localeCompare(b.path));
           for (const row of manifest.files) {
             row.sha256 = hash(fs.readFileSync(path.join(root, row.path)));
@@ -166,7 +185,7 @@ jobs:
           path: artifacts/p01-technology-integration/
           retention-days: 14
       - name: Preserve exact tested prebuilt package without rebuilding
-        if: success() && github.ref_name == 'candidate/p01-ecrl-segment-evidence-20261127'
+        if: success() && (github.ref_name == 'candidate/p01-ecrl-segment-evidence-20261127' || github.ref_name == 'candidate/p01-ecrl-c2-type2-20261128')
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -200,7 +219,7 @@ jobs:
           print('P01_PREBUILT_ARCHIVE_VERIFIED', manifest['sourceSha'], len(expected), archive.stat().st_size, digest)
           PY
       - name: Archive exact tested prebuilt output
-        if: success() && github.ref_name == 'candidate/p01-ecrl-segment-evidence-20261127'
+        if: success() && (github.ref_name == 'candidate/p01-ecrl-segment-evidence-20261127' || github.ref_name == 'candidate/p01-ecrl-c2-type2-20261128')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: p01-prebuilt-tested
