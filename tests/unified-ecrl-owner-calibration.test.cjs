@@ -23,7 +23,8 @@ function harness(){
  const w=dom.window;let admin=false,session='public',requests=0;
  const A={get canAdmin(){return admin},get status(){return session},async fetchMemberBundle(){requests++;return {content:sample}}};
  w.RailwayAccess=A;
- let source=null;const layers=new Map();
+ w.MRS10P01MapCore=require('../assets/p01-map-core.js');
+ let source=null,zoom=8;const layers=new Map();
  const map={
   getStyle:()=>({version:8}),isStyleLoaded:()=>true,
   getSource:id=>id===calibration.NS?source:null,
@@ -31,11 +32,11 @@ function harness(){
   hasImage:()=>true,addImage(){},getLayer:id=>layers.get(id),
   addLayer:l=>layers.set(l.id,{...l,visibility:'visible'}),
   setLayoutProperty(id,_key,value){layers.get(id).visibility=value},
-  project:c=>({x:c[0]*10,y:c[1]*10})
+  getZoom:()=>zoom,project:c=>({x:c[0]*10,y:c[1]*10})
  };
  vm.runInNewContext(fs.readFileSync('assets/unified-ecrl/owner-calibration.js','utf8'),{window:w,document:w.document});
  const inst=w.MRS10ECRLOwnerCalibration.create({map,getCategory:()=> 'ECRL',onSelect:()=>{}});
- return {inst,source:()=>source,layers,grant(){admin=true;session='authenticated'},revoke(){admin=false;session='public'},get requests(){return requests},dom};
+ return {inst,source:()=>source,layers,zoom(value){zoom=value},grant(){admin=true;session='authenticated'},revoke(){admin=false;session='public'},get requests(){return requests},dom};
 }
 test('signed-out or member sessions are denied, authenticated admin loads and logout clears points',async()=>{
  const h=harness();
@@ -45,6 +46,12 @@ test('signed-out or member sessions are denied, authenticated admin loads and lo
  assert.equal(h.source().data.features.length,3);
  assert.equal(h.inst.reference('ecrl-loop-historical-01').code,'PL01');
  assert.equal(h.inst.count,3);
+ const layer=h.layers.get(calibration.NS+'-symbol');
+ assert.equal(layer.minzoom,9);
+ assert.deepEqual(layer.layout['icon-size'],['step',['zoom'],0,6,0,9,16/48,13,24/48,16,26/48]);
+ assert.equal(h.inst.hit({x:1025,y:35}),null);
+ h.zoom(9);
+ assert.equal(h.inst.hit({x:1025,y:35}).ref.code,'PL01');
  h.revoke();assert.equal((await h.inst.sync()).status,'NO_AUTH');
  assert.equal(h.inst.count,0);assert.equal(h.inst.reference('ecrl-loop-historical-01'),null);
  assert.equal(h.source().data.features.length,0);

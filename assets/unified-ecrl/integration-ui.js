@@ -28,7 +28,10 @@ function create(adapter,{master=root.MRS10ECRLMasterIntelligence?.create(adapter
  function referenceLabel(ref){return ref?.kind==='HISTORICAL'?ui('historic'):ref?.kind==='MARITIME'?ui('maritime'):ref?.kind==='YARD'?ui('yardAccuracy'):ref?ui('location'):ui('noPoint')}
  function syncSchematic(){
   const panel=$('ecrl-schematic');if(!panel||!dataContract)return;
-  panel.dataset.detail=root.MRS10UnifiedECRL.detailLevel(getZoom());
+  const zoom=getZoom(),core=root.MRS10P01MapCore;
+  panel.dataset.detail=root.MRS10UnifiedECRL.detailLevel(zoom);
+  panel.style.setProperty('--p01-stn-icon',core.iconPixels('STN',zoom)+'px');
+  panel.style.setProperty('--p01-facility-icon',core.iconPixels('FACILITY',zoom)+'px');
   panel.hidden=!['ECRL','Malaysia','All','MRS10'].includes(getCategory())||!Object.values(adapter.flags).some(Boolean);
  }
  function renderSchematic(){
@@ -41,7 +44,8 @@ function create(adapter,{master=root.MRS10ECRLMasterIntelligence?.create(adapter
   for(const asset of dataContract.records){
    const row=el('li',null,'ecrl-schematic-'+asset.type.toLowerCase());
    const button=el('button',null,'ecrl-schematic-asset');
-   const icon=el('span',null,'ecrl-design-icon');
+   const icon=asset.type==='STN'?root.MRS10P01MapCore.stationType2Canvas():el('span');
+   icon.className='ecrl-design-icon';
    icon.setAttribute('aria-hidden','true');
    button.type='button';button.dataset.schematicAsset=asset.assetId;
    const label=asset.code?asset.code+' · '+asset.name:asset.name+' · '+ui('pending');

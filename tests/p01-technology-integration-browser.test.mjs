@@ -23,9 +23,12 @@ const batchOnly=process.env.P01_QA_ECRL_BATCH_ONLY==='1';
 const sharedOnly=process.env.P01_QA_SHARED_CORE_ONLY==='1';
 const hierarchyOnly=process.env.P01_QA_RAILWAY_HIERARCHY_ONLY==='1';
 const compositionOnly=process.env.P01_QA_MAP_COMPOSITION_ONLY==='1';
+const iconsOnly=process.env.P01_QA_ICON_SCALING_ONLY==='1';
 const profiles=[['desktop',1200,900],['ipad',810,1080],['iphone',390,844],['iphone-landscape',844,390]];
 const arcgis=/^https:\/\/[^/]*arcgis\.com\//;
 const emptyGis=r=>r.fulfill({json:{features:[]},headers:{'access-control-allow-origin':'*'}});
+const sizeSpec=(sizes,units)=>['step',['zoom'],sizes[0]/units,6,sizes[1]/units,9,sizes[2]/units,13,sizes[3]/units,16,sizes[4]/units];
+const stnSizes=[8,16,24,34,34],interchangeSizes=[12,20,28,38,38];
 
 async function checkPublicAssetLookup(page){
   const list=page.locator('#asset-reference-list'),search=page.locator('#asset-search');
@@ -367,7 +370,8 @@ async function checkMapComposition(page,engine,device){
  assert.equal(layers.markerType,'symbol');
  assert.equal(layers.iconRegistered,true);
  assert.equal(layers.iconCanOverlapBasemap,true);
- assert.deepEqual(layers.iconSize,['step',['zoom'],0.62,8,0.82,12,1]);
+ assert.deepEqual(layers.iconSize,sizeSpec(stnSizes,34));
+ assert.deepEqual(await page.evaluate(()=>window.ecrlTestMap.getPaintProperty('mrs10-v7-mrt-kajang-interchange','circle-radius')),sizeSpec(interchangeSizes,2));
  assert.ok(!layers.codes.includes('STN10'));
  assert.equal(layers.legacyVisibility,'none');
  assert.equal(layers.railSource,'transport');
@@ -713,8 +717,9 @@ async function checkMemberC2Type2(page,engine,device){
  },ns);
  assert.equal(evidence.type2,true);
  assert.equal(evidence.logicalWidth,44);
- assert.equal(evidence.scale,0.65);
- assert.deepEqual(evidence.corridorScale,['step',['zoom'],0.62,8,0.82,12,1]);
+ const historical=['==',['get','kind'],'HISTORICAL'];
+ assert.deepEqual(evidence.scale,sizeSpec(stnSizes,44).map((value,i)=>i>=2&&i%2===0?['case',historical,value,0.65]:value));
+ assert.deepEqual(evidence.corridorScale,sizeSpec(stnSizes,34));
  assert.deepEqual(evidence.stations.map(row=>row.id),['ecrl-stn-17','ecrl-stn-18','ecrl-stn-19','ecrl-stn-20']);
  const canvas=page.locator('#map canvas');
  for(const {id,coordinates,qualifier} of evidence.stations){
@@ -736,6 +741,41 @@ async function checkMemberC2Type2(page,engine,device){
   await page.locator('.maplibregl-popup-close-button').click();
   await popup.waitFor({state:'hidden'});
  }
+}
+
+async function checkIconZoomTiers(page,engine,device,member){
+ const mapSource=member?'mrs10-v8-ecrl-infra':'mrs10-v7-ecrl-localities';
+ const panel=page.locator('#ecrl-schematic');
+ if(member){
+  assert.deepEqual(await page.evaluate(()=>window.ecrlTestMap.getLayoutProperty('mrs10-v8-mrt-kajang-interchange','icon-size')),sizeSpec(interchangeSizes,64));
+  await panel.locator('summary').click();
+ }
+ for(const [zoom,stn,facility] of [[5,8,0],[6,16,0],[9,24,16],[13,34,24],[16,34,26]]){
+  await page.evaluate(async ({zoom,mapSource})=>{
+   const map=window.ecrlTestMap,{features}=await map.getSource(mapSource).getData();
+   map.jumpTo({center:features[5].geometry.coordinates,zoom});
+  },{zoom,mapSource});
+  await page.waitForFunction(z=>window.ecrlTestMap.getZoom()===z&&window.ecrlTestMap.areTilesLoaded(),zoom);
+  if(member){
+    await page.waitForFunction(size=>document.getElementById('ecrl-schematic').style.getPropertyValue('--p01-stn-icon')===size+'px',stn);
+   const station=panel.locator('.ecrl-schematic-stn .ecrl-design-icon').first();
+   assert.equal(await station.evaluate(n=>n.getBoundingClientRect().width),stn);
+   assert.ok(await panel.locator('.ecrl-schematic-stn button').first().evaluate(n=>n.getBoundingClientRect().height)>=44);
+   for(const [kind,n] of [['pl',7],['depot',2]]){
+    const markers=panel.locator('.ecrl-schematic-'+kind+' .ecrl-design-icon:visible');
+    assert.equal(await markers.count(),facility?n:0);
+    if(facility)assert.deepEqual(await markers.first().evaluate(n=>({width:n.getBoundingClientRect().width,
+     color:getComputedStyle(n).backgroundColor})),{width:facility,color:kind==='pl'?'rgb(180, 92, 9)':'rgb(15, 118, 110)'});
+   }
+   if(zoom===13)await panel.screenshot({path:out+'/'+engine+'-'+device+'-v8-schematic-z13.png'});
+  }
+  if([5,9,13,16].includes(zoom)){
+   if(member)await panel.locator('summary').click();
+   await page.locator('.mapbox').screenshot({path:out+'/'+engine+'-'+device+(member?'-v8':'-v7')+'-icons-z'+zoom+'.png'});
+   if(member)await panel.locator('summary').click();
+  }
+ }
+ if(member)await panel.locator('summary').click();
 }
 
 async function checkRailwayHierarchy(page,engine,device){
@@ -771,7 +811,7 @@ async function checkRailwayHierarchy(page,engine,device){
  const snapshot=()=>page.evaluate(({specs,coordinate})=>{
   const map=window.ecrlTestMap,point=map.project(coordinate);
   return {
-   pick:map.queryRenderedFeatures(point,{layers:[specs.kajang,specs.putrajaya]}).map(x=>x.layer.id),
+   pick:map.queryRenderedFeatures(point,{layers:[specs.kajang,specs.putrajaya,specs.kajang+'-interchange',specs.putrajaya+'-interchange']}).map(x=>x.layer.id.replace(/-interchange$/,'')),
    road:map.getPaintProperty(specs.road,'text-opacity'),
    water:map.getPaintProperty(specs.water,'text-opacity')??null,
    place:map.getPaintProperty(specs.place,'text-opacity'),
@@ -782,12 +822,13 @@ async function checkRailwayHierarchy(page,engine,device){
  const picture=label=>page.locator('#map').screenshot({path:out+'/'+engine+'-'+device+'-'+label+'.png'});
  const waitForTop=top=>page.waitForFunction(({top,specs,coordinate})=>{
   const map=window.ecrlTestMap;
-  return map?.queryRenderedFeatures(map.project(coordinate),{layers:[specs.kajang,specs.putrajaya]})[0]?.layer.id===top;
+  return map?.queryRenderedFeatures(map.project(coordinate),{layers:[specs.kajang,specs.putrajaya,specs.kajang+'-interchange',specs.putrajaya+'-interchange']})[0]?.layer.id.replace(/-interchange$/,'')===top;
  },{top,specs,coordinate},{timeout:12000});
  await ready();
  await page.locator('#filters').getByRole('button',{name:'Semua',exact:true}).click();
  await position();
  await waitForTop(specs.putrajaya);
+ assert.deepEqual(await page.evaluate(id=>window.ecrlTestMap.getPaintProperty(id+'-interchange','circle-radius'),specs.putrajaya),sizeSpec(interchangeSizes,2));
  const before=await snapshot();
  assert.deepEqual(before.pick,[specs.putrajaya,specs.kajang]);
  assert.equal(before.road,0.8);
@@ -939,7 +980,7 @@ async function checkUnavailableRenderer(browser){
 for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
  const browser=await driver.launch({headless:true,args:engine==='chromium'?['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']:[]});
  try{
-  if(!batchOnly&&!sharedOnly&&!hierarchyOnly&&!compositionOnly&&engine==='chromium')await checkUnavailableRenderer(browser);
+  if(!batchOnly&&!sharedOnly&&!hierarchyOnly&&!compositionOnly&&!iconsOnly&&engine==='chromium')await checkUnavailableRenderer(browser);
   for(const [device,width,height] of profiles){
    if((batchOnly||sharedOnly||hierarchyOnly)&&!["desktop","iphone"].includes(device))continue;
    const page=await browser.newPage({viewport:{width,height},hasTouch:device!=='desktop',isMobile:device!=='desktop'});
@@ -963,11 +1004,30 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
    await page.route('https://tiles.openfreemap.org/styles/**', r=>r.fulfill({json:{version:8,sources:{},layers:[{id:'bg',type:'background',paint:{'background-color':'#dce6e4'}}]},headers:{'access-control-allow-origin':'*'}}));
    await page.route(arcgis,emptyGis);
    try{
+    if(iconsOnly){
+     assert.equal((await page.goto(base+'/unified-map-v7.html')).status(),200);
+     await page.waitForFunction(()=>window.ecrlTestMap?.getLayer('mrs10-v7-ecrl-localities-point')&&window.ecrlTestMap.isStyleLoaded());
+     const publicScales=await page.evaluate(()=>{
+      const map=window.ecrlTestMap;
+      return {station:map.getLayoutProperty('mrs10-v7-ecrl-localities-point','icon-size'),
+       facilityLayer:!!map.getLayer('mrs10-v7-ecrl-loop-reference')};
+     });
+     assert.deepEqual(publicScales,{station:sizeSpec(stnSizes,34),facilityLayer:false});
+     await checkIconZoomTiers(page,engine,device,false);
+     await checkMemberC2Type2(page,engine,device);
+     await checkIconZoomTiers(page,engine,device,true);
+     assert.deepEqual(errors,[]);
+     assert.deepEqual(localFailures,[]);
+     rows.push({engine,device,status:'PASS',iconZoomTiers:5,publicV7:true,memberV8:true,c2Popups:4});
+     continue;
+    }
     if(compositionOnly){
      await checkMapComposition(page,engine,device);
+     await checkIconZoomTiers(page,engine,device,false);
      await checkAlignmentEvidence(page,engine,device);
      await checkMemberReferenceParity(page,engine,device);
      await checkMemberC2Type2(page,engine,device);
+     await checkIconZoomTiers(page,engine,device,true);
      await checkReferenceRoundtrip(page,device);
      if(device==='desktop'){
       await checkSharedIdentity(page);
@@ -989,7 +1049,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
      assert.ok(localFailures.every(path=>path==='/data/ecrl-public-identity-v1.json'||
       device==='desktop'&&path==='/data/ecrl-reference-alignment.geojson'));
      rows.push({engine,device,status:'PASS',mapComposition:true,memberReferenceParity:true,physicalLayersUnchanged:true,
-      plReferenceCards:4,plReferenceMarkers:0,alignmentRetry:device==='desktop',touch:device!=='desktop'});
+      plReferenceCards:4,plReferenceMarkers:0,alignmentRetry:device==='desktop',iconZoomTiers:5,touch:device!=='desktop'});
      continue;
     }
     if(hierarchyOnly){
@@ -1039,8 +1099,8 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
     const panel=page.locator('#ecrl-schematic');
     assert.equal(await panel.locator('[data-schematic-asset]').count(),25);
     assert.deepEqual(await page.evaluate(()=>window.ecrlTestMap.getLayoutProperty('mrs10-v8-ecrl-infra-station-marker','icon-size')),
-     ['step',['zoom'],0.62,8,0.82,12,1]);
-    for(const [tier,zoom,pl,depot,spur] of [['far',7,0,0,0],['mid',9,7,0,0],['near',12,7,2,7]]){
+     sizeSpec(stnSizes,34));
+    for(const [tier,zoom,pl,depot,spur,stnSize,facilitySize] of [['far',7,0,0,0,16,0],['mid',9,7,2,0,24,16],['near',12,7,2,7,24,16]]){
      await page.evaluate(z=>window.ecrlTestMap.jumpTo({center:[103,3.8],zoom:z}),zoom);
      await page.waitForFunction(k=>document.querySelector('#ecrl-schematic').dataset.detail===k,tier);
      if(tier==='far')await panel.locator('summary').click();
@@ -1048,9 +1108,9 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
      for(const [type,n] of [['stn',16],['pl',pl],['depot',depot],['spur',spur]])
       assert.equal(await panel.locator('.ecrl-schematic-'+type+':visible').count(),n);
      const size=await panel.locator('.ecrl-schematic-stn .ecrl-design-icon').first().evaluate(n=>n.getBoundingClientRect().width);
-     assert.equal(size,34);
-     if(pl)assert.equal(await panel.locator('.ecrl-schematic-pl .ecrl-design-icon').first().evaluate(n=>n.getBoundingClientRect().width),26);
-     if(depot)assert.equal(await panel.locator('.ecrl-schematic-depot .ecrl-design-icon').first().evaluate(n=>n.getBoundingClientRect().width),26);
+     assert.equal(size,stnSize);
+     if(pl)assert.equal(await panel.locator('.ecrl-schematic-pl .ecrl-design-icon').first().evaluate(n=>n.getBoundingClientRect().width),facilitySize);
+     if(depot)assert.equal(await panel.locator('.ecrl-schematic-depot .ecrl-design-icon').first().evaluate(n=>n.getBoundingClientRect().width),facilitySize);
      const panelBox=await panel.boundingBox(), fullscreenBox=await page.locator('#map-fullscreen').boundingBox();
      assert.ok(panelBox.x>=fullscreenBox.x+fullscreenBox.width);
      if(device==='iphone'||tier==='near')await page.screenshot({path:`${out}/${engine}-${device}-${tier}.png`});
@@ -1117,7 +1177,7 @@ for(const [engine,driver] of [['chromium',chromium],['webkit',webkit]]){
     assert.equal(await page.evaluate(()=>window.MRS10V8Diagnostics.snapshot().ecrl.physicalSegments),0);
     assert.deepEqual(errors,[]);
     assert.deepEqual(localFailures,[]);
-    rows.push({engine,device,status:'PASS',maplibre:'6.13.0',publicV7:true,publicNavigation:true,tiers:[[16,0,0,0],[16,7,0,0],[16,7,2,7]],stationPopup:true,popupScroll:true,controlsClear:true,plNoPoint:true,fullscreenFallbackEscape:true});
+    rows.push({engine,device,status:'PASS',maplibre:'6.13.0',publicV7:true,publicNavigation:true,tiers:[[16,0,0,0],[16,7,2,0],[16,7,2,7]],stationPopup:true,popupScroll:true,controlsClear:true,plNoPoint:true,fullscreenFallbackEscape:true});
    }catch(e){rows.push({engine,device,status:'FAIL',error:String(e.stack||e)});await page.screenshot({path:`${out}/${engine}-${device}-fail.png`}).catch(()=>{})}
    finally{await fs.writeFile(out+'/visual-qa.json',JSON.stringify(rows,null,2));console.log(JSON.stringify(rows.at(-1)));await page.close()}
   }

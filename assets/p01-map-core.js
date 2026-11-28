@@ -165,6 +165,21 @@
  function referenceAlignmentVisible(category,mode='NORMAL',enabled=true){
   return enabled&&((mode==='NORMAL'&&['MRS10','Malaysia','All','ECRL'].includes(category))||mode==='INFRASTRUCTURE_FOCUS');
  }
+ const iconZoomStops=Object.freeze([6,9,13,16]);
+ const iconSizes=Object.freeze({
+  STN:Object.freeze([8,16,24,34,34]),
+  INTERCHANGE:Object.freeze([12,20,28,38,38]),
+  FACILITY:Object.freeze([0,0,16,24,26])
+ });
+ const facilityMinZoom=iconZoomStops[1];
+ function iconPixels(kind,zoom){
+  const next=iconZoomStops.findIndex(stop=>zoom<stop);
+  return iconSizes[kind][next<0?iconZoomStops.length:next];
+ }
+ function iconScale(kind,spriteSize,condition,fallback){
+  const value=px=>condition?['case',condition,px/spriteSize,fallback]:px/spriteSize;
+  return ['step',['zoom'],value(iconSizes[kind][0]),...iconZoomStops.flatMap((stop,i)=>[stop,value(iconSizes[kind][i+1])])];
+ }
  function stationType2Canvas(pixelSize=68){
   const canvas=document.createElement('canvas');canvas.width=canvas.height=pixelSize;
   const ctx=canvas.getContext('2d');ctx.scale(pixelSize/24,pixelSize/24);
@@ -181,7 +196,7 @@
   const canvas=stationType2Canvas(pixelSize);
   map.addImage(id,canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height),{pixelRatio:2});
  }
- const api=Object.freeze({routes,sectionDGauges,readAssetId,assetHref,createEcrlContext,publicAssetIdentity,publicStationReferences,publicPassingLoopReferences,isPassingLoopPlacementHeld,stationType2Canvas,installStationType2,findPublicAssets,loadPublicAssetIdentity,publicReferenceAlignment,loadPublicReferenceAlignment,referenceAlignmentSpec,installReferenceAlignment,referenceAlignmentVisible});
+ const api=Object.freeze({routes,sectionDGauges,readAssetId,assetHref,createEcrlContext,publicAssetIdentity,publicStationReferences,publicPassingLoopReferences,isPassingLoopPlacementHeld,stationType2Canvas,installStationType2,iconPixels,iconScale,facilityMinZoom,findPublicAssets,loadPublicAssetIdentity,publicReferenceAlignment,loadPublicReferenceAlignment,referenceAlignmentSpec,installReferenceAlignment,referenceAlignmentVisible});
  if(typeof module==='object')module.exports=api;
  if(root)root.MRS10P01MapCore=api;
 })(typeof window==='undefined'?null:window);

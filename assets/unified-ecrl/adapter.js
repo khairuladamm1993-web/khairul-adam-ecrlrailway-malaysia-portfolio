@@ -5,6 +5,7 @@ const DETAIL_ZOOM=Object.freeze({PL:9,DEPOT:12});
 const detailLevel=zoom=>zoom>=DETAIL_ZOOM.DEPOT?'near':zoom>=DETAIL_ZOOM.PL?'mid':'far';
 const codedStation=['!=',['to-string',['get','stationCode']],''];
 const notHistorical=['!=',['get','kind'],'HISTORICAL'];
+const historical=['==',['get','kind'],'HISTORICAL'];
 function labelImage(map,id,text){
  if(map.hasImage(id))return;
  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
@@ -81,12 +82,12 @@ const loops=registry.loops.map(annotate);
   for(const [kind,color] of Object.entries(COLORS))if(!map.hasImage(NS+'-'+kind)){
    const c=document.createElement('canvas');c.width=c.height=44;const x=c.getContext('2d');x.lineWidth=3;x.strokeStyle=color;x.fillStyle='white';x.setLineDash([5,4]);x.beginPath();if(kind==='YARD')x.rect(7,7,30,30);else x.arc(22,22,15,0,Math.PI*2);x.fill();x.stroke();map.addImage(NS+'-'+kind,x.getImageData(0,0,44,44));
   }
-  if(!map.getLayer(NS+'-ring'))map.addLayer({id:NS+'-ring',type:'symbol',source:NS,layout:{'icon-image':['concat',NS+'-',['get','kind']],'icon-size':0.65,'icon-allow-overlap':true,'icon-ignore-placement':true}});
+  if(!map.getLayer(NS+'-ring'))map.addLayer({id:NS+'-ring',type:'symbol',source:NS,layout:{'icon-image':['concat',NS+'-',['get','kind']],'icon-size':mapCore.iconScale('STN',44,historical,0.65),'icon-allow-overlap':true,'icon-ignore-placement':true}});
   if(!map.getLayer(NS+'-inner'))map.addLayer({id:NS+'-inner',type:'circle',source:NS,filter:notHistorical,paint:{'circle-radius':2.5,'circle-color':['get','color']}});
   if(!map.getLayer(NS+'-station-marker')){
    mapCore.installStationType2(map,NS+'-train');
    map.addLayer({id:NS+'-station-marker',type:'symbol',source:NS,filter:codedStation,layout:{
-    'icon-image':NS+'-train','icon-size':['step',['zoom'],0.62,8,0.82,12,1],'icon-padding':['step',['zoom'],4,12,2]
+    'icon-image':NS+'-train','icon-size':mapCore.iconScale('STN',34),'icon-padding':['step',['zoom'],4,12,2]
    }});
   }
   if(!map.getLayer(NS+'-station-label')){
@@ -103,11 +104,11 @@ const loops=registry.loops.map(annotate);
  function hit(map,point){
   if(!map?.getLayer(NS+'-hit')||map.getLayoutProperty(NS+'-hit','visibility')==='none')return null;
   const rect=[[point.x-5,point.y-5],[point.x+5,point.y+5]];
-  const visibleStations=new Set(map.queryRenderedFeatures(rect,{layers:[NS+'-station-marker',NS+'-station-label']}).map(f=>f.properties.assetId));
+  const visibleStations=new Set(map.queryRenderedFeatures(rect,{layers:[NS+'-station-marker',NS+'-station-label',NS+'-ring']}).map(f=>f.properties.assetId));
   return refs.filter(r=>flags[r.kind]&&(r.kind!=='LOCALITY'||visibleStations.has(r.assetId))).map(r=>{
    const p=map.project(r.coordinates);
    return {...r,distance:Math.hypot(p.x-point.x,p.y-point.y)};
-  }).filter(r=>r.distance<=14||(r.kind==='LOCALITY'&&visibleStations.has(r.assetId))).sort((a,b)=>a.distance-b.distance)[0]||null;
+  }).filter(r=>r.distance<=14||(['LOCALITY','HISTORICAL'].includes(r.kind)&&visibleStations.has(r.assetId))).sort((a,b)=>a.distance-b.distance)[0]||null;
  }
  function search(q){const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');const text=norm(q);if(!text)return [];if(/^stn\d{1,2}$/.test(text))return stations.filter(a=>norm(a.stationCode)===text);if(/^pl0?[1-7]$/.test(text))return loops.filter(a=>norm(a.plCode)===text||norm(a.plCode)===text.replace(/^pl([1-7])$/,'pl0$1'));return assets.filter(a=>norm(['ECRL',a.officialName,a.historicalName,a.assetId,a.section,a.stationCode,a.plCode,a.chainageLabel,a.assetId==='ecrl-depot-gombak-north'?'GNU EMU Depot':'',...(a.alternativeNames||[])].join(' ')).includes(text))}
  function snapshot(map){return {assetCount:assets.length,stationCount:registry.stations.length,referenceCount:refs.length,referenceKinds:Object.fromEntries(Object.keys(flags).map(k=>[k,refs.filter(r=>r.kind===k).length])),flags:{...flags},verifiedStationPoints:0,verifiedLoopPoints:0,physicalSegments:0,sourcePresent:!!map?.getSource(NS),layersPresent:!!map?.getLayer(NS+'-inner'),visible:!!map?.getLayer(NS+'-hit')&&map.getLayoutProperty(NS+'-hit','visibility')!=='none'}}

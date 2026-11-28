@@ -54,7 +54,6 @@ const mapLabels={
 };
 const ecrlSource='mrs10-v7-ecrl-localities',ecrlMarker=ecrlSource+'-point',ecrlLabel=ecrlSource+'-label',railContext='mrs10-v7-rail-context';
 const ecrlLoopMarker='mrs10-v7-ecrl-loop-reference';
-const ecrlLoopZoom=9; // V8 DETAIL_ZOOM.PL
 const ecrlReferenceUi={
  ms:['Passing loop · rujukan kawasan','Memuatkan jajaran rujukan ECRL…','Jajaran rujukan ECRL gagal dimuatkan.','Cuba lagi'],
  en:['Passing loop · locality reference','Loading the ECRL reference alignment…','Could not load the ECRL reference alignment.','Retry'],
@@ -434,6 +433,8 @@ function geoJSON(){
 }
 const srcId=id=>'mrs10-v7-source-'+id;
 const layerId=id=>'mrs10-v7-'+id;
+const interchangeId=id=>layerId(id)+'-interchange';
+const interchangeRelations=new Set(['INTERCHANGE','CONNECTED_STATION_COMPLEX']);
 function installGeographicContext(map){
  const style=map.getStyle();
  const transportation=style.layers.find(layer=>layer['source-layer']==='transportation'&&style.sources[layer.source]?.type==='vector');
@@ -453,8 +454,8 @@ function installGeographicContext(map){
  if(state.ecrlLoops.length&&!map.getLayer(ecrlLoopMarker)){
   if(!map.getSource(ecrlLoopMarker))map.addSource(ecrlLoopMarker,{type:'geojson',
    data:{type:'FeatureCollection',features:state.ecrlLoops}});
-  map.addLayer({id:ecrlLoopMarker,type:'circle',source:ecrlLoopMarker,minzoom:ecrlLoopZoom,
-   paint:{'circle-radius':['interpolate',['linear'],['zoom'],ecrlLoopZoom,5,14,7],
+  map.addLayer({id:ecrlLoopMarker,type:'circle',source:ecrlLoopMarker,minzoom:window.MRS10P01MapCore.facilityMinZoom,
+   paint:{'circle-radius':window.MRS10P01MapCore.iconScale('FACILITY',2),
     'circle-color':'#b57925','circle-stroke-color':'#fff','circle-stroke-width':1.5}},
    map.getLayer(ecrlMarker)?ecrlMarker:undefined);
  }
@@ -463,7 +464,7 @@ function installGeographicContext(map){
  if(!map.getLayer(ecrlMarker)){
   window.MRS10P01MapCore.installStationType2(map,ecrlType2);
   map.addLayer({id:ecrlMarker,type:'symbol',source:ecrlSource,
-   layout:{'icon-image':ecrlType2,'icon-size':['step',['zoom'],0.62,8,0.82,12,1],'icon-allow-overlap':true}});
+   layout:{'icon-image':ecrlType2,'icon-size':window.MRS10P01MapCore.iconScale('STN',34),'icon-allow-overlap':true}});
  }
  if(style.glyphs&&!map.getLayer(ecrlLabel))map.addLayer({id:ecrlLabel,type:'symbol',source:ecrlSource,minzoom:8,
   layout:{'text-field':['step',['zoom'],['get','code'],11,['concat',['get','code'],' · ',['get','name']]],
@@ -478,9 +479,15 @@ function updateMapLayer(){
   for(const r of state.manifest){
    const source=srcId(r.id),lid=layerId(r.id);
    const data=core.toGeoJSON([state.results.get(r.id)]);
+   for(const feature of data.features){
+    const point=findGeo(r.id,feature.properties.id);
+    feature.properties.interchange=!!point&&integration.transfersFor(point,state.manifest,core.interchangeRegistry,core.normalise)
+     .some(transfer=>transfer.route.id!==r.id&&interchangeRelations.has(transfer.relation));
+   }
    if(!map.getSource(source))map.addSource(source,{type:'geojson',data});
    else map.getSource(source).setData(data);
-   if(!map.getLayer(lid))map.addLayer({id:lid,type:'circle',source,
+   const interchange=['==',['get','interchange'],true];
+   if(!map.getLayer(lid))map.addLayer({id:lid,type:'circle',source,filter:['!',interchange],
     paint:{
      'circle-color':r.color,
      'circle-radius':r.id==='erl-klia-ekspres'?
@@ -491,6 +498,10 @@ function updateMapLayer(){
      'circle-stroke-width':2,
      'circle-opacity':1
     }});
+   const transferLayer=interchangeId(r.id);
+   if(!map.getLayer(transferLayer))map.addLayer({id:transferLayer,type:'circle',source,filter:interchange,
+    paint:{'circle-color':r.color,'circle-radius':window.MRS10P01MapCore.iconScale('INTERCHANGE',2),
+     'circle-stroke-color':'#fff','circle-stroke-width':2,'circle-opacity':1}});
   }
   installGeographicContext(map);
   applyVisibility();
@@ -520,19 +531,23 @@ function applyVisibility(){
  const layers=[];
  const focusedId=state.railFocus?layerId(state.selected):null;
  for(const r of state.manifest){
-  const id=layerId(r.id);
-  if(!map.getLayer(id))continue;
-  layers.push(id);
-  const visibility=state.category==='All'||state.category===r.category?'visible':'none';
-  if(map.getLayoutProperty(id,'visibility')!==visibility)map.setLayoutProperty(id,'visibility',visibility);
-  const focused=id===focusedId;
-  const opacity=focusedId&&!focused?0.65:1;
-  for(const [property,value] of [['circle-opacity',opacity],['circle-stroke-opacity',opacity],['circle-stroke-width',focused?3:2]]){
-   if(map.getPaintProperty(id,property)!==value)map.setPaintProperty(id,property,value);
+  const focused=layerId(r.id)===focusedId;
+  for(const id of [layerId(r.id),interchangeId(r.id)]){
+   if(!map.getLayer(id))continue;
+   layers.push(id);
+   const visibility=state.category==='All'||state.category===r.category?'visible':'none';
+   if(map.getLayoutProperty(id,'visibility')!==visibility)map.setLayoutProperty(id,'visibility',visibility);
+   const opacity=focusedId&&!focused?0.65:1;
+   for(const [property,value] of [['circle-opacity',opacity],['circle-stroke-opacity',opacity],['circle-stroke-width',focused?3:2]]){
+    if(map.getPaintProperty(id,property)!==value)map.setPaintProperty(id,property,value);
+   }
   }
  }
  // Raise the selected service above overlaps and restore source order on reset.
- if(focusedId&&layers.includes(focusedId))layers.push(...layers.splice(layers.indexOf(focusedId),1));
+ if(focusedId&&layers.includes(focusedId)){
+  const index=layers.indexOf(focusedId);
+  layers.push(...layers.splice(index,layers[index+1]===interchangeId(state.selected)?2:1));
+ }
  const railLayers=new Set(layers);
  const styleLayers=map.getStyle()?.layers??[];
  const current=styleLayers.filter(layer=>railLayers.has(layer.id));
@@ -684,7 +699,7 @@ function startMap(){
    state.map.on('error',()=>{if(!state.mapReady){state.networkError=true;showStatus()}});
   state.map.on('click',e=>{
    if(!state.mapReady)return;
-   const layers=[ecrlLabel,ecrlMarker,ecrlLoopMarker,...state.manifest.map(r=>layerId(r.id))].filter(id=>state.map.getLayer(id));
+   const layers=[ecrlLabel,ecrlMarker,ecrlLoopMarker,...state.manifest.flatMap(r=>[layerId(r.id),interchangeId(r.id)])].filter(id=>state.map.getLayer(id));
    const hits=layers.length?state.map.queryRenderedFeatures([[e.point.x-11,e.point.y-11],[e.point.x+11,e.point.y+11]],{layers}):[];
    const references=hits.filter(hit=>[ecrlMarker,ecrlLabel,ecrlLoopMarker].includes(hit.layer.id));
    const byDistance=hit=>{

@@ -43,8 +43,9 @@ function create({map,getCategory,onSelect}){
    x.setLineDash([]);x.fillStyle='#b97922';x.beginPath();x.arc(24,24,5,0,Math.PI*2);x.fill();
    map.addImage(NS+'-icon',x.getImageData(0,0,48,48));
   }
-  if(!map.getLayer(NS+'-symbol'))map.addLayer({id:NS+'-symbol',type:'symbol',source:NS,layout:{
-   'icon-image':NS+'-icon','icon-size':0.78,'icon-allow-overlap':true,'icon-ignore-placement':true
+  const core=root.MRS10P01MapCore;
+  if(!map.getLayer(NS+'-symbol'))map.addLayer({id:NS+'-symbol',type:'symbol',source:NS,minzoom:core.facilityMinZoom,layout:{
+   'icon-image':NS+'-icon','icon-size':core.iconScale('FACILITY',48),'icon-allow-overlap':true,'icon-ignore-placement':true
   }});
   visibility();
  }
@@ -72,6 +73,7 @@ function create({map,getCategory,onSelect}){
  function reference(id){return allowed()?data.find(r=>r.assetId===id)||null:null}
  function hit(point){
   if(!allowed()||!map?.project||getCategory()!=='ECRL'&&getCategory()!=='All')return null;
+  if(map.getZoom()<root.MRS10P01MapCore.facilityMinZoom)return null;
   return data.map(r=>{const p=map.project(r.coordinates);return {ref:r,distance:Math.hypot(point.x-p.x,point.y-p.y)}})
    .filter(r=>r.distance<=18).sort((a,b)=>a.distance-b.distance)[0]||null;
  }
